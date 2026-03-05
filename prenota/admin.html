@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Riservata - Gestione Prenotazioni</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --accent: #ff0000; --bg: #000; --card: #111; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 20px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 10px; border-left: 5px solid var(--accent); }
+        .stat-card span { display: block; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+        .stat-card b { font-size: 1.8rem; color: #fff; }
+
+        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; }
+        th { background: #222; color: var(--accent); text-align: left; padding: 15px; text-transform: uppercase; font-size: 0.8rem; }
+        td { padding: 15px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        tr:hover { background: #1a1a1a; }
+
+        .badge-posti { background: #333; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; }
+        .btn-delete { background: none; border: none; color: #555; cursor: pointer; transition: 0.3s; }
+        .btn-delete:hover { color: var(--accent); }
+        
+        .tel-link { color: #0084ff; text-decoration: none; font-weight: bold; }
+        .partenza-box { color: #00ff00; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr { display: block; }
+            th { display: none; }
+            tr { margin-bottom: 15px; border: 1px solid #333; }
+            td { text-align: right; position: relative; padding-left: 50%; }
+            td::before { content: attr(data-label); position: absolute; left: 15px; font-weight: bold; color: var(--accent); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Gestione Prenotazioni</h1>
+        <button onclick="location.reload()" style="background:var(--accent); color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">AGGIORNA</button>
+    </header>
+
+    <div class="stats-container">
+        <div class="stat-card"><span>Totale Prenotazioni</span><b id="count-prenotazioni">0</b></div>
+        <div class="stat-card"><span>Posti Occupati Totali</span><b id="count-posti">0</b></div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Viaggio/Evento</th>
+                    <th>Cliente</th>
+                    <th>Telefono</th>
+                    <th>Partenza da</th>
+                    <th>Posti / Pax</th>
+                    <th>Azione</th>
+                </tr>
+            </thead>
+            <tbody id="tabella-corpo">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        async function caricaDati() {
+            // Carica prenotazioni e collega i dati della tabella 'tratte' (o 'viaggi')
+            const { data, error } = await sb
+                .from('prenotazioni')
+                .select(`
+                    *,
+                    tratte ( titolo )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            const corpo = document.getElementById('tabella-corpo');
+            corpo.innerHTML = '';
+            
+            let totalePosti = 0;
+
+            data.forEach(p => {
+                const dataLocale = new Date(p.created_at).toLocaleDateString('it-IT');
+                const numPosti = p.posti_selezionati.length;
+                totalePosti += numPosti;
+
+                // Gestione visualizzazione posti (se sono ID del Limo o numeri del Bus)
+                const listaPosti = p.posti_selezionati.every(x => !isNaN(x)) 
+                    ? p.posti_selezionati.join(', ') 
+                    : `${numPosti} Persona/e`;
+
+                corpo.innerHTML += `
+                    <tr>
+                        <td data-label="Data">${dataLocale}</td>
+                        <td data-label="Viaggio"><b>${p.tratte ? p.tratte.titolo : 'N/D'}</b></td>
+                        <td data-label="Cliente">${p.nome_cliente}</td>
+                        <td data-label="Telefono"><a href="tel:${p.telefono_cliente}" class="tel-link">${p.telefono_cliente}</a></td>
+                        <td data-label="Partenza" class="partenza-box">${p.partenza || 'Non specificata'}</td>
+                        <td data-label="Posti"><span class="badge-posti">${listaPosti}</span></td>
+                        <td data-label="Azione">
+                            <button class="btn-delete" onclick="elimina('${p.id}')">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('count-prenotazioni').innerText = data.length;
+            document.getElementById('count-posti').innerText = totalePosti;
+            lucide.createIcons();
+        }
+
+        async function elimina(id) {
+            if (confirm("Sei sicuro di voler eliminare questa prenotazione? L'azione è irreversibile.")) {
+                const { error } = await sb.from('prenotazioni').delete().eq('id', id);
+                if (!error) caricaDati();
+                else alert("Errore durante l'eliminazione.");
+            }
+        }
+
+        // Caricamento iniziale
+        caricaDati();
+        // Icone
+        lucide.createIcons();
+    </script>
+</body>
+</html>
