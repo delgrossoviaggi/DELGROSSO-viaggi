@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Delgrosso</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: #000; padding: 20px;">
+
+    <div style="max-width: 600px; margin: auto; background: #111; padding: 30px; border: 1px solid #ff0000;">
+        <h2 style="color: #ff0000; text-align: center;">GESTIONE SITO</h2>
+        
+        <input type="password" id="adminPass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:15px; background:#222; color:white; border:1px solid #333;">
+        
+        <select id="categoria" style="width:100%; padding:12px; margin-bottom:15px; background:#222; color:white;">
+            <option value="viaggio">Viaggio (Bus GT)</option>
+            <option value="evento">Evento (Limousine Bus)</option>
+        </select>
+
+        <input type="text" id="titolo" placeholder="Titolo Locandina" style="width:100%; padding:12px; margin-bottom:10px; background:#222; color:white; border:1px solid #333;">
+        <input type="text" id="link" placeholder="Link Prenotazione" style="width:100%; padding:12px; margin-bottom:10px; background:#222; color:white; border:1px solid #333;">
+        
+        <label style="display:block; margin: 10px 0;">Seleziona Foto:</label>
+        <input type="file" id="fotoFile" style="margin-bottom:20px; color: white;">
+
+        <button onclick="pubblica()" class="btn-luxury" style="border:none; cursor:pointer;">CARICA ORA</button>
+
+        <hr style="border: 0.5px solid #333; margin: 40px 0;">
+        
+        <h3 style="color: #ff0000;">LOCANDINE ATTIVE</h3>
+        <div id="admin-list"></div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

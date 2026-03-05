@@ -1,0 +1,163 @@
+<style>
+    :root {
+        --accent: #ff0000;
+        --bg: #000000;
+        --card-bg: #0a0a0a;
+        --text: #ffffff;
+    }
+
+    * { 
+        box-sizing: border-box; 
+        margin: 0; 
+        padding: 0; 
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body { 
+        font-family: 'Poppins', sans-serif; 
+        background: var(--bg); 
+        color: var(--text); 
+        overflow-x: hidden; 
+    }
+
+    /* --- HEADER --- */
+    header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        padding: 10px 5%; 
+        background: rgba(0,0,0,0.95);
+        border-bottom: 2px solid var(--accent);
+        position: fixed; /* Errore 1 corretto: da sticky a fixed per migliore compatibilità */
+        width: 100%;
+        top: 0; 
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+    }
+    
+    .logo-container { 
+        display: flex; 
+        align-items: center; 
+    }
+    
+    .logo-img { 
+        height: 65px; 
+        width: auto; 
+        display: block;
+        object-fit: contain;
+        /* Tecnica sicura: forziamo la visibilità */
+        filter: brightness(0) invert(1); 
+        -webkit-filter: brightness(0) invert(1);
+        transition: transform 0.3s ease;
+    }
+
+    /* --- NAV --- */
+    nav { display: flex; align-items: center; }
+    nav a { 
+        color: white; 
+        text-decoration: none; 
+        margin-left: 20px; 
+        font-size: 0.8rem; 
+        font-weight: 700; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        transition: 0.3s; 
+    }
+    nav a:hover { color: var(--accent); }
+
+    .admin-trigger { 
+        margin-left: 20px; 
+        cursor: pointer; 
+        color: #333; 
+        transition: 0.3s; 
+    }
+    .admin-trigger:hover { color: var(--accent); }
+
+    /* --- HERO --- */
+    .hero {
+        height: 80vh; 
+        margin-top: 85px; /* Errore 2 corretto: aggiunto margine per compensare l'header fixed */
+        position: relative; 
+        overflow: hidden;
+        display: flex; 
+        flex-direction: column; 
+        justify-content: flex-end; 
+        align-items: center;
+        text-align: center;
+    }
+    
+    .slide {
+        position: absolute; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%;
+        background-size: cover; 
+        background-position: center;
+        opacity: 0; 
+        transition: opacity 1.2s ease; 
+        z-index: -1;
+    }
+    .slide.active { opacity: 1; }
+
+    /* --- GRIGLIA --- */
+    .container { padding: 60px 5%; }
+    .section-title { 
+        font-size: 2rem; 
+        text-transform: uppercase; 
+        border-left: 6px solid var(--accent); 
+        padding-left: 15px; 
+        margin-bottom: 40px; 
+    }
+    .section-title span { color: var(--accent); }
+
+    .grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 30px; 
+    }
+    
+    .card { 
+        background: var(--card-bg); 
+        transition: 0.4s; 
+        border: 1px solid #1a1a1a; 
+    }
+    .card:hover { transform: translateY(-10px); border-color: var(--accent); }
+    .card img { width: 100%; height: 450px; object-fit: cover; }
+    
+    .card-info { padding: 20px; text-align: center; }
+    .card-info h3 { margin-bottom: 15px; text-transform: uppercase; }
+
+    /* --- FOOTER --- */
+    footer { 
+        padding: 50px 5%; 
+        background: #050505; 
+        text-align: center; 
+        border-top: 1px solid #111; 
+    }
+    
+    .footer-logo { 
+        height: 80px; 
+        width: auto;
+        margin-bottom: 20px; 
+        filter: brightness(0) invert(1);
+    }
+
+    /* --- MODALE ADMIN --- */
+    #admin-modal {
+        position: fixed; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); 
+        z-index: 2000; 
+        display: none; 
+        padding-top: 100px;
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 768px) {
+        /* Errore 3 corretto: rimosse proprietà sovrapposte che bloccavano il logo su mobile */
+        header { padding: 10px 2%; }
+        .logo-img { height: 45px; }
+        nav a { margin-left: 10px; font-size: 0.6rem; }
+    }
+</style>
