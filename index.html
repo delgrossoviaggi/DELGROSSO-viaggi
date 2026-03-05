@@ -8,135 +8,61 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
-            --accent: #ff0000;
-            --bg: #000000;
-            --card-bg: #0a0a0a;
-            --text: #ffffff;
-        }
-
+        :root { --accent: #ff0000; --bg: #000000; --card-bg: #0a0a0a; --text: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* HEADER */
+        /* HEADER RESPONSIVE */
         header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 5%; background: rgba(0,0,0,0.98);
+            padding: 15px 5%; background: rgba(0,0,0,0.95);
             border-bottom: 2px solid var(--accent);
-            position: sticky; top: 0; z-index: 1000;
-            backdrop-filter: blur(15px);
+            position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(15px);
         }
+        .logo-container { text-decoration: none; }
+        .brand-main { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; color: #fff; display: block; }
+        .brand-sub { font-size: 0.6rem; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
 
-        .logo-container { display: flex; align-items: center; text-decoration: none; }
-        .text-logo { display: flex; flex-direction: column; line-height: 0.9; cursor: pointer; }
-        .brand-main {
-            font-size: 2rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #ffffff 40%, #888888 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0px 2px 4px rgba(255,0,0,0.2));
-        }
-        .brand-sub {
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-top: 4px;
-        }
-        .brand-sub span { color: #fff; font-weight: 300; margin: 0 3px; }
+        nav { display: flex; align-items: center; gap: 15px; }
+        nav a { color: white; text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .admin-trigger { cursor: pointer; color: #444; margin-left: 10px; }
 
-        nav { display: flex; align-items: center; }
-        nav a { color: white; text-decoration: none; margin-left: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        nav a:hover { color: var(--accent); }
-
-        .admin-trigger { margin-left: 25px; cursor: pointer; color: #333; transition: 0.3s; }
-        .admin-trigger:hover { color: var(--accent); }
-
-        /* HERO SLIDER */
-        .hero {
-            height: 85vh; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-            text-align: center; border-bottom: 5px solid var(--accent);
-        }
-        .slide {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            opacity: 0; transition: opacity 1.5s ease-in-out; z-index: -1;
-        }
+        /* HERO SECTION */
+        .hero { height: 70vh; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-bottom: 4px solid var(--accent); }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: 1.5s; z-index: -1; filter: brightness(0.5); }
         .slide.active { opacity: 1; }
-        .hero-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.9));
-            z-index: 0;
-        }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; line-height: 0.9; margin-bottom: 20px; }
 
-        .flotta-overlay-container {
-            position: relative; z-index: 10; width: 90%; max-width: 1200px;
-            margin-bottom: 50px;
-        }
-        .hero h1 { font-size: clamp(2rem, 7vw, 5rem); text-transform: uppercase; line-height: 0.85; font-weight: 900; letter-spacing: -2px; margin-bottom: 30px; }
-
-        .flotta-slider-boxes {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
-        }
-        .flotta-box {
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px);
-            padding: 20px 15px; border-top: 3px solid var(--accent); transition: 0.3s;
-        }
-        .flotta-box h4 { font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 5px; color: #fff; }
-        .flotta-box p { font-size: 0.7rem; color: #aaa; }
-
-        /* SEZIONI FLOTTA */
-        .container { padding: 80px 5% 40px; }
-        .section-title { font-size: 2.5rem; text-transform: uppercase; border-left: 10px solid var(--accent); padding-left: 25px; font-weight: 900; margin-bottom: 10px; }
-        .section-subtitle { font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 40px; padding-left: 35px; }
-        .section-title span { color: var(--accent); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+        /* GRIGLIA VIAGGI */
+        .container { padding: 60px 5%; }
+        .section-title { font-size: 2rem; border-left: 8px solid var(--accent); padding-left: 15px; margin-bottom: 40px; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
         
-        .card { background: var(--card-bg); overflow: hidden; transition: 0.5s; border: 1px solid #151515; }
-        .card img { width: 100%; height: 450px; object-fit: cover; filter: brightness(0.8); transition: 0.5s; }
-        .card:hover img { filter: brightness(1.1); transform: scale(1.02); }
-        .card-info { padding: 30px; background: #050505; }
-        .card-info h3 { font-size: 1.4rem; margin-bottom: 15px; text-transform: uppercase; font-weight: 900; }
+        .card { background: var(--card-bg); border: 1px solid #111; border-radius: 10px; overflow: hidden; transition: 0.4s; }
+        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
+        .card img { width: 100%; height: 350px; object-fit: cover; }
+        .card-info { padding: 25px; }
+        .card-info h3 { margin-bottom: 15px; text-transform: uppercase; }
         
-        .specs { display: flex; gap: 15px; margin-bottom: 25px; border-top: 1px solid #111; padding-top: 15px; }
-        .spec-item { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: 700; }
-        .spec-item i { color: var(--accent); width: 16px; }
+        .btn { display: block; width: 100%; padding: 15px; background: var(--accent); color: white; text-decoration: none; font-weight: 900; text-align: center; border: none; cursor: pointer; border-radius: 5px; }
+        .btn-prenota { background: #fff; color: #000; margin-top: 10px; }
 
-        .btn { 
-            display: inline-block; width: 100%; padding: 18px; background: var(--accent); 
-            color: white; text-decoration: none; font-weight: 900; text-transform: uppercase; 
-            cursor: pointer; border: none; letter-spacing: 2px; text-align: center; transition: 0.3s;
-        }
-        .btn:hover { background: #cc0000; box-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        /* FOOTER AGGIORNATO */
+        footer { background: #050505; padding: 60px 5% 30px; border-top: 2px solid var(--accent); }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
+        .footer-col h4 { color: var(--accent); margin-bottom: 20px; font-size: 0.9rem; letter-spacing: 1px; }
+        .footer-col p { font-size: 0.85rem; color: #ccc; margin-bottom: 8px; }
+        .social-links { display: flex; gap: 15px; margin-top: 15px; }
+        .social-links a { color: #fff; background: #111; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
+        .social-links a:hover { background: var(--accent); }
 
-        /* CONTATTI */
-        #contatti { background: #050505; padding: 100px 5%; border-top: 2px solid #111; }
-        .contatti-wrapper { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
-
-        /* FOOTER & SOCIAL */
-        footer { padding: 80px 5% 40px; background: #000; border-top: 1px solid #111; text-align: center; }
-        .footer-social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 800px; margin: 40px auto; }
-        .social-column h6 { text-transform: uppercase; color: var(--accent); letter-spacing: 3px; margin-bottom: 15px; font-size: 0.75rem; font-weight: 900; }
-        .social-links { display: flex; justify-content: center; gap: 15px; }
-        .social-links a { color: #fff; background: #111; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #222; transition: 0.3s; }
-        .social-links a:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-3px); }
-
-        /* ADMIN MODAL */
-        #admin-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: none; padding: 50px 5%; overflow-y: auto; }
-        .admin-content { max-width: 800px; margin: 0 auto; background: #0a0a0a; border: 1px solid #222; padding: 40px; border-top: 5px solid var(--accent); position: relative; }
-        .login-box { text-align: center; max-width: 400px; margin: 100px auto; background: #0a0a0a; padding: 40px; border: 1px solid #222; border-top: 5px solid var(--accent); }
-        .login-box input { width: 100%; padding: 15px; margin-bottom: 15px; background: #111; border: 1px solid #222; color: white; font-family: inherit; }
-
-        @media (max-width: 768px) {
-            .flotta-slider-boxes { grid-template-columns: repeat(2, 1fr); }
-            .contatti-wrapper { grid-template-columns: 1fr; }
-            .footer-social-grid { grid-template-columns: 1fr; }
+        /* MOBILE FIXES */
+        @media (max-width: 600px) {
+            header { padding: 10px 3%; }
+            nav a { display: none; } /* Nasconde menu testo su mobile per pulizia */
+            .brand-main { font-size: 1.4rem; }
+            .hero h1 { font-size: 3rem; }
         }
     </style>
 </head>
@@ -144,109 +70,81 @@
 
     <header>
         <a href="#" class="logo-container">
-            <div class="text-logo">
-                <span class="brand-main">DEL GROSSO</span>
-                <span class="brand-sub">VIAGGI <span>&</span> LIMOUSINE BUS</span>
-            </div>
+            <span class="brand-main">DEL GROSSO</span>
+            <span class="brand-sub">VIAGGI & LIMOUSINE BUS</span>
         </a>
         <nav>
-            <a href="#hero-slider">LA FLOTTA</a>
             <a href="#bus">BUS GT</a>
-            <a href="#limo">LIMOUSINE</a>
+            <a href="#limo">LIMO</a>
             <a href="#contatti">CONTATTI</a>
             <div class="admin-trigger" onclick="toggleAdmin(true)"><i data-lucide="lock"></i></div>
         </nav>
     </header>
 
     <section class="hero" id="hero-slider">
-        <div class="hero-overlay"></div>
-        <div class="flotta-overlay-container">
-            <h1>ESPERIENZE DI VIAGGIO</h1>
-            <div class="flotta-slider-boxes">
-                <div class="flotta-box"><h4>BUS GT</h4><p>53 - 63 Posti.</p></div>
-                <div class="flotta-box"><h4>LIMO BUS</h4><p>Max 30 Posti.</p></div>
-                <div class="flotta-box"><h4>AREA VIP</h4><p>Esclusiva Limo.</p></div>
-                <div class="flotta-box"><h4>TOUR</h4><p>Nazionali & Estero.</p></div>
-            </div>
-        </div>
-    </section>
+        <h1>VIAGGIA IN<br><span style="color:var(--accent)">PRIMA CLASSE</span></h1>
+        </section>
 
     <div class="container" id="bus">
-        <h2 class="section-title">TOUR <span>AUTOBUS GT</span></h2>
-        <p class="section-subtitle">Comfort e sicurezza (53-63 posti)</p>
+        <h2 class="section-title">TOUR <span>BUS GT</span></h2>
         <div id="grid-bus" class="grid"></div>
     </div>
 
-    <div class="container" id="limo" style="background: #020202;">
-        <h2 class="section-title">EVENTI <span>LIMOUSINE BUS</span></h2>
-        <p class="section-subtitle">Lusso itinerante con Area VIP (Max 30 posti)</p>
+    <div class="container" id="limo" style="background:#020202;">
+        <h2 class="section-title">EVENTI <span>LIMO BUS</span></h2>
         <div id="grid-limo" class="grid"></div>
     </div>
 
-    <section id="contatti">
-        <div class="contatti-wrapper">
-            <div class="contatti-info">
-                <h2 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 30px;">I NOSTRI <span>CONTATTI</span></h2>
-                <p style="font-size: 1.2rem; font-weight: 900; margin-bottom:10px;">📞 320.5730466 (Raffaele)</p>
-                <p style="font-size: 1.2rem; font-weight: 900; margin-bottom:10px;">📞 366.2127916 (Nicola)</p>
+    <footer id="contatti">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>DEL GROSSO VIAGGI & LIMOUSINE BUS</h4>
+                <p>📞 320.5730466 (Raffaele)</p>
+                <p>📞 366.2127916 (Nicola)</p>
                 <p>📩 info@delgrossoviaggi.it</p>
             </div>
-            <div class="contatti-form">
-                <input type="text" placeholder="Nome" style="width:100%; padding:15px; margin-bottom:10px; background:#111; color:white; border:1px solid #222;">
-                <textarea placeholder="Messaggio..." style="width:100%; padding:15px; height:100px; background:#111; color:white; border:1px solid #222; font-family: inherit; margin-bottom: 10px;"></textarea>
-                <button class="btn">INVIA RICHIESTA</button>
+            <div class="footer-col">
+                <h4>WHATSAPP RAPIDO</h4>
+                <p>💬 Limobus (Nicola): <a href="https://wa.me/393662127916" style="color:white;">3662127916</a></p>
+                <p>💬 Bus GT (Raffaele): <a href="https://wa.me/393205730466" style="color:white;">3205730466</a></p>
             </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="text-logo" style="align-items: center; margin-bottom: 20px;">
-            <span class="brand-main">DEL GROSSO</span>
-            <span class="brand-sub">VIAGGI <span>&</span> LIMOUSINE BUS</span>
-        </div>
-
-        <div class="footer-social-grid">
-            <div class="social-column">
-                <h6>Del Grosso Viaggi</h6>
+            <div class="footer-col">
+                <h4>SOCIAL DEL GROSSO</h4>
                 <div class="social-links">
-                    <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/#" target="_blank"><i data-lucide="facebook"></i></a>
+                    <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank"><i data-lucide="facebook"></i></a>
                     <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank"><i data-lucide="instagram"></i></a>
                 </div>
-            </div>
-            <div class="social-column">
-                <h6>Limousine Bus</h6>
+                <h4 style="margin-top:20px;">SOCIAL LIMO BUS</h4>
                 <div class="social-links">
                     <a href="https://www.facebook.com/people/Limousine-Bus/61552174581411/" target="_blank"><i data-lucide="facebook"></i></a>
                     <a href="https://www.instagram.com/_limousine_bus/" target="_blank"><i data-lucide="instagram"></i></a>
                 </div>
             </div>
         </div>
-
-        <p style="letter-spacing: 2px; color: #444; font-size: 0.6rem; text-transform: uppercase;">&copy; 2026 DEL GROSSO VIAGGI - TRASPORTO DI CLASSE</p>
+        <p style="text-align:center; margin-top:40px; font-size:0.6rem; color:#444; letter-spacing:2px;">&copy; 2026 DEL GROSSO VIAGGI - TRASPORTO DI CLASSE</p>
     </footer>
 
-    <div id="admin-modal">
-        <div id="login-section" class="login-box">
-            <h2 style="color:var(--accent); text-transform:uppercase; margin-bottom:30px;">Login Admin</h2>
-            <input type="text" id="admin_user" placeholder="Username">
-            <input type="password" id="admin_pass" placeholder="Password">
-            <button onclick="loginAdmin()" class="btn">ACCEDI</button>
-            <p onclick="toggleAdmin(false)" style="margin-top:20px; font-size:0.7rem; cursor:pointer; color:#444;">Chiudi</p>
-        </div>
-        <div id="admin-panel" class="admin-content" style="display:none;">
-            <h2 style="color:var(--accent); margin-bottom:20px;">NUOVO MEZZO</h2>
-            <div style="background:#111; padding:20px; border:1px solid #222; margin-bottom:20px;">
-                <input type="text" id="titolo" placeholder="Nome Bus" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
+    <div id="admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:2000; padding:20px;">
+        <div style="max-width:500px; margin:50px auto; background:#111; padding:30px; border-top:4px solid red;">
+            <div id="login-section">
+                <h2 style="margin-bottom:20px;">ADMIN LOGIN</h2>
+                <input type="password" id="admin_pass" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
+                <button onclick="loginAdmin()" class="btn">ENTRA</button>
+                <button onclick="toggleAdmin(false)" style="background:none; border:none; color:#444; margin-top:15px; cursor:pointer;">Chiudi</button>
+            </div>
+            <div id="admin-panel" style="display:none;">
+                <h2 style="color:red;">GESTIONE</h2>
+                <a href="prenota/admin.html" class="btn" style="background:blue; margin:10px 0;">Vedi Prenotazioni</a>
+                <hr style="margin:20px 0; border:#222;">
+                <input type="text" id="titolo" placeholder="Nome Viaggio/Bus" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
                 <select id="cat" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
                     <option value="viaggio">Bus GT</option>
-                    <option value="evento">Limousine Bus</option>
+                    <option value="evento">Limo Bus</option>
                     <option value="flotta">Slider Home</option>
                 </select>
-                <input type="file" id="file" style="margin-bottom:15px;">
-                <button onclick="upload()" class="btn">PUBBLICA</button>
+                <input type="file" id="file" style="margin-bottom:10px;">
+                <button onclick="upload()" class="btn">PUBBLICA ORA</button>
             </div>
-            <div id="lista-admin"></div>
-            <button onclick="toggleAdmin(false)" class="btn" style="background:#333; margin-top:20px;">ESCI</button>
         </div>
     </div>
 
@@ -257,64 +155,51 @@
         const sb = supabase.createClient(S_URL, S_KEY);
 
         function toggleAdmin(show) { document.getElementById('admin-modal').style.display = show ? 'block' : 'none'; }
-        
         function loginAdmin() {
-            if(document.getElementById('admin_user').value === 'admin' && document.getElementById('admin_pass').value === 'DELGROSSO2026') {
+            if(document.getElementById('admin_pass').value === 'DELGROSSO2026') {
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'block';
                 init();
-            } else { alert("Dati errati"); }
+            } else { alert("Accesso Negato"); }
         }
 
         async function init() {
-            const { data, error } = await sb.from('viaggi').select('*').order('created_at', { ascending: false });
-            if(error) return;
-            
+            const { data } = await sb.from('viaggi').select('*').order('created_at', { ascending: false });
             const busGrid = document.getElementById('grid-bus');
             const limoGrid = document.getElementById('grid-limo');
             const slider = document.getElementById('hero-slider');
-            const adminList = document.getElementById('lista-admin');
-
-            busGrid.innerHTML = ''; limoGrid.innerHTML = ''; if(adminList) adminList.innerHTML = '';
             
-            const sliderData = data.filter(i => i.categoria === 'flotta').length > 0 ? data.filter(i => i.categoria === 'flotta') : data.slice(0,5);
-            document.querySelectorAll('.slide').forEach(s => s.remove());
+            busGrid.innerHTML = ''; limoGrid.innerHTML = '';
+            
+            // Slider Logic
+            const sliderData = data.filter(i => i.categoria === 'flotta');
             sliderData.forEach((item, idx) => {
                 const slide = document.createElement('div');
                 slide.className = `slide ${idx === 0 ? 'active' : ''}`;
                 slide.style.backgroundImage = `url('${item.immagine_url}')`;
                 slider.appendChild(slide);
             });
-            startRotation();
+            if(sliderData.length > 1) startSlider();
 
-            data.forEach(item => {
-                if(item.categoria !== 'flotta') {
-                    const isLimo = item.categoria === 'evento';
-                    const card = `
-                        <div class="card">
-                            <img src="${item.immagine_url}">
-                            <div class="card-info">
-                                <h3>${item.titolo}</h3>
-                                <div class="specs">
-                                    <div class="spec-item"><i data-lucide="users"></i> ${isLimo ? 'Max 30 Posti' : '53/63 Posti'}</div>
-                                    <div class="spec-item"><i data-lucide="${isLimo ? 'star' : 'coffee'}"></i> ${isLimo ? 'Area VIP' : 'No Toilette'}</div>
-                                </div>
-                                <a href="https://wa.me/393662127916" class="btn" target="_blank">INFO WHATSAPP</a>
-                            </div>
+            // Cards Logic
+            data.filter(i => i.categoria !== 'flotta').forEach(item => {
+                const card = `
+                    <div class="card">
+                        <img src="${item.immagine_url}">
+                        <div class="card-info">
+                            <h3>${item.titolo}</h3>
+                            <a href="prenota/index.html?id=${item.id}" class="btn">PRENOTA POSTO</a>
                         </div>
-                    `;
-                    if(item.categoria === 'viaggio') busGrid.innerHTML += card;
-                    else limoGrid.innerHTML += card;
-                }
-                if(adminList) adminList.innerHTML += `<div style="padding:10px; border-bottom:1px solid #222; display:flex; justify-content:space-between; font-size:0.8rem;">${item.titolo} <button onclick="elimina(${item.id}, '${item.immagine_url}')" style="color:red; background:none; border:none; cursor:pointer;">Elimina</button></div>`;
+                    </div>`;
+                if(item.categoria === 'viaggio') busGrid.innerHTML += card;
+                else limoGrid.innerHTML += card;
             });
             lucide.createIcons();
         }
 
-        function startRotation() {
-            const slides = document.querySelectorAll('.slide');
-            if(slides.length < 2) return;
+        function startSlider() {
             let current = 0;
+            const slides = document.querySelectorAll('.slide');
             setInterval(() => {
                 slides[current].classList.remove('active');
                 current = (current + 1) % slides.length;
@@ -326,24 +211,15 @@
             const file = document.getElementById('file').files[0];
             const tit = document.getElementById('titolo').value;
             const cat = document.getElementById('cat').value;
-            if(!file || !tit) return alert("Dati mancanti");
-            const fname = `${Date.now()}_img.jpg`;
-            const bucket = (cat === 'evento') ? 'eventi' : 'foto';
-            const { error: stErr } = await sb.storage.from(bucket).upload(fname, file);
-            if(stErr) return alert("Errore upload");
-            const { data: urlData } = sb.storage.from(bucket).getPublicUrl(fname);
-            await sb.from('viaggi').insert([{ titolo: tit, immagine_url: urlData.publicUrl, categoria: cat }]);
+            if(!file || !tit) return alert("Inserisci i dati");
+            const fname = `${Date.now()}.jpg`;
+            const { error: err } = await sb.storage.from('foto').upload(fname, file);
+            if(err) return alert("Errore caricamento immagine");
+            const { data: url } = sb.storage.from('foto').getPublicUrl(fname);
+            await sb.from('viaggi').insert([{ titolo: tit, immagine_url: url.publicUrl, categoria: cat }]);
             location.reload();
         }
 
-        async function elimina(id, url) {
-            if(!confirm("Eliminare?")) return;
-            const fname = url.split('/').pop();
-            const bucket = url.includes('/eventi/') ? 'eventi' : 'foto';
-            await sb.from('viaggi').delete().eq('id', id);
-            await sb.storage.from(bucket).remove([fname]);
-            init();
-        }
         init();
     </script>
 </body>
