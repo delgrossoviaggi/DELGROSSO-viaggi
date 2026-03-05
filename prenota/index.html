@@ -8,39 +8,31 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root { --accent: #ff0000; --bg: #000; --text: #fff; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; text-align: center; }
-        header { padding: 20px; border-bottom: 2px solid var(--accent); }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; text-align: center; }
+        header { padding: 20px; border-bottom: 2px solid var(--accent); background: rgba(0,0,0,0.9); position: sticky; top:0; z-index:100; }
         .container { padding: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; width: 300px; }
+        .card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; width: 300px; transition: 0.3s; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
         .card img { width: 100%; border-radius: 5px; height: 180px; object-fit: cover; }
         
-        /* BOTTONI */
-        .btn-prenota { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 5px; }
+        .btn-prenota { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 5px; text-transform: uppercase; }
         .btn-prenota:disabled { background: #333 !important; color: #777 !important; cursor: not-allowed; }
 
         #mappa-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: none; overflow-y: auto; padding-top: 20px; }
         
-        /* BUS NORMALE */
-        .bus-container { background: #1a1a1a; border: 3px solid #333; border-radius: 50px 50px 10px 10px; display: inline-block; padding: 40px 15px 20px 15px; margin-bottom: 30px; }
+        .bus-container { background: #1a1a1a; border: 3px solid #333; border-radius: 50px 50px 15px 15px; display: inline-block; padding: 40px 15px 25px 15px; margin-bottom: 30px; }
         .bus-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; min-height: 45px; }
-        .seat { width: 50px; height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #555; font-weight: bold; }
-        .seat.selected { color: #ff0000 !important; }
-        .seat.occupied { color: #000 !important; cursor: not-allowed; opacity: 0.1; }
+        .seat { width: 50px; height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #555; font-weight: bold; transition: 0.2s; }
+        .seat.selected { color: #ff0000 !important; transform: scale(1.2); }
+        .seat.occupied { color: #222 !important; cursor: not-allowed; opacity: 0.3; }
         .corridoio { width: 30px; }
-        .servizio { width: 108px; background: #080808; border: 1px dashed #444; color: #666; display: flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 5px; font-weight: bold; text-transform: uppercase; }
+        .servizio { width: 108px; background: #080808; border: 1px dashed #444; color: #666; display: flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 5px; font-weight: bold; }
 
-        /* EFFETTO DISCO LIMOBUS */
-        @keyframes disco {
-            0% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
-            33% { border-color: #00ff00; box-shadow: 0 0 10px #00ff00; }
-            66% { border-color: #0000ff; box-shadow: 0 0 10px #0000ff; }
-            100% { border-color: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
-        }
-        .limo-mode { animation: disco 2s linear infinite; border: 4px solid red; border-radius: 20px; padding: 30px; background: #050505; }
-        .limo-title { color: gold; font-size: 24px; font-weight: bold; text-shadow: 2px 2px #000; margin-bottom: 15px; }
-
-        .form-box { max-width: 320px; margin: 0 auto; padding: 20px; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 10px; background: #111; border: 1px solid #333; color: white; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        .form-box { max-width: 350px; margin: 0 auto; padding: 20px; background: #0a0a0a; border-radius: 15px; border: 1px solid #222; margin-bottom: 50px; }
+        input, select { width: 100%; padding: 14px; margin-bottom: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        #posti-txt { color: var(--accent); font-weight: 900; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -49,18 +41,22 @@
     <div id="grid-tratte" class="container"></div>
 
     <div id="mappa-modal">
-        <button onclick="location.reload()" style="background:#333; color:white; border:none; padding:10px 20px; border-radius:20px; margin-bottom:10px; cursor:pointer;">CHIUDI X</button>
-        <h2 id="titolo-bus" style="color:red; margin-bottom:20px;"></h2>
+        <button onclick="location.reload()" style="background:#333; color:white; border:none; padding:10px 25px; border-radius:20px; margin-bottom:20px; cursor:pointer; font-weight:bold;">← TORNA INDIETRO</button>
+        <h2 id="titolo-bus" style="color:red; margin-bottom:10px; text-transform:uppercase;"></h2>
         
         <div id="area-selezione" class="bus-container"></div>
 
         <div class="form-box">
+            <h3 style="color:var(--accent); margin-bottom:15px; font-size:0.9rem;">INSERISCI I TUOI DATI</h3>
             <input type="text" id="nome" placeholder="Nome e Cognome">
-            <input type="tel" id="tel" placeholder="Tuo Cellulare">
-            <div id="display-scelta">
-                <p>Posti scelti: <span id="posti-txt" style="color:red; font-weight:bold;">Nessuno</span></p>
+            <input type="tel" id="tel" placeholder="Numero di Telefono">
+            <input type="text" id="partenza" placeholder="Da dove parti? (Città/Fermata)">
+            
+            <div id="display-scelta" style="margin: 15px 0;">
+                <p style="font-size:0.8rem; color:#888; margin:0;">POSTI SELEZIONATI:</p>
+                <span id="posti-txt">Nessuno</span>
             </div>
-            <button id="btn-conferma" class="btn-prenota" onclick="conferma()">CONFERMA PRENOTAZIONE</button>
+            <button id="btn-conferma" class="btn-prenota" onclick="conferma()">CONFERMA E INVIA WHATSAPP</button>
         </div>
     </div>
 
@@ -81,8 +77,8 @@
             data.forEach(t => {
                 grid.innerHTML += `<div class="card">
                     <img src="${t.immagine_url}">
-                    <h3>${t.titolo}</h3>
-                    <p style="font-size:12px; color:#666;">BUS: ${t.modello_bus}</p>
+                    <h3 style="margin:10px 0 5px 0;">${t.titolo}</h3>
+                    <p style="font-size:11px; color:#ff0000; font-weight:bold; letter-spacing:1px; margin-bottom:10px;">BUS: ${t.modello_bus}</p>
                     <button class="btn-prenota" onclick="apriMappa('${t.id}', '${t.modello_bus}', '${t.titolo}')">PRENOTA ORA</button>
                 </div>`;
             });
@@ -92,51 +88,33 @@
             t_id = id; t_titolo = titolo; selezionati = [];
             tipoBus = modello.toLowerCase().includes('limo') ? 'limo' : 'normale';
             
-            const modal = document.getElementById('mappa-modal');
-            modal.style.display = 'block';
+            document.getElementById('mappa-modal').style.display = 'block';
             document.getElementById('titolo-bus').innerText = titolo;
             const render = document.getElementById('area-selezione');
             const btn = document.getElementById('btn-conferma');
             
-            render.innerHTML = '';
-            render.className = tipoBus === 'limo' ? 'bus-container limo-mode' : 'bus-container';
+            render.innerHTML = 'Caricamento posti...';
             btn.disabled = false;
-            btn.innerText = "CONFERMA PRENOTAZIONE";
 
             const { data: p } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', id);
             const occupati = p ? p.flatMap(x => x.posti_selezionati) : [];
 
+            render.innerHTML = '';
             if (tipoBus === 'limo') {
                 const rimasti = 30 - occupati.length;
-                document.getElementById('display-scelta').style.display = 'none';
-                
-                if (rimasti <= 0) {
-                    render.innerHTML = `<div class="limo-title">🚫 SOLDOUT 🚫</div><p>Spiacenti, il Limobus è al completo!</p>`;
-                    btn.disabled = true;
-                    btn.innerText = "TUTTO ESAURITO";
-                } else {
-                    render.innerHTML = `
-                        <div class="limo-title">✨ LIMOBUS ✨</div>
-                        <p>Disponibilità: <b>${rimasti} / 30</b></p>
-                        <select id="quantita-limo" onchange="selezionaLimo(this.value)">
-                            <option value="">Quante persone?</option>
-                            ${Array.from({length: Math.min(rimasti, 15)}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
-                        </select>`;
-                }
+                render.innerHTML = `<div style="padding:20px;"><h2 style="color:gold;">LIMOBUS DISPONIBILE</h2><p>Posti liberi: ${rimasti} / 30</p>
+                <select id="quantita-limo" onchange="selezionaLimo(this.value)"><option value="">Quante persone?</option>
+                ${Array.from({length: Math.min(rimasti, 15)}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}</select></div>`;
             } else {
-                document.getElementById('display-scelta').style.display = 'block';
-                const maxPosti = modello.includes('63') ? 63 : 53;
-                if (occupati.length >= maxPosti) {
-                    btn.disabled = true;
-                    btn.innerText = "SOLDOUT - ESAURITO";
-                }
                 disegnaMappa(modello, occupati, render);
             }
         }
 
         function disegnaMappa(modello, occupati, render) {
+            // Layout dinamici con ultima fila 5 posti
             const bus53 = [[1,2,'C',3,4],[5,6,'C',7,8],[9,10,'C',11,12],[13,14,'C',15,16],[17,18,'C',19,20],[21,22,'C','WC'],[23,24,'C','USCITA'],[25,26,'C',27,28],[29,30,'C',31,32],[33,34,'C',35,36],[37,38,'C',39,40],[41,42,'C',43,44],[45,46,'C',47,48],[49,50,51,52,53]];
             const bus63 = [[1,2,'C',3,4],[5,6,'C',7,8],[9,10,'C',11,12],[13,14,'C',15,16],[17,18,'C',19,20],[21,22,'C',23,24],[25,26,'C',27,28],[29,30,'C','WC'],[31,32,'C','USCITA'],[33,34,'C',35,36],[37,38,'C',39,40],[41,42,'C',43,44],[45,46,'C',47,48],[49,50,'C',51,52],[53,54,'C',55,56],[57,58,'C',' '],[59,60,61,62,63]];
+            
             const schema = modello.includes('63') ? bus63 : bus53;
             
             schema.forEach(fila => {
@@ -157,10 +135,6 @@
             lucide.createIcons();
         }
 
-        window.selezionaLimo = (val) => {
-            selezionati = val ? Array.from({length: parseInt(val)}, (_, i) => `Limo-${Date.now()}-${i}`) : [];
-        };
-
         window.seleziona = (num, isOcc) => {
             if (isOcc) return;
             const el = document.getElementById(`s-${num}`);
@@ -170,19 +144,40 @@
             document.getElementById('posti-txt').innerText = selezionati.sort((a,b)=>a-b).join(', ') || "Nessuno";
         };
 
+        window.selezionaLimo = (val) => {
+            selezionati = val ? Array.from({length: parseInt(val)}, (_, i) => `Persona ${i+1}`) : [];
+            document.getElementById('posti-txt').innerText = val ? val + " Persone" : "Nessuno";
+        };
+
         async function conferma() {
-            const nome = document.getElementById('nome').value;
+            const nome = document.getElementById('nome').value.toUpperCase();
             const tel = document.getElementById('tel').value;
-            if(!nome || !tel || selezionati.length === 0) return alert("Inserisci Nome, Tel e seleziona i posti!");
+            const part = document.getElementById('partenza').value.toUpperCase();
+
+            if(!nome || !tel || !part || selezionati.length === 0) {
+                return alert("ATTENZIONE: Inserisci Nome, Telefono, Partenza e scegli i posti!");
+            }
 
             const { error } = await sb.from('prenotazioni').insert([{
-                tratta_id: t_id, nome_cliente: nome, telefono_cliente: tel, posti_selezionati: selezionati
+                tratta_id: t_id, 
+                nome_cliente: nome, 
+                telefono_cliente: tel, 
+                partenza: part, // Salvataggio colonna partenza
+                posti_selezionati: selezionati
             }]);
 
             if(!error) {
-                const info = tipoBus === 'limo' ? `${selezionati.length} Persone` : `Posti: ${selezionati.join(', ')}`;
-                window.open(`https://wa.me/393662127916?text=${encodeURIComponent("PRENOTAZIONE\nViaggio: "+t_titolo+"\nNome: "+nome+"\n"+info)}`);
+                const infoPosti = tipoBus === 'limo' ? `${selezionati.length} Persone` : `Posti: ${selezionati.sort((a,b)=>a-b).join(', ')}`;
+                const waMsg = `PRENOTAZIONE DAL SITO\n--------------------------\nViaggio: ${t_titolo}\nCliente: ${nome}\nTel: ${tel}\nPartenza: ${part}\n${infoPosti}`;
+                
+                // Apre WhatsApp (Numero Nicola Limobus o Raffaele Bus GT)
+                const waNum = tipoBus === 'limo' ? '3662127916' : '3205730466';
+                window.open(`https://wa.me/39${waNum}?text=${encodeURIComponent(waMsg)}`);
+                
+                alert("Grazie " + nome + "! Prenotazione inviata con successo.");
                 location.reload();
+            } else {
+                alert("Errore nel salvataggio. Riprova.");
             }
         }
         carica();
