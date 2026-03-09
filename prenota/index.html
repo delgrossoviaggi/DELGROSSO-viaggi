@@ -50,7 +50,6 @@
             <h3 style="color:var(--accent); margin-bottom:15px; font-size:0.9rem;">INSERISCI I TUOI DATI</h3>
             <input type="text" id="nome" placeholder="Nome e Cognome">
             <input type="tel" id="tel" placeholder="Numero di Telefono">
-            <input type="text" id="partenza" placeholder="Da dove parti? (Città/Fermata)">
             
             <div id="display-scelta" style="margin: 15px 0;">
                 <p style="font-size:0.8rem; color:#888; margin:0;">POSTI SELEZIONATI:</p>
@@ -152,23 +151,21 @@
         async function conferma() {
             const nome = document.getElementById('nome').value.toUpperCase();
             const tel = document.getElementById('tel').value;
-            const part = document.getElementById('partenza').value.toUpperCase();
 
-            if(!nome || !tel || !part || selezionati.length === 0) {
-                return alert("ATTENZIONE: Inserisci Nome, Telefono, Partenza e scegli i posti!");
+            if(!nome || !tel || selezionati.length === 0) {
+                return alert("ATTENZIONE: Inserisci Nome, Telefono e scegli i posti!");
             }
 
             const { error } = await sb.from('prenotazioni').insert([{
                 tratta_id: t_id, 
                 nome_cliente: nome, 
                 telefono_cliente: tel, 
-                partenza: part, // Salvataggio colonna partenza
                 posti_selezionati: selezionati
             }]);
 
             if(!error) {
                 const infoPosti = tipoBus === 'limo' ? `${selezionati.length} Persone` : `Posti: ${selezionati.sort((a,b)=>a-b).join(', ')}`;
-                const waMsg = `PRENOTAZIONE DAL SITO\n--------------------------\nViaggio: ${t_titolo}\nCliente: ${nome}\nTel: ${tel}\nPartenza: ${part}\n${infoPosti}`;
+                const waMsg = `PRENOTAZIONE DAL SITO\n--------------------------\nViaggio: ${t_titolo}\nCliente: ${nome}\nTel: ${tel}\n${infoPosti}`;
                 
                 // Apre WhatsApp (Numero Nicola Limobus o Raffaele Bus GT)
                 const waNum = tipoBus === 'limo' ? '3662127916' : '3205730466';
