@@ -13,105 +13,61 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
-            <a href="index.html" class="text-2xl font-extrabold text-blue-900 tracking-tight">Del Grosso <span class="text-blue-600">Viaggi</span></a>
-            <nav class="hidden lg:flex space-x-8">
-                <a href="index.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Home</a>
-                <a href="flotta.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">La Flotta</a>
-                <a href="prenota.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Prenotazioni</a>
-                <a href="admin.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Admin</a>
+    <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-20 md:h-24">
+            <a href="index.html" class="flex items-center h-full py-2">
+                <img src="logo.jpg.JPEG" alt="Del Grosso Logo" class="h-12 sm:h-16 md:h-20 w-auto object-contain">
+            </a>
+            <nav class="hidden lg:flex space-x-6 items-center">
+                <a href="flotta.html" class="text-gray-600 font-semibold transition">Flotta</a>
+                <a href="viaggi.html" class="text-gray-600 font-semibold transition">Viaggi</a>
+                <a href="prenota.html" class="text-gray-600 font-semibold transition">Prenotazioni</a>
+                <a href="contatti.html" class="text-blue-600 font-bold transition">Contatti</a>
+                <a href="admin.html" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold">Admin</a>
             </nav>
+            <div class="lg:hidden">
+                <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-2xl p-2">☰</button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t p-4 space-y-3 font-semibold">
+            <a href="index.html" class="block">Home</a>
+            <a href="prenota.html" class="block">Prenotazioni</a>
+            <a href="contatti.html" class="block text-blue-600">Contatti</a>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-        <div class="mb-8">
-            <a href="index.html" class="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800 transition bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-xl shadow-sm">← Torna alla Home</a>
-        </div>
-
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-8 tracking-tight">Contatti</h1>
-
+    <main class="max-w-4xl mx-auto px-4 py-16 w-full">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-8">Contatti</h1>
         <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100 space-y-6">
-            
-            <div class="flex items-start">
-                <span class="text-xl mr-3">📞</span>
-                <div>
-                    <strong class="text-gray-900">Telefono:</strong> 
-                    <span class="text-gray-600">3205730466 (Raffaele) — 3662127916 (Nicola)</span>
-                </div>
-            </div>
-
-            <div class="flex items-start">
-                <span class="text-xl mr-3">💬</span>
-                <div>
-                    <strong class="text-gray-900">WhatsApp:</strong> 
-                    <a href="https://wa.me/393205730466" class="text-blue-600 hover:underline font-semibold">3205730466 (Bus GT)</a> / 
-                    <a href="https://wa.me/393662127916" class="text-blue-600 hover:underline font-semibold">3662127916 (Limobus)</a>
-                </div>
-            </div>
-
-            <div class="flex items-start">
-                <span class="text-xl mr-3">✉️</span>
-                <div>
-                    <strong class="text-gray-900">Email:</strong> 
-                    <a href="mailto:info@delgrossoviaggi.it" class="text-blue-600 hover:underline font-semibold">info@delgrossoviaggi.it</a>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-100 pt-6 mt-6">
-                <div class="flex items-start mb-4">
-                    <span class="text-xl mr-3">📸</span>
-                    <div>
-                        <strong class="text-gray-900 block mb-1">Instagram:</strong> 
-                        <a href="https://www.instagram.com/delgrosso_viaggi_/" class="text-blue-600 hover:underline">Del Grosso Viaggi</a> | 
-                        <a href="https://www.instagram.com/_limousine_bus/" class="text-blue-600 hover:underline">Limousine Bus</a>
-                    </div>
-                </div>
-
-                <div class="flex items-start">
-                    <span class="text-xl mr-3">📘</span>
-                    <div>
-                        <strong class="text-gray-900 block mb-1">Facebook:</strong> 
-                        <a href="https://www.facebook.com/871671722704094" class="text-blue-600 hover:underline">Del Grosso Viaggi & Limousine Bus</a> | 
-                        <a href="https://www.facebook.com/profile.php?id=61552174581411" class="text-blue-600 hover:underline">Limousine Bus</a>
-                    </div>
-                </div>
+            <p>📞 <strong>Telefono:</strong> 3205730466 (Raffaele) — 3662127916 (Nicola)</p>
+            <p>💬 <strong>WhatsApp:</strong> <a href="https://wa.me/393205730466" class="text-blue-600">Bus GT</a> / <a href="https://wa.me/393662127916" class="text-blue-600">Limobus</a></p>
+            <p>✉️ <strong>Email:</strong> <a href="mailto:info@delgrossoviaggi.it" class="text-blue-600 underline">info@delgrossoviaggi.it</a></p>
+            <div class="pt-6 border-t">
+                <p class="mb-2">📸 <strong>Instagram:</strong> <a href="https://www.instagram.com/delgrosso_viaggi_/" class="text-blue-600">Del Grosso Viaggi</a></p>
+                <p>📘 <strong>Facebook:</strong> <a href="https://www.facebook.com/871671722704094" class="text-blue-600">Del Grosso Viaggi & Limobus</a></p>
             </div>
         </div>
     </main>
 
-    <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-16 mb-12">
-            
+    <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600 mt-auto text-center md:text-left">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Del Grosso Viaggi & Limousine Bus</h3>
-                <ul class="space-y-3 text-sm">
-                    <li class="flex items-center"><span class="bg-blue-600 p-1.5 rounded mr-3">📞</span> Telefono: 3205730466 (Raffaele) — 3662127916 (Nicola)</li>
-                    <li class="flex items-center"><span class="bg-blue-600 p-1.5 rounded mr-3">💬</span> WhatsApp Limobus (Nicola): <a href="https://wa.me/393662127916" class="font-bold ml-1 hover:text-blue-400">3662127916</a></li>
-                    <li class="flex items-center"><span class="bg-blue-600 p-1.5 rounded mr-3">💬</span> WhatsApp Bus GT (Raffaele): <a href="https://wa.me/393205730466" class="font-bold ml-1 hover:text-blue-400">3205730466</a></li>
-                    <li class="flex items-center"><span class="bg-blue-600 p-1.5 rounded mr-3">✉️</span> Email: <a href="mailto:info@delgrossoviaggi.it" class="font-bold ml-1 hover:text-blue-400">info@delgrossoviaggi.it</a></li>
+                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-4 text-sm uppercase">Del Grosso Viaggi & Limousine Bus</h3>
+                <ul class="text-sm text-gray-400 space-y-2">
+                    <li>📞 3205730466 — 3662127916</li>
+                    <li>✉️ info@delgrossoviaggi.it</li>
                 </ul>
             </div>
-
-            <div>
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Social</h3>
-                <div class="space-y-3">
-                    <a href="https://www.instagram.com/delgrosso_viaggi_/" class="flex items-center bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-blue-500 transition">
-                        <span class="mr-3">📸</span> <span class="font-semibold text-blue-400">Instagram (DelGrosso)</span>
-                    </a>
-                    <a href="https://www.instagram.com/_limousine_bus/" class="flex items-center bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-blue-500 transition">
-                        <span class="mr-3">📸</span> <span class="font-semibold text-blue-400">Instagram (Limousine Bus)</span>
-                    </a>
-                    <a href="https://www.facebook.com/871671722704094" class="flex items-center bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-blue-500 transition">
-                        <span class="mr-3">👍</span> <span class="font-semibold text-blue-400">Facebook (DelGrosso)</span>
-                    </a>
-                    <a href="https://www.facebook.com/profile.php?id=61552174581411" class="flex items-center bg-gray-900 border border-gray-800 rounded-lg p-3 hover:border-blue-500 transition">
-                        <span class="mr-3">👍</span> <span class="font-semibold text-blue-400">Facebook (Limousine Bus)</span>
-                    </a>
+            <div class="md:text-right">
+                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-4 text-sm uppercase">Social</h3>
+                <div class="flex justify-center md:justify-end gap-4 text-blue-400 font-bold text-xs uppercase">
+                    <a href="#">Instagram</a><a href="#">Facebook</a>
                 </div>
             </div>
-
+        </div>
+        <div class="max-w-7xl mx-auto px-4 border-t border-gray-800 pt-8 mt-8 text-center text-gray-500 text-xs">
+            <p>© 2026 Del Grosso Viaggi. Tutti i diritti riservati.</p>
+            <p class="text-sm font-bold text-gray-400 mt-2">Fatto con cura da Cristino Nicola Pio.</p>
         </div>
     </footer>
 </body>
