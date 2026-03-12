@@ -9,157 +9,181 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         const passwordAttesa = "Delgrosso@26";
-        let accesso = prompt("Inserisci la password:");
+        let accesso = prompt("Password Amministratore:");
         if (accesso !== passwordAttesa) { window.location.href = "index.html"; }
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen pb-10">
+<body class="bg-gray-100 min-h-screen pb-20">
 
-    <nav class="bg-gray-900 text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-md">
-        <h1 class="font-bold text-sm uppercase tracking-widest">Admin Panel</h1>
-        <a href="index.html" class="bg-gray-700 px-3 py-1 rounded text-xs">Esci</a>
+    <nav class="bg-black text-white p-4 sticky top-0 z-50 flex justify-between items-center shadow-xl">
+        <h1 class="font-black text-xs uppercase tracking-widest text-blue-500">Del Grosso Admin</h1>
+        <div class="flex gap-2">
+             <button onclick="exportExcel()" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] font-bold">EXCEL</button>
+             <a href="index.html" class="bg-red-600 px-3 py-1 rounded text-[10px] font-bold">ESCI</a>
+        </div>
     </nav>
 
     <div class="max-w-4xl mx-auto p-4 space-y-6">
         
-        <div id="status-bar" class="hidden fixed top-16 left-0 w-full bg-yellow-400 text-black text-center py-2 font-bold text-sm z-50 shadow-lg">
-            Attendere... Caricamento in corso ⏳
-        </div>
-
-        <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-200 shadow-sm">
-            <h2 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">🖼️ Nuovo Carousel</h2>
-            <input type="text" id="car-titolo" placeholder="Titolo (es. Limobus)" class="w-full p-3 mb-3 border rounded-xl outline-none text-sm">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-indigo-100">
+            <h2 class="font-bold text-indigo-900 mb-4 italic">🖼️ Gestione Carousel Flotta</h2>
+            <input type="text" id="car-titolo" placeholder="Titolo (Es. Limousine Bus)" class="w-full p-3 mb-3 border rounded-xl text-sm outline-none focus:border-indigo-500">
             <input type="file" id="car-file" accept="image/*" class="block w-full text-xs text-gray-500 mb-4 file:mr-3 file:py-2 file:px-4 file:rounded-full file:bg-indigo-600 file:text-white file:border-0">
-            <button onclick="aggiungiCarousel()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold active:scale-95 transition">CARICA ORA</button>
-            <div id="lista-carousel" class="mt-4 space-y-2 max-h-40 overflow-y-auto"></div>
+            <button id="btn-car" onclick="aggiungiCarousel()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold active:bg-indigo-800 transition shadow-lg">CARICA FOTO CAROUSEL</button>
+            
+            <div id="lista-carousel" class="mt-6 space-y-3 max-h-60 overflow-y-auto pt-4 border-t">
+                </div>
         </div>
 
-        <div class="bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-sm">
-            <h2 class="font-bold text-blue-900 mb-4">📢 Pubblica Avviso Home</h2>
-            <input type="text" id="avviso-titolo" placeholder="Titolo Avviso" class="w-full p-3 mb-3 border rounded-xl text-sm">
-            <textarea id="avviso-testo" placeholder="Testo avviso..." class="w-full p-3 mb-3 border rounded-xl text-sm h-24"></textarea>
-            <input type="file" id="avviso-file" accept="image/*" class="text-xs mb-4">
-            <button onclick="gestisciAvviso()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold active:scale-95 transition">PUBBLICA AVVISO</button>
+        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-green-100">
+            <h2 class="font-bold text-green-900 mb-6 italic">📋 Registro Passeggeri</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b bg-gray-50 text-gray-400 uppercase">
+                            <th class="p-3">Cliente</th>
+                            <th class="p-3">Posti</th>
+                            <th class="p-3 text-right">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-prenotazioni">
+                        </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border shadow-sm">
-            <h2 class="font-bold text-gray-800 mb-4 italic underline">➕ Nuova Locandina Viaggio</h2>
-            <input type="text" id="add-titolo" placeholder="Destinazione" class="w-full p-3 mb-3 border rounded-xl text-sm">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-200">
+            <h2 class="font-bold text-gray-800 mb-4 italic">➕ Nuova Locandina Viaggio</h2>
+            <input type="text" id="add-titolo" placeholder="Titolo Viaggio" class="w-full p-3 mb-3 border rounded-xl text-sm">
             <select id="add-bus" class="w-full p-3 mb-3 border rounded-xl text-sm">
                 <option value="GT 53 POSTI">GT 53 POSTI</option>
                 <option value="GT 63 POSTI">GT 63 POSTI</option>
                 <option value="LIMOBUS">LIMOBUS</option>
             </select>
             <input type="file" id="locandina-file" accept="image/*" class="text-xs mb-4">
-            <button onclick="gestisciViaggio()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold active:scale-95 transition">CREA LOCANDINA</button>
+            <button id="btn-viaggio" onclick="gestisciViaggio()" class="w-full bg-gray-900 text-white py-4 rounded-xl font-bold">PUBBLICA LOCANDINA</button>
             <div id="lista-viaggi" class="mt-6 space-y-2 border-t pt-4"></div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border shadow-sm overflow-hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-bold">📋 Prenotati</h2>
-                <button onclick="exportExcel()" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-tighter">Scarica Excel</button>
-            </div>
-            <div class="overflow-x-auto text-xs">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="p-2 border">Cliente</th>
-                            <th class="p-2 border">Viaggio</th>
-                            <th class="p-2 border">Posti</th>
-                            <th class="p-2 border">Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-prenotazioni"></tbody>
-                </table>
+    </div>
+
+    <div id="modal-edit" class="fixed inset-0 bg-black/80 hidden z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6">
+            <h3 class="font-bold text-lg mb-2">Modifica Posti</h3>
+            <p id="edit-nome" class="text-sm text-blue-600 mb-4 font-bold"></p>
+            <input type="text" id="edit-posti" class="w-full p-4 border-2 border-blue-100 rounded-2xl mb-6 text-center font-bold text-xl">
+            <div class="flex gap-2">
+                <button onclick="chiudiEdit()" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold text-sm">ANNULLA</button>
+                <button onclick="salvaEdit()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm">SALVA</button>
             </div>
         </div>
-
     </div>
 
     <script>
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
+        let idEdit = null;
 
-        function showStatus(show) {
-            document.getElementById('status-bar').classList.toggle('hidden', !show);
-        }
-
-        async function uploadFoto(fileInput) {
-            const file = fileInput.files[0];
-            if (!file) return null;
-            
-            showStatus(true);
-            // Forza formato web friendly per iPhone
-            const fileName = `img_${Date.now()}.jpg`; 
-            
-            const { data, error } = await sb.storage.from('immagini').upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: false
-            });
-
-            if (error) {
-                alert("Errore caricamento: " + error.message);
-                showStatus(false);
-                return null;
-            }
-
-            const { data: { publicUrl } } = sb.storage.from('immagini').getPublicUrl(fileName);
-            showStatus(false);
-            return publicUrl;
-        }
-
-        async function caricaDati() {
+        async function caricaTutto() {
             // Carica Carousel
             const { data: car } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: false});
-            document.getElementById('lista-carousel').innerHTML = car.map(c => `<div class="flex justify-between items-center bg-white p-2 rounded border text-xs"><img src="${c.immagine_url}" class="w-8 h-8 object-cover rounded"><span>${c.titolo}</span><button onclick="eliminaCarousel('${c.id}')" class="text-red-500 font-bold">X</button></div>`).join('');
+            document.getElementById('lista-carousel').innerHTML = car.map(c => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-2xl border">
+                    <img src="${c.immagine_url}" class="w-12 h-12 object-cover rounded-lg">
+                    <span class="text-[10px] font-bold uppercase truncate px-2">${c.titolo}</span>
+                    <button onclick="eliminaDato('carousel_flotta', '${c.id}')" class="text-red-500 font-black px-2">ELIMINA</button>
+                </div>`).join('');
 
             // Carica Viaggi
-            const { data: v } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            document.getElementById('lista-viaggi').innerHTML = v.map(viaggio => `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl border text-xs"><span><strong>${viaggio.titolo}</strong> (${viaggio.modello_bus})</span><button onclick="eliminaViaggio('${viaggio.id}')" class="text-red-500 font-bold">Elimina</button></div>`).join('');
+            const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            document.getElementById('lista-viaggi').innerHTML = viaggi.map(v => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl border text-[10px]">
+                    <span class="font-bold uppercase">${v.titolo}</span>
+                    <button onclick="eliminaDato('tratte', '${v.id}')" class="text-red-500 font-bold">CANCELLA</button>
+                </div>`).join('');
 
             // Carica Prenotazioni
-            const { data: p } = await sb.from('prenotazioni').select('*, tratte(titolo)').order('created_at', {ascending: false});
-            document.getElementById('lista-prenotazioni').innerHTML = p.map(pre => `
+            const { data: preno } = await sb.from('prenotazioni').select('*, tratte(titolo)').order('created_at', {ascending: false});
+            document.getElementById('lista-prenotazioni').innerHTML = preno.map(p => `
                 <tr class="border-b">
-                    <td class="p-2 border font-bold">${pre.nome_cliente}<br><span class="font-normal text-gray-400">${pre.telefono_cliente}</span></td>
-                    <td class="p-2 border">${pre.tratte?.titolo || 'N/D'}</td>
-                    <td class="p-2 border font-bold text-blue-600">${pre.posti_selezionati.join(',')}</td>
-                    <td class="p-2 border text-center"><button onclick="eliminaPreno('${pre.id}')" class="bg-red-500 text-white px-2 py-1 rounded">X</button></td>
+                    <td class="p-3 font-bold">${p.nome_cliente}<br><span class="font-normal text-gray-400">${p.tratte?.titolo || 'N/D'}</span></td>
+                    <td class="p-3 font-bold text-blue-600 text-sm">${p.posti_selezionati.join(',')}</td>
+                    <td class="p-3 text-right flex gap-2 justify-end">
+                        <button onclick="apriEdit('${p.id}', '${p.nome_cliente}', '${p.posti_selezionati.join(',')}')" class="text-blue-500 font-bold border border-blue-500 px-2 py-1 rounded">M</button>
+                        <button onclick="eliminaDato('prenotazioni', '${p.id}')" class="text-red-500 font-bold border border-red-500 px-2 py-1 rounded">X</button>
+                    </td>
                 </tr>`).join('');
         }
 
-        async function aggiungiCarousel() {
-            const t = document.getElementById('car-titolo').value;
-            const img = await uploadFoto(document.getElementById('car-file'));
-            if(t && img) { await sb.from('carousel_flotta').insert([{titolo: t, immagine_url: img}]); location.reload(); }
+        async function upload(input) {
+            const file = input.files[0];
+            if (!file) return null;
+            const ext = file.name.split('.').pop();
+            const fileName = `${Date.now()}.${ext}`;
+            const { data, error } = await sb.storage.from('immagini').upload(fileName, file);
+            if (error) throw error;
+            const { data: { publicUrl } } = sb.storage.from('immagini').getPublicUrl(fileName);
+            return publicUrl;
         }
 
-        async function gestisciAvviso() {
-            const t = document.getElementById('avviso-titolo').value, txt = document.getElementById('avviso-testo').value;
-            const img = await uploadFoto(document.getElementById('avviso-file'));
-            if(t && txt) { await sb.from('avvisi_home').insert([{titolo: t, testo_descrizione: txt, immagine_url: img}]); alert("Pubblicato!"); location.reload(); }
+        async function aggiungiCarousel() {
+            try {
+                const btn = document.getElementById('btn-car'); btn.innerText = "CARICAMENTO..."; btn.disabled = true;
+                const img = await upload(document.getElementById('car-file'));
+                const t = document.getElementById('car-titolo').value;
+                if(img && t) {
+                    await sb.from('carousel_flotta').insert([{titolo: t, immagine_url: img}]);
+                    location.reload();
+                }
+            } catch (e) { alert("Errore: " + e.message); }
         }
 
         async function gestisciViaggio() {
-            const t = document.getElementById('add-titolo').value, b = document.getElementById('add-bus').value;
-            const img = await uploadFoto(document.getElementById('locandina-file'));
-            if(t && img) { await sb.from('tratte').insert([{titolo: t, immagine_url: img, modello_bus: b}]); location.reload(); }
+            try {
+                const img = await upload(document.getElementById('locandina-file'));
+                const t = document.getElementById('add-titolo').value, b = document.getElementById('add-bus').value;
+                if(img && t) {
+                    await sb.from('tratte').insert([{titolo: t, immagine_url: img, modello_bus: b}]);
+                    location.reload();
+                }
+            } catch (e) { alert("Errore: " + e.message); }
         }
 
-        async function eliminaViaggio(id) { if(confirm("Eliminare?")) { await sb.from('tratte').delete().eq('id', id); location.reload(); } }
-        async function eliminaCarousel(id) { if(confirm("Eliminare?")) { await sb.from('carousel_flotta').delete().eq('id', id); location.reload(); } }
-        async function eliminaPreno(id) { if(confirm("Cancellare prenotazione?")) { await sb.from('prenotazioni').delete().eq('id', id); location.reload(); } }
+        async function eliminaDato(tabella, id) {
+            if(confirm("Sei sicuro di voler eliminare?")) {
+                const { error } = await sb.from(tabella).delete().eq('id', id);
+                if(error) alert("Errore: " + error.message);
+                else caricaTutto();
+            }
+        }
+
+        function apriEdit(id, nome, posti) {
+            idEdit = id; document.getElementById('edit-nome').innerText = nome;
+            document.getElementById('edit-posti').value = posti;
+            document.getElementById('modal-edit').classList.remove('hidden');
+        }
+        function chiudiEdit() { document.getElementById('modal-edit').classList.add('hidden'); }
+
+        async function salvaEdit() {
+            const nuovi = document.getElementById('edit-posti').value.split(',').map(s => s.trim());
+            const { error } = await sb.from('prenotazioni').update({ posti_selezionati: nuovi }).eq('id', idEdit);
+            if(!error) { chiudiEdit(); caricaTutto(); }
+        }
 
         function exportExcel() {
-            const ws = XLSX.utils.json_to_sheet(document.getElementById('lista-prenotazioni').innerText);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Passeggeri");
+            const rows = [['Cliente', 'Viaggio', 'Posti']];
+            const items = document.querySelectorAll('#lista-prenotazioni tr');
+            items.forEach(row => {
+                const td = row.querySelectorAll('td');
+                rows.push([td[0].innerText.split('\n')[0], td[0].innerText.split('\n')[1], td[1].innerText]);
+            });
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri");
             XLSX.writeFile(wb, "Passeggeri_DelGrosso.xlsx");
         }
 
-        caricaDati();
+        caricaTutto();
     </script>
 </body>
 </html>
