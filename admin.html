@@ -2,36 +2,234 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel - Delgrosso</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Del Grosso Viaggi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        // PROTEZIONE PASSWORD
+        const passwordAttesa = "Delgrosso@26";
+        let accesso = prompt("Inserisci la password amministratore:");
+        if (accesso !== passwordAttesa) {
+            alert("Password errata!");
+            window.location.href = "index.html";
+        }
+    </script>
 </head>
-<body style="background: #000; padding: 20px;">
+<body class="bg-gray-100 min-h-screen">
 
-    <div style="max-width: 600px; margin: auto; background: #111; padding: 30px; border: 1px solid #ff0000;">
-        <h2 style="color: #ff0000; text-align: center;">GESTIONE SITO</h2>
-        
-        <input type="password" id="adminPass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:15px; background:#222; color:white; border:1px solid #333;">
-        
-        <select id="categoria" style="width:100%; padding:12px; margin-bottom:15px; background:#222; color:white;">
-            <option value="viaggio">Viaggio (Bus GT)</option>
-            <option value="evento">Evento (Limousine Bus)</option>
-        </select>
+    <nav class="bg-gray-900 text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-50">
+        <h1 class="text-xl font-bold italic">Del Grosso Gestione</h1>
+        <div class="flex gap-4">
+            <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded text-xs font-bold transition">📊 Esporta Excel</button>
+            <button onclick="exportPDF()" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded text-xs font-bold transition">📄 Esporta PDF</button>
+            <a href="index.html" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded text-xs transition">Torna al Sito</a>
+        </div>
+    </nav>
 
-        <input type="text" id="titolo" placeholder="Titolo Locandina" style="width:100%; padding:12px; margin-bottom:10px; background:#222; color:white; border:1px solid #333;">
-        <input type="text" id="link" placeholder="Link Prenotazione" style="width:100%; padding:12px; margin-bottom:10px; background:#222; color:white; border:1px solid #333;">
+    <div class="max-w-7xl mx-auto p-6 space-y-8 mt-4">
         
-        <label style="display:block; margin: 10px 0;">Seleziona Foto:</label>
-        <input type="file" id="fotoFile" style="margin-bottom:20px; color: white;">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 shadow-sm flex flex-col">
+                <h2 class="text-lg font-bold text-indigo-900 mb-4 italic">🖼️ Foto Flotta (Carousel)</h2>
+                <input type="text" id="car-titolo" placeholder="Titolo (Es. Limousine Bus)" class="w-full p-3 mb-3 border rounded-xl outline-none">
+                <input type="text" id="car-badge" placeholder="Badge (Es. Party Tour)" class="w-full p-3 mb-3 border rounded-xl outline-none">
+                <label class="block mb-4">
+                    <span class="text-xs font-bold text-indigo-700 block mb-1">Carica Foto:</span>
+                    <input type="file" id="car-file" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer">
+                </label>
+                <button onclick="aggiungiCarousel()" class="mt-auto w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Aggiungi</button>
+            </div>
 
-        <button onclick="pubblica()" class="btn-luxury" style="border:none; cursor:pointer;">CARICA ORA</button>
+            <div class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col">
+                <h2 class="text-lg font-bold text-gray-900 mb-4 italic">📸 Foto Attive</h2>
+                <div id="lista-carousel" class="space-y-3 h-48 overflow-y-auto pr-2">
+                    <p class="text-gray-400 text-sm italic">Caricamento galleria...</p>
+                </div>
+            </div>
 
-        <hr style="border: 0.5px solid #333; margin: 40px 0;">
-        
-        <h3 style="color: #ff0000;">LOCANDINE ATTIVE</h3>
-        <div id="admin-list"></div>
+        </div>
+
+        <div class="bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200">
+            <h2 class="text-xl font-extrabold text-blue-900 mb-4 italic">📢 Avviso Home Page</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <input type="text" id="avviso-titolo" placeholder="Titolo Avviso" class="w-full p-3 border rounded-xl outline-none">
+                    <label class="block">
+                        <span class="text-sm font-bold text-blue-700 block mb-1">Carica Foto Avviso (Opzionale):</span>
+                        <input type="file" id="avviso-file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                    </label>
+                </div>
+                <textarea id="avviso-testo" rows="4" placeholder="Testo dell'avviso..." class="w-full p-3 border rounded-xl outline-none resize-none"></textarea>
+            </div>
+            <button onclick="gestisciAvviso()" class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Pubblica</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                <h2 class="text-lg font-bold mb-4 italic">➕ Nuova Locandina</h2>
+                <input type="text" id="add-titolo" placeholder="Destinazione" class="w-full p-3 mb-3 border rounded-xl outline-none">
+                <select id="add-bus" class="w-full p-3 mb-3 border rounded-xl outline-none">
+                    <option value="GT 53 POSTI">GT 53 POSTI</option>
+                    <option value="GT 63 POSTI">GT 63 POSTI</option>
+                    <option value="LIMOBUS">LIMOBUS</option>
+                </select>
+                <input type="file" id="locandina-file" class="text-xs mb-4">
+                <button onclick="gestisciViaggio()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold">Crea Viaggio</button>
+            </div>
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border">
+                <h2 class="text-lg font-bold mb-4 font-mono uppercase">📌 Viaggi Attivi</h2>
+                <div id="lista-viaggi" class="space-y-3 h-64 overflow-y-auto pr-2">
+                    <p class="text-gray-400 text-sm italic">Caricamento locandine...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border overflow-hidden">
+            <h2 class="text-xl font-bold mb-6 italic">📋 Elenco Prenotazioni</h2>
+            <div class="overflow-x-auto">
+                <table id="tabella-preno" class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 border-b text-gray-700">
+                        <tr>
+                            <th class="p-4">Cliente / Tel</th>
+                            <th class="p-4">Viaggio</th>
+                            <th class="p-4">Posti</th>
+                            <th class="p-4 text-right">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-prenotazioni">
+                        <tr><td colspan="4" class="p-4 text-center italic text-gray-400">Caricamento prenotazioni...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <script src="admin.js"></script>
+    <div id="modal-edit" class="fixed inset-0 bg-black/50 hidden z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">Modifica Posti: <span id="edit-nome-cliente" class="text-blue-600"></span></h3>
+            <p class="text-gray-500 text-sm mb-4">Numeri separati da virgola (es: 1, 2, 53)</p>
+            <input type="text" id="edit-nuovi-posti" class="w-full p-3 border-2 border-blue-100 rounded-xl mb-6 outline-none focus:border-blue-500 font-bold text-lg">
+            <div class="flex gap-3">
+                <button onclick="chiudiEdit()" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold">Annulla</button>
+                <button onclick="salvaModificaPosti()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+        let prenotazioniAttuali = [], idInModifica = null;
+
+        async function uploadFoto(fileInput) {
+            const file = fileInput.files[0];
+            if (!file) return null;
+            const fileName = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+            const { data, error } = await sb.storage.from('immagini').upload(fileName, file);
+            if (error) { console.error(error); return null; }
+            const { data: { publicUrl } } = sb.storage.from('immagini').getPublicUrl(fileName);
+            return publicUrl;
+        }
+
+        async function caricaDati() {
+            try {
+                // 1. CARICA CAROUSEL
+                const { data: carousel } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: true});
+                document.getElementById('lista-carousel').innerHTML = carousel && carousel.length > 0 ? carousel.map(c => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 border rounded-xl">
+                        <div class="flex items-center gap-4">
+                            <img src="${c.immagine_url}" class="w-12 h-12 object-cover rounded shadow-sm">
+                            <p class="text-sm font-bold text-gray-800">${c.titolo}</p>
+                        </div>
+                        <button onclick="eliminaCarousel('${c.id}')" class="text-red-500 font-bold text-sm bg-red-50 px-3 py-1 rounded">Elimina</button>
+                    </div>`).join('') : '<p class="text-sm text-gray-400">Nessuna foto nel carousel.</p>';
+
+                // 2. CARICA VIAGGI
+                const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+                document.getElementById('lista-viaggi').innerHTML = viaggi && viaggi.length > 0 ? viaggi.map(v => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 border rounded-xl hover:bg-gray-100 transition">
+                        <div class="flex items-center gap-4">
+                            <img src="${v.immagine_url}" class="w-12 h-12 object-cover rounded-lg shadow-sm">
+                            <div><p class="text-sm font-bold text-gray-800">${v.titolo}</p><p class="text-xs text-blue-600 font-bold">${v.modello_bus}</p></div>
+                        </div>
+                        <button onclick="eliminaViaggio('${v.id}')" class="text-red-500 font-bold text-sm bg-red-50 px-3 py-1 rounded">Elimina</button>
+                    </div>`).join('') : '<p class="text-sm text-gray-400 italic">Nessun viaggio programmato.</p>';
+
+                // 3. CARICA PRENOTAZIONI
+                const { data: preno, error: prenoErr } = await sb.from('prenotazioni').select('*, tratte(titolo)').order('created_at', {ascending: false});
+                if(prenoErr) throw prenoErr;
+
+                prenotazioniAttuali = preno || [];
+                document.getElementById('lista-prenotazioni').innerHTML = prenotazioniAttuali.length > 0 ? prenotazioniAttuali.map(p => `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-4 font-bold text-gray-800">${p.nome_cliente}<br><span class="font-normal text-gray-500">${p.telefono_cliente}</span></td>
+                        <td class="p-4">${p.tratte?.titolo || '<span class="text-red-400 italic">Viaggio eliminato</span>'}</td>
+                        <td class="p-4 font-mono text-blue-600 font-bold text-lg">${p.posti_selezionati.join(', ')}</td>
+                        <td class="p-4 text-right space-x-2">
+                            <button onclick="apriEdit('${p.id}', '${p.nome_cliente}', '${p.posti_selezionati.join(',')}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Modifica</button>
+                            <button onclick="eliminaPrenotazione('${p.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold">X</button>
+                        </td>
+                    </tr>`).join('') : '<tr><td colspan="4" class="p-4 text-center italic text-gray-400">Nessuna prenotazione ricevuta.</td></tr>';
+            } catch (err) {
+                console.error("Errore caricamento dati:", err);
+                alert("Si è verificato un errore nel caricamento dei dati da Supabase.");
+            }
+        }
+
+        // --- FUNZIONI DI GESTIONE ---
+        async function aggiungiCarousel() {
+            const t = document.getElementById('car-titolo').value, b = document.getElementById('car-badge').value;
+            const imgUrl = await uploadFoto(document.getElementById('car-file'));
+            if(!t || !imgUrl) return alert("Inserisci titolo e scegli una foto!");
+            await sb.from('carousel_flotta').insert([{titolo: t, badge: b, immagine_url: imgUrl}]);
+            caricaDati();
+        }
+        async function eliminaCarousel(id) { if(confirm("Rimuovere foto?")) { await sb.from('carousel_flotta').delete().eq('id', id); caricaDati(); } }
+
+        async function gestisciAvviso() {
+            const t = document.getElementById('avviso-titolo').value, txt = document.getElementById('avviso-testo').value;
+            const img = await uploadFoto(document.getElementById('avviso-file'));
+            if(t && txt) { await sb.from('avvisi_home').insert([{titolo: t, testo_descrizione: txt, immagine_url: img}]); alert("Pubblicato!"); caricaDati(); }
+        }
+
+        async function gestisciViaggio() {
+            const t = document.getElementById('add-titolo').value, b = document.getElementById('add-bus').value;
+            const img = await uploadFoto(document.getElementById('locandina-file'));
+            if(t && img) { await sb.from('tratte').insert([{titolo: t, immagine_url: img, modello_bus: b}]); caricaDati(); }
+        }
+        async function eliminaViaggio(id) { if(confirm("Eliminare viaggio?")) { await sb.from('tratte').delete().eq('id', id); caricaDati(); } }
+
+        function apriEdit(id, nome, posti) { idInModifica = id; document.getElementById('edit-nome-cliente').innerText = nome; document.getElementById('edit-nuovi-posti').value = posti; document.getElementById('modal-edit').classList.remove('hidden'); }
+        function chiudiEdit() { document.getElementById('modal-edit').classList.add('hidden'); idInModifica = null; }
+        async function salvaModificaPosti() {
+            const nuoviPosti = document.getElementById('edit-nuovi-posti').value.split(',').map(s => s.trim()).filter(s => s !== "");
+            const { error } = await sb.from('prenotazioni').update({ posti_selezionati: nuoviPosti }).eq('id', idInModifica);
+            if(!error) { chiudiEdit(); caricaDati(); }
+        }
+        async function eliminaPrenotazione(id) { if(confirm("Cancellare prenotazione?")) { await sb.from('prenotazioni').delete().eq('id', id); caricaDati(); } }
+
+        // --- FUNZIONI EXPORT ---
+        function exportExcel() {
+            const data = prenotazioniAttuali.map(p => ({ Cliente: p.nome_cliente, Telefono: p.telefono_cliente, Viaggio: p.tratte?.titolo || 'N/A', Posti: p.posti_selezionati.join(', ') }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Prenotazioni");
+            XLSX.writeFile(wb, "Prenotazioni_DelGrosso.xlsx");
+        }
+        function exportPDF() {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.text("Registro Passeggeri - Del Grosso Viaggi", 14, 15);
+            const rows = prenotazioniAttuali.map(p => [p.nome_cliente, p.telefono_cliente, p.tratte?.titolo || 'N/A', p.posti_selezionati.join(', ')]);
+            doc.autoTable({ head: [['Passeggero', 'Telefono', 'Tratta', 'Posti']], body: rows, startY: 20 });
+            doc.save("Passeggeri_DelGrosso.pdf");
+        }
+
+        caricaDati();
+    </script>
 </body>
 </html>

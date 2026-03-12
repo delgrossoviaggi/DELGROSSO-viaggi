@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Nostra Flotta | Del Grosso Viaggi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .swiper-button-next, .swiper-button-prev { color: #ffffff !important; text-shadow: 0px 2px 4px rgba(0,0,0,0.5); }
+        .swiper-pagination-bullet { background-color: #ffffff !important; opacity: 0.7; }
+        .swiper-pagination-bullet-active { background-color: #2563eb !important; opacity: 1; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <a href="index.html" class="text-xl font-bold text-gray-900 tracking-tight">Del Grosso Viaggi</a>
+            <nav class="hidden md:flex space-x-8">
+                <a href="index.html" class="text-gray-600 hover:text-blue-600 transition">Home</a>
+                <a href="flotta.html" class="text-blue-600 font-bold transition">Flotta & Foto</a>
+                <a href="viaggi.html" class="text-gray-600 hover:text-blue-600 transition">Viaggi & Eventi</a>
+                <a href="contatti.html" class="text-gray-600 hover:text-blue-600 transition">Contatti</a>
+            </nav>
+            <a href="admin.html" class="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Area Admin 🔒</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Galleria Flotta</h1>
+        <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">Scorri le immagini dei nostri mezzi. Dai Limousine Bus per i tuoi party agli Autobus Gran Turismo per viaggiare in totale comfort.</p>
+
+        <div class="swiper mySwiper h-[500px] md:h-[700px] rounded-3xl shadow-xl overflow-hidden mb-16">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide relative">
+                    <img src="https://images.unsplash.com/photo-1512426038459-22aebcb3d649?q=80&w=1600" class="w-full h-full object-cover" alt="Limobus Esterno">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
+                        <h3 class="text-3xl font-bold text-white">Limousine Bus - Esterno</h3>
+                    </div>
+                </div>
+                <div class="swiper-slide relative">
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1600" class="w-full h-full object-cover" alt="Bus GT">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
+                        <h3 class="text-3xl font-bold text-white">Autobus Gran Turismo</h3>
+                    </div>
+                </div>
+                </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold mb-4 text-blue-900">Autobus Gran Turismo</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    Progettati per lunghi viaggi e grandi gruppi. I nostri mezzi da 53 posti offrono ampi spazi e comfort, con l'ultima fila composta in modo ergonomico dai sedili 49-50-51-52-53. Per le comitive più numerose, la nostra flotta include anche veicoli da 63 posti, in cui l'ampia fila posteriore comprende le sedute 59-60-61-62-63, garantendo la stessa qualità di viaggio a tutti i passeggeri.
+                </p>
+            </div>
+            <div class="bg-gray-900 text-white p-8 rounded-2xl shadow-sm">
+                <h2 class="text-2xl font-bold mb-4 text-purple-400">Limousine Bus</h2>
+                <p class="text-gray-300 leading-relaxed">
+                    Un vero e proprio privè itinerante. Allestimenti di lusso, impianto audio premium, luci LED dinamiche e divanetti in pelle per farti vivere la tua festa privata mentre attraversi la città. La scelta numero uno per eventi indimenticabili.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".mySwiper", {
+            spaceBetween: 0,
+            loop: true,
+            navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+            pagination: { el: ".swiper-pagination", clickable: true },
+            autoplay: { delay: 4000, disableOnInteraction: false }
+        });
+    </script>
+</body>
+</html>

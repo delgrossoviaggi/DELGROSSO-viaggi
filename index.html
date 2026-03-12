@@ -3,224 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Del Grosso Viaggi & Limousine Bus</title>
+    <title>Del Grosso Viaggi & Limousine Bus | Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --accent: #ff0000; --bg: #000000; --card-bg: #0a0a0a; --text: #ffffff; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
-
-        /* HEADER RESPONSIVE */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 5%; background: rgba(0,0,0,0.95);
-            border-bottom: 2px solid var(--accent);
-            position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(15px);
-        }
-        .logo-container { text-decoration: none; }
-        .brand-main { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; color: #fff; display: block; }
-        .brand-sub { font-size: 0.6rem; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
-
-        nav { display: flex; align-items: center; gap: 15px; }
-        nav a { color: white; text-decoration: none; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-        .admin-trigger { cursor: pointer; color: #444; margin-left: 10px; }
-
-        /* HERO SECTION */
-        .hero { height: 70vh; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-bottom: 4px solid var(--accent); }
-        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: 1.5s; z-index: -1; filter: brightness(0.5); }
-        .slide.active { opacity: 1; }
-        .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; line-height: 0.9; margin-bottom: 20px; }
-
-        /* GRIGLIA VIAGGI */
-        .container { padding: 60px 5%; }
-        .section-title { font-size: 2rem; border-left: 8px solid var(--accent); padding-left: 15px; margin-bottom: 40px; text-transform: uppercase; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        
-        .card { background: var(--card-bg); border: 1px solid #111; border-radius: 10px; overflow: hidden; transition: 0.4s; }
-        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
-        .card img { width: 100%; height: 350px; object-fit: cover; }
-        .card-info { padding: 25px; }
-        .card-info h3 { margin-bottom: 15px; text-transform: uppercase; }
-        
-        .btn { display: block; width: 100%; padding: 15px; background: var(--accent); color: white; text-decoration: none; font-weight: 900; text-align: center; border: none; cursor: pointer; border-radius: 5px; }
-        .btn-prenota { background: #fff; color: #000; margin-top: 10px; }
-
-        /* FOOTER AGGIORNATO */
-        footer { background: #050505; padding: 60px 5% 30px; border-top: 2px solid var(--accent); }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
-        .footer-col h4 { color: var(--accent); margin-bottom: 20px; font-size: 0.9rem; letter-spacing: 1px; }
-        .footer-col p { font-size: 0.85rem; color: #ccc; margin-bottom: 8px; }
-        .social-links { display: flex; gap: 15px; margin-top: 15px; }
-        .social-links a { color: #fff; background: #111; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
-        .social-links a:hover { background: var(--accent); }
-
-        /* MOBILE FIXES */
-        @media (max-width: 600px) {
-            header { padding: 10px 3%; }
-            nav a { display: none; } /* Nasconde menu testo su mobile per pulizia */
-            .brand-main { font-size: 1.4rem; }
-            .hero h1 { font-size: 3rem; }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; display: flex; flex-direction: column; min-height: 100vh;}
+        main { flex: 1; }
+        .swiper-button-next, .swiper-button-prev { color: #2563eb !important; }
+        .swiper-pagination-bullet-active { background-color: #2563eb !important; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
 
-    <header>
-        <a href="#" class="logo-container">
-            <span class="brand-main">DEL GROSSO</span>
-            <span class="brand-sub">VIAGGI & LIMOUSINE BUS</span>
-        </a>
-        <nav>
-            <a href="#bus">BUS GT</a>
-            <a href="#limo">LIMO</a>
-            <a href="#contatti">CONTATTI</a>
-            <div class="admin-trigger" onclick="toggleAdmin(true)"><i data-lucide="lock"></i></div>
-        </nav>
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20 md:h-24">
+            <a href="#" class="flex items-center h-full py-2">
+                <img src="logo.jpg" alt="Del Grosso Viaggi & Limousine Bus Logo" class="h-16 md:h-20 w-auto object-contain" loading="lazy">
+            </a>
+            <nav class="hidden lg:flex space-x-8">
+                <a href="#flotta" class="text-gray-600 hover:text-blue-600 font-semibold transition">La Flotta</a>
+                <a href="prenota.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Prenotazioni</a>
+                <a href="contatti.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Contatti</a>
+            </nav>
+            <div class="flex items-center space-x-3">
+                <a href="admin.html" class="hidden sm:inline-flex bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition shadow-sm">Area Admin 🔒</a>
+                <a href="prenota.html" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">✅ Prenota Ora</a>
+            </div>
+        </div>
     </header>
 
-    <section class="hero" id="hero-slider">
-        <h1>VIAGGIA IN<br><span style="color:var(--accent)">PRIMA CLASSE</span></h1>
+    <main>
+        <section class="relative bg-gradient-to-b from-blue-50 to-gray-50 py-24 lg:py-32 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight">
+                    Viaggia con <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Stile e Sicurezza</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+                    Dall'eleganza del Limousine Bus per i tuoi party esclusivi, alla comodità dei nostri Autobus Gran Turismo per viaggi e trasferte di gruppo.
+                </p>
+            </div>
         </section>
 
-    <div class="container" id="bus">
-        <h2 class="section-title">TOUR <span>BUS GT</span></h2>
-        <div id="grid-bus" class="grid"></div>
-    </div>
-
-    <div class="container" id="limo" style="background:#020202;">
-        <h2 class="section-title">EVENTI <span>LIMO BUS</span></h2>
-        <div id="grid-limo" class="grid"></div>
-    </div>
-
-    <footer id="contatti">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <h4>DEL GROSSO VIAGGI & LIMOUSINE BUS</h4>
-                <p>📞 320.5730466 (Raffaele)</p>
-                <p>📞 366.2127916 (Nicola)</p>
-                <p>📩 info@delgrossoviaggi.it</p>
-            </div>
-            <div class="footer-col">
-                <h4>WHATSAPP RAPIDO</h4>
-                <p>💬 Limobus (Nicola): <a href="https://wa.me/393662127916" style="color:white;">3662127916</a></p>
-                <p>💬 Bus GT (Raffaele): <a href="https://wa.me/393205730466" style="color:white;">3205730466</a></p>
-            </div>
-            <div class="footer-col">
-                <h4>SOCIAL DEL GROSSO</h4>
-                <div class="social-links">
-                    <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank"><i data-lucide="facebook"></i></a>
-                    <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank"><i data-lucide="instagram"></i></a>
+        <section id="sezione-avvisi" class="hidden py-12 bg-white border-y border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center mb-6">
+                    <span class="text-3xl mr-3">📢</span>
+                    <h2 class="text-2xl font-extrabold text-blue-900">Bacheca Avvisi e Novità</h2>
                 </div>
-                <h4 style="margin-top:20px;">SOCIAL LIMO BUS</h4>
-                <div class="social-links">
-                    <a href="https://www.facebook.com/people/Limousine-Bus/61552174581411/" target="_blank"><i data-lucide="facebook"></i></a>
-                    <a href="https://www.instagram.com/_limousine_bus/" target="_blank"><i data-lucide="instagram"></i></a>
+                <div id="avvisi-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    </div>
+            </div>
+        </section>
+
+        <section id="flotta" class="py-20 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">La Nostra Flotta</h2>
+                <div class="swiper mySwiper rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                    <div class="swiper-wrapper" id="carousel-wrapper">
+                        <p class="text-center w-full py-10 text-gray-500">Caricamento foto in corso...</p>
+                    </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12 border-b border-gray-100 pb-8">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Viaggi in Programma</h2>
+                    <p class="text-gray-500 text-lg">Scopri le nostre prossime gite e assicurati il tuo posto a bordo.</p>
+                </div>
+                
+                <div id="grid-viaggi-home" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <p class="text-center text-gray-500 col-span-full py-10">Caricamento viaggi in corso...</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 bg-gray-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="text-purple-400 font-bold tracking-widest uppercase text-sm">Party Tour</span>
+                    <h2 class="text-4xl md:text-5xl font-extrabold mt-2 mb-4">Eventi Limousine Bus</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 rounded-3xl p-8 border border-gray-700 flex flex-col md:flex-row gap-6 items-center">
+                        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center text-4xl shadow-inner">🥂</div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Feste Private</h3>
+                            <p class="text-gray-400 mb-4 text-sm">Bottiglie incluse, musica personalizzata e stop fotografici.</p>
+                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#1ebd5c] transition">Scrivi a Nicola</a>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-3xl p-8 border border-gray-700 flex flex-col md:flex-row gap-6 items-center">
+                        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-500 flex-shrink-0 flex items-center justify-center text-4xl shadow-inner">🎓</div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Eventi Speciali</h3>
+                            <p class="text-gray-400 mb-4 text-sm">Organizza il transfer più divertente per lauree o matrimoni.</p>
+                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#1ebd5c] transition">Scrivi a Nicola</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-16 mb-12">
+            <div>
+                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Del Grosso Viaggi & Limousine Bus</h3>
+                <ul class="space-y-3 text-sm text-gray-300">
+                    <li>📞 Telefono: 3205730466 (Raffaele) — 3662127916 (Nicola)</li>
+                    <li>💬 WhatsApp Limobus (Nicola): <a href="https://wa.me/393662127916" class="text-white font-bold ml-1 hover:text-blue-400">3662127916</a></li>
+                    <li>💬 WhatsApp Bus GT (Raffaele): <a href="https://wa.me/393205730466" class="text-white font-bold ml-1 hover:text-blue-400">3205730466</a></li>
+                    <li>✉️ Email: <a href="mailto:info@delgrossoviaggi.it" class="text-white font-bold ml-1 hover:text-blue-400">info@delgrossoviaggi.it</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Social</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <a href="https://www.instagram.com/delgrosso_viaggi_/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">📸 Instagram (DelGrosso)</a>
+                    <a href="https://www.instagram.com/_limousine_bus/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">📸 Instagram (Limo)</a>
+                    <a href="https://www.facebook.com/871671722704094" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">👍 Facebook (DelGrosso)</a>
+                    <a href="https://www.facebook.com/profile.php?id=61552174581411" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">👍 Facebook (Limo)</a>
                 </div>
             </div>
         </div>
-        <p style="text-align:center; margin-top:40px; font-size:0.6rem; color:#444; letter-spacing:2px;">&copy; 2026 DEL GROSSO VIAGGI - TRASPORTO DI CLASSE</p>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-800 pt-8 flex flex-col items-center text-center text-gray-500 text-xs">
+            <p class="mb-2">© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
+            <p class="font-semibold text-gray-400 tracking-wide">Fatto con cura da Cristino Nicola Pio.</p>
+        </div>
     </footer>
 
-    <div id="admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); z-index:2000; padding:20px;">
-        <div style="max-width:500px; margin:50px auto; background:#111; padding:30px; border-top:4px solid red;">
-            <div id="login-section">
-                <h2 style="margin-bottom:20px;">ADMIN LOGIN</h2>
-                <input type="password" id="admin_pass" placeholder="Password" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-                <button onclick="loginAdmin()" class="btn">ENTRA</button>
-                <button onclick="toggleAdmin(false)" style="background:none; border:none; color:#444; margin-top:15px; cursor:pointer;">Chiudi</button>
-            </div>
-            <div id="admin-panel" style="display:none;">
-                <h2 style="color:red;">GESTIONE</h2>
-                <a href="prenota/admin.html" class="btn" style="background:blue; margin:10px 0;">Vedi Prenotazioni</a>
-                <hr style="margin:20px 0; border:#222;">
-                <input type="text" id="titolo" placeholder="Nome Viaggio/Bus" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-                <select id="cat" style="width:100%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #333;">
-                    <option value="viaggio">Bus GT</option>
-                    <option value="evento">Limo Bus</option>
-                    <option value="flotta">Slider Home</option>
-                </select>
-                <input type="file" id="file" style="margin-bottom:10px;">
-                <button onclick="upload()" class="btn">PUBBLICA ORA</button>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        lucide.createIcons();
+        // Connessione a Supabase
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        function toggleAdmin(show) { document.getElementById('admin-modal').style.display = show ? 'block' : 'none'; }
-        function loginAdmin() {
-            if(document.getElementById('admin_pass').value === 'DELGROSSO2026') {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'block';
-                init();
-            } else { alert("Accesso Negato"); }
-        }
-
-        async function init() {
-            const { data } = await sb.from('viaggi').select('*').order('created_at', { ascending: false });
-            const busGrid = document.getElementById('grid-bus');
-            const limoGrid = document.getElementById('grid-limo');
-            const slider = document.getElementById('hero-slider');
+        async function caricaDatiHome() {
+            // 1. CARICAMENTO CAROUSEL FLOTTA
+            const { data: slides } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: true});
+            const wrapper = document.getElementById('carousel-wrapper');
             
-            busGrid.innerHTML = ''; limoGrid.innerHTML = '';
-            
-            // Slider Logic
-            const sliderData = data.filter(i => i.categoria === 'flotta');
-            sliderData.forEach((item, idx) => {
-                const slide = document.createElement('div');
-                slide.className = `slide ${idx === 0 ? 'active' : ''}`;
-                slide.style.backgroundImage = `url('${item.immagine_url}')`;
-                slider.appendChild(slide);
-            });
-            if(sliderData.length > 1) startSlider();
-
-            // Cards Logic
-            data.filter(i => i.categoria !== 'flotta').forEach(item => {
-                const card = `
-                    <div class="card">
-                        <img src="${item.immagine_url}">
-                        <div class="card-info">
-                            <h3>${item.titolo}</h3>
-                            <a href="prenota/index.html?id=${item.id}" class="btn">PRENOTA POSTO</a>
+            if(slides && slides.length > 0) {
+                wrapper.innerHTML = slides.map(s => `
+                    <div class="swiper-slide relative h-[450px] md:h-[600px] flex items-end">
+                        <img src="${s.immagine_url}" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="relative z-10 p-8 md:p-16 text-white text-left">
+                            <span class="bg-blue-600 text-xs font-bold uppercase py-1 px-3 rounded-full mb-4 inline-block">${s.badge || 'Flotta'}</span>
+                            <h3 class="text-3xl md:text-5xl font-bold mb-4">${s.titolo}</h3>
+                            <p class="text-lg md:text-xl text-gray-200 max-w-2xl">${s.descrizione || ''}</p>
                         </div>
+                    </div>
+                `).join('');
+            } else {
+                // Immagine Default se non c'è nulla nel database
+                wrapper.innerHTML = `
+                    <div class="swiper-slide relative h-[450px] md:h-[600px] flex items-center justify-center bg-gray-900">
+                        <p class="text-white text-xl font-semibold">Aggiungi foto dal Pannello Admin per visualizzare il Carousel</p>
                     </div>`;
-                if(item.categoria === 'viaggio') busGrid.innerHTML += card;
-                else limoGrid.innerHTML += card;
+            }
+
+            // Inizializza Swiper DOPO aver caricato le foto
+            new Swiper(".mySwiper", {
+                spaceBetween: 30, effect: "fade", loop: true,
+                navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+                pagination: { el: ".swiper-pagination", clickable: true },
+                autoplay: { delay: 5000, disableOnInteraction: false }
             });
-            lucide.createIcons();
+
+            // 2. CARICAMENTO AVVISI
+            const { data: avvisi } = await sb.from('avvisi_home').select('*').order('created_at', {ascending: false}).limit(4);
+            if (avvisi && avvisi.length > 0) {
+                document.getElementById('sezione-avvisi').classList.remove('hidden');
+                document.getElementById('avvisi-container').innerHTML = avvisi.map(a => `
+                    <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex gap-5 hover:shadow-md transition">
+                        ${a.immagine_url ? `<img src="${a.immagine_url}" class="w-24 h-24 object-cover rounded-xl shadow-sm hidden sm:block">` : ''}
+                        <div><h3 class="text-xl font-bold text-blue-900 mb-2">${a.titolo}</h3><p class="text-gray-700 text-sm">${a.testo_descrizione}</p></div>
+                    </div>
+                `).join('');
+            }
+
+            // 3. CARICAMENTO VIAGGI IN PROGRAMMA
+            const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            const gridViaggi = document.getElementById('grid-viaggi-home');
+            
+            if (!tratte || tratte.length === 0) {
+                gridViaggi.innerHTML = '<p class="text-center text-gray-500 col-span-full py-10">Stiamo programmando nuovi viaggi... Torna a trovarci presto!</p>';
+            } else {
+                gridViaggi.innerHTML = tratte.map(t => `
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col hover:shadow-xl transition group">
+                        <div class="relative overflow-hidden rounded-xl mb-4 h-56"><img src="${t.immagine_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">${t.titolo}</h3>
+                        <p class="text-blue-600 text-[11px] font-black uppercase tracking-wider mb-6">${t.modello_bus}</p>
+                        <a href="prenota.html" class="mt-auto text-center w-full bg-blue-50 text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-600 hover:text-white transition">VAI ALLA PRENOTAZIONE</a>
+                    </div>
+                `).join('');
+            }
         }
 
-        function startSlider() {
-            let current = 0;
-            const slides = document.querySelectorAll('.slide');
-            setInterval(() => {
-                slides[current].classList.remove('active');
-                current = (current + 1) % slides.length;
-                slides[current].classList.add('active');
-            }, 5000);
-        }
-
-        async function upload() {
-            const file = document.getElementById('file').files[0];
-            const tit = document.getElementById('titolo').value;
-            const cat = document.getElementById('cat').value;
-            if(!file || !tit) return alert("Inserisci i dati");
-            const fname = `${Date.now()}.jpg`;
-            const { error: err } = await sb.storage.from('foto').upload(fname, file);
-            if(err) return alert("Errore caricamento immagine");
-            const { data: url } = sb.storage.from('foto').getPublicUrl(fname);
-            await sb.from('viaggi').insert([{ titolo: tit, immagine_url: url.publicUrl, categoria: cat }]);
-            location.reload();
-        }
-
-        init();
+        caricaDatiHome();
     </script>
 </body>
 </html>
