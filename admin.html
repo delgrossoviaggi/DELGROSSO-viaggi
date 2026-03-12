@@ -25,37 +25,35 @@
 
     <div class="max-w-4xl mx-auto p-4 space-y-6">
         
-        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-indigo-100">
-            <h2 class="font-bold text-indigo-900 mb-4 italic">🖼️ Gestione Carousel Flotta</h2>
-            <input type="text" id="car-titolo" placeholder="Titolo (Es. Limousine Bus)" class="w-full p-3 mb-3 border rounded-xl text-sm outline-none focus:border-indigo-500">
-            <input type="file" id="car-file" accept="image/*" class="block w-full text-xs text-gray-500 mb-4 file:mr-3 file:py-2 file:px-4 file:rounded-full file:bg-indigo-600 file:text-white file:border-0">
-            <button id="btn-car" onclick="aggiungiCarousel()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold active:bg-indigo-800 transition shadow-lg">CARICA FOTO CAROUSEL</button>
+        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-blue-100">
+            <h2 class="font-bold text-blue-900 mb-4 italic">📢 Bacheca Avvisi Home (News)</h2>
+            <p class="text-[10px] text-gray-500 mb-4 uppercase font-bold">Quello che scrivi qui apparirà subito sotto l'intestazione della Home Page.</p>
             
-            <div id="lista-carousel" class="mt-6 space-y-3 max-h-60 overflow-y-auto pt-4 border-t">
+            <input type="text" id="avviso-titolo" placeholder="Titolo dell'Avviso (es. Chiusura Straordinaria)" class="w-full p-3 mb-3 border rounded-xl text-sm outline-none focus:border-blue-500">
+            <textarea id="avviso-testo" placeholder="Descrizione o testo dell'annuncio..." class="w-full p-3 mb-3 border rounded-xl text-sm h-24 outline-none focus:border-blue-500"></textarea>
+            
+            <label class="block text-[10px] font-bold mb-1 text-gray-400">AGGIUNGI UNA FOTO ALL'AVVISO (OPZIONALE)</label>
+            <input type="file" id="avviso-file" accept="image/*" class="block w-full text-xs text-gray-500 mb-4 file:mr-3 file:py-2 file:px-4 file:rounded-full file:bg-blue-600 file:text-white file:border-0">
+            
+            <button id="btn-avviso" onclick="gestisciAvviso()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold active:bg-blue-800 transition shadow-lg mb-6">PUBBLICA AVVISO IN HOME</button>
+            
+            <div id="lista-avvisi" class="space-y-3 pt-4 border-t">
                 </div>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-green-100">
-            <h2 class="font-bold text-green-900 mb-6 italic">📋 Registro Passeggeri</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="border-b bg-gray-50 text-gray-400 uppercase">
-                            <th class="p-3">Cliente</th>
-                            <th class="p-3">Posti</th>
-                            <th class="p-3 text-right">Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-prenotazioni">
-                        </tbody>
-                </table>
-            </div>
+        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-indigo-100">
+            <h2 class="font-bold text-indigo-900 mb-4 italic">🖼️ Gestione Carousel (Foto Grandi Home)</h2>
+            <input type="text" id="car-titolo" placeholder="Nome Mezzo (es. Limobus Interni)" class="w-full p-3 mb-3 border rounded-xl text-sm outline-none focus:border-indigo-500">
+            <input type="file" id="car-file" accept="image/*" class="block w-full text-xs text-gray-500 mb-4 file:mr-3 file:py-2 file:px-4 file:rounded-full file:bg-indigo-600 file:text-white file:border-0">
+            <button id="btn-car" onclick="aggiungiCarousel()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold active:bg-indigo-800 transition shadow-lg">CARICA FOTO NEL CAROUSEL</button>
+            
+            <div id="lista-carousel" class="mt-6 space-y-3 max-h-60 overflow-y-auto pt-4 border-t"></div>
         </div>
 
         <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-gray-200">
             <h2 class="font-bold text-gray-800 mb-4 italic">➕ Nuova Locandina Viaggio</h2>
-            <input type="text" id="add-titolo" placeholder="Titolo Viaggio" class="w-full p-3 mb-3 border rounded-xl text-sm">
-            <select id="add-bus" class="w-full p-3 mb-3 border rounded-xl text-sm">
+            <input type="text" id="add-titolo" placeholder="Destinazione (es. Carnevale di Venezia)" class="w-full p-3 mb-3 border rounded-xl text-sm outline-none">
+            <select id="add-bus" class="w-full p-3 mb-3 border rounded-xl text-sm bg-gray-50">
                 <option value="GT 53 POSTI">GT 53 POSTI</option>
                 <option value="GT 63 POSTI">GT 63 POSTI</option>
                 <option value="LIMOBUS">LIMOBUS</option>
@@ -63,6 +61,21 @@
             <input type="file" id="locandina-file" accept="image/*" class="text-xs mb-4">
             <button id="btn-viaggio" onclick="gestisciViaggio()" class="w-full bg-gray-900 text-white py-4 rounded-xl font-bold">PUBBLICA LOCANDINA</button>
             <div id="lista-viaggi" class="mt-6 space-y-2 border-t pt-4"></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-green-100">
+            <h2 class="font-bold text-green-900 mb-4 italic">📋 Registro Passeggeri</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[10px]">
+                    <thead>
+                        <tr class="border-b bg-gray-50 text-gray-400">
+                            <th class="p-3">CLIENTE</th>
+                            <th class="p-3 text-right">AZIONI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-prenotazioni"></tbody>
+                </table>
+            </div>
         </div>
 
     </div>
@@ -86,13 +99,24 @@
         let idEdit = null;
 
         async function caricaTutto() {
+            // Carica Avvisi Home
+            const { data: avv } = await sb.from('avvisi_home').select('*').order('created_at', {ascending: false});
+            document.getElementById('lista-avvisi').innerHTML = avv.map(a => `
+                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-2xl border border-blue-100">
+                    <div class="flex items-center gap-2">
+                        ${a.immagine_url ? `<img src="${a.immagine_url}" class="w-8 h-8 object-cover rounded">` : ''}
+                        <span class="text-[10px] font-bold">${a.titolo}</span>
+                    </div>
+                    <button onclick="eliminaDato('avvisi_home', '${a.id}')" class="text-red-500 font-bold px-2">X</button>
+                </div>`).join('');
+
             // Carica Carousel
             const { data: car } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: false});
             document.getElementById('lista-carousel').innerHTML = car.map(c => `
                 <div class="flex justify-between items-center p-3 bg-gray-50 rounded-2xl border">
-                    <img src="${c.immagine_url}" class="w-12 h-12 object-cover rounded-lg">
+                    <img src="${c.immagine_url}" class="w-10 h-10 object-cover rounded-lg">
                     <span class="text-[10px] font-bold uppercase truncate px-2">${c.titolo}</span>
-                    <button onclick="eliminaDato('carousel_flotta', '${c.id}')" class="text-red-500 font-black px-2">ELIMINA</button>
+                    <button onclick="eliminaDato('carousel_flotta', '${c.id}')" class="text-red-500 font-black px-2 text-xs">ELIMINA</button>
                 </div>`).join('');
 
             // Carica Viaggi
@@ -107,11 +131,10 @@
             const { data: preno } = await sb.from('prenotazioni').select('*, tratte(titolo)').order('created_at', {ascending: false});
             document.getElementById('lista-prenotazioni').innerHTML = preno.map(p => `
                 <tr class="border-b">
-                    <td class="p-3 font-bold">${p.nome_cliente}<br><span class="font-normal text-gray-400">${p.tratte?.titolo || 'N/D'}</span></td>
-                    <td class="p-3 font-bold text-blue-600 text-sm">${p.posti_selezionati.join(',')}</td>
+                    <td class="p-3 font-bold">${p.nome_cliente}<br><span class="font-normal text-gray-400 text-[9px]">${p.tratte?.titolo || 'N/D'}</span><br><span class="text-blue-600 text-xs">${p.posti_selezionati.join(',')}</span></td>
                     <td class="p-3 text-right flex gap-2 justify-end">
-                        <button onclick="apriEdit('${p.id}', '${p.nome_cliente}', '${p.posti_selezionati.join(',')}')" class="text-blue-500 font-bold border border-blue-500 px-2 py-1 rounded">M</button>
-                        <button onclick="eliminaDato('prenotazioni', '${p.id}')" class="text-red-500 font-bold border border-red-500 px-2 py-1 rounded">X</button>
+                        <button onclick="apriEdit('${p.id}', '${p.nome_cliente}', '${p.posti_selezionati.join(',')}')" class="text-blue-500 font-bold border border-blue-500 px-3 py-1 rounded-lg">M</button>
+                        <button onclick="eliminaDato('prenotazioni', '${p.id}')" class="text-red-500 font-bold border border-red-500 px-3 py-1 rounded-lg">X</button>
                     </td>
                 </tr>`).join('');
         }
@@ -120,11 +143,25 @@
             const file = input.files[0];
             if (!file) return null;
             const ext = file.name.split('.').pop();
-            const fileName = `${Date.now()}.${ext}`;
+            const fileName = `admin_${Date.now()}.${ext}`;
             const { data, error } = await sb.storage.from('immagini').upload(fileName, file);
             if (error) throw error;
             const { data: { publicUrl } } = sb.storage.from('immagini').getPublicUrl(fileName);
             return publicUrl;
+        }
+
+        async function gestisciAvviso() {
+            try {
+                const btn = document.getElementById('btn-avviso'); btn.innerText = "PUBBLICAZIONE..."; btn.disabled = true;
+                const t = document.getElementById('avviso-titolo').value;
+                const txt = document.getElementById('avviso-testo').value;
+                const img = await upload(document.getElementById('avviso-file'));
+                
+                if(t && txt) {
+                    await sb.from('avvisi_home').insert([{titolo: t, testo_descrizione: txt, immagine_url: img}]);
+                    location.reload();
+                } else { alert("Titolo e Testo sono obbligatori!"); btn.innerText = "PUBBLICA AVVISO IN HOME"; btn.disabled = false; }
+            } catch (e) { alert("Errore: " + e.message); }
         }
 
         async function aggiungiCarousel() {
@@ -135,23 +172,24 @@
                 if(img && t) {
                     await sb.from('carousel_flotta').insert([{titolo: t, immagine_url: img}]);
                     location.reload();
-                }
+                } else { alert("Inserisci foto e titolo!"); btn.innerText = "CARICA FOTO CAROUSEL"; btn.disabled = false; }
             } catch (e) { alert("Errore: " + e.message); }
         }
 
         async function gestisciViaggio() {
             try {
+                const btn = document.getElementById('btn-viaggio'); btn.innerText = "PUBBLICAZIONE..."; btn.disabled = true;
                 const img = await upload(document.getElementById('locandina-file'));
                 const t = document.getElementById('add-titolo').value, b = document.getElementById('add-bus').value;
                 if(img && t) {
                     await sb.from('tratte').insert([{titolo: t, immagine_url: img, modello_bus: b}]);
                     location.reload();
-                }
+                } else { alert("Compila tutti i campi!"); btn.innerText = "PUBBLICA LOCANDINA"; btn.disabled = false; }
             } catch (e) { alert("Errore: " + e.message); }
         }
 
         async function eliminaDato(tabella, id) {
-            if(confirm("Sei sicuro di voler eliminare?")) {
+            if(confirm("Vuoi cancellare definitivamente questo elemento?")) {
                 const { error } = await sb.from(tabella).delete().eq('id', id);
                 if(error) alert("Errore: " + error.message);
                 else caricaTutto();
@@ -176,7 +214,10 @@
             const items = document.querySelectorAll('#lista-prenotazioni tr');
             items.forEach(row => {
                 const td = row.querySelectorAll('td');
-                rows.push([td[0].innerText.split('\n')[0], td[0].innerText.split('\n')[1], td[1].innerText]);
+                if(td.length > 0) {
+                    const info = td[0].innerText.split('\n');
+                    rows.push([info[0], info[1], info[2]]);
+                }
             });
             const ws = XLSX.utils.aoa_to_sheet(rows);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri");
