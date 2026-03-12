@@ -17,30 +17,59 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20 md:h-24">
-            <a href="#" class="flex items-center h-full py-2">
-                <img src="logo.jpg" alt="Del Grosso Viaggi & Limousine Bus Logo" class="h-16 md:h-20 w-auto object-contain" loading="lazy">
-            </a>
-            <nav class="hidden lg:flex space-x-8">
-                <a href="#flotta" class="text-gray-600 hover:text-blue-600 font-semibold transition">La Flotta</a>
-                <a href="prenota.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Prenotazioni</a>
-                <a href="contatti.html" class="text-gray-600 hover:text-blue-600 font-semibold transition">Contatti</a>
-            </nav>
-            <div class="flex items-center space-x-3">
-                <a href="admin.html" class="hidden sm:inline-flex bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition shadow-sm">Area Admin 🔒</a>
-                <a href="prenota.html" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">✅ Prenota Ora</a>
+    <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20 md:h-24">
+                
+                <a href="index.html" class="flex items-center h-full py-2">
+                    <img src="logo.jpg.JPEG" alt="Del Grosso Viaggi Logo" class="h-12 sm:h-16 md:h-20 w-auto object-contain" onerror="this.src='https://via.placeholder.com/200x80?text=LOGO+NON+TROVATO'">
+                </a>
+                
+                <nav class="hidden lg:flex space-x-6 items-center">
+                    <a href="flotta.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Flotta</a>
+                    <a href="dettagli-bus.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Dettagli Bus</a>
+                    <a href="viaggi.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Viaggi</a>
+                    <a href="prenota.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Prenotazioni</a>
+                    <a href="contatti.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Contatti</a>
+                    
+                    <div class="pl-4 flex items-center space-x-3 border-l border-gray-200">
+                        <a href="admin.html" class="bg-gray-900 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition shadow-sm text-sm">Admin 🔒</a>
+                        <a href="prenota.html" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg text-sm">✅ Prenota</a>
+                    </div>
+                </nav>
+
+                <div class="lg:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-800 hover:text-blue-600 focus:outline-none p-2">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-xl pb-4">
+            <div class="px-4 pt-4 pb-2 space-y-2">
+                <a href="flotta.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">La Flotta</a>
+                <a href="dettagli-bus.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Dettagli Bus</a>
+                <a href="viaggi.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Viaggi</a>
+                <a href="prenota.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Prenotazioni</a>
+                <a href="contatti.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Contatti</a>
+            </div>
+            <div class="px-4 pt-4 border-t border-gray-100 flex flex-col space-y-3">
+                <a href="admin.html" class="block text-center w-full bg-gray-900 text-white px-5 py-3 rounded-xl font-bold shadow-sm">Area Admin 🔒</a>
+                <a href="prenota.html" class="block text-center w-full bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg">✅ Prenota Ora</a>
             </div>
         </div>
     </header>
 
     <main>
-        <section class="relative bg-gradient-to-b from-blue-50 to-gray-50 py-24 lg:py-32 overflow-hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight">
+        <section class="relative bg-gradient-to-b from-blue-50 to-gray-50 py-20 lg:py-32 overflow-hidden px-4">
+            <div class="max-w-7xl mx-auto text-center relative z-10">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight">
                     Viaggia con <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Stile e Sicurezza</span>
                 </h1>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+                <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-10 px-2">
                     Dall'eleganza del Limousine Bus per i tuoi party esclusivi, alla comodità dei nostri Autobus Gran Turismo per viaggi e trasferte di gruppo.
                 </p>
             </div>
@@ -52,59 +81,58 @@
                     <span class="text-3xl mr-3">📢</span>
                     <h2 class="text-2xl font-extrabold text-blue-900">Bacheca Avvisi e Novità</h2>
                 </div>
-                <div id="avvisi-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    </div>
+                <div id="avvisi-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
         </section>
 
-        <section id="flotta" class="py-20 bg-gray-50">
+        <section class="py-16 sm:py-20 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">La Nostra Flotta</h2>
-                <div class="swiper mySwiper rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">La Nostra Flotta</h2>
+                <div class="swiper mySwiper rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                     <div class="swiper-wrapper" id="carousel-wrapper">
                         <p class="text-center w-full py-10 text-gray-500">Caricamento foto in corso...</p>
                     </div>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next hidden sm:flex"></div>
+                    <div class="swiper-button-prev hidden sm:flex"></div>
                     <div class="swiper-pagination"></div>
                 </div>
             </div>
         </section>
 
-        <section class="py-20 bg-white">
+        <section class="py-16 sm:py-20 bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12 border-b border-gray-100 pb-8">
+                <div class="text-center mb-10 sm:mb-12 border-b border-gray-100 pb-8">
                     <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Viaggi in Programma</h2>
-                    <p class="text-gray-500 text-lg">Scopri le nostre prossime gite e assicurati il tuo posto a bordo.</p>
+                    <p class="text-gray-500 text-lg px-2">Scopri le nostre prossime gite e assicurati il tuo posto a bordo.</p>
                 </div>
                 
-                <div id="grid-viaggi-home" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div id="grid-viaggi-home" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     <p class="text-center text-gray-500 col-span-full py-10">Caricamento viaggi in corso...</p>
                 </div>
             </div>
         </section>
 
-        <section class="py-20 bg-gray-900 text-white">
+        <section class="py-16 sm:py-20 bg-gray-900 text-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
+                <div class="text-center mb-12 sm:mb-16">
                     <span class="text-purple-400 font-bold tracking-widest uppercase text-sm">Party Tour</span>
-                    <h2 class="text-4xl md:text-5xl font-extrabold mt-2 mb-4">Eventi Limousine Bus</h2>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mt-2 mb-4">Eventi Limousine Bus</h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-gray-800 rounded-3xl p-8 border border-gray-700 flex flex-col md:flex-row gap-6 items-center">
-                        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center text-4xl shadow-inner">🥂</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                    <div class="bg-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-700 flex flex-col sm:flex-row gap-6 items-center text-center sm:text-left">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center text-3xl sm:text-4xl shadow-inner">🥂</div>
                         <div>
-                            <h3 class="text-2xl font-bold mb-2">Feste Private</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold mb-2">Feste Private</h3>
                             <p class="text-gray-400 mb-4 text-sm">Bottiglie incluse, musica personalizzata e stop fotografici.</p>
-                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#1ebd5c] transition">Scrivi a Nicola</a>
+                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-bold hover:bg-[#1ebd5c] transition w-full sm:w-auto text-center">Scrivi a Nicola</a>
                         </div>
                     </div>
-                    <div class="bg-gray-800 rounded-3xl p-8 border border-gray-700 flex flex-col md:flex-row gap-6 items-center">
-                        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-500 flex-shrink-0 flex items-center justify-center text-4xl shadow-inner">🎓</div>
+                    <div class="bg-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-700 flex flex-col sm:flex-row gap-6 items-center text-center sm:text-left">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-500 flex-shrink-0 flex items-center justify-center text-3xl sm:text-4xl shadow-inner">🎓</div>
                         <div>
-                            <h3 class="text-2xl font-bold mb-2">Eventi Speciali</h3>
+                            <h3 class="text-xl sm:text-2xl font-bold mb-2">Eventi Speciali</h3>
                             <p class="text-gray-400 mb-4 text-sm">Organizza il transfer più divertente per lauree o matrimoni.</p>
-                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#1ebd5c] transition">Scrivi a Nicola</a>
+                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-bold hover:bg-[#1ebd5c] transition w-full sm:w-auto text-center">Scrivi a Nicola</a>
                         </div>
                     </div>
                 </div>
@@ -113,23 +141,23 @@
     </main>
 
     <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-16 mb-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16 mb-12">
             <div>
                 <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Del Grosso Viaggi & Limousine Bus</h3>
                 <ul class="space-y-3 text-sm text-gray-300">
                     <li>📞 Telefono: 3205730466 (Raffaele) — 3662127916 (Nicola)</li>
-                    <li>💬 WhatsApp Limobus (Nicola): <a href="https://wa.me/393662127916" class="text-white font-bold ml-1 hover:text-blue-400">3662127916</a></li>
-                    <li>💬 WhatsApp Bus GT (Raffaele): <a href="https://wa.me/393205730466" class="text-white font-bold ml-1 hover:text-blue-400">3205730466</a></li>
-                    <li>✉️ Email: <a href="mailto:info@delgrossoviaggi.it" class="text-white font-bold ml-1 hover:text-blue-400">info@delgrossoviaggi.it</a></li>
+                    <li class="flex flex-wrap items-center">💬 WhatsApp Limobus (Nicola): <a href="https://wa.me/393662127916" class="text-white font-bold ml-1 hover:text-blue-400">3662127916</a></li>
+                    <li class="flex flex-wrap items-center">💬 WhatsApp Bus GT (Raffaele): <a href="https://wa.me/393205730466" class="text-white font-bold ml-1 hover:text-blue-400">3205730466</a></li>
+                    <li class="flex flex-wrap items-center">✉️ Email: <a href="mailto:info@delgrossoviaggi.it" class="text-white font-bold ml-1 hover:text-blue-400 break-all">info@delgrossoviaggi.it</a></li>
                 </ul>
             </div>
             <div>
                 <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Social</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <a href="https://www.instagram.com/delgrosso_viaggi_/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">📸 Instagram (DelGrosso)</a>
-                    <a href="https://www.instagram.com/_limousine_bus/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">📸 Instagram (Limo)</a>
-                    <a href="https://www.facebook.com/871671722704094" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">👍 Facebook (DelGrosso)</a>
-                    <a href="https://www.facebook.com/profile.php?id=61552174581411" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition">👍 Facebook (Limo)</a>
+                    <a href="https://www.instagram.com/delgrosso_viaggi_/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">📸 Instagram (DelGrosso)</a>
+                    <a href="https://www.instagram.com/_limousine_bus/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">📸 Instagram (Limo)</a>
+                    <a href="https://www.facebook.com/871671722704094" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">👍 Facebook (DelGrosso)</a>
+                    <a href="https://www.facebook.com/profile.php?id=61552174581411" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">👍 Facebook (Limo)</a>
                 </div>
             </div>
         </div>
@@ -143,6 +171,12 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // SCRIPT PER IL MENU MOBILE TENDINA
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
         // Connessione a Supabase
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
@@ -155,25 +189,24 @@
             
             if(slides && slides.length > 0) {
                 wrapper.innerHTML = slides.map(s => `
-                    <div class="swiper-slide relative h-[450px] md:h-[600px] flex items-end">
+                    <div class="swiper-slide relative h-[300px] sm:h-[450px] md:h-[600px] flex items-end">
                         <img src="${s.immagine_url}" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-                        <div class="relative z-10 p-8 md:p-16 text-white text-left">
-                            <span class="bg-blue-600 text-xs font-bold uppercase py-1 px-3 rounded-full mb-4 inline-block">${s.badge || 'Flotta'}</span>
-                            <h3 class="text-3xl md:text-5xl font-bold mb-4">${s.titolo}</h3>
-                            <p class="text-lg md:text-xl text-gray-200 max-w-2xl">${s.descrizione || ''}</p>
+                        <div class="relative z-10 p-6 sm:p-8 md:p-16 text-white text-left w-full">
+                            <span class="bg-blue-600 text-[10px] sm:text-xs font-bold uppercase py-1 px-3 rounded-full mb-3 inline-block">${s.badge || 'Flotta'}</span>
+                            <h3 class="text-2xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-4">${s.titolo}</h3>
+                            <p class="text-sm sm:text-lg md:text-xl text-gray-200 max-w-2xl hidden sm:block">${s.descrizione || ''}</p>
                         </div>
                     </div>
                 `).join('');
             } else {
-                // Immagine Default se non c'è nulla nel database
                 wrapper.innerHTML = `
-                    <div class="swiper-slide relative h-[450px] md:h-[600px] flex items-center justify-center bg-gray-900">
-                        <p class="text-white text-xl font-semibold">Aggiungi foto dal Pannello Admin per visualizzare il Carousel</p>
+                    <div class="swiper-slide relative h-[300px] sm:h-[450px] md:h-[600px] flex items-center justify-center bg-gray-900">
+                        <p class="text-white text-lg sm:text-xl font-semibold px-4 text-center">Aggiungi foto dal Pannello Admin per visualizzare il Carousel</p>
                     </div>`;
             }
 
-            // Inizializza Swiper DOPO aver caricato le foto
+            // Inizializza Swiper
             new Swiper(".mySwiper", {
                 spaceBetween: 30, effect: "fade", loop: true,
                 navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
@@ -186,9 +219,9 @@
             if (avvisi && avvisi.length > 0) {
                 document.getElementById('sezione-avvisi').classList.remove('hidden');
                 document.getElementById('avvisi-container').innerHTML = avvisi.map(a => `
-                    <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex gap-5 hover:shadow-md transition">
-                        ${a.immagine_url ? `<img src="${a.immagine_url}" class="w-24 h-24 object-cover rounded-xl shadow-sm hidden sm:block">` : ''}
-                        <div><h3 class="text-xl font-bold text-blue-900 mb-2">${a.titolo}</h3><p class="text-gray-700 text-sm">${a.testo_descrizione}</p></div>
+                    <div class="bg-blue-50/50 p-5 sm:p-6 rounded-2xl border border-blue-100 flex flex-col sm:flex-row gap-4 hover:shadow-md transition">
+                        ${a.immagine_url ? `<img src="${a.immagine_url}" class="w-full sm:w-24 h-40 sm:h-24 object-cover rounded-xl shadow-sm">` : ''}
+                        <div><h3 class="text-lg sm:text-xl font-bold text-blue-900 mb-2">${a.titolo}</h3><p class="text-gray-700 text-sm">${a.testo_descrizione}</p></div>
                     </div>
                 `).join('');
             }
@@ -202,10 +235,10 @@
             } else {
                 gridViaggi.innerHTML = tratte.map(t => `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col hover:shadow-xl transition group">
-                        <div class="relative overflow-hidden rounded-xl mb-4 h-56"><img src="${t.immagine_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-1">${t.titolo}</h3>
-                        <p class="text-blue-600 text-[11px] font-black uppercase tracking-wider mb-6">${t.modello_bus}</p>
-                        <a href="prenota.html" class="mt-auto text-center w-full bg-blue-50 text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-600 hover:text-white transition">VAI ALLA PRENOTAZIONE</a>
+                        <div class="relative overflow-hidden rounded-xl mb-4 h-48 sm:h-56"><img src="${t.immagine_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></div>
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">${t.titolo}</h3>
+                        <p class="text-blue-600 text-[10px] sm:text-[11px] font-black uppercase tracking-wider mb-6">${t.modello_bus}</p>
+                        <a href="prenota.html" class="mt-auto text-center w-full bg-blue-50 text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-600 hover:text-white transition text-sm sm:text-base">VAI ALLA PRENOTAZIONE</a>
                     </div>
                 `).join('');
             }
