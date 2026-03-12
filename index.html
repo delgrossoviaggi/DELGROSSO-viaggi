@@ -2,249 +2,193 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Del Grosso Viaggi & Limousine Bus | Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; display: flex; flex-direction: column; min-height: 100vh;}
-        main { flex: 1; }
-        .swiper-button-next, .swiper-button-prev { color: #2563eb !important; }
-        .swiper-pagination-bullet-active { background-color: #2563eb !important; }
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        
+        /* CAROUSEL DINAMICO: La foto comanda l'altezza */
+        .mySwiper {
+            width: 100%;
+            height: auto;
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+        .swiper-slide {
+            height: auto !important; /* Permette alla slide di adattarsi alla foto */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain; /* Assicura che la foto sia intera */
+        }
+
+        .animate-marquee {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="overflow-x-hidden">
 
     <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20 md:h-24">
-                
-                <a href="index.html" class="flex items-center h-full py-2">
-                    <img src="logo.jpg.JPEG" alt="Del Grosso Viaggi Logo" class="h-12 sm:h-16 md:h-20 w-auto object-contain" onerror="this.src='https://via.placeholder.com/200x80?text=LOGO+NON+TROVATO'">
-                </a>
-                
-                <nav class="hidden lg:flex space-x-6 items-center">
-                    <a href="flotta.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Flotta</a>
-                    <a href="dettagli-bus.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Dettagli Bus</a>
-                    <a href="viaggi.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Viaggi</a>
-                    <a href="prenota.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Prenotazioni</a>
-                    <a href="contatti.html" class="text-gray-600 hover:text-blue-600 font-semibold transition text-sm xl:text-base">Contatti</a>
-                    
-                    <div class="pl-4 flex items-center space-x-3 border-l border-gray-200">
-                        <a href="admin.html" class="bg-gray-900 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-gray-800 transition shadow-sm text-sm">Admin 🔒</a>
-                        <a href="prenota.html" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg text-sm">✅ Prenota</a>
-                    </div>
-                </nav>
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-20 md:h-24">
+            <a href="index.html" class="flex items-center h-full">
+                <img src="logo.jpg.JPEG" alt="Logo" class="h-14 md:h-20 w-auto object-contain">
+            </a>
+            
+            <nav class="hidden lg:flex space-x-6 items-center text-[11px] font-extrabold uppercase tracking-tight">
+                <a href="flotta.html" class="hover:text-blue-600 transition">Flotta</a>
+                <a href="dettagli-bus.html" class="hover:text-blue-600 transition">Dettagli Bus</a>
+                <a href="viaggi.html" class="hover:text-blue-600 transition">Viaggi</a>
+                <a href="prenota.html" class="hover:text-blue-600 transition">Prenotazioni</a>
+                <a href="contatti.html" class="hover:text-blue-600 transition">Contatti</a>
+                <a href="admin.html" class="bg-black text-white px-4 py-2 rounded-lg ml-2">Admin 🔒</a>
+                <a href="prenota.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md">✅ Prenota</a>
+            </nav>
 
-                <div class="lg:hidden flex items-center">
-                    <button id="mobile-menu-btn" class="text-gray-800 hover:text-blue-600 focus:outline-none p-2">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+            <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="lg:hidden text-3xl">☰</button>
         </div>
-
-        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-100 absolute w-full left-0 shadow-xl pb-4">
-            <div class="px-4 pt-4 pb-2 space-y-2">
-                <a href="flotta.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">La Flotta</a>
-                <a href="dettagli-bus.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Dettagli Bus</a>
-                <a href="viaggi.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Viaggi</a>
-                <a href="prenota.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Prenotazioni</a>
-                <a href="contatti.html" class="block px-3 py-3 rounded-md text-base font-semibold text-gray-800 hover:bg-gray-50 hover:text-blue-600">Contatti</a>
-            </div>
-            <div class="px-4 pt-4 border-t border-gray-100 flex flex-col space-y-3">
-                <a href="admin.html" class="block text-center w-full bg-gray-900 text-white px-5 py-3 rounded-xl font-bold shadow-sm">Area Admin 🔒</a>
-                <a href="prenota.html" class="block text-center w-full bg-blue-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg">✅ Prenota Ora</a>
-            </div>
+        
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t p-6 space-y-4 font-bold shadow-2xl absolute w-full z-50">
+            <a href="flotta.html" class="block">La Flotta</a>
+            <a href="dettagli-bus.html" class="block">Dettagli Bus</a>
+            <a href="viaggi.html" class="block">Viaggi</a>
+            <a href="prenota.html" class="block text-blue-600 font-black">Prenotazioni</a>
+            <a href="admin.html" class="block bg-gray-100 p-3 rounded-xl text-center">Admin 🔒</a>
         </div>
     </header>
 
     <main>
-        <section class="relative bg-gradient-to-b from-blue-50 to-gray-50 py-20 lg:py-32 overflow-hidden px-4">
-            <div class="max-w-7xl mx-auto text-center relative z-10">
-                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight">
-                    Viaggia con <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Stile e Sicurezza</span>
-                </h1>
-                <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-10 px-2">
-                    Dall'eleganza del Limousine Bus per i tuoi party esclusivi, alla comodità dei nostri Autobus Gran Turismo per viaggi e trasferte di gruppo.
-                </p>
-            </div>
+        <section id="sezione-avvisi" class="hidden bg-blue-700 text-white py-2 overflow-hidden border-b border-blue-800">
+            <div id="avvisi-container" class="animate-marquee whitespace-nowrap font-bold uppercase text-[10px] tracking-widest"></div>
         </section>
 
-        <section id="sezione-avvisi" class="hidden py-12 bg-white border-y border-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center mb-6">
-                    <span class="text-3xl mr-3">📢</span>
-                    <h2 class="text-2xl font-extrabold text-blue-900">Bacheca Avvisi e Novità</h2>
-                </div>
-                <div id="avvisi-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div class="max-w-6xl mx-auto px-4 mt-8">
+            <div class="swiper mySwiper shadow-2xl border border-gray-100">
+                <div class="swiper-wrapper" id="carousel-wrapper"></div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
             </div>
+        </div>
+
+        <section class="py-16 max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-black uppercase italic text-gray-900 tracking-tighter">Viaggi in Programma</h2>
+                <p class="text-gray-400 text-sm mt-2 font-medium">Scopri le nostre prossime gite e assicurati il tuo posto a bordo.</p>
+            </div>
+            <div id="grid-viaggi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
-        <section class="py-16 sm:py-20 bg-gray-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">La Nostra Flotta</h2>
-                <div class="swiper mySwiper rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-                    <div class="swiper-wrapper" id="carousel-wrapper">
-                        <p class="text-center w-full py-10 text-gray-500">Caricamento foto in corso...</p>
-                    </div>
-                    <div class="swiper-button-next hidden sm:flex"></div>
-                    <div class="swiper-button-prev hidden sm:flex"></div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-16 sm:py-20 bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-10 sm:mb-12 border-b border-gray-100 pb-8">
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">Viaggi in Programma</h2>
-                    <p class="text-gray-500 text-lg px-2">Scopri le nostre prossime gite e assicurati il tuo posto a bordo.</p>
+        <section class="py-20 bg-[#0f172a] text-white">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <span class="text-blue-500 font-black text-[10px] uppercase tracking-[0.3em]">Party Tour</span>
+                    <h2 class="text-4xl font-black mt-2 tracking-tighter uppercase italic">Eventi Limousine Bus</h2>
                 </div>
                 
-                <div id="grid-viaggi-home" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    <p class="text-center text-gray-500 col-span-full py-10">Caricamento viaggi in corso...</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-16 sm:py-20 bg-gray-900 text-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-12 sm:mb-16">
-                    <span class="text-purple-400 font-bold tracking-widest uppercase text-sm">Party Tour</span>
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold mt-2 mb-4">Eventi Limousine Bus</h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                    <div class="bg-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-700 flex flex-col sm:flex-row gap-6 items-center text-center sm:text-left">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center text-3xl sm:text-4xl shadow-inner">🥂</div>
-                        <div>
-                            <h3 class="text-xl sm:text-2xl font-bold mb-2">Feste Private</h3>
-                            <p class="text-gray-400 mb-4 text-sm">Bottiglie incluse, musica personalizzata e stop fotografici.</p>
-                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-bold hover:bg-[#1ebd5c] transition w-full sm:w-auto text-center">Scrivi a Nicola</a>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800/40 p-8 rounded-[2rem] border border-gray-700 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-4">🥂</div>
+                        <h3 class="text-2xl font-bold mb-2">Feste Private</h3>
+                        <p class="text-gray-400 text-sm mb-6">Bottiglie incluse, musica personalizzata e stop fotografici.</p>
+                        <a href="https://wa.me/393662127916" class="bg-green-500 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition">Scrivi a Nicola</a>
                     </div>
-                    <div class="bg-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-700 flex flex-col sm:flex-row gap-6 items-center text-center sm:text-left">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-500 flex-shrink-0 flex items-center justify-center text-3xl sm:text-4xl shadow-inner">🎓</div>
-                        <div>
-                            <h3 class="text-xl sm:text-2xl font-bold mb-2">Eventi Speciali</h3>
-                            <p class="text-gray-400 mb-4 text-sm">Organizza il transfer più divertente per lauree o matrimoni.</p>
-                            <a href="https://wa.me/393662127916" class="inline-block bg-[#25D366] text-white px-5 py-2.5 rounded-lg font-bold hover:bg-[#1ebd5c] transition w-full sm:w-auto text-center">Scrivi a Nicola</a>
-                        </div>
+                    <div class="bg-gray-800/40 p-8 rounded-[2rem] border border-gray-700 flex flex-col items-center text-center">
+                        <div class="text-4xl mb-4">🎓</div>
+                        <h3 class="text-2xl font-bold mb-2">Eventi Speciali</h3>
+                        <p class="text-gray-400 text-sm mb-6">Organizza il transfer più divertente per lauree o matrimoni.</p>
+                        <a href="https://wa.me/393662127916" class="bg-green-500 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition">Scrivi a Nicola</a>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-16 mb-12">
+    <footer class="bg-black text-white pt-16 pb-8 border-t-2 border-blue-600">
+        <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
             <div>
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Del Grosso Viaggi & Limousine Bus</h3>
-                <ul class="space-y-3 text-sm text-gray-300">
-                    <li>📞 Telefono: 3205730466 (Raffaele) — 3662127916 (Nicola)</li>
-                    <li class="flex flex-wrap items-center">💬 WhatsApp Limobus (Nicola): <a href="https://wa.me/393662127916" class="text-white font-bold ml-1 hover:text-blue-400">3662127916</a></li>
-                    <li class="flex flex-wrap items-center">💬 WhatsApp Bus GT (Raffaele): <a href="https://wa.me/393205730466" class="text-white font-bold ml-1 hover:text-blue-400">3205730466</a></li>
-                    <li class="flex flex-wrap items-center">✉️ Email: <a href="mailto:info@delgrossoviaggi.it" class="text-white font-bold ml-1 hover:text-blue-400 break-all">info@delgrossoviaggi.it</a></li>
+                <h3 class="bg-blue-600 inline-block px-3 py-1 font-black text-[10px] uppercase mb-6 tracking-widest">Del Grosso Viaggi & Limousine Bus</h3>
+                <ul class="space-y-4 text-xs font-bold text-gray-300">
+                    <li class="flex items-center gap-3">📞 3205730466 — 3662127916</li>
+                    <li class="flex items-center gap-3 text-blue-400">✉️ info@delgrossoviaggi.it</li>
                 </ul>
             </div>
-            <div>
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-6 text-sm">Social</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <a href="https://www.instagram.com/delgrosso_viaggi_/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">📸 Instagram (DelGrosso)</a>
-                    <a href="https://www.instagram.com/_limousine_bus/" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">📸 Instagram (Limo)</a>
-                    <a href="https://www.facebook.com/871671722704094" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">👍 Facebook (DelGrosso)</a>
-                    <a href="https://www.facebook.com/profile.php?id=61552174581411" class="bg-gray-900 border border-gray-800 p-3 rounded-lg text-xs font-bold text-blue-400 hover:border-blue-500 transition block text-center sm:text-left">👍 Facebook (Limo)</a>
+            <div class="md:text-right">
+                <h3 class="bg-blue-600 inline-block px-3 py-1 font-black text-[10px] uppercase mb-6 tracking-widest">Social</h3>
+                <div class="grid grid-cols-2 gap-2 max-w-xs md:ml-auto">
+                    <a href="#" class="bg-gray-900 p-3 rounded-lg text-[9px] font-black uppercase border border-gray-800 hover:border-blue-500 transition">Instagram (DelGrosso)</a>
+                    <a href="#" class="bg-gray-900 p-3 rounded-lg text-[9px] font-black uppercase border border-gray-800 hover:border-blue-500 transition">Instagram (Limo)</a>
                 </div>
             </div>
         </div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-800 pt-8 flex flex-col items-center text-center text-gray-500 text-xs">
-            <p class="mb-2">© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
-            <p class="font-semibold text-gray-400 tracking-wide">Fatto con cura da Cristino Nicola Pio.</p>
+        <div class="text-center pt-8 border-t border-gray-900 text-[10px] text-gray-600 font-bold">
+            <p>© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
+            <p class="mt-2 text-gray-500 italic">Fatto con cura da Cristino Nicola Pio.</p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // SCRIPT PER IL MENU MOBILE TENDINA
-        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
-
-        // Connessione a Supabase
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        async function caricaDatiHome() {
-            // 1. CARICAMENTO CAROUSEL FLOTTA
-            const { data: slides } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: true});
-            const wrapper = document.getElementById('carousel-wrapper');
-            
-            if(slides && slides.length > 0) {
-                wrapper.innerHTML = slides.map(s => `
-                    <div class="swiper-slide relative h-[300px] sm:h-[450px] md:h-[600px] flex items-end">
-                        <img src="${s.immagine_url}" class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-                        <div class="relative z-10 p-6 sm:p-8 md:p-16 text-white text-left w-full">
-                            <span class="bg-blue-600 text-[10px] sm:text-xs font-bold uppercase py-1 px-3 rounded-full mb-3 inline-block">${s.badge || 'Flotta'}</span>
-                            <h3 class="text-2xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-4">${s.titolo}</h3>
-                            <p class="text-sm sm:text-lg md:text-xl text-gray-200 max-w-2xl hidden sm:block">${s.descrizione || ''}</p>
+        async function init() {
+            // Carica Carousel
+            const { data: car } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: false});
+            if(car && car.length > 0) {
+                document.getElementById('carousel-wrapper').innerHTML = car.map(c => `
+                    <div class="swiper-slide relative">
+                        <img src="${c.immagine_url}">
+                        <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 p-8 pt-16">
+                            <span class="bg-blue-600 text-[9px] font-black px-2 py-1 rounded mb-2 inline-block uppercase tracking-widest text-white">Flotta</span>
+                            <h2 class="text-white text-xl md:text-3xl font-black uppercase italic tracking-tighter">${c.titolo}</h2>
                         </div>
-                    </div>
-                `).join('');
-            } else {
-                wrapper.innerHTML = `
-                    <div class="swiper-slide relative h-[300px] sm:h-[450px] md:h-[600px] flex items-center justify-center bg-gray-900">
-                        <p class="text-white text-lg sm:text-xl font-semibold px-4 text-center">Aggiungi foto dal Pannello Admin per visualizzare il Carousel</p>
-                    </div>`;
+                    </div>`).join('');
             }
-
-            // Inizializza Swiper
-            new Swiper(".mySwiper", {
-                spaceBetween: 30, effect: "fade", loop: true,
-                navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+            new Swiper(".mySwiper", { 
                 pagination: { el: ".swiper-pagination", clickable: true },
-                autoplay: { delay: 5000, disableOnInteraction: false }
+                navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+                autoplay: { delay: 4500 },
+                loop: true,
+                autoHeight: true // Fondamentale per adattarsi all'altezza della foto
             });
 
-            // 2. CARICAMENTO AVVISI
-            const { data: avvisi } = await sb.from('avvisi_home').select('*').order('created_at', {ascending: false}).limit(4);
-            if (avvisi && avvisi.length > 0) {
+            // Carica Avvisi
+            const { data: avv } = await sb.from('avvisi_home').select('*').limit(1).order('created_at', {ascending: false});
+            if(avv && avv.length > 0) {
                 document.getElementById('sezione-avvisi').classList.remove('hidden');
-                document.getElementById('avvisi-container').innerHTML = avvisi.map(a => `
-                    <div class="bg-blue-50/50 p-5 sm:p-6 rounded-2xl border border-blue-100 flex flex-col sm:flex-row gap-4 hover:shadow-md transition">
-                        ${a.immagine_url ? `<img src="${a.immagine_url}" class="w-full sm:w-24 h-40 sm:h-24 object-cover rounded-xl shadow-sm">` : ''}
-                        <div><h3 class="text-lg sm:text-xl font-bold text-blue-900 mb-2">${a.titolo}</h3><p class="text-gray-700 text-sm">${a.testo_descrizione}</p></div>
-                    </div>
-                `).join('');
+                document.getElementById('avvisi-container').innerHTML = `📢 ${avv[0].titolo}: ${avv[0].testo_descrizione} &nbsp;&nbsp;&nbsp;&nbsp; 🚌 Prenota ora i tuoi viaggi 2026! &nbsp;&nbsp;&nbsp;&nbsp; 📢 ${avv[0].titolo}: ${avv[0].testo_descrizione}`;
             }
 
-            // 3. CARICAMENTO VIAGGI IN PROGRAMMA
-            const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            const gridViaggi = document.getElementById('grid-viaggi-home');
-            
-            if (!tratte || tratte.length === 0) {
-                gridViaggi.innerHTML = '<p class="text-center text-gray-500 col-span-full py-10">Stiamo programmando nuovi viaggi... Torna a trovarci presto!</p>';
-            } else {
-                gridViaggi.innerHTML = tratte.map(t => `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col hover:shadow-xl transition group">
-                        <div class="relative overflow-hidden rounded-xl mb-4 h-48 sm:h-56"><img src="${t.immagine_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></div>
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">${t.titolo}</h3>
-                        <p class="text-blue-600 text-[10px] sm:text-[11px] font-black uppercase tracking-wider mb-6">${t.modello_bus}</p>
-                        <a href="prenota.html" class="mt-auto text-center w-full bg-blue-50 text-blue-700 font-bold py-3 rounded-xl hover:bg-blue-600 hover:text-white transition text-sm sm:text-base">VAI ALLA PRENOTAZIONE</a>
+            // Carica Viaggi
+            const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            if(viaggi) document.getElementById('grid-viaggi').innerHTML = viaggi.map(v => `
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-xl border border-gray-100 flex flex-col hover:translate-y-[-5px] transition duration-300">
+                    <img src="${v.immagine_url}" class="h-56 w-full object-cover">
+                    <div class="p-8 flex flex-col flex-1">
+                        <h3 class="font-black text-xl uppercase italic text-gray-900 tracking-tighter mb-1">${v.titolo}</h3>
+                        <p class="text-blue-600 text-[10px] font-black uppercase tracking-widest mb-6">${v.modello_bus}</p>
+                        <a href="prenota.html" class="mt-auto block bg-blue-50 text-blue-700 text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">Vai alla prenotazione</a>
                     </div>
-                `).join('');
-            }
+                </div>`).join('');
         }
-
-        caricaDatiHome();
+        init();
     </script>
 </body>
 </html>
