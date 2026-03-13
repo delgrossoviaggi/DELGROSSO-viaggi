@@ -5,85 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Flotta - Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
-        main { flex: 1; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-
-    <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-20 md:h-24">
-            <a href="index.html" class="flex items-center h-full py-2">
-                <img src="logo.jpg.JPEG" alt="Del Grosso Logo" class="h-12 sm:h-16 md:h-20 w-auto object-contain">
-            </a>
-            <nav class="hidden lg:flex space-x-6 items-center text-sm font-semibold">
-                <a href="flotta.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Flotta</a>
-                <a href="dettagli-bus.html" class="text-gray-600 hover:text-blue-600 transition">Dettagli Bus</a>
-                <a href="viaggi.html" class="text-gray-600 hover:text-blue-600 transition">Viaggi</a>
-                <a href="prenota.html" class="text-gray-600 hover:text-blue-600 transition">Prenotazioni</a>
-                <a href="contatti.html" class="text-gray-600 hover:text-blue-600 transition">Contatti</a>
+<body>
+    <header class="bg-white shadow-sm h-20 flex items-center sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center w-full">
+            <a href="index.html"><img src="logo.jpg.JPEG" class="h-14 w-auto object-contain"></a>
+            <nav class="hidden md:flex gap-6 font-black uppercase text-[10px] tracking-widest">
+                <a href="index.html" class="hover:text-blue-600 transition">Home</a>
+                <a href="flotta.html" class="text-blue-600">La Flotta</a>
+                <a href="viaggi.html" class="hover:text-blue-600 transition">Viaggi</a>
+                <a href="dettagli-bus.html" class="hover:text-blue-600 transition">Dettagli</a>
             </nav>
-            <div class="lg:hidden">
-                <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-2xl p-2">☰</button>
-            </div>
-        </div>
-        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t p-4 space-y-3 font-semibold shadow-lg absolute w-full z-50">
-            <a href="index.html" class="block">Home</a>
-            <a href="flotta.html" class="block text-blue-600">La Flotta</a>
-            <a href="viaggi.html" class="block">Viaggi</a>
-            <a href="prenota.html" class="block">Prenotazioni</a>
-            <a href="contatti.html" class="block">Contatti</a>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-16">
         <div class="text-center mb-16">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">I Nostri Mezzi</h1>
-            <p class="text-gray-600 max-w-2xl mx-auto">Sicurezza, pulizia e comfort tecnologico al servizio del tuo viaggio.</p>
+            <h1 class="text-5xl font-black uppercase italic tracking-tighter text-gray-900">I Nostri Mezzi</h1>
+            <p class="text-gray-400 font-bold mt-2 uppercase text-xs tracking-[0.4em]">Gestiti da Del Grosso Admin</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 group hover:shadow-xl transition">
-                <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200" class="w-full h-64 object-cover">
-                <div class="p-8">
-                    <h2 class="text-2xl font-bold mb-4">Autobus Gran Turismo</h2>
-                    <p class="text-gray-600 mb-6 italic">Disponibili in versioni da 53 e 63 posti. Ideali per gite scolastiche, pellegrinaggi e tour nazionali.</p>
-                    <ul class="space-y-2 text-sm text-gray-500 mb-6">
-                        <li class="flex items-center">✅ Prese USB a ogni sedile</li>
-                        <li class="flex items-center">✅ Toilette di bordo</li>
-                        <li class="flex items-center">✅ Climatizzazione automatica</li>
-                    </ul>
-                </div>
+        <div id="grid-flotta" class="grid grid-cols-1 md:grid-cols-2 gap-12">
             </div>
-
-            <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 group hover:shadow-xl transition">
-                <img src="https://images.unsplash.com/photo-1512426038459-22aebcb3d649?q=80&w=1200" class="w-full h-64 object-cover">
-                <div class="p-8">
-                    <h2 class="text-2xl font-bold mb-4 text-purple-700">Limousine Bus</h2>
-                    <p class="text-gray-600 mb-6 italic">L'unica discoteca itinerante. Il mezzo perfetto per eventi indimenticabili.</p>
-                    <ul class="space-y-2 text-sm text-gray-500 mb-6">
-                        <li class="flex items-center">✅ Impianto audio da 5000W</li>
-                        <li class="flex items-center">✅ Luci LED e Laser</li>
-                        <li class="flex items-center">✅ Area Bar e divanetti in pelle</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
     </main>
 
-    <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600">
-        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div>
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-4 text-sm uppercase">Del Grosso Viaggi</h3>
-                <p class="text-sm text-gray-400">info@delgrossoviaggi.it | 320 573 0466</p>
-            </div>
-            <div class="md:text-right">
-                <p class="text-xs text-gray-500">© 2026 Del Grosso Viaggi. Tutti i diritti riservati.</p>
-                <p class="text-sm font-bold text-gray-400 mt-2">Fatto con cura da Cristino Nicola Pio.</p>
-            </div>
-        </div>
-    </footer>
+    <script>
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        async function caricaFlotta() {
+            const { data } = await sb.from('flotta_page').select('*').order('id', {ascending: true});
+            const render = document.getElementById('grid-flotta');
+            
+            if(data) {
+                render.innerHTML = data.map(bus => `
+                    <div class="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-gray-100 flex flex-col group">
+                        <img src="${bus.immagine_url}" class="w-full h-72 object-cover group-hover:scale-105 transition duration-500">
+                        <div class="p-10 flex flex-col flex-1">
+                            <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 mb-4">${bus.titolo}</h2>
+                            <p class="text-gray-500 font-medium italic mb-8 leading-relaxed">"${bus.descrizione}"</p>
+                            <a href="dettagli-bus.html" class="mt-auto block bg-blue-50 text-blue-700 text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">Vedi Specifiche Tecniche</a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        caricaFlotta();
+    </script>
 </body>
 </html>
