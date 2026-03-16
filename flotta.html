@@ -2,53 +2,113 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Flotta - Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap'); body { font-family: 'Inter', sans-serif; }</style>
-</head>
-<body class="bg-gray-50">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fff; color: #1a1a1a; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .container { width: 92%; max-width: 1200px; margin: auto; }
+        
+        /* HEADER */
+        header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo-container img { height: 55px; width: auto; object-fit: contain; }
+        .nav-links { list-style: none; display: flex; gap: 25px; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; }
 
-    <header class="bg-[#d0e0e3] h-20 flex items-center px-6 justify-between border-b border-[#b7c9cc] sticky top-0 z-50">
-        <div class="text-2xl font-black text-[#2c4c5c] italic tracking-tighter">DEL GROSSO VIAGGI</div>
-        <nav class="hidden lg:flex space-x-6 text-[10px] font-black uppercase">
-            <a href="index.html">Home</a>
-            <a href="viaggi.html">Viaggi</a>
-            <a href="flotta.html" class="text-blue-600">Flotta</a>
-            <a href="contatti.html">Contatti</a>
-        </nav>
+        /* HERO PAGINA */
+        .page-hero { background: #000; color: white; padding: 100px 0; text-align: center; }
+        .page-hero h1 { font-size: 48px; font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -2px; }
+        .page-hero p { font-size: 18px; opacity: 0.8; margin-top: 10px; font-style: italic; }
+
+        /* SEZIONE FLOTTA DETTAGLIATA */
+        .flotta-dettaglio-section { padding: 80px 0; }
+        .bus-detail-block { display: flex; align-items: center; gap: 60px; margin-bottom: 80px; }
+        .bus-detail-block:nth-child(even) { flex-direction: row-reverse; }
+        .bus-image-container { flex: 1; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid #f0f0f0; }
+        .bus-image-container img { width: 100%; height: auto; object-fit: cover; }
+        .bus-text-container { flex: 1; }
+        .bus-label { font-size: 12px; font-weight: 900; text-transform: uppercase; color: #2563eb; letter-spacing: 2px; margin-bottom: 10px; display: block; }
+        .bus-text-container h2 { font-size: 36px; font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -1px; margin-bottom: 20px; color: #000; }
+        .bus-text-container p { font-size: 16px; color: #555; margin-bottom: 30px; line-height: 1.8; }
+        .btn-prenota-small { background: #000; color: white; padding: 16px 32px; text-decoration: none; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-radius: 50px; display: inline-block; transition: 0.3s; }
+        .btn-prenota-small:hover { background: #2563eb; }
+
+        /* FOOTER */
+        .main-footer { background: #000; color: white; padding: 80px 0 0 0; }
+        .footer-grid-custom { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 50px; }
+        .footer-title { font-size: 11px; font-weight: 900; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; color: #2563eb; }
+        .footer-col p { font-size: 13px; opacity: 0.7; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .footer-socials { display: flex; gap: 20px; margin-top: 20px; }
+        .footer-socials a { color: white; font-size: 20px; opacity: 0.7; transition: 0.3s; }
+        .footer-socials a:hover { opacity: 1; color: #2563eb; transform: scale(1.1); }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li a { text-decoration: none; color: white; opacity: 0.7; font-size: 13px; display: block; margin-bottom: 10px; transition: 0.3s; }
+        .footer-col ul li a:hover { opacity: 1; color: #2563eb; padding-left: 5px; }
+        
+        /* FIRMA DESIGNER */
+        .designer-signature { text-align: center; padding: 25px 0; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+        .designer-signature p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin: 0; }
+        .designer-signature strong { color: rgba(255,255,255,0.8); font-weight: 800; }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) { .footer-grid-custom { grid-template-columns: 1fr 1fr; gap: 30px; } }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .page-hero { padding: 80px 0; }
+            .page-hero h1 { font-size: 36px; }
+            .bus-detail-block, .bus-detail-block:nth-child(even) { flex-direction: column; gap: 30px; text-align: center; }
+            .bus-text-container h2 { font-size: 28px; }
+            .footer-grid-custom { grid-template-columns: 1fr; text-align: center; }
+            .footer-col p, .footer-socials { justify-content: center; }
+            .footer-col ul li a:hover { padding-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-flex">
+            <a href="index.html" class="logo-container">
+                <img src="logo.jpg.JPEG" alt="Del Grosso Viaggi Logo">
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="flotta.html" class="active">La Flotta</a></li>
+                    <li><a href="prenota.html">Prenota</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-16">
-        <h1 class="text-4xl font-black italic uppercase text-gray-900 mb-12 text-center">La Nostra Flotta di Eccellenza</h1>
-        <div id="lista-bus-completa" class="space-y-16">
+    <section class="page-hero">
+        <div class="container">
+            <h1>La Nostra Flotta</h1>
+            <p>Eccellenza, Comfort e Sicurezza su Ruote</p>
+        </div>
+    </section>
+
+    <section class="flotta-dettaglio-section">
+        <div class="container" id="flotta-dettaglio-container">
             </div>
-    </main>
+    </section>
 
-    <script>
-        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
-        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
-        const sb = supabase.createClient(S_URL, S_KEY);
-
-        async function caricaFlotta() {
-            const { data } = await sb.from('dettagli_bus').select('*');
-            document.getElementById('lista-bus-completa').innerHTML = data.map(b => `
-                <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border">
-                    <img src="${b.immagine_url}" class="md:w-1/2 h-80 md:h-auto object-cover">
-                    <div class="p-10 md:w-1/2 flex flex-col justify-center">
-                        <span class="text-orange-500 font-black uppercase text-xs tracking-widest mb-2">${b.posti} Posti - Comfort Top</span>
-                        <h2 class="text-3xl font-black italic uppercase text-slate-800 mb-4">${b.nome_bus}</h2>
-                        <p class="text-gray-600 mb-8 italic leading-relaxed">${b.descrizione_lunga}</p>
-                        <div class="bg-gray-50 p-4 rounded-2xl border flex items-center gap-4">
-                            <i class="fas fa-check-circle text-green-500"></i>
-                            <span class="text-[10px] font-bold uppercase text-gray-400">Servizi: ${b.servizi}</span>
-                        </div>
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid-custom">
+                <div class="footer-col">
+                    <h4 class="footer-title">Del Grosso Viaggi</h4>
+                    <p>La tua scelta di eccellenza per il noleggio di autobus Gran Turismo e Limousine Bus.</p>
+                    <div class="footer-socials">
+                        <a href="#" target="_blank">FB</a>
+                        <a href="#" target="_blank">IG</a>
                     </div>
                 </div>
-            `).join('');
-        }
-        caricaFlotta();
-    </script>
-</body>
-</html>
+                <div class="footer-col">
+                    <h4 class="footer-title">Contatti</h4>
+                    <p>Via Esempio, 123<br>Città (PR), 43123</p>
+                    <p>+39 052

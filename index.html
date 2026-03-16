@@ -2,109 +2,178 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Del Grosso Viaggi - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        header { background-color: #d0e0e3; border-bottom: 2px solid #b7c9cc; }
-        .dg-blu { color: #2c4c5c; }
-        .hero-slide { transition: opacity 1s ease-in-out; background-color: #1a202c; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #fff; color: #1a1a1a; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .container { width: 92%; max-width: 1200px; margin: auto; }
+        
+        /* HEADER */
+        header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo-container img { height: 55px; width: auto; object-fit: contain; }
+        .nav-links { list-style: none; display: flex; gap: 25px; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; }
+
+        /* CAROUSEL */
+        .hero-carousel { height: 65vh; position: relative; overflow: hidden; background: #000; }
+        .slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
+        .slide.active { opacity: 1; z-index: 2; }
+        .slide-image { width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1.1); transition: 8s linear; }
+        .slide.active .slide-image { transform: scale(1); }
+        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6)); display: flex; align-items: center; z-index: 3; }
+        .hero-content { color: white; padding: 0 5%; }
+        .hero-content h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 900; max-width: 700px; line-height: 1; text-transform: uppercase; font-style: italic; letter-spacing: -2px; }
+
+        /* SEZIONI */
+        .section-main-title { font-size: 32px; font-weight: 900; color: #000; margin-bottom: 30px; text-transform: uppercase; font-style: italic; letter-spacing: -1px; text-align: center; }
+        .intro-section { padding: 80px 0; text-align: center; }
+        .description-text { max-width: 800px; margin: 0 auto 30px; font-size: 18px; color: #444; }
+        .btn-prenota { background: #2563eb; color: white; padding: 18px 36px; text-decoration: none; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-radius: 50px; display: inline-block; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
+        .btn-prenota:hover { background: #1d4ed8; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3); }
+
+        /* FLOTTA HOME */
+        .flotta-section { padding: 80px 0; background-color: #f9fafb; }
+        .flotta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+        .bus-card { background: white; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; transition: 0.4s; flex-direction: column; display: flex; }
+        .bus-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px rgba(0,0,0,0.12); }
+        .bus-card img { width: 100%; height: 250px; object-fit: cover; }
+        .bus-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; }
+        .bus-content h3 { font-size: 22px; font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 15px; color: #000; }
+        .bus-content p { font-size: 15px; color: #666; font-style: italic; margin-bottom: 25px; flex-grow: 1; }
+        .btn-scopri { background: #000; color: white; padding: 16px 32px; text-decoration: none; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-radius: 50px; display: inline-block; transition: 0.3s; text-align: center; margin-top: auto; }
+        .btn-scopri:hover { background: #2563eb; }
+
+        /* LOCANDINE */
+        .locandine-section { padding: 80px 0; }
+        .locandine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .locandina-card { background: white; border-radius: 25px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding-bottom: 25px; text-align: center; border: 1px solid #f0f0f0; transition: 0.3s; }
+        .locandina-card:hover { transform: scale(1.03); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .locandina-card img { width: 100%; height: 380px; object-fit: cover; transition: 0.5s; }
+        .locandina-card h3 { font-size: 16px; font-weight: 800; text-transform: uppercase; margin: 20px 0; color: #000; px: 15px; }
+
+        /* FOOTER */
+        .main-footer { background: #000; color: white; padding: 80px 0 0 0; }
+        .footer-grid-custom { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 50px; }
+        .footer-title { font-size: 11px; font-weight: 900; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; color: #2563eb; }
+        .footer-col p { font-size: 13px; opacity: 0.7; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .footer-socials { display: flex; gap: 20px; margin-top: 20px; }
+        .footer-socials a { color: white; font-size: 20px; opacity: 0.7; transition: 0.3s; }
+        .footer-socials a:hover { opacity: 1; color: #2563eb; transform: scale(1.1); }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li a { text-decoration: none; color: white; opacity: 0.7; font-size: 13px; display: block; margin-bottom: 10px; transition: 0.3s; }
+        .footer-col ul li a:hover { opacity: 1; color: #2563eb; padding-left: 5px; }
+        
+        /* FIRMA DESIGNER */
+        .designer-signature { text-align: center; padding: 25px 0; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+        .designer-signature p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin: 0; }
+        .designer-signature strong { color: rgba(255,255,255,0.8); font-weight: 800; }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) { .footer-grid-custom { grid-template-columns: 1fr 1fr; gap: 30px; } }
+        @media (max-width: 768px) {
+            .nav-links { display: none; } /* Semplificazione mobile */
+            .hero-carousel { height: 55vh; }
+            .hero-content h1 { font-size: 36px; }
+            .section-main-title { font-size: 28px; }
+            .description-text { font-size: 16px; }
+            .footer-grid-custom { grid-template-columns: 1fr; text-align: center; }
+            .footer-col p, .footer-socials { justify-content: center; }
+            .footer-col ul li a:hover { padding-left: 0; }
+        }
     </style>
 </head>
-<body class="bg-white">
+<body>
 
-    <header class="sticky top-0 z-50 h-20 md:h-24 flex items-center justify-between px-6 md:px-12">
-        <div class="text-2xl font-black dg-blu italic uppercase tracking-tighter">DEL GROSSO VIAGGI</div>
-        <nav class="hidden lg:flex space-x-8 text-[11px] font-black dg-blu uppercase tracking-widest">
-            <a href="index.html" class="hover:text-blue-600">Chi Siamo</a>
-            <a href="viaggi.html" class="hover:text-blue-600">Tour e Viaggi</a>
-            <a href="flotta.html" class="hover:text-blue-600">Flotta</a>
-            <a href="contatti.html" class="hover:text-blue-600">Contatti</a>
-        </nav>
-        <button class="lg:hidden dg-blu text-2xl">☰</button>
+    <header>
+        <div class="container header-flex">
+            <a href="index.html" class="logo-container">
+                <img src="logo.jpg.JPEG" alt="Del Grosso Viaggi Logo">
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="flotta.html">La Flotta</a></li>
+                    <li><a href="prenota.html">Prenota</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <section class="h-[500px] md:h-[650px] relative overflow-hidden">
-        <div id="carousel-inner" class="h-full w-full">
-            </div>
-        <div class="absolute inset-0 flex items-center px-8 md:px-20 z-10 pointer-events-none">
-            <div class="max-w-4xl text-white drop-shadow-2xl">
-                <h1 class="text-4xl md:text-6xl font-black italic uppercase leading-none mb-4">
-                    Viaggi di gruppo in comfort e sicurezza.
-                </h1>
-                <p class="text-sm md:text-xl font-bold uppercase tracking-widest opacity-90">
-                    Del Grosso Viaggi & Limousine Bus
-                </p>
+    <section class="hero-carousel" id="carousel-container">
+        <div class="hero-overlay">
+            <div class="hero-content">
+                <h1>Esperienze di Viaggio<br>Esclusive e Confortevoli</h1>
             </div>
         </div>
     </section>
 
-    <section class="py-16 px-6 text-center bg-white">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl md:text-3xl font-black dg-blu uppercase italic mb-6 tracking-tighter">La Nostra Passione per il Viaggio</h2>
-            <p class="text-gray-600 italic leading-relaxed mb-8 text-lg">
-                La Nostra Passione per il viaggio, coniugata ad un servizio impeccabile per medie e lunghe percorrenze, offre comfort e affidabilità con la sua livrea distintiva "Del Grosso".
-            </p>
-            <div class="inline-block border-t border-b border-gray-200 py-4">
-                <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-black italic">
-                    IMPORTANTE: Specializzati ESCLUSIVAMENTE nel NOLEGGIO CON CONDUCENTE.
-                </p>
-            </div>
+    <section class="intro-section">
+        <div class="container">
+            <h2 class="section-main-title">Benvenuti a Bordo</h2>
+            <p class="description-text">Scopri il piacere di viaggiare con Del Grosso Viaggi. Offriamo servizi di noleggio autobus Gran Turismo e Limousine Bus per ogni tua esigenza, garantendo massima sicurezza, comfort e stile.</p>
+            <a href="prenota.html" class="btn-prenota">Prenota il Tuo Viaggio</a>
         </div>
     </section>
 
-    <section class="py-20 bg-gray-50 border-t border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-center text-3xl font-black uppercase italic mb-12 dg-blu tracking-tighter">La Nostra Flotta di Eccellenza</h2>
-            <div id="grid-flotta" class="grid grid-cols-1 md:grid-cols-3 gap-10">
+    <section class="flotta-section">
+        <div class="container">
+            <h2 class="section-main-title">La Nostra Flotta di Eccellenza</h2>
+            <div class="flotta-grid" id="flotta-privata-container">
                 </div>
         </div>
     </section>
 
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-center text-3xl font-black uppercase italic mb-12 dg-blu tracking-tighter">Prossimi Tour e Viaggi</h2>
-            <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+    <section class="locandine-section">
+        <div class="container">
+            <h2 class="section-main-title">Prossimi Viaggi & Eventi</h2>
+            <div class="locandine-grid" id="locandine-container">
                 </div>
         </div>
     </section>
 
-    <footer class="bg-[#333] text-white py-16">
-        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 text-[11px] leading-relaxed">
-            <div>
-                <h4 class="font-black uppercase mb-4 text-sm tracking-tighter text-orange-400">Contatti Diretti</h4>
-                <p class="mb-2">📞 3205730466 (Raffaele)</p>
-                <p class="mb-2">📞 3662127916 (Nicola)</p>
-                <p class="mb-2">💬 WhatsApp Nicola: 3662127916</p>
-                <p>📩 info@delgrossoviaggi.it</p>
-            </div>
-            <div>
-                <h4 class="font-black uppercase mb-4 text-sm tracking-tighter text-gray-300">Sede Operativa</h4>
-                <p>San Severo (FG)</p>
-                <p>Ref. Line 320 5773446</p>
-                <p>Cell. 320 978 6100</p>
-                <p class="mt-4 font-bold text-white">www.delgrossoviaggi.it</p>
-            </div>
-            <div class="h-44 bg-gray-600 rounded-3xl overflow-hidden border-2 border-white/10">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d15.3!3d41.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDM2JzAwLjAiTiAxNcKwMTgnMDAuMCJF!5e0!3m2!1sit!2sit!4v1620000000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-            </div>
-            <div class="text-right flex flex-col justify-between">
-                <div>
-                    <h4 class="font-black uppercase mb-4 text-sm tracking-tighter text-gray-300">Social & Legal</h4>
-                    <p>Noleggio Con Conducente</p>
-                    <p>P.Iva 01234567890</p>
-                    <div class="flex justify-end gap-4 mt-4 text-2xl">
-                        <a href="#" class="hover:text-orange-400"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="hover:text-orange-400"><i class="fab fa-instagram"></i></a>
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid-custom">
+                <div class="footer-col">
+                    <h4 class="footer-title">Del Grosso Viaggi</h4>
+                    <p>La tua scelta di eccellenza per il noleggio di autobus Gran Turismo e Limousine Bus.</p>
+                    <div class="footer-socials">
+                        <a href="#" target="_blank">FB</a>
+                        <a href="#" target="_blank">IG</a>
                     </div>
                 </div>
-                <div class="mt-8">
-                    <a href="admin-panel.html" class="opacity-10 hover:opacity-100 transition"><i class="fas fa-lock"></i> Accesso Admin</a>
+                <div class="footer-col">
+                    <h4 class="footer-title">Contatti</h4>
+                    <p>Via Esempio, 123<br>Città (PR), 43123</p>
+                    <p>+39 0521 123456</p>
+                    <p>info@delgrossoviaggi.it</p>
                 </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">Link Rapidi</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="flotta.html">La Flotta</a></li>
+                        <li><a href="prenota.html">Prenota</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">Note Legali</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">Termini di Servizio</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="designer-signature">
+            <div class="container">
+                <p>Designer © <strong>Cristino Nicola Pio</strong></p>
             </div>
         </div>
     </footer>
@@ -114,59 +183,62 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        async function init() {
-            // 1. Carousel
-            const { data: slides } = await sb.from('carousel_home').select('*').order('created_at', {ascending: false});
-            const carousel = document.getElementById('carousel-inner');
+        async function caricaHome() {
+            // 1. CAROUSEL
+            const { data: slides } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: true});
+            const carousel = document.getElementById('carousel-container');
             if(slides && slides.length > 0) {
-                carousel.innerHTML = slides.map((s, i) => `
-                    <div class="hero-slide absolute inset-0 w-full h-full bg-center bg-cover ${i===0?'opacity-100':'opacity-0'}" style="background-image: url('${s.immagine_url}')">
-                        <div class="absolute inset-0 bg-black/30"></div>
-                    </div>
-                `).join('');
+                slides.forEach((slide, index) => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = `slide ${index === 0 ? 'active' : ''}`;
+                    slideDiv.innerHTML = `<div class="slide-image" style="background-image: url('${slide.immagine_url}');"></div>`;
+                    carousel.appendChild(slideDiv);
+                });
                 startCarousel();
             }
 
-            // 2. Flotta Dinamica
-            const { data: bus } = await sb.from('flotta_completa').select('*').order('id', {ascending: true});
-            const gridFlotta = document.getElementById('grid-flotta');
-            if(bus) gridFlotta.innerHTML = bus.map(b => `
-                <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border transition hover:-translate-y-2">
-                    <img src="${b.immagine_url}" class="h-64 w-full object-cover">
-                    <div class="p-8 text-center">
-                        <h3 class="font-black italic uppercase dg-blu text-xs mb-4 min-h-[30px] flex items-center justify-center">${b.nome_bus}</h3>
-                        <p class="text-[10px] text-gray-400 italic mb-6 line-clamp-2">${b.descrizione_breve || ''}</p>
-                        <a href="flotta.html" class="inline-block bg-dg-blu text-white px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest active:scale-95 transition">Scopri di più</a>
+            // 2. FLOTTA HOME
+            const { data: flotta } = await sb.from('flotta_page').select('*').order('id', {ascending: true});
+            const flottaContainer = document.getElementById('flotta-privata-container');
+            if(flotta) {
+                flottaContainer.innerHTML = flotta.map(bus => `
+                    <div class="bus-card">
+                        <img src="${bus.immagine_url}" alt="${bus.titolo}">
+                        <div class="bus-content">
+                            <h3>${bus.titolo}</h3>
+                            <p>${bus.descrizione}</p>
+                            <a href="flotta.html" class="btn-scopri">Scopri di Più</a>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
 
-            // 3. Viaggi Dinamici
-            const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            const gridViaggi = document.getElementById('grid-viaggi');
-            if(viaggi) gridViaggi.innerHTML = viaggi.map(v => `
-                <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border transition hover:shadow-orange-100">
-                    <img src="${v.immagine_url}" class="h-80 w-full object-cover">
-                    <div class="p-8 text-center">
-                        <h3 class="font-black italic uppercase dg-blu text-lg mb-6 tracking-tighter">${v.titolo}</h3>
-                        <a href="prenota.html?id=${v.id}" class="bg-orange-600 text-white px-10 py-4 rounded-2xl font-black block uppercase italic shadow-lg active:scale-95 transition">Prenota ora</a>
+            // 3. LOCANDINE
+            const { data: locandine } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            const locandineContainer = document.getElementById('locandine-container');
+            if(locandine) {
+                locandineContainer.innerHTML = locandine.map(loc => `
+                    <div class="locandina-card">
+                        <img src="${loc.immagine_url}" alt="${loc.titolo}">
+                        <h3>${loc.titolo}</h3>
+                        <a href="prenota.html" class="btn-scopri">Prenota Ora</a>
                     </div>
-                </div>
-            `).join('');
-        }
-
-        function startCarousel() {
-            let slides = document.querySelectorAll('.hero-slide'), cur = 0;
-            if(slides.length > 1) {
-                setInterval(() => {
-                    slides[cur].classList.replace('opacity-100', 'opacity-0');
-                    cur = (cur + 1) % slides.length;
-                    slides[cur].classList.replace('opacity-0', 'opacity-100');
-                }, 5000);
+                `).join('');
             }
         }
 
-        init();
+        // Logica Carousel
+        function startCarousel() {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlide = 0;
+            setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 5000); // Cambia ogni 5 secondi
+        }
+
+        caricaHome();
     </script>
 </body>
 </html>

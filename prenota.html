@@ -7,219 +7,55 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; color: #1a1a1a; }
+        .container-main { width: 92%; max-width: 1200px; margin: auto; }
+
+        /* HEADER */
+        header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo-container img { height: 55px; width: auto; object-fit: contain; }
+        .nav-links { list-style: none; display: flex; gap: 25px; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #2563eb; }
         
-        /* SEDILI DINAMICI */
-        .seat { 
-            width: 46px; height: 46px; 
-            @apply rounded-xl flex items-center justify-center text-[11px] font-black transition-all border-2 shadow-sm shrink-0;
-            touch-action: manipulation;
-        }
-        .seat-available { @apply bg-white border-gray-200 text-gray-700 cursor-pointer active:scale-95; }
+        /* FORM PRENOTAZIONE */
+        .booking-main { max-w-md mx-auto p-4 mt-10 space-y-8; }
+        .card-booking { @apply bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100; }
+        h1.page-title { font-size: 36px; font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -2px; margin-bottom: 10px; line-height: 1; color: #000; }
+        p.page-subtitle { font-size: 16px; color: #666; font-style: italic; margin-bottom: 30px; }
+        
+        label.input-label { @apply text-[10px] font-black uppercase text-blue-600 ml-2 mb-1 block tracking-widest; }
+        input.form-input, select.form-select { @apply w-full p-5 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all appearance-none text-base; color: #000; }
+        input.form-input::placeholder { color: #a0aec0; font-weight: 600; }
+        
+        /* MAPPA BUS BLINDATA */
+        .map-section { @apply hidden bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100; }
+        .map-header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 30px; }
+        .map-header h2 { font-size: 24px; font-weight: 900; text-transform: uppercase; font-style: italic; color: #000; leading-none; tracking-tighter; }
+        .bus-model-badge { @apply text-[10px] font-black bg-blue-100 text-blue-600 px-4 py-1 rounded-full uppercase tracking-widest; }
+
+        .bus-outer { @apply bg-gray-50 p-8 rounded-[4rem] border-4 border-gray-200 relative; }
+        .bus-front { w-full h-10 bg-gray-200 rounded-t-full mb-10 flex items-center justify-center text-[10px] font-black text-gray-400 uppercase tracking-widest; }
+        .bus-grid-container { @apply w-full overflow-x-auto text-center pb-4; }
+        .bus-grid { display: inline-grid; grid-template-columns: repeat(5, 1fr); gap: 12px; justify-items: center; align-items: center; }
+        .corridoio { width: 20px; }
+        .bus-back { w-full h-8 bg-gray-200 rounded-b-3xl mt-10; }
+
+        /* SEDILI */
+        .seat { @apply rounded-xl flex items-center justify-center font-black transition-all border-2 shadow-sm shrink-0 manipulation; width: 48px; height: 48px; font-size: 12px; }
+        .seat-available { @apply bg-white border-gray-200 text-gray-700 cursor-pointer active:scale-90 hover:border-blue-400; }
         .seat-selected { @apply bg-blue-600 border-blue-700 text-white shadow-lg shadow-blue-200 scale-110 z-10; }
-        .seat-occupied { @apply bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed opacity-50; }
+        .seat-occupied { @apply bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed opacity-50; }
         .seat-driver { @apply bg-orange-400 border-orange-500 text-white cursor-not-allowed; }
-        
-        /* LAYOUT BUS */
-        .bus-container {
-            display: inline-flex;
-            flex-direction: column;
-            gap: 12px;
-            background: #fff;
-            padding: 30px 20px;
-            border-radius: 50px;
-            border: 4px solid #e5e7eb;
-        }
-        .bus-row { display: flex; gap: 8px; justify-content: center; align-items: center; }
-        .corridoio { width: 35px; }
 
-        .loader { border-top-color: #2563eb; animation: spinner 0.6s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="pb-10">
+        /* RIEPILOGO E PULSANTE */
+        .summary-box { @apply bg-blue-600 p-6 rounded-3xl text-center shadow-lg shadow-blue-200 mt-10; }
+        .summary-label { text-[10px] font-black text-blue-100 uppercase tracking-widest mb-1; }
+        .summary-seats { text-4xl font-black text-white italic tracking-tighter; }
+        .btn-confirm { @apply w-full bg-green-500 text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all mt-6; font-size: 14px; }
+        .btn-confirm:hover { background: #16a34a; }
 
-    <header class="bg-white shadow-sm h-20 flex items-center sticky top-0 z-50 px-4">
-        <div class="max-w-4xl mx-auto flex justify-between items-center w-full">
-            <a href="index.html" class="flex items-center">
-                <img src="logo.jpg.JPEG" alt="Logo" class="h-12 md:h-16 w-auto object-contain">
-            </a>
-            <a href="index.html" class="bg-gray-100 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-200 transition">Torna Home</a>
-        </div>
-    </header>
-
-    <main class="max-w-md mx-auto p-4 space-y-6">
-
-        <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
-            <h1 class="text-3xl font-black uppercase italic tracking-tighter mb-6 text-gray-900 leading-none Text-left">Prenotazione<br>Posti</h1>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-black uppercase text-blue-600 ml-2 mb-1 block">Scegli il Viaggio</label>
-                    <select id="select-viaggio" onchange="caricaMappaPosti()" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all appearance-none">
-                        <option value="">Caricamento viaggi...</option>
-                    </select>
-                </div>
-                
-                <input type="text" id="nome-cliente" placeholder="NOME E COGNOME" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500 uppercase">
-                <input type="tel" id="telefono-cliente" placeholder="NUMERO CELLULARE" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500">
-            </div>
-        </section>
-
-        <section id="sezione-mappa" class="hidden bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
-            <div class="flex justify-between items-end mb-6">
-                <h2 class="font-black uppercase italic text-xl leading-none tracking-tighter">Scegli la<br>tua posizione</h2>
-                <div id="info-modello" class="text-[9px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-lg uppercase tracking-widest"></div>
-            </div>
-
-            <div class="w-full overflow-x-auto text-center pb-4">
-                <div id="bus-render" class="bus-container">
-                    </div>
-            </div>
-
-            <div class="mt-8 space-y-4">
-                <div class="bg-blue-600 p-5 rounded-3xl text-center shadow-lg">
-                    <p class="text-[9px] font-black text-blue-200 uppercase tracking-widest mb-1">Sedili Selezionati</p>
-                    <p id="display-posti" class="text-3xl font-black text-white italic tracking-tighter">NESSUNO</p>
-                </div>
-                
-                <button id="btn-invia" onclick="inviaPrenotazione()" class="w-full bg-green-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">
-                    CONFERMA E INVIA WHATSAPP
-                </button>
-            </div>
-        </section>
-
-    </main>
-
-    <script>
-        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
-        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
-        const sb = supabase.createClient(S_URL, S_KEY);
-
-        let selezionati = [];
-        let occupati = [];
-        let modelloBus = "";
-
-        async function caricaViaggi() {
-            const { data } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            const select = document.getElementById('select-viaggio');
-            if(data) {
-                select.innerHTML = '<option value="">-- SELEZIONA DESTINAZIONE --</option>' + 
-                    data.map(v => `<option value="${v.id}" data-modello="${v.modello_bus}">${v.titolo}</option>`).join('');
-            }
-        }
-
-        async function caricaMappaPosti() {
-            const viaggioId = document.getElementById('select-viaggio').value;
-            if(!viaggioId) return;
-
-            const select = document.getElementById('select-viaggio');
-            modelloBus = select.options[select.selectedIndex].getAttribute('data-modello');
-            
-            selezionati = [];
-            document.getElementById('display-posti').innerText = "NESSUNO";
-            document.getElementById('info-modello').innerText = modelloBus;
-            document.getElementById('sezione-mappa').classList.remove('hidden');
-
-            const { data } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', viaggioId);
-            occupati = data ? data.flatMap(p => p.posti_selezionati.map(String)) : [];
-
-            disegnaMappaBlindata();
-        }
-
-        function disegnaMappaBlindata() {
-            const render = document.getElementById('bus-render');
-            render.innerHTML = "";
-            
-            const totalePosti = modelloBus.includes("63") ? 63 : 53;
-            const inizioFondo = totalePosti - 4; // 59 o 49
-
-            // 1. ANTERIORE (AUTISTA)
-            const rowA = document.createElement('div');
-            rowA.className = "bus-row w-full justify-start pl-2 mb-4";
-            rowA.innerHTML = `<div class="seat seat-driver">AUT</div>`;
-            render.appendChild(rowA);
-
-            // 2. CORPO BUS (2+C+2)
-            let n = 1;
-            while (n < inizioFondo) {
-                const row = document.createElement('div');
-                row.className = "bus-row";
-                
-                row.appendChild(creaSedile(n++));
-                row.appendChild(creaSedile(n++));
-                
-                const corr = document.createElement('div');
-                corr.className = "corridoio";
-                row.appendChild(corr);
-                
-                row.appendChild(creaSedile(n++));
-                row.appendChild(creaSedile(n++));
-                
-                render.appendChild(row);
-            }
-
-            // 3. FONDO BUS (5 SEDILI UNITI) - Senza corridoio e senza doppioni
-            const rowF = document.createElement('div');
-            rowF.className = "bus-row mt-2";
-            for(let j = inizioFondo; j <= totalePosti; j++) {
-                rowF.appendChild(creaSedile(j));
-            }
-            render.appendChild(rowF);
-        }
-
-        function creaSedile(numero) {
-            const sStr = numero.toString();
-            const isOcc = occupati.includes(sStr);
-            const seat = document.createElement('div');
-            seat.id = `s-${numero}`;
-            seat.className = `seat ${isOcc ? 'seat-occupied' : 'seat-available'}`;
-            seat.innerText = numero;
-            
-            if(!isOcc) {
-                seat.onclick = () => {
-                    if (selezionati.includes(sStr)) {
-                        selezionati = selezionati.filter(i => i !== sStr);
-                        seat.classList.replace('seat-selected', 'seat-available');
-                    } else {
-                        selezionati.push(sStr);
-                        seat.classList.replace('seat-available', 'seat-selected');
-                    }
-                    document.getElementById('display-posti').innerText = selezionati.length ? selezionati.sort((a,b)=>parseInt(a)-parseInt(b)).join(', ') : "NESSUNO";
-                };
-            }
-            return seat;
-        }
-
-        async function inviaPrenotazione() {
-            const nome = document.getElementById('nome-cliente').value.trim().toUpperCase();
-            const tel = document.getElementById('telefono-cliente').value.trim();
-            const viaggioId = document.getElementById('select-viaggio').value;
-            const viaggioNome = document.getElementById('select-viaggio').options[document.getElementById('select-viaggio').selectedIndex].text;
-
-            if(!nome || !tel || selezionati.length === 0) {
-                alert("🔴 Dati incompleti!");
-                return;
-            }
-
-            document.getElementById('btn-invia').innerText = "REGISTRAZIONE...";
-            document.getElementById('btn-invia').disabled = true;
-
-            const { error } = await sb.from('prenotazioni').insert([{ 
-                nome_cliente: nome, 
-                telefono_cliente: tel, 
-                tratta_id: viaggioId, 
-                posti_selezionati: selezionati 
-            }]);
-
-            if(!error) {
-                const wa = `Prenotazione: ${viaggioNome}\nCliente: ${nome}\nPosti: ${selezionati.join(', ')}`;
-                window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(wa)}`;
-            } else { alert("Errore invio."); }
-        }
-
-        caricaViaggi();
-    </script>
-</body>
-</html>
+        /* FOOTER */
+        .main-footer { background: #000; color: white; padding: 80px 0 0 0; margin-top: 80px; }
+        .footer-grid-custom { display: grid; grid-template-columns: 1.5fr 1fr
