@@ -1,59 +1,141 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; color: #333; line-height: 1.6; }
-.container { width: 90%; max-width: 1200px; margin: auto; }
+/* RESET E BASE */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { 
+    font-family: 'Inter', sans-serif; 
+    color: #1a1a1a; 
+    line-height: 1.6; 
+    background-color: #ffffff;
+    overflow-x: hidden;
+}
+.container { width: 92%; max-width: 1200px; margin: auto; }
 
-/* HEADER AZZURRINO */
-header { background: #d0e0e3; padding: 15px 0; border-bottom: 2px solid #b7c9cc; position: sticky; top: 0; z-index: 1000; }
+/* HEADER MODERNO (LOGO A SINISTRA) */
+header { 
+    background: rgba(255, 255, 255, 0.95); 
+    padding: 10px 0; 
+    border-bottom: 1px solid #eaeaea; 
+    position: sticky; 
+    top: 0; 
+    z-index: 1000; 
+    backdrop-filter: blur(10px); 
+}
 .header-flex { display: flex; justify-content: space-between; align-items: center; }
-.logo { font-weight: 800; font-size: 22px; color: #2c4c5c; letter-spacing: -1px; }
-.nav-links { list-style: none; display: flex; gap: 20px; }
-.nav-links a { text-decoration: none; color: #2c4c5c; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 
-/* CAROUSEL */
-.hero-carousel { height: 550px; position: relative; overflow: hidden; }
-.slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1s ease-in-out; }
+/* LOGO BOX */
+.logo-container img {
+    height: 55px; /* Dimensioni ottimali per iPhone */
+    width: auto;
+    object-contain: contain;
+}
+
+.nav-links { list-style: none; display: flex; gap: 25px; }
+.nav-links a { 
+    text-decoration: none; 
+    color: #000; 
+    font-size: 10px; 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+.nav-links a:hover { color: #2563eb; }
+
+/* CAROUSEL MASTER */
+.hero-carousel { height: 65vh; position: relative; overflow: hidden; background: #000; }
+.slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
 .slide.active { opacity: 1; }
-.slide-image { width: 100%; height: 100%; background-size: cover; background-position: center; }
-.hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; }
-.hero-content { color: white; padding: 0 50px; }
-.hero-content h1 { font-size: 36px; font-weight: 800; max-width: 600px; line-height: 1.1; margin-bottom: 10px; }
+.slide-image { 
+    width: 100%; height: 100%; 
+    background-size: cover; 
+    background-position: center; 
+    transform: scale(1.1); /* Effetto zoom lento */
+    transition: 8s linear;
+}
+.slide.active .slide-image { transform: scale(1); }
 
-/* SEZIONI TITOLI */
-.section-main-title { font-size: 26px; font-weight: 800; color: #333; margin-bottom: 20px; text-transform: none; }
-.intro-section { padding: 60px 0; border-bottom: 1px solid #eee; }
-.description-text { max-width: 800px; margin: auto; font-size: 16px; margin-bottom: 20px; }
-.disclaimer-text { font-size: 14px; color: #000; text-transform: uppercase; }
+.hero-overlay { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6)); 
+    display: flex; align-items: center; 
+}
+.hero-content { color: white; padding: 0 5%; }
+.hero-content h1 { 
+    font-size: clamp(32px, 5vw, 56px); 
+    font-weight: 900; 
+    max-width: 700px; 
+    line-height: 1; 
+    text-transform: uppercase;
+    italic;
+    letter-spacing: -2px;
+}
 
-/* FLOTTA GRID */
-.flotta-section { padding: 60px 0; background: #fff; }
-.flotta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px; }
-.bus-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: left; transition: 0.3s; }
-.bus-card img { width: 100%; height: 200px; object-fit: cover; }
-.bus-content { padding: 25px; }
-.bus-content h3 { font-size: 14px; font-weight: 800; margin-bottom: 10px; line-height: 1.3; height: 40px; }
-.bus-content p { font-size: 13px; color: #666; margin-bottom: 20px; height: 60px; overflow: hidden; }
-.btn-scopri { background: #2c4c5c; color: white; padding: 10px 20px; text-decoration: none; font-size: 12px; font-weight: 800; border-radius: 5px; display: inline-block; }
+/* TITOLI SEZIONI */
+.section-main-title { 
+    font-size: 32px; 
+    font-weight: 900; 
+    color: #000; 
+    margin-bottom: 30px; 
+    text-transform: uppercase; 
+    italic; 
+    letter-spacing: -1px;
+}
 
-/* LOCANDINE */
-.bg-gray { background: #f4f7f7; padding: 60px 0; }
-.locandine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 30px; }
-.locandina-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; padding-bottom: 20px; }
-.locandina-card img { width: 100%; height: 350px; object-fit: cover; }
-.locandina-card h3 { font-size: 14px; margin: 15px 0; font-weight: 800; }
+/* CARDS FLOTTA (STILE ADMIN) */
+.flotta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+.bus-card { 
+    background: white; 
+    border-radius: 30px; 
+    overflow: hidden; 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06); 
+    border: 1px solid #f0f0f0;
+    transition: 0.4s; 
+}
+.bus-card:hover { transform: translateY(-10px); shadow: 0 30px 60px rgba(0,0,0,0.12); }
+.bus-card img { width: 100%; height: 250px; object-fit: cover; }
+.bus-content { padding: 30px; }
+.bus-content h3 { font-size: 22px; font-weight: 900; text-transform: uppercase; italic; margin-bottom: 15px; }
+.bus-content p { font-size: 15px; color: #666; font-style: italic; margin-bottom: 25px; }
 
-/* FOOTER */
-.main-footer { background: #555; color: white; padding: 50px 0; font-size: 12px; }
-.footer-grid-custom { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 30px; }
-.footer-title { font-size: 13px; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; }
-.footer-col p { margin-bottom: 10px; line-height: 1.5; opacity: 0.9; }
-.footer-col i { width: 20px; }
-.footer-socials { display: flex; gap: 15px; margin: 15px 0; }
-.footer-socials a { color: white; font-size: 20px; }
-.footer-extra { margin-top: 15px; border-top: 1px solid #777; padding-top: 15px; }
+/* BOTTONI BLINDATI */
+.btn-scopri, .btn-prenota { 
+    background: #000; 
+    color: white; 
+    padding: 16px 32px; 
+    text-decoration: none; 
+    font-size: 11px; 
+    font-weight: 900; 
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 50px; 
+    display: inline-block; 
+    transition: 0.3s;
+}
+.btn-scopri:hover { background: #2563eb; transform: scale(1.05); }
 
+/* LOCANDINE (HOME) */
+.locandina-card { 
+    background: white; 
+    border-radius: 25px; 
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+    padding-bottom: 25px; 
+}
+.locandina-card img { width: 100%; height: 400px; object-fit: cover; transition: 0.5s; }
+.locandina-card:hover img { transform: scale(1.05); }
+
+/* FOOTER NERO */
+.main-footer { background: #000; color: white; padding: 80px 0 40px 0; }
+.footer-grid-custom { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
+.footer-title { font-size: 11px; font-weight: 900; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; color: #2563eb; }
+.footer-col p { font-size: 13px; opacity: 0.7; margin-bottom: 12px; }
+
+/* RESPONSIVE PER IPHONE */
 @media (max-width: 768px) {
+    .header-flex { flex-direction: row; }
+    .nav-links { display: none; } /* Nascondi menu su mobile per pulizia o usa burger */
+    .hero-carousel { height: 50vh; }
     .footer-grid-custom { grid-template-columns: 1fr; text-align: center; }
-    .footer-socials { justify-content: center; }
+    .section-main-title { font-size: 26px; }
 }

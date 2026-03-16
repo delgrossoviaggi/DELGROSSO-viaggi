@@ -3,44 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Del Grosso Viaggi - Manutenzione</title>
+    <title>Del Grosso Viaggi - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { text-align: center; padding: 50px 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #ffffff; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .logo { max-width: 250px; height: auto; margin-bottom: 30px; }
-        h1 { font-size: 28px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        p { font-size: 18px; color: #555; line-height: 1.6; }
-        .highlight { color: #000; font-weight: bold; }
-        
-        .cta-box { margin: 30px 0; padding: 20px; background-color: #f9f9f9; border-radius: 10px; }
-        .btn { display: inline-block; padding: 15px 30px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background-color: #333; }
-        
-        .contacts { margin-top: 30px; font-size: 16px; border-top: 1px solid #eee; padding-top: 20px; }
-        .contacts a { color: #000; text-decoration: none; font-weight: bold; }
-        .whatsapp { color: #25D366 !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        header { background-color: #d0e0e3; border-bottom: 2px solid #b7c9cc; }
+        .dg-blu { color: #2c4c5c; }
+        .hero-slide { transition: opacity 1s ease-in-out; background-color: #1a202c; }
     </style>
 </head>
-<body>
+<body class="bg-white">
 
-    <div class="container">
-        <img src="logo.JPEG" alt="Del Grosso Viaggi" class="logo">
-        
-        <h1>Sito in Manutenzione 🛠️</h1>
-        <p>Stiamo lavorando per migliorare i nostri servizi online.</p>
+    <header class="sticky top-0 z-50 h-20 md:h-24 flex items-center justify-between px-6 md:px-12">
+        <div class="text-2xl font-black dg-blu italic uppercase tracking-tighter">DEL GROSSO VIAGGI</div>
+        <nav class="hidden lg:flex space-x-8 text-[11px] font-black dg-blu uppercase tracking-widest">
+            <a href="index.html" class="hover:text-blue-600">Chi Siamo</a>
+            <a href="viaggi.html" class="hover:text-blue-600">Tour e Viaggi</a>
+            <a href="flotta.html" class="hover:text-blue-600">Flotta</a>
+            <a href="contatti.html" class="hover:text-blue-600">Contatti</a>
+        </nav>
+        <button class="lg:hidden dg-blu text-2xl">☰</button>
+    </header>
 
-        <div class="cta-box">
-            <p class="highlight">Devi prenotare i tuoi posti?</p>
-            <p>Puoi procedere temporaneamente tramite la nostra piattaforma dedicata:</p>
-            <a href="https://delgrossoviaggi-app.vercel.app/index.html" class="btn">PRENOTA ORA</a>
+    <section class="h-[500px] md:h-[650px] relative overflow-hidden">
+        <div id="carousel-inner" class="h-full w-full">
+            </div>
+        <div class="absolute inset-0 flex items-center px-8 md:px-20 z-10 pointer-events-none">
+            <div class="max-w-4xl text-white drop-shadow-2xl">
+                <h1 class="text-4xl md:text-6xl font-black italic uppercase leading-none mb-4">
+                    Viaggi di gruppo in comfort e sicurezza.
+                </h1>
+                <p class="text-sm md:text-xl font-bold uppercase tracking-widest opacity-90">
+                    Del Grosso Viaggi & Limousine Bus
+                </p>
+            </div>
         </div>
+    </section>
 
-        <div class="contacts">
-            <p>Per urgenze di prenotazione contattaci:</p>
-            📧 Email: <a href="mailto:info@degrossoviaggi.it">info@degrossoviaggi.it</a><br><br>
-            💬 WhatsApp: <a href="https://wa.me/393662127916" class="whatsapp">366 2127916 (Nicola)</a>
+    <section class="py-16 px-6 text-center bg-white">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl md:text-3xl font-black dg-blu uppercase italic mb-6 tracking-tighter">La Nostra Passione per il Viaggio</h2>
+            <p class="text-gray-600 italic leading-relaxed mb-8 text-lg">
+                La Nostra Passione per il viaggio, coniugata ad un servizio impeccabile per medie e lunghe percorrenze, offre comfort e affidabilità con la sua livrea distintiva "Del Grosso".
+            </p>
+            <div class="inline-block border-t border-b border-gray-200 py-4">
+                <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-black italic">
+                    IMPORTANTE: Specializzati ESCLUSIVAMENTE nel NOLEGGIO CON CONDUCENTE.
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 
+    <section class="py-20 bg-gray-50 border-t border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-center text-3xl font-black uppercase italic mb-12 dg-blu tracking-tighter">La Nostra Flotta di Eccellenza</h2>
+            <div id="grid-flotta" class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-center text-3xl font-black uppercase italic mb-12 dg-blu tracking-tighter">Prossimi Tour e Viaggi</h2>
+            <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#333] text-white py-16">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 text-[11px] leading-relaxed">
+            <div>
+                <h4 class="font-black uppercase mb-4 text-sm tracking-tighter text-orange-400">Contatti Diretti</h4>
+                <p class="mb-2">📞 3205730466 (Raffaele)</p>
+                <p class="mb-2">📞 3662127916 (Nicola)</p>
+                <p class="mb-2">💬 WhatsApp Nicola: 3662127916</p>
+                <p>📩 info@delgrossoviaggi.it</p>
+            </div>
+            <div>
+                <h4 class="font-black uppercase mb-4 text-sm tracking-tighter text-gray-300">Sede Operativa</h4>
+                <p>San Severo (FG)</p>
+                <p>Ref. Line 320 5773446</p>
+                <p>Cell. 320 978 6100</p>
+                <p class="mt-4 font-bold text-white">www.delgrossoviaggi.it</p>
+            </div>
+            <div class="h-44 bg-gray-600 rounded-3xl overflow-hidden border-2 border-white/10">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d15.3!3d41.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDM2JzAwLjAiTiAxNcKwMTgnMDAuMCJF!5e0!3m2!1sit!2sit!4v1620000000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+            <div class="text-right flex flex-col justify-between">
+                <div>
+                    <h4 class="font-black uppercase mb-4 text-sm tracking-tighter text-gray-300">Social & Legal</h4>
+                    <p>Noleggio Con Conducente</p>
+                    <p>P.Iva 01234567890</p>
+                    <div class="flex justify-end gap-4 mt-4 text-2xl">
+                        <a href="#" class="hover:text-orange-400"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="hover:text-orange-400"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <a href="admin-panel.html" class="opacity-10 hover:opacity-100 transition"><i class="fas fa-lock"></i> Accesso Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        async function init() {
+            // 1. Carousel
+            const { data: slides } = await sb.from('carousel_home').select('*').order('created_at', {ascending: false});
+            const carousel = document.getElementById('carousel-inner');
+            if(slides && slides.length > 0) {
+                carousel.innerHTML = slides.map((s, i) => `
+                    <div class="hero-slide absolute inset-0 w-full h-full bg-center bg-cover ${i===0?'opacity-100':'opacity-0'}" style="background-image: url('${s.immagine_url}')">
+                        <div class="absolute inset-0 bg-black/30"></div>
+                    </div>
+                `).join('');
+                startCarousel();
+            }
+
+            // 2. Flotta Dinamica
+            const { data: bus } = await sb.from('flotta_completa').select('*').order('id', {ascending: true});
+            const gridFlotta = document.getElementById('grid-flotta');
+            if(bus) gridFlotta.innerHTML = bus.map(b => `
+                <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border transition hover:-translate-y-2">
+                    <img src="${b.immagine_url}" class="h-64 w-full object-cover">
+                    <div class="p-8 text-center">
+                        <h3 class="font-black italic uppercase dg-blu text-xs mb-4 min-h-[30px] flex items-center justify-center">${b.nome_bus}</h3>
+                        <p class="text-[10px] text-gray-400 italic mb-6 line-clamp-2">${b.descrizione_breve || ''}</p>
+                        <a href="flotta.html" class="inline-block bg-dg-blu text-white px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest active:scale-95 transition">Scopri di più</a>
+                    </div>
+                </div>
+            `).join('');
+
+            // 3. Viaggi Dinamici
+            const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            const gridViaggi = document.getElementById('grid-viaggi');
+            if(viaggi) gridViaggi.innerHTML = viaggi.map(v => `
+                <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border transition hover:shadow-orange-100">
+                    <img src="${v.immagine_url}" class="h-80 w-full object-cover">
+                    <div class="p-8 text-center">
+                        <h3 class="font-black italic uppercase dg-blu text-lg mb-6 tracking-tighter">${v.titolo}</h3>
+                        <a href="prenota.html?id=${v.id}" class="bg-orange-600 text-white px-10 py-4 rounded-2xl font-black block uppercase italic shadow-lg active:scale-95 transition">Prenota ora</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function startCarousel() {
+            let slides = document.querySelectorAll('.hero-slide'), cur = 0;
+            if(slides.length > 1) {
+                setInterval(() => {
+                    slides[cur].classList.replace('opacity-100', 'opacity-0');
+                    cur = (cur + 1) % slides.length;
+                    slides[cur].classList.replace('opacity-0', 'opacity-100');
+                }, 5000);
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>

@@ -2,119 +2,224 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prenota - Del Grosso Viaggi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prenota Posto - Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .bus-floor { background: #ffffff; border: 6px solid #e5e7eb; border-radius: 60px 60px 20px 20px; padding: 60px 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); display: inline-block; }
-        .seat { width: 50px; height: 50px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: 800; font-size: 14px; transition: 0.2s; }
-        .seat.selected { background: #2563eb !important; color: white !important; transform: scale(1.1); box-shadow: 0 0 15px rgba(37,99,235,0.4); }
-        .seat.occupied { background: #e5e7eb !important; color: #9ca3af !important; cursor: not-allowed; opacity: 0.5; }
-        .corridoio { width: 40px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        
+        /* SEDILI DINAMICI */
+        .seat { 
+            width: 46px; height: 46px; 
+            @apply rounded-xl flex items-center justify-center text-[11px] font-black transition-all border-2 shadow-sm shrink-0;
+            touch-action: manipulation;
+        }
+        .seat-available { @apply bg-white border-gray-200 text-gray-700 cursor-pointer active:scale-95; }
+        .seat-selected { @apply bg-blue-600 border-blue-700 text-white shadow-lg shadow-blue-200 scale-110 z-10; }
+        .seat-occupied { @apply bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed opacity-50; }
+        .seat-driver { @apply bg-orange-400 border-orange-500 text-white cursor-not-allowed; }
+        
+        /* LAYOUT BUS */
+        .bus-container {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #fff;
+            padding: 30px 20px;
+            border-radius: 50px;
+            border: 4px solid #e5e7eb;
+        }
+        .bus-row { display: flex; gap: 8px; justify-content: center; align-items: center; }
+        .corridoio { width: 35px; }
+
+        .loader { border-top-color: #2563eb; animation: spinner 0.6s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="pb-10">
 
-    <header class="bg-[#d0e0e3] h-20 flex items-center justify-between px-6 border-b border-[#b7c9cc]">
-        <div class="text-2xl font-black text-[#2c4c5c] italic tracking-tighter">DEL GROSSO VIAGGI</div>
-        <a href="viaggi.html" class="text-[10px] font-black uppercase text-[#2c4c5c] bg-white/50 px-4 py-2 rounded-xl">← Torna ai Viaggi</a>
+    <header class="bg-white shadow-sm h-20 flex items-center sticky top-0 z-50 px-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center w-full">
+            <a href="index.html" class="flex items-center">
+                <img src="logo.jpg.JPEG" alt="Logo" class="h-12 md:h-16 w-auto object-contain">
+            </a>
+            <a href="index.html" class="bg-gray-100 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-200 transition">Torna Home</a>
+        </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 py-12 text-center">
-        <div id="selezione-viaggio" class="mb-12">
-            <h1 class="text-4xl font-black italic uppercase mb-8">Scegli il tuo Viaggio</h1>
-            <div id="grid-tratte" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-        </div>
+    <main class="max-w-md mx-auto p-4 space-y-6">
 
-        <div id="mappa-prenotazione" class="hidden">
-            <h2 id="titolo-bus" class="text-2xl font-black uppercase italic mb-8 text-blue-900"></h2>
+        <section class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
+            <h1 class="text-3xl font-black uppercase italic tracking-tighter mb-6 text-gray-900 leading-none Text-left">Prenotazione<br>Posti</h1>
             
-            <div class="overflow-x-auto mb-12">
-                <div id="area-mappa" class="bus-floor"></div>
-            </div>
-
-            <div class="max-w-md mx-auto bg-white p-8 rounded-[2.5rem] shadow-2xl border">
-                <input type="text" id="nome" placeholder="NOME E COGNOME" class="w-full p-4 rounded-2xl border-2 mb-4 font-bold uppercase text-center focus:border-blue-600 outline-none">
-                <input type="tel" id="tel" placeholder="TELEFONO" class="w-full p-4 rounded-2xl border-2 mb-6 font-bold text-center focus:border-blue-600 outline-none">
-                
-                <div class="bg-blue-50 p-4 rounded-2xl mb-6 flex justify-between items-center px-6">
-                    <span class="font-bold text-blue-800 uppercase text-xs">Posti scelti:</span>
-                    <span id="posti-txt" class="font-black text-blue-600">Nessuno</span>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-blue-600 ml-2 mb-1 block">Scegli il Viaggio</label>
+                    <select id="select-viaggio" onchange="caricaMappaPosti()" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500 transition-all appearance-none">
+                        <option value="">Caricamento viaggi...</option>
+                    </select>
                 </div>
-
-                <button onclick="conferma()" class="w-full bg-green-500 hover:bg-green-600 text-white py-5 rounded-[1.5rem] font-black uppercase italic tracking-widest shadow-xl transition active:scale-95">CONFERMA E WHATSAPP</button>
+                
+                <input type="text" id="nome-cliente" placeholder="NOME E COGNOME" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500 uppercase">
+                <input type="tel" id="telefono-cliente" placeholder="NUMERO CELLULARE" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-bold outline-none focus:border-blue-500">
             </div>
-        </div>
+        </section>
+
+        <section id="sezione-mappa" class="hidden bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
+            <div class="flex justify-between items-end mb-6">
+                <h2 class="font-black uppercase italic text-xl leading-none tracking-tighter">Scegli la<br>tua posizione</h2>
+                <div id="info-modello" class="text-[9px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-lg uppercase tracking-widest"></div>
+            </div>
+
+            <div class="w-full overflow-x-auto text-center pb-4">
+                <div id="bus-render" class="bus-container">
+                    </div>
+            </div>
+
+            <div class="mt-8 space-y-4">
+                <div class="bg-blue-600 p-5 rounded-3xl text-center shadow-lg">
+                    <p class="text-[9px] font-black text-blue-200 uppercase tracking-widest mb-1">Sedili Selezionati</p>
+                    <p id="display-posti" class="text-3xl font-black text-white italic tracking-tighter">NESSUNO</p>
+                </div>
+                
+                <button id="btn-invia" onclick="inviaPrenotazione()" class="w-full bg-green-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">
+                    CONFERMA E INVIA WHATSAPP
+                </button>
+            </div>
+        </section>
+
     </main>
 
     <script>
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
-        let selezionati = [], t_id = null, t_titolo = "";
 
-        async function carica() {
+        let selezionati = [];
+        let occupati = [];
+        let modelloBus = "";
+
+        async function caricaViaggi() {
             const { data } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            const grid = document.getElementById('grid-tratte');
-            grid.innerHTML = data.map(t => `
-                <div class="bg-white p-4 rounded-3xl border-2 shadow-sm transition hover:border-blue-500 cursor-pointer" onclick="apriMappa('${t.id}', '${t.modello_bus}', '${t.titolo}')">
-                    <img src="${t.immagine_url}" class="h-32 w-full object-cover rounded-2xl mb-4">
-                    <h3 class="font-black italic uppercase text-sm">${t.titolo}</h3>
-                </div>`).join('');
-        }
-
-        async function apriMappa(id, modello, titolo) {
-            t_id = id; t_titolo = titolo; selezionati = [];
-            document.getElementById('selezione-viaggio').classList.add('hidden');
-            document.getElementById('mappa-prenotazione').classList.remove('hidden');
-            document.getElementById('titolo-bus').innerText = titolo;
-            
-            const { data } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', id);
-            const occupati = data ? data.flatMap(x => x.posti_selezionati) : [];
-            disegna(modello, occupati);
-        }
-
-        function disegna(modello, occupati) {
-            const area = document.getElementById('area-mappa'); area.innerHTML = '';
-            // Schema Bus 53 Posti (49-53 Ultima fila)
-            const schema = [[1,2,'C',3,4],[5,6,'C',7,8],[9,10,'C',11,12],[13,14,'C',15,16],[17,18,'C',19,20],[21,22,'C','WC'],[23,24,'C','USCITA'],[25,26,'C',27,28],[29,30,'C',31,32],[33,34,'C',35,36],[37,38,'C',39,40],[41,42,'C',43,44],[45,46,'C',47,48],[49,50,51,52,53]];
-            
-            schema.forEach(fila => {
-                const r = document.createElement('div'); r.className = 'flex justify-center gap-3 mb-3';
-                fila.forEach(p => {
-                    if(p==='C') r.innerHTML += `<div class="corridoio"></div>`;
-                    else if(['WC','USCITA'].includes(p)) r.innerHTML += `<div class="w-[110px] bg-gray-100 rounded-lg flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase">${p}</div>`;
-                    else {
-                        const isOcc = occupati.includes(p.toString());
-                        r.innerHTML += `<div id="s-${p}" class="seat ${isOcc?'occupied':''}" onclick="toggleSeat('${p}', ${isOcc})">${p}</div>`;
-                    }
-                }); area.appendChild(r);
-            });
-        }
-
-        window.toggleSeat = (n, isOcc) => {
-            if(isOcc) return;
-            const el = document.getElementById(`s-${n}`);
-            el.classList.toggle('selected');
-            if(el.classList.contains('selected')) selezionati.push(n);
-            else selezionati = selezionati.filter(x => x !== n);
-            document.getElementById('posti-txt').innerText = selezionati.length ? selezionati.sort((a,b)=>a-b).join(', ') : "Nessuno";
-        };
-
-        async function conferma() {
-            const n = document.getElementById('nome').value.toUpperCase(), t = document.getElementById('tel').value;
-            if(!n || !t || !selezionati.length) return alert("Dati mancanti!");
-            const { error } = await sb.from('prenotazioni').insert([{tratta_id: t_id, nome_cliente: n, telefono_cliente: t, posti_selezionati: selezionati}]);
-            if(!error) {
-                const msg = `✅ PRENOTAZIONE DEL GROSSO\n\nViaggio: ${t_titolo}\nCliente: ${n}\nPosti: ${selezionati.join(', ')}`;
-                window.open(`https://wa.me/393662127916?text=${encodeURIComponent(msg)}`);
-                location.reload();
+            const select = document.getElementById('select-viaggio');
+            if(data) {
+                select.innerHTML = '<option value="">-- SELEZIONA DESTINAZIONE --</option>' + 
+                    data.map(v => `<option value="${v.id}" data-modello="${v.modello_bus}">${v.titolo}</option>`).join('');
             }
         }
-        carica();
+
+        async function caricaMappaPosti() {
+            const viaggioId = document.getElementById('select-viaggio').value;
+            if(!viaggioId) return;
+
+            const select = document.getElementById('select-viaggio');
+            modelloBus = select.options[select.selectedIndex].getAttribute('data-modello');
+            
+            selezionati = [];
+            document.getElementById('display-posti').innerText = "NESSUNO";
+            document.getElementById('info-modello').innerText = modelloBus;
+            document.getElementById('sezione-mappa').classList.remove('hidden');
+
+            const { data } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', viaggioId);
+            occupati = data ? data.flatMap(p => p.posti_selezionati.map(String)) : [];
+
+            disegnaMappaBlindata();
+        }
+
+        function disegnaMappaBlindata() {
+            const render = document.getElementById('bus-render');
+            render.innerHTML = "";
+            
+            const totalePosti = modelloBus.includes("63") ? 63 : 53;
+            const inizioFondo = totalePosti - 4; // 59 o 49
+
+            // 1. ANTERIORE (AUTISTA)
+            const rowA = document.createElement('div');
+            rowA.className = "bus-row w-full justify-start pl-2 mb-4";
+            rowA.innerHTML = `<div class="seat seat-driver">AUT</div>`;
+            render.appendChild(rowA);
+
+            // 2. CORPO BUS (2+C+2)
+            let n = 1;
+            while (n < inizioFondo) {
+                const row = document.createElement('div');
+                row.className = "bus-row";
+                
+                row.appendChild(creaSedile(n++));
+                row.appendChild(creaSedile(n++));
+                
+                const corr = document.createElement('div');
+                corr.className = "corridoio";
+                row.appendChild(corr);
+                
+                row.appendChild(creaSedile(n++));
+                row.appendChild(creaSedile(n++));
+                
+                render.appendChild(row);
+            }
+
+            // 3. FONDO BUS (5 SEDILI UNITI) - Senza corridoio e senza doppioni
+            const rowF = document.createElement('div');
+            rowF.className = "bus-row mt-2";
+            for(let j = inizioFondo; j <= totalePosti; j++) {
+                rowF.appendChild(creaSedile(j));
+            }
+            render.appendChild(rowF);
+        }
+
+        function creaSedile(numero) {
+            const sStr = numero.toString();
+            const isOcc = occupati.includes(sStr);
+            const seat = document.createElement('div');
+            seat.id = `s-${numero}`;
+            seat.className = `seat ${isOcc ? 'seat-occupied' : 'seat-available'}`;
+            seat.innerText = numero;
+            
+            if(!isOcc) {
+                seat.onclick = () => {
+                    if (selezionati.includes(sStr)) {
+                        selezionati = selezionati.filter(i => i !== sStr);
+                        seat.classList.replace('seat-selected', 'seat-available');
+                    } else {
+                        selezionati.push(sStr);
+                        seat.classList.replace('seat-available', 'seat-selected');
+                    }
+                    document.getElementById('display-posti').innerText = selezionati.length ? selezionati.sort((a,b)=>parseInt(a)-parseInt(b)).join(', ') : "NESSUNO";
+                };
+            }
+            return seat;
+        }
+
+        async function inviaPrenotazione() {
+            const nome = document.getElementById('nome-cliente').value.trim().toUpperCase();
+            const tel = document.getElementById('telefono-cliente').value.trim();
+            const viaggioId = document.getElementById('select-viaggio').value;
+            const viaggioNome = document.getElementById('select-viaggio').options[document.getElementById('select-viaggio').selectedIndex].text;
+
+            if(!nome || !tel || selezionati.length === 0) {
+                alert("🔴 Dati incompleti!");
+                return;
+            }
+
+            document.getElementById('btn-invia').innerText = "REGISTRAZIONE...";
+            document.getElementById('btn-invia').disabled = true;
+
+            const { error } = await sb.from('prenotazioni').insert([{ 
+                nome_cliente: nome, 
+                telefono_cliente: tel, 
+                tratta_id: viaggioId, 
+                posti_selezionati: selezionati 
+            }]);
+
+            if(!error) {
+                const wa = `Prenotazione: ${viaggioNome}\nCliente: ${nome}\nPosti: ${selezionati.join(', ')}`;
+                window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(wa)}`;
+            } else { alert("Errore invio."); }
+        }
+
+        caricaViaggi();
     </script>
 </body>
 </html>
