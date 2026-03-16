@@ -1,163 +1,59 @@
-<style>
-    :root {
-        --accent: #ff0000;
-        --bg: #000000;
-        --card-bg: #0a0a0a;
-        --text: #ffffff;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
-    * { 
-        box-sizing: border-box; 
-        margin: 0; 
-        padding: 0; 
-    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; color: #333; line-height: 1.6; }
+.container { width: 90%; max-width: 1200px; margin: auto; }
 
-    html { scroll-behavior: smooth; }
+/* HEADER AZZURRINO */
+header { background: #d0e0e3; padding: 15px 0; border-bottom: 2px solid #b7c9cc; position: sticky; top: 0; z-index: 1000; }
+.header-flex { display: flex; justify-content: space-between; align-items: center; }
+.logo { font-weight: 800; font-size: 22px; color: #2c4c5c; letter-spacing: -1px; }
+.nav-links { list-style: none; display: flex; gap: 20px; }
+.nav-links a { text-decoration: none; color: #2c4c5c; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 
-    body { 
-        font-family: 'Poppins', sans-serif; 
-        background: var(--bg); 
-        color: var(--text); 
-        overflow-x: hidden; 
-    }
+/* CAROUSEL */
+.hero-carousel { height: 550px; position: relative; overflow: hidden; }
+.slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1s ease-in-out; }
+.slide.active { opacity: 1; }
+.slide-image { width: 100%; height: 100%; background-size: cover; background-position: center; }
+.hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; }
+.hero-content { color: white; padding: 0 50px; }
+.hero-content h1 { font-size: 36px; font-weight: 800; max-width: 600px; line-height: 1.1; margin-bottom: 10px; }
 
-    /* --- HEADER --- */
-    header {
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center;
-        padding: 10px 5%; 
-        background: rgba(0,0,0,0.95);
-        border-bottom: 2px solid var(--accent);
-        position: fixed; /* Errore 1 corretto: da sticky a fixed per migliore compatibilità */
-        width: 100%;
-        top: 0; 
-        z-index: 1000;
-        backdrop-filter: blur(10px);
-    }
-    
-    .logo-container { 
-        display: flex; 
-        align-items: center; 
-    }
-    
-    .logo-img { 
-        height: 65px; 
-        width: auto; 
-        display: block;
-        object-fit: contain;
-        /* Tecnica sicura: forziamo la visibilità */
-        filter: brightness(0) invert(1); 
-        -webkit-filter: brightness(0) invert(1);
-        transition: transform 0.3s ease;
-    }
+/* SEZIONI TITOLI */
+.section-main-title { font-size: 26px; font-weight: 800; color: #333; margin-bottom: 20px; text-transform: none; }
+.intro-section { padding: 60px 0; border-bottom: 1px solid #eee; }
+.description-text { max-width: 800px; margin: auto; font-size: 16px; margin-bottom: 20px; }
+.disclaimer-text { font-size: 14px; color: #000; text-transform: uppercase; }
 
-    /* --- NAV --- */
-    nav { display: flex; align-items: center; }
-    nav a { 
-        color: white; 
-        text-decoration: none; 
-        margin-left: 20px; 
-        font-size: 0.8rem; 
-        font-weight: 700; 
-        text-transform: uppercase; 
-        letter-spacing: 1px; 
-        transition: 0.3s; 
-    }
-    nav a:hover { color: var(--accent); }
+/* FLOTTA GRID */
+.flotta-section { padding: 60px 0; background: #fff; }
+.flotta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px; }
+.bus-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: left; transition: 0.3s; }
+.bus-card img { width: 100%; height: 200px; object-fit: cover; }
+.bus-content { padding: 25px; }
+.bus-content h3 { font-size: 14px; font-weight: 800; margin-bottom: 10px; line-height: 1.3; height: 40px; }
+.bus-content p { font-size: 13px; color: #666; margin-bottom: 20px; height: 60px; overflow: hidden; }
+.btn-scopri { background: #2c4c5c; color: white; padding: 10px 20px; text-decoration: none; font-size: 12px; font-weight: 800; border-radius: 5px; display: inline-block; }
 
-    .admin-trigger { 
-        margin-left: 20px; 
-        cursor: pointer; 
-        color: #333; 
-        transition: 0.3s; 
-    }
-    .admin-trigger:hover { color: var(--accent); }
+/* LOCANDINE */
+.bg-gray { background: #f4f7f7; padding: 60px 0; }
+.locandine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 30px; }
+.locandina-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; padding-bottom: 20px; }
+.locandina-card img { width: 100%; height: 350px; object-fit: cover; }
+.locandina-card h3 { font-size: 14px; margin: 15px 0; font-weight: 800; }
 
-    /* --- HERO --- */
-    .hero {
-        height: 80vh; 
-        margin-top: 85px; /* Errore 2 corretto: aggiunto margine per compensare l'header fixed */
-        position: relative; 
-        overflow: hidden;
-        display: flex; 
-        flex-direction: column; 
-        justify-content: flex-end; 
-        align-items: center;
-        text-align: center;
-    }
-    
-    .slide {
-        position: absolute; 
-        top: 0; left: 0; 
-        width: 100%; height: 100%;
-        background-size: cover; 
-        background-position: center;
-        opacity: 0; 
-        transition: opacity 1.2s ease; 
-        z-index: -1;
-    }
-    .slide.active { opacity: 1; }
+/* FOOTER */
+.main-footer { background: #555; color: white; padding: 50px 0; font-size: 12px; }
+.footer-grid-custom { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 30px; }
+.footer-title { font-size: 13px; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; }
+.footer-col p { margin-bottom: 10px; line-height: 1.5; opacity: 0.9; }
+.footer-col i { width: 20px; }
+.footer-socials { display: flex; gap: 15px; margin: 15px 0; }
+.footer-socials a { color: white; font-size: 20px; }
+.footer-extra { margin-top: 15px; border-top: 1px solid #777; padding-top: 15px; }
 
-    /* --- GRIGLIA --- */
-    .container { padding: 60px 5%; }
-    .section-title { 
-        font-size: 2rem; 
-        text-transform: uppercase; 
-        border-left: 6px solid var(--accent); 
-        padding-left: 15px; 
-        margin-bottom: 40px; 
-    }
-    .section-title span { color: var(--accent); }
-
-    .grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-        gap: 30px; 
-    }
-    
-    .card { 
-        background: var(--card-bg); 
-        transition: 0.4s; 
-        border: 1px solid #1a1a1a; 
-    }
-    .card:hover { transform: translateY(-10px); border-color: var(--accent); }
-    .card img { width: 100%; height: 450px; object-fit: cover; }
-    
-    .card-info { padding: 20px; text-align: center; }
-    .card-info h3 { margin-bottom: 15px; text-transform: uppercase; }
-
-    /* --- FOOTER --- */
-    footer { 
-        padding: 50px 5%; 
-        background: #050505; 
-        text-align: center; 
-        border-top: 1px solid #111; 
-    }
-    
-    .footer-logo { 
-        height: 80px; 
-        width: auto;
-        margin-bottom: 20px; 
-        filter: brightness(0) invert(1);
-    }
-
-    /* --- MODALE ADMIN --- */
-    #admin-modal {
-        position: fixed; 
-        top: 0; left: 0; 
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95); 
-        z-index: 2000; 
-        display: none; 
-        padding-top: 100px;
-    }
-
-    /* --- MOBILE --- */
-    @media (max-width: 768px) {
-        /* Errore 3 corretto: rimosse proprietà sovrapposte che bloccavano il logo su mobile */
-        header { padding: 10px 2%; }
-        .logo-img { height: 45px; }
-        nav a { margin-left: 10px; font-size: 0.6rem; }
-    }
-</style>
+@media (max-width: 768px) {
+    .footer-grid-custom { grid-template-columns: 1fr; text-align: center; }
+    .footer-socials { justify-content: center; }
+}

@@ -6,31 +6,23 @@
     <title>La Flotta - Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap'); body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
-    <header class="bg-white shadow-sm h-20 flex items-center sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center w-full">
-            <a href="index.html"><img src="logo.jpg.JPEG" class="h-14 w-auto object-contain"></a>
-            <nav class="hidden md:flex gap-6 font-black uppercase text-[10px] tracking-widest">
-                <a href="index.html" class="hover:text-blue-600 transition">Home</a>
-                <a href="flotta.html" class="text-blue-600">La Flotta</a>
-                <a href="viaggi.html" class="hover:text-blue-600 transition">Viaggi</a>
-                <a href="dettagli-bus.html" class="hover:text-blue-600 transition">Dettagli</a>
-            </nav>
-        </div>
+<body class="bg-gray-50">
+
+    <header class="bg-[#d0e0e3] h-20 flex items-center px-6 justify-between border-b border-[#b7c9cc] sticky top-0 z-50">
+        <div class="text-2xl font-black text-[#2c4c5c] italic tracking-tighter">DEL GROSSO VIAGGI</div>
+        <nav class="hidden lg:flex space-x-6 text-[10px] font-black uppercase">
+            <a href="index.html">Home</a>
+            <a href="viaggi.html">Viaggi</a>
+            <a href="flotta.html" class="text-blue-600">Flotta</a>
+            <a href="contatti.html">Contatti</a>
+        </nav>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-16">
-        <div class="text-center mb-16">
-            <h1 class="text-5xl font-black uppercase italic tracking-tighter text-gray-900">I Nostri Mezzi</h1>
-            <p class="text-gray-400 font-bold mt-2 uppercase text-xs tracking-[0.4em]">Gestiti da Del Grosso Admin</p>
-        </div>
-
-        <div id="grid-flotta" class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <h1 class="text-4xl font-black italic uppercase text-gray-900 mb-12 text-center">La Nostra Flotta di Eccellenza</h1>
+        <div id="lista-bus-completa" class="space-y-16">
             </div>
     </main>
 
@@ -40,21 +32,21 @@
         const sb = supabase.createClient(S_URL, S_KEY);
 
         async function caricaFlotta() {
-            const { data } = await sb.from('flotta_page').select('*').order('id', {ascending: true});
-            const render = document.getElementById('grid-flotta');
-            
-            if(data) {
-                render.innerHTML = data.map(bus => `
-                    <div class="bg-white rounded-[3rem] overflow-hidden shadow-xl border border-gray-100 flex flex-col group">
-                        <img src="${bus.immagine_url}" class="w-full h-72 object-cover group-hover:scale-105 transition duration-500">
-                        <div class="p-10 flex flex-col flex-1">
-                            <h2 class="text-3xl font-black uppercase italic tracking-tighter text-gray-900 mb-4">${bus.titolo}</h2>
-                            <p class="text-gray-500 font-medium italic mb-8 leading-relaxed">"${bus.descrizione}"</p>
-                            <a href="dettagli-bus.html" class="mt-auto block bg-blue-50 text-blue-700 text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">Vedi Specifiche Tecniche</a>
+            const { data } = await sb.from('dettagli_bus').select('*');
+            document.getElementById('lista-bus-completa').innerHTML = data.map(b => `
+                <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border">
+                    <img src="${b.immagine_url}" class="md:w-1/2 h-80 md:h-auto object-cover">
+                    <div class="p-10 md:w-1/2 flex flex-col justify-center">
+                        <span class="text-orange-500 font-black uppercase text-xs tracking-widest mb-2">${b.posti} Posti - Comfort Top</span>
+                        <h2 class="text-3xl font-black italic uppercase text-slate-800 mb-4">${b.nome_bus}</h2>
+                        <p class="text-gray-600 mb-8 italic leading-relaxed">${b.descrizione_lunga}</p>
+                        <div class="bg-gray-50 p-4 rounded-2xl border flex items-center gap-4">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                            <span class="text-[10px] font-bold uppercase text-gray-400">Servizi: ${b.servizi}</span>
                         </div>
                     </div>
-                `).join('');
-            }
+                </div>
+            `).join('');
         }
         caricaFlotta();
     </script>

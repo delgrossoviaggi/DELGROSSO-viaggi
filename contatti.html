@@ -5,70 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contatti - Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
-        main { flex: 1; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap'); body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 flex flex-col min-h-screen">
 
-    <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-20 md:h-24">
-            <a href="index.html" class="flex items-center h-full py-2">
-                <img src="logo.jpg.JPEG" alt="Del Grosso Logo" class="h-12 sm:h-16 md:h-20 w-auto object-contain">
-            </a>
-            <nav class="hidden lg:flex space-x-6 items-center">
-                <a href="flotta.html" class="text-gray-600 font-semibold transition">Flotta</a>
-                <a href="viaggi.html" class="text-gray-600 font-semibold transition">Viaggi</a>
-                <a href="prenota.html" class="text-gray-600 font-semibold transition">Prenotazioni</a>
-                <a href="contatti.html" class="text-blue-600 font-bold transition">Contatti</a>
-                <a href="admin.html" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-bold">Admin</a>
-            </nav>
-            <div class="lg:hidden">
-                <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-2xl p-2">☰</button>
-            </div>
-        </div>
-        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t p-4 space-y-3 font-semibold">
-            <a href="index.html" class="block">Home</a>
-            <a href="prenota.html" class="block">Prenotazioni</a>
-            <a href="contatti.html" class="block text-blue-600">Contatti</a>
-        </div>
+    <header class="bg-[#d0e0e3] border-b border-[#b7c9cc] h-20 flex items-center px-6 justify-between sticky top-0 z-50">
+        <div class="text-2xl font-black text-[#2c4c5c] italic tracking-tighter">DEL GROSSO VIAGGI</div>
+        <nav class="hidden lg:flex space-x-6 text-[10px] font-black uppercase text-[#2c4c5c]">
+            <a href="index.html">Home</a>
+            <a href="viaggi.html">Viaggi</a>
+            <a href="flotta.html">Flotta</a>
+            <a href="contatti.html" class="text-blue-600">Contatti</a>
+        </nav>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 py-16 w-full">
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-8">Contatti</h1>
-        <div class="bg-white p-8 rounded-2xl shadow-md border border-gray-100 space-y-6">
-            <p>📞 <strong>Telefono:</strong> 3205730466 (Raffaele) — 3662127916 (Nicola)</p>
-            <p>💬 <strong>WhatsApp:</strong> <a href="https://wa.me/393205730466" class="text-blue-600">Bus GT</a> / <a href="https://wa.me/393662127916" class="text-blue-600">Limobus</a></p>
-            <p>✉️ <strong>Email:</strong> <a href="mailto:info@delgrossoviaggi.it" class="text-blue-600 underline">info@delgrossoviaggi.it</a></p>
-            <div class="pt-6 border-t">
-                <p class="mb-2">📸 <strong>Instagram:</strong> <a href="https://www.instagram.com/delgrosso_viaggi_/" class="text-blue-600">Del Grosso Viaggi</a></p>
-                <p>📘 <strong>Facebook:</strong> <a href="https://www.facebook.com/871671722704094" class="text-blue-600">Del Grosso Viaggi & Limobus</a></p>
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-16 w-full">
+        <h1 class="text-4xl font-black italic uppercase text-gray-900 mb-2 text-center">Contattaci</h1>
+        <p class="text-gray-500 font-bold mb-12 uppercase text-xs tracking-widest text-center">Siamo a tua disposizione per preventivi e informazioni</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border-t-8 border-orange-500 text-center">
+                <i class="fas fa-bus text-4xl text-orange-500 mb-4"></i>
+                <h3 class="font-black uppercase italic mb-2">Bus Gran Turismo</h3>
+                <p class="text-gray-500 text-xs font-bold mb-4 uppercase">Raffaele Del Grosso</p>
+                <a href="tel:3205730466" class="text-xl font-black text-slate-800 block mb-2">320 5730466</a>
+                <a href="https://wa.me/393205730466" class="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-[10px] uppercase italic">WhatsApp Bus GT</a>
             </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border-t-8 border-blue-600 text-center">
+                <i class="fas fa-glass-cheers text-4xl text-blue-600 mb-4"></i>
+                <h3 class="font-black uppercase italic mb-2">Limousine Bus</h3>
+                <p class="text-gray-500 text-xs font-bold mb-4 uppercase">Nicola Pio Cristino</p>
+                <a href="tel:3662127916" class="text-xl font-black text-slate-800 block mb-2">366 2127916</a>
+                <a href="https://wa.me/393662127916" class="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-[10px] uppercase italic">WhatsApp Limobus</a>
+            </div>
+        </div>
+
+        <div class="mt-12 bg-[#2c4c5c] p-10 rounded-[3rem] text-white text-center shadow-2xl">
+            <i class="fas fa-envelope text-3xl mb-4"></i>
+            <h4 class="font-black uppercase italic mb-2">Scrivici una Email</h4>
+            <a href="mailto:info@delgrossoviaggi.it" class="text-xl font-bold border-b-2 border-orange-500 pb-1">info@delgrossoviaggi.it</a>
         </div>
     </main>
 
-    <footer class="bg-gray-950 text-white pt-12 pb-8 border-t-4 border-blue-600 mt-auto text-center md:text-left">
-        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div>
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-4 text-sm uppercase">Del Grosso Viaggi & Limousine Bus</h3>
-                <ul class="text-sm text-gray-400 space-y-2">
-                    <li>📞 3205730466 — 3662127916</li>
-                    <li>✉️ info@delgrossoviaggi.it</li>
-                </ul>
-            </div>
-            <div class="md:text-right">
-                <h3 class="bg-blue-600 inline-block px-3 py-1 font-bold mb-4 text-sm uppercase">Social</h3>
-                <div class="flex justify-center md:justify-end gap-4 text-blue-400 font-bold text-xs uppercase">
-                    <a href="#">Instagram</a><a href="#">Facebook</a>
-                </div>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto px-4 border-t border-gray-800 pt-8 mt-8 text-center text-gray-500 text-xs">
-            <p>© 2026 Del Grosso Viaggi. Tutti i diritti riservati.</p>
-            <p class="text-sm font-bold text-gray-400 mt-2">Fatto con cura da Cristino Nicola Pio.</p>
-        </div>
+    <footer class="bg-[#444] text-white py-8 text-center text-[10px] uppercase font-bold tracking-widest">
+        Del Grosso Viaggi & Limousine Bus - San Severo (FG)
     </footer>
 </body>
 </html>

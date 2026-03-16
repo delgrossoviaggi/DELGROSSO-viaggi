@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Master Admin - Del Grosso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        const passwordAttesa = "Delgrosso@26";
+        if (localStorage.getItem("adminLogged") !== "true") {
+            let accesso = prompt("Password Amministratore:");
+            if (accesso === passwordAttesa) { localStorage.setItem("adminLogged", "true"); } 
+            else { window.location.href = "index.html"; }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .admin-card { @apply bg-white p-6 rounded-[2.5rem] shadow-xl border-t-8 mb-8 transition-all; }
+        .btn-blue { @apply bg-[#2c4c5c] hover:bg-blue-700 text-white font-black py-4 rounded-2xl w-full uppercase italic shadow-lg active:scale-95 transition-all; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen pb-20">
+
+    <nav class="bg-slate-900 text-white p-4 sticky top-0 z-50 flex justify-between items-center border-b-4 border-orange-500 shadow-2xl">
+        <div class="flex flex-col">
+            <span class="font-black text-lg tracking-tighter italic uppercase">Del Grosso <span class="text-orange-500">Admin</span></span>
+            <span class="text-[8px] uppercase font-bold text-slate-400">Controllo 360° - 2026</span>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="exportExcel()" class="bg-green-600 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">Excel</button>
+            <button onclick="localStorage.removeItem('adminLogged'); location.reload()" class="bg-red-600 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">Esci</button>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto p-4 mt-6">
+
+        <div class="admin-card border-green-600">
+            <h2 class="font-black text-xl text-slate-800 uppercase italic mb-4">📋 Gestione Passeggeri</h2>
+            <div class="overflow-x-auto rounded-2xl border">
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="bg-slate-50 uppercase font-black text-slate-500"><th class="p-4 border">Cliente</th><th class="p-4 border">Viaggio</th><th class="p-4 text-center border">Posti</th><th class="p-4 text-center border">Azioni</th></tr></thead>
+                    <tbody id="lista-prenotazioni" class="bg-white font-medium"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-card border-yellow-500">
+            <h2 class="font-black text-xl text-slate-800 uppercase italic mb-4">📸 Carousel Home</h2>
+            <input type="file" id="c-file" class="mb-4 block w-full text-xs">
+            <button onclick="salvaCarousel()" class="bg-yellow-600 text-white font-black py-4 rounded-2xl w-full uppercase italic shadow-lg mb-4">Aggiungi Foto</button>
+            <div id="lista-carousel" class="grid grid-cols-2 md:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="admin-card border-blue-600">
+            <h2 class="font-black text-xl text-slate-800 uppercase italic mb-4">🖼️ Locandine Viaggi</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-3">
+                    <input type="text" id="v-titolo" placeholder="Titolo Viaggio" class="w-full p-4 border rounded-2xl font-bold">
+                    <select id="v-bus" class="w-full p-4 border rounded-2xl font-bold uppercase text-xs">
+                        <option value="53 POSTI">Bus GT 53 Posti</option>
+                        <option value="63 POSTI">Bus GT 63 Posti</option>
+                        <option value="LIMO">Limousine Bus</option>
+                    </select>
+                    <input type="file" id="v-file" class="text-xs">
+                    <button onclick="salvaViaggio()" class="btn-blue">Pubblica Viaggio</button>
+                </div>
+                <div id="lista-viaggi-admin" class="bg-slate-50 p-4 rounded-2xl space-y-2 max-h-60 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <div class="admin-card border-slate-900">
+            <h2 class="font-black text-xl text-slate-900 uppercase italic mb-4">🏠 Editor Testi Pagine</h2>
+            <div id="editor-testi" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <button onclick="salvaTuttiTesti()" class="btn-blue mt-6">Aggiorna Testi del Sito</button>
+        </div>
+
+    </div>
+
+    <script>
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        async function upload(input) {
+            const file = input.files[0]; if (!file) return null;
+            const fileName = `DG_2026_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+            const { data, error } = await sb.storage.from('immagini').upload(fileName, file);
+            if (error) throw error;
+            const { data: { publicUrl } } = sb.storage.from('immagini').getPublicUrl(fileName);
+            return publicUrl;
+        }
+
+        // PRENOTATI
+        async function caricaPrenotazioni() {
+            const { data } = await sb.from('prenotazioni').select('*').order('created_at', {ascending: false});
+            const render = document.getElementById('lista-prenotazioni');
+            if(data) {
+                window.lastPrenotati = data;
+                render.innerHTML = data.map(p => `
+                    <tr class="border-b">
+                        <td class="p-4 border-r"><strong>${p.nome_cliente}</strong><br><span class="text-blue-500">${p.telefono_cliente}</span></td>
+                        <td class="p-4 border-r uppercase text-[10px] font-bold">${p.viaggio_scelto || 'N/D'}</td>
+                        <td class="p-4 border-r text-center font-black bg-emerald-50">${p.posti_selezionati?.join(', ') || 'N/D'}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="delPre(${p.id})" class="text-red-500 hover:scale-110"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function delPre(id) { if(confirm("Cancellare definitivamente?")) { await sb.from('prenotazioni').delete().eq('id', id); caricaPrenotazioni(); } }
+
+        // CAROUSEL & VIAGGI
+        async function salvaCarousel() {
+            const img = await upload(document.getElementById('c-file'));
+            if(img) { await sb.from('carousel_home').insert([{ immagine_url: img }]); location.reload(); }
+        }
+        async function salvaViaggio() {
+            const t = document.getElementById('v-titolo').value, b = document.getElementById('v-bus').value;
+            const img = await upload(document.getElementById('v-file'));
+            if(t && img) { await sb.from('tratte').insert([{ titolo: t, immagine_url: img, modello_bus: b }]); location.reload(); }
+        }
+
+        // TESTI
+        const campiSito = { "home_chi_siamo": "Testo Sezione Passione", "contatti_tel": "Telefono Primario", "home_disclaimer": "Testo Disclaimer NCC" };
+        async function initTesti() {
+            const { data } = await sb.from('contenuti_pagine').select('*');
+            document.getElementById('editor-testi').innerHTML = Object.keys(campiSito).map(key => {
+                const val = data?.find(i => i.id === key)?.valore || "";
+                return `<div class="bg-white p-4 rounded-2xl border shadow-sm"><label class="text-[9px] font-black uppercase text-slate-400">${campiSito[key]}</label><textarea id="input-${key}" class="w-full mt-2 p-2 bg-gray-50 rounded-xl text-xs font-medium border-0">${val}</textarea></div>`;
+            }).join('');
+        }
+        async function salvaTuttiTesti() {
+            for (let key in campiSito) {
+                const v = document.getElementById(`input-${key}`).value;
+                await sb.from('contenuti_pagine').upsert({ id: key, valore: v });
+            }
+            alert("Sito Aggiornato!");
+        }
+
+        function exportExcel() {
+            const ws = XLSX.utils.json_to_sheet(window.lastPrenotati);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Passeggeri");
+            XLSX.writeFile(wb, "Passeggeri_DelGrosso_2026.xlsx");
+        }
+
+        window.onload = () => { caricaPrenotazioni(); initTesti(); };
+    </script>
+</body>
+</html>
