@@ -3,100 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Del Grosso Viaggi - Home</title>
+    <title>Del Grosso Viaggi | Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #fff; color: #1a1a1a; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .container { width: 92%; max-width: 1200px; margin: auto; }
         
-        /* HEADER */
-        header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; }
-        .logo-container img { height: 55px; width: auto; object-fit: contain; }
-        .nav-links { list-style: none; display: flex; gap: 25px; }
-        .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .nav-links a:hover, .nav-links a.active { color: #2563eb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a1a; line-height: 1.6; background-color: #fff; }
+        
+        /* HEADER MODERNO */
+        header { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 10px 0; 
+            border-bottom: 1px solid #eaeaea; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            backdrop-filter: blur(10px); 
+        }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
+        .logo-box img { height: 55px; width: auto; object-fit: contain; }
+        
+        .nav-links { list-style: none; display: flex; gap: 20px; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* CAROUSEL */
-        .hero-carousel { height: 65vh; position: relative; overflow: hidden; background: #000; }
-        .slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
-        .slide.active { opacity: 1; z-index: 2; }
-        .slide-image { width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1.1); transition: 8s linear; }
-        .slide.active .slide-image { transform: scale(1); }
-        .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6)); display: flex; align-items: center; z-index: 3; }
-        .hero-content { color: white; padding: 0 5%; }
-        .hero-content h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 900; max-width: 700px; line-height: 1; text-transform: uppercase; font-style: italic; letter-spacing: -2px; }
+        /* CAROUSEL DINAMICO */
+        .hero-carousel { height: 60vh; position: relative; overflow: hidden; background: #000; }
+        .slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1.5s ease-in-out; }
+        .slide.active { opacity: 1; }
+        .slide-image { width: 100%; height: 100%; background-size: cover; background-position: center; }
+        .hero-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)); 
+            display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+        .hero-content h1 { color: white; font-size: clamp(30px, 6vw, 60px); font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -2px; line-height: 0.9; }
 
         /* SEZIONI */
-        .section-main-title { font-size: 32px; font-weight: 900; color: #000; margin-bottom: 30px; text-transform: uppercase; font-style: italic; letter-spacing: -1px; text-align: center; }
-        .intro-section { padding: 80px 0; text-align: center; }
-        .description-text { max-width: 800px; margin: 0 auto 30px; font-size: 18px; color: #444; }
-        .btn-prenota { background: #2563eb; color: white; padding: 18px 36px; text-decoration: none; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-radius: 50px; display: inline-block; transition: 0.3s; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
-        .btn-prenota:hover { background: #1d4ed8; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3); }
+        .section-title { font-size: 32px; font-weight: 900; text-transform: uppercase; font-style: italic; text-align: center; margin-bottom: 40px; letter-spacing: -1px; }
+        .py-section { padding: 80px 0; }
+        .container { width: 92%; max-width: 1200px; margin: auto; }
 
-        /* FLOTTA HOME */
-        .flotta-section { padding: 80px 0; background-color: #f9fafb; }
-        .flotta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
-        .bus-card { background: white; border-radius: 30px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; transition: 0.4s; flex-direction: column; display: flex; }
-        .bus-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px rgba(0,0,0,0.12); }
-        .bus-card img { width: 100%; height: 250px; object-fit: cover; }
-        .bus-content { padding: 30px; flex-grow: 1; display: flex; flex-direction: column; }
-        .bus-content h3 { font-size: 22px; font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 15px; color: #000; }
-        .bus-content p { font-size: 15px; color: #666; font-style: italic; margin-bottom: 25px; flex-grow: 1; }
-        .btn-scopri { background: #000; color: white; padding: 16px 32px; text-decoration: none; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-radius: 50px; display: inline-block; transition: 0.3s; text-align: center; margin-top: auto; }
-        .btn-scopri:hover { background: #2563eb; }
-
-        /* LOCANDINE */
-        .locandine-section { padding: 80px 0; }
-        .locandine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        .locandina-card { background: white; border-radius: 25px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding-bottom: 25px; text-align: center; border: 1px solid #f0f0f0; transition: 0.3s; }
-        .locandina-card:hover { transform: scale(1.03); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
-        .locandina-card img { width: 100%; height: 380px; object-fit: cover; transition: 0.5s; }
-        .locandina-card h3 { font-size: 16px; font-weight: 800; text-transform: uppercase; margin: 20px 0; color: #000; px: 15px; }
-
-        /* FOOTER */
-        .main-footer { background: #000; color: white; padding: 80px 0 0 0; }
-        .footer-grid-custom { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 50px; }
-        .footer-title { font-size: 11px; font-weight: 900; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 2px; color: #2563eb; }
-        .footer-col p { font-size: 13px; opacity: 0.7; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-        .footer-socials { display: flex; gap: 20px; margin-top: 20px; }
-        .footer-socials a { color: white; font-size: 20px; opacity: 0.7; transition: 0.3s; }
-        .footer-socials a:hover { opacity: 1; color: #2563eb; transform: scale(1.1); }
-        .footer-col ul { list-style: none; }
-        .footer-col ul li a { text-decoration: none; color: white; opacity: 0.7; font-size: 13px; display: block; margin-bottom: 10px; transition: 0.3s; }
-        .footer-col ul li a:hover { opacity: 1; color: #2563eb; padding-left: 5px; }
+        /* CARD FLOTTA & LOCANDINE */
+        .grid-custom { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .card-style { 
+            background: white; border-radius: 30px; overflow: hidden; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; transition: 0.3s;
+        }
+        .card-style:hover { transform: translateY(-10px); }
+        .card-img { width: 100%; height: 250px; object-fit: cover; }
+        .card-body { padding: 30px; text-align: center; }
+        .card-body h3 { font-size: 20px; font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 10px; }
+        .card-body p { font-size: 14px; color: #666; margin-bottom: 20px; }
         
-        /* FIRMA DESIGNER */
-        .designer-signature { text-align: center; padding: 25px 0; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
-        .designer-signature p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin: 0; }
-        .designer-signature strong { color: rgba(255,255,255,0.8); font-weight: 800; }
+        .btn-main { 
+            background: #000; color: white; padding: 15px 30px; border-radius: 50px; 
+            font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+        }
+        .btn-main:hover { background: #2563eb; }
 
-        /* RESPONSIVE */
-        @media (max-width: 992px) { .footer-grid-custom { grid-template-columns: 1fr 1fr; gap: 30px; } }
+        /* FOOTER NERO */
+        footer { background: #000; color: white; padding: 80px 0 0 0; margin-top: 60px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; padding-bottom: 60px; }
+        .footer-col h4 { font-size: 12px; font-weight: 900; text-transform: uppercase; color: #2563eb; margin-bottom: 20px; letter-spacing: 1px; }
+        .footer-col p, .footer-col a { font-size: 13px; color: #aaa; text-decoration: none; display: block; margin-bottom: 8px; }
+        .footer-col strong { color: #fff; }
+
+        /* FIRMA DESIGNER & ADMIN */
+        .signature { 
+            border-top: 1px solid #222; padding: 25px 0; text-align: center; 
+            display: flex; justify-content: center; align-items: center; gap: 15px;
+        }
+        .signature p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #555; }
+        .admin-lock { opacity: 0.2; font-size: 12px; text-decoration: none; transition: 0.3s; }
+        .admin-lock:hover { opacity: 1; }
+
         @media (max-width: 768px) {
-            .nav-links { display: none; } /* Semplificazione mobile */
-            .hero-carousel { height: 55vh; }
-            .hero-content h1 { font-size: 36px; }
-            .section-main-title { font-size: 28px; }
-            .description-text { font-size: 16px; }
-            .footer-grid-custom { grid-template-columns: 1fr; text-align: center; }
-            .footer-col p, .footer-socials { justify-content: center; }
-            .footer-col ul li a:hover { padding-left: 0; }
+            .nav-links { display: none; }
+            .hero-carousel { height: 50vh; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="container header-flex">
-            <a href="index.html" class="logo-container">
-                <img src="logo.jpg.JPEG" alt="Del Grosso Viaggi Logo">
+        <div class="header-flex">
+            <a href="index.html" class="logo-box">
+                <img src="logo.jpg.JPEG" alt="Logo Del Grosso">
             </a>
             <nav>
                 <ul class="nav-links">
-                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="index.html">Home</a></li>
                     <li><a href="flotta.html">La Flotta</a></li>
                     <li><a href="prenota.html">Prenota</a></li>
                 </ul>
@@ -104,76 +102,56 @@
         </div>
     </header>
 
-    <section class="hero-carousel" id="carousel-container">
+    <section class="hero-carousel" id="carousel-list">
         <div class="hero-overlay">
             <div class="hero-content">
-                <h1>Esperienze di Viaggio<br>Esclusive e Confortevoli</h1>
+                <h1>Viaggia in Prima Classe<br>con Del Grosso</h1>
             </div>
         </div>
     </section>
 
-    <section class="intro-section">
+    <section class="py-section">
         <div class="container">
-            <h2 class="section-main-title">Benvenuti a Bordo</h2>
-            <p class="description-text">Scopri il piacere di viaggiare con Del Grosso Viaggi. Offriamo servizi di noleggio autobus Gran Turismo e Limousine Bus per ogni tua esigenza, garantendo massima sicurezza, comfort e stile.</p>
-            <a href="prenota.html" class="btn-prenota">Prenota il Tuo Viaggio</a>
-        </div>
-    </section>
-
-    <section class="flotta-section">
-        <div class="container">
-            <h2 class="section-main-title">La Nostra Flotta di Eccellenza</h2>
-            <div class="flotta-grid" id="flotta-privata-container">
+            <h2 class="section-title">La Nostra Flotta</h2>
+            <div class="grid-custom" id="flotta-home">
                 </div>
         </div>
     </section>
 
-    <section class="locandine-section">
+    <section class="py-section" style="background: #f9fafb;">
         <div class="container">
-            <h2 class="section-main-title">Prossimi Viaggi & Eventi</h2>
-            <div class="locandine-grid" id="locandine-container">
+            <h2 class="section-title">Viaggi In Programma</h2>
+            <div class="grid-custom" id="locandine-home">
                 </div>
         </div>
     </section>
 
-    <footer class="main-footer">
+    <footer>
         <div class="container">
-            <div class="footer-grid-custom">
+            <div class="footer-grid">
                 <div class="footer-col">
-                    <h4 class="footer-title">Del Grosso Viaggi</h4>
-                    <p>La tua scelta di eccellenza per il noleggio di autobus Gran Turismo e Limousine Bus.</p>
-                    <div class="footer-socials">
-                        <a href="#" target="_blank">FB</a>
-                        <a href="#" target="_blank">IG</a>
-                    </div>
+                    <h4>Del Grosso Viaggi</h4>
+                    <p>Noleggio Autobus GT e Limousine Bus per viaggi indimenticabili.</p>
                 </div>
                 <div class="footer-col">
-                    <h4 class="footer-title">Contatti</h4>
-                    <p>Via Esempio, 123<br>Città (PR), 43123</p>
-                    <p>+39 0521 123456</p>
-                    <p>info@delgrossoviaggi.it</p>
+                    <h4>Contatti Diretti</h4>
+                    <p>📞 <strong>320 5730466</strong> (Raffaele)</p>
+                    <p>📞 <strong>366 2127916</strong> (Nicola)</p>
+                    <p>💬 WA Nicola: <a href="https://wa.me/393662127916" style="color:#2563eb">366 2127916</a></p>
+                    <p>📩 info@delgrossoviaggi.it</p>
                 </div>
                 <div class="footer-col">
-                    <h4 class="footer-title">Link Rapidi</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="flotta.html">La Flotta</a></li>
-                        <li><a href="prenota.html">Prenota</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4 class="footer-title">Note Legali</h4>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                        <li><a href="#">Termini di Servizio</a></li>
-                    </ul>
+                    <h4>Sede & Info</h4>
+                    <p>📍 San Severo (FG)</p>
+                    <p>Ref. Line: 320 5773446</p>
+                    <p>Cell. 320 978 6100</p>
+                    <p>🌐 <strong>www.delgrossoviaggi.it</strong></p>
                 </div>
             </div>
-        </div>
-        <div class="designer-signature">
-            <div class="container">
+            
+            <div class="signature">
                 <p>Designer © <strong>Cristino Nicola Pio</strong></p>
+                <a href="admin.html" class="admin-lock">🔒</a>
             </div>
         </div>
     </footer>
@@ -183,62 +161,58 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        async function caricaHome() {
-            // 1. CAROUSEL
+        async function initHome() {
+            // 1. Carica Carousel
             const { data: slides } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: true});
-            const carousel = document.getElementById('carousel-container');
-            if(slides && slides.length > 0) {
-                slides.forEach((slide, index) => {
-                    const slideDiv = document.createElement('div');
-                    slideDiv.className = `slide ${index === 0 ? 'active' : ''}`;
-                    slideDiv.innerHTML = `<div class="slide-image" style="background-image: url('${slide.immagine_url}');"></div>`;
-                    carousel.appendChild(slideDiv);
+            const cList = document.getElementById('carousel-list');
+            if(slides) {
+                slides.forEach((s, i) => {
+                    const d = document.createElement('div');
+                    d.className = `slide ${i === 0 ? 'active' : ''}`;
+                    d.innerHTML = `<div class="slide-image" style="background-image: url('${s.immagine_url}')"></div>`;
+                    cList.appendChild(d);
                 });
                 startCarousel();
             }
 
-            // 2. FLOTTA HOME
-            const { data: flotta } = await sb.from('flotta_page').select('*').order('id', {ascending: true});
-            const flottaContainer = document.getElementById('flotta-privata-container');
-            if(flotta) {
-                flottaContainer.innerHTML = flotta.map(bus => `
-                    <div class="bus-card">
-                        <img src="${bus.immagine_url}" alt="${bus.titolo}">
-                        <div class="bus-content">
-                            <h3>${bus.titolo}</h3>
-                            <p>${bus.descrizione}</p>
-                            <a href="flotta.html" class="btn-scopri">Scopri di Più</a>
-                        </div>
+            // 2. Carica Flotta
+            const { data: flotta } = await sb.from('flotta_page').select('*').order('id');
+            document.getElementById('flotta-home').innerHTML = flotta.map(f => `
+                <div class="card-style">
+                    <img src="${f.immagine_url}" class="card-img">
+                    <div class="card-body">
+                        <h3>${f.titolo}</h3>
+                        <p>${f.descrizione}</p>
+                        <a href="flotta.html" class="btn-main">Dettagli Mezzo</a>
                     </div>
-                `).join('');
-            }
+                </div>`).join('');
 
-            // 3. LOCANDINE
-            const { data: locandine } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            const locandineContainer = document.getElementById('locandine-container');
-            if(locandine) {
-                locandineContainer.innerHTML = locandine.map(loc => `
-                    <div class="locandina-card">
-                        <img src="${loc.immagine_url}" alt="${loc.titolo}">
-                        <h3>${loc.titolo}</h3>
-                        <a href="prenota.html" class="btn-scopri">Prenota Ora</a>
+            // 3. Carica Locandine
+            const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            document.getElementById('locandine-home').innerHTML = tratte.map(t => `
+                <div class="card-style">
+                    <img src="${t.immagine_url}" class="card-img">
+                    <div class="card-body">
+                        <h3>${t.titolo}</h3>
+                        <p>Mezzo: ${t.modello_bus}</p>
+                        <a href="prenota.html" class="btn-main">Prenota Posto</a>
                     </div>
-                `).join('');
-            }
+                </div>`).join('');
         }
 
-        // Logica Carousel
         function startCarousel() {
-            const slides = document.querySelectorAll('.slide');
-            let currentSlide = 0;
-            setInterval(() => {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }, 5000); // Cambia ogni 5 secondi
+            const s = document.querySelectorAll('.slide');
+            let c = 0;
+            if(s.length > 0) {
+                setInterval(() => {
+                    s[c].classList.remove('active');
+                    c = (c + 1) % s.length;
+                    s[c].classList.add('active');
+                }, 5000);
+            }
         }
 
-        caricaHome();
+        initHome();
     </script>
 </body>
 </html>
