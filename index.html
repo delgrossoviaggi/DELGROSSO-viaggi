@@ -12,7 +12,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; color: #1a1a1a; line-height: 1.6; background-color: #fff; }
         
-        /* HEADER MODERNO */
+        /* HEADER */
         header { 
             background: rgba(255, 255, 255, 0.95); 
             padding: 10px 0; 
@@ -28,7 +28,7 @@
         .nav-links { list-style: none; display: flex; gap: 20px; }
         .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* CAROUSEL DINAMICO */
+        /* CAROUSEL */
         .hero-carousel { height: 60vh; position: relative; overflow: hidden; background: #000; }
         .slide { position: absolute; width: 100%; height: 100%; opacity: 0; transition: 1.5s ease-in-out; }
         .slide.active { opacity: 1; }
@@ -40,12 +40,11 @@
         }
         .hero-content h1 { color: white; font-size: clamp(30px, 6vw, 60px); font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -2px; line-height: 0.9; }
 
-        /* SEZIONI */
+        /* GRID & CARDS */
         .section-title { font-size: 32px; font-weight: 900; text-transform: uppercase; font-style: italic; text-align: center; margin-bottom: 40px; letter-spacing: -1px; }
         .py-section { padding: 80px 0; }
         .container { width: 92%; max-width: 1200px; margin: auto; }
 
-        /* CARD FLOTTA & LOCANDINE */
         .grid-custom { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
         .card-style { 
             background: white; border-radius: 30px; overflow: hidden; 
@@ -55,22 +54,21 @@
         .card-img { width: 100%; height: 250px; object-fit: cover; }
         .card-body { padding: 30px; text-align: center; }
         .card-body h3 { font-size: 20px; font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 10px; }
-        .card-body p { font-size: 14px; color: #666; margin-bottom: 20px; }
         
         .btn-main { 
             background: #000; color: white; padding: 15px 30px; border-radius: 50px; 
-            font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; display: inline-block;
         }
         .btn-main:hover { background: #2563eb; }
 
-        /* FOOTER NERO */
+        /* FOOTER */
         footer { background: #000; color: white; padding: 80px 0 0 0; margin-top: 60px; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; padding-bottom: 60px; }
         .footer-col h4 { font-size: 12px; font-weight: 900; text-transform: uppercase; color: #2563eb; margin-bottom: 20px; letter-spacing: 1px; }
         .footer-col p, .footer-col a { font-size: 13px; color: #aaa; text-decoration: none; display: block; margin-bottom: 8px; }
         .footer-col strong { color: #fff; }
 
-        /* FIRMA DESIGNER & ADMIN */
+        /* SIGNATURE */
         .signature { 
             border-top: 1px solid #222; padding: 25px 0; text-align: center; 
             display: flex; justify-content: center; align-items: center; gap: 15px;
@@ -113,16 +111,14 @@
     <section class="py-section">
         <div class="container">
             <h2 class="section-title">La Nostra Flotta</h2>
-            <div class="grid-custom" id="flotta-home">
-                </div>
+            <div class="grid-custom" id="flotta-home"></div>
         </div>
     </section>
 
     <section class="py-section" style="background: #f9fafb;">
         <div class="container">
             <h2 class="section-title">Viaggi In Programma</h2>
-            <div class="grid-custom" id="locandine-home">
-                </div>
+            <div class="grid-custom" id="locandine-home"></div>
         </div>
     </section>
 
@@ -131,13 +127,13 @@
             <div class="footer-grid">
                 <div class="footer-col">
                     <h4>Del Grosso Viaggi</h4>
-                    <p>Noleggio Autobus GT e Limousine Bus per viaggi indimenticabili.</p>
+                    <p>Noleggio Autobus GT e Limousine Bus.</p>
                 </div>
                 <div class="footer-col">
                     <h4>Contatti Diretti</h4>
                     <p>📞 <strong>320 5730466</strong> (Raffaele)</p>
                     <p>📞 <strong>366 2127916</strong> (Nicola)</p>
-                    <p>💬 WA Nicola: <a href="https://wa.me/393662127916" style="color:#2563eb">366 2127916</a></p>
+                    <p>💬 WhatsApp Nicola: <a href="https://wa.me/393662127916" style="color:#2563eb">366 2127916</a></p>
                     <p>📩 info@delgrossoviaggi.it</p>
                 </div>
                 <div class="footer-col">
@@ -162,42 +158,52 @@
         const sb = supabase.createClient(S_URL, S_KEY);
 
         async function initHome() {
-            // 1. Carica Carousel
+            // Carousel - Bucket 'foto'
             const { data: slides } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: true});
             const cList = document.getElementById('carousel-list');
             if(slides) {
                 slides.forEach((s, i) => {
                     const d = document.createElement('div');
                     d.className = `slide ${i === 0 ? 'active' : ''}`;
-                    d.innerHTML = `<div class="slide-image" style="background-image: url('${s.immagine_url}')"></div>`;
+                    // Correzione automatica se il link fosse vecchio
+                    let imgUrl = s.immagine_url.replace('/immagini/', '/foto/');
+                    d.innerHTML = `<div class="slide-image" style="background-image: url('${imgUrl}')"></div>`;
                     cList.appendChild(d);
                 });
                 startCarousel();
             }
 
-            // 2. Carica Flotta
+            // Flotta - Bucket 'foto'
             const { data: flotta } = await sb.from('flotta_page').select('*').order('id');
-            document.getElementById('flotta-home').innerHTML = flotta.map(f => `
-                <div class="card-style">
-                    <img src="${f.immagine_url}" class="card-img">
-                    <div class="card-body">
-                        <h3>${f.titolo}</h3>
-                        <p>${f.descrizione}</p>
-                        <a href="flotta.html" class="btn-main">Dettagli Mezzo</a>
-                    </div>
-                </div>`).join('');
+            if(flotta) {
+                document.getElementById('flotta-home').innerHTML = flotta.map(f => {
+                    let imgUrl = f.immagine_url.replace('/immagini/', '/foto/');
+                    return `
+                    <div class="card-style">
+                        <img src="${imgUrl}" class="card-img">
+                        <div class="card-body">
+                            <h3>${f.titolo}</h3>
+                            <a href="flotta.html" class="btn-main">Dettagli</a>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
 
-            // 3. Carica Locandine
+            // Tratte - Bucket 'foto'
             const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            document.getElementById('locandine-home').innerHTML = tratte.map(t => `
-                <div class="card-style">
-                    <img src="${t.immagine_url}" class="card-img">
-                    <div class="card-body">
-                        <h3>${t.titolo}</h3>
-                        <p>Mezzo: ${t.modello_bus}</p>
-                        <a href="prenota.html" class="btn-main">Prenota Posto</a>
-                    </div>
-                </div>`).join('');
+            if(tratte) {
+                document.getElementById('locandine-home').innerHTML = tratte.map(t => {
+                    let imgUrl = t.immagine_url.replace('/immagini/', '/foto/');
+                    return `
+                    <div class="card-style">
+                        <img src="${imgUrl}" class="card-img">
+                        <div class="card-body">
+                            <h3>${t.titolo}</h3>
+                            <a href="prenota.html" class="btn-main">Prenota</a>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
         }
 
         function startCarousel() {
