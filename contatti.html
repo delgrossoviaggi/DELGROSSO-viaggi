@@ -2,55 +2,94 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contatti - Del Grosso Viaggi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contatti | Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap'); body { font-family: 'Inter', sans-serif; }</style>
-</head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; color: #1a1a1a; background-color: #f9fafb; }
+        
+        header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
+        .logo-box img { height: 55px; width: auto; object-fit: contain; }
+        .nav-links { list-style: none; display: flex; gap: 20px; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
 
-    <header class="bg-[#d0e0e3] border-b border-[#b7c9cc] h-20 flex items-center px-6 justify-between sticky top-0 z-50">
-        <div class="text-2xl font-black text-[#2c4c5c] italic tracking-tighter">DEL GROSSO VIAGGI</div>
-        <nav class="hidden lg:flex space-x-6 text-[10px] font-black uppercase text-[#2c4c5c]">
-            <a href="index.html">Home</a>
-            <a href="viaggi.html">Viaggi</a>
-            <a href="flotta.html">Flotta</a>
-            <a href="contatti.html" class="text-blue-600">Contatti</a>
-        </nav>
+        .contact-card { @apply bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-100 transition-all; }
+        .btn-call { @apply w-full flex items-center justify-center gap-3 py-5 rounded-2xl font-black uppercase tracking-widest text-sm transition-all active:scale-95 mb-4; }
+        
+        footer { background: #000; color: white; padding: 60px 0 20px; text-align: center; }
+        .signature { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 30px; border-top: 1px solid #111; padding-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-flex">
+            <a href="index.html" class="logo-box"><img src="logo.jpg.JPEG" alt="Logo Del Grosso"></a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="flotta.html">Flotta</a></li>
+                    <li><a href="prenota.html">Prenota</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <main class="flex-grow max-w-4xl mx-auto px-4 py-16 w-full">
-        <h1 class="text-4xl font-black italic uppercase text-gray-900 mb-2 text-center">Contattaci</h1>
-        <p class="text-gray-500 font-bold mb-12 uppercase text-xs tracking-widest text-center">Siamo a tua disposizione per preventivi e informazioni</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border-t-8 border-orange-500 text-center">
-                <i class="fas fa-bus text-4xl text-orange-500 mb-4"></i>
-                <h3 class="font-black uppercase italic mb-2">Bus Gran Turismo</h3>
-                <p class="text-gray-500 text-xs font-bold mb-4 uppercase">Raffaele Del Grosso</p>
-                <a href="tel:3205730466" class="text-xl font-black text-slate-800 block mb-2">320 5730466</a>
-                <a href="https://wa.me/393205730466" class="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-[10px] uppercase italic">WhatsApp Bus GT</a>
-            </div>
-
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border-t-8 border-blue-600 text-center">
-                <i class="fas fa-glass-cheers text-4xl text-blue-600 mb-4"></i>
-                <h3 class="font-black uppercase italic mb-2">Limousine Bus</h3>
-                <p class="text-gray-500 text-xs font-bold mb-4 uppercase">Nicola Pio Cristino</p>
-                <a href="tel:3662127916" class="text-xl font-black text-slate-800 block mb-2">366 2127916</a>
-                <a href="https://wa.me/393662127916" class="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-[10px] uppercase italic">WhatsApp Limobus</a>
-            </div>
+    <main class="max-w-4xl mx-auto p-6 py-12 space-y-8">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-black uppercase italic tracking-tighter leading-none mb-4">Contatti Diretti</h1>
+            <p class="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">Siamo a tua disposizione 24/7</p>
         </div>
 
-        <div class="mt-12 bg-[#2c4c5c] p-10 rounded-[3rem] text-white text-center shadow-2xl">
-            <i class="fas fa-envelope text-3xl mb-4"></i>
-            <h4 class="font-black uppercase italic mb-2">Scrivici una Email</h4>
-            <a href="mailto:info@delgrossoviaggi.it" class="text-xl font-bold border-b-2 border-orange-500 pb-1">info@delgrossoviaggi.it</a>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="contact-card">
+                <h2 class="text-blue-600 font-black uppercase text-xs mb-6 tracking-widest">Ufficio Prenotazioni</h2>
+                
+                <div class="mb-8">
+                    <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Responsabile Logistica</p>
+                    <p class="text-xl font-black mb-4 uppercase">Raffaele</p>
+                    <a href="tel:3205730466" class="btn-call bg-black text-white">📞 Chiama Raffaele</a>
+                </div>
+
+                <div class="mb-2">
+                    <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Responsabile Clienti</p>
+                    <p class="text-xl font-black mb-4 uppercase">Nicola</p>
+                    <a href="tel:3662127916" class="btn-call bg-blue-600 text-white">📞 Chiama Nicola</a>
+                    <a href="https://wa.me/393662127916" class="btn-call bg-green-500 text-white">💬 WhatsApp Nicola</a>
+                </div>
+            </div>
+
+            <div class="contact-card bg-black text-white border-none">
+                <h2 class="text-blue-500 font-black uppercase text-xs mb-6 tracking-widest">Sede Operativa</h2>
+                <p class="text-2xl font-black italic uppercase mb-8">San Severo (FG)</p>
+                
+                <div class="space-y-6 opacity-80">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-blue-500">Email Ufficiale</p>
+                        <a href="mailto:info@delgrossoviaggi.it" class="text-lg font-bold">info@delgrossoviaggi.it</a>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-blue-500">Ref. Line</p>
+                        <p class="text-lg font-bold">320 5773446</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-blue-500">Cell. Aziendale</p>
+                        <p class="text-lg font-bold">320 978 6100</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
-    <footer class="bg-[#444] text-white py-8 text-center text-[10px] uppercase font-bold tracking-widest">
-        Del Grosso Viaggi & Limousine Bus - San Severo (FG)
+    <footer>
+        <div class="container">
+            <p class="text-[10px] uppercase opacity-40">www.delgrossoviaggi.it</p>
+            <div class="signature">Designer © <strong>Cristino Nicola Pio</strong></div>
+        </div>
     </footer>
+
 </body>
 </html>
