@@ -7,116 +7,121 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const passAttesa = "Delgrosso@26";
         if (sessionStorage.getItem("admin_auth") !== "true") {
-            const acc = prompt("Password Amministratore:");
-            if (acc === passAttesa) { sessionStorage.setItem("admin_auth", "true"); }
+            const pass = prompt("Password Amministratore:");
+            if (pass === "Delgrosso@26") { sessionStorage.setItem("admin_auth", "true"); }
             else { window.location.href = "index.html"; }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f4f7fa; }
-        .card-adm { @apply bg-white p-6 rounded-[2.5rem] shadow-sm border-t-8 mb-6; }
-        input, select, textarea { @apply w-full p-3 bg-gray-50 border-2 border-gray-100 rounded-xl font-bold mb-3 outline-none focus:border-blue-500; }
-        label { @apply text-[10px] font-black uppercase text-gray-400 ml-1 mb-1 block; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+        .section-card { @apply bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 mb-6 transition-all; }
+        .input-style { @apply w-full p-3 bg-gray-50 border border-gray-200 rounded-xl font-bold mb-3 outline-none focus:ring-2 focus:ring-blue-500 text-sm; }
+        .label-style { @apply text-[10px] font-black uppercase text-gray-400 mb-1 ml-1 block; }
         
-        /* BUS GRID STYLE */
-        .bus-container { background: #e5e7eb; padding: 20px 10px; border-radius: 35px; border: 4px solid #d1d5db; display: inline-block; }
+        .bus-container { @apply bg-gray-100 p-5 rounded-[2.5rem] border-4 border-gray-200 inline-block mx-auto; }
         .bus-grid { display: grid; grid-template-columns: repeat(5, 35px); gap: 8px; justify-content: center; }
-        .seat { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
-        .seat.available { background: white; color: #555; border-color: #eee; }
-        .seat.selected { background: #2563eb; color: white; transform: scale(1.1); }
-        .seat.occupied { background: #9ca3af; color: white; cursor: not-allowed; opacity: 0.6; }
+        .seat { @apply w-[35px] h-[35px] flex items-center justify-center rounded-lg text-[10px] font-black border-2 transition-all cursor-pointer; }
+        .seat.available { @apply bg-white border-gray-200 text-gray-400 hover:border-blue-500; }
+        .seat.selected { @apply bg-blue-600 border-blue-600 text-white shadow-lg scale-110; }
+        .seat.occupied { @apply bg-gray-300 border-gray-300 text-gray-500 cursor-not-allowed opacity-50; }
         .corridor { width: 35px; height: 35px; }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        
+        .btn-action { @apply w-full py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 shadow-md; }
+        .home-icon-btn { @apply p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-all border border-gray-100; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-20">
 
-    <nav class="bg-black text-white p-4 sticky top-0 z-50 flex justify-between items-center border-b-2 border-blue-600 shadow-xl">
-        <div class="flex items-center gap-2">
-            <img src="logo.jpg.JPEG" class="h-8 w-auto bg-white p-1 rounded">
-            <h1 class="font-black uppercase italic text-blue-500 text-sm">Gestione Totale 2026</h1>
+    <nav class="bg-white border-b border-gray-200 p-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="home-icon-btn" title="Torna al Sito">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+                    </svg>
+                </a>
+                
+                <div class="flex items-center gap-2">
+                    <div class="bg-black p-1.5 rounded-lg"><img src="logo.jpg.JPEG" class="h-6 w-auto"></div>
+                    <div>
+                        <h1 class="font-black text-[10px] uppercase tracking-tighter leading-none">Gestione Admin</h1>
+                        <span class="text-[8px] text-blue-600 font-bold uppercase">Del Grosso 2026</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="init()" class="text-[9px] font-black uppercase bg-blue-50 text-blue-600 px-4 py-2 rounded-xl border border-blue-100 transition-all active:scale-95">Sincronizza</button>
+                <a href="index.html" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all hover:bg-red-600 hover:text-white">Esci</a>
+            </div>
         </div>
-        <a href="index.html" class="bg-red-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Esci</a>
     </nav>
 
-    <div class="max-w-7xl mx-auto p-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <div class="lg:col-span-7">
-            
-            <div class="card-adm border-green-500">
-                <h2 class="font-black uppercase italic mb-6 text-green-700 text-xl">📋 Inserimento Manuale</h2>
-                <input type="text" id="p-nome" placeholder="NOME E COGNOME">
-                <label>Scegli Viaggio</label>
-                <select id="p-tratta" onchange="generaPiantina(this.value)">
-                    <option value="">Caricamento viaggi...</option>
-                </select>
+        <div class="lg:col-span-6">
+            <div class="section-card border-t-4 border-blue-600">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-black uppercase italic text-lg text-blue-700 italic">👥 Registro Passeggeri</h2>
+                    <span id="counter-preno" class="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full">...</span>
+                </div>
+                <div id="lista-p" class="space-y-3 max-h-[800px] overflow-y-auto custom-scroll pr-2">
+                    <p class="text-center py-10 font-bold opacity-10">CARICAMENTO...</p>
+                </div>
+            </div>
+        </div>
 
-                <div id="box-piantina" class="hidden my-6 text-center">
+        <div class="lg:col-span-6 space-y-6">
+            
+            <div class="section-card border-t-4 border-green-500">
+                <h2 class="font-black uppercase italic text-lg text-green-700 mb-6">Aggiungi / Modifica</h2>
+                <input type="text" id="p-nome" placeholder="Nome Cliente" class="input-style">
+                <select id="p-tratta" onchange="generaMappa(this.value)" class="input-style"></select>
+                <div id="area-bus" class="hidden text-center py-4 bg-gray-50 rounded-3xl mb-4">
                     <div class="bus-container"><div id="grid-posti" class="bus-grid"></div></div>
-                    <p class="mt-4 font-black text-blue-600">Posti selezionati: <span id="p-selezionati-label">Nessuno</span></p>
+                    <div id="label-posti" class="mt-4 text-blue-600 font-black text-lg uppercase tracking-tighter">Scegli i posti</div>
                 </div>
-                <button onclick="salvaPreno()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Conferma Prenotazione</button>
-            </div>
-
-            <div class="card-adm border-blue-500">
-                <h2 class="font-black uppercase italic mb-6 text-blue-700">👥 Registro Passeggeri (Tutti)</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[11px]">
-                        <thead>
-                            <tr class="bg-gray-100 font-black uppercase text-gray-500">
-                                <th class="p-3">Passeggero</th>
-                                <th class="p-3">Posti</th>
-                                <th class="p-3 text-right">Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-p"></tbody>
-                    </table>
+                <div class="flex gap-2">
+                    <button id="btn-salva" onclick="salvaPreno()" class="btn-action bg-green-600 text-white flex-1">Salva Prenotazione</button>
+                    <button id="btn-annulla" onclick="resetForm()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
                 </div>
             </div>
-        </div>
 
-        <div class="lg:col-span-5 space-y-6">
-            
-            <div class="card-adm border-black">
-                <h2 class="font-black uppercase italic mb-4">🚌 Nuova Locandina Viaggio</h2>
-                <input type="text" id="v-titolo" placeholder="Destinazione (es. Gardaland)">
-                <select id="v-bus-mod">
-                    <option value="53">GT 53 POSTI</option>
-                    <option value="63">GT 63 POSTI</option>
-                    <option value="1">LIMOBUS</option>
-                </select>
-                <label>Immagine Locandina</label>
-                <input type="file" id="v-file" accept="image/*">
-                <button onclick="salvaLocandina()" class="w-full bg-black text-white py-3 rounded-xl font-black uppercase text-[10px]">Pubblica Viaggio</button>
+            <div class="section-card border-t-4 border-indigo-600">
+                <h2 class="font-black uppercase italic text-sm text-indigo-700 mb-4">🖼️ Carousel Home</h2>
+                <input type="file" id="c-file" class="text-[10px] mb-3">
+                <button onclick="salvaMedia('carousel')" class="btn-action bg-indigo-600 text-white">Carica Foto</button>
+                <div id="preview-carousel" class="grid grid-cols-3 gap-2 mt-4 p-2 bg-gray-50 rounded-2xl max-h-40 overflow-y-auto custom-scroll"></div>
             </div>
 
-            <div class="card-adm border-orange-500">
-                <h2 class="font-black uppercase italic mb-4 text-orange-600">📊 Stato Bus</h2>
-                <div id="stato-bus" class="space-y-2"></div>
+            <div class="section-card border-t-4 border-orange-500">
+                <h2 class="font-black uppercase italic text-sm text-orange-600 mb-4">🚚 Gestione Flotta</h2>
+                <input type="text" id="f-titolo" placeholder="Nome Bus" class="input-style">
+                <textarea id="f-desc" placeholder="Dettagli bus..." class="input-style h-20"></textarea>
+                <input type="file" id="f-file" class="text-[10px] mb-3">
+                <button onclick="salvaMedia('flotta')" class="btn-action bg-orange-600 text-white">Aggiungi Bus</button>
+                <div id="preview-flotta" class="mt-4 space-y-2 max-h-40 overflow-y-auto custom-scroll pr-2"></div>
             </div>
 
-            <div class="card-adm border-indigo-500">
-                <h2 class="font-black uppercase italic mb-4 text-indigo-700">🖼️ Carousel Home</h2>
-                <input type="file" id="c-file" accept="image/*">
-                <button onclick="salvaCarousel()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-black uppercase text-[10px]">Aggiungi Immagine</button>
-                <div id="preview-carousel" class="grid grid-cols-3 gap-2 mt-4"></div>
+            <div class="section-card border-t-4 border-black">
+                <h2 class="font-black uppercase italic text-sm mb-4">🚌 Viaggi in Programma</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="v-titolo" placeholder="Destinazione" class="input-style">
+                    <select id="v-modello" class="input-style">
+                        <option value="53">53 Posti</option>
+                        <option value="63">63 Posti</option>
+                    </select>
+                </div>
+                <input type="file" id="v-file" class="text-[10px] mb-3">
+                <button onclick="salvaMedia('viaggio')" class="btn-action bg-black text-white">Pubblica Viaggio</button>
+                <div id="preview-v" class="mt-4 grid grid-cols-2 gap-2 max-h-40 overflow-y-auto custom-scroll"></div>
             </div>
-        </div>
-    </div>
 
-    <div id="modal-edit" class="fixed inset-0 bg-black/90 hidden z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl">
-            <h3 class="font-black text-xl mb-4 uppercase italic">Modifica Prenotazione</h3>
-            <label>Nome</label>
-            <input type="text" id="edit-nome">
-            <label>Posti (separati da virgola)</label>
-            <input type="text" id="edit-posti">
-            <div class="flex gap-2">
-                <button onclick="chiudiEdit()" class="flex-1 bg-gray-100 py-4 rounded-xl font-black uppercase text-[10px]">Annulla</button>
-                <button onclick="confermaModifica()" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-[10px]">Salva</button>
-            </div>
         </div>
     </div>
 
@@ -125,111 +130,127 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        let postiSelezionati = [];
-        let mappaConfig = {}; 
-        let idEdit = null;
+        let scelti = []; let configBus = {}; let editId = null;
+
+        function fixUrl(url) { return url ? url.replace('/immagini/', '/foto/') + "?v=" + Date.now() : ''; }
 
         async function init() {
-            const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+            const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
             const { data: preno } = await sb.from('prenotazioni').select('*').order('created_at', {ascending: false});
-            const { data: car } = await sb.from('carousel_flotta').select('*');
+            const { data: car } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: false});
+            const { data: flotta } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
 
-            // Select Tratte
-            document.getElementById('p-tratta').innerHTML = '<option value="">Scegli...</option>' + tratte.map(t => {
-                mappaConfig[t.id] = t.modello_bus;
-                return `<option value="${t.id}">${t.titolo}</option>`;
-            }).join('');
+            configBus = {};
+            if(viaggi) viaggi.forEach(v => configBus[v.id] = v.modello_bus);
 
-            // Registro Passeggeri (Fix: Se manca il join, cerchiamo il nome a mano)
-            document.getElementById('lista-p').innerHTML = (preno || []).map(p => {
-                const tNome = tratte.find(x => x.id === p.tratta_id)?.titolo || "Viaggio eliminato";
-                return `
-                <tr class="border-b bg-white hover:bg-gray-50 transition">
-                    <td class="p-3 font-black uppercase leading-tight">${p.nome_cliente}<br><span class="text-blue-500 text-[9px]">${tNome}</span></td>
-                    <td class="p-3 font-black text-blue-600">${p.posti_selezionati.join(', ')}</td>
-                    <td class="p-3 text-right flex gap-1 justify-end">
-                        <button onclick="apriEdit('${p.id}', '${p.nome_cliente}', '${p.posti_selezionati}')" class="bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold text-[9px]">MOD</button>
-                        <button onclick="elimina('prenotazioni','${p.id}')" class="bg-red-100 text-red-700 px-2 py-1 rounded font-bold text-[9px]">DEL</button>
-                    </td>
-                </tr>`;
-            }).join('');
+            // Registro Prenotati
+            const listaP = document.getElementById('lista-p');
+            if(preno) {
+                document.getElementById('counter-preno').innerText = preno.length + " CLIENTI";
+                listaP.innerHTML = preno.map(p => {
+                    const vNome = viaggi?.find(v => v.id === p.tratta_id)?.titolo || "Viaggio eliminato";
+                    return `
+                    <div class="p-4 bg-white border rounded-2xl flex justify-between items-center shadow-sm group hover:border-blue-300 transition-all">
+                        <div>
+                            <div class="font-black text-xs uppercase leading-none mb-1">${p.nome_cliente}</div>
+                            <div class="text-[9px] text-blue-600 font-bold uppercase">${vNome}</div>
+                            <div class="text-[10px] text-gray-400 font-black mt-1">POSTI: ${p.posti_selezionati.join(', ')}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="caricaModifica('${p.id}', '${p.nome_cliente}', '${p.tratta_id}', '${p.posti_selezionati}')" class="bg-blue-50 text-blue-600 font-black text-[9px] px-2 py-2 rounded-lg">MOD</button>
+                            <button onclick="elimina('prenotazioni','${p.id}')" class="bg-red-50 text-red-600 font-black text-[9px] px-2 py-2 rounded-lg">X</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
 
-            // Stato Bus
-            document.getElementById('stato-bus').innerHTML = tratte.map(t => {
-                const occ = (preno || []).filter(p => p.tratta_id === t.id).reduce((acc, curr) => acc + curr.posti_selezionati.length, 0);
-                const tot = parseInt(t.modello_bus) || 53;
-                return `<div class="flex justify-between text-[10px] font-black uppercase bg-gray-50 p-2 rounded-lg border">
-                    <span>${t.titolo}</span>
-                    <span class="text-blue-600">${occ} / ${tot} POSTI</span>
-                </div>`;
-            }).join('');
-
-            // Carousel
+            // Carousel Anteprime
             document.getElementById('preview-carousel').innerHTML = (car || []).map(c => `
-                <div class="relative group">
-                    <img src="${c.immagine_url}" class="h-12 w-full object-cover rounded border">
-                    <button onclick="elimina('carousel_flotta','${c.id}')" class="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 text-[8px] font-black rounded">X</button>
+                <div class="relative h-14 rounded-xl overflow-hidden group">
+                    <img src="${fixUrl(c.immagine_url)}" class="w-full h-full object-cover">
+                    <button onclick="elimina('carousel_flotta','${c.id}')" class="absolute inset-0 bg-red-600/70 text-white font-black text-[8px] opacity-0 group-hover:opacity-100 uppercase">Elimina</button>
                 </div>`).join('');
+
+            // Flotta Anteprime
+            document.getElementById('preview-flotta').innerHTML = (flotta || []).map(f => `
+                <div class="flex items-center gap-3 p-2 bg-white border rounded-xl shadow-sm">
+                    <img src="${fixUrl(f.immagine_url)}" class="w-10 h-10 object-cover rounded-lg">
+                    <span class="flex-1 text-[9px] font-black uppercase truncate">${f.titolo}</span>
+                    <button onclick="elimina('flotta_page','${f.id}')" class="text-red-500 font-black px-2">X</button>
+                </div>`).join('');
+
+            // Viaggi Anteprime
+            document.getElementById('preview-v').innerHTML = (viaggi || []).map(v => `
+                <div class="relative h-20 rounded-xl overflow-hidden group border">
+                    <img src="${fixUrl(v.immagine_url)}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 p-1 text-center">
+                        <span class="text-[8px] text-white font-black uppercase mb-1 truncate w-full px-1">${v.titolo}</span>
+                        <button onclick="elimina('tratte','${v.id}')" class="text-[8px] bg-red-600 text-white px-2 py-1 rounded font-black uppercase">Elimina</button>
+                    </div>
+                </div>`).join('');
+
+            document.getElementById('p-tratta').innerHTML = '<option value="">Seleziona viaggio...</option>' + 
+                (viaggi || []).map(v => `<option value="${v.id}">${v.titolo}</option>`).join('');
         }
 
-        async function generaPiantina(trattaId) {
-            if(!trattaId) { document.getElementById('box-piantina').classList.add('hidden'); return; }
-            const grid = document.getElementById('grid-posti');
-            document.getElementById('box-piantina').classList.remove('hidden');
-            grid.innerHTML = '';
+        async function generaMappa(trattaId, pre_selezionati = []) {
+            if(!trattaId) { document.getElementById('area-bus').classList.add('hidden'); return; }
+            document.getElementById('area-bus').classList.remove('hidden');
+            const grid = document.getElementById('grid-posti'); grid.innerHTML = '';
+            scelti = typeof pre_selezionati === 'string' ? pre_selezionati.split(',') : pre_selezionati;
             
-            const { data: giaOccupati } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', trattaId);
-            const occ = giaOccupati ? giaOccupati.flatMap(p => p.posti_selezionati.map(String)) : [];
-            const cap = parseInt(mappaConfig[trattaId]) || 53;
-
-            postiSelezionati = [];
-            document.getElementById('p-selezionati-label').innerText = "Nessuno";
+            const cap = parseInt(configBus[trattaId]) || 53;
+            const { data: occ } = await sb.from('prenotazioni').select('posti_selezionati, id').eq('tratta_id', trattaId);
+            const presi = (occ || []).filter(o => o.id !== editId).flatMap(o => o.posti_selezionati.map(String));
 
             for (let i = 1; i <= cap; i++) {
                 if (i % 4 === 1 && i > 1 && i <= (cap - 5)) { grid.appendChild(Object.assign(document.createElement('div'), {className:'corridor'})); }
-                const s = String(i);
-                const isOcc = occ.includes(s);
+                const s = String(i); const isOcc = presi.includes(s);
                 const div = document.createElement('div');
-                div.className = `seat ${isOcc ? 'occupied' : 'available'}`;
+                div.className = `seat ${isOcc ? 'occupied' : (scelti.includes(s) ? 'selected' : 'available')}`;
                 div.innerText = i;
-                if (!isOcc) div.onclick = () => {
+                if(!isOcc) div.onclick = () => {
                     div.classList.toggle('selected');
-                    if(div.classList.contains('selected')) postiSelezionati.push(s);
-                    else postiSelezionati = postiSelezionati.filter(p => p !== s);
-                    document.getElementById('p-selezionati-label').innerText = postiSelezionati.join(', ') || "Nessuno";
+                    if(div.classList.contains('selected')) scelti.push(s); else scelti = scelti.filter(x => x !== s);
+                    document.getElementById('label-posti').innerText = scelti.length > 0 ? scelti.join(', ') : "Scegli i posti";
                 };
                 grid.appendChild(div);
             }
         }
 
-        async function salvaLocandina() {
-            const f = document.getElementById('v-file').files[0];
-            if(!f) return alert("Manca foto");
-            const name = `loc_${Date.now()}`;
+        async function salvaMedia(tipo) {
+            const fileId = tipo === 'carousel' ? 'c-file' : (tipo === 'flotta' ? 'f-file' : 'v-file');
+            const f = document.getElementById(fileId).files[0]; if(!f) return alert("Scegli un file!");
+            
+            const name = `adm_${Date.now()}.${f.name.split('.').pop()}`;
             await sb.storage.from('foto').upload(name, f);
             const { data: { publicUrl } } = sb.storage.from('foto').getPublicUrl(name);
-            await sb.from('tratte').insert([{ titolo: document.getElementById('v-titolo').value, modello_bus: document.getElementById('v-bus-mod').value, immagine_url: publicUrl }]);
+
+            if(tipo === 'carousel') await sb.from('carousel_flotta').insert([{ immagine_url: publicUrl }]);
+            else if(tipo === 'flotta') await sb.from('flotta_page').insert([{ titolo: document.getElementById('f-titolo').value, descrizione: document.getElementById('f-desc').value, immagine_url: publicUrl }]);
+            else if(tipo === 'viaggio') await sb.from('tratte').insert([{ titolo: document.getElementById('v-titolo').value, modello_bus: document.getElementById('v-modello').value, immagine_url: publicUrl }]);
+            
             location.reload();
         }
 
         async function salvaPreno() {
-            const nome = document.getElementById('p-nome').value;
-            const tratta = document.getElementById('p-tratta').value;
-            if(!nome || !tratta || postiSelezionati.length === 0) return alert("Dati mancanti!");
-            await sb.from('prenotazioni').insert([{ nome_cliente: nome, tratta_id: tratta, posti_selezionati: postiSelezionati }]);
+            const payload = { nome_cliente: document.getElementById('p-nome').value, tratta_id: document.getElementById('p-tratta').value, posti_selezionati: scelti };
+            if(!payload.nome_cliente || !payload.tratta_id || scelti.length === 0) return alert("Completa i dati!");
+            if(editId) await sb.from('prenotazioni').update(payload).eq('id', editId);
+            else await sb.from('prenotazioni').insert([payload]);
             location.reload();
         }
 
-        function apriEdit(id, nome, posti) { idEdit = id; document.getElementById('edit-nome').value = nome; document.getElementById('edit-posti').value = posti; document.getElementById('modal-edit').classList.remove('hidden'); }
-        function chiudiEdit() { document.getElementById('modal-edit').classList.add('hidden'); }
-        
-        async function confermaModifica() {
-            const p = document.getElementById('edit-posti').value.split(',').map(x => x.trim());
-            await sb.from('prenotazioni').update({ nome_cliente: document.getElementById('edit-nome').value, posti_selezionati: p }).eq('id', idEdit);
-            location.reload();
+        function caricaModifica(id, nome, trattaId, posti) {
+            editId = id; document.getElementById('p-nome').value = nome; document.getElementById('p-tratta').value = trattaId;
+            document.getElementById('btn-salva').innerText = "Applica Modifica";
+            document.getElementById('btn-annulla').classList.remove('hidden');
+            generaMappa(trattaId, posti);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); location.reload(); } }
+        function resetForm() { editId = null; location.reload(); }
+        async function elimina(tab, id) { if(confirm("Cancellare definitivamente?")) { await sb.from(tab).delete().eq('id', id); init(); } }
 
         init();
     </script>
