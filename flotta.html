@@ -8,42 +8,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1a1a1a; margin: 0; }
-        
-        /* HEADER */
         header { background: white; padding: 12px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
-        
         .nav-links { list-style: none; display: flex; gap: 15px; }
         .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* HERO */
         .hero { background: #000; color: white; padding: 60px 20px; text-align: center; }
         .hero h1 { font-size: 40px; font-weight: 900; text-transform: uppercase; italic; line-height: 0.9; }
-
-        /* BUS CARD */
-        .bus-card { 
-            @apply bg-white rounded-[2.5rem] overflow-hidden shadow-xl mb-12 border border-gray-100 mx-auto max-w-5xl;
-            display: flex; flex-direction: column;
-        }
-        @media (min-width: 768px) {
-            .bus-card { flex-direction: row; align-items: stretch; }
-            .bus-card:nth-child(even) { flex-direction: row-reverse; }
-        }
-
-        .bus-img { flex: 1.2; height: 350px; }
+        .bus-card { @apply bg-white rounded-[2.5rem] overflow-hidden shadow-xl mb-12 border border-gray-100 mx-auto max-w-5xl flex flex-col md:flex-row; }
+        .bus-card:nth-child(even) { @apply md:flex-row-reverse; }
+        .bus-img { @apply md:flex-[1.2] h-[350px]; }
         .bus-img img { width: 100%; height: 100%; object-fit: cover; }
-
-        .bus-info { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        .bus-info { @apply md:flex-1 p-8 md:p-12 flex flex-col justify-center; }
         .bus-info h2 { font-size: 28px; font-weight: 900; text-transform: uppercase; italic; margin-bottom: 15px; line-height: 1; }
-        .bus-info p { font-size: 15px; color: #4b5563; white-space: pre-line; margin-bottom: 20px; }
-
-        .btn-book { 
-            @apply inline-block bg-blue-600 text-white font-black uppercase text-[10px] py-4 px-8 rounded-2xl self-start transition-all active:scale-95;
-            box-shadow: 0 10px 20px rgba(37,99,235,0.2);
-        }
-
+        .bus-info p { font-size: 15px; color: #4b5563; white-space: pre-line; margin-bottom: 25px; }
+        .btn-book { @apply inline-block bg-blue-600 text-white font-black uppercase text-[10px] py-4 px-8 rounded-2xl self-start transition-all active:scale-95; box-shadow: 0 10px 20px rgba(37,99,235,0.2); }
         footer { background: #000; color: white; padding: 40px 0; text-align: center; margin-top: 50px; }
         .signature { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 20px; }
     </style>
@@ -57,6 +36,7 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="viaggi.html">Viaggi</a></li>
                 <li><a href="prenota.html">Prenota</a></li>
+                <li><a href="contatti.html">Contatti</a></li>
             </ul></nav>
         </div>
     </header>
@@ -82,44 +62,31 @@
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
-
-        function fixUrl(url) {
-            if(!url) return 'logo.jpg.JPEG';
-            return url.replace('/immagini/', '/foto/') + "?v=" + new Date().getTime();
-        }
+        function fixUrl(url) { return url ? url.replace('/immagini/', '/foto/') + "?v=" + Date.now() : 'logo.jpg.JPEG'; }
 
         async function caricaDati() {
             const main = document.getElementById('container-flotta');
-            
             try {
                 const { data, error } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
-                
                 if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    main.innerHTML = `<div class="text-center py-20 opacity-30 font-black uppercase italic">Nessun mezzo trovato. Aggiungili dall'Admin!</div>`;
+                if (!data?.length) {
+                    main.innerHTML = `<div class="text-center py-20 opacity-30 font-black uppercase italic">Nessun mezzo trovato nel sistema.</div>`;
                     return;
                 }
-
                 main.innerHTML = data.map(bus => `
                     <div class="bus-card">
-                        <div class="bus-img">
-                            <img src="${fixUrl(bus.immagine_url)}" onerror="this.src='logo.jpg.JPEG'">
-                        </div>
+                        <div class="bus-img"><img src="${fixUrl(bus.immagine_url)}" onerror="this.src='logo.jpg.JPEG'"></div>
                         <div class="bus-info">
                             <h2>${bus.titolo}</h2>
                             <p>${bus.descrizione}</p>
                             <a href="prenota.html" class="btn-book">Richiedi Preventivo</a>
                         </div>
-                    </div>
-                `).join('');
-
+                    </div>`).join('');
             } catch (err) {
                 console.error(err);
-                main.innerHTML = `<div class="text-center py-20 text-red-500 font-black uppercase italic">Errore di collegamento. Controlla la tabella 'flotta_page' su Supabase.</div>`;
+                main.innerHTML = `<div class="text-center py-20 text-red-500 font-black uppercase italic tracking-tighter">Errore di collegamento al database.</div>`;
             }
         }
-
         caricaDati();
     </script>
 </body>
