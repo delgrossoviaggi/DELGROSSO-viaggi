@@ -74,7 +74,7 @@
                 <p id="display-posti" class="text-4xl font-black text-white italic">NESSUNO</p>
             </div>
 
-            <button onclick="inviaWA()" class="w-full mt-6 bg-green-500 text-white py-6 rounded-[2.5rem] font-black uppercase shadow-xl active:scale-95 transition-all">
+            <button onclick="inviaPrenotazione()" class="w-full mt-6 bg-green-500 text-white py-6 rounded-[2.5rem] font-black uppercase shadow-xl active:scale-95 transition-all">
                 CONFERMA E PRENOTA
             </button>
         </div>
@@ -98,13 +98,15 @@
         async function init() {
             const { data } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
             const sel = document.getElementById('select-viaggio');
-            data.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.id;
-                opt.textContent = v.titolo;
-                opt.dataset.modello = v.modello_bus;
-                sel.appendChild(opt);
-            });
+            if(data) {
+                data.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = v.titolo;
+                    opt.dataset.modello = v.modello_bus;
+                    sel.appendChild(opt);
+                });
+            }
         }
 
         async function caricaMappa() {
@@ -127,7 +129,6 @@
             const totale = modelloBus.includes("63") ? 63 : 53;
             const inizioFondo = totale - 4;
 
-            // Autista
             container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div><div class="corridoio"></div><div></div><div></div>`;
 
             let n = 1;
@@ -143,18 +144,20 @@
 
         function creaSedile(num) {
             const s = document.createElement('div');
-            const isOcc = occupati.includes(String(num));
+            const sStr = String(num);
+            const isOcc = occupati.includes(sStr);
             s.className = `seat ${isOcc ? 'seat-occupied' : 'seat-available'}`;
             s.innerText = num;
             if(!isOcc) {
                 s.onclick = () => {
-                    const sStr = String(num);
                     if(selezionati.includes(sStr)) {
                         selezionati = selezionati.filter(x => x !== sStr);
-                        s.classList.replace('seat-selected', 'seat-available');
+                        s.classList.remove('seat-selected');
+                        s.classList.add('seat-available');
                     } else {
                         selezionati.push(sStr);
-                        s.classList.replace('seat-available', 'seat-selected');
+                        s.classList.remove('seat-available');
+                        s.classList.add('seat-selected');
                     }
                     document.getElementById('display-posti').innerText = selezionati.length ? selezionati.join(', ') : "NESSUNO";
                 };
@@ -162,24 +165,28 @@
             return s;
         }
 
-        async function inviaWA() {
+        async function inviaPrenotazione() {
             const nome = document.getElementById('nome-cliente').value.trim();
             const tel = document.getElementById('telefono-cliente').value.trim();
             const trattaId = document.getElementById('select-viaggio').value;
             const trattaNome = document.getElementById('select-viaggio').options[document.getElementById('select-viaggio').selectedIndex].text;
 
-            if(!nome || !tel || selezionati.length === 0) return alert("Completa tutti i dati!");
+            if(!nome) { alert("Inserisci il Nome!"); return; }
+            if(selezionati.length === 0) { alert("Scegli almeno un posto!"); return; }
 
             const { error } = await sb.from('prenotazioni').insert([{
                 nome_cliente: nome.toUpperCase(),
-                telefono_cliente: tel,
+                telefono_cliente: tel || "NON INSERITO",
                 tratta_id: trattaId,
                 posti_selezionati: selezionati
             }]);
 
             if(!error) {
-                const msg = `Prenotazione: ${trattaNome}\nNome: ${nome}\nPosti: ${selezionati.join(', ')}`;
-                window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(msg)}`;
+                const messaggio = `*NUOVA PRENOTAZIONE*\n📍 Viaggio: ${trattaNome}\n👤 Cliente: ${nome}\n📞 Cell: ${tel || 'N/D'}\n💺 Posti: ${selezionati.join(', ')}`;
+                window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(messaggio)}`;
+            } else {
+                alert("Errore tecnico: " + error.message);
+                console.error(error);
             }
         }
 
