@@ -7,91 +7,75 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; color: #1a1a1a; line-height: 1.6; background-color: #f8fafc; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1a1a1a; margin: 0; }
         
         /* HEADER */
-        header { background: rgba(255, 255, 255, 0.95); padding: 12px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
+        header { background: white; padding: 12px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; }
         .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
-        .logo-box img { height: 50px; width: auto; object-fit: contain; }
         
         .nav-links { list-style: none; display: flex; gap: 15px; }
-        .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .nav-links a:hover { color: #2563eb; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
 
         /* HERO */
-        .page-hero { background: #000; color: white; padding: 80px 0; text-align: center; position: relative; }
-        .page-hero h1 { font-size: clamp(32px, 8vw, 48px); font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -2px; line-height: 0.9; }
-        .page-hero p { opacity: 0.6; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 3px; margin-top: 15px; color: #3b82f6; }
+        .hero { background: #000; color: white; padding: 60px 20px; text-align: center; }
+        .hero h1 { font-size: 40px; font-weight: 900; text-transform: uppercase; italic; line-height: 0.9; }
 
-        /* BLOCCHI MEZZI */
-        .bus-block { display: flex; align-items: center; gap: 40px; margin-bottom: 80px; opacity: 0; transform: translateY(30px); transition: 0.8s ease-out; }
-        .bus-block.show { opacity: 1; transform: translateY(0); }
-        .bus-block:nth-child(even) { flex-direction: row-reverse; }
-        
-        .bus-img-side { flex: 1.2; border-radius: 40px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid #fff; aspect-ratio: 16/10; }
-        .bus-img-side img { width: 100%; height: 100%; display: block; object-fit: cover; }
-        
-        .bus-text-side { flex: 1; padding: 20px; }
-        .bus-text-side h2 { font-size: clamp(24px, 5vw, 34px); font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 15px; color: #000; line-height: 1; }
-        .bus-text-side p { font-size: 15px; color: #4b5563; margin-bottom: 25px; white-space: pre-line; font-weight: 500; }
-        
-        .btn-action { 
-            background: #2563eb; color: white; padding: 14px 35px; border-radius: 20px; 
-            font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; display: inline-block; transition: 0.3s;
+        /* BUS CARD */
+        .bus-card { 
+            @apply bg-white rounded-[2.5rem] overflow-hidden shadow-xl mb-12 border border-gray-100 mx-auto max-w-5xl;
+            display: flex; flex-direction: column;
+        }
+        @media (min-width: 768px) {
+            .bus-card { flex-direction: row; align-items: stretch; }
+            .bus-card:nth-child(even) { flex-direction: row-reverse; }
+        }
+
+        .bus-img { flex: 1.2; height: 350px; }
+        .bus-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .bus-info { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        .bus-info h2 { font-size: 28px; font-weight: 900; text-transform: uppercase; italic; margin-bottom: 15px; line-height: 1; }
+        .bus-info p { font-size: 15px; color: #4b5563; white-space: pre-line; margin-bottom: 20px; }
+
+        .btn-book { 
+            @apply inline-block bg-blue-600 text-white font-black uppercase text-[10px] py-4 px-8 rounded-2xl self-start transition-all active:scale-95;
             box-shadow: 0 10px 20px rgba(37,99,235,0.2);
         }
-        .btn-action:hover { background: #000; transform: scale(1.05); }
 
-        footer { background: #000; color: white; padding: 60px 0 30px; text-align: center; }
-        .signature { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 30px; border-top: 1px solid #111; padding-top: 20px; }
-
-        @media (max-width: 992px) {
-            .bus-block, .bus-block:nth-child(even) { flex-direction: column; text-align: center; gap: 20px; }
-            .bus-img-side { border-radius: 30px; width: 100%; }
-        }
+        footer { background: #000; color: white; padding: 40px 0; text-align: center; margin-top: 50px; }
+        .signature { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-flex">
-            <a href="index.html" class="logo-box">
-                <img src="logo.jpg.JPEG" alt="Del Grosso">
-            </a>
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="flotta.html" style="color:#2563eb">Flotta</a></li>
-                    <li><a href="viaggi.html">Viaggi</a></li>
-                    <li><a href="prenota.html">Prenota</a></li>
-                    <li><a href="contatti.html">Contatti</a></li>
-                </ul>
-            </nav>
+            <a href="index.html"><img src="logo.jpg.JPEG" class="h-10 w-auto"></a>
+            <nav><ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="viaggi.html">Viaggi</a></li>
+                <li><a href="prenota.html">Prenota</a></li>
+            </ul></nav>
         </div>
     </header>
 
-    <section class="page-hero">
-        <div class="max-w-4xl mx-auto px-4">
-            <p>I nostri mezzi</p>
-            <h1>Eccellenza <br> In Movimento</h1>
-        </div>
+    <section class="hero">
+        <h1>ECCELLENZA <br><span class="text-blue-500">IN MOVIMENTO</span></h1>
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em] mt-4 opacity-50">La nostra flotta esclusiva</p>
     </section>
 
-    <section class="py-20">
-        <div class="max-w-6xl mx-auto px-6" id="flotta-list">
-            <p class="text-center font-bold opacity-20 animate-pulse">SINCRONIZZAZIONE DATABASE...</p>
+    <main class="py-12 px-6" id="container-flotta">
+        <div class="text-center py-20">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
+            <p class="font-black uppercase text-xs opacity-20">Connessione al garage...</p>
         </div>
-    </section>
+    </main>
 
     <footer>
-        <div class="container px-6">
-            <img src="logo.jpg.JPEG" class="h-8 mx-auto mb-6 brightness-0 invert opacity-30">
-            <p class="text-[10px] uppercase opacity-40">Del Grosso Viaggi & Limousine Bus - San Severo (FG)</p>
-            <div class="signature">Designer © <strong>Cristino Nicola Pio</strong></div>
-        </div>
+        <img src="logo.jpg.JPEG" class="h-8 mx-auto mb-4 brightness-0 invert opacity-20">
+        <div class="signature">Designer © <strong>Cristino Nicola Pio</strong></div>
     </footer>
 
     <script>
@@ -99,51 +83,44 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        // RIPARAZIONE URL E FORZA AGGIORNAMENTO
         function fixUrl(url) {
-            if (!url) return 'logo.jpg.JPEG';
-            let cleanUrl = url.replace('/immagini/', '/foto/');
-            return cleanUrl + "?v=" + new Date().getTime();
+            if(!url) return 'logo.jpg.JPEG';
+            return url.replace('/immagini/', '/foto/') + "?v=" + new Date().getTime();
         }
 
-        async function caricaFlotta() {
+        async function caricaDati() {
+            const main = document.getElementById('container-flotta');
+            
             try {
-                const { data: flotta, error } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
+                const { data, error } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
                 
                 if (error) throw error;
-                const container = document.getElementById('flotta-list');
-                
-                if(flotta && flotta.length > 0) {
-                    container.innerHTML = flotta.map(f => `
-                        <div class="bus-block">
-                            <div class="bus-img-side">
-                                <img src="${fixUrl(f.immagine_url)}" onerror="this.src='logo.jpg.JPEG'" alt="${f.titolo}">
-                            </div>
-                            <div class="bus-text-side">
-                                <h2>${f.titolo}</h2>
-                                <p>${f.descrizione}</p>
-                                <a href="prenota.html" class="btn-action">Richiedi Preventivo</a>
-                            </div>
-                        </div>
-                    `).join('');
 
-                    // Trigger animazione comparsa
-                    setTimeout(() => {
-                        document.querySelectorAll('.bus-block').forEach((b, i) => {
-                            setTimeout(() => b.classList.add('show'), i * 150);
-                        });
-                    }, 100);
-
-                } else {
-                    container.innerHTML = `<p class="text-center opacity-30 font-black uppercase italic">Nessun mezzo registrato nel sistema.</p>`;
+                if (!data || data.length === 0) {
+                    main.innerHTML = `<div class="text-center py-20 opacity-30 font-black uppercase italic">Nessun mezzo trovato. Aggiungili dall'Admin!</div>`;
+                    return;
                 }
+
+                main.innerHTML = data.map(bus => `
+                    <div class="bus-card">
+                        <div class="bus-img">
+                            <img src="${fixUrl(bus.immagine_url)}" onerror="this.src='logo.jpg.JPEG'">
+                        </div>
+                        <div class="bus-info">
+                            <h2>${bus.titolo}</h2>
+                            <p>${bus.descrizione}</p>
+                            <a href="prenota.html" class="btn-book">Richiedi Preventivo</a>
+                        </div>
+                    </div>
+                `).join('');
+
             } catch (err) {
                 console.error(err);
-                document.getElementById('flotta-list').innerHTML = `<p class="text-center text-red-500 font-bold">Errore di collegamento al database.</p>`;
+                main.innerHTML = `<div class="text-center py-20 text-red-500 font-black uppercase italic">Errore di collegamento. Controlla la tabella 'flotta_page' su Supabase.</div>`;
             }
         }
 
-        caricaFlotta();
+        caricaDati();
     </script>
 </body>
 </html>
