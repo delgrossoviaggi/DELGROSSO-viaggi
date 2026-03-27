@@ -2,45 +2,148 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Del Grosso Viaggi - Manutenzione</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>La Flotta | Del Grosso Viaggi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { text-align: center; padding: 50px 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #ffffff; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .logo { max-width: 250px; height: auto; margin-bottom: 30px; }
-        h1 { font-size: 28px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        p { font-size: 18px; color: #555; line-height: 1.6; }
-        .highlight { color: #000; font-weight: bold; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
-        .cta-box { margin: 30px 0; padding: 20px; background-color: #f9f9f9; border-radius: 10px; }
-        .btn { display: inline-block; padding: 15px 30px; background-color: #000; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background-color: #333; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; margin: 0; padding: 0; overflow-x: hidden; }
         
-        .contacts { margin-top: 30px; font-size: 16px; border-top: 1px solid #eee; padding-top: 20px; }
-        .contacts a { color: #000; text-decoration: none; font-weight: bold; }
-        .whatsapp { color: #25D366 !important; }
+        header { background: white; padding: 15px 0; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 1000; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
+        .nav-links { list-style: none; display: flex; gap: 20px; }
+        .nav-links a { text-decoration: none; color: #000; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* HERO SECTION */
+        .hero { background: #000; color: white; padding: 80px 20px; text-align: center; position: relative; }
+        .hero h1 { font-size: 50px; font-weight: 900; text-transform: uppercase; font-style: italic; line-height: 0.8; letter-spacing: -2px; }
+        .hero p { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5em; color: #3b82f6; margin-bottom: 15px; }
+
+        /* BUS SECTION - LAYOUT ALTERNATO */
+        .bus-container { max-width: 1400px; margin: 60px auto; padding: 0 20px; }
+        
+        .bus-row { 
+            display: flex; flex-direction: column; align-items: center; 
+            margin-bottom: 100px; gap: 40px; 
+        }
+
+        @media (min-width: 1024px) {
+            .bus-row { flex-direction: row; gap: 80px; }
+            /* Il trucco per l'alternanza: ogni seconda riga inverte l'ordine */
+            .bus-row:nth-child(even) { flex-direction: row-reverse; }
+        }
+
+        /* Foto Ingrandita */
+        .bus-image-box { 
+            flex: 1.5; width: 100%; position: relative;
+            border-radius: 3rem; overflow: hidden; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+            height: 500px;
+        }
+        .bus-image-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+        .bus-image-box:hover img { transform: scale(1.05); }
+
+        /* Info e Descrizione a lato */
+        .bus-content-box { flex: 1; padding: 20px; }
+        .bus-content-box h2 { font-size: 42px; font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 20px; line-height: 1; color: #000; }
+        .bus-content-box p { font-size: 17px; color: #4b5563; line-height: 1.8; margin-bottom: 35px; white-space: pre-line; text-align: justify; }
+
+        /* Pulsantiera Contatti */
+        .contact-actions { display: flex; flex-direction: column; gap: 12px; }
+        .btn-wa { 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #25d366; color: white; padding: 18px; border-radius: 1.5rem;
+            font-weight: 900; text-transform: uppercase; font-size: 11px; text-decoration: none;
+            transition: 0.3s; box-shadow: 0 10px 20px rgba(37,211,102,0.2);
+        }
+        .btn-mail { 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #000; color: white; padding: 18px; border-radius: 1.5rem;
+            font-weight: 900; text-transform: uppercase; font-size: 11px; text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-wa:hover, .btn-mail:hover { transform: translateY(-5px); filter: brightness(1.1); }
+
+        footer { background: #000; color: white; padding: 60px 0; text-align: center; }
+        .designer { font-size: 10px; text-transform: uppercase; letter-spacing: 3px; opacity: 0.3; margin-top: 30px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <img src="logo.JPEG" alt="Del Grosso Viaggi" class="logo">
-        
-        <h1>Sito in Manutenzione 🛠️</h1>
-        <p>Stiamo lavorando per migliorare i nostri servizi online.</p>
-
-        <div class="cta-box">
-            <p class="highlight">Devi prenotare i tuoi posti?</p>
-            <p>Puoi procedere temporaneamente tramite la nostra piattaforma dedicata:</p>
-            <a href="https://delgrossoviaggi-app.vercel.app/index.html" class="btn">PRENOTA ORA</a>
+    <header>
+        <div class="header-flex">
+            <a href="index.html"><img src="logo.jpg.JPEG" class="h-12 w-auto"></a>
+            <nav><ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="viaggi.html">Viaggi</a></li>
+                <li><a href="prenota.html">Prenota</a></li>
+            </ul></nav>
         </div>
+    </header>
 
-        <div class="contacts">
-            <p>Per urgenze di prenotazione contattaci:</p>
-            📧 Email: <a href="mailto:info@degrossoviaggi.it">info@degrossoviaggi.it</a><br><br>
-            💬 WhatsApp: <a href="https://wa.me/393662127916" class="whatsapp">366 2127916 (Nicola)</a>
+    <section class="hero">
+        <p>Luxury Travel Experience</p>
+        <h1>ECCELLENZA <br><span class="text-blue-500">IN MOVIMENTO</span></h1>
+    </section>
+
+    <main class="bus-container" id="lista-mezzi">
+        <div class="text-center py-20 opacity-20 font-black uppercase italic animate-pulse">
+            Configurazione Flotta in corso...
         </div>
-    </div>
+    </main>
 
+    <footer>
+        <img src="logo.jpg.JPEG" style="height: 40px; margin: 0 auto 20px; filter: brightness(0) invert(1); opacity: 0.2;">
+        <p class="font-bold uppercase text-[10px] tracking-widest">Del Grosso Viaggi & Limousine Bus</p>
+        <div class="designer">Designer © Cristino Nicola Pio</div>
+    </footer>
+
+    <script>
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        async function caricaFlotta() {
+            const main = document.getElementById('lista-mezzi');
+            try {
+                const { data, error } = await sb.from('flotta_page').select('*').order('created_at', {ascending: true});
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    main.innerHTML = '<p class="text-center opacity-30 uppercase font-black">Il garage è vuoto.</p>';
+                    return;
+                }
+
+                main.innerHTML = data.map((bus, index) => {
+                    const msg = encodeURIComponent(`Salve, vorrei un preventivo per il mezzo: ${bus.titolo}`);
+                    return `
+                        <div class="bus-row">
+                            <div class="bus-image-box">
+                                <img src="${bus.immagine_url}" onerror="this.src='logo.jpg.JPEG'">
+                            </div>
+                            <div class="bus-content-box">
+                                <h2>${bus.titolo}</h2>
+                                <p>${bus.descrizione}</p>
+                                
+                                <div class="contact-actions">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <a href="https://wa.me/393662127916?text=${msg}" class="btn-wa">Nicola</a>
+                                        <a href="https://wa.me/393205730466?text=${msg}" class="btn-wa">Raffaele</a>
+                                    </div>
+                                    <a href="mailto:info@delgrossoviaggi.it?subject=Richiesta Noleggio ${bus.titolo}" class="btn-mail">
+                                        Email: info@delgrossoviaggi.it
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                main.innerHTML = '<p class="text-center text-red-500 font-black uppercase">Errore di sincronizzazione.</p>';
+            }
+        }
+        caricaFlotta();
+    </script>
 </body>
 </html>
