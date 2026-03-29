@@ -14,6 +14,7 @@
         .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
         .nav-links { list-style: none; display: flex; gap: 20px; }
         .nav-links a { text-decoration: none; color: #000; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        
         .hero { background: #000; color: white; padding: 80px 20px; text-align: center; }
         .hero h1 { font-size: 50px; font-weight: 900; text-transform: uppercase; font-style: italic; line-height: 0.8; }
         .hero p { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5em; color: #3b82f6; margin-bottom: 15px; }
@@ -24,20 +25,24 @@
             .bus-row { flex-direction: row; gap: 80px; }
             .bus-row:nth-child(even) { flex-direction: row-reverse; }
         }
-        .bus-image-box { flex: 1.5; width: 100%; border-radius: 3rem; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.1); height: 500px; position: relative; }
-        .bus-image-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .bus-image-box { flex: 1.5; width: 100%; border-radius: 3rem; overflow: hidden; position: relative; }
+        .main-img-wrap { width: 100%; height: 500px; background: #f9f9f9; border-radius: 3rem; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); cursor: zoom-in; }
+        .main-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+
+        .bus-gallery-thumbs { display: flex; gap: 12px; margin-top: 20px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .bus-gallery-thumbs::-webkit-scrollbar { display: none; }
         
-        /* Galleria miniature */
-        .bus-gallery-thumbs { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; padding-bottom: 10px; }
-        .thumb-img { width: 80px; height: 60px; object-fit: cover; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
-        .thumb-img:hover { border-color: #3b82f6; }
+        .thumb-wrap { flex-shrink: 0; width: 100px; height: 70px; border-radius: 15px; overflow: hidden; border: 3px solid transparent; transition: 0.3s; cursor: pointer; }
+        .thumb-wrap.active { border-color: #3b82f6; }
+        .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
         .bus-content-box { flex: 1; padding: 20px; }
         .bus-content-box h2 { font-size: 42px; font-weight: 900; text-transform: uppercase; font-style: italic; margin-bottom: 20px; }
         .bus-content-box p { font-size: 17px; color: #4b5563; line-height: 1.8; margin-bottom: 35px; white-space: pre-line; }
         
         .btn-wa { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25d366; color: white; padding: 18px; border-radius: 1.5rem; font-weight: 900; text-transform: uppercase; font-size: 11px; text-decoration: none; transition: 0.3s; }
-        .btn-wa:hover { transform: translateY(-5px); }
+        .btn-wa:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(37,211,102,0.2); }
 
         footer { background: #000; color: white; padding: 60px 0; text-align: center; }
     </style>
@@ -60,7 +65,9 @@
         <h1>ECCELLENZA <br><span class="text-blue-500">IN MOVIMENTO</span></h1>
     </section>
 
-    <main class="bus-container" id="lista-mezzi"></main>
+    <main class="bus-container" id="lista-mezzi">
+        <div class="text-center py-20 opacity-20 font-black uppercase italic animate-pulse">Caricamento Flotta...</div>
+    </main>
 
     <footer>
         <img src="logo.JPEG" style="height: 40px; margin: 0 auto 20px; filter: brightness(0) invert(1); opacity: 0.2;">
@@ -73,28 +80,52 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
+        // Funzione per cambiare l'immagine principale al click sulle miniature
+        function cambiaFoto(busId, url, el) {
+            document.getElementById(`main-img-${busId}`).src = url;
+            // Rimuovi classe active da tutte le miniature di quel bus
+            const thumbs = el.parentElement.querySelectorAll('.thumb-wrap');
+            thumbs.forEach(t => t.classList.remove('active'));
+            // Aggiungi active a quella cliccata
+            el.classList.add('active');
+        }
+
         async function caricaFlotta() {
             const main = document.getElementById('lista-mezzi');
-            const { data } = await sb.from('flotta_page').select('*').order('created_at', {ascending: true});
+            const { data, error } = await sb.from('flotta_page').select('*').order('created_at', {ascending: true});
             
-            if (!data) return;
+            if (error || !data) {
+                main.innerHTML = '<p class="text-center opacity-30 uppercase font-black">Errore nel caricamento.</p>';
+                return;
+            }
 
             main.innerHTML = data.map((bus) => {
                 const msg = encodeURIComponent(`Salve, vorrei info sul mezzo: ${bus.titolo}`);
-                // Uniamo copertina e gallery per GLightbox
-                const tutteLeFoto = [bus.immagine_url, ...(bus.foto_urls || [])];
                 
-                const galleryHtml = tutteLeFoto.map(url => `
-                    <a href="${url}" class="glightbox-${bus.id}">
-                        <img src="${url}" class="thumb-img">
-                    </a>
+                // Uniamo la foto principale con le altre foto della galleria
+                const albumCompleto = [bus.immagine_url, ...(bus.foto_urls || [])];
+                
+                const thumbsHtml = albumCompleto.map((url, i) => `
+                    <div class="thumb-wrap ${i === 0 ? 'active' : ''}" onclick="cambiaFoto('${bus.id}', '${url}', this)">
+                        <img src="${url}" alt="Anteprima">
+                    </div>
+                `).join('');
+
+                // Generiamo i link nascosti per GLightbox (così cliccando sulla foto grande si apre l'album)
+                const glightboxLinks = albumCompleto.map(url => `
+                    <a href="${url}" class="glightbox-${bus.id} hidden"></a>
                 `).join('');
 
                 return `
                     <div class="bus-row">
                         <div class="bus-image-box">
-                            <img src="${bus.immagine_url}" id="main-img-${bus.id}">
-                            <div class="bus-gallery-thumbs">${galleryHtml}</div>
+                            <div class="main-img-wrap" onclick="document.querySelector('.glightbox-${bus.id}').click()">
+                                <img src="${bus.immagine_url}" id="main-img-${bus.id}" alt="${bus.titolo}">
+                                ${glightboxLinks}
+                            </div>
+                            <div class="bus-gallery-thumbs">
+                                ${thumbsHtml}
+                            </div>
                         </div>
                         <div class="bus-content-box">
                             <h2>${bus.titolo}</h2>
@@ -105,11 +136,12 @@
                 `;
             }).join('');
 
-            // Inizializza GLightbox per ogni bus
+            // Inizializza GLightbox per ogni album di ogni bus
             data.forEach(bus => {
-                GLightbox({ selector: `.glightbox-${bus.id}` });
+                GLightbox({ selector: `.glightbox-${bus.id}`, loop: true });
             });
         }
+        
         caricaFlotta();
     </script>
 </body>

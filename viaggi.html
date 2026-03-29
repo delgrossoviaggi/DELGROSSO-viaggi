@@ -16,16 +16,14 @@
         .logo-box img { height: 50px; width: auto; object-fit: contain; }
         .nav-links { list-style: none; display: flex; gap: 15px; }
         .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .nav-links a:hover { color: #2563eb; }
 
-        .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.4s ease; display: flex; flex-direction: column; }
-        .card-tour:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); }
+        .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; display: flex; flex-direction: column; }
 
         .image-container { 
             position: relative; 
             height: 380px; 
-            background: #eee; /* Grigio se non carica */
-            cursor: zoom-in; 
+            background: #000; /* Sfondo nero per far risaltare la locandina */
+            cursor: pointer; 
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -34,30 +32,24 @@
         .image-container img { 
             max-width: 100%; 
             max-height: 100%; 
-            object-fit: contain; 
-            transition: 0.5s ease;
-            background: #000; /* Sfondo nero per far risaltare la locandina */
-            width: 100%;
-            height: 100%;
+            object-fit: contain; /* MOSTRA TUTTA LA LOCANDINA */
         }
 
         .sold-out-overlay {
-            position: absolute; inset: 0; background: rgba(255, 255, 255, 0.6);
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6);
             z-index: 20; display: flex; align-items: center; justify-content: center; pointer-events: none;
         }
         .sold-out-badge {
             background: #ef4444; color: white; font-weight: 900; text-transform: uppercase;
             padding: 8px 24px; font-size: 20px; font-style: italic; border: 3px solid white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: rotate(-10deg);
+            transform: rotate(-10deg);
         }
 
         .btn-book { 
             background: black; color: white; padding: 14px 20px; border-radius: 1rem; 
             font-weight: 900; text-transform: uppercase; font-size: 11px;
-            transition: all 0.3s; text-decoration: none; text-align: center;
-            flex: 1;
+            text-align: center; flex: 1;
         }
-        .btn-book:hover { background: #2563eb; }
         
         .counter-badge {
             background: #f1f5f9; color: #1e293b; padding: 12px; border-radius: 1rem;
@@ -66,10 +58,9 @@
             align-items: center; justify-content: center; min-width: 85px;
         }
         .counter-number { color: #2563eb; font-size: 16px; font-weight: 900; line-height: 1; }
-        .btn-disabled { background: #cbd5e1 !important; cursor: not-allowed; }
     </style>
 </head>
-<body class="pb-20">
+<body>
 
     <header>
         <div class="header-flex">
@@ -89,12 +80,10 @@
         <div class="text-center mb-12">
             <p class="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-2">Discovery Program</p>
             <h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1>
-            <p class="text-gray-400 text-[10px] font-bold uppercase mt-4 tracking-widest">Tocca la locandina per ingrandire</p>
         </div>
         
         <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <p class="col-span-full text-center py-20 opacity-20 font-black uppercase tracking-widest">Sincronizzazione Viaggi...</p>
-        </div>
+            </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -103,61 +92,54 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        // FUNZIONE CORRETTA PER LE IMMAGINI
-        function getImageUrl(url) {
-            if (!url) return 'logo.JPEG';
-            // Se l'URL è già un link completo (http...), lo usiamo così com'è aggiungendo solo la cache
-            return url + (url.includes('?') ? '&' : '?') + "v=" + new Date().getTime();
-        }
-
         async function caricaViaggi() {
             const grid = document.getElementById('grid-viaggi');
             
             try {
-                const { data: tratte, error: tErr } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-                const { data: preno, error: pErr } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
+                // Prendo tratte e prenotazioni
+                const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+                const { data: preno } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
 
-                if (tErr || !tratte || tratte.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-center py-20 font-black uppercase opacity-20">Nessun viaggio disponibile.</p>`;
+                if (!tratte || tratte.length === 0) {
+                    grid.innerHTML = `<p class="col-span-full text-center py-20 font-black opacity-20">NESSUN VIAGGIO ATTIVO</p>`;
                     return;
                 }
 
                 grid.innerHTML = tratte.map(v => {
-                    const occupatiCount = (preno || [])
+                    const occupati = (preno || [])
                         .filter(p => p.tratta_id === v.id)
                         .reduce((acc, curr) => acc + (curr.posti_selezionati ? curr.posti_selezionati.length : 0), 0);
                     
                     const capacita = parseInt(v.modello_bus) || 53;
-                    const disponibili = capacita - occupatiCount;
-                    const isFull = disponibili <= 0;
-                    const imgUrl = getImageUrl(v.immagine_url);
+                    const liberi = capacita - occupati;
+                    const isFull = liberi <= 0;
+                    
+                    // URL pulito: se non c'è immagine_url usa il logo
+                    const finalImg = v.immagine_url ? v.immagine_url : 'logo.JPEG';
 
                     return `
                         <div class="card-tour">
-                            <div class="image-container">
-                                ${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">SOLD OUT</div></div>` : ''}
-                                <a href="${imgUrl}" class="glightbox" data-title="${v.titolo}">
-                                    <img src="${imgUrl}" alt="${v.titolo}" onerror="this.src='logo.JPEG'; this.style.objectFit='contain';">
-                                </a>
-                                <div class="absolute top-4 left-4 bg-black/80 backdrop-blur text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">
+                            <div class="image-container" onclick="apriFoto('${finalImg}')">
+                                ${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">ESAURITO</div></div>` : ''}
+                                <img src="${finalImg}" onerror="this.src='logo.JPEG'">
+                                <div class="absolute top-4 left-4 bg-black/80 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase">
                                     Bus ${capacita} Posti
                                 </div>
                             </div>
 
                             <div class="p-6">
-                                <h2 class="font-black uppercase italic text-lg mb-6 leading-tight h-14 flex items-center">
+                                <h2 class="font-black uppercase italic text-lg mb-6 h-14 flex items-center">
                                     ${v.titolo}
                                 </h2>
                                 
                                 <div class="flex items-stretch gap-3">
                                     <div class="counter-badge">
-                                        <span class="counter-number">${isFull ? 0 : disponibili}</span>
+                                        <span class="counter-number">${isFull ? 0 : liberi}</span>
                                         <span>Posti</span>
                                     </div>
-                                    
                                     ${isFull ? 
-                                        `<button class="btn-book btn-disabled" disabled>Completo</button>` : 
-                                        `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">Prenota</a>`
+                                        `<button class="btn-book opacity-30" disabled>COMPLETO</button>` : 
+                                        `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">PRENOTA</a>`
                                     }
                                 </div>
                             </div>
@@ -165,16 +147,18 @@
                     `;
                 }).join('');
 
-                GLightbox({ 
-                    selector: '.glightbox',
-                    touchNavigation: true,
-                    zoomable: true
-                });
-
             } catch (err) {
-                console.error(err);
-                grid.innerHTML = "<p class='text-center uppercase font-black py-20'>Errore di Caricamento.</p>";
+                grid.innerHTML = "Errore caricamento dati.";
             }
+        }
+
+        // Funzione per ingrandire la foto senza bug del caricamento infinito
+        function apriFoto(url) {
+            const myGallery = GLightbox({
+                elements: [{ 'href': url, 'type': 'image' }],
+                touchNavigation: true,
+            });
+            myGallery.open();
         }
 
         caricaViaggi();
