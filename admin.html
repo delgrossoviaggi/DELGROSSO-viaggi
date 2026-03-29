@@ -51,18 +51,72 @@
         </div>
 
         <div class="lg:col-span-7 space-y-6">
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Master Admin - Del Grosso Viaggi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (sessionStorage.getItem("admin_auth") !== "true") {
+            const pass = prompt("Password Amministratore:");
+            if (pass === "Delgrosso@26") { sessionStorage.setItem("admin_auth", "true"); }
+            else { window.location.href = "index.html"; }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; overflow-x: hidden; }
+        .section-card { background: white; border-radius: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .input-style { width: 100%; padding: 0.75rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; font-weight: 700; margin-bottom: 0.75rem; outline: none; font-size: 0.875rem; }
+        .bus-grid { display: grid; grid-template-columns: repeat(5, 35px); gap: 8px; justify-content: center; }
+        .seat { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 10px; font-weight: 900; border: 2px solid #e5e7eb; cursor: pointer; }
+        .seat.available { background: white; color: #9ca3af; }
+        .seat.selected { background: #2563eb; border-color: #2563eb; color: white; }
+        .seat.occupied { background: #e5e7eb; border-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+        .corridor { width: 35px; height: 35px; }
+        .btn-action { width: 100%; padding: 0.8rem; border-radius: 0.75rem; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: all 0.2s; cursor: pointer; border:none; }
+        .preview-media { width: 56px; height: 40px; border-radius: 8px; object-fit: cover; background: #000; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; overflow: hidden; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <nav class="bg-white border-b border-gray-200 p-4 sticky top-0 z-50 shadow-sm flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="bg-gray-100 p-2 px-4 rounded-xl font-black text-[10px] uppercase border">SITO</a>
+            <h1 class="font-black text-xs uppercase italic">Master Admin <span class="text-blue-600">Total Cloud</span></h1>
+        </div>
+        <button onclick="location.reload()" class="text-[9px] font-black uppercase bg-blue-50 text-blue-600 px-4 py-2 rounded-xl">Reset Admin</button>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-5">
+            <div class="section-card" style="border-top: 4px solid #2563eb;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-black uppercase italic text-lg text-blue-700 italic">Passeggeri</h2>
+                    <span id="counter-preno" class="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full">...</span>
+                </div>
+                <div id="lista-p" class="space-y-3 max-h-[1000px] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-7 space-y-6">
             
             <div class="section-card" style="border-top: 4px solid #f43f5e;">
                 <h2 class="font-black uppercase italic text-lg text-rose-600 mb-6 italic">Party On The Road</h2>
                 <input type="text" id="g-titolo" placeholder="NOME EVENTO (ES. 18 ANNI LUIGI)" class="input-style uppercase">
                 <div class="mb-4">
-                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Carica Foto (.jpg, .png, .dng) o Video (.mp4, .mov):</label>
+                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Scegli Foto (jpg, png, dng) o Video (mp4, mov):</label>
                     <input type="file" id="g-files" class="text-[10px]" multiple accept="image/*,video/*,.dng">
                 </div>
                 <div class="flex gap-2">
                     <button id="btn-salva-gallery" onclick="salvaGallery()" class="btn-action bg-rose-600 text-white flex-1 text-center">Pubblica Album Party</button>
                     <button id="btn-annulla-gallery" onclick="resetGallery()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
                 </div>
+                <div id="upload-status" class="mt-4 text-[10px] font-black uppercase text-rose-600 hidden italic"></div>
                 <div id="preview-gallery" class="mt-6 space-y-2"></div>
             </div>
 
@@ -113,9 +167,8 @@
         let cacheV = [], cacheF = [], cacheG = [], scelti = []; 
         let editP = null, editV = null, editF = null, editG = null;
 
-        // Funzione per capire se un file è video dall'URL
         function isVideo(url) {
-            const videoExts = ['mp4', 'mov', 'avi', 'webm'];
+            const videoExts = ['mp4', 'mov', 'avi', 'webm', 'm4v'];
             const ext = url.split('.').pop().toLowerCase().split('?')[0];
             return videoExts.includes(ext);
         }
@@ -128,7 +181,6 @@
             
             cacheV = v || []; cacheF = f || []; cacheG = g || [];
 
-            // Passeggeri
             document.getElementById('lista-p').innerHTML = (p || []).map(item => {
                 const tr = cacheV.find(x => x.id === item.tratta_id);
                 return `<div class="p-4 bg-white border rounded-2xl flex justify-between items-center shadow-sm">
@@ -137,12 +189,11 @@
                 </div>`;
             }).join('');
 
-            // Party Gallery Preview (Gestione Video/Foto)
             document.getElementById('preview-gallery').innerHTML = cacheG.map(ev => {
                 const firstUrl = ev.foto_urls[0];
                 const previewContent = isVideo(firstUrl) 
-                    ? `<div class="preview-media bg-black text-white">VIDEO</div>`
-                    : `<img src="${firstUrl}" class="preview-media shadow-sm">`;
+                    ? `<div class="preview-media">VIDEO</div>`
+                    : `<img src="${firstUrl}" class="preview-media">`;
 
                 return `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
@@ -155,7 +206,6 @@
                 </div>`;
             }).join('');
 
-            // Viaggi Preview
             document.getElementById('preview-v').innerHTML = cacheV.map(item => `
                 <div class="relative h-24 rounded-xl overflow-hidden border group shadow-sm">
                     <img src="${item.immagine_url}" class="w-full h-full object-cover">
@@ -165,7 +215,6 @@
                     </div>
                 </div>`).join('');
 
-            // Flotta Preview
             document.getElementById('preview-flotta').innerHTML = cacheF.map(bus => `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
                     <img src="${bus.immagine_url}" class="w-14 h-10 object-cover rounded-lg">
@@ -180,38 +229,38 @@
             document.getElementById('counter-preno').innerText = (p || []).length + " CLIENTI";
         }
 
-        // --- CARICAMENTO GALLERY (FOTO E VIDEO) ---
+        // --- SISTEMA SALVATAGGIO PARTY CON LOGICA MEMORIA OTTIMIZZATA ---
         async function salvaGallery() {
             const t = document.getElementById('g-titolo').value.toUpperCase().trim();
             const files = document.getElementById('g-files').files;
+            const status = document.getElementById('upload-status');
             
-            if(!t) return alert("Inserisci il nome della festa!");
-            if(!editG && files.length === 0) return alert("Seleziona almeno un file!");
+            if(!t) return alert("Inserisci il nome!");
+            if(!editG && files.length === 0) return alert("Scegli i file!");
 
             const btn = document.getElementById('btn-salva-gallery');
-            const originalText = btn.innerText;
-            btn.innerText = "⏳ CARICAMENTO IN CORSO...";
             btn.disabled = true;
+            status.classList.remove('hidden');
 
             try {
                 let urls = editG ? cacheG.find(x => x.id === editG).foto_urls : [];
                 
-                if(files.length > 0) {
-                    for(let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        btn.innerText = `⏳ CARICAMENTO ${i+1}/${files.length}...`;
-                        
-                        const fileExt = file.name.split('.').pop().toLowerCase();
-                        const fileName = `party_${Date.now()}_${i}.${fileExt}`;
-                        
-                        const { data: upData, error: upErr } = await sb.storage.from('foto').upload(fileName, file);
-                        if(upErr) throw upErr;
+                // Caricamento sequenziale per evitare crash di memoria
+                for(let i = 0; i < files.length; i++) {
+                    const f = files[i];
+                    status.innerText = `⏳ Elaborazione file ${i+1} di ${files.length}...`;
+                    
+                    const ext = f.name.split('.').pop().toLowerCase();
+                    const name = `p_${Date.now()}_${i}.${ext}`;
+                    
+                    const { data: upData, error: upErr } = await sb.storage.from('foto').upload(name, f);
+                    if(upErr) throw upErr;
 
-                        const { data: urlData } = sb.storage.from('foto').getPublicUrl(fileName);
-                        urls.push(urlData.publicUrl);
-                    }
+                    const { data: urlData } = sb.storage.from('foto').getPublicUrl(name);
+                    urls.push(urlData.publicUrl);
                 }
 
+                status.innerText = "💾 Sincronizzazione Database...";
                 const payload = { titolo: t, foto_urls: urls };
                 const { error: dbErr } = editG 
                     ? await sb.from('gallery_eventi').update(payload).eq('id', editG)
@@ -219,29 +268,41 @@
 
                 if(dbErr) throw dbErr;
 
-                alert("Party salvato con successo!");
+                alert("Party aggiornato con successo!");
                 location.reload();
 
             } catch (err) {
                 console.error(err);
-                alert("ERRORE: " + (err.message || "File troppo pesante o errore server."));
-                btn.innerText = originalText;
+                alert("Errore: " + err.message);
                 btn.disabled = false;
+                status.classList.add('hidden');
             }
         }
 
         function caricaModificaGallery(id) {
             const ev = cacheG.find(x => x.id === id);
-            editG = id;
-            document.getElementById('g-titolo').value = ev.titolo;
-            document.getElementById('btn-salva-gallery').innerText = "AGGIORNA ALBUM";
+            editG = id; document.getElementById('g-titolo').value = ev.titolo;
+            document.getElementById('btn-salva-gallery').innerText = "Aggiorna Album";
             document.getElementById('btn-annulla-gallery').classList.remove('hidden');
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function resetGallery() { editG = null; location.reload(); }
 
-        // --- FUNZIONI STANDARD ---
+        // --- ALTRE FUNZIONI ---
+        async function salvaPreno() {
+            const n = document.getElementById('p-nome').value.toUpperCase().trim();
+            const tr = document.getElementById('p-tratta').value;
+            if(!n || !tr || !scelti.length) return alert("Dati incompleti!");
+            await sb.from('prenotazioni').insert([{ nome_cliente: n, tratta_id: tr, posti_selezionati: scelti }]);
+            location.reload();
+        }
+
+        function caricaModificaPreno(id, n, tr, p) {
+            editP = id; document.getElementById('p-nome').value = n; document.getElementById('p-tratta').value = tr;
+            caricaPiantinaAdmin(tr, p); window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
         async function caricaPiantinaAdmin(tid, pre = []) {
             if(!tid) return document.getElementById('area-bus').classList.add('hidden');
             const v = cacheV.find(x => x.id === tid);
@@ -266,71 +327,31 @@
             }
         }
 
-        async function salvaPreno() {
-            const n = document.getElementById('p-nome').value.toUpperCase().trim();
-            const tr = document.getElementById('p-tratta').value;
-            if(!n || !tr || !scelti.length) return alert("Dati incompleti!");
-            const obj = { nome_cliente: n, tratta_id: tr, posti_selezionati: scelti };
-            if(editP) await sb.from('prenotazioni').update(obj).eq('id', editP);
-            else await sb.from('prenotazioni').insert([obj]);
-            location.reload();
-        }
-
-        function caricaModificaPreno(id, n, tr, p) {
-            editP = id; document.getElementById('p-nome').value = n; document.getElementById('p-tratta').value = tr;
-            document.getElementById('btn-salva-preno').innerText = "APPLICA MODIFICA";
-            caricaPiantinaAdmin(tr, p); window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
         async function salvaViaggio() {
             const t = document.getElementById('v-titolo').value.toUpperCase().trim();
             const m = document.getElementById('v-modello').value;
             const f = document.getElementById('v-file').files[0];
-            let url = editV ? cacheV.find(x => x.id === editV).immagine_url : null;
-            if(f) {
-                const name = `v_${Date.now()}`;
-                await sb.storage.from('foto').upload(name, f);
-                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
-            }
-            if(!t || !url) return alert("Dati mancanti!");
-            const obj = { titolo: t, modello_bus: m, immagine_url: url };
-            if(editV) await sb.from('tratte').update(obj).eq('id', editV);
-            else await sb.from('tratte').insert([obj]);
+            if(!t || !f) return alert("Dati mancanti!");
+            const name = `v_${Date.now()}`;
+            await sb.storage.from('foto').upload(name, f);
+            const url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
+            await sb.from('tratte').insert([{ titolo: t, modello_bus: m, immagine_url: url }]);
             location.reload();
-        }
-
-        function caricaModificaViaggio(id) {
-            const v = cacheV.find(x => x.id === id); editV = id;
-            document.getElementById('v-titolo').value = v.titolo;
-            document.getElementById('v-modello').value = v.modello_bus;
-            window.scrollTo({top: 500, behavior: 'smooth'});
         }
 
         async function salvaFlotta() {
             const t = document.getElementById('f-titolo').value.toUpperCase().trim();
             const d = document.getElementById('f-desc').value.trim();
             const f = document.getElementById('f-file').files[0];
-            let url = editF ? cacheF.find(x => x.id === editF).immagine_url : null;
-            if(f) {
-                const name = `fl_${Date.now()}`;
-                await sb.storage.from('foto').upload(name, f);
-                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
-            }
-            if(!t || !url) return alert("Dati mancanti!");
-            const obj = { titolo: t, descrizione: d, immagine_url: url };
-            if(editF) await sb.from('flotta_page').update(obj).eq('id', editF);
-            else await sb.from('flotta_page').insert([obj]);
+            if(!t || !f) return alert("Dati mancanti!");
+            const name = `fl_${Date.now()}`;
+            await sb.storage.from('foto').upload(name, f);
+            const url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
+            await sb.from('flotta_page').insert([{ titolo: t, descrizione: d, immagine_url: url }]);
             location.reload();
         }
 
-        function caricaModificaFlotta(id) {
-            const bus = cacheF.find(x => x.id === id);
-            editF = id; document.getElementById('f-titolo').value = bus.titolo;
-            document.getElementById('f-desc').value = bus.descrizione;
-            window.scrollTo({top: 800, behavior: 'smooth'});
-        }
-
-        async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); init(); } }
+        async function elimina(tab, id) { if(confirm("Eliminare?")) { await sb.from(tab).delete().eq('id', id); init(); } }
 
         init();
     </script>
