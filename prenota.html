@@ -28,7 +28,7 @@
 
     <header>
         <div class="header-flex">
-            <a href="index.html"><img src="logo.jpg.JPEG" class="h-10 w-auto"></a>
+            <a href="index.html"><img src="logo.JPEG" class="h-10 w-auto" alt="Logo"></a>
             <nav class="flex gap-4">
                 <a href="viaggi.html" class="text-[9px] font-black uppercase text-gray-400">Viaggi</a>
                 <a href="index.html" class="text-[9px] font-black uppercase text-blue-600">Home</a>
@@ -157,7 +157,6 @@
                 return;
             }
 
-            // SICUREZZA: Converte sempre i posti in Array di Stringhe per il database
             const postiDaSalvare = selezionati.map(String);
 
             const { error } = await sb.from('prenotazioni').insert([{
@@ -171,12 +170,10 @@
                 const msg = `*NUOVA PRENOTAZIONE*\n📍 Viaggio: ${trattaNome}\n👤 Cliente: ${nome.toUpperCase()}\n📞 Cell: ${tel || 'N/D'}\n💺 Posti: ${postiDaSalvare.join(', ')}`;
                 window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(msg)}`;
             } else {
-                // Se c'è un errore, lo scrive nel dettaglio per capire il problema
                 console.error("Errore Supabase:", error);
-                alert("Errore Database: " + error.message + "\n\nAssicurati di aver eseguito il comando SQL per disabilitare RLS!");
+                alert("Errore Database: " + error.message);
             }
         }
-
         init();
     </script>
 </body>

@@ -10,80 +10,32 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1a1a1a; }
-        
         header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
         .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
         .logo-box img { height: 50px; width: auto; object-fit: contain; }
         .nav-links { list-style: none; display: flex; gap: 15px; }
-        .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-
+        .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; display: flex; flex-direction: column; }
-
-        .image-container { 
-            position: relative; 
-            height: 380px; 
-            background: #000; /* Sfondo nero per far risaltare la locandina */
-            cursor: pointer; 
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .image-container img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; /* MOSTRA TUTTA LA LOCANDINA */
-        }
-
-        .sold-out-overlay {
-            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6);
-            z-index: 20; display: flex; align-items: center; justify-content: center; pointer-events: none;
-        }
-        .sold-out-badge {
-            background: #ef4444; color: white; font-weight: 900; text-transform: uppercase;
-            padding: 8px 24px; font-size: 20px; font-style: italic; border: 3px solid white;
-            transform: rotate(-10deg);
-        }
-
-        .btn-book { 
-            background: black; color: white; padding: 14px 20px; border-radius: 1rem; 
-            font-weight: 900; text-transform: uppercase; font-size: 11px;
-            text-align: center; flex: 1;
-        }
-        
-        .counter-badge {
-            background: #f1f5f9; color: #1e293b; padding: 12px; border-radius: 1rem;
-            font-weight: 800; font-size: 9px; text-transform: uppercase;
-            border: 1px solid #e2e8f0; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; min-width: 85px;
-        }
+        .image-container { position: relative; height: 380px; background: #000; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .image-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .sold-out-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 20; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .sold-out-badge { background: #ef4444; color: white; font-weight: 900; text-transform: uppercase; padding: 8px 24px; font-size: 20px; font-style: italic; border: 3px solid white; transform: rotate(-10deg); }
+        .btn-book { background: black; color: white; padding: 14px 20px; border-radius: 1rem; font-weight: 900; text-transform: uppercase; font-size: 11px; text-align: center; flex: 1; }
+        .counter-badge { background: #f1f5f9; color: #1e293b; padding: 12px; border-radius: 1rem; font-weight: 800; font-size: 9px; text-transform: uppercase; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 85px; }
         .counter-number { color: #2563eb; font-size: 16px; font-weight: 900; line-height: 1; }
     </style>
 </head>
-<body>
-
+<body class="pb-20">
     <header>
         <div class="header-flex">
             <a href="index.html" class="logo-box"><img src="logo.JPEG" alt="Logo"></a>
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="flotta.html">Flotta</a></li>
-                    <li><a href="viaggi.html" style="color: #2563eb;">Viaggi</a></li>
-                    <li><a href="contatti.html">Contatti</a></li>
-                </ul>
-            </nav>
+            <nav><ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="flotta.html">Flotta</a></li><li><a href="viaggi.html" style="color: #2563eb;">Viaggi</a></li><li><a href="contatti.html">Contatti</a></li></ul></nav>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto py-12 px-4">
-        <div class="text-center mb-12">
-            <p class="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-2">Discovery Program</p>
-            <h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1>
-        </div>
-        
-        <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            </div>
+        <div class="text-center mb-12"><p class="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-2">Discovery Program</p><h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1></div>
+        <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -91,76 +43,23 @@
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
-
         async function caricaViaggi() {
             const grid = document.getElementById('grid-viaggi');
-            
             try {
-                // Prendo tratte e prenotazioni
                 const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
                 const { data: preno } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
-
-                if (!tratte || tratte.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-center py-20 font-black opacity-20">NESSUN VIAGGIO ATTIVO</p>`;
-                    return;
-                }
-
+                if (!tratte || tratte.length === 0) { grid.innerHTML = `<p class="col-span-full text-center py-20 font-black opacity-20">NESSUN VIAGGIO ATTIVO</p>`; return; }
                 grid.innerHTML = tratte.map(v => {
-                    const occupati = (preno || [])
-                        .filter(p => p.tratta_id === v.id)
-                        .reduce((acc, curr) => acc + (curr.posti_selezionati ? curr.posti_selezionati.length : 0), 0);
-                    
+                    const occupati = (preno || []).filter(p => p.tratta_id === v.id).reduce((acc, curr) => acc + (curr.posti_selezionati ? curr.posti_selezionati.length : 0), 0);
                     const capacita = parseInt(v.modello_bus) || 53;
                     const liberi = capacita - occupati;
                     const isFull = liberi <= 0;
-                    
-                    // URL pulito: se non c'è immagine_url usa il logo
-                    const finalImg = v.immagine_url ? v.immagine_url : 'logo.JPEG';
-
-                    return `
-                        <div class="card-tour">
-                            <div class="image-container" onclick="apriFoto('${finalImg}')">
-                                ${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">ESAURITO</div></div>` : ''}
-                                <img src="${finalImg}" onerror="this.src='logo.JPEG'">
-                                <div class="absolute top-4 left-4 bg-black/80 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase">
-                                    Bus ${capacita} Posti
-                                </div>
-                            </div>
-
-                            <div class="p-6">
-                                <h2 class="font-black uppercase italic text-lg mb-6 h-14 flex items-center">
-                                    ${v.titolo}
-                                </h2>
-                                
-                                <div class="flex items-stretch gap-3">
-                                    <div class="counter-badge">
-                                        <span class="counter-number">${isFull ? 0 : liberi}</span>
-                                        <span>Posti</span>
-                                    </div>
-                                    ${isFull ? 
-                                        `<button class="btn-book opacity-30" disabled>COMPLETO</button>` : 
-                                        `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">PRENOTA</a>`
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    const finalImg = v.immagine_url || 'logo.JPEG';
+                    return `<div class="card-tour"><div class="image-container" onclick="apriFoto('${finalImg}')">${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">ESAURITO</div></div>` : ''}<img src="${finalImg}" onerror="this.src='logo.JPEG'"><div class="absolute top-4 left-4 bg-black/80 text-white px-3 py-1 rounded-full text-[8px] font-black uppercase">Bus ${capacita} Posti</div></div><div class="p-6"><h2 class="font-black uppercase italic text-lg mb-6 h-14 flex items-center">${v.titolo}</h2><div class="flex items-stretch gap-3"><div class="counter-badge"><span class="counter-number">${isFull ? 0 : liberi}</span><span>Posti</span></div>${isFull ? `<button class="btn-book opacity-30" disabled>COMPLETO</button>` : `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">PRENOTA</a>`}</div></div></div>`;
                 }).join('');
-
-            } catch (err) {
-                grid.innerHTML = "Errore caricamento dati.";
-            }
+            } catch (err) { grid.innerHTML = "Errore caricamento dati."; }
         }
-
-        // Funzione per ingrandire la foto senza bug del caricamento infinito
-        function apriFoto(url) {
-            const myGallery = GLightbox({
-                elements: [{ 'href': url, 'type': 'image' }],
-                touchNavigation: true,
-            });
-            myGallery.open();
-        }
-
+        function apriFoto(url) { const myGallery = GLightbox({ elements: [{ 'href': url, 'type': 'image' }], touchNavigation: true }); myGallery.open(); }
         caricaViaggi();
     </script>
 </body>
