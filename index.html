@@ -20,7 +20,7 @@
         .carousel-wrap { position: relative; width: 100%; height: 75vh; background: #000; overflow: hidden; }
         .slide { 
             position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; 
-            background-size: contain; /* Si adatta alla grandezza della foto senza tagliarla */
+            background-size: contain; 
             background-repeat: no-repeat;
             background-position: center; 
         }
@@ -30,7 +30,7 @@
         .carousel-text-top h2 { font-weight: 900; text-transform: uppercase; font-style: italic; font-size: 1.8rem; line-height: 1.1; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
         .carousel-text-top span { color: #3b82f6; }
 
-        /* Card Style */
+        /* Card Styles */
         .flotta-card { position: relative; overflow: hidden; border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; height: 320px; transition: 0.4s ease; cursor: pointer; }
         .flotta-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; }
         .flotta-card:hover img { transform: scale(1.1); }
@@ -56,6 +56,7 @@
             <a href="index.html" class="flex-shrink-0">
                 <img src="logo.JPEG" class="h-10 md:h-16 w-auto object-contain" alt="Logo">
             </a>
+            
             <div class="flex items-center gap-4 md:gap-8 overflow-hidden">
                 <nav class="nav-container flex gap-4 md:gap-8 py-2">
                     <a href="#home" class="nav-link">Home</a>
@@ -64,6 +65,12 @@
                     <a href="viaggi.html" class="nav-link">Viaggi</a>
                     <a href="contatti.html" class="nav-link">Contatti</a>
                 </nav>
+                
+                <a href="admin.html" class="flex-shrink-0 opacity-20 hover:opacity-100 transition-all p-2 bg-gray-100 rounded-full ml-2">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </header>
@@ -75,7 +82,7 @@
         <div id="carousel-container" class="absolute inset-0"></div>
     </section>
 
-    <section class="py-24 bg-white border-b border-gray-50">
+    <section class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-6">
             <div class="mb-16">
                 <p class="text-blue-600 font-black uppercase text-[10px] tracking-[0.4em] mb-2">Exclusive Selection</p>
