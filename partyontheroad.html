@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+<!DOCTYPE html>
+<html lang="it">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party On The Road | Limousine Bus Del Grosso</title>
@@ -11,6 +14,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
         
+        /* BLOCO TASTO DESTRO E TRASCINAMENTO SULLE IMMAGINI */
+        img, video {
+            -webkit-user-select: none;
+            -webkit-touch-callout: none; /* Blocca menu salvataggio su iPhone */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            pointer-events: none; /* Impedisce il trascinamento */
+        }
+
+        /* CARD EVENTO */
         .event-card { 
             border-radius: 2.5rem; overflow: hidden; position: relative; cursor: pointer; 
             transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); height: 420px;
@@ -30,37 +44,24 @@
         }
 
         #contactMenu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 1.5rem;
-            padding: 1.2rem;
-            width: 280px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            z-index: 100;
+            display: none; position: absolute; top: 100%; right: 0;
+            background: #111; border: 1px solid #333; border-radius: 1.5rem;
+            padding: 1.2rem; width: 280px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 100;
         }
         .contact-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: white;
-            transition: 0.3s;
+            display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase; text-decoration: none;
+            color: white; transition: 0.3s;
         }
         .contact-link:hover { background: #222; color: #2563eb; }
+
+        /* NASCONDE IL TASTO DOWNLOAD DI DEFAULT DI ALCUNI BROWSER SUI VIDEO */
+        video::-internal-media-controls-download-button { display:none; }
+        video::-webkit-media-controls-enclosure { overflow:hidden; }
+        video::-webkit-media-controls-panel { width: calc(100% + 30px); }
     </style>
 </head>
-<body>
-
-    <nav class="p-6 flex justify-between items-center border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+<body oncontextmenu="return false;"> <nav class="p-6 flex justify-between items-center border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
         <a href="index.html"><img src="logo.JPEG" class="h-12 md:h-16 w-auto" alt="Logo"></a>
         <div class="relative">
             <button onclick="toggleContacts()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all scale-100 active:scale-90">
@@ -106,14 +107,6 @@
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
-        window.onclick = function(event) {
-            if (!event.target.matches('button')) {
-                const menu = document.getElementById('contactMenu');
-                if (menu && menu.style.display === 'block') menu.style.display = 'none';
-            }
-        }
-
-        // Funzione per capire se è un video
         function isVideo(url) {
             const videoExts = ['mp4', 'mov', 'avi', 'webm', 'm4v'];
             const ext = url.split('.').pop().toLowerCase().split('?')[0];
@@ -130,7 +123,6 @@
                     grid.innerHTML = data.map(ev => {
                         const galleryHtml = ev.foto_urls.map((url, index) => {
                             const video = isVideo(url);
-                            // Se è video aggiungiamo la classe glightbox specifica
                             return `<a href="${url}" class="glightbox-${ev.id} ${index === 0 ? '' : 'hidden'}" 
                                        data-gallery="gallery-${ev.id}" 
                                        ${video ? 'data-type="video"' : ''}></a>`;
@@ -142,7 +134,7 @@
                                 <div class="event-overlay">
                                     <h2 class="text-3xl font-black uppercase italic leading-none group-hover:tracking-wider transition-all duration-500">${ev.titolo}</h2>
                                     <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
-                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls.length} Multimedia</p>
+                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls.length} Shots</p>
                                         <span class="text-white font-black text-[10px] uppercase tracking-widest">Guarda →</span>
                                     </div>
                                 </div>
@@ -155,15 +147,16 @@
                             selector: `.glightbox-${ev.id}`,
                             loop: true,
                             autoplayVideos: true,
-                            plyr: { config: { ratio: '9:16', muted: false, hideControls: false } }
+                            touchNavigation: true,
+                            keyboardNavigation: true,
+                            closeButton: true,
+                            // DISABILITA TASTI DOWNLOAD E ZOOM ECCESSIVI
+                            zoomable: false, 
+                            draggable: false 
                         });
                     });
-                } else {
-                    grid.innerHTML = `<p class="col-span-full text-center opacity-40 font-black uppercase tracking-widest">In attesa del prossimo party...</p>`;
                 }
-            } catch (err) {
-                grid.innerHTML = `<p class="col-span-full text-center text-red-500 uppercase">Errore dati.</p>`;
-            }
+            } catch (err) { console.error(err); }
         }
 
         function apriAlbum(id) {
@@ -172,6 +165,9 @@
         }
 
         caricaEventi();
+
+        // BLOCCO TASTO DESTRO ULTERIORE PROTEZIONE
+        document.addEventListener('contextmenu', event => event.preventDefault());
     </script>
 </body>
 </html>
