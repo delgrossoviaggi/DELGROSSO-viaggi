@@ -11,7 +11,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
         
-        /* CARD CON FOTO BUS DI SFONDO */
         .event-card { 
             border-radius: 2.5rem; overflow: hidden; position: relative; cursor: pointer; 
             transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); height: 420px;
@@ -88,8 +87,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 pb-40">
-        <div id="grid-eventi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
-            </div>
+        <div id="grid-eventi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center"></div>
     </main>
 
     <footer class="py-12 border-t border-zinc-900 text-center">
@@ -108,7 +106,6 @@
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Chiudi menu contatti se clicchi fuori
         window.onclick = function(event) {
             if (!event.target.matches('button')) {
                 const menu = document.getElementById('contactMenu');
@@ -116,20 +113,28 @@
             }
         }
 
+        // Funzione per capire se è un video
+        function isVideo(url) {
+            const videoExts = ['mp4', 'mov', 'avi', 'webm', 'm4v'];
+            const ext = url.split('.').pop().toLowerCase().split('?')[0];
+            return videoExts.includes(ext);
+        }
+
         async function caricaEventi() {
             const grid = document.getElementById('grid-eventi');
-            
             try {
                 const { data, error } = await sb.from('gallery_eventi').select('*').order('created_at', {ascending: false});
-                
                 if (error) throw error;
 
                 if(data && data.length > 0) {
                     grid.innerHTML = data.map(ev => {
-                        // Creiamo i link nascosti per GLightbox basandoci sull'array foto_urls nel DB
-                        const galleryHtml = ev.foto_urls.map((url, index) => 
-                            `<a href="${url}" class="glightbox-${ev.id} ${index === 0 ? '' : 'hidden'}" data-gallery="gallery-${ev.id}"></a>`
-                        ).join('');
+                        const galleryHtml = ev.foto_urls.map((url, index) => {
+                            const video = isVideo(url);
+                            // Se è video aggiungiamo la classe glightbox specifica
+                            return `<a href="${url}" class="glightbox-${ev.id} ${index === 0 ? '' : 'hidden'}" 
+                                       data-gallery="gallery-${ev.id}" 
+                                       ${video ? 'data-type="video"' : ''}></a>`;
+                        }).join('');
 
                         return `
                             <div class="event-card group shadow-2xl" onclick="apriAlbum('${ev.id}')">
@@ -137,7 +142,7 @@
                                 <div class="event-overlay">
                                     <h2 class="text-3xl font-black uppercase italic leading-none group-hover:tracking-wider transition-all duration-500">${ev.titolo}</h2>
                                     <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
-                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls.length} Shots</p>
+                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls.length} Multimedia</p>
                                         <span class="text-white font-black text-[10px] uppercase tracking-widest">Guarda →</span>
                                     </div>
                                 </div>
@@ -145,21 +150,19 @@
                         `;
                     }).join('');
 
-                    // Inizializza GLightbox per ogni album trovato
                     data.forEach(ev => {
                         GLightbox({ 
                             selector: `.glightbox-${ev.id}`,
                             loop: true,
-                            openEffect: 'zoom',
-                            closeEffect: 'fade'
+                            autoplayVideos: true,
+                            plyr: { config: { ratio: '9:16', muted: false, hideControls: false } }
                         });
                     });
                 } else {
                     grid.innerHTML = `<p class="col-span-full text-center opacity-40 font-black uppercase tracking-widest">In attesa del prossimo party...</p>`;
                 }
             } catch (err) {
-                console.error("Errore Supabase:", err);
-                grid.innerHTML = `<p class="col-span-full text-center text-red-500 font-black uppercase">Errore nel caricamento dei dati.</p>`;
+                grid.innerHTML = `<p class="col-span-full text-center text-red-500 uppercase">Errore dati.</p>`;
             }
         }
 
