@@ -6,6 +6,7 @@
     <title>Tour e Viaggi | Del Grosso</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1a1a1a; }
@@ -17,132 +18,139 @@
         .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
         .nav-links a:hover { color: #2563eb; }
 
-        .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.5s ease; position: relative; }
-        .card-tour:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); }
+        .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.5s ease; }
+        .card-tour:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
 
-        /* Stile Sold Out con linea obliqua */
+        .image-container { position: relative; height: 320px; cursor: zoom-in; overflow: hidden; }
+        .image-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
+        .image-container:hover img { transform: scale(1.05); }
+
         .sold-out-overlay {
             position: absolute; inset: 0; background: rgba(255, 255, 255, 0.7);
-            z-index: 20; display: flex; align-items: center; justify-content: center;
-            pointer-events: none;
+            z-index: 20; display: flex; align-items: center; justify-content: center; pointer-events: none;
         }
         .sold-out-badge {
             background: #ef4444; color: white; font-weight: 900; text-transform: uppercase;
             padding: 10px 30px; font-size: 24px; font-style: italic; border: 4px solid white;
             box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: rotate(-15deg);
-            position: relative;
-        }
-        /* Linea rossa obliqua che taglia la card */
-        .card-tour.full::after {
-            content: ""; position: absolute; top: 50%; left: -10%; width: 120%; height: 5px;
-            background: #ef4444; transform: rotate(-25deg); z-index: 25; opacity: 0.8;
-            pointer-events: none;
         }
 
-        .btn-book { background: black; color: white; padding: 16px 32px; border-radius: 1.25rem; font-weight: 900; text-transform: uppercase; font-style: italic; transition: all 0.3s; text-decoration: none; display: inline-block; }
-        .btn-book:hover { background: #2563eb; transform: scale(1.05); }
-        .btn-disabled { background: #cbd5e1 !important; cursor: not-allowed; transform: none !important; }
+        .btn-book { 
+            background: black; color: white; padding: 14px 24px; border-radius: 1rem; 
+            font-weight: 900; text-transform: uppercase; font-size: 11px;
+            transition: all 0.3s; text-decoration: none; text-align: center;
+            flex: 1;
+        }
+        .btn-book:hover { background: #2563eb; }
+        
+        .counter-badge {
+            background: #f1f5f9; color: #1e293b; padding: 14px; border-radius: 1rem;
+            font-weight: 800; font-size: 10px; text-transform: uppercase;
+            border: 1px solid #e2e8f0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; min-width: 90px;
+        }
+        .counter-number { color: #2563eb; font-size: 16px; font-weight: 900; line-height: 1; }
+
+        .btn-disabled { background: #cbd5e1 !important; cursor: not-allowed; }
     </style>
 </head>
 <body class="pb-20">
 
     <header>
         <div class="header-flex">
-            <a href="index.html" class="logo-box"><img src="logo.jpg.JPEG" alt="Logo"></a>
+            <a href="index.html" class="logo-box"><img src="logo.JPEG" alt="Logo"></a>
             <nav>
                 <ul class="nav-links">
                     <li><a href="index.html">Home</a></li>
                     <li><a href="flotta.html">Flotta</a></li>
                     <li><a href="viaggi.html" style="color: #2563eb;">Viaggi</a></li>
-                    <li><a href="prenota.html">Prenota</a></li>
+                    <li><a href="contatti.html">Contatti</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <div class="max-w-7xl mx-auto py-16 px-4">
-        <p class="text-center text-blue-600 font-black uppercase tracking-[0.3em] text-[10px] mb-2">Pianifica la tua prossima avventura</p>
-        <h1 class="text-4xl md:text-6xl font-black uppercase italic text-center mb-16 tracking-tighter">Prossime Partenze</h1>
-        
-        <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            <div class="col-span-full text-center py-20 opacity-20 font-black uppercase italic tracking-widest">Sincronizzazione tour...</div>
+        <div class="text-center mb-16">
+            <p class="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-2">Discovery Program</p>
+            <h1 class="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1>
+            <p class="text-gray-400 text-xs font-medium mt-4">Clicca sulla locandina per ingrandire i dettagli del viaggio.</p>
         </div>
+        
+        <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
         function fixUrl(url) {
-            if (!url) return 'logo.jpg.JPEG';
-            return url.replace('/immagini/', '/foto/') + "?v=" + new Date().getTime();
+            return url ? url + "?v=" + new Date().getTime() : 'logo.JPEG';
         }
 
         async function caricaViaggi() {
             const grid = document.getElementById('grid-viaggi');
             
             try {
-                // 1. Carica le tratte
-                const { data: tratte, error: tErr } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-                if (tErr) throw tErr;
-
-                // 2. Carica tutte le prenotazioni per fare il calcolo dei posti
-                const { data: preno, error: pErr } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
-                if (pErr) throw pErr;
+                const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+                const { data: preno } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
 
                 if (!tratte || tratte.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-center font-black uppercase opacity-30">Nessun viaggio attivo.</p>`;
+                    grid.innerHTML = `<p class="col-span-full text-center py-20 font-black uppercase opacity-20">Nessun viaggio disponibile.</p>`;
                     return;
                 }
 
                 grid.innerHTML = tratte.map(v => {
-                    // CALCOLO POSTI OCCUPATI
-                    const occupati = preno
+                    const occupatiCount = preno
                         .filter(p => p.tratta_id === v.id)
                         .reduce((acc, curr) => acc + (curr.posti_selezionati ? curr.posti_selezionati.length : 0), 0);
                     
                     const capacita = parseInt(v.modello_bus) || 53;
-                    const disponibili = capacita - occupati;
+                    const disponibili = capacita - occupatiCount;
                     const isFull = disponibili <= 0;
+                    const imgUrl = fixUrl(v.immagine_url);
 
                     return `
-                        <div class="card-tour ${isFull ? 'full' : ''}">
-                            ${isFull ? `
-                                <div class="sold-out-overlay">
-                                    <div class="sold-out-badge">SOLD OUT</div>
+                        <div class="card-tour">
+                            <div class="image-container">
+                                ${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">SOLD OUT</div></div>` : ''}
+                                <a href="${imgUrl}" class="glightbox">
+                                    <img src="${imgUrl}" alt="${v.titolo}">
+                                </a>
+                                <div class="absolute top-4 left-4 bg-black/80 backdrop-blur text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">
+                                    Mezzo: ${capacita} Posti
                                 </div>
-                            ` : ''}
-                            
-                            <div class="relative h-72 overflow-hidden">
-                                <img src="${fixUrl(v.immagine_url)}" class="w-full h-full object-cover" onerror="this.src='logo.jpg.JPEG'">
-                                <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1 rounded-full text-[9px] font-black uppercase">
-                                    Bus GT ${capacita} posti
-                                </div>
-                                ${!isFull ? `
-                                    <div class="absolute bottom-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-[10px] font-black">
-                                        ${disponibili} POSTI DISPONIBILI
-                                    </div>
-                                ` : ''}
                             </div>
 
-                            <div class="p-8 text-center">
-                                <h2 class="font-black uppercase italic text-xl mb-8 min-h-[3.5rem] flex items-center justify-center leading-tight">
+                            <div class="p-6">
+                                <h2 class="font-black uppercase italic text-lg mb-6 leading-tight h-12 flex items-center">
                                     ${v.titolo}
                                 </h2>
                                 
-                                ${isFull ? 
-                                    `<button class="btn-book btn-disabled" disabled>Tutto Esaurito</button>` : 
-                                    `<a href="prenota.html?id=${v.id}" class="btn-book">Prenota ora</a>`
-                                }
+                                <div class="flex items-stretch gap-3">
+                                    <div class="counter-badge">
+                                        <span class="counter-number">${isFull ? 0 : disponibili}</span>
+                                        <span>Liberi</span>
+                                    </div>
+                                    
+                                    ${isFull ? 
+                                        `<button class="btn-book btn-disabled" disabled>Esaurito</button>` : 
+                                        `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">Prenota Ora</a>`
+                                    }
+                                </div>
                             </div>
                         </div>
                     `;
                 }).join('');
 
+                // Inizializza l'effetto ingrandimento locandina
+                GLightbox({ selector: '.glightbox' });
+
             } catch (err) {
-                console.error(err);
-                grid.innerHTML = "<p class='text-center font-black text-red-500 uppercase'>Errore di connessione.</p>";
+                grid.innerHTML = "<p class='text-center uppercase font-black py-20'>Errore Sincronizzazione.</p>";
             }
         }
 
