@@ -18,39 +18,53 @@
         .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
         .nav-links a:hover { color: #2563eb; }
 
-        .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.5s ease; }
-        .card-tour:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+        .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.4s ease; display: flex; flex-direction: column; }
+        .card-tour:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); }
 
-        .image-container { position: relative; height: 320px; cursor: zoom-in; overflow: hidden; }
-        .image-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
-        .image-container:hover img { transform: scale(1.05); }
+        /* CONTENITORE IMMAGINE: contain invece di cover per vedere tutta la locandina */
+        .image-container { 
+            position: relative; 
+            height: 380px; 
+            background: #f1f5f9; /* Sfondo leggero dietro la locandina */
+            cursor: zoom-in; 
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-container img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; /* MOSTRA TUTTA LA FOTO SENZA TAGLI */
+            transition: 0.5s ease;
+        }
+        .card-tour:hover .image-container img { transform: scale(1.02); }
 
         .sold-out-overlay {
-            position: absolute; inset: 0; background: rgba(255, 255, 255, 0.7);
+            position: absolute; inset: 0; background: rgba(255, 255, 255, 0.6);
             z-index: 20; display: flex; align-items: center; justify-content: center; pointer-events: none;
         }
         .sold-out-badge {
             background: #ef4444; color: white; font-weight: 900; text-transform: uppercase;
-            padding: 10px 30px; font-size: 24px; font-style: italic; border: 4px solid white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: rotate(-15deg);
+            padding: 8px 24px; font-size: 20px; font-style: italic; border: 3px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); transform: rotate(-10deg);
         }
 
         .btn-book { 
-            background: black; color: white; padding: 14px 24px; border-radius: 1rem; 
+            background: black; color: white; padding: 14px 20px; border-radius: 1rem; 
             font-weight: 900; text-transform: uppercase; font-size: 11px;
-            transition: all 0.3s; text-decoration: none; text-align: center;
+            transition: 0.3s; text-decoration: none; text-align: center;
             flex: 1;
         }
         .btn-book:hover { background: #2563eb; }
         
         .counter-badge {
-            background: #f1f5f9; color: #1e293b; padding: 14px; border-radius: 1rem;
-            font-weight: 800; font-size: 10px; text-transform: uppercase;
+            background: #f1f5f9; color: #1e293b; padding: 12px; border-radius: 1rem;
+            font-weight: 800; font-size: 9px; text-transform: uppercase;
             border: 1px solid #e2e8f0; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; min-width: 90px;
+            align-items: center; justify-content: center; min-width: 85px;
         }
         .counter-number { color: #2563eb; font-size: 16px; font-weight: 900; line-height: 1; }
-
         .btn-disabled { background: #cbd5e1 !important; cursor: not-allowed; }
     </style>
 </head>
@@ -70,14 +84,14 @@
         </div>
     </header>
 
-    <div class="max-w-7xl mx-auto py-16 px-4">
-        <div class="text-center mb-16">
+    <div class="max-w-7xl mx-auto py-12 px-4">
+        <div class="text-center mb-12">
             <p class="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-2">Discovery Program</p>
-            <h1 class="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1>
-            <p class="text-gray-400 text-xs font-medium mt-4">Clicca sulla locandina per ingrandire i dettagli del viaggio.</p>
+            <h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1>
+            <p class="text-gray-400 text-[10px] font-bold uppercase mt-4 tracking-widest">Tocca la locandina per i dettagli completi</p>
         </div>
         
-        <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             </div>
     </div>
 
@@ -104,7 +118,7 @@
                 }
 
                 grid.innerHTML = tratte.map(v => {
-                    const occupatiCount = preno
+                    const occupatiCount = (preno || [])
                         .filter(p => p.tratta_id === v.id)
                         .reduce((acc, curr) => acc + (curr.posti_selezionati ? curr.posti_selezionati.length : 0), 0);
                     
@@ -117,28 +131,28 @@
                         <div class="card-tour">
                             <div class="image-container">
                                 ${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">SOLD OUT</div></div>` : ''}
-                                <a href="${imgUrl}" class="glightbox">
+                                <a href="${imgUrl}" class="glightbox" data-title="${v.titolo}">
                                     <img src="${imgUrl}" alt="${v.titolo}">
                                 </a>
                                 <div class="absolute top-4 left-4 bg-black/80 backdrop-blur text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">
-                                    Mezzo: ${capacita} Posti
+                                    Bus ${capacita} Posti
                                 </div>
                             </div>
 
                             <div class="p-6">
-                                <h2 class="font-black uppercase italic text-lg mb-6 leading-tight h-12 flex items-center">
+                                <h2 class="font-black uppercase italic text-lg mb-6 leading-tight h-14 flex items-center">
                                     ${v.titolo}
                                 </h2>
                                 
                                 <div class="flex items-stretch gap-3">
                                     <div class="counter-badge">
                                         <span class="counter-number">${isFull ? 0 : disponibili}</span>
-                                        <span>Liberi</span>
+                                        <span>Posti</span>
                                     </div>
                                     
                                     ${isFull ? 
-                                        `<button class="btn-book btn-disabled" disabled>Esaurito</button>` : 
-                                        `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">Prenota Ora</a>`
+                                        `<button class="btn-book btn-disabled" disabled>Completo</button>` : 
+                                        `<a href="prenota.html?id=${v.id}" class="btn-book flex items-center justify-center">Prenota</a>`
                                     }
                                 </div>
                             </div>
@@ -146,8 +160,12 @@
                     `;
                 }).join('');
 
-                // Inizializza l'effetto ingrandimento locandina
-                GLightbox({ selector: '.glightbox' });
+                GLightbox({ 
+                    selector: '.glightbox',
+                    touchNavigation: true,
+                    loop: false,
+                    zoomable: true
+                });
 
             } catch (err) {
                 grid.innerHTML = "<p class='text-center uppercase font-black py-20'>Errore Sincronizzazione.</p>";

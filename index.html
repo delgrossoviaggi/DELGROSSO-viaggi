@@ -9,119 +9,35 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; overflow-x: hidden; background-color: #fff; margin: 0; }
-        .nav-container { display: flex; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .nav-container::-webkit-scrollbar { display: none; }
-        .nav-link { font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: #1a1a1a; text-decoration: none; transition: 0.3s; flex-shrink: 0; }
-        .nav-link:hover { color: #2563eb; }
-        .carousel-wrap { position: relative; width: 100%; height: 75vh; background: #000; overflow: hidden; }
-        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; background-size: contain; background-repeat: no-repeat; background-position: center; }
-        .slide.active { opacity: 1; }
-        .carousel-text-top { position: absolute; top: 40px; left: 40px; z-index: 20; color: white; max-width: 600px; text-align: left; pointer-events: none; }
-        .carousel-text-top h2 { font-weight: 900; text-transform: uppercase; font-style: italic; font-size: 1.8rem; line-height: 1.1; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
-        .carousel-text-top span { color: #3b82f6; }
-        .flotta-card { position: relative; overflow: hidden; border-radius: 2.5rem; background: white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; height: 320px; transition: all 0.4s ease; cursor: pointer; }
-        .flotta-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; }
-        .flotta-card:hover img { transform: scale(1.1); }
-        .flotta-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; color: white; }
-        .party-home-card { border-radius: 2rem; overflow: hidden; height: 280px; position: relative; cursor: pointer; transition: 0.4s ease; border: 1px solid #111; }
-        .footer-pro { background: #000; color: white; padding: 5rem 2rem; }
-        .social-btn { display: flex; align-items: center; gap: 1rem; background: #0f0f0f; border: 1px solid #1a1a1a; padding: 1rem 1.5rem; border-radius: 1rem; transition: 0.3s; text-decoration: none; width: 100%; }
-        .social-btn:hover { background: #1a1a1a; border-color: #3b82f6; transform: translateX(5px); }
-        .social-btn span { font-weight: 800; text-transform: uppercase; font-size: 11px; color: #fff; letter-spacing: 0.05em; }
-        .contact-item { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-        .contact-label { font-weight: 900; text-transform: uppercase; font-size: 11px; color: #3b82f6; display: block; margin-bottom: 2px; }
-        .contact-value { font-weight: 400; font-size: 16px; color: #e5e7eb; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <header class="p-4 sticky top-0 bg-white/95 backdrop-blur-md z-[100] border-b border-gray-100">
-        <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
-            <a href="index.html" class="flex-shrink-0">
-                <img src="logo.JPEG" class="h-10 md:h-16 w-auto object-contain" alt="Logo">
-            </a>
-            <div class="flex items-center gap-4 md:gap-8 overflow-hidden">
-                <nav class="nav-container flex gap-4 md:gap-8 py-2">
-                    <a href="#home" class="nav-link">Home</a>
-                    <a href="flotta.html" class="nav-link">La Flotta</a>
-                    <a href="partyontheroad.html" class="nav-link text-blue-600">Party On The Road</a>
-                    <a href="viaggi.html" class="nav-link">Viaggi</a>
-                    <a href="contatti.html" class="nav-link">Contatti</a>
-                </nav>
-            </div>
-        </div>
-    </header>
-
-    <section id="home" class="carousel-wrap">
-        <div class="carousel-text-top">
-            <h2>CON DELGROSSO VIAGGI & LIMOUSINE BUS <br><span>VIAGGI CON STILE.</span></h2>
-        </div>
-        <div id="carousel-container" class="absolute inset-0"></div>
-    </section>
-
-    <section class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="mb-16"><h2 class="text-5xl font-black uppercase italic italic">La Mia Flotta</h2><div class="h-1.5 w-20 bg-blue-600 mt-4"></div></div>
-            <div id="grid-flotta" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        </div>
-    </section>
-
-    <footer id="contatti" class="footer-pro">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
-            <div>
-                <h3 class="text-2xl font-black uppercase mb-10 italic">Del Grosso Viaggi & Limousine Bus</h3>
-                <div class="contact-item">
-                    <span class="text-blue-500">📞</span>
-                    <div>
-                        <span class="contact-label">RAFFAELE (Bus GT)</span>
-                        <a href="tel:3205730466" class="contact-value">320 5730466</a>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <span class="text-blue-500">📞</span>
-                    <div>
-                        <span class="contact-label">NICOLA (Limobus)</span>
-                        <a href="tel:3662127916" class="contact-value">366 2127916</a>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <span class="text-blue-500">✉️</span>
-                    <div>
-                        <span class="contact-label">Email</span>
-                        <a href="mailto:info@delgrossoviaggi.it" class="contact-value">info@delgrossoviaggi.it</a>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-xl font-black uppercase mb-8 text-zinc-500">Social Network</h3>
-                <div class="grid grid-cols-1 gap-4">
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Del Grosso Viaggi | Home</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; overflow-x: hidden; background-color: #fff; margin: 0; }
         
+        /* Navbar Adattiva */
         .nav-container { display: flex; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .nav-container::-webkit-scrollbar { display: none; }
         .nav-link { font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: #1a1a1a; text-decoration: none; transition: 0.3s; flex-shrink: 0; }
         .nav-link:hover { color: #2563eb; }
 
+        /* Carousel Adattivo */
         .carousel-wrap { position: relative; width: 100%; height: 75vh; background: #000; overflow: hidden; }
-        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; background-size: cover; background-position: center; }
+        .slide { 
+            position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; 
+            background-size: contain; /* Si adatta alla grandezza della foto senza tagliarla */
+            background-repeat: no-repeat;
+            background-position: center; 
+        }
         .slide.active { opacity: 1; }
 
-        .flotta-card { position: relative; overflow: hidden; border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; height: 320px; transition: all 0.4s ease; cursor: pointer; }
+        .carousel-text-top { position: absolute; top: 40px; left: 40px; z-index: 20; color: white; max-width: 600px; text-align: left; pointer-events: none; }
+        .carousel-text-top h2 { font-weight: 900; text-transform: uppercase; font-style: italic; font-size: 1.8rem; line-height: 1.1; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        .carousel-text-top span { color: #3b82f6; }
+
+        /* Card Style */
+        .flotta-card { position: relative; overflow: hidden; border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; height: 320px; transition: 0.4s ease; cursor: pointer; }
         .flotta-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; }
         .flotta-card:hover img { transform: scale(1.1); }
         .flotta-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; color: white; }
 
-        .party-home-card { border-radius: 2rem; overflow: hidden; height: 280px; position: relative; cursor: pointer; transition: 0.4s ease; background: #111; }
-        .party-home-card:hover { transform: scale(1.03); }
+        .party-home-card { border-radius: 2rem; overflow: hidden; height: 280px; position: relative; cursor: pointer; transition: 0.4s ease; background: #111; border: 1px solid #222; }
+        .party-home-card:hover { transform: scale(1.03); border-color: #3b82f6; }
 
         .footer-pro { background: #000; color: white; padding: 5rem 2rem; }
         .social-btn { display: flex; align-items: center; gap: 1rem; background: #0f0f0f; border: 1px solid #1a1a1a; padding: 1rem 1.5rem; border-radius: 1rem; transition: 0.3s; text-decoration: none; width: 100%; }
@@ -154,15 +70,15 @@
 
     <section id="home" class="carousel-wrap">
         <div class="carousel-text-top">
-            <h2 class="text-3xl md:text-5xl font-black italic uppercase italic">VIAGGI CON STILE <br><span>DEL GROSSO.</span></h2>
+            <h2>CON DELGROSSO VIAGGI & LIMOUSINE BUS <br><span>VIAGGI CON STILE.</span></h2>
         </div>
         <div id="carousel-container" class="absolute inset-0"></div>
     </section>
 
-    <section class="py-24 bg-white">
+    <section class="py-24 bg-white border-b border-gray-50">
         <div class="max-w-7xl mx-auto px-6">
             <div class="mb-16">
-                <p class="text-blue-600 font-black uppercase text-[10px] tracking-[0.4em] mb-2">Excellence Fleet</p>
+                <p class="text-blue-600 font-black uppercase text-[10px] tracking-[0.4em] mb-2">Exclusive Selection</p>
                 <h2 class="text-5xl font-black uppercase italic tracking-tighter">La Mia Flotta</h2>
                 <div class="h-1.5 w-20 bg-blue-600 mt-4"></div>
             </div>
@@ -177,7 +93,7 @@
                     <p class="text-blue-500 font-black uppercase text-[10px] tracking-[0.4em] mb-2">The Club Experience</p>
                     <h2 class="text-4xl md:text-5xl font-black uppercase italic tracking-tighter">Party On The Road</h2>
                 </div>
-                <a href="partyontheroad.html" class="text-[10px] font-black uppercase border-b border-blue-600 pb-1">Vedi Tutti →</a>
+                <a href="partyontheroad.html" class="text-[10px] font-black uppercase border-b border-blue-600 pb-1">Vedi Tutti i Party →</a>
             </div>
             <div id="grid-party-home" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </div>
@@ -241,7 +157,7 @@
         function fixUrl(url) { return url ? url + "?v=" + Date.now() : 'logo.JPEG'; }
 
         async function init() {
-            // 1. CAROUSEL
+            // CAROUSEL
             const { data: slides } = await sb.from('carousel_flotta').select('*');
             if(slides?.length) {
                 const container = document.getElementById('carousel-container');
@@ -260,7 +176,7 @@
                 }, 5000);
             }
 
-            // 2. FLOTTA
+            // FLOTTA
             const { data: flotta } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
             if(flotta) {
                 document.getElementById('grid-flotta').innerHTML = flotta.map(f => `
@@ -274,7 +190,7 @@
                 `).join('');
             }
 
-            // 3. PARTY PREVIEW
+            // PARTY PREVIEW
             const { data: party } = await sb.from('gallery_eventi').select('*').order('created_at', {ascending: false}).limit(4);
             if(party) {
                 document.getElementById('grid-party-home').innerHTML = party.map(p => `
@@ -288,7 +204,7 @@
                 `).join('');
             }
 
-            // 4. LOCANDINE VIAGGI
+            // LOCANDINE VIAGGI
             const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
             if(viaggi) {
                 document.getElementById('grid-viaggi').innerHTML = viaggi.map(v => `
