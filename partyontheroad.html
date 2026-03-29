@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<!DOCTYPE html>
-<html lang="it">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party On The Road | Limousine Bus Del Grosso</title>
@@ -14,17 +11,25 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
         
-        /* BLOCO TASTO DESTRO E TRASCINAMENTO SULLE IMMAGINI */
+        /* BLOCO TOTALE DOWNLOAD E SALVATAGGIO */
         img, video {
             -webkit-user-select: none;
-            -webkit-touch-callout: none; /* Blocca menu salvataggio su iPhone */
+            -webkit-touch-callout: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            pointer-events: none; /* Impedisce il trascinamento */
+            pointer-events: none !important; /* Impedisce interazione diretta */
         }
 
-        /* CARD EVENTO */
+        /* Protezione Extra: Strato invisibile sopra la galleria aperta */
+        .gslide-media::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 9999;
+            background: transparent;
+        }
+
         .event-card { 
             border-radius: 2.5rem; overflow: hidden; position: relative; cursor: pointer; 
             transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); height: 420px;
@@ -54,14 +59,11 @@
             color: white; transition: 0.3s;
         }
         .contact-link:hover { background: #222; color: #2563eb; }
-
-        /* NASCONDE IL TASTO DOWNLOAD DI DEFAULT DI ALCUNI BROWSER SUI VIDEO */
-        video::-internal-media-controls-download-button { display:none; }
-        video::-webkit-media-controls-enclosure { overflow:hidden; }
-        video::-webkit-media-controls-panel { width: calc(100% + 30px); }
     </style>
 </head>
-<body oncontextmenu="return false;"> <nav class="p-6 flex justify-between items-center border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+<body oncontextmenu="return false;"> 
+
+    <nav class="p-6 flex justify-between items-center border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
         <a href="index.html"><img src="logo.JPEG" class="h-12 md:h-16 w-auto" alt="Logo"></a>
         <div class="relative">
             <button onclick="toggleContacts()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all scale-100 active:scale-90">
@@ -123,9 +125,10 @@
                     grid.innerHTML = data.map(ev => {
                         const galleryHtml = ev.foto_urls.map((url, index) => {
                             const video = isVideo(url);
+                            // IMPORTANTE: data-type image forza la visualizzazione invece del download
                             return `<a href="${url}" class="glightbox-${ev.id} ${index === 0 ? '' : 'hidden'}" 
                                        data-gallery="gallery-${ev.id}" 
-                                       ${video ? 'data-type="video"' : ''}></a>`;
+                                       data-type="${video ? 'video' : 'image'}"></a>`;
                         }).join('');
 
                         return `
@@ -150,9 +153,9 @@
                             touchNavigation: true,
                             keyboardNavigation: true,
                             closeButton: true,
-                            // DISABILITA TASTI DOWNLOAD E ZOOM ECCESSIVI
                             zoomable: false, 
-                            draggable: false 
+                            draggable: false,
+                            touchFollowAxis: false
                         });
                     });
                 }
@@ -166,8 +169,11 @@
 
         caricaEventi();
 
-        // BLOCCO TASTO DESTRO ULTERIORE PROTEZIONE
+        // BLOCCO TASTO DESTRO E COMBINAZIONI TASTIERA (CTRL+S, CTRL+U)
         document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.ctrlKey && (e.keyCode === 83 || e.keyCode === 85)) return false;
+        };
     </script>
 </body>
 </html>
