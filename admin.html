@@ -24,7 +24,7 @@
         .seat.selected { background: #2563eb; border-color: #2563eb; color: white; }
         .seat.occupied { background: #e5e7eb; border-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
         .corridor { width: 35px; height: 35px; }
-        .btn-action { width: 100%; padding: 0.8rem; border-radius: 0.75rem; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: all 0.2s; cursor: pointer; }
+        .btn-action { width: 100%; padding: 0.8rem; border-radius: 0.75rem; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: all 0.2s; cursor: pointer; border:none; }
     </style>
 </head>
 <body class="pb-20">
@@ -51,29 +51,28 @@
 
         <div class="lg:col-span-7 space-y-6">
             
-            <div class="section-card" style="border-top: 4px solid #8b5cf6;">
-                <h2 class="font-black uppercase italic text-lg text-purple-700 mb-6 italic">Carousel Home</h2>
+            <div class="section-card" style="border-top: 4px solid #f43f5e;">
+                <h2 class="font-black uppercase italic text-lg text-rose-600 mb-6 italic">Party On The Road</h2>
+                <input type="text" id="g-titolo" placeholder="NOME EVENTO (ES. 18 ANNI LUIGI)" class="input-style uppercase">
                 <div class="mb-4">
-                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Carica nuova foto slider:</label>
-                    <input type="file" id="c-file" class="text-[10px]">
+                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Seleziona foto evento (anche multiple):</label>
+                    <input type="file" id="g-files" class="text-[10px]" multiple>
                 </div>
-                <button onclick="salvaCarousel()" class="btn-action bg-purple-600 text-white">Carica nello Slider</button>
-                <div id="preview-carousel" class="mt-6 grid grid-cols-4 gap-2"></div>
+                <button id="btn-salva-gallery" onclick="salvaGallery()" class="btn-action bg-rose-600 text-white">Pubblica Album Party</button>
+                <div id="preview-gallery" class="mt-6 space-y-2"></div>
             </div>
 
             <div class="section-card" style="border-top: 4px solid #10b981;">
                 <h2 class="font-black uppercase italic text-lg text-green-700 mb-6 italic">Prenotazione Rapida</h2>
                 <input type="text" id="p-nome" placeholder="NOME E COGNOME" class="input-style uppercase">
                 <select id="p-tratta" onchange="caricaPiantinaAdmin(this.value)" class="input-style"></select>
-                
                 <div id="area-bus" class="hidden py-6 bg-gray-50 rounded-3xl mb-4 border-2 border-dashed">
                     <div id="grid-posti" class="bus-grid mb-4"></div>
                     <div id="label-posti" class="text-center text-blue-600 font-black text-lg italic">SELEZIONA POSTI</div>
                 </div>
-
                 <div class="flex gap-2">
                     <button id="btn-salva-preno" onclick="salvaPreno()" class="btn-action bg-green-600 text-white flex-1">Salva</button>
-                    <button id="btn-annulla-preno" onclick="resetPreno()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
+                    <button onclick="location.reload()" class="bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
                 </div>
             </div>
 
@@ -96,7 +95,10 @@
                 <input type="text" id="f-titolo" placeholder="NOME BUS" class="input-style uppercase">
                 <textarea id="f-desc" placeholder="DESCRIZIONE..." class="input-style h-20"></textarea>
                 <input type="file" id="f-file" class="text-[10px] mb-4">
-                <button onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white">Aggiungi Bus</button>
+                <div class="flex gap-2">
+                    <button id="btn-salva-flotta" onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white flex-1">Salva Mezzo</button>
+                    <button id="btn-annulla-flotta" onclick="resetFlotta()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
+                </div>
                 <div id="preview-flotta" class="mt-6 space-y-2"></div>
             </div>
 
@@ -108,35 +110,38 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        let cacheV = []; let scelti = []; let editP = null; let editV = null;
+        let cacheV = []; let cacheF = []; let scelti = []; 
+        let editP = null; let editV = null; let editF = null;
 
         async function init() {
             const { data: v } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
             const { data: p } = await sb.from('prenotazioni').select('*').order('created_at', {ascending: false});
             const { data: f } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
-            const { data: c } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: false});
+            const { data: g } = await sb.from('gallery_eventi').select('*').order('created_at', {ascending: false});
             
             cacheV = v || [];
+            cacheF = f || [];
 
-            // 1. Lista Passeggeri
+            // 1. Passeggeri
             document.getElementById('lista-p').innerHTML = (p || []).map(item => {
                 const tr = cacheV.find(x => x.id === item.tratta_id);
-                return `<div class="p-4 bg-white border rounded-2xl flex justify-between items-center">
+                return `<div class="p-4 bg-white border rounded-2xl flex justify-between items-center shadow-sm">
                     <div><div class="font-black text-[11px] uppercase">${item.nome_cliente}</div><div class="text-[9px] text-blue-600 font-bold uppercase italic">${tr ? tr.titolo : 'N/A'}</div><div class="text-[10px] text-gray-400 font-black">POSTI: ${item.posti_selezionati.join(', ')}</div></div>
                     <div class="flex gap-1"><button onclick="caricaModificaPreno('${item.id}','${item.nome_cliente}','${item.tratta_id}','${item.posti_selezionati}')" class="bg-blue-50 text-blue-600 font-black text-[9px] p-2 rounded-lg">MOD</button><button onclick="elimina('prenotazioni','${item.id}')" class="bg-red-50 text-red-600 font-black text-[9px] p-2 rounded-lg">X</button></div>
                 </div>`;
             }).join('');
 
-            // 2. Preview Carousel (Sincronizzato)
-            document.getElementById('preview-carousel').innerHTML = (c || []).map(img => `
-                <div class="relative h-16 rounded-xl overflow-hidden border group">
-                    <img src="${img.immagine_url}" class="w-full h-full object-cover">
-                    <button onclick="elimina('carousel_flotta','${img.id}')" class="absolute inset-0 bg-red-600/80 text-white font-black text-[8px] opacity-0 group-hover:opacity-100 uppercase italic">Elimina</button>
+            // 2. Party Gallery
+            document.getElementById('preview-gallery').innerHTML = (g || []).map(ev => `
+                <div class="flex items-center gap-3 p-3 bg-white border rounded-xl">
+                    <img src="${ev.foto_urls[0]}" class="w-12 h-10 object-cover rounded-lg">
+                    <div class="flex-1 font-black text-[9px] uppercase">${ev.titolo} (${ev.foto_urls.length} foto)</div>
+                    <button onclick="elimina('gallery_eventi','${ev.id}')" class="text-red-500 font-black text-sm p-1">×</button>
                 </div>`).join('');
 
-            // 3. Preview Viaggi (Con Tasto Modifica)
+            // 3. Viaggi
             document.getElementById('preview-v').innerHTML = cacheV.map(item => `
-                <div class="relative h-24 rounded-xl overflow-hidden border group">
+                <div class="relative h-24 rounded-xl overflow-hidden border group shadow-sm">
                     <img src="${item.immagine_url}" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-2">
                         <button onclick="caricaModificaViaggio('${item.id}')" class="text-[8px] bg-blue-600 text-white px-2 py-1 rounded font-black uppercase mb-1">Mod</button>
@@ -144,61 +149,73 @@
                     </div>
                 </div>`).join('');
 
-            // 4. Preview Flotta
-            document.getElementById('preview-flotta').innerHTML = (f || []).map(bus => `
-                <div class="flex items-center gap-3 p-2 bg-white border rounded-xl shadow-sm">
-                    <img src="${bus.immagine_url}" class="w-12 h-10 object-cover rounded-lg">
+            // 4. Flotta
+            document.getElementById('preview-flotta').innerHTML = cacheF.map(bus => `
+                <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
+                    <img src="${bus.immagine_url}" class="w-14 h-10 object-cover rounded-lg">
                     <div class="flex-1 font-black text-[9px] uppercase">${bus.titolo}</div>
-                    <button onclick="elimina('flotta_page','${bus.id}')" class="text-red-500 font-black text-sm p-1">×</button>
+                    <div class="flex gap-1">
+                        <button onclick="caricaModificaFlotta('${bus.id}')" class="bg-orange-50 text-orange-600 font-black text-[9px] p-2 rounded-lg">MOD</button>
+                        <button onclick="elimina('flotta_page','${bus.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1">×</button>
+                    </div>
                 </div>`).join('');
 
-            document.getElementById('p-tratta').innerHTML = '<option value="">-- VIAGGIO --</option>' + cacheV.map(v => `<option value="${v.id}">${v.titolo}</option>`).join('');
+            document.getElementById('p-tratta').innerHTML = '<option value="">-- SELEZIONA VIAGGIO --</option>' + cacheV.map(v => `<option value="${v.id}">${v.titolo}</option>`).join('');
             document.getElementById('counter-preno').innerText = (p || []).length + " CLIENTI";
         }
 
-        // --- CAROUSEL ---
-        async function salvaCarousel() {
-            const f = document.getElementById('c-file').files[0]; if(!f) return alert("Seleziona foto!");
-            const name = `car_${Date.now()}`;
-            await sb.storage.from('foto').upload(name, f);
-            const { data } = sb.storage.from('foto').getPublicUrl(name);
-            await sb.from('carousel_flotta').insert([{ immagine_url: data.publicUrl }]);
+        // --- PARTY ON THE ROAD (UPLOAD MULTIPLO) ---
+        async function salvaGallery() {
+            const titolo = document.getElementById('g-titolo').value.toUpperCase().trim();
+            const files = document.getElementById('g-files').files;
+            if(!titolo || !files.length) return alert("Dati mancanti!");
+
+            const btn = document.getElementById('btn-salva-gallery');
+            btn.innerText = "Caricamento..."; btn.disabled = true;
+
+            let urls = [];
+            for(let f of files) {
+                const name = `party_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                await sb.storage.from('foto').upload(name, f);
+                urls.push(sb.storage.from('foto').getPublicUrl(name).data.publicUrl);
+            }
+            await sb.from('gallery_eventi').insert([{ titolo, foto_urls: urls }]);
             location.reload();
         }
 
-        // --- PIANTINA ADMIN ---
-        async function caricaPiantinaAdmin(tid, pre = []) {
-            if(!tid) return document.getElementById('area-bus').classList.add('hidden');
-            const v = cacheV.find(x => x.id === tid);
-            document.getElementById('area-bus').classList.remove('hidden');
-            const grid = document.getElementById('grid-posti'); grid.innerHTML = '';
-            scelti = typeof pre === 'string' ? pre.split(',') : pre;
-            const cap = parseInt(v.modello_bus) || 53;
-            const { data: occ } = await sb.from('prenotazioni').select('posti_selezionati, id').eq('tratta_id', tid);
-            const presi = (occ || []).filter(o => o.id !== editP).flatMap(o => o.posti_selezionati.map(String));
-
-            for (let i = 1; i <= cap; i++) {
-                if (i % 4 === 1 && i > 1 && i <= (cap - 5)) grid.appendChild(Object.assign(document.createElement('div'), {className:'corridor'}));
-                const s = String(i); const isOcc = presi.includes(s);
-                const div = document.createElement('div');
-                div.className = `seat ${isOcc ? 'occupied' : (scelti.includes(s) ? 'selected' : 'available')}`;
-                div.innerText = i;
-                if(!isOcc) div.onclick = () => {
-                    div.classList.toggle('selected');
-                    if(div.classList.contains('selected')) scelti.push(s); else scelti = scelti.filter(x => x !== s);
-                    document.getElementById('label-posti').innerText = scelti.length ? scelti.join(', ') : "SELEZIONA POSTI";
-                };
-                grid.appendChild(div);
-            }
+        // --- FLOTTA MODIFICA ---
+        function caricaModificaFlotta(id) {
+            const bus = cacheF.find(x => x.id === id);
+            editF = id; document.getElementById('f-titolo').value = bus.titolo;
+            document.getElementById('f-desc').value = bus.descrizione;
+            document.getElementById('btn-salva-flotta').innerText = "Aggiorna Mezzo";
+            document.getElementById('btn-annulla-flotta').classList.remove('hidden');
+            window.scrollTo({top: 800, behavior: 'smooth'});
         }
 
-        // --- VIAGGI ---
+        async function salvaFlotta() {
+            const t = document.getElementById('f-titolo').value.toUpperCase().trim();
+            const d = document.getElementById('f-desc').value.trim();
+            const f = document.getElementById('f-file').files[0];
+            let url = editF ? cacheF.find(x => x.id === editF).immagine_url : null;
+            if(f) {
+                const name = `fl_${Date.now()}`;
+                await sb.storage.from('foto').upload(name, f);
+                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
+            }
+            if(!t || !url) return alert("Dati mancanti!");
+            const obj = { titolo: t, descrizione: d, immagine_url: url };
+            if(editF) await sb.from('flotta_page').update(obj).eq('id', editF);
+            else await sb.from('flotta_page').insert([obj]);
+            location.reload();
+        }
+
+        // --- VIAGGI MODIFICA ---
         function caricaModificaViaggio(id) {
             const v = cacheV.find(x => x.id === id); editV = id;
             document.getElementById('v-titolo').value = v.titolo;
             document.getElementById('v-modello').value = v.modello_bus;
-            const btn = document.getElementById('btn-salva-viaggio');
-            btn.innerText = "Aggiorna Viaggio"; btn.className = "btn-action bg-blue-600 text-white";
+            document.getElementById('btn-salva-viaggio').innerText = "Aggiorna Viaggio";
             window.scrollTo({top: 500, behavior: 'smooth'});
         }
 
@@ -212,7 +229,7 @@
                 await sb.storage.from('foto').upload(name, f);
                 url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
             }
-            if(!t || !url) return alert("Mancano dati!");
+            if(!t || !url) return alert("Dati mancanti!");
             const obj = { titolo: t, modello_bus: m, immagine_url: url };
             if(editV) await sb.from('tratte').update(obj).eq('id', editV);
             else await sb.from('tratte').insert([obj]);
@@ -233,26 +250,35 @@
         function caricaModificaPreno(id, n, tr, p) {
             editP = id; document.getElementById('p-nome').value = n; document.getElementById('p-tratta').value = tr;
             document.getElementById('btn-salva-preno').innerText = "Applica Modifica";
-            document.getElementById('btn-annulla-preno').classList.remove('hidden');
             caricaPiantinaAdmin(tr, p); window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        // --- FLOTTA ---
-        async function salvaFlotta() {
-            const t = document.getElementById('f-titolo').value.toUpperCase();
-            const d = document.getElementById('f-desc').value;
-            const f = document.getElementById('f-file').files[0];
-            if(!t || !f) return alert("Mancano dati!");
-            const name = `fl_${Date.now()}`;
-            await sb.storage.from('foto').upload(name, f);
-            const url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
-            await sb.from('flotta_page').insert([{ titolo: t, descrizione: d, immagine_url: url }]);
-            location.reload();
+        async function caricaPiantinaAdmin(tid, pre = []) {
+            if(!tid) return document.getElementById('area-bus').classList.add('hidden');
+            const v = cacheV.find(x => x.id === tid);
+            document.getElementById('area-bus').classList.remove('hidden');
+            const grid = document.getElementById('grid-posti'); grid.innerHTML = '';
+            scelti = typeof pre === 'string' ? pre.split(',') : pre;
+            const cap = parseInt(v.modello_bus) || 53;
+            const { data: occ } = await sb.from('prenotazioni').select('posti_selezionati, id').eq('tratta_id', tid);
+            const presi = (occ || []).filter(o => o.id !== editP).flatMap(o => o.posti_selezionati.map(String));
+            for (let i = 1; i <= cap; i++) {
+                if (i % 4 === 1 && i > 1 && i <= (cap - 5)) grid.appendChild(Object.assign(document.createElement('div'), {className:'corridor'}));
+                const s = String(i); const isOcc = presi.includes(s);
+                const div = document.createElement('div');
+                div.className = `seat ${isOcc ? 'occupied' : (scelti.includes(s) ? 'selected' : 'available')}`;
+                div.innerText = i;
+                if(!isOcc) div.onclick = () => {
+                    div.classList.toggle('selected');
+                    if(div.classList.contains('selected')) scelti.push(s); else scelti = scelti.filter(x => x !== s);
+                    document.getElementById('label-posti').innerText = scelti.length ? scelti.join(', ') : "SELEZIONA POSTI";
+                };
+                grid.appendChild(div);
+            }
         }
 
-        async function elimina(tab, id) { if(confirm("Confermi eliminazione?")) { await sb.from(tab).delete().eq('id', id); init(); } }
-        function resetPreno() { location.reload(); }
-        
+        async function elimina(tab, id) { if(confirm("Eliminare?")) { await sb.from(tab).delete().eq('id', id); init(); } }
+        function resetFlotta() { location.reload(); }
         init();
     </script>
 </body>
