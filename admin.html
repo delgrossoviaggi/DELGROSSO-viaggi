@@ -42,7 +42,7 @@
         <div class="lg:col-span-5">
             <div class="section-card" style="border-top: 4px solid #2563eb;">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-black uppercase italic text-lg text-blue-700">Passeggeri</h2>
+                    <h2 class="font-black uppercase italic text-lg text-blue-700 italic">Passeggeri</h2>
                     <span id="counter-preno" class="bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full">...</span>
                 </div>
                 <div id="lista-p" class="space-y-3 max-h-[1000px] overflow-y-auto pr-2"></div>
@@ -55,18 +55,18 @@
                 <h2 class="font-black uppercase italic text-lg text-rose-600 mb-6">Party On The Road</h2>
                 <input type="text" id="g-titolo" placeholder="NOME EVENTO (ES. 18 ANNI LUIGI)" class="input-style uppercase">
                 <div class="mb-4">
-                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Aggiungi foto (lascia vuoto se vuoi tenere le attuali):</label>
-                    <input type="file" id="g-files" class="text-[10px]" multiple>
+                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Seleziona foto (Max 10 alla volta consigliato):</label>
+                    <input type="file" id="g-files" class="text-[10px]" multiple accept="image/*">
                 </div>
                 <div class="flex gap-2">
-                    <button id="btn-salva-gallery" onclick="salvaGallery()" class="btn-action bg-rose-600 text-white flex-1">Salva / Aggiorna Album</button>
+                    <button id="btn-salva-gallery" onclick="salvaGallery()" class="btn-action bg-rose-600 text-white flex-1 text-center">Pubblica Album Party</button>
                     <button id="btn-annulla-gallery" onclick="resetGallery()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
                 </div>
                 <div id="preview-gallery" class="mt-6 space-y-2"></div>
             </div>
 
             <div class="section-card" style="border-top: 4px solid #10b981;">
-                <h2 class="font-black uppercase italic text-lg text-green-700 mb-6">Prenotazione Rapida</h2>
+                <h2 class="font-black uppercase italic text-lg text-green-700 mb-6 italic">Prenotazione Rapida</h2>
                 <input type="text" id="p-nome" placeholder="NOME E COGNOME" class="input-style uppercase">
                 <select id="p-tratta" onchange="caricaPiantinaAdmin(this.value)" class="input-style"></select>
                 <div id="area-bus" class="hidden py-6 bg-gray-50 rounded-3xl mb-4 border-2 border-dashed">
@@ -75,7 +75,6 @@
                 </div>
                 <div class="flex gap-2">
                     <button id="btn-salva-preno" onclick="salvaPreno()" class="btn-action bg-green-600 text-white flex-1">Salva</button>
-                    <button onclick="location.reload()" class="bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
                 </div>
             </div>
 
@@ -89,7 +88,7 @@
                     </select>
                 </div>
                 <input type="file" id="v-file" class="text-[10px] mb-4">
-                <button id="btn-salva-viaggio" onclick="salvaViaggio()" class="btn-action bg-black text-white">Pubblica / Aggiorna Viaggio</button>
+                <button id="btn-salva-viaggio" onclick="salvaViaggio()" class="btn-action bg-black text-white">Pubblica Viaggio</button>
                 <div id="preview-v" class="mt-6 grid grid-cols-3 gap-3"></div>
             </div>
 
@@ -98,10 +97,7 @@
                 <input type="text" id="f-titolo" placeholder="NOME BUS" class="input-style uppercase">
                 <textarea id="f-desc" placeholder="DESCRIZIONE..." class="input-style h-20"></textarea>
                 <input type="file" id="f-file" class="text-[10px] mb-4">
-                <div class="flex gap-2">
-                    <button id="btn-salva-flotta" onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white flex-1">Aggiungi / Aggiorna Bus</button>
-                    <button id="btn-annulla-flotta" onclick="resetFlotta()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
-                </div>
+                <button id="btn-salva-flotta" onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white">Salva Mezzo</button>
                 <div id="preview-flotta" class="mt-6 space-y-2"></div>
             </div>
 
@@ -124,7 +120,7 @@
             
             cacheV = v || []; cacheF = f || []; cacheG = g || [];
 
-            // 1. Passeggeri
+            // Lista Passeggeri
             document.getElementById('lista-p').innerHTML = (p || []).map(item => {
                 const tr = cacheV.find(x => x.id === item.tratta_id);
                 return `<div class="p-4 bg-white border rounded-2xl flex justify-between items-center shadow-sm">
@@ -133,7 +129,7 @@
                 </div>`;
             }).join('');
 
-            // 2. Party Gallery (CON MODIFICA)
+            // Party Gallery Preview
             document.getElementById('preview-gallery').innerHTML = cacheG.map(ev => `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
                     <img src="${ev.foto_urls[0]}" class="w-14 h-10 object-cover rounded-lg">
@@ -144,7 +140,7 @@
                     </div>
                 </div>`).join('');
 
-            // 3. Viaggi
+            // Viaggi Preview
             document.getElementById('preview-v').innerHTML = cacheV.map(item => `
                 <div class="relative h-24 rounded-xl overflow-hidden border group shadow-sm">
                     <img src="${item.immagine_url}" class="w-full h-full object-cover">
@@ -154,7 +150,7 @@
                     </div>
                 </div>`).join('');
 
-            // 4. Flotta
+            // Flotta Preview
             document.getElementById('preview-flotta').innerHTML = cacheF.map(bus => `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
                     <img src="${bus.immagine_url}" class="w-14 h-10 object-cover rounded-lg">
@@ -169,115 +165,68 @@
             document.getElementById('counter-preno').innerText = (p || []).length + " CLIENTI";
         }
 
-        // --- FUNZIONI MODIFICA GALLERY ---
+        // --- SISTEMA CARICAMENTO GALLERY RIPARATO ---
+        async function salvaGallery() {
+            const t = document.getElementById('g-titolo').value.toUpperCase().trim();
+            const files = document.getElementById('g-files').files;
+            
+            if(!t) return alert("Inserisci il nome della festa!");
+            if(!editG && files.length === 0) return alert("Seleziona almeno una foto!");
+
+            const btn = document.getElementById('btn-salva-gallery');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ CARICAMENTO IN CORSO...";
+            btn.disabled = true;
+
+            try {
+                let urls = editG ? cacheG.find(x => x.id === editG).foto_urls : [];
+                
+                if(files.length > 0) {
+                    for(let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        btn.innerText = `⏳ CARICAMENTO ${i+1}/${files.length}...`;
+                        
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `party_${Date.now()}_${i}.${fileExt}`;
+                        
+                        const { data: upData, error: upErr } = await sb.storage.from('foto').upload(fileName, file);
+                        if(upErr) throw upErr;
+
+                        const { data: urlData } = sb.storage.from('foto').getPublicUrl(fileName);
+                        urls.push(urlData.publicUrl);
+                    }
+                }
+
+                const payload = { titolo: t, foto_urls: urls };
+                const { error: dbErr } = editG 
+                    ? await sb.from('gallery_eventi').update(payload).eq('id', editG)
+                    : await sb.from('gallery_eventi').insert([payload]);
+
+                if(dbErr) throw dbErr;
+
+                alert("Album salvato con successo!");
+                location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert("ERRORE: " + (err.message || "Problema di connessione o file troppo pesante."));
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
         function caricaModificaGallery(id) {
             const ev = cacheG.find(x => x.id === id);
-            editG = id; document.getElementById('g-titolo').value = ev.titolo;
-            document.getElementById('btn-salva-gallery').innerText = "Aggiorna Album";
+            editG = id;
+            document.getElementById('g-titolo').value = ev.titolo;
+            document.getElementById('btn-salva-gallery').innerText = "AGGIORNA ALBUM";
             document.getElementById('btn-annulla-gallery').classList.remove('hidden');
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        async function salvaGallery() {
-            const t = document.getElementById('g-titolo').value.toUpperCase().trim();
-            const files = document.getElementById('g-files').files;
-            if(!t) return alert("Inserisci un titolo!");
-
-            const btn = document.getElementById('btn-salva-gallery');
-            btn.innerText = "Caricamento..."; btn.disabled = true;
-
-            let urls = editG ? cacheG.find(x => x.id === editG).foto_urls : [];
-            
-            if(files.length > 0) {
-                // Se carichi nuove foto, le aggiungiamo a quelle esistenti (o puoi resettarle togliendo editG logic)
-                let newUrls = [];
-                for(let f of files) {
-                    const cleanName = f.name.replace(/\s+/g, '_').toLowerCase();
-                    const name = `party_${Date.now()}_${cleanName}`;
-                    await sb.storage.from('foto').upload(name, f);
-                    newUrls.push(sb.storage.from('foto').getPublicUrl(name).data.publicUrl);
-                }
-                urls = editG ? [...urls, ...newUrls] : newUrls; // Aggiunge a quelle vecchie se è modifica
-            }
-
-            const payload = { titolo: t, foto_urls: urls };
-            const { error } = editG 
-                ? await sb.from('gallery_eventi').update(payload).eq('id', editG)
-                : await sb.from('gallery_eventi').insert([payload]);
-
-            if(error) alert(error.message); else location.reload();
-        }
-
         function resetGallery() { editG = null; location.reload(); }
 
-        // --- FUNZIONI STANDARD RIPARATE ---
-        function caricaModificaFlotta(id) {
-            const bus = cacheF.find(x => x.id === id);
-            editF = id; document.getElementById('f-titolo').value = bus.titolo;
-            document.getElementById('f-desc').value = bus.descrizione;
-            document.getElementById('btn-salva-flotta').innerText = "Aggiorna Mezzo";
-            document.getElementById('btn-annulla-flotta').classList.remove('hidden');
-            window.scrollTo({top: 800, behavior: 'smooth'});
-        }
-
-        async function salvaFlotta() {
-            const t = document.getElementById('f-titolo').value.toUpperCase().trim();
-            const d = document.getElementById('f-desc').value.trim();
-            const f = document.getElementById('f-file').files[0];
-            let url = editF ? cacheF.find(x => x.id === editF).immagine_url : null;
-            if(f) {
-                const name = `fl_${Date.now()}`;
-                await sb.storage.from('foto').upload(name, f);
-                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
-            }
-            if(!t || !url) return alert("Dati mancanti!");
-            const obj = { titolo: t, descrizione: d, immagine_url: url };
-            if(editF) await sb.from('flotta_page').update(obj).eq('id', editF);
-            else await sb.from('flotta_page').insert([obj]);
-            location.reload();
-        }
-
-        function caricaModificaViaggio(id) {
-            const v = cacheV.find(x => x.id === id); editV = id;
-            document.getElementById('v-titolo').value = v.titolo;
-            document.getElementById('v-modello').value = v.modello_bus;
-            document.getElementById('btn-salva-viaggio').innerText = "Aggiorna Viaggio";
-            window.scrollTo({top: 500, behavior: 'smooth'});
-        }
-
-        async function salvaViaggio() {
-            const t = document.getElementById('v-titolo').value.toUpperCase().trim();
-            const m = document.getElementById('v-modello').value;
-            const f = document.getElementById('v-file').files[0];
-            let url = editV ? cacheV.find(x => x.id === editV).immagine_url : null;
-            if(f) {
-                const name = `v_${Date.now()}`;
-                await sb.storage.from('foto').upload(name, f);
-                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
-            }
-            if(!t || !url) return alert("Dati mancanti!");
-            const obj = { titolo: t, modello_bus: m, immagine_url: url };
-            if(editV) await sb.from('tratte').update(obj).eq('id', editV);
-            else await sb.from('tratte').insert([obj]);
-            location.reload();
-        }
-
-        async function salvaPreno() {
-            const n = document.getElementById('p-nome').value.toUpperCase().trim();
-            const tr = document.getElementById('p-tratta').value;
-            if(!n || !tr || !scelti.length) return alert("Dati incompleti!");
-            const obj = { nome_cliente: n, tratta_id: tr, posti_selezionati: scelti };
-            if(editP) await sb.from('prenotazioni').update(obj).eq('id', editP);
-            else await sb.from('prenotazioni').insert([obj]);
-            location.reload();
-        }
-
-        function caricaModificaPreno(id, n, tr, p) {
-            editP = id; document.getElementById('p-nome').value = n; document.getElementById('p-tratta').value = tr;
-            document.getElementById('btn-salva-preno').innerText = "Applica Modifica";
-            caricaPiantinaAdmin(tr, p); window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
+        // --- FUNZIONI STANDARD ---
         async function caricaPiantinaAdmin(tid, pre = []) {
             if(!tid) return document.getElementById('area-bus').classList.add('hidden');
             const v = cacheV.find(x => x.id === tid);
@@ -302,9 +251,72 @@
             }
         }
 
-        async function elimina(tab, id) { if(confirm("Confermi eliminazione definitiva?")) { await sb.from(tab).delete().eq('id', id); init(); } }
-        function resetFlotta() { location.reload(); }
-        
+        async function salvaPreno() {
+            const n = document.getElementById('p-nome').value.toUpperCase().trim();
+            const tr = document.getElementById('p-tratta').value;
+            if(!n || !tr || !scelti.length) return alert("Dati incompleti!");
+            const obj = { nome_cliente: n, tratta_id: tr, posti_selezionati: scelti };
+            if(editP) await sb.from('prenotazioni').update(obj).eq('id', editP);
+            else await sb.from('prenotazioni').insert([obj]);
+            location.reload();
+        }
+
+        function caricaModificaPreno(id, n, tr, p) {
+            editP = id; document.getElementById('p-nome').value = n; document.getElementById('p-tratta').value = tr;
+            document.getElementById('btn-salva-preno').innerText = "APPLICA MODIFICA";
+            caricaPiantinaAdmin(tr, p); window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        async function salvaViaggio() {
+            const t = document.getElementById('v-titolo').value.toUpperCase().trim();
+            const m = document.getElementById('v-modello').value;
+            const f = document.getElementById('v-file').files[0];
+            let url = editV ? cacheV.find(x => x.id === editV).immagine_url : null;
+            if(f) {
+                const name = `v_${Date.now()}`;
+                await sb.storage.from('foto').upload(name, f);
+                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
+            }
+            if(!t || !url) return alert("Dati mancanti!");
+            const obj = { titolo: t, modello_bus: m, immagine_url: url };
+            if(editV) await sb.from('tratte').update(obj).eq('id', editV);
+            else await sb.from('tratte').insert([obj]);
+            location.reload();
+        }
+
+        function caricaModificaViaggio(id) {
+            const v = cacheV.find(x => x.id === id); editV = id;
+            document.getElementById('v-titolo').value = v.titolo;
+            document.getElementById('v-modello').value = v.modello_bus;
+            window.scrollTo({top: 500, behavior: 'smooth'});
+        }
+
+        async function salvaFlotta() {
+            const t = document.getElementById('f-titolo').value.toUpperCase().trim();
+            const d = document.getElementById('f-desc').value.trim();
+            const f = document.getElementById('f-file').files[0];
+            let url = editF ? cacheF.find(x => x.id === editF).immagine_url : null;
+            if(f) {
+                const name = `fl_${Date.now()}`;
+                await sb.storage.from('foto').upload(name, f);
+                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
+            }
+            if(!t || !url) return alert("Dati mancanti!");
+            const obj = { titolo: t, descrizione: d, immagine_url: url };
+            if(editF) await sb.from('flotta_page').update(obj).eq('id', editF);
+            else await sb.from('flotta_page').insert([obj]);
+            location.reload();
+        }
+
+        function caricaModificaFlotta(id) {
+            const bus = cacheF.find(x => x.id === id);
+            editF = id; document.getElementById('f-titolo').value = bus.titolo;
+            document.getElementById('f-desc').value = bus.descrizione;
+            window.scrollTo({top: 800, behavior: 'smooth'});
+        }
+
+        async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); init(); } }
+
         init();
     </script>
 </body>
