@@ -39,7 +39,7 @@
             <a href="index.html" class="bg-gray-100 p-2 px-4 rounded-xl font-black text-[10px] uppercase border">SITO</a>
             <h1 class="font-black text-xs uppercase italic">Master Admin <span class="text-blue-600">Total Cloud</span></h1>
         </div>
-        <button onclick="location.reload()" class="text-[9px] font-black uppercase bg-blue-50 text-blue-600 px-4 py-2 rounded-xl">Reset Admin</button>
+        <button onclick="location.reload()" class="text-[9px] font-black uppercase bg-blue-50 text-blue-600 px-4 py-2 rounded-xl">Aggiorna Liste</button>
     </nav>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -56,24 +56,30 @@
 
         <div class="lg:col-span-7 space-y-6">
             
+            <div class="section-card" style="border-top: 4px solid #3b82f6;">
+                <h2 class="font-black uppercase italic text-lg text-blue-600 mb-6 italic">Carousel Home Sito</h2>
+                <div class="mb-4">
+                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Aggiungi foto allo slider principale:</label>
+                    <input type="file" id="c-file" class="text-[10px]" accept="image/*">
+                </div>
+                <button id="btn-salva-carousel" onclick="salvaCarousel()" class="btn-action bg-blue-600 text-white">Carica Foto Slider</button>
+                <div id="preview-carousel" class="mt-6 grid grid-cols-4 gap-2"></div>
+            </div>
+
             <div class="section-card" style="border-top: 4px solid #f43f5e;">
                 <h2 class="font-black uppercase italic text-lg text-rose-600 mb-6 italic">Party On The Road</h2>
                 <input type="text" id="g-titolo" placeholder="NOME EVENTO" class="input-style uppercase">
                 <div class="mb-4">
-                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Scegli Foto o Video:</label>
+                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Scegli Foto (jpg, png, dng) o Video (mp4, mov):</label>
                     <input type="file" id="g-files" class="text-[10px]" multiple accept="image/*,video/*,.dng">
                 </div>
-                
                 <div id="upload-status-area" class="hidden mb-4">
-                    <div class="progress-bar-container">
-                        <div id="progress-bar" class="progress-bar-fill"></div>
-                    </div>
-                    <p id="upload-status-text" class="text-[10px] font-black uppercase text-rose-600 italic text-center"></p>
+                    <div class="progress-bar-container"><div id="progress-bar" class="progress-bar-fill"></div></div>
+                    <p id="upload-status-text" class="text-[10px] font-black text-rose-600 italic text-center"></p>
                 </div>
-
                 <div class="flex gap-2">
                     <button id="btn-salva-gallery" onclick="salvaGallery()" class="btn-action bg-rose-600 text-white flex-1">Pubblica Album</button>
-                    <button id="btn-annulla-gallery" onclick="resetGallery()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
+                    <button onclick="location.reload()" class="bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Reset</button>
                 </div>
                 <div id="preview-gallery" class="mt-6 space-y-2"></div>
             </div>
@@ -86,9 +92,7 @@
                     <div id="grid-posti" class="bus-grid mb-4"></div>
                     <div id="label-posti" class="text-center text-blue-600 font-black text-lg italic">SELEZIONA POSTI</div>
                 </div>
-                <div class="flex gap-2">
-                    <button id="btn-salva-preno" onclick="salvaPreno()" class="btn-action bg-green-600 text-white flex-1">Salva</button>
-                </div>
+                <button onclick="salvaPreno()" class="btn-action bg-green-600 text-white">Salva Posti</button>
             </div>
 
             <div class="section-card" style="border-top: 4px solid #000;">
@@ -101,7 +105,7 @@
                     </select>
                 </div>
                 <input type="file" id="v-file" class="text-[10px] mb-4" accept="image/*">
-                <button id="btn-salva-viaggio" onclick="salvaViaggio()" class="btn-action bg-black text-white">Pubblica Viaggio</button>
+                <button onclick="salvaViaggio()" class="btn-action bg-black text-white">Pubblica Viaggio</button>
                 <div id="preview-v" class="mt-6 grid grid-cols-3 gap-3"></div>
             </div>
 
@@ -110,7 +114,7 @@
                 <input type="text" id="f-titolo" placeholder="NOME BUS" class="input-style uppercase">
                 <textarea id="f-desc" placeholder="DESCRIZIONE..." class="input-style h-20"></textarea>
                 <input type="file" id="f-file" class="text-[10px] mb-4" accept="image/*">
-                <button id="btn-salva-flotta" onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white">Salva Mezzo</button>
+                <button onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white">Salva Mezzo</button>
                 <div id="preview-flotta" class="mt-6 space-y-2"></div>
             </div>
 
@@ -123,7 +127,7 @@
         const sb = supabase.createClient(S_URL, S_KEY);
 
         let cacheV = [], cacheF = [], cacheG = [], scelti = []; 
-        let editP = null, editV = null, editF = null, editG = null;
+        let editP = null, editG = null;
 
         function isVideo(url) {
             const videoExts = ['mp4', 'mov', 'avi', 'webm', 'm4v'];
@@ -136,56 +140,67 @@
             const { data: p } = await sb.from('prenotazioni').select('*').order('created_at', {ascending: false});
             const { data: f } = await sb.from('flotta_page').select('*').order('created_at', {ascending: false});
             const { data: g } = await sb.from('gallery_eventi').select('*').order('created_at', {ascending: false});
+            const { data: c } = await sb.from('carousel_flotta').select('*').order('created_at', {ascending: false});
             
             cacheV = v || []; cacheF = f || []; cacheG = g || [];
 
+            // Carousel List
+            document.getElementById('preview-carousel').innerHTML = (c || []).map(img => `
+                <div class="relative h-16 rounded-xl overflow-hidden border group">
+                    <img src="${img.immagine_url}" class="w-full h-full object-cover">
+                    <button onclick="elimina('carousel_flotta','${img.id}')" class="absolute inset-0 bg-red-600/80 text-white font-black text-[8px] opacity-0 group-hover:opacity-100 uppercase italic">Elimina</button>
+                </div>`).join('');
+
+            // Passeggeri List
             document.getElementById('lista-p').innerHTML = (p || []).map(item => {
                 const tr = cacheV.find(x => x.id === item.tratta_id);
                 return `<div class="p-4 bg-white border rounded-2xl flex justify-between items-center shadow-sm">
                     <div><div class="font-black text-[11px] uppercase">${item.nome_cliente}</div><div class="text-[9px] text-blue-600 font-bold uppercase italic">${tr ? tr.titolo : 'N/A'}</div><div class="text-[10px] text-gray-400 font-black">POSTI: ${item.posti_selezionati.join(', ')}</div></div>
-                    <div class="flex gap-1"><button onclick="caricaModificaPreno('${item.id}','${item.nome_cliente}','${item.tratta_id}','${item.posti_selezionati}')" class="bg-blue-50 text-blue-600 font-black text-[9px] p-2 rounded-lg">MOD</button><button onclick="elimina('prenotazioni','${item.id}')" class="bg-red-50 text-red-600 font-black text-[9px] p-2 rounded-lg">X</button></div>
+                    <div class="flex gap-1"><button onclick="elimina('prenotazioni','${item.id}')" class="bg-red-50 text-red-600 font-black text-[9px] p-2 rounded-lg">X</button></div>
                 </div>`;
             }).join('');
 
-            document.getElementById('preview-gallery').innerHTML = cacheG.map(ev => {
-                const firstUrl = ev.foto_urls[0];
-                const previewContent = isVideo(firstUrl) 
-                    ? `<div class="preview-media">VIDEO</div>`
-                    : `<img src="${firstUrl}" class="preview-media">`;
-
-                return `<div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
-                    ${previewContent}
+            // Gallery Party List
+            document.getElementById('preview-gallery').innerHTML = cacheG.map(ev => `
+                <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
+                    <div class="preview-media">${isVideo(ev.foto_urls[0]) ? 'VIDEO' : `<img src="${ev.foto_urls[0]}" class="w-full h-full object-cover">`}</div>
                     <div class="flex-1 font-black text-[9px] uppercase">${ev.titolo} (${ev.foto_urls.length})</div>
-                    <div class="flex gap-1">
-                        <button onclick="caricaModificaGallery('${ev.id}')" class="bg-rose-50 text-rose-600 font-black text-[9px] p-2 rounded-lg">MOD</button>
-                        <button onclick="elimina('gallery_eventi','${ev.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1 rounded-lg">×</button>
-                    </div>
-                </div>`;
-            }).join('');
-
-            document.getElementById('preview-v').innerHTML = cacheV.map(item => `
-                <div class="relative h-24 rounded-xl overflow-hidden border group shadow-sm">
-                    <img src="${item.immagine_url}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center p-2">
-                        <button onclick="caricaModificaViaggio('${item.id}')" class="text-[8px] bg-blue-600 text-white px-2 py-1 rounded font-black uppercase mb-1">Mod</button>
-                        <button onclick="elimina('tratte','${item.id}')" class="text-[8px] bg-red-600 text-white px-2 py-1 rounded font-black uppercase">X</button>
-                    </div>
+                    <button onclick="elimina('gallery_eventi','${ev.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1 rounded-lg">×</button>
                 </div>`).join('');
 
+            // Viaggi List
+            document.getElementById('preview-v').innerHTML = cacheV.map(item => `
+                <div class="relative h-24 rounded-xl overflow-hidden border shadow-sm">
+                    <img src="${item.immagine_url}" class="w-full h-full object-cover">
+                    <button onclick="elimina('tratte','${item.id}')" class="absolute top-1 right-1 bg-red-600 text-white rounded p-1 text-[8px]">ELIMINA</button>
+                </div>`).join('');
+
+            // Flotta List
             document.getElementById('preview-flotta').innerHTML = cacheF.map(bus => `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
                     <img src="${bus.immagine_url}" class="w-14 h-10 object-cover rounded-lg">
                     <div class="flex-1 font-black text-[9px] uppercase">${bus.titolo}</div>
-                    <div class="flex gap-1">
-                        <button onclick="caricaModificaFlotta('${bus.id}')" class="bg-orange-50 text-orange-600 font-black text-[9px] p-2 rounded-lg">MOD</button>
-                        <button onclick="elimina('flotta_page','${bus.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1 rounded-lg">×</button>
-                    </div>
+                    <button onclick="elimina('flotta_page','${bus.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1 rounded-lg">×</button>
                 </div>`).join('');
 
             document.getElementById('p-tratta').innerHTML = '<option value="">-- SELEZIONA VIAGGIO --</option>' + cacheV.map(v => `<option value="${v.id}">${v.titolo}</option>`).join('');
             document.getElementById('counter-preno').innerText = (p || []).length + " CLIENTI";
         }
 
+        // --- CAROUSEL LOGIC ---
+        async function salvaCarousel() {
+            const f = document.getElementById('c-file').files[0];
+            if(!f) return alert("Scegli una foto!");
+            const btn = document.getElementById('btn-salva-carousel');
+            btn.innerText = "Caricamento...";
+            const name = `car_${Date.now()}`;
+            await sb.storage.from('foto').upload(name, f);
+            const { data } = sb.storage.from('foto').getPublicUrl(name);
+            await sb.from('carousel_flotta').insert([{ immagine_url: data.publicUrl }]);
+            location.reload();
+        }
+
+        // --- GALLERY PARTY LOGIC (SEQUENTIAL UPLOAD) ---
         async function salvaGallery() {
             const t = document.getElementById('g-titolo').value.toUpperCase().trim();
             const files = document.getElementById('g-files').files;
@@ -193,43 +208,29 @@
             const progressBar = document.getElementById('progress-bar');
             const statusText = document.getElementById('upload-status-text');
             
-            if(!t) return alert("Inserisci il nome!");
-            if(!editG && files.length === 0) return alert("Scegli i file!");
+            if(!t || files.length === 0) return alert("Dati mancanti!");
 
             const btn = document.getElementById('btn-salva-gallery');
             btn.disabled = true;
             statusArea.classList.remove('hidden');
 
             try {
-                let urls = editG ? cacheG.find(x => x.id === editG).foto_urls : [];
-                
+                let urls = [];
                 for(let i = 0; i < files.length; i++) {
                     const f = files[i];
                     const percent = Math.round(((i + 1) / files.length) * 100);
                     progressBar.style.width = percent + '%';
-                    statusText.innerText = `⏳ CARICAMENTO FILE ${i+1} DI ${files.length} (${percent}%)`;
+                    statusText.innerText = `⏳ UPLOAD FILE ${i+1}/${files.length} (${percent}%)`;
                     
                     const ext = f.name.split('.').pop().toLowerCase();
-                    const name = `p_${Date.now()}_${i}.${ext}`;
-                    
+                    const name = `party_${Date.now()}_${i}.${ext}`;
                     const { error: upErr } = await sb.storage.from('foto').upload(name, f);
                     if(upErr) throw upErr;
-
                     const { data: urlData } = sb.storage.from('foto').getPublicUrl(name);
                     urls.push(urlData.publicUrl);
                 }
-
-                statusText.innerText = "💾 SINCRONIZZAZIONE DATABASE...";
-                const payload = { titolo: t, foto_urls: urls };
-                const { error: dbErr } = editG 
-                    ? await sb.from('gallery_eventi').update(payload).eq('id', editG)
-                    : await sb.from('gallery_eventi').insert([payload]);
-
-                if(dbErr) throw dbErr;
-
-                alert("OPERAZIONE COMPLETATA!");
+                await sb.from('gallery_eventi').insert([{ titolo: t, foto_urls: urls }]);
                 location.reload();
-
             } catch (err) {
                 alert("ERRORE: " + err.message);
                 btn.disabled = false;
@@ -237,17 +238,7 @@
             }
         }
 
-        function caricaModificaGallery(id) {
-            const ev = cacheG.find(x => x.id === id);
-            editG = id; document.getElementById('g-titolo').value = ev.titolo;
-            document.getElementById('btn-salva-gallery').innerText = "Aggiorna Album";
-            document.getElementById('btn-annulla-gallery').classList.remove('hidden');
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        function resetGallery() { editG = null; location.reload(); }
-
-        // --- ALTRE FUNZIONI ---
+        // --- COMMON LOGIC ---
         async function salvaPreno() {
             const n = document.getElementById('p-nome').value.toUpperCase().trim();
             const tr = document.getElementById('p-tratta').value;
@@ -256,25 +247,20 @@
             location.reload();
         }
 
-        function caricaModificaPreno(id, n, tr, p) {
-            editP = id; document.getElementById('p-nome').value = n; document.getElementById('p-tratta').value = tr;
-            caricaPiantinaAdmin(tr, p); window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        async function caricaPiantinaAdmin(tid, pre = []) {
+        async function caricaPiantinaAdmin(tid) {
             if(!tid) return document.getElementById('area-bus').classList.add('hidden');
             const v = cacheV.find(x => x.id === tid);
             document.getElementById('area-bus').classList.remove('hidden');
             const grid = document.getElementById('grid-posti'); grid.innerHTML = '';
-            scelti = (typeof pre === 'string' ? pre.split(',') : pre).map(String);
+            scelti = [];
             const cap = parseInt(v.modello_bus) || 53;
-            const { data: occ } = await sb.from('prenotazioni').select('posti_selezionati, id').eq('tratta_id', tid);
-            const presi = (occ || []).filter(o => o.id !== editP).flatMap(o => o.posti_selezionati.map(String));
+            const { data: occ } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', tid);
+            const presi = (occ || []).flatMap(o => o.posti_selezionati.map(String));
             for (let i = 1; i <= cap; i++) {
                 if (i % 4 === 1 && i > 1 && i <= (cap - 5)) grid.appendChild(Object.assign(document.createElement('div'), {className:'corridor'}));
                 const s = String(i); const isOcc = presi.includes(s);
                 const div = document.createElement('div');
-                div.className = `seat ${isOcc ? 'occupied' : (scelti.includes(s) ? 'selected' : 'available')}`;
+                div.className = `seat ${isOcc ? 'occupied' : 'available'}`;
                 div.innerText = i;
                 if(!isOcc) div.onclick = () => {
                     div.classList.toggle('selected');
@@ -309,7 +295,7 @@
             location.reload();
         }
 
-        async function elimina(tab, id) { if(confirm("Eliminare?")) { await sb.from(tab).delete().eq('id', id); init(); } }
+        async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); init(); } }
 
         init();
     </script>
