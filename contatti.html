@@ -6,104 +6,176 @@
     <title>Contatti | Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; color: #1a1a1a; background-color: #f3f4f6; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
         
-        header { background: rgba(255, 255, 255, 0.95); padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
-        .logo-box img { height: 50px; width: auto; object-fit: contain; }
-        .nav-links { list-style: none; display: flex; gap: 15px; }
-        .nav-links a { text-decoration: none; color: #000; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-
-        .contact-card { @apply bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 transition-all hover:shadow-xl; }
-        .btn-call { @apply w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 mb-3 shadow-md; }
-        
-        /* Box Social Migliorato */
-        .social-link { 
-            @apply flex flex-col items-center justify-center gap-1 p-6 bg-white rounded-3xl border border-gray-200 font-black text-[10px] uppercase transition-all shadow-sm;
-            min-height: 100px;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: #111; 
+            background-color: #fcfcfc; 
+            -webkit-font-smoothing: antialiased;
         }
-        .social-link:hover { @apply border-blue-600 text-blue-600 bg-blue-50 transform -translate-y-1; }
 
-        footer { background: #000; color: white; padding: 60px 0 20px; text-align: center; }
-        .signature { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 30px; border-top: 1px solid #111; padding-top: 20px; }
+        header { 
+            background: rgba(255, 255, 255, 0.8); 
+            padding: 15px 0; 
+            border-bottom: 1px solid rgba(0,0,0,0.05); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            backdrop-filter: blur(15px); 
+        }
+
+        .contact-card { 
+            background: white; 
+            border-radius: 2rem; 
+            padding: 2.5rem; 
+            border: 1px solid #f1f1f1;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+            border-color: #3b82f6;
+        }
+
+        .btn-action {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .social-grid-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 1.5rem;
+            transition: 0.3s;
+        }
+
+        .social-grid-link:hover {
+            background: #f8faff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .section-label {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        footer { background: #000; color: white; padding: 4rem 0 2rem; }
     </style>
 </head>
-<body class="pb-12">
+<body>
 
     <header>
-        <div class="header-flex">
-            <a href="index.html" class="logo-box"><img src="logo.JPEG" alt="Logo Del Grosso"></a>
-            <nav>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="flotta.html">Flotta</a></li>
-                    <li><a href="partyontheroad.html">Party</a></li>
-                    <li><a href="viaggi.html">Viaggi</a></li>
-                </ul>
+        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
+            <a href="index.html"><img src="logo.JPEG" class="h-10 md:h-14 w-auto object-contain"></a>
+            <nav class="hidden md:flex gap-8">
+                <a href="index.html" class="text-[10px] font-black uppercase tracking-widest hover:text-blue-600 transition">Home</a>
+                <a href="flotta.html" class="text-[10px] font-black uppercase tracking-widest hover:text-blue-600 transition">Flotta</a>
+                <a href="partyontheroad.html" class="text-[10px] font-black uppercase tracking-widest hover:text-blue-600 transition">Party</a>
+                <a href="viaggi.html" class="text-[10px] font-black uppercase tracking-widest hover:text-blue-600 transition">Viaggi</a>
             </nav>
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto p-6 py-12">
+    <main class="max-w-5xl mx-auto px-6 py-16">
         <div class="text-center mb-16">
-            <p class="text-blue-600 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Booking & Info</p>
-            <h1 class="text-4xl md:text-5xl font-black uppercase italic tracking-tighter">I Nostri Contatti</h1>
+            <span class="section-label">Esclusività al tuo servizio</span>
+            <h1 class="text-5xl md:text-6xl font-black uppercase italic tracking-tighter leading-none mb-4">Mettiti in Contatto</h1>
+            <p class="text-gray-400 font-medium">Scegli il dipartimento dedicato alle tue esigenze.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            <div class="contact-card border-t-8 border-black">
-                <div class="mb-6">
-                    <h2 class="text-xl font-black uppercase italic">RAFFAELE <br><span class="text-blue-600">Bus GT Turismo</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            
+            <div class="contact-card">
+                <div class="mb-8">
+                    <span class="section-label">Dipartimento Viaggi</span>
+                    <h2 class="text-2xl font-black uppercase italic">RAFFAELE</h2>
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Bus GT & Travel Specialist</p>
                 </div>
-                <a href="tel:3205730466" class="btn-call bg-black text-white">📞 Chiama 320 5730466</a>
-                <a href="https://wa.me/393205730466" target="_blank" class="btn-call bg-green-600 text-white">💬 WhatsApp Raffaele</a>
+                
+                <a href="tel:3205730466" class="btn-action bg-black text-white hover:bg-gray-800">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    Chiama 320 5730466
+                </a>
+                
+                <a href="https://wa.me/393205730466" target="_blank" class="btn-action bg-[#25D366] text-white hover:opacity-90">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path></svg>
+                    WhatsApp Raffaele
+                </a>
             </div>
 
-            <div class="contact-card border-t-8 border-blue-600">
-                <div class="mb-6">
-                    <h2 class="text-xl font-black uppercase italic">NICOLA <br><span class="text-blue-600">Limousine Bus</span></h2>
+            <div class="contact-card">
+                <div class="mb-8">
+                    <span class="section-label">Luxury & Events</span>
+                    <h2 class="text-2xl font-black uppercase italic">NICOLA</h2>
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Limousine Bus Specialist</p>
                 </div>
-                <a href="tel:3662127916" class="btn-call bg-blue-600 text-white">📞 Chiama 366 2127916</a>
-                <a href="https://wa.me/393662127916" target="_blank" class="btn-call bg-green-600 text-white">💬 WhatsApp Nicola</a>
+                
+                <a href="tel:3662127916" class="btn-action bg-blue-600 text-white hover:bg-blue-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                    Chiama 366 2127916
+                </a>
+                
+                <a href="https://wa.me/393662127916" target="_blank" class="btn-action bg-[#25D366] text-white hover:opacity-90">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path></svg>
+                    WhatsApp Nicola
+                </a>
             </div>
         </div>
 
-        <div class="contact-card text-center mb-12">
-            <p class="text-[10px] font-black text-blue-600 uppercase mb-2">Inviaci una Mail</p>
-            <a href="mailto:info@delgrossoviaggi.it" class="text-2xl font-black lowercase break-all">info@delgrossoviaggi.it</a>
+        <div class="bg-blue-50 border border-blue-100 rounded-[2rem] p-8 text-center mb-16">
+            <span class="section-label">Richieste Preventivi</span>
+            <a href="mailto:info@delgrossoviaggi.it" class="text-2xl md:text-3xl font-black text-blue-600 block hover:opacity-70 transition lowercase">info@delgrossoviaggi.it</a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" class="social-link">
-                <span class="text-2xl mb-1">📸</span>
-                <span>INSTAGRAM</span>
-                <span class="opacity-50 text-[8px]">@delgrosso_viaggi_</span>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" class="social-grid-link">
+                <span class="font-black text-[10px] tracking-widest">INSTAGRAM</span>
+                <span class="text-gray-400 text-[9px]">Del Grosso Viaggi</span>
             </a>
-            <a href="https://www.instagram.com/_limousine_bus/" target="_blank" class="social-link">
-                <span class="text-2xl mb-1">📸</span>
-                <span>INSTAGRAM</span>
-                <span class="opacity-50 text-[8px]">@_limousine_bus</span>
+            <a href="https://www.instagram.com/_limousine_bus/" target="_blank" class="social-grid-link">
+                <span class="font-black text-[10px] tracking-widest">INSTAGRAM</span>
+                <span class="text-gray-400 text-[9px]">Limousine Bus</span>
             </a>
-            <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" class="social-link">
-                <span class="text-2xl mb-1">👍</span>
-                <span>FACEBOOK</span>
-                <span class="opacity-50 text-[8px]">DelGrosso Viaggi</span>
+            <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" class="social-grid-link">
+                <span class="font-black text-[10px] tracking-widest">FACEBOOK</span>
+                <span class="text-gray-400 text-[9px]">DelGrosso Page</span>
             </a>
-            <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" class="social-link">
-                <span class="text-2xl mb-1">👍</span>
-                <span>FACEBOOK</span>
-                <span class="opacity-50 text-[8px]">Limousine Bus</span>
+            <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" class="social-grid-link">
+                <span class="font-black text-[10px] tracking-widest">FACEBOOK</span>
+                <span class="text-gray-400 text-[9px]">Luxury Bus</span>
             </a>
         </div>
     </main>
 
     <footer>
-        <div class="container px-6 mx-auto">
-            <img src="logo.JPEG" class="h-10 mx-auto mb-6 brightness-0 invert opacity-50">
-            <p class="text-[10px] uppercase opacity-40 tracking-[0.2em]">San Severo (FG) - Puglia - Italia</p>
-            <div class="signature">Designer © Cristino Nicola Pio</div>
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <img src="logo.JPEG" class="h-10 mx-auto mb-8 brightness-0 invert opacity-40">
+            <p class="text-[10px] uppercase font-black tracking-[0.3em] opacity-30 mb-2">San Severo (FG) • Puglia • Italia</p>
+            <p class="text-[9px] font-medium opacity-20 uppercase tracking-widest">© 2026 Del Grosso Viaggi. Designer Cristino Nicola Pio</p>
         </div>
     </footer>
 

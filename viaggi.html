@@ -21,11 +21,10 @@
         .card-tour { background: white; border-radius: 2.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #f1f5f9; transition: all 0.4s ease; display: flex; flex-direction: column; }
         .card-tour:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); }
 
-        /* CONTENITORE IMMAGINE: contain invece di cover per vedere tutta la locandina */
         .image-container { 
             position: relative; 
             height: 380px; 
-            background: #f1f5f9; /* Sfondo leggero dietro la locandina */
+            background: #eee; /* Grigio se non carica */
             cursor: zoom-in; 
             overflow: hidden;
             display: flex;
@@ -35,10 +34,12 @@
         .image-container img { 
             max-width: 100%; 
             max-height: 100%; 
-            object-fit: contain; /* MOSTRA TUTTA LA FOTO SENZA TAGLI */
+            object-fit: contain; 
             transition: 0.5s ease;
+            background: #000; /* Sfondo nero per far risaltare la locandina */
+            width: 100%;
+            height: 100%;
         }
-        .card-tour:hover .image-container img { transform: scale(1.02); }
 
         .sold-out-overlay {
             position: absolute; inset: 0; background: rgba(255, 255, 255, 0.6);
@@ -53,7 +54,7 @@
         .btn-book { 
             background: black; color: white; padding: 14px 20px; border-radius: 1rem; 
             font-weight: 900; text-transform: uppercase; font-size: 11px;
-            transition: 0.3s; text-decoration: none; text-align: center;
+            transition: all 0.3s; text-decoration: none; text-align: center;
             flex: 1;
         }
         .btn-book:hover { background: #2563eb; }
@@ -88,11 +89,12 @@
         <div class="text-center mb-12">
             <p class="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-2">Discovery Program</p>
             <h1 class="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">Prossime Partenze</h1>
-            <p class="text-gray-400 text-[10px] font-bold uppercase mt-4 tracking-widest">Tocca la locandina per i dettagli completi</p>
+            <p class="text-gray-400 text-[10px] font-bold uppercase mt-4 tracking-widest">Tocca la locandina per ingrandire</p>
         </div>
         
         <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            </div>
+            <p class="col-span-full text-center py-20 opacity-20 font-black uppercase tracking-widest">Sincronizzazione Viaggi...</p>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -101,18 +103,21 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        function fixUrl(url) {
-            return url ? url + "?v=" + new Date().getTime() : 'logo.JPEG';
+        // FUNZIONE CORRETTA PER LE IMMAGINI
+        function getImageUrl(url) {
+            if (!url) return 'logo.JPEG';
+            // Se l'URL è già un link completo (http...), lo usiamo così com'è aggiungendo solo la cache
+            return url + (url.includes('?') ? '&' : '?') + "v=" + new Date().getTime();
         }
 
         async function caricaViaggi() {
             const grid = document.getElementById('grid-viaggi');
             
             try {
-                const { data: tratte } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-                const { data: preno } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
+                const { data: tratte, error: tErr } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+                const { data: preno, error: pErr } = await sb.from('prenotazioni').select('tratta_id, posti_selezionati');
 
-                if (!tratte || tratte.length === 0) {
+                if (tErr || !tratte || tratte.length === 0) {
                     grid.innerHTML = `<p class="col-span-full text-center py-20 font-black uppercase opacity-20">Nessun viaggio disponibile.</p>`;
                     return;
                 }
@@ -125,14 +130,14 @@
                     const capacita = parseInt(v.modello_bus) || 53;
                     const disponibili = capacita - occupatiCount;
                     const isFull = disponibili <= 0;
-                    const imgUrl = fixUrl(v.immagine_url);
+                    const imgUrl = getImageUrl(v.immagine_url);
 
                     return `
                         <div class="card-tour">
                             <div class="image-container">
                                 ${isFull ? `<div class="sold-out-overlay"><div class="sold-out-badge">SOLD OUT</div></div>` : ''}
                                 <a href="${imgUrl}" class="glightbox" data-title="${v.titolo}">
-                                    <img src="${imgUrl}" alt="${v.titolo}">
+                                    <img src="${imgUrl}" alt="${v.titolo}" onerror="this.src='logo.JPEG'; this.style.objectFit='contain';">
                                 </a>
                                 <div class="absolute top-4 left-4 bg-black/80 backdrop-blur text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">
                                     Bus ${capacita} Posti
@@ -163,12 +168,12 @@
                 GLightbox({ 
                     selector: '.glightbox',
                     touchNavigation: true,
-                    loop: false,
                     zoomable: true
                 });
 
             } catch (err) {
-                grid.innerHTML = "<p class='text-center uppercase font-black py-20'>Errore Sincronizzazione.</p>";
+                console.error(err);
+                grid.innerHTML = "<p class='text-center uppercase font-black py-20'>Errore di Caricamento.</p>";
             }
         }
 
