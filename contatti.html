@@ -19,7 +19,12 @@
         .contact-card { @apply bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 transition-all hover:shadow-xl; }
         .btn-call { @apply w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 mb-3 shadow-md; }
         
-        .social-link { @apply flex flex-col gap-1 p-5 bg-white rounded-2xl border border-gray-100 font-black text-[10px] uppercase transition-all hover:bg-blue-50 hover:text-blue-600 shadow-sm; }
+        /* Box Social Migliorato */
+        .social-link { 
+            @apply flex flex-col items-center justify-center gap-1 p-6 bg-white rounded-3xl border border-gray-200 font-black text-[10px] uppercase transition-all shadow-sm;
+            min-height: 100px;
+        }
+        .social-link:hover { @apply border-blue-600 text-blue-600 bg-blue-50 transform -translate-y-1; }
 
         footer { background: #000; color: white; padding: 60px 0 20px; text-align: center; }
         .signature { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 30px; border-top: 1px solid #111; padding-top: 20px; }
@@ -49,7 +54,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <div class="contact-card border-t-8 border-black">
-                <div class="flex justify-between items-start mb-6">
+                <div class="mb-6">
                     <h2 class="text-xl font-black uppercase italic">RAFFAELE <br><span class="text-blue-600">Bus GT Turismo</span></h2>
                 </div>
                 <a href="tel:3205730466" class="btn-call bg-black text-white">📞 Chiama 320 5730466</a>
@@ -57,7 +62,7 @@
             </div>
 
             <div class="contact-card border-t-8 border-blue-600">
-                <div class="flex justify-between items-start mb-6">
+                <div class="mb-6">
                     <h2 class="text-xl font-black uppercase italic">NICOLA <br><span class="text-blue-600">Limousine Bus</span></h2>
                 </div>
                 <a href="tel:3662127916" class="btn-call bg-blue-600 text-white">📞 Chiama 366 2127916</a>
@@ -70,22 +75,26 @@
             <a href="mailto:info@delgrossoviaggi.it" class="text-2xl font-black lowercase break-all">info@delgrossoviaggi.it</a>
         </div>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" class="social-link text-center">
-                <span>📸 INSTAGRAM</span>
-                <span class="opacity-50">@delgrosso_viaggi_</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" class="social-link">
+                <span class="text-2xl mb-1">📸</span>
+                <span>INSTAGRAM</span>
+                <span class="opacity-50 text-[8px]">@delgrosso_viaggi_</span>
             </a>
-            <a href="https://www.instagram.com/_limousine_bus/" target="_blank" class="social-link text-center">
-                <span>📸 INSTAGRAM</span>
-                <span class="opacity-50">@_limousine_bus</span>
+            <a href="https://www.instagram.com/_limousine_bus/" target="_blank" class="social-link">
+                <span class="text-2xl mb-1">📸</span>
+                <span>INSTAGRAM</span>
+                <span class="opacity-50 text-[8px]">@_limousine_bus</span>
             </a>
-            <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" class="social-link text-center">
-                <span>👍 FACEBOOK</span>
-                <span class="opacity-50">DelGrosso Viaggi</span>
+            <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" class="social-link">
+                <span class="text-2xl mb-1">👍</span>
+                <span>FACEBOOK</span>
+                <span class="opacity-50 text-[8px]">DelGrosso Viaggi</span>
             </a>
-            <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" class="social-link text-center">
-                <span>👍 FACEBOOK</span>
-                <span class="opacity-50">Limousine Bus</span>
+            <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" class="social-link">
+                <span class="text-2xl mb-1">👍</span>
+                <span>FACEBOOK</span>
+                <span class="opacity-50 text-[8px]">Limousine Bus</span>
             </a>
         </div>
     </main>
