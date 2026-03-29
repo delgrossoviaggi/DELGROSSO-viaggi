@@ -19,7 +19,7 @@
         .contact-card { @apply bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 transition-all hover:shadow-xl; }
         .btn-call { @apply w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all active:scale-95 mb-3 shadow-md; }
         
-        .social-link { @apply flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 font-bold text-xs uppercase transition-all hover:bg-blue-50 hover:text-blue-600; }
+        .social-link { @apply flex flex-col gap-1 p-5 bg-white rounded-2xl border border-gray-100 font-black text-[10px] uppercase transition-all hover:bg-blue-50 hover:text-blue-600 shadow-sm; }
 
         footer { background: #000; color: white; padding: 60px 0 20px; text-align: center; }
         .signature { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #444; margin-top: 30px; border-top: 1px solid #111; padding-top: 20px; }
@@ -29,13 +29,13 @@
 
     <header>
         <div class="header-flex">
-            <a href="index.html" class="logo-box"><img src="logo.jpg.JPEG" alt="Logo Del Grosso"></a>
+            <a href="index.html" class="logo-box"><img src="logo.JPEG" alt="Logo Del Grosso"></a>
             <nav>
                 <ul class="nav-links">
                     <li><a href="index.html">Home</a></li>
                     <li><a href="flotta.html">Flotta</a></li>
+                    <li><a href="partyontheroad.html">Party</a></li>
                     <li><a href="viaggi.html">Viaggi</a></li>
-                    <li><a href="prenota.html">Prenota</a></li>
                 </ul>
             </nav>
         </div>
@@ -43,63 +43,58 @@
 
     <main class="max-w-5xl mx-auto p-6 py-12">
         <div class="text-center mb-16">
-            <p class="text-blue-600 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Contatti Ufficiali</p>
-            <h1 class="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none">Mettiti in Contatto</h1>
+            <p class="text-blue-600 font-black uppercase text-[10px] tracking-[0.3em] mb-2">Booking & Info</p>
+            <h1 class="text-4xl md:text-5xl font-black uppercase italic tracking-tighter">I Nostri Contatti</h1>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <div class="contact-card border-t-8 border-black">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-xl font-black uppercase italic">Bus GT <br><span class="text-blue-600">Turismo</span></h2>
-                    <span class="bg-gray-100 text-[9px] font-black px-3 py-1 rounded-full uppercase">Ref. Raffaele</span>
+                    <h2 class="text-xl font-black uppercase italic">RAFFAELE <br><span class="text-blue-600">Bus GT Turismo</span></h2>
                 </div>
-                
-                <p class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest">Contatto Diretto</p>
                 <a href="tel:3205730466" class="btn-call bg-black text-white">📞 Chiama 320 5730466</a>
-                <a href="https://wa.me/393205730466" class="btn-call bg-green-600 text-white">💬 WhatsApp Raffaele</a>
-                
-                <div class="mt-8 p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                    <p class="text-[9px] font-black text-gray-400 uppercase mb-1">Email Aziendale</p>
-                    <a href="mailto:info@delgrossoviaggi.it" class="text-sm font-black lowercase">info@delgrossoviaggi.it</a>
-                </div>
+                <a href="https://wa.me/393205730466" target="_blank" class="btn-call bg-green-600 text-white">💬 WhatsApp Raffaele</a>
             </div>
 
             <div class="contact-card border-t-8 border-blue-600">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-xl font-black uppercase italic">Limousine <br><span class="text-blue-600">Luxury Bus</span></h2>
-                    <span class="bg-blue-50 text-blue-600 text-[9px] font-black px-3 py-1 rounded-full uppercase">Ref. Nicola</span>
+                    <h2 class="text-xl font-black uppercase italic">NICOLA <br><span class="text-blue-600">Limousine Bus</span></h2>
                 </div>
-                
-                <p class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest">Contatto Diretto</p>
                 <a href="tel:3662127916" class="btn-call bg-blue-600 text-white">📞 Chiama 366 2127916</a>
-                <a href="https://wa.me/393662127916" class="btn-call bg-green-600 text-white">💬 WhatsApp Nicola</a>
-
-                <div class="mt-8">
-                     <p class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest">Sede Operativa</p>
-                     <p class="text-lg font-black italic uppercase">San Severo (FG)</p>
-                     <p class="text-xs font-bold text-gray-400 uppercase">Puglia - Italia</p>
-                </div>
+                <a href="https://wa.me/393662127916" target="_blank" class="btn-call bg-green-600 text-white">💬 WhatsApp Nicola</a>
             </div>
+        </div>
 
-            <div class="lg:col-span-2 contact-card">
-                <h2 class="text-center text-sm font-black uppercase tracking-widest mb-8 italic underline decoration-blue-600">Seguici sui Social</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <a href="#" class="social-link">📸 Instagram <span class="text-[9px] opacity-40">DelGrosso</span></a>
-                    <a href="#" class="social-link">📸 Instagram <span class="text-[9px] opacity-40">Limobus</span></a>
-                    <a href="#" class="social-link">👍 Facebook <span class="text-[9px] opacity-40">DelGrosso</span></a>
-                    <a href="#" class="social-link">👍 Facebook <span class="text-[9px] opacity-40">Limobus</span></a>
-                </div>
-            </div>
+        <div class="contact-card text-center mb-12">
+            <p class="text-[10px] font-black text-blue-600 uppercase mb-2">Inviaci una Mail</p>
+            <a href="mailto:info@delgrossoviaggi.it" class="text-2xl font-black lowercase break-all">info@delgrossoviaggi.it</a>
+        </div>
 
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" class="social-link text-center">
+                <span>📸 INSTAGRAM</span>
+                <span class="opacity-50">@delgrosso_viaggi_</span>
+            </a>
+            <a href="https://www.instagram.com/_limousine_bus/" target="_blank" class="social-link text-center">
+                <span>📸 INSTAGRAM</span>
+                <span class="opacity-50">@_limousine_bus</span>
+            </a>
+            <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" class="social-link text-center">
+                <span>👍 FACEBOOK</span>
+                <span class="opacity-50">DelGrosso Viaggi</span>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" class="social-link text-center">
+                <span>👍 FACEBOOK</span>
+                <span class="opacity-50">Limousine Bus</span>
+            </a>
         </div>
     </main>
 
     <footer>
-        <div class="container px-6">
-            <img src="logo.jpg.JPEG" class="h-10 mx-auto mb-6 brightness-0 invert opacity-50">
-            <p class="text-[10px] uppercase opacity-40 tracking-[0.2em]">Del Grosso Viaggi & Limousine Bus - San Severo (FG)</p>
-            <div class="signature">Designer © <strong>Cristino Nicola Pio</strong></div>
+        <div class="container px-6 mx-auto">
+            <img src="logo.JPEG" class="h-10 mx-auto mb-6 brightness-0 invert opacity-50">
+            <p class="text-[10px] uppercase opacity-40 tracking-[0.2em]">San Severo (FG) - Puglia - Italia</p>
+            <div class="signature">Designer © Cristino Nicola Pio</div>
         </div>
     </footer>
 
