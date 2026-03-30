@@ -19,15 +19,10 @@
         .section-card { background: white; border-radius: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; padding: 1.5rem; margin-bottom: 1.5rem; }
         .input-style { width: 100%; padding: 0.75rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; font-weight: 700; margin-bottom: 0.75rem; outline: none; font-size: 0.875rem; }
         .bus-grid { display: grid; grid-template-columns: repeat(5, 35px); gap: 8px; justify-content: center; }
-        .seat { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; font-size: 10px; font-weight: 900; border: 2px solid #e5e7eb; cursor: pointer; }
-        .seat.available { background: white; color: #9ca3af; }
-        .seat.selected { background: #2563eb; border-color: #2563eb; color: white; }
-        .seat.occupied { background: #e5e7eb; border-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
-        .corridor { width: 35px; height: 35px; }
         .btn-action { width: 100%; padding: 0.8rem; border-radius: 0.75rem; font-weight: 900; text-transform: uppercase; font-size: 10px; transition: all 0.2s; cursor: pointer; border:none; }
         .preview-media { width: 56px; height: 40px; border-radius: 8px; object-fit: cover; background: #000; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; overflow: hidden; }
         .progress-bar-container { width: 100%; background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden; margin: 10px 0; }
-        .progress-bar-fill { background-color: #f43f5e; height: 100%; width: 0%; transition: width 0.3s ease; }
+        .progress-bar-fill { background-color: #f97316; height: 100%; width: 0%; transition: width 0.3s ease; }
     </style>
 </head>
 <body class="pb-20">
@@ -54,34 +49,40 @@
 
         <div class="lg:col-span-7 space-y-6">
             
+            <div class="section-card" style="border-top: 4px solid #f97316;">
+                <h2 class="font-black uppercase italic text-lg text-orange-600 mb-6">Garage Flotta</h2>
+                
+                <div class="bg-orange-50 p-4 rounded-2xl mb-6 border border-orange-100">
+                    <input type="text" id="f-titolo" placeholder="NOME BUS (ES. SETRA S515 HD)" class="input-style uppercase">
+                    <textarea id="f-desc" placeholder="DESCRIZIONE E SERVIZI (Wi-Fi, Prese USB, ecc...)" class="input-style h-24"></textarea>
+                    
+                    <div class="mb-4">
+                        <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Aggiungi Nuove Foto al Mezzo:</label>
+                        <input type="file" id="f-file" class="text-[10px]" multiple accept="image/*">
+                    </div>
+
+                    <div id="current-bus-photos-label" class="hidden text-[10px] font-black text-orange-400 uppercase mb-2">Foto attuali in memoria:</div>
+                    <div id="current-bus-photos" class="flex gap-2 overflow-x-auto pb-4 mb-4"></div>
+
+                    <div id="f-upload-status" class="hidden mb-4">
+                        <div class="progress-bar-container"><div id="f-progress-bar" class="progress-bar-fill"></div></div>
+                        <p id="f-status-text" class="text-[10px] font-black text-orange-600 italic text-center"></p>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button id="btn-salva-flotta" onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white flex-1">Salva / Aggiorna Mezzo</button>
+                        <button id="btn-annulla-flotta" onclick="resetFlotta()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
+                    </div>
+                </div>
+
+                <div id="preview-flotta" class="mt-6 space-y-2"></div>
+            </div>
+
             <div class="section-card" style="border-top: 4px solid #3b82f6;">
                 <h2 class="font-black uppercase italic text-lg text-blue-600 mb-6 italic">Carousel Home Sito</h2>
                 <input type="file" id="c-file" class="text-[10px] mb-2" accept="image/*">
                 <button id="btn-salva-carousel" onclick="salvaCarousel()" class="btn-action bg-blue-600 text-white">Carica Foto Slider</button>
                 <div id="preview-carousel" class="mt-6 grid grid-cols-4 gap-2"></div>
-            </div>
-
-            <div class="section-card" style="border-top: 4px solid #f97316;">
-                <h2 class="font-black uppercase italic text-lg text-orange-600 mb-6">Garage Flotta</h2>
-                <input type="text" id="f-titolo" placeholder="NOME BUS (ES. SETRA S515 HD)" class="input-style uppercase">
-                <textarea id="f-desc" placeholder="DESCRIZIONE E SERVIZI..." class="input-style h-24"></textarea>
-                <div class="mb-4">
-                    <label class="block text-[10px] font-black text-gray-400 mb-1 uppercase">Aggiungi Foto al Mezzo (Copertina + Gallery):</label>
-                    <input type="file" id="f-file" class="text-[10px]" multiple accept="image/*">
-                </div>
-                
-                <div id="f-upload-status" class="hidden mb-4">
-                    <div class="progress-bar-container"><div id="f-progress-bar" class="progress-bar-fill"></div></div>
-                    <p id="f-status-text" class="text-[10px] font-black text-orange-600 italic text-center"></p>
-                </div>
-
-                <div class="flex gap-2">
-                    <button id="btn-salva-flotta" onclick="salvaFlotta()" class="btn-action bg-orange-600 text-white flex-1">Salva / Aggiorna Mezzo</button>
-                    <button id="btn-annulla-flotta" onclick="resetFlotta()" class="hidden bg-gray-200 text-gray-500 px-6 rounded-xl font-bold uppercase text-[10px]">Annulla</button>
-                </div>
-
-                <div id="current-bus-photos" class="mt-4 flex gap-2 overflow-x-auto pb-2"></div>
-                <div id="preview-flotta" class="mt-6 space-y-2"></div>
             </div>
 
             <div class="section-card" style="border-top: 4px solid #f43f5e;">
@@ -101,7 +102,7 @@
         const sb = supabase.createClient(S_URL, S_KEY);
 
         let cacheV = [], cacheF = [], cacheG = [], cacheC = []; 
-        let editF = null; // ID per la modifica della flotta
+        let editF = null;
 
         async function init() {
             const { data: v } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
@@ -112,14 +113,7 @@
             
             cacheV = v || []; cacheF = f || []; cacheG = g || []; cacheC = c || [];
 
-            // Carousel List
-            document.getElementById('preview-carousel').innerHTML = cacheC.map(img => `
-                <div class="relative h-16 rounded-xl overflow-hidden border group">
-                    <img src="${img.immagine_url}" class="w-full h-full object-cover">
-                    <button onclick="elimina('carousel_flotta','${img.id}')" class="absolute inset-0 bg-red-600/80 text-white font-black text-[8px] opacity-0 group-hover:opacity-100 uppercase">Elimina</button>
-                </div>`).join('');
-
-            // Passeggeri List
+            // Passeggeri
             document.getElementById('lista-p').innerHTML = (p || []).map(item => {
                 const tr = cacheV.find(x => x.id === item.tratta_id);
                 return `<div class="p-4 bg-white border rounded-2xl flex justify-between items-center shadow-sm">
@@ -128,29 +122,36 @@
                 </div>`;
             }).join('');
 
-            // FLOTTA LIST (CON TASTO MOD)
+            // Flotta con funzione MOD
             document.getElementById('preview-flotta').innerHTML = cacheF.map(bus => `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
-                    <img src="${bus.immagine_url}" class="w-14 h-10 object-cover rounded-lg">
-                    <div class="flex-1 font-black text-[9px] uppercase">${bus.titolo}</div>
+                    <img src="${bus.immagine_url}" class="w-14 h-10 object-cover rounded-lg border">
+                    <div class="flex-1 font-black text-[9px] uppercase">${bus.titolo} (${(bus.foto_urls || []).length + 1} Foto)</div>
                     <div class="flex gap-1">
                         <button onclick="caricaModificaFlotta('${bus.id}')" class="bg-blue-50 text-blue-600 font-black text-[9px] p-2 rounded-lg">MOD</button>
-                        <button onclick="elimina('flotta_page','${bus.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1 rounded-lg">×</button>
+                        <button onclick="elimina('flotta_page','${bus.id}')" class="bg-red-50 text-red-600 font-black text-[9px] p-2 rounded-lg">×</button>
                     </div>
                 </div>`).join('');
 
-            // Gallery Party List
+            // Carousel
+            document.getElementById('preview-carousel').innerHTML = cacheC.map(img => `
+                <div class="relative h-16 rounded-xl overflow-hidden border group">
+                    <img src="${img.immagine_url}" class="w-full h-full object-cover">
+                    <button onclick="elimina('carousel_flotta','${img.id}')" class="absolute inset-0 bg-red-600/80 text-white font-black text-[8px] opacity-0 group-hover:opacity-100 uppercase">Elimina</button>
+                </div>`).join('');
+
+            // Gallery
             document.getElementById('preview-gallery').innerHTML = cacheG.map(ev => `
                 <div class="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm">
                     <img src="${ev.foto_urls[0]}" class="w-10 h-10 rounded-lg object-cover">
-                    <div class="flex-1 font-black text-[9px] uppercase">${ev.titolo} (${ev.foto_urls.length})</div>
-                    <button onclick="elimina('gallery_eventi','${ev.id}')" class="bg-red-50 text-red-600 font-black text-sm p-1 rounded-lg">×</button>
+                    <div class="flex-1 font-black text-[9px] uppercase">${ev.titolo}</div>
+                    <button onclick="elimina('gallery_eventi','${ev.id}')" class="bg-red-50 text-red-600 font-black text-[9px] p-2 rounded-lg">×</button>
                 </div>`).join('');
 
             document.getElementById('counter-preno').innerText = (p || []).length + " CLIENTI";
         }
 
-        // --- GARAGE FLOTTA LOGIC ---
+        // LOGICA GARAGE FLOTTA AVANZATA
         function caricaModificaFlotta(id) {
             const bus = cacheF.find(x => x.id === id);
             editF = id;
@@ -159,10 +160,10 @@
             document.getElementById('btn-salva-flotta').innerText = "AGGIORNA MEZZO";
             document.getElementById('btn-annulla-flotta').classList.remove('hidden');
             
-            // Mostra miniature foto attuali
             const photoArea = document.getElementById('current-bus-photos');
+            document.getElementById('current-bus-photos-label').classList.remove('hidden');
             const allPhotos = [bus.immagine_url, ...(bus.foto_urls || [])];
-            photoArea.innerHTML = allPhotos.map(url => `<img src="${url}" class="h-12 w-12 object-cover rounded-lg border">`).join('');
+            photoArea.innerHTML = allPhotos.map(url => `<img src="${url}" class="h-16 w-20 object-cover rounded-lg border shadow-sm shrink-0">`).join('');
             
             window.scrollTo({top: document.getElementById('f-titolo').offsetTop - 100, behavior: 'smooth'});
         }
@@ -171,9 +172,12 @@
             editF = null;
             document.getElementById('f-titolo').value = '';
             document.getElementById('f-desc').value = '';
+            document.getElementById('f-file').value = '';
             document.getElementById('current-bus-photos').innerHTML = '';
+            document.getElementById('current-bus-photos-label').classList.add('hidden');
             document.getElementById('btn-salva-flotta').innerText = "SALVA MEZZO";
             document.getElementById('btn-annulla-flotta').classList.add('hidden');
+            document.getElementById('f-upload-status').classList.add('hidden');
         }
 
         async function salvaFlotta() {
@@ -201,33 +205,29 @@
                         progressBar.style.width = percent + '%';
                         statusText.innerText = `CARICAMENTO FOTO ${i+1}/${files.length}`;
                         
-                        const name = `bus_${Date.now()}_${i}`;
+                        const ext = files[i].name.split('.').pop();
+                        const name = `bus_${Date.now()}_${i}.${ext}`;
                         await sb.storage.from('foto').upload(name, files[i]);
                         const url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
                         
-                        if(i === 0 && !copertina) copertina = url; // La prima foto diventa copertina se non c'è
-                        else gallery.push(url);
+                        if(!copertina && i === 0) copertina = url; else gallery.push(url);
                     }
                 }
 
                 if(!copertina) { btn.disabled = false; return alert("Carica almeno una foto!"); }
 
                 const obj = { titolo: t, descrizione: d, immagine_url: copertina, foto_urls: gallery };
-                
-                const { error } = editF 
-                    ? await sb.from('flotta_page').update(obj).eq('id', editF)
-                    : await sb.from('flotta_page').insert([obj]);
+                const { error } = editF ? await sb.from('flotta_page').update(obj).eq('id', editF) : await sb.from('flotta_page').insert([obj]);
 
                 if(error) throw error;
                 location.reload();
             } catch (err) {
-                alert(err.message);
+                alert("Errore: " + err.message);
                 btn.disabled = false;
-                statusArea.classList.add('hidden');
             }
         }
 
-        // --- CAROUSEL LOGIC ---
+        // CAROUSEL & GALLERY
         async function salvaCarousel() {
             const f = document.getElementById('c-file').files[0];
             if(!f) return alert("Scegli una foto!");
@@ -238,7 +238,20 @@
             location.reload();
         }
 
-        // --- ELIMINAZIONE ---
+        async function salvaGallery() {
+            const t = document.getElementById('g-titolo').value.toUpperCase().trim();
+            const files = document.getElementById('g-files').files;
+            if(!t || files.length === 0) return alert("Dati mancanti!");
+            let urls = [];
+            for(let i = 0; i < files.length; i++) {
+                const name = `party_${Date.now()}_${i}`;
+                await sb.storage.from('foto').upload(name, files[i]);
+                urls.push(sb.storage.from('foto').getPublicUrl(name).data.publicUrl);
+            }
+            await sb.from('gallery_eventi').insert([{ titolo: t, foto_urls: urls }]);
+            location.reload();
+        }
+
         async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); init(); } }
 
         init();
