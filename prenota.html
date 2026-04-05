@@ -60,7 +60,6 @@
 
         let selezionati = [], occupati = [], modelloBus = "53", viaggioDati = null;
 
-        // GESTIONE CLICK DELEGATA
         document.getElementById('bus-container-master').onclick = function(e) {
             const el = e.target;
             if (el.classList.contains('seat-available') || el.classList.contains('seat-selected')) {
@@ -80,18 +79,13 @@
             try {
                 const { data, error } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
                 if(error) throw error;
-                
                 const sel = document.getElementById('select-viaggio');
                 sel.innerHTML = '<option value="">-- SELEZIONA VIAGGIO --</option>';
-                
                 data.forEach(v => {
                     const opt = document.createElement('option');
-                    opt.value = v.id;
-                    opt.textContent = v.titolo;
-                    opt.dataset.modello = v.modello_bus || "53";
+                    opt.value = v.id; opt.textContent = v.titolo; opt.dataset.modello = v.modello_bus || "53";
                     sel.appendChild(opt);
                 });
-
                 const urlId = new URLSearchParams(window.location.search).get('id');
                 if(urlId) { sel.value = urlId; caricaMappa(); }
             } catch(e) { alert("Errore connessione: " + e.message); }
@@ -100,60 +94,39 @@
         async function caricaMappa() {
             const sel = document.getElementById('select-viaggio');
             if(!sel.value) return;
-            
             modelloBus = sel.options[sel.selectedIndex].dataset.modello;
             selezionati = [];
             document.getElementById('display-posti').innerText = "NESSUNO";
             document.getElementById('sezione-mappa').classList.remove('hidden');
-
             try {
-                // Recupera anche i dati della tratta per il sold out
                 const { data: tratta } = await sb.from('tratte').select('*').eq('id', sel.value).single();
                 viaggioDati = tratta;
-
                 const { data, error } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', sel.value);
                 if(error) throw error;
                 occupati = data ? data.flatMap(d => d.posti_selezionati.map(String)) : [];
                 disegnaBus();
-            } catch(e) { 
-                console.error("Errore posti:", e);
-                occupati = [];
-                disegnaBus(); 
-            }
+            } catch(e) { console.error("Errore posti:", e); occupati = []; disegnaBus(); }
         }
 
         function disegnaBus() {
             const container = document.getElementById('render-bus');
             container.innerHTML = "";
             let postiTotal = parseInt(modelloBus);
-
             if (postiTotal === 7) {
                 container.style.gridTemplateColumns = "repeat(3, 1fr)";
-                container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div>${htmlSedile(1)}`;
-                container.innerHTML += `<div class="col-span-3 h-5"></div>`;
-                container.innerHTML += `${htmlSedile(2)}${htmlSedile(3)}${htmlSedile(4)}`;
-                container.innerHTML += `<div class="col-span-3 text-[7px] font-black opacity-20 uppercase">Faccia a Faccia</div>`;
-                container.innerHTML += `${htmlSedile(5)}${htmlSedile(6)}${htmlSedile(7)}`;
+                container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div>${htmlSedile(1)}<div class="col-span-3 h-5"></div>${htmlSedile(2)}${htmlSedile(3)}${htmlSedile(4)}<div class="col-span-3 text-[7px] font-black opacity-20 uppercase">Faccia a Faccia</div>${htmlSedile(5)}${htmlSedile(6)}${htmlSedile(7)}`;
                 return;
             }
-
             container.style.gridTemplateColumns = "repeat(5, 1fr)";
             container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div><div style="width:20px"></div><div></div><div></div>`;
-
             if (modelloBus === "63") {
-                let nS = 1; let nD = 3;
+                let nS = 1, nD = 3;
                 for (let fila = 0; fila < 14; fila++) {
                     container.innerHTML += htmlSedile(nS) + htmlSedile(nS + 1) + `<div style="width:20px"></div>`;
                     nS += 4;
-                    if (fila === 6) { 
-                        container.innerHTML += `<div class="col-span-2 border-b-2 border-red-500 text-[7px] font-black text-red-500 flex items-center justify-center uppercase">Porta</div>`;
-                    } else if (fila > 6) {
-                        container.innerHTML += htmlSedile(nD - 4) + htmlSedile(nD - 3);
-                        nD += 4;
-                    } else {
-                        container.innerHTML += htmlSedile(nD) + htmlSedile(nD + 1);
-                        nD += 4;
-                    }
+                    if (fila === 6) { container.innerHTML += `<div class="col-span-2 border-b-2 border-red-500 text-[7px] font-black text-red-500 flex items-center justify-center uppercase">Porta</div>`; }
+                    else if (fila > 6) { container.innerHTML += htmlSedile(nD - 4) + htmlSedile(nD - 3); nD += 4; }
+                    else { container.innerHTML += htmlSedile(nD) + htmlSedile(nD + 1); nD += 4; }
                 }
                 container.innerHTML += htmlSedile(57) + htmlSedile(58) + `<div style="width:20px"></div>` + htmlSedile(55) + htmlSedile(56);
                 for (let i = 59; i <= 63; i++) container.innerHTML += htmlSedile(i);
@@ -163,7 +136,7 @@
                     container.innerHTML += htmlSedile(n);
                     if (n % 4 === 2) container.innerHTML += `<div style="width:20px"></div>`;
                 }
-                for (let i = inizioFondo; i <= postiTotal; i++) container.appendChild(htmlSedile(i));
+                for (let i = inizioFondo; i <= postiTotal; i++) container.innerHTML += htmlSedile(i);
             }
         }
 
@@ -179,47 +152,42 @@
             const sel = document.getElementById('select-viaggio');
             const btn = document.getElementById('btn-preno');
 
-            if(!nome || selezionati.length === 0 || !tel) return alert("Completa tutti i dati e scegli i posti!");
+            if(!nome || selezionati.length === 0 || !tel) return alert("Completa tutti i dati!");
 
-            btn.disabled = true;
-            btn.innerText = "SINCRO IN CORSO...";
+            btn.disabled = true; btn.innerText = "SINCRO IN CORSO...";
 
             try {
-                // SALVATAGGIO SU SUPABASE
+                // 1. SALVATAGGIO SU SUPABASE
                 const { error } = await sb.from('prenotazioni').insert([{
                     nome_cliente: nome.toUpperCase(),
                     telefono_cliente: tel,
                     tratta_id: sel.value,
                     posti_selezionati: selezionati.map(String)
                 }]);
-                
                 if(error) throw error;
 
-                // CONTROLLO SOLD OUT PER RIEPILOGO AUTOMATICO
+                // 2. MESSAGGIO DI CONFERMA PER IL CLIENTE
+                alert(`PRENOTAZIONE RICEVUTA!\n\nCiao ${nome.toUpperCase()}, i posti ${selezionati.join(', ')} sono stati bloccati.\n\nVerrete contattati dal gestore del sito per l'acconto tra le 12/24 ore dalla prenotazione.`);
+
+                // 3. CONTROLLO SOLD OUT E MESSAGGIO PER NICOLA
                 const { data: tuttePreno } = await sb.from('prenotazioni').select('*').eq('tratta_id', sel.value);
                 const postiTotaliOccupati = tuttePreno.flatMap(p => p.posti_selezionati).length;
                 const capienzaBus = parseInt(viaggioDati.modello_bus);
 
-                let waUrl = `https://wa.me/393662127916?text=${encodeURIComponent(`Nuova Prenotazione!\n👤 Cliente: ${nome.toUpperCase()}\n📞 Cell: ${tel}\n📍 Viaggio: ${viaggioDati.titolo}\n💺 Posti: ${selezionati.join(', ')}`)}`;
-
+                let msgNicola = "";
                 if (postiTotaliOccupati >= capienzaBus) {
-                    let riepilogo = `🚨 *VIAGGIO SOLD OUT* 🚨\n\n📍 Viaggio: *${viaggioDati.titolo}*\n🚌 Capienza: ${capienzaBus} posti\n\n*ELENCO COMPLETO PASSEGGERI:*\n`;
+                    msgNicola = `🚨 *SOLD OUT - RIEPILOGO FINALE* 🚨\n\n📍 Viaggio: *${viaggioDati.titolo}*\n🚌 Bus: ${capienzaBus} posti (COMPLETO)\n\n👥 *LISTA PASSEGGERI:* \n`;
                     tuttePreno.forEach((p, i) => {
-                        riepilogo += `${i+1}. ${p.nome_cliente} - 📞 ${p.telefono_cliente} - (Posti: ${p.posti_selezionati.join(',')})\n`;
+                        msgNicola += `${i+1}. ${p.nome_cliente} - 📞 ${p.telefono_cliente} - (Posti: ${p.posti_selezionati.join(',')})\n`;
                     });
-                    // Sovrascrive l'URL per mandare il riepilogo completo se è sold out
-                    waUrl = `https://wa.me/393662127916?text=${encodeURIComponent(riepilogo)}`;
+                } else {
+                    msgNicola = `NUOVA PRENOTAZIONE DA CONTATTARE!\n\n👤 Nome: ${nome.toUpperCase()}\n📞 Cell: ${tel}\n📍 Viaggio: ${viaggioDati.titolo}\n💺 Posti: ${selezionati.join(', ')}\n\n--- RICORDA DI RICHIEDERE L'ACCONTO ---`;
                 }
 
-                window.location.href = waUrl;
+                window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(msgNicola)}`;
 
-            } catch(e) {
-                alert("Errore tecnico: " + e.message);
-                btn.disabled = false;
-                btn.innerText = "CONFERMA PRENOTAZIONE 💬";
-            }
+            } catch(e) { alert("Errore tecnico: " + e.message); btn.disabled = false; btn.innerText = "CONFERMA PRENOTAZIONE 💬"; }
         }
-
         init();
     </script>
 </body>
