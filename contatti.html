@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contatti | Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
         
@@ -178,6 +179,15 @@
             <p class="text-[9px] font-medium opacity-20 uppercase tracking-widest">© 2026 Del Grosso Viaggi. Designer Cristino Nicola Pio</p>
         </div>
     </footer>
+
+    <script>
+        // CONFIGURAZIONE SUPABASE (Sincronizzato per logica globale)
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+        
+        console.log("Modulo Contatti pronto.");
+    </script>
 
 </body>
 </html>

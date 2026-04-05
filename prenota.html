@@ -9,171 +9,201 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
-        header { background: white; padding: 10px 0; border-bottom: 1px solid #eaeaea; position: sticky; top: 0; z-index: 1000; }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
-        .seat { width: 45px; height: 50px; position: relative; @apply flex items-center justify-center text-[11px] font-black transition-all shadow-md shrink-0; border-radius: 10px 10px 4px 4px; margin-top: 8px; }
-        .seat::before { content: ""; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 28px; height: 8px; background: inherit; border-radius: 4px 4px 0 0; filter: brightness(85%); border: 1px solid rgba(0,0,0,0.1); }
-        .seat-available { background-color: #2563eb; color: white; border: 1px solid #1e40af; cursor: pointer; }
-        .seat-occupied { background-color: #dc2626; color: white; border: 1px solid #991b1b; cursor: not-allowed; opacity: 0.6; }
-        .seat-selected { background-color: #fbbf24; color: #000; border: 2px solid #b45309; scale: 1.1; z-index: 10; }
-        .seat-driver { background-color: #4b5563; color: white; border-radius: 8px; cursor: not-allowed; }
-        .bus-outer { @apply bg-white p-6 md:p-8 rounded-[3rem] border-4 border-gray-200 inline-block; }
-        .bus-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: center; }
-        .corridoio { width: 25px; }
-        footer { background: #000; color: white; padding: 40px 0 20px 0; margin-top: 50px; text-align: center; }
-        .signature { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-top: 20px; }
+        .seat { 
+            width: 45px; height: 50px; display: flex; align-items: center; justify-content: center; 
+            font-size: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; 
+            border: 1px solid rgba(0,0,0,0.1); transition: 0.2s; position: relative; z-index: 10;
+        }
+        .seat-available { background-color: #2563eb; color: white; }
+        .seat-occupied { background-color: #dc2626; color: white; opacity: 0.4; cursor: not-allowed !important; }
+        .seat-selected { background-color: #fbbf24 !important; color: black !important; border: 2px solid #b45309 !important; transform: scale(1.1); z-index: 20; }
+        .seat-driver { background-color: #4b5563; color: white; cursor: default; }
+        .bus-outer { background: white; padding: 20px; border-radius: 40px; border: 4px solid #e5e7eb; display: inline-block; }
+        .bus-grid { display: grid; gap: 10px; align-items: center; justify-items: center; }
     </style>
 </head>
-<body>
+<body class="p-4 pb-20">
 
-    <header>
-        <div class="header-flex">
-            <a href="index.html"><img src="logo.JPEG" class="h-10 w-auto" alt="Logo"></a>
-            <nav class="flex gap-4">
-                <a href="viaggi.html" class="text-[9px] font-black uppercase text-gray-400">Viaggi</a>
-                <a href="index.html" class="text-[9px] font-black uppercase text-blue-600">Home</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="max-w-md mx-auto p-4 space-y-6 mt-4">
+    <main class="max-w-md mx-auto space-y-6">
         <div class="bg-white p-6 rounded-[2.5rem] shadow-xl">
-            <h1 class="text-3xl font-black italic uppercase tracking-tighter mb-6 text-center">Prenota il Posto</h1>
+            <h1 class="text-2xl font-black uppercase text-center mb-4 italic text-blue-600">Prenota il tuo Posto</h1>
             
-            <label class="text-[10px] font-black uppercase text-gray-400 ml-1">Scegli Viaggio</label>
+            <label class="text-[10px] font-black text-gray-400 uppercase">1. Seleziona Viaggio</label>
             <select id="select-viaggio" onchange="caricaMappa()" class="w-full p-4 bg-gray-50 border-2 rounded-2xl font-bold mb-4 outline-none focus:border-blue-500">
-                <option value="">-- SELEZIONA --</option>
+                <option value="">-- CARICAMENTO... --</option>
             </select>
 
-            <label class="text-[10px] font-black uppercase text-gray-400 ml-1">Il tuo Nome</label>
-            <input type="text" id="nome-cliente" placeholder="NOME E COGNOME" class="w-full p-4 bg-gray-50 border-2 rounded-2xl font-bold mb-4 outline-none uppercase">
-            
-            <label class="text-[10px] font-black uppercase text-gray-400 ml-1">Il tuo Cellulare</label>
-            <input type="tel" id="telefono-cliente" placeholder="ES. 366 1234567" class="w-full p-4 bg-gray-50 border-2 rounded-2xl font-bold outline-none">
+            <input type="text" id="nome-cliente" placeholder="TUO NOME E COGNOME" class="w-full p-4 bg-gray-50 border-2 rounded-2xl font-bold mb-4 uppercase">
+            <input type="tel" id="telefono-cliente" placeholder="TUO CELLULARE" class="w-full p-4 bg-gray-50 border-2 rounded-2xl font-bold uppercase">
         </div>
 
         <div id="sezione-mappa" class="hidden text-center">
-            <div class="bus-outer">
+            <div class="bus-outer shadow-2xl" id="bus-container-master">
                 <div id="render-bus" class="bus-grid"></div>
             </div>
 
-            <div class="mt-8 bg-blue-600 p-6 rounded-3xl shadow-lg">
-                <p class="text-[10px] font-black text-blue-200 uppercase mb-1">Posti selezionati:</p>
-                <p id="display-posti" class="text-4xl font-black text-white italic">NESSUNO</p>
+            <div class="mt-8 bg-blue-600 p-6 rounded-3xl shadow-lg text-white">
+                <p class="text-[10px] font-black uppercase opacity-70">Posti scelti:</p>
+                <p id="display-posti" class="text-4xl font-black italic">NESSUNO</p>
             </div>
 
-            <button onclick="inviaPrenotazione()" class="w-full mt-6 bg-green-500 text-white py-6 rounded-[2.5rem] font-black uppercase shadow-xl active:scale-95 transition-all">
+            <button onclick="inviaPrenotazione()" id="btn-preno" class="w-full mt-6 bg-green-500 text-white py-6 rounded-[2rem] font-black uppercase shadow-xl active:scale-95 transition-all">
                 CONFERMA PRENOTAZIONE 💬
             </button>
         </div>
     </main>
-
-    <footer>
-        <div class="signature">Designer © <strong>Cristino Nicola Pio</strong></div>
-    </footer>
 
     <script>
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        let selezionati = [];
-        let occupati = [];
-        let modelloBus = "53";
+        let selezionati = [], occupati = [], modelloBus = "53";
+
+        // GESTIONE CLICK DELEGATA
+        document.getElementById('bus-container-master').onclick = function(e) {
+            const el = e.target;
+            if (el.classList.contains('seat-available') || el.classList.contains('seat-selected')) {
+                const num = el.getAttribute('data-num');
+                if (selezionati.includes(num)) {
+                    selezionati = selezionati.filter(x => x !== num);
+                    el.classList.remove('seat-selected');
+                } else {
+                    selezionati.push(num);
+                    el.classList.add('seat-selected');
+                }
+                document.getElementById('display-posti').innerText = selezionati.length ? selezionati.join(', ') : "NESSUNO";
+            }
+        };
 
         async function init() {
-            const { data, error } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
-            if(error) { console.error(error); return; }
-            const sel = document.getElementById('select-viaggio');
-            data.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.id;
-                opt.textContent = v.titolo;
-                opt.dataset.modello = v.modello_bus || "53";
-                sel.appendChild(opt);
-            });
-            const urlParams = new URLSearchParams(window.location.search);
-            const idUrl = urlParams.get('id');
-            if(idUrl) { sel.value = idUrl; caricaMappa(); }
+            try {
+                const { data, error } = await sb.from('tratte').select('*').order('created_at', {ascending: false});
+                if(error) throw error;
+                
+                const sel = document.getElementById('select-viaggio');
+                sel.innerHTML = '<option value="">-- SELEZIONA VIAGGIO --</option>';
+                
+                data.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = v.titolo;
+                    opt.dataset.modello = v.modello_bus || "53";
+                    sel.appendChild(opt);
+                });
+
+                // Se arrivo dalla pagina viaggi con un ID nell'URL
+                const urlId = new URLSearchParams(window.location.search).get('id');
+                if(urlId) { sel.value = urlId; caricaMappa(); }
+            } catch(e) { alert("Errore connessione: " + e.message); }
         }
 
         async function caricaMappa() {
             const sel = document.getElementById('select-viaggio');
             if(!sel.value) return;
+            
             modelloBus = sel.options[sel.selectedIndex].dataset.modello;
             selezionati = [];
             document.getElementById('display-posti').innerText = "NESSUNO";
             document.getElementById('sezione-mappa').classList.remove('hidden');
 
-            const { data } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', sel.value);
-            occupati = data ? data.flatMap(d => d.posti_selezionati.map(String)) : [];
-            disegnaMappa();
+            try {
+                // Recupera i posti già occupati per questo specifico viaggio
+                const { data, error } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', sel.value);
+                if(error) throw error;
+                occupati = data ? data.flatMap(d => d.posti_selezionati.map(String)) : [];
+                disegnaBus();
+            } catch(e) { 
+                console.error("Errore posti:", e);
+                occupati = [];
+                disegnaBus(); 
+            }
         }
 
-        function disegnaMappa() {
+        function disegnaBus() {
             const container = document.getElementById('render-bus');
             container.innerHTML = "";
-            const totale = modelloBus.includes("63") ? 63 : 53;
-            const inizioFondo = totale - 4;
-            container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div><div class="corridoio"></div><div></div><div></div>`;
-            let n = 1;
-            while(n < inizioFondo) {
-                container.appendChild(creaSedile(n++)); container.appendChild(creaSedile(n++));
-                const c = document.createElement('div'); c.className="corridoio"; container.appendChild(c);
-                container.appendChild(creaSedile(n++)); container.appendChild(creaSedile(n++));
+            let postiTotal = parseInt(modelloBus);
+
+            if (postiTotal === 7) {
+                container.style.gridTemplateColumns = "repeat(3, 1fr)";
+                container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div>${htmlSedile(1)}`;
+                container.innerHTML += `<div class="col-span-3 h-5"></div>`;
+                container.innerHTML += `${htmlSedile(2)}${htmlSedile(3)}${htmlSedile(4)}`;
+                container.innerHTML += `<div class="col-span-3 text-[7px] font-black opacity-20 uppercase">Faccia a Faccia</div>`;
+                container.innerHTML += `${htmlSedile(5)}${htmlSedile(6)}${htmlSedile(7)}`;
+                return;
             }
-            for(let i=inizioFondo; i<=totale; i++) container.appendChild(creaSedile(i));
+
+            container.style.gridTemplateColumns = "repeat(5, 1fr)";
+            container.innerHTML += `<div class="seat seat-driver">AUT</div><div></div><div style="width:20px"></div><div></div><div></div>`;
+
+            if (modelloBus === "63") {
+                let nS = 1; let nD = 3;
+                for (let fila = 0; fila < 14; fila++) {
+                    container.innerHTML += htmlSedile(nS) + htmlSedile(nS + 1) + `<div style="width:20px"></div>`;
+                    nS += 4;
+                    if (fila === 6) { 
+                        container.innerHTML += `<div class="col-span-2 border-b-2 border-red-500 text-[7px] font-black text-red-500 flex items-center justify-center uppercase">Porta</div>`;
+                    } else if (fila > 6) {
+                        container.innerHTML += htmlSedile(nD - 4) + htmlSedile(nD - 3);
+                        nD += 4;
+                    } else {
+                        container.innerHTML += htmlSedile(nD) + htmlSedile(nD + 1);
+                        nD += 4;
+                    }
+                }
+                container.innerHTML += htmlSedile(57) + htmlSedile(58) + `<div style="width:20px"></div>` + htmlSedile(55) + htmlSedile(56);
+                for (let i = 59; i <= 63; i++) container.innerHTML += htmlSedile(i);
+            } else {
+                let inizioFondo = postiTotal - 4;
+                for (let n = 1; n < inizioFondo; n++) {
+                    container.innerHTML += htmlSedile(n);
+                    if (n % 4 === 2) container.innerHTML += `<div style="width:20px"></div>`;
+                }
+                for (let i = inizioFondo; i <= postiTotal; i++) container.innerHTML += htmlSedile(i);
+            }
         }
 
-        function creaSedile(num) {
-            const s = document.createElement('div');
-            const sStr = String(num);
-            const isOcc = occupati.includes(sStr);
-            s.className = `seat ${isOcc ? 'seat-occupied' : 'seat-available'}`;
-            s.innerText = num;
-            if(!isOcc) {
-                s.onclick = () => {
-                    if(selezionati.includes(sStr)) {
-                        selezionati = selezionati.filter(x => x !== sStr);
-                        s.classList.remove('seat-selected');
-                    } else {
-                        selezionati.push(sStr);
-                        s.classList.add('seat-selected');
-                    }
-                    document.getElementById('display-posti').innerText = selezionati.length ? selezionati.join(', ') : "NESSUNO";
-                };
-            }
-            return s;
+        function htmlSedile(num) {
+            const nStr = String(num);
+            const isOcc = occupati.includes(nStr);
+            return `<div class="seat ${isOcc ? 'seat-occupied' : 'seat-available'}" data-num="${nStr}">${num}</div>`;
         }
 
         async function inviaPrenotazione() {
             const nome = document.getElementById('nome-cliente').value.trim();
             const tel = document.getElementById('telefono-cliente').value.trim();
-            const trattaId = document.getElementById('select-viaggio').value;
-            const trattaNome = document.getElementById('select-viaggio').options[document.getElementById('select-viaggio').selectedIndex].text;
+            const sel = document.getElementById('select-viaggio');
+            const btn = document.getElementById('btn-preno');
 
-            if(!nome || selezionati.length === 0) {
-                alert("Compila il nome e scegli i posti!");
-                return;
-            }
+            if(!nome || selezionati.length === 0 || !tel) return alert("Completa tutti i dati e scegli i posti!");
 
-            const postiDaSalvare = selezionati.map(String);
+            btn.disabled = true;
+            btn.innerText = "SINCRO IN CORSO...";
 
-            const { error } = await sb.from('prenotazioni').insert([{
-                nome_cliente: nome.toUpperCase(),
-                telefono_cliente: tel || "N/D",
-                tratta_id: trattaId,
-                posti_selezionati: postiDaSalvare
-            }]);
+            try {
+                // SALVATAGGIO SU SUPABASE
+                const { error } = await sb.from('prenotazioni').insert([{
+                    nome_cliente: nome.toUpperCase(),
+                    telefono_cliente: tel,
+                    tratta_id: sel.value,
+                    posti_selezionati: selezionati.map(String)
+                }]);
+                
+                if(error) throw error;
 
-            if(!error) {
-                const msg = `*NUOVA PRENOTAZIONE*\n📍 Viaggio: ${trattaNome}\n👤 Cliente: ${nome.toUpperCase()}\n📞 Cell: ${tel || 'N/D'}\n💺 Posti: ${postiDaSalvare.join(', ')}`;
+                // INVIO WHATSAPP
+                const msg = `Nuova Prenotazione!\n👤 Cliente: ${nome.toUpperCase()}\n📞 Cell: ${tel}\n📍 Viaggio: ${sel.options[sel.selectedIndex].text}\n💺 Posti: ${selezionati.join(', ')}`;
                 window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(msg)}`;
-            } else {
-                console.error("Errore Supabase:", error);
-                alert("Errore Database: " + error.message);
+
+            } catch(e) {
+                alert("Errore tecnico: " + e.message);
+                btn.disabled = false;
+                btn.innerText = "CONFERMA PRENOTAZIONE 💬";
             }
         }
+
         init();
     </script>
 </body>

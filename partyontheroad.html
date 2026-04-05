@@ -11,17 +11,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
         
-        /* BLOCO TOTALE DOWNLOAD E SALVATAGGIO */
+        /* BLOCCO TOTALE DOWNLOAD E SALVATAGGIO */
         img, video {
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            pointer-events: none !important; /* Impedisce interazione diretta */
+            pointer-events: none !important;
         }
 
-        /* Protezione Extra: Strato invisibile sopra la galleria aperta */
         .gslide-media::after {
             content: "";
             position: absolute;
@@ -35,7 +34,6 @@
             transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); height: 420px;
             border: 1px solid #1a1a1a;
             background-color: #0a0a0a;
-            background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('limo-bus.jpeg');
             background-size: cover;
             background-position: center;
         }
@@ -90,7 +88,8 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 pb-40">
-        <div id="grid-eventi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center"></div>
+        <div id="grid-eventi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
+             </div>
     </main>
 
     <footer class="py-12 border-t border-zinc-900 text-center">
@@ -100,6 +99,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
+        // CONFIGURAZIONE SUPABASE
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
@@ -110,34 +110,46 @@
         }
 
         function isVideo(url) {
+            if (!url) return false;
             const videoExts = ['mp4', 'mov', 'avi', 'webm', 'm4v'];
-            const ext = url.split('.').pop().toLowerCase().split('?')[0];
+            const cleanUrl = url.split('?')[0].split('#')[0];
+            const ext = cleanUrl.split('.').pop().toLowerCase();
             return videoExts.includes(ext);
         }
 
         async function caricaEventi() {
             const grid = document.getElementById('grid-eventi');
             try {
-                const { data, error } = await sb.from('gallery_eventi').select('*').order('created_at', {ascending: false});
+                // Recupera dati dalla tabella 'gallery_eventi'
+                const { data: eventi, error } = await sb
+                    .from('gallery_eventi')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
                 if (error) throw error;
 
-                if(data && data.length > 0) {
-                    grid.innerHTML = data.map(ev => {
+                if(eventi && eventi.length > 0) {
+                    grid.innerHTML = eventi.map(ev => {
+                        // Prima foto/video dell'array come copertina
+                        const coverImg = ev.foto_urls && ev.foto_urls.length > 0 ? ev.foto_urls[0] : 'limo-bus.jpeg';
+                        
+                        // Genera i link invisibili per la gallery GLightbox
                         const galleryHtml = ev.foto_urls.map((url, index) => {
                             const video = isVideo(url);
-                            // IMPORTANTE: data-type image forza la visualizzazione invece del download
                             return `<a href="${url}" class="glightbox-${ev.id} ${index === 0 ? '' : 'hidden'}" 
                                        data-gallery="gallery-${ev.id}" 
                                        data-type="${video ? 'video' : 'image'}"></a>`;
                         }).join('');
 
                         return `
-                            <div class="event-card group shadow-2xl" onclick="apriAlbum('${ev.id}')">
+                            <div class="event-card group shadow-2xl" 
+                                 style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('${coverImg}')"
+                                 onclick="apriAlbum('${ev.id}')">
                                 ${galleryHtml}
                                 <div class="event-overlay">
                                     <h2 class="text-3xl font-black uppercase italic leading-none group-hover:tracking-wider transition-all duration-500">${ev.titolo}</h2>
                                     <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
-                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls.length} Shots</p>
+                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls ? ev.foto_urls.length : 0} Shots</p>
                                         <span class="text-white font-black text-[10px] uppercase tracking-widest">Guarda →</span>
                                     </div>
                                 </div>
@@ -145,7 +157,8 @@
                         `;
                     }).join('');
 
-                    data.forEach(ev => {
+                    // Inizializza GLightbox per ogni album
+                    eventi.forEach(ev => {
                         GLightbox({ 
                             selector: `.glightbox-${ev.id}`,
                             loop: true,
@@ -154,12 +167,16 @@
                             keyboardNavigation: true,
                             closeButton: true,
                             zoomable: false, 
-                            draggable: false,
-                            touchFollowAxis: false
+                            draggable: false
                         });
                     });
+                } else {
+                    grid.innerHTML = '<p class="col-span-full opacity-30 uppercase font-black italic">In attesa del primo party...</p>';
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error("Errore:", err);
+                grid.innerHTML = '<p class="col-span-full text-red-500">Errore nel caricamento della gallery.</p>';
+            }
         }
 
         function apriAlbum(id) {
@@ -169,7 +186,7 @@
 
         caricaEventi();
 
-        // BLOCCO TASTO DESTRO E COMBINAZIONI TASTIERA (CTRL+S, CTRL+U)
+        // SICUREZZA
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.onkeydown = function(e) {
             if (e.ctrlKey && (e.keyCode === 83 || e.keyCode === 85)) return false;
