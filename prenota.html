@@ -58,7 +58,7 @@
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        let selezionati = [], occupati = [], modelloBus = "53";
+        let selezionati = [], occupati = [], modelloBus = "53", viaggioDati = null;
 
         // GESTIONE CLICK DELEGATA
         document.getElementById('bus-container-master').onclick = function(e) {
@@ -92,7 +92,6 @@
                     sel.appendChild(opt);
                 });
 
-                // Se arrivo dalla pagina viaggi con un ID nell'URL
                 const urlId = new URLSearchParams(window.location.search).get('id');
                 if(urlId) { sel.value = urlId; caricaMappa(); }
             } catch(e) { alert("Errore connessione: " + e.message); }
@@ -108,7 +107,10 @@
             document.getElementById('sezione-mappa').classList.remove('hidden');
 
             try {
-                // Recupera i posti già occupati per questo specifico viaggio
+                // Recupera anche i dati della tratta per il sold out
+                const { data: tratta } = await sb.from('tratte').select('*').eq('id', sel.value).single();
+                viaggioDati = tratta;
+
                 const { data, error } = await sb.from('prenotazioni').select('posti_selezionati').eq('tratta_id', sel.value);
                 if(error) throw error;
                 occupati = data ? data.flatMap(d => d.posti_selezionati.map(String)) : [];
@@ -161,7 +163,7 @@
                     container.innerHTML += htmlSedile(n);
                     if (n % 4 === 2) container.innerHTML += `<div style="width:20px"></div>`;
                 }
-                for (let i = inizioFondo; i <= postiTotal; i++) container.innerHTML += htmlSedile(i);
+                for (let i = inizioFondo; i <= postiTotal; i++) container.appendChild(htmlSedile(i));
             }
         }
 
@@ -193,9 +195,23 @@
                 
                 if(error) throw error;
 
-                // INVIO WHATSAPP
-                const msg = `Nuova Prenotazione!\n👤 Cliente: ${nome.toUpperCase()}\n📞 Cell: ${tel}\n📍 Viaggio: ${sel.options[sel.selectedIndex].text}\n💺 Posti: ${selezionati.join(', ')}`;
-                window.location.href = `https://wa.me/393662127916?text=${encodeURIComponent(msg)}`;
+                // CONTROLLO SOLD OUT PER RIEPILOGO AUTOMATICO
+                const { data: tuttePreno } = await sb.from('prenotazioni').select('*').eq('tratta_id', sel.value);
+                const postiTotaliOccupati = tuttePreno.flatMap(p => p.posti_selezionati).length;
+                const capienzaBus = parseInt(viaggioDati.modello_bus);
+
+                let waUrl = `https://wa.me/393662127916?text=${encodeURIComponent(`Nuova Prenotazione!\n👤 Cliente: ${nome.toUpperCase()}\n📞 Cell: ${tel}\n📍 Viaggio: ${viaggioDati.titolo}\n💺 Posti: ${selezionati.join(', ')}`)}`;
+
+                if (postiTotaliOccupati >= capienzaBus) {
+                    let riepilogo = `🚨 *VIAGGIO SOLD OUT* 🚨\n\n📍 Viaggio: *${viaggioDati.titolo}*\n🚌 Capienza: ${capienzaBus} posti\n\n*ELENCO COMPLETO PASSEGGERI:*\n`;
+                    tuttePreno.forEach((p, i) => {
+                        riepilogo += `${i+1}. ${p.nome_cliente} - 📞 ${p.telefono_cliente} - (Posti: ${p.posti_selezionati.join(',')})\n`;
+                    });
+                    // Sovrascrive l'URL per mandare il riepilogo completo se è sold out
+                    waUrl = `https://wa.me/393662127916?text=${encodeURIComponent(riepilogo)}`;
+                }
+
+                window.location.href = waUrl;
 
             } catch(e) {
                 alert("Errore tecnico: " + e.message);
