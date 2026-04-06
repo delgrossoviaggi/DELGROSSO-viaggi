@@ -38,15 +38,18 @@
             .bus-info h2 { font-size: 32px; } 
             .gallery-grid { grid-template-columns: repeat(2, 1fr); } 
         }
-        
-        /* CSS per far vedere sempre la foto INTERA e ADATTATA nel Lightbox */
+
+        /* --- CORREZIONE LIGHTBOX: TUTTO SCHERMO SENZA ZOOM --- */
         .gslide-image img {
-            max-width: 95vw !important;
-            max-height: 85vh !important;
-            object-fit: contain !important;
-            margin: auto;
+            max-width: 100vw !important;  /* Usa tutta la larghezza */
+            max-height: 100vh !important; /* Usa tutta l'altezza */
+            object-fit: contain !important; /* IMPORTANTE: Adatta la foto senza tagliarla */
             width: auto !important;
             height: auto !important;
+        }
+        .glightbox-container .ginner-container {
+            width: 100% !important;
+            height: 100% !important;
         }
     </style>
 </head>
@@ -124,17 +127,16 @@
                     </div>`;
                 }).join('');
 
-                // Configurazione Lightbox bilanciata: foto intera e adattata allo schermo
+                // Configurazione Lightbox: Massima estensione senza zoom forzato
                 flotta.forEach(bus => { 
                     GLightbox({ 
                         selector: `.glightbox-${bus.id}`, 
                         loop: true,
-                        width: 'auto',       // Larghezza basata sulla foto
-                        height: 'auto',      // Altezza basata sulla foto
-                        fitToViewport: true, // Impedisce alla foto di uscire dai bordi
-                        zoomable: false,     // Disabilita lo zoom automatico che sgrana
-                        draggable: true,
-                        touchNavigation: true
+                        width: '100vw',    // Usa tutta la larghezza display
+                        height: '100vh',   // Usa tutta l'altezza display
+                        fitToViewport: true, // Adatta al display senza uscire dai bordi
+                        zoomable: false,    // Evita zoom automatici fastidiosi
+                        draggable: true
                     }); 
                 });
 
