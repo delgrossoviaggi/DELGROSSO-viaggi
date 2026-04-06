@@ -18,7 +18,7 @@
         .hero h1 { font-size: 45px; font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -1px; }
         .hero p { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4em; color: #3b82f6; margin-bottom: 10px; }
         .bus-container { max-width: 1200px; margin: 80px auto; padding: 0 20px; }
-        .bus-card { margin-bottom: 150px; scroll-margin-top: 120px; } /* scroll-margin evita che l'header copra il titolo */
+        .bus-card { margin-bottom: 150px; scroll-margin-top: 120px; }
         .main-img-container { width: 100%; height: 600px; border-radius: 2.5rem; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.15); cursor: zoom-in; margin-bottom: 30px; }
         .main-img-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; }
         .main-img-container:hover img { transform: scale(1.03); }
@@ -33,6 +33,12 @@
         .btn-wa:hover { background: #3b82f6; transform: translateY(-3px); }
         footer { background: #000; color: white; padding: 60px 0; text-align: center; margin-top: 100px; }
         @media (max-width: 768px) { .main-img-container { height: 350px; border-radius: 1.5rem; } .bus-info h2 { font-size: 32px; } .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+        
+        /* Correzione per far vedere bene le foto nel lightbox */
+        .gslide-image img {
+            max-height: 90vh !important;
+            object-fit: contain !important;
+        }
     </style>
 </head>
 <body>
@@ -86,7 +92,6 @@
                     const immaginiExtra = bus.foto_gallery || []; 
                     const allImages = [bus.immagine_url, ...immaginiExtra].filter(url => url);
 
-                    // Aggiunto ID specifico alla bus-card
                     return `
                     <div class="bus-card" id="bus-${bus.id}">
                         <div class="main-img-container" onclick="openLightbox('${bus.id}')">
@@ -110,19 +115,25 @@
                     </div>`;
                 }).join('');
 
-                // Inizializza GLightbox
-                flotta.forEach(bus => { GLightbox({ selector: `.glightbox-${bus.id}`, loop: true }); });
+                // Configurazione Lightbox ottimizzata per far vedere tutta la foto
+                flotta.forEach(bus => { 
+                    GLightbox({ 
+                        selector: `.glightbox-${bus.id}`, 
+                        loop: true,
+                        width: 'auto',
+                        height: 'auto',
+                        zoomable: true,
+                        draggable: true
+                    }); 
+                });
 
-                // --- GESTIONE SALTO (SCROLL) ---
                 const urlParams = new URLSearchParams(window.location.search);
                 const busId = urlParams.get('bus');
                 if (busId) {
                     setTimeout(() => {
                         const target = document.getElementById(`bus-${busId}`);
-                        if (target) {
-                            target.scrollIntoView({ behavior: 'smooth' });
-                        }
-                    }, 500); // Piccolo ritardo per assicurarsi che le immagini siano renderizzate
+                        if (target) { target.scrollIntoView({ behavior: 'smooth' }); }
+                    }, 500);
                 }
 
             } catch (error) {
