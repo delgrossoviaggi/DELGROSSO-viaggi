@@ -39,13 +39,13 @@
             .gallery-grid { grid-template-columns: repeat(2, 1fr); } 
         }
 
-        /* --- CORREZIONE LIGHTBOX: TUTTO SCHERMO SENZA ZOOM --- */
+        /* --- FIX DEFINITIVO: FOTO INTERA A TUTTO SCHERMO SENZA TAGLI --- */
         .gslide-image img {
-            max-width: 100vw !important;  /* Usa tutta la larghezza */
-            max-height: 100vh !important; /* Usa tutta l'altezza */
-            object-fit: contain !important; /* IMPORTANTE: Adatta la foto senza tagliarla */
-            width: auto !important;
-            height: auto !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            object-fit: contain !important; /* Mostra tutta la foto adattandola */
+            margin: auto;
+            display: block;
         }
         .glightbox-container .ginner-container {
             width: 100% !important;
@@ -127,16 +127,15 @@
                     </div>`;
                 }).join('');
 
-                // Configurazione Lightbox: Massima estensione senza zoom forzato
+                // Configurazione Lightbox pulita per adattamento automatico
                 flotta.forEach(bus => { 
                     GLightbox({ 
                         selector: `.glightbox-${bus.id}`, 
                         loop: true,
-                        width: '100vw',    // Usa tutta la larghezza display
-                        height: '100vh',   // Usa tutta l'altezza display
-                        fitToViewport: true, // Adatta al display senza uscire dai bordi
-                        zoomable: false,    // Evita zoom automatici fastidiosi
-                        draggable: true
+                        zoomable: false,      // Niente zoom che taglia i bordi
+                        draggable: true,
+                        touchNavigation: true,
+                        autoHeight: true      // Si adatta all'altezza della foto
                     }); 
                 });
 
