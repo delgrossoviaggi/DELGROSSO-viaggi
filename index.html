@@ -13,15 +13,20 @@
         .nav-container::-webkit-scrollbar { display: none; }
         .nav-link { font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: #1a1a1a; text-decoration: none; transition: 0.3s; flex-shrink: 0; }
         .nav-link:hover { color: #2563eb; }
+        
+        /* Carousel Dinamico */
         .carousel-wrap { position: relative; width: 100%; height: 75vh; background: #000; overflow: hidden; }
         .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; background-size: cover; background-repeat: no-repeat; background-position: center; }
         .slide.active { opacity: 1; }
+        
         .carousel-text-top { position: absolute; top: 40px; left: 40px; z-index: 20; color: white; max-width: 600px; text-align: left; pointer-events: none; }
         .carousel-text-top h2 { font-weight: 900; text-transform: uppercase; font-style: italic; font-size: 1.8rem; line-height: 1.1; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+        
         .flotta-card { position: relative; overflow: hidden; border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; height: 320px; transition: 0.4s ease; cursor: pointer; }
         .flotta-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
         .flotta-card:hover img { transform: scale(1.05); }
         .flotta-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; color: white; }
+        
         .party-home-card { border-radius: 2rem; overflow: hidden; height: 280px; position: relative; cursor: pointer; transition: 0.4s ease; background: #111; border: 1px solid #222; }
         .footer-pro { background: #000; color: white; padding: 5rem 2rem; }
         .social-btn { display: flex; align-items: center; gap: 1rem; background: #0f0f0f; border: 1px solid #1a1a1a; padding: 1rem 1.5rem; border-radius: 1rem; transition: 0.3s; text-decoration: none; width: 100%; }
@@ -120,20 +125,17 @@
         const sb = supabase.createClient(S_URL, S_KEY);
 
         async function init() {
-            // 1. CARICAMENTO CAROUSEL
+            // 1. CARICAMENTO CAROUSEL (Sincronizzato con tabella carousel_home)
             try {
-                const { data: carouselData } = await sb.from('carousel_flotta').select('*');
+                const { data: cData } = await sb.from('carousel_home').select('*').limit(1).maybeSingle();
                 const container = document.getElementById('carousel-container');
-                if(carouselData && carouselData.length > 0) {
-                    container.innerHTML = "";
-                    carouselData.forEach((s, i) => {
-                        const d = document.createElement('div');
-                        d.className = `slide ${i === 0 ? 'active' : ''}`;
-                        d.style.backgroundImage = `url(${s.immagine_url})`;
-                        container.appendChild(d);
-                    });
+                
+                if(cData && cData.foto_urls && cData.foto_urls.length > 0) {
+                    container.innerHTML = cData.foto_urls.map((url, i) => `
+                        <div class="slide ${i === 0 ? 'active' : ''}" style="background-image: url('${url}')"></div>
+                    `).join('');
                     
-                    if(carouselData.length > 1) {
+                    if(cData.foto_urls.length > 1) {
                         setInterval(() => {
                             const act = document.querySelector('.slide.active');
                             if(act) {
@@ -143,12 +145,14 @@
                             }
                         }, 5000);
                     }
+                } else {
+                    container.innerHTML = `<div class="slide active" style="background-image: url('logo.JPEG'); background-size: contain;"></div>`;
                 }
             } catch(e) { console.error("Errore Carousel:", e); }
 
-            // 2. CARICAMENTO FLOTTA (Sincronizzato con salto pagina)
+            // 2. CARICAMENTO FLOTTA
             try {
-                const { data: flottaData } = await sb.from('flotta_page').select('*');
+                const { data: flottaData } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
                 if(flottaData) {
                     document.getElementById('grid-flotta').innerHTML = flottaData.map(f => `
                         <div class="flotta-card shadow-lg" onclick="location.href='flotta.html?bus=${f.id}'">

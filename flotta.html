@@ -6,7 +6,6 @@
     <title>La Nostra Flotta | Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; margin: 0; padding: 0; scroll-behavior: smooth; }
@@ -17,39 +16,37 @@
         .hero { background: #000; color: white; padding: 60px 20px; text-align: center; }
         .hero h1 { font-size: 45px; font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -1px; }
         .hero p { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4em; color: #3b82f6; margin-bottom: 10px; }
-        .bus-container { max-width: 1200px; margin: 80px auto; padding: 0 20px; }
-        .bus-card { margin-bottom: 150px; scroll-margin-top: 120px; }
-        .main-img-container { width: 100%; height: 600px; border-radius: 2.5rem; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.15); cursor: zoom-in; margin-bottom: 30px; }
-        .main-img-container img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s ease; }
-        .main-img-container:hover img { transform: scale(1.03); }
-        .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
-        .thumb-item { height: 120px; border-radius: 1rem; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
-        .thumb-item:hover { border-color: #3b82f6; opacity: 0.8; }
-        .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
-        .bus-info { margin-top: 40px; max-width: 800px; }
-        .bus-info h2 { font-size: 50px; font-weight: 900; text-transform: uppercase; font-style: italic; line-height: 1; margin-bottom: 25px; }
-        .bus-info p { font-size: 18px; color: #4b5563; line-height: 1.8; white-space: pre-line; margin-bottom: 40px; }
-        .btn-wa { display: inline-flex; align-items: center; gap: 12px; background: #000; color: white; padding: 20px 40px; border-radius: 100px; font-weight: 900; text-transform: uppercase; font-size: 12px; text-decoration: none; transition: 0.3s; }
-        .btn-wa:hover { background: #3b82f6; transform: translateY(-3px); }
-        footer { background: #000; color: white; padding: 60px 0; text-align: center; margin-top: 100px; }
         
-        @media (max-width: 768px) { 
-            .main-img-container { height: 350px; border-radius: 1.5rem; } 
-            .bus-info h2 { font-size: 32px; } 
-            .gallery-grid { grid-template-columns: repeat(2, 1fr); } 
-        }
+        .bus-container { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
+        .bus-card { margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 50px; }
+        .main-img-container { width: 100%; height: 500px; border-radius: 2rem; overflow: hidden; cursor: pointer; }
+        .main-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .gallery-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
+        .thumb-item { aspect-ratio: 1; border-radius: 0.8rem; overflow: hidden; cursor: pointer; border: 2px solid transparent; }
+        .thumb-item:hover { border-color: #3b82f6; }
+        .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- FIX DEFINITIVO: FOTO INTERA A TUTTO SCHERMO SENZA TAGLI --- */
-        .gslide-image img {
-            max-width: 100vw !important;
-            max-height: 100vh !important;
-            object-fit: contain !important; /* Mostra tutta la foto adattandola */
-            margin: auto;
-            display: block;
+        .bus-info h2 { font-size: 40px; font-weight: 900; text-transform: uppercase; font-style: italic; margin: 20px 0; }
+        .bus-info p { color: #4b5563; line-height: 1.6; white-space: pre-line; margin-bottom: 30px; }
+        .btn-wa { display: inline-flex; align-items: center; background: #000; color: white; padding: 15px 30px; border-radius: 100px; font-weight: 900; text-transform: uppercase; font-size: 11px; text-decoration: none; }
+
+        /* --- VISUALIZZATORE MANUALE (NO BUG) --- */
+        #custom-viewer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            display: none; align-items: center; justify-content: center;
+            cursor: pointer;
         }
-        .glightbox-container .ginner-container {
-            width: 100% !important;
-            height: 100% !important;
+        #custom-viewer img {
+            max-width: 95%; max-height: 95%;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+        #custom-viewer .close-v {
+            position: absolute; top: 20px; right: 20px; color: white;
+            font-size: 40px; font-weight: bold;
         }
     </style>
 </head>
@@ -57,7 +54,7 @@
 
     <header>
         <div class="header-flex">
-            <a href="index.html"><img src="logo.JPEG" class="h-10 w-auto" alt="Logo"></a>
+            <a href="index.html"><img src="logo.JPEG" class="h-10 w-auto"></a>
             <nav><ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="viaggi.html">Viaggi</a></li>
@@ -66,20 +63,13 @@
         </div>
     </header>
 
-    <section class="hero">
-        <p>Luxury & Comfort</p>
-        <h1>LA NOSTRA <span class="text-blue-500">FLOTTA</span></h1>
-    </section>
+    <main class="bus-container" id="lista-mezzi"></main>
 
-    <main class="bus-container" id="lista-mezzi">
-        <div class="text-center py-20 text-gray-400 font-bold uppercase animate-pulse">Caricamento flotta...</div>
-    </main>
+    <div id="custom-viewer" onclick="closeViewer()">
+        <span class="close-v">&times;</span>
+        <img id="viewer-img" src="">
+    </div>
 
-    <footer>
-        <p class="font-bold uppercase text-[10px] tracking-[0.3em] opacity-50">Del Grosso Viaggi & Limousine Bus</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
@@ -87,79 +77,42 @@
 
         async function caricaFlotta() {
             const main = document.getElementById('lista-mezzi');
-            try {
-                const { data: flotta, error } = await sb
-                    .from('flotta_page')
-                    .select('*')
-                    .order('created_at', { ascending: true });
+            const { data: flotta } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
+            
+            main.innerHTML = flotta.map(bus => {
+                const gallery = bus.foto_gallery || [];
+                const allImgs = [...new Set([bus.immagine_url, ...gallery])].filter(u => u);
 
-                if (error) throw error;
-
-                if (!flotta || flotta.length === 0) {
-                    main.innerHTML = `<div class="text-center py-20 text-gray-400 font-bold uppercase">Nessun mezzo disponibile.</div>`;
-                    return;
-                }
-
-                main.innerHTML = flotta.map(bus => {
-                    const immaginiExtra = bus.foto_gallery || []; 
-                    const allImages = [bus.immagine_url, ...immaginiExtra].filter(url => url);
-
-                    return `
-                    <div class="bus-card" id="bus-${bus.id}">
-                        <div class="main-img-container" onclick="openLightbox('${bus.id}')">
-                            <img src="${bus.immagine_url}" id="cover-${bus.id}" alt="${bus.titolo}">
-                        </div>
-                        <div class="gallery-grid">
-                            ${allImages.map(img => `
-                                <div class="thumb-item" onclick="document.getElementById('cover-${bus.id}').src='${img}'">
-                                    <img src="${img}" alt="Dettaglio">
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="bus-info">
-                            <h2>${bus.titolo}</h2>
-                            <p>${bus.descrizione || 'Comfort ed eleganza per ogni tuo viaggio.'}</p>
-                            <div class="hidden">
-                                ${allImages.map(img => `<a href="${img}" class="glightbox-${bus.id}" data-gallery="gallery-${bus.id}"></a>`).join('')}
+                return `
+                <div class="bus-card">
+                    <div class="main-img-container" onclick="openViewer('${bus.immagine_url}')">
+                        <img src="${bus.immagine_url}">
+                    </div>
+                    <div class="gallery-grid">
+                        ${allImgs.map(img => `
+                            <div class="thumb-item" onclick="openViewer('${img}')">
+                                <img src="${img}">
                             </div>
-                            <a href="https://wa.me/393662127916?text=Vorrei info sul mezzo: ${bus.titolo}" class="btn-wa">Richiedi Preventivo</a>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                // Configurazione Lightbox pulita per adattamento automatico
-                flotta.forEach(bus => { 
-                    GLightbox({ 
-                        selector: `.glightbox-${bus.id}`, 
-                        loop: true,
-                        zoomable: false,      // Niente zoom che taglia i bordi
-                        draggable: true,
-                        touchNavigation: true,
-                        autoHeight: true      // Si adatta all'altezza della foto
-                    }); 
-                });
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const busId = urlParams.get('bus');
-                if (busId) {
-                    setTimeout(() => {
-                        const target = document.getElementById(`bus-${busId}`);
-                        if (target) { target.scrollIntoView({ behavior: 'smooth' }); }
-                    }, 500);
-                }
-
-            } catch (error) {
-                console.error("Errore:", error);
-                main.innerHTML = `<div class="text-center py-20 text-red-500 font-bold">ERRORE CARICAMENTO.</div>`;
-            }
+                        `).join('')}
+                    </div>
+                    <div class="bus-info">
+                        <h2>${bus.titolo}</h2>
+                        <p>${bus.descrizione}</p>
+                        <a href="https://wa.me/393662127916?text=Info mezzo: ${bus.titolo}" class="btn-wa">Richiedi Preventivo</a>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
-        function openLightbox(id) {
-            const currentImg = document.getElementById(`cover-${id}`).src;
-            const links = document.querySelectorAll(`.glightbox-${id}`);
-            let found = false;
-            links.forEach(link => { if(link.href === currentImg) { link.click(); found = true; } });
-            if(!found && links[0]) links[0].click();
+        function openViewer(url) {
+            document.getElementById('viewer-img').src = url;
+            document.getElementById('custom-viewer').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Blocca scroll
+        }
+
+        function closeViewer() {
+            document.getElementById('custom-viewer').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Sblocca scroll
         }
 
         caricaFlotta();
