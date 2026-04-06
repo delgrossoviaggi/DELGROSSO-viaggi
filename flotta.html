@@ -32,14 +32,21 @@
         .btn-wa { display: inline-flex; align-items: center; gap: 12px; background: #000; color: white; padding: 20px 40px; border-radius: 100px; font-weight: 900; text-transform: uppercase; font-size: 12px; text-decoration: none; transition: 0.3s; }
         .btn-wa:hover { background: #3b82f6; transform: translateY(-3px); }
         footer { background: #000; color: white; padding: 60px 0; text-align: center; margin-top: 100px; }
-        @media (max-width: 768px) { .main-img-container { height: 350px; border-radius: 1.5rem; } .bus-info h2 { font-size: 32px; } .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
         
-        /* Forza la visualizzazione intera della foto nel Lightbox */
+        @media (max-width: 768px) { 
+            .main-img-container { height: 350px; border-radius: 1.5rem; } 
+            .bus-info h2 { font-size: 32px; } 
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); } 
+        }
+        
+        /* CSS per far vedere sempre la foto INTERA e ADATTATA nel Lightbox */
         .gslide-image img {
-            max-height: 90vh !important;
+            max-width: 95vw !important;
+            max-height: 85vh !important;
             object-fit: contain !important;
-            width: auto !important;
             margin: auto;
+            width: auto !important;
+            height: auto !important;
         }
     </style>
 </head>
@@ -117,15 +124,17 @@
                     </div>`;
                 }).join('');
 
-                // Configurazione Lightbox bilanciata: foto intera e dimensioni naturali
+                // Configurazione Lightbox bilanciata: foto intera e adattata allo schermo
                 flotta.forEach(bus => { 
                     GLightbox({ 
                         selector: `.glightbox-${bus.id}`, 
                         loop: true,
-                        width: '90vw',
-                        height: '85vh',
-                        zoomable: false, // Impedisce l'ingrandimento eccessivo
-                        draggable: true
+                        width: 'auto',       // Larghezza basata sulla foto
+                        height: 'auto',      // Altezza basata sulla foto
+                        fitToViewport: true, // Impedisce alla foto di uscire dai bordi
+                        zoomable: false,     // Disabilita lo zoom automatico che sgrana
+                        draggable: true,
+                        touchNavigation: true
                     }); 
                 });
 
