@@ -24,6 +24,8 @@
         .thumb { width: 60px; height: 50px; object-fit: cover; border-radius: 8px; background: #eee; border: 1px solid #ddd; }
         .delete-btn { background: #fee2e2; color: #ef4444; font-weight: 900; padding: 8px 12px; border-radius: 10px; font-size: 11px; cursor: pointer; }
         .edit-btn { background: #dcfce7; color: #16a34a; font-weight: 900; padding: 8px 12px; border-radius: 10px; font-size: 11px; cursor: pointer; margin-right: 5px; }
+        .preview-grid-item { position: relative; height: 60px; border-radius: 8px; overflow: hidden; }
+        .remove-photo-badge { position: absolute; top: 0; right: 0; background: red; color: white; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 0 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body class="pb-20">
@@ -35,19 +37,17 @@
             </a>
             <h1 class="font-black text-blue-600 uppercase italic hidden md:block">Controllo Totale Del Grosso</h1>
         </div>
-        
         <div class="flex gap-2">
-            <button onclick="exportExcel()" class="bg-green-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase shadow-lg">Esporta Liste Excel</button>
+            <button onclick="exportExcel()" class="bg-green-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase shadow-lg">Esporta Excel</button>
             <button onclick="location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase shadow-lg">Sincronizza Cloud</button>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
         <div class="lg:col-span-8 space-y-6">
             
             <div class="section-card" style="border-top: 6px solid #2563eb;">
-                <h2 class="font-black uppercase text-blue-600 mb-4 tracking-tighter text-xl">1. Gestione Tratte & Partenze</h2>
+                <h2 class="font-black uppercase text-blue-600 mb-4 tracking-tighter text-xl">1. Gestione Tratte</h2>
                 <div class="bg-blue-50 p-4 rounded-3xl mb-6">
                     <input type="text" id="v-titolo" placeholder="NOME VIAGGIO" class="input-style uppercase">
                     <input type="text" id="v-data" placeholder="DATA EVENTO" class="input-style uppercase">
@@ -58,17 +58,20 @@
                         <option value="7">MERCEDES V250d 7 POSTI</option>
                     </select>
                     <input type="file" id="v-file" class="text-[10px] mb-4">
-                    <button onclick="salvaViaggio()" id="btn-v" class="btn-action bg-blue-600 text-white shadow-xl">Salva / Aggiorna Viaggio</button>
+                    <button onclick="salvaViaggio()" id="btn-v" class="btn-action bg-blue-600 text-white shadow-xl">Salva Viaggio</button>
                 </div>
                 <div id="display-viaggi" class="space-y-2"></div>
             </div>
 
             <div class="section-card" style="border-top: 6px solid #f97316;">
-                <h2 class="font-black uppercase text-orange-600 mb-4 tracking-tighter text-xl">2. Garage Flotta (Mezzi)</h2>
+                <h2 class="font-black uppercase text-orange-600 mb-4 tracking-tighter text-xl">2. Garage Flotta</h2>
                 <div class="bg-orange-50 p-4 rounded-3xl mb-6">
                     <input type="text" id="f-nome" placeholder="NOME MEZZO" class="input-style uppercase">
                     <textarea id="f-desc" placeholder="DESCRIZIONE TECNICA..." class="input-style h-24"></textarea>
-                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50">Seleziona una o più foto (Gallery):</p>
+                    
+                    <div id="anteprima-gallery-flotta" class="grid grid-cols-4 gap-2 mb-4 hidden"></div>
+                    
+                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50">Carica foto (Gallery):</p>
                     <input type="file" id="f-files" class="text-[10px] mb-4" multiple>
                     <button onclick="salvaFlotta()" id="btn-f" class="btn-action bg-orange-600 text-white shadow-xl">Salva nel Garage</button>
                 </div>
@@ -76,12 +79,11 @@
             </div>
 
             <div class="section-card" style="border-top: 6px solid #a855f7;">
-                <h2 class="font-black uppercase text-purple-600 mb-4 tracking-tighter text-xl">3. Party On The Road (Gallery)</h2>
+                <h2 class="font-black uppercase text-purple-600 mb-4 tracking-tighter text-xl">3. Party On The Road</h2>
                 <div class="bg-purple-50 p-4 rounded-3xl mb-6">
                     <input type="text" id="p-titolo" placeholder="TITOLO ALBUM" class="input-style uppercase">
-                    <label class="text-[9px] font-bold block mb-1 uppercase">Carica foto album:</label>
                     <input type="file" id="p-files" class="text-[10px] mb-4" multiple>
-                    <button onclick="salvaParty()" id="btn-p" class="btn-action bg-purple-600 text-white shadow-xl">Crea / Aggiorna Album</button>
+                    <button onclick="salvaParty()" id="btn-p" class="btn-action bg-purple-600 text-white shadow-xl">Salva Album</button>
                 </div>
                 <div id="display-party" class="space-y-2"></div>
             </div>
@@ -89,11 +91,11 @@
 
         <div class="lg:col-span-4">
             <div class="section-card" style="border-top: 6px solid #000;">
-                <h2 class="font-black uppercase mb-4 text-center tracking-tighter text-xl">Liste Passeggeri</h2>
+                <h2 class="font-black uppercase mb-4 text-center tracking-tighter text-xl">Passeggeri</h2>
                 <div class="bg-gray-100 p-4 rounded-2xl mb-6">
-                    <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs">
-                    <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2, 5)" class="input-style text-xs">
-                    <button onclick="aggiornaPrenotazione()" id="btn-pr" class="w-full bg-black text-white py-3 rounded-xl font-bold text-[10px] uppercase">Salva Modifiche</button>
+                    <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs uppercase">
+                    <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2)" class="input-style text-xs">
+                    <button onclick="aggiornaPrenotazione()" id="btn-pr" class="w-full bg-black text-white py-3 rounded-xl font-bold text-[10px] uppercase">Salva</button>
                 </div>
                 <div id="display-preno" class="space-y-3"></div>
             </div>
@@ -107,6 +109,7 @@
 
         let editViaggioId = null, editFlottaId = null, editPartyId = null, editPrenoId = null;
         let allData = { viaggi: [], flotta: [], party: [], prenotazioni: [] };
+        let fotoCorrentiFlotta = [];
 
         async function init() {
             try {
@@ -125,43 +128,45 @@
         }
 
         function renderAll() {
+            // Viaggi
             document.getElementById('display-viaggi').innerHTML = allData.viaggi.map(d => `
                 <div class="item-row">
                     <img src="${d.immagine_url}" class="thumb">
-                    <div class="flex-1 font-bold text-[10px] uppercase">${d.titolo} <br> <span class="text-blue-500">${d.data_partenza}</span></div>
+                    <div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div>
                     <div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div>
                     <div onclick="elimina('tratte','${d.id}')" class="delete-btn">×</div>
                 </div>`).join('');
 
+            // Flotta
             document.getElementById('display-flotta').innerHTML = allData.flotta.map(d => `
-                <div class="item-row">
-                    <img src="${d.immagine_url}" class="thumb">
-                    <div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div>
-                    <div onclick="preparaModificaFlotta('${d.id}')" class="edit-btn">MOD</div>
-                    <div onclick="elimina('flotta_page','${d.id}')" class="delete-btn">×</div>
+                <div class="item-row flex-col items-start gap-2">
+                    <div class="flex items-center w-full gap-4">
+                        <img src="${d.immagine_url}" class="thumb">
+                        <div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div>
+                        <div onclick="preparaModificaFlotta('${d.id}')" class="edit-btn">MOD</div>
+                        <div onclick="elimina('flotta_page','${d.id}')" class="delete-btn">×</div>
+                    </div>
+                    <div class="flex gap-1 overflow-x-auto w-full pb-1">
+                        ${(d.foto_gallery || []).map(img => `<img src="${img}" class="h-8 w-8 object-cover rounded border">`).join('')}
+                    </div>
                 </div>`).join('');
 
+            // Party
             document.getElementById('display-party').innerHTML = allData.party.map(d => `
                 <div class="item-row">
                     <img src="${d.foto_urls ? d.foto_urls[0] : ''}" class="thumb">
-                    <div class="flex-1 font-bold text-[10px] uppercase">${d.titolo} <br><span class="opacity-50 text-[8px] italic">${d.foto_urls ? d.foto_urls.length : 0} FOTO</span></div>
+                    <div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div>
                     <div onclick="preparaModificaParty('${d.id}')" class="edit-btn">MOD</div>
                     <div onclick="elimina('gallery_eventi','${d.id}')" class="delete-btn">×</div>
                 </div>`).join('');
 
+            // Prenotazioni
             document.getElementById('display-preno').innerHTML = allData.prenotazioni.map(p => {
                 const v = allData.viaggi.find(x => x.id === p.tratta_id);
-                return `
-                <div class="p-3 bg-gray-50 border rounded-xl text-[10px]">
-                    <div class="flex justify-between">
-                        <strong class="text-blue-600 uppercase">${p.nome_cliente}</strong>
-                        <div class="flex gap-1">
-                            <span onclick="preparaModificaPreno('${p.id}')" class="cursor-pointer text-green-600 font-bold">MOD</span>
-                            <span onclick="elimina('prenotazioni','${p.id}')" class="cursor-pointer text-red-400 font-bold ml-2">×</span>
-                        </div>
-                    </div>
-                    <div class="mt-1 font-black uppercase italic">📍 ${v ? v.titolo : 'N/D'}</div>
-                    <div class="mt-1 bg-white p-1 border rounded text-center font-black text-blue-500">POSTI: ${p.posti_selezionati ? p.posti_selezionati.join(' - ') : ''}</div>
+                return `<div class="p-3 bg-gray-50 border rounded-xl text-[10px]">
+                    <div class="flex justify-between"><strong>${p.nome_cliente}</strong><div class="flex gap-1"><span onclick="preparaModificaPreno('${p.id}')" class="cursor-pointer text-green-600 font-bold">MOD</span><span onclick="elimina('prenotazioni','${p.id}')" class="cursor-pointer text-red-400 font-bold ml-2">×</span></div></div>
+                    <div class="mt-1 opacity-60">📍 ${v ? v.titolo : 'N/D'} | 📞 ${p.telefono_cliente}</div>
+                    <div class="mt-1 bg-white p-1 border rounded text-center font-black">POSTI: ${p.posti_selezionati.join(' - ')}</div>
                 </div>`;
             }).join('');
         }
@@ -186,20 +191,25 @@
             const btn = document.getElementById('btn-f');
             btn.innerText = "SINCRO..."; btn.disabled = true;
             try {
-                let galleryUrls = [];
+                let nuoveUrls = [];
                 for (let i = 0; i < fFiles.length; i++) {
                     const name = `bus_${Date.now()}_${i}`;
                     await sb.storage.from('foto').upload(name, fFiles[i]);
                     const { data: { publicUrl } } = sb.storage.from('foto').getPublicUrl(name);
-                    galleryUrls.push(publicUrl);
+                    nuoveUrls.push(publicUrl);
                 }
-                const payload = { titolo: document.getElementById('f-nome').value.toUpperCase(), descrizione: document.getElementById('f-desc').value };
-                if (galleryUrls.length > 0) {
-                    payload.immagine_url = galleryUrls[0];
-                    payload.foto_gallery = galleryUrls;
-                }
+                const galleryFinale = [...fotoCorrentiFlotta, ...nuoveUrls];
+                const payload = { 
+                    titolo: document.getElementById('f-nome').value.toUpperCase(), 
+                    descrizione: document.getElementById('f-desc').value,
+                    immagine_url: galleryFinale[0] || '',
+                    foto_gallery: galleryFinale 
+                };
                 if (editFlottaId) await sb.from('flotta_page').update(payload).eq('id', editFlottaId);
-                else await sb.from('flotta_page').insert([payload]);
+                else {
+                    if (galleryFinale.length === 0) throw new Error("Manca la foto!");
+                    await sb.from('flotta_page').insert([payload]);
+                }
                 location.reload();
             } catch (e) { alert(e.message); btn.disabled = false; }
         }
@@ -220,6 +230,31 @@
             location.reload();
         }
 
+        function preparaModificaFlotta(id) {
+            editFlottaId = id;
+            const d = allData.flotta.find(x => x.id === id);
+            document.getElementById('f-nome').value = d.titolo;
+            document.getElementById('f-desc').value = d.descrizione;
+            fotoCorrentiFlotta = d.foto_gallery || [];
+            renderAnteprimaModifica();
+            window.scrollTo({top: 400, behavior: 'smooth'});
+        }
+
+        function renderAnteprimaModifica() {
+            const container = document.getElementById('anteprima-gallery-flotta');
+            container.classList.remove('hidden');
+            container.innerHTML = fotoCorrentiFlotta.map((url, i) => `
+                <div class="preview-grid-item">
+                    <img src="${url}" class="w-full h-full object-cover rounded">
+                    <div onclick="rimuoviDallaGallery(${i})" class="remove-photo-badge">×</div>
+                </div>`).join('');
+        }
+
+        function rimuoviDallaGallery(index) {
+            fotoCorrentiFlotta.splice(index, 1);
+            renderAnteprimaModifica();
+        }
+
         function preparaModificaViaggio(id) {
             editViaggioId = id;
             const d = allData.viaggi.find(x => x.id === id);
@@ -227,14 +262,6 @@
             document.getElementById('v-data').value = d.data_partenza;
             document.getElementById('v-modello').value = d.modello_bus;
             window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        function preparaModificaFlotta(id) {
-            editFlottaId = id;
-            const d = allData.flotta.find(x => x.id === id);
-            document.getElementById('f-nome').value = d.titolo;
-            document.getElementById('f-desc').value = d.descrizione;
-            window.scrollTo({top: 400, behavior: 'smooth'});
         }
 
         function preparaModificaParty(id) {
@@ -253,10 +280,7 @@
 
         async function aggiornaPrenotazione() {
             if(!editPrenoId) return;
-            const obj = {
-                nome_cliente: document.getElementById('pr-nome').value.toUpperCase(),
-                posti_selezionati: document.getElementById('pr-posti').value.split(',').map(x => x.trim())
-            };
+            const obj = { nome_cliente: document.getElementById('pr-nome').value.toUpperCase(), posti_selezionati: document.getElementById('pr-posti').value.split(',').map(x => x.trim()) };
             await sb.from('prenotazioni').update(obj).eq('id', editPrenoId);
             location.reload();
         }
