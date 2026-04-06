@@ -34,10 +34,12 @@
         footer { background: #000; color: white; padding: 60px 0; text-align: center; margin-top: 100px; }
         @media (max-width: 768px) { .main-img-container { height: 350px; border-radius: 1.5rem; } .bus-info h2 { font-size: 32px; } .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
         
-        /* Correzione per far vedere bene le foto nel lightbox */
+        /* Forza la visualizzazione intera della foto nel Lightbox */
         .gslide-image img {
             max-height: 90vh !important;
             object-fit: contain !important;
+            width: auto !important;
+            margin: auto;
         }
     </style>
 </head>
@@ -115,14 +117,14 @@
                     </div>`;
                 }).join('');
 
-                // Configurazione Lightbox ottimizzata per far vedere tutta la foto
+                // Configurazione Lightbox bilanciata: foto intera e dimensioni naturali
                 flotta.forEach(bus => { 
                     GLightbox({ 
                         selector: `.glightbox-${bus.id}`, 
                         loop: true,
-                        width: 'auto',
-                        height: 'auto',
-                        zoomable: true,
+                        width: '90vw',
+                        height: '85vh',
+                        zoomable: false, // Impedisce l'ingrandimento eccessivo
                         draggable: true
                     }); 
                 });
