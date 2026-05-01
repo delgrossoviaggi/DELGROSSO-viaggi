@@ -2,25 +2,31 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Party On The Road | Limousine Bus Del Grosso</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Party On The Road | Del Grosso Viaggi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; overflow-x: hidden; }
         
-        /* BLOCCO TOTALE DOWNLOAD E SALVATAGGIO */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #000; 
+            color: #fff; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Protezione Contenuti */
         img, video {
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
             pointer-events: none !important;
         }
 
+        /* Overlay di sicurezza per GLightbox */
         .gslide-media::after {
             content: "";
             position: absolute;
@@ -29,77 +35,134 @@
             background: transparent;
         }
 
+        /* Card Evento con stile image_4a623f.png */
         .event-card { 
-            border-radius: 2.5rem; overflow: hidden; position: relative; cursor: pointer; 
-            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); height: 420px;
-            border: 1px solid #1a1a1a;
-            background-color: #0a0a0a;
+            border-radius: 2rem; 
+            overflow: hidden; 
+            position: relative; 
+            cursor: pointer; 
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); 
+            height: 450px;
+            border: 1px solid #111;
+            background-color: #050505;
+        }
+        
+        .event-card:hover { 
+            transform: scale(1.02); 
+            border-color: #2563eb; 
+            box-shadow: 0 0 40px rgba(37, 99, 235, 0.2);
+        }
+        
+        .event-bg {
+            position: absolute;
+            inset: 0;
             background-size: cover;
             background-position: center;
-        }
-        .event-card:hover { transform: translateY(-12px); border-color: #2563eb; }
-        
-        .event-overlay { 
-            position: absolute; inset: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 100%); 
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 2.5rem; 
-            z-index: 10;
+            transition: transform 0.8s ease;
+            z-index: 1;
         }
 
+        .event-card:hover .event-bg {
+            transform: scale(1.1);
+        }
+
+        .event-overlay { 
+            position: absolute; 
+            inset: 0; 
+            background: linear-gradient(to top, #000 0%, rgba(0,0,0,0.4) 50%, transparent 100%); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end; 
+            padding: 2rem; 
+            z-index: 2;
+        }
+
+        /* Menu Contatti */
         #contactMenu {
-            display: none; position: absolute; top: 100%; right: 0;
-            background: #111; border: 1px solid #333; border-radius: 1.5rem;
-            padding: 1.2rem; width: 280px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 100;
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            right: 0;
+            background: #0a0a0a; 
+            border: 1px solid #222; 
+            border-radius: 1.5rem;
+            padding: 1rem; 
+            width: 260px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,1); 
+            z-index: 100;
         }
+        
         .contact-link {
-            display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px;
-            font-size: 11px; font-weight: 800; text-transform: uppercase; text-decoration: none;
-            color: white; transition: 0.3s;
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 10px; 
+            border-radius: 12px;
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            color: #eee; 
+            transition: 0.3s;
         }
-        .contact-link:hover { background: #222; color: #2563eb; }
+        
+        .contact-link:hover { background: #111; color: #2563eb; }
+
+        /* Typography */
+        .glitch-text {
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;"> 
 
-    <nav class="p-6 flex justify-between items-center border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
-        <a href="index.html"><img src="logo.JPEG" class="h-12 md:h-16 w-auto" alt="Logo"></a>
+    <!-- Navigazione coerente con image_4a623f.png -->
+    <nav class="p-6 flex justify-between items-center bg-black/90 backdrop-blur-md sticky top-0 z-50">
+        <a href="index.html">
+            <div class="bg-white p-2 rounded-sm">
+                <img src="logo.JPEG" class="h-8 md:h-10 w-auto" alt="Logo">
+            </div>
+        </a>
         <div class="relative">
-            <button onclick="toggleContacts()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all scale-100 active:scale-90">
-                Prenota Club
+            <button onclick="toggleContacts()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-tighter transition-all">
+                PRENOTA CLUB
             </button>
             <div id="contactMenu" class="mt-4">
-                <a href="https://wa.me/393662127916" target="_blank" class="contact-link"><span>💬</span> WhatsApp Nicola</a>
-                <a href="https://wa.me/393205730466" target="_blank" class="contact-link"><span>💬</span> WhatsApp Raffaele</a>
+                <a href="https://wa.me/393662127916" target="_blank" class="contact-link"><span>💬</span> Nicola WhatsApp</a>
+                <a href="https://wa.me/393205730466" target="_blank" class="contact-link"><span>💬</span> Raffaele WhatsApp</a>
                 <div class="h-px bg-zinc-800 my-2"></div>
                 <a href="tel:3662127916" class="contact-link"><span>📞</span> Chiama Nicola</a>
                 <a href="tel:3205730466" class="contact-link"><span>📞</span> Chiama Raffaele</a>
-                <div class="h-px bg-zinc-800 my-2"></div>
-                <a href="mailto:info@delgrossoviaggi.it" class="contact-link"><span>✉️</span> Invia Email</a>
             </div>
         </div>
     </nav>
 
-    <header class="py-24 text-center px-4 max-w-4xl mx-auto">
-        <p class="text-blue-500 font-black uppercase tracking-[0.6em] text-[10px] mb-6">Gallery</p>
-        <h1 class="text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-[0.8] mb-8">
+    <!-- Header coerente con image_4a623f.png -->
+    <header class="pt-20 pb-16 text-center px-4">
+        <p class="text-blue-500 font-black uppercase tracking-[0.8em] text-[10px] mb-8">GALLERY</p>
+        <h1 class="text-7xl md:text-[10rem] font-black uppercase italic glitch-text mb-4">
             PARTY <br><span class="text-blue-600">ON THE ROAD</span>
         </h1>
-        <p class="text-zinc-500 uppercase text-[11px] tracking-[0.4em]">I momenti più esclusivi a bordo del Limousine Bus.</p>
+        <p class="text-zinc-500 uppercase text-[10px] tracking-[0.4em] mt-8">I MOMENTI PIÙ ESCLUSIVI A BORDO DEL LIMOUSINE BUS.</p>
     </header>
 
+    <!-- Main Grid -->
     <main class="max-w-7xl mx-auto px-6 pb-40">
-        <div id="grid-eventi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
-             </div>
+        <div id="grid-eventi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Gli eventi verranno caricati qui -->
+        </div>
     </main>
 
-    <footer class="py-12 border-t border-zinc-900 text-center">
-        <img src="logo.JPEG" class="h-8 mx-auto mb-6 brightness-0 invert opacity-20">
-        <p class="text-zinc-600 text-[10px] font-black uppercase tracking-[0.5em]">Del Grosso Viaggi © 2026</p>
+    <!-- Footer coerente con image_4a623f.png -->
+    <footer class="py-20 border-t border-zinc-900 text-center">
+        <div class="bg-zinc-900 w-10 h-10 mx-auto mb-10 rounded-sm flex items-center justify-center opacity-50">
+            <div class="w-4 h-4 bg-zinc-700"></div>
+        </div>
+        <p class="text-zinc-600 text-[9px] font-black uppercase tracking-[0.5em]">DEL GROSSO VIAGGI © 2026</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
-        // CONFIGURAZIONE SUPABASE
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
@@ -109,18 +172,16 @@
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Funzione avanzata per rilevare video (inclusi Cloudinary senza estensione palese)
         function isVideo(url) {
             if (!url) return false;
-            const videoExts = ['mp4', 'mov', 'avi', 'webm', 'm4v'];
-            const cleanUrl = url.split('?')[0].split('#')[0];
-            const ext = cleanUrl.split('.').pop().toLowerCase();
-            return videoExts.includes(ext);
+            const videoSignatures = ['/video/upload/', '.mp4', '.mov', '.webm', '.m4v'];
+            return videoSignatures.some(sig => url.toLowerCase().includes(sig));
         }
 
         async function caricaEventi() {
             const grid = document.getElementById('grid-eventi');
             try {
-                // Recupera dati dalla tabella 'gallery_eventi'
                 const { data: eventi, error } = await sb
                     .from('gallery_eventi')
                     .select('*')
@@ -130,67 +191,65 @@
 
                 if(eventi && eventi.length > 0) {
                     grid.innerHTML = eventi.map(ev => {
-                        // Prima foto/video dell'array come copertina
-                        const coverImg = ev.foto_urls && ev.foto_urls.length > 0 ? ev.foto_urls[0] : 'limo-bus.jpeg';
+                        const mediaUrls = ev.foto_urls || [];
+                        const cover = mediaUrls.length > 0 ? mediaUrls[0] : '';
                         
-                        // Genera i link invisibili per la gallery GLightbox
-                        const galleryHtml = ev.foto_urls.map((url, index) => {
+                        // Generazione HTML nascosto per GLightbox
+                        const galleryHtml = mediaUrls.map((url, idx) => {
                             const video = isVideo(url);
-                            return `<a href="${url}" class="glightbox-${ev.id} ${index === 0 ? '' : 'hidden'}" 
+                            return `<a href="${url}" class="glightbox-${ev.id} hidden" 
                                        data-gallery="gallery-${ev.id}" 
                                        data-type="${video ? 'video' : 'image'}"></a>`;
                         }).join('');
 
                         return `
-                            <div class="event-card group shadow-2xl" 
-                                 style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('${coverImg}')"
-                                 onclick="apriAlbum('${ev.id}')">
+                            <div class="event-card group" onclick="apriAlbum('${ev.id}')">
+                                <div class="event-bg" style="background-image: url('${cover}')"></div>
                                 ${galleryHtml}
                                 <div class="event-overlay">
-                                    <h2 class="text-3xl font-black uppercase italic leading-none group-hover:tracking-wider transition-all duration-500">${ev.titolo}</h2>
-                                    <div class="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
-                                        <p class="text-[10px] text-blue-500 font-black uppercase tracking-widest">${ev.foto_urls ? ev.foto_urls.length : 0} Shots</p>
-                                        <span class="text-white font-black text-[10px] uppercase tracking-widest">Guarda →</span>
+                                    <h2 class="text-4xl font-black uppercase italic leading-[0.8] mb-4">${ev.titolo}</h2>
+                                    <div class="flex justify-between items-center pt-4 border-t border-white/10">
+                                        <p class="text-[9px] text-blue-500 font-black uppercase tracking-widest">${mediaUrls.length} FILES</p>
+                                        <span class="text-white font-black text-[9px] uppercase tracking-widest">SCOPRI →</span>
                                     </div>
                                 </div>
                             </div>
                         `;
                     }).join('');
 
-                    // Inizializza GLightbox per ogni album
+                    // Inizializzazione GLightbox
                     eventi.forEach(ev => {
                         GLightbox({ 
                             selector: `.glightbox-${ev.id}`,
                             loop: true,
                             autoplayVideos: true,
                             touchNavigation: true,
-                            keyboardNavigation: true,
-                            closeButton: true,
-                            zoomable: false, 
+                            zoomable: false,
                             draggable: false
                         });
                     });
                 } else {
-                    grid.innerHTML = '<p class="col-span-full opacity-30 uppercase font-black italic">In attesa del primo party...</p>';
+                    grid.innerHTML = '<p class="col-span-full text-center opacity-20 uppercase font-black italic py-20">In attesa del primo party...</p>';
                 }
             } catch (err) { 
                 console.error("Errore:", err);
-                grid.innerHTML = '<p class="col-span-full text-red-500">Errore nel caricamento della gallery.</p>';
+                grid.innerHTML = '<p class="col-span-full text-center text-red-500 uppercase font-black text-xs">Errore connessione database.</p>';
             }
         }
 
         function apriAlbum(id) {
-            const primoLink = document.querySelector(`.glightbox-${id}`);
-            if(primoLink) primoLink.click();
+            const el = document.querySelector(`.glightbox-${id}`);
+            if(el) el.click();
         }
 
+        // Init
         caricaEventi();
 
-        // SICUREZZA
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.ctrlKey && (e.keyCode === 83 || e.keyCode === 85)) return false;
-        };
+        // Sicurezza UI
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        window.addEventListener('keydown', e => {
+            if (e.ctrlKey && (e.key === 's' || e.key === 'u')) e.preventDefault();
+        });
     </script>
 </body>
 </html>

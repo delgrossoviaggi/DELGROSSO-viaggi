@@ -49,7 +49,7 @@
             <div class="section-card" style="border-top: 6px solid #10b981;">
                 <h2 class="font-black uppercase text-emerald-600 mb-4 tracking-tighter text-xl">0. Carousel Home Page</h2>
                 <div class="bg-emerald-50 p-6 rounded-3xl mb-6 border border-emerald-100">
-                    <p class="text-[11px] font-black mb-4 uppercase text-emerald-800 tracking-wider">Foto Attuali:</p>
+                    <p class="text-[11px] font-black mb-4 uppercase text-emerald-800 tracking-wider">Foto Attuali (Cloudinary):</p>
                     <div id="anteprima-carousel" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6"></div>
                     <div class="border-t border-emerald-200 pt-4">
                         <label class="text-[10px] font-black block mb-2 uppercase text-emerald-700">Aggiungi nuove foto:</label>
@@ -82,7 +82,7 @@
                     <input type="text" id="f-nome" placeholder="NOME MEZZO" class="input-style uppercase">
                     <textarea id="f-desc" placeholder="DESCRIZIONE TECNICA..." class="input-style h-24"></textarea>
                     <div id="anteprima-gallery-flotta" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
-                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50 text-orange-800">Aggiungi foto alla Gallery:</p>
+                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50 text-orange-800">Aggiungi foto gallery (Cloudinary):</p>
                     <input type="file" id="f-files" class="text-[10px] mb-4" multiple accept="image/*">
                     <button onclick="salvaFlotta()" id="btn-f" class="btn-action bg-orange-600 text-white shadow-xl">Salva Mezzo</button>
                 </div>
@@ -94,7 +94,7 @@
                 <div class="bg-purple-50 p-4 rounded-3xl mb-6">
                     <input type="text" id="p-titolo" placeholder="TITOLO ALBUM" class="input-style uppercase">
                     <div id="anteprima-gallery-party" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
-                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50 text-purple-800">Aggiungi foto/video:</p>
+                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50 text-purple-800">Aggiungi foto/video (Cloudinary):</p>
                     <input type="file" id="p-files" class="text-[10px] mb-4" multiple accept="image/*,video/*">
                     <button onclick="salvaParty()" id="btn-p" class="btn-action bg-purple-600 text-white shadow-xl">Salva Album Party</button>
                 </div>
@@ -104,7 +104,7 @@
 
         <div class="lg:col-span-4">
             <div class="section-card" style="border-top: 6px solid #000;">
-                <h2 class="font-black uppercase mb-4 text-center tracking-tighter text-xl">Passeggeri</h2>
+                <h2 class="font-black uppercase mb-4 text-center tracking-tighter text-xl">Passeggeri (Supabase)</h2>
                 <div class="bg-gray-100 p-4 rounded-2xl mb-6 text-center">
                     <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs uppercase">
                     <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2)" class="input-style text-xs">
@@ -116,9 +116,14 @@
     </div>
 
     <script>
+        // CONFIGURAZIONE SUPABASE
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
+
+        // CONFIGURAZIONE CLOUDINARY
+        const CLOUD_NAME = "tuo_cloud_name"; // SOSTITUISCI CON IL TUO CLOUD NAME
+        const UPLOAD_PRESET = "tuo_preset";   // SOSTITUISCI CON IL TUO UPLOAD PRESET (UNSIGNED)
 
         let editViaggioId = null, editFlottaId = null, editPartyId = null, editPrenoId = null;
         let allData = { viaggi: [], flotta: [], party: [], prenotazioni: [], carousel: [] };
@@ -126,6 +131,20 @@
         let fotoCorrentiFlotta = [];
         let fotoCorrentiParty = [];
         let fotoCorrentiCarousel = [];
+
+        // FUNZIONE UPLOAD CLOUDINARY
+        async function uploadCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            return data.secure_url;
+        }
 
         async function init() {
             try {
@@ -162,7 +181,7 @@
             }).join('');
         }
 
-        // CAROUSEL
+        // CAROUSEL (CLOUDINARY)
         function renderAnteprimaCarousel() {
             const container = document.getElementById('anteprima-carousel');
             container.innerHTML = fotoCorrentiCarousel.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="rimuoviDalCarousel(${i})" class="remove-photo-badge">×</div></div>`).join('');
@@ -170,23 +189,22 @@
         function rimuoviDalCarousel(i) { fotoCorrentiCarousel.splice(i,1); renderAnteprimaCarousel(); }
 
         async function salvaCarousel() {
-            const btn = document.getElementById('btn-c'); btn.innerText = "UPLOAD..."; btn.disabled = true;
+            const btn = document.getElementById('btn-c'); btn.innerText = "CLOUDINARY UPLOAD..."; btn.disabled = true;
             try {
                 const files = document.getElementById('c-files').files;
                 let nuove = [];
                 for (let f of files) {
-                    const name = `home_${Date.now()}_${i}`;
-                    await sb.storage.from('foto').upload(name, f);
-                    nuove.push(sb.storage.from('foto').getPublicUrl(name).data.publicUrl);
+                    const url = await uploadCloudinary(f);
+                    nuove.push(url);
                 }
                 const finale = [...fotoCorrentiCarousel, ...nuove];
                 if(allData.carouselId) await sb.from('carousel_home').update({ foto_urls: finale }).eq('id', allData.carouselId);
                 else await sb.from('carousel_home').insert([{ foto_urls: finale }]);
                 location.reload();
-            } catch(e) { alert(e.message); btn.disabled = false; btn.innerText="Salva Carousel Home"; }
+            } catch(e) { alert("Errore upload Cloudinary: " + e.message); btn.disabled = false; btn.innerText="Salva Carousel Home"; }
         }
 
-        // FLOTTA
+        // FLOTTA (CLOUDINARY)
         function caricaModificaFlotta(id) {
             editFlottaId = id; const d = allData.flotta.find(x => x.id === id);
             document.getElementById('f-nome').value = d.titolo; document.getElementById('f-desc').value = d.descrizione;
@@ -198,14 +216,13 @@
             document.getElementById('anteprima-gallery-flotta').innerHTML = fotoCorrentiFlotta.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiFlotta.splice(${i},1);renderAnteprimaFlotta()" class="remove-photo-badge">×</div></div>`).join('');
         }
         async function salvaFlotta() {
-            const btn = document.getElementById('btn-f'); btn.disabled = true; btn.innerText = "SALVATAGGIO...";
+            const btn = document.getElementById('btn-f'); btn.disabled = true; btn.innerText = "UPLOAD...";
             try {
                 const files = document.getElementById('f-files').files;
                 let nuove = [];
                 for(let f of files) {
-                    const name = `bus_${Date.now()}_${Math.random()}`;
-                    await sb.storage.from('foto').upload(name, f);
-                    nuove.push(sb.storage.from('foto').getPublicUrl(name).data.publicUrl);
+                    const url = await uploadCloudinary(f);
+                    nuove.push(url);
                 }
                 const finale = [...fotoCorrentiFlotta, ...nuove];
                 const data = { titolo: document.getElementById('f-nome').value.toUpperCase(), descrizione: document.getElementById('f-desc').value, immagine_url: finale[0], foto_gallery: finale };
@@ -215,7 +232,7 @@
             } catch(e) { alert(e.message); btn.disabled = false; }
         }
 
-        // PARTY
+        // PARTY (CLOUDINARY)
         function caricaModificaParty(id) {
             editPartyId = id; const d = allData.party.find(x => x.id === id);
             document.getElementById('p-titolo').value = d.titolo;
@@ -232,9 +249,8 @@
                 const files = document.getElementById('p-files').files;
                 let nuove = [];
                 for(let f of files) {
-                    const name = `party_${Date.now()}_${Math.random()}`;
-                    await sb.storage.from('foto').upload(name, f);
-                    nuove.push(sb.storage.from('foto').getPublicUrl(name).data.publicUrl);
+                    const url = await uploadCloudinary(f);
+                    nuove.push(url);
                 }
                 const finale = [...fotoCorrentiParty, ...nuove];
                 const data = { titolo: document.getElementById('p-titolo').value.toUpperCase(), foto_urls: finale };
@@ -244,15 +260,17 @@
             } catch(e) { alert(e.message); btn.disabled = false; }
         }
 
-        // TRATTE
+        // TRATTE (DATA ON SUPABASE + IMAGE ON CLOUDINARY)
         async function salvaViaggio() {
+            const btn = document.getElementById('btn-v'); btn.disabled = true;
             const f = document.getElementById('v-file').files[0];
             let url = editViaggioId ? allData.viaggi.find(x => x.id === editViaggioId).immagine_url : null;
+            
             if(f) {
-                const name = `loc_${Date.now()}`;
-                await sb.storage.from('foto').upload(name, f);
-                url = sb.storage.from('foto').getPublicUrl(name).data.publicUrl;
+                btn.innerText = "CLOUDINARY...";
+                url = await uploadCloudinary(f);
             }
+            
             const obj = { titolo: document.getElementById('v-titolo').value.toUpperCase(), data_partenza: document.getElementById('v-data').value.toUpperCase(), modello_bus: document.getElementById('v-modello').value, immagine_url: url };
             if(editViaggioId) await sb.from('tratte').update(obj).eq('id', editViaggioId);
             else await sb.from('tratte').insert([obj]);
@@ -263,7 +281,7 @@
             document.getElementById('v-titolo').value = d.titolo; document.getElementById('v-data').value = d.data_partenza; document.getElementById('v-modello').value = d.modello_bus;
         }
 
-        // PRENO
+        // PRENO (STRICTLY SUPABASE)
         function preparaModificaPreno(id) { editPrenoId = id; const p = allData.prenotazioni.find(x => x.id === id); document.getElementById('pr-nome').value = p.nome_cliente; document.getElementById('pr-posti').value = p.posti_selezionati.join(','); }
         async function aggiornaPrenotazione() {
             if(!editPrenoId) return;
@@ -275,6 +293,7 @@
             const data = allData.prenotazioni.map(p => { const v = allData.viaggi.find(x => x.id === p.tratta_id); return { NOME: p.nome_cliente, TELEFONO: p.telefono_cliente, TRATTA: v ? v.titolo : 'N/D', POSTI: p.posti_selezionati.join(' - ') }; });
             const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri"); XLSX.writeFile(wb, "Lista_DelGrosso.xlsx");
         }
+        
         async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); location.reload(); } }
 
         init();

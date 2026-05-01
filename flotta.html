@@ -8,45 +8,164 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1a1a1a; margin: 0; padding: 0; scroll-behavior: smooth; }
-        header { background: white; padding: 15px 0; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 1000; }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; width: 92%; max-width: 1200px; margin: auto; }
-        .nav-links { list-style: none; display: flex; gap: 20px; }
-        .nav-links a { text-decoration: none; color: #000; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-        .hero { background: #000; color: white; padding: 60px 20px; text-align: center; }
-        .hero h1 { font-size: 45px; font-weight: 900; text-transform: uppercase; font-style: italic; letter-spacing: -1px; }
-        .hero p { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4em; color: #3b82f6; margin-bottom: 10px; }
         
-        .bus-container { max-width: 1200px; margin: 50px auto; padding: 0 20px; }
-        .bus-card { margin-bottom: 100px; border-bottom: 1px solid #eee; padding-bottom: 50px; }
-        .main-img-container { width: 100%; height: 500px; border-radius: 2rem; overflow: hidden; cursor: pointer; }
-        .main-img-container img { width: 100%; height: 100%; object-fit: cover; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #ffffff; 
+            color: #000; 
+            margin: 0; 
+            padding: 0; 
+            scroll-behavior: smooth; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navbar raffinata */
+        header { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 12px 0; 
+            border-bottom: 1px solid #f2f2f2; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            backdrop-filter: blur(10px);
+        }
+        .header-flex { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 90%; 
+            max-width: 1300px; 
+            margin: auto; 
+        }
+        .nav-links { list-style: none; display: flex; gap: 25px; }
+        .nav-links a { 
+            text-decoration: none; 
+            color: #000; 
+            font-size: 10px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #2563eb; }
+
+        /* Titolo Sezione */
+        .fleet-header {
+            padding: 80px 20px 40px;
+            text-align: center;
+        }
+        .fleet-header p {
+            font-[900] text-[10px] uppercase tracking-[0.6em] text-blue-600 mb-4;
+        }
+        .fleet-header h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            line-height: 0.9;
+        }
+
+        /* Bus Layout */
+        .bus-container { max-width: 1300px; margin: 0 auto; padding: 40px 20px 100px; }
         
-        .gallery-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 15px; }
-        .thumb-item { aspect-ratio: 1; border-radius: 0.8rem; overflow: hidden; cursor: pointer; border: 2px solid transparent; }
-        .thumb-item:hover { border-color: #3b82f6; }
+        .bus-card { 
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 50px;
+            margin-bottom: 150px; 
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .bus-card { grid-template-columns: 1fr; gap: 30px; margin-bottom: 100px; }
+            .fleet-header h1 { font-size: 3.5rem; }
+        }
+
+        /* Immagine Principale */
+        .main-img-container { 
+            width: 100%; 
+            aspect-ratio: 16/10; 
+            border-radius: 2.5rem; 
+            overflow: hidden; 
+            cursor: pointer; 
+            background: #f7f7f7;
+            border: 1px solid #eee;
+        }
+        .main-img-container img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .main-img-container:hover img { transform: scale(1.03); }
+
+        /* Gallery Thumbnails */
+        .gallery-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 12px; 
+            margin-top: 15px; 
+        }
+        .thumb-item { 
+            aspect-ratio: 1; 
+            border-radius: 1.2rem; 
+            overflow: hidden; 
+            cursor: pointer; 
+            border: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+        .thumb-item:hover { transform: translateY(-5px); }
         .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        .bus-info h2 { font-size: 40px; font-weight: 900; text-transform: uppercase; font-style: italic; margin: 20px 0; }
-        .bus-info p { color: #4b5563; line-height: 1.6; white-space: pre-line; margin-bottom: 30px; }
-        .btn-wa { display: inline-flex; align-items: center; background: #000; color: white; padding: 15px 30px; border-radius: 100px; font-weight: 900; text-transform: uppercase; font-size: 11px; text-decoration: none; }
+        /* Testi */
+        .bus-info h2 { 
+            font-size: 48px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-style: italic; 
+            margin-bottom: 20px; 
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .bus-info p { 
+            font-size: 15px;
+            color: #555; 
+            line-height: 1.7; 
+            white-space: pre-line; 
+            margin-bottom: 40px; 
+        }
+        .btn-wa { 
+            display: inline-flex; 
+            align-items: center; 
+            background: #000; 
+            color: white; 
+            padding: 18px 40px; 
+            border-radius: 100px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            font-size: 11px; 
+            letter-spacing: 1px;
+            text-decoration: none; 
+            transition: all 0.3s;
+        }
+        .btn-wa:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.15); background: #2563eb; }
 
-        /* --- VISUALIZZATORE MANUALE (NO BUG) --- */
+        /* Viewer Fullscreen */
         #custom-viewer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999;
+            background: rgba(255,255,255,0.98); z-index: 9999;
             display: none; align-items: center; justify-content: center;
-            cursor: pointer;
+            cursor: zoom-out;
         }
         #custom-viewer img {
-            max-width: 95%; max-height: 95%;
+            max-width: 92%; max-height: 85%;
             object-fit: contain;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            border-radius: 8px;
+            border-radius: 1rem;
         }
-        #custom-viewer .close-v {
-            position: absolute; top: 20px; right: 20px; color: white;
-            font-size: 40px; font-weight: bold;
+        .close-v {
+            position: absolute; top: 30px; right: 40px; color: #000;
+            font-size: 30px; font-weight: 300; cursor: pointer;
         }
     </style>
 </head>
@@ -58,15 +177,23 @@
             <nav><ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="viaggi.html">Viaggi</a></li>
+                <li><a href="party-on-the-road.html">Party</a></li>
                 <li><a href="contatti.html">Contatti</a></li>
             </ul></nav>
         </div>
     </header>
 
-    <main class="bus-container" id="lista-mezzi"></main>
+    <div class="fleet-header">
+        <p class="text-blue-600 font-black uppercase tracking-[0.6em] text-[10px] mb-4">La Nostra Selezione</p>
+        <h1>GARAGE <span class="text-zinc-200">FLOTTA</span></h1>
+    </div>
+
+    <main class="bus-container" id="lista-mezzi">
+        <!-- Caricamento dinamico qui -->
+    </main>
 
     <div id="custom-viewer" onclick="closeViewer()">
-        <span class="close-v">&times;</span>
+        <span class="close-v">✕</span>
         <img id="viewer-img" src="">
     </div>
 
@@ -77,44 +204,55 @@
 
         async function caricaFlotta() {
             const main = document.getElementById('lista-mezzi');
-            const { data: flotta } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
+            const { data: flotta, error } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
             
+            if (error) {
+                main.innerHTML = `<p class="text-center opacity-50">Errore caricamento flotta.</p>`;
+                return;
+            }
+
             main.innerHTML = flotta.map(bus => {
                 const gallery = bus.foto_gallery || [];
+                // Uniamo immagine principale e gallery rimuovendo duplicati
                 const allImgs = [...new Set([bus.immagine_url, ...gallery])].filter(u => u);
 
                 return `
-                <div class="bus-card">
-                    <div class="main-img-container" onclick="openViewer('${bus.immagine_url}')">
-                        <img src="${bus.immagine_url}">
-                    </div>
-                    <div class="gallery-grid">
-                        ${allImgs.map(img => `
-                            <div class="thumb-item" onclick="openViewer('${img}')">
-                                <img src="${img}">
-                            </div>
-                        `).join('')}
+                <section class="bus-card">
+                    <div class="bus-visuals">
+                        <div class="main-img-container" onclick="openViewer('${bus.immagine_url}')">
+                            <img src="${bus.immagine_url}" loading="lazy" alt="${bus.titolo}">
+                        </div>
+                        <div class="gallery-grid">
+                            ${allImgs.slice(1, 9).map(img => `
+                                <div class="thumb-item" onclick="openViewer('${img}')">
+                                    <img src="${img}" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                     <div class="bus-info">
                         <h2>${bus.titolo}</h2>
                         <p>${bus.descrizione}</p>
-                        <a href="https://wa.me/393662127916?text=Info mezzo: ${bus.titolo}" class="btn-wa">Richiedi Preventivo</a>
+                        <a href="https://wa.me/393662127916?text=Ciao, vorrei un preventivo per: ${bus.titolo}" class="btn-wa">
+                            Verifica Disponibilità
+                        </a>
                     </div>
-                </div>`;
+                </section>`;
             }).join('');
         }
 
         function openViewer(url) {
             document.getElementById('viewer-img').src = url;
             document.getElementById('custom-viewer').style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Blocca scroll
+            document.body.style.overflow = 'hidden';
         }
 
         function closeViewer() {
             document.getElementById('custom-viewer').style.display = 'none';
-            document.body.style.overflow = 'auto'; // Sblocca scroll
+            document.body.style.overflow = 'auto';
         }
 
+        // Avvio caricamento
         caricaFlotta();
     </script>
 </body>
