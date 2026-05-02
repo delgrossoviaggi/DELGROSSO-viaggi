@@ -116,14 +116,13 @@
     </div>
 
     <script>
-        // CONFIGURAZIONE SUPABASE
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        // CONFIGURAZIONE CLOUDINARY
-        const CLOUD_NAME = "tuo_cloud_name"; // SOSTITUISCI CON IL TUO CLOUD NAME
-        const UPLOAD_PRESET = "tuo_preset";   // SOSTITUISCI CON IL TUO UPLOAD PRESET (UNSIGNED)
+        // CONFIGURAZIONE DEFINITIVA
+        const CLOUD_NAME = "dubkmnnkl"; 
+        const UPLOAD_PRESET = "delgrosso_unsigned";   
 
         let editViaggioId = null, editFlottaId = null, editPartyId = null, editPrenoId = null;
         let allData = { viaggi: [], flotta: [], party: [], prenotazioni: [], carousel: [] };
@@ -132,17 +131,16 @@
         let fotoCorrentiParty = [];
         let fotoCorrentiCarousel = [];
 
-        // FUNZIONE UPLOAD CLOUDINARY
         async function uploadCloudinary(file) {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', UPLOAD_PRESET);
-            
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
                 method: 'POST',
                 body: formData
             });
             const data = await res.json();
+            if (!data.secure_url) throw new Error(data.error?.message || "Upload fallito");
             return data.secure_url;
         }
 
@@ -153,7 +151,7 @@
                     sb.from('flotta_page').select('*').order('created_at', {ascending: false}),
                     sb.from('gallery_eventi').select('*').order('created_at', {ascending: false}),
                     sb.from('prenotazioni').select('*').order('created_at', {ascending: false}),
-                    sb.from('carousel_home').select('*')
+                    sb.from('carousel_home').select('*').order('created_at', {ascending: false}).limit(1)
                 ]);
 
                 allData.viaggi = vReq.data || [];
@@ -181,58 +179,45 @@
             }).join('');
         }
 
-        // CAROUSEL (CLOUDINARY)
         function renderAnteprimaCarousel() {
-            const container = document.getElementById('anteprima-carousel');
-            container.innerHTML = fotoCorrentiCarousel.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="rimuoviDalCarousel(${i})" class="remove-photo-badge">×</div></div>`).join('');
+            document.getElementById('anteprima-carousel').innerHTML = fotoCorrentiCarousel.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiCarousel.splice(${i},1);renderAnteprimaCarousel()" class="remove-photo-badge">×</div></div>`).join('');
         }
-        function rimuoviDalCarousel(i) { fotoCorrentiCarousel.splice(i,1); renderAnteprimaCarousel(); }
 
         async function salvaCarousel() {
-            const btn = document.getElementById('btn-c'); btn.innerText = "CLOUDINARY UPLOAD..."; btn.disabled = true;
+            const btn = document.getElementById('btn-c'); btn.innerText = "UPLOAD..."; btn.disabled = true;
             try {
                 const files = document.getElementById('c-files').files;
-                let nuove = [];
-                for (let f of files) {
-                    const url = await uploadCloudinary(f);
-                    nuove.push(url);
-                }
-                const finale = [...fotoCorrentiCarousel, ...nuove];
-                if(allData.carouselId) await sb.from('carousel_home').update({ foto_urls: finale }).eq('id', allData.carouselId);
-                else await sb.from('carousel_home').insert([{ foto_urls: finale }]);
+                for (let f of files) { fotoCorrentiCarousel.push(await uploadCloudinary(f)); }
+                if(allData.carouselId) await sb.from('carousel_home').update({ foto_urls: fotoCorrentiCarousel }).eq('id', allData.carouselId);
+                else await sb.from('carousel_home').insert([{ foto_urls: fotoCorrentiCarousel }]);
                 location.reload();
-            } catch(e) { alert("Errore upload Cloudinary: " + e.message); btn.disabled = false; btn.innerText="Salva Carousel Home"; }
+            } catch(e) { alert(e.message); btn.disabled = false; btn.innerText="Salva Carousel Home"; }
         }
 
-        // FLOTTA (CLOUDINARY)
         function caricaModificaFlotta(id) {
             editFlottaId = id; const d = allData.flotta.find(x => x.id === id);
             document.getElementById('f-nome').value = d.titolo; document.getElementById('f-desc').value = d.descrizione;
             fotoCorrentiFlotta = d.foto_gallery || [];
-            renderAnteprimaFlotta();
             document.getElementById('anteprima-gallery-flotta').classList.remove('hidden');
+            renderAnteprimaFlotta();
         }
+
         function renderAnteprimaFlotta() {
             document.getElementById('anteprima-gallery-flotta').innerHTML = fotoCorrentiFlotta.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiFlotta.splice(${i},1);renderAnteprimaFlotta()" class="remove-photo-badge">×</div></div>`).join('');
         }
+
         async function salvaFlotta() {
             const btn = document.getElementById('btn-f'); btn.disabled = true; btn.innerText = "UPLOAD...";
             try {
                 const files = document.getElementById('f-files').files;
-                let nuove = [];
-                for(let f of files) {
-                    const url = await uploadCloudinary(f);
-                    nuove.push(url);
-                }
-                const finale = [...fotoCorrentiFlotta, ...nuove];
-                const data = { titolo: document.getElementById('f-nome').value.toUpperCase(), descrizione: document.getElementById('f-desc').value, immagine_url: finale[0], foto_gallery: finale };
+                for(let f of files) { fotoCorrentiFlotta.push(await uploadCloudinary(f)); }
+                const data = { titolo: document.getElementById('f-nome').value.toUpperCase(), descrizione: document.getElementById('f-desc').value, immagine_url: fotoCorrentiFlotta[0], foto_gallery: fotoCorrentiFlotta };
                 if(editFlottaId) await sb.from('flotta_page').update(data).eq('id', editFlottaId);
                 else await sb.from('flotta_page').insert([data]);
                 location.reload();
             } catch(e) { alert(e.message); btn.disabled = false; }
         }
 
-        // PARTY (CLOUDINARY)
         function caricaModificaParty(id) {
             editPartyId = id; const d = allData.party.find(x => x.id === id);
             document.getElementById('p-titolo').value = d.titolo;
@@ -240,49 +225,43 @@
             document.getElementById('anteprima-gallery-party').classList.remove('hidden');
             renderAnteprimaParty();
         }
+
         function renderAnteprimaParty() {
             document.getElementById('anteprima-gallery-party').innerHTML = fotoCorrentiParty.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiParty.splice(${i},1);renderAnteprimaParty()" class="remove-photo-badge">×</div></div>`).join('');
         }
+
         async function salvaParty() {
             const btn = document.getElementById('btn-p'); btn.disabled = true; btn.innerText = "UPLOAD...";
             try {
                 const files = document.getElementById('p-files').files;
-                let nuove = [];
-                for(let f of files) {
-                    const url = await uploadCloudinary(f);
-                    nuove.push(url);
-                }
-                const finale = [...fotoCorrentiParty, ...nuove];
-                const data = { titolo: document.getElementById('p-titolo').value.toUpperCase(), foto_urls: finale };
+                for(let f of files) { fotoCorrentiParty.push(await uploadCloudinary(f)); }
+                const data = { titolo: document.getElementById('p-titolo').value.toUpperCase(), foto_urls: fotoCorrentiParty };
                 if(editPartyId) await sb.from('gallery_eventi').update(data).eq('id', editPartyId);
                 else await sb.from('gallery_eventi').insert([data]);
                 location.reload();
             } catch(e) { alert(e.message); btn.disabled = false; }
         }
 
-        // TRATTE (DATA ON SUPABASE + IMAGE ON CLOUDINARY)
         async function salvaViaggio() {
-            const btn = document.getElementById('btn-v'); btn.disabled = true;
-            const f = document.getElementById('v-file').files[0];
-            let url = editViaggioId ? allData.viaggi.find(x => x.id === editViaggioId).immagine_url : null;
-            
-            if(f) {
-                btn.innerText = "CLOUDINARY...";
-                url = await uploadCloudinary(f);
-            }
-            
-            const obj = { titolo: document.getElementById('v-titolo').value.toUpperCase(), data_partenza: document.getElementById('v-data').value.toUpperCase(), modello_bus: document.getElementById('v-modello').value, immagine_url: url };
-            if(editViaggioId) await sb.from('tratte').update(obj).eq('id', editViaggioId);
-            else await sb.from('tratte').insert([obj]);
-            location.reload();
+            const btn = document.getElementById('btn-v'); btn.disabled = true; btn.innerText = "UPLOAD...";
+            try {
+                const f = document.getElementById('v-file').files[0];
+                let url = editViaggioId ? allData.viaggi.find(x => x.id === editViaggioId).immagine_url : null;
+                if(f) url = await uploadCloudinary(f);
+                const obj = { titolo: document.getElementById('v-titolo').value.toUpperCase(), data_partenza: document.getElementById('v-data').value.toUpperCase(), modello_bus: document.getElementById('v-modello').value, immagine_url: url };
+                if(editViaggioId) await sb.from('tratte').update(obj).eq('id', editViaggioId);
+                else await sb.from('tratte').insert([obj]);
+                location.reload();
+            } catch(e) { alert(e.message); btn.disabled = false; }
         }
+
         function preparaModificaViaggio(id) {
             editViaggioId = id; const d = allData.viaggi.find(x => x.id === id);
             document.getElementById('v-titolo').value = d.titolo; document.getElementById('v-data').value = d.data_partenza; document.getElementById('v-modello').value = d.modello_bus;
         }
 
-        // PRENO (STRICTLY SUPABASE)
         function preparaModificaPreno(id) { editPrenoId = id; const p = allData.prenotazioni.find(x => x.id === id); document.getElementById('pr-nome').value = p.nome_cliente; document.getElementById('pr-posti').value = p.posti_selezionati.join(','); }
+        
         async function aggiornaPrenotazione() {
             if(!editPrenoId) return;
             const obj = { nome_cliente: document.getElementById('pr-nome').value.toUpperCase(), posti_selezionati: document.getElementById('pr-posti').value.split(',').map(x => x.trim()) };
@@ -290,7 +269,10 @@
         }
 
         function exportExcel() {
-            const data = allData.prenotazioni.map(p => { const v = allData.viaggi.find(x => x.id === p.tratta_id); return { NOME: p.nome_cliente, TELEFONO: p.telefono_cliente, TRATTA: v ? v.titolo : 'N/D', POSTI: p.posti_selezionati.join(' - ') }; });
+            const data = allData.prenotazioni.map(p => { 
+                const v = allData.viaggi.find(x => x.id === p.tratta_id); 
+                return { NOME: p.nome_cliente, TRATTA: v ? v.titolo : 'N/D', POSTI: p.posti_selezionati.join(' - ') }; 
+            });
             const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri"); XLSX.writeFile(wb, "Lista_DelGrosso.xlsx");
         }
         
