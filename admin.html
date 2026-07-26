@@ -1,126 +1,185 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Master Admin PRO | Del Grosso Viaggi</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- XLSX Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
+
     <script>
         if (sessionStorage.getItem("admin_auth") !== "true") {
             const pass = prompt("Password Amministratore:");
             if (pass === "Delgrosso@26") { sessionStorage.setItem("admin_auth", "true"); }
             else { window.location.href = "index.html"; }
         }
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { brand: { blue: '#2563eb', darkBlue: '#1d4ed8', dark: '#09090b', card: '#121215' } }
+                }
+            }
+        }
     </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; -webkit-tap-highlight-color: transparent; }
-        .section-card { background: white; border-radius: 2rem; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .input-style { width: 100%; padding: 0.8rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-weight: 700; margin-bottom: 0.8rem; outline: none; font-size: 16px; }
-        .btn-action { width: 100%; padding: 1rem; border-radius: 1rem; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer; transition: 0.2s; border: none; }
-        .item-row { display: flex; align-items: center; gap: 15px; padding: 12px; background: #fff; border: 1px solid #f1f5f9; border-radius: 1rem; margin-bottom: 8px; }
-        .thumb { width: 60px; height: 50px; object-fit: cover; border-radius: 8px; background: #eee; border: 1px solid #ddd; }
-        .delete-btn { background: #fee2e2; color: #ef4444; font-weight: 900; padding: 8px 12px; border-radius: 10px; font-size: 11px; cursor: pointer; }
-        .edit-btn { background: #dcfce7; color: #16a34a; font-weight: 900; padding: 8px 12px; border-radius: 10px; font-size: 11px; cursor: pointer; margin-right: 5px; }
-        .preview-grid-item { position: relative; height: 80px; border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0; }
-        .remove-photo-badge { position: absolute; top: 0; right: 0; background: #ef4444; color: white; width: 28px; height: 28px; font-size: 18px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 0 10px; cursor: pointer; font-weight: bold; z-index: 10; transition: 0.2s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #09090b; color: #f4f4f5; -webkit-font-smoothing: antialiased; }
+        .glass-nav { background: rgba(9, 9, 11, 0.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .input-style { width: 100%; padding: 0.85rem 1rem; background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; font-weight: 700; margin-bottom: 0.75rem; outline: none; font-size: 13px; color: white; transition: border-color 0.2s; }
+        .input-style:focus { border-color: #2563eb; }
+        .btn-action { width: 100%; padding: 1rem; border-radius: 1rem; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer; transition: all 0.2s; border: none; letter-spacing: 0.05em; }
+        .item-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #18181b; border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; margin-bottom: 8px; }
+        .thumb { width: 55px; height: 45px; object-fit: cover; border-radius: 8px; background: #27272a; border: 1px solid rgba(255,255,255,0.1); }
+        .delete-btn { background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 800; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .delete-btn:hover { background: #ef4444; color: white; }
+        .edit-btn { background: rgba(34, 197, 94, 0.15); color: #4ade80; font-weight: 800; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .edit-btn:hover { background: #22c55e; color: white; }
+        .preview-grid-item { position: relative; height: 70px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .remove-photo-badge { position: absolute; top: 0; right: 0; background: #ef4444; color: white; width: 24px; height: 24px; font-size: 14px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 0 8px; cursor: pointer; font-weight: bold; z-index: 10; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-20 selection:bg-brand-blue selection:text-white">
 
-    <nav class="bg-white border-b p-4 sticky top-0 z-50 flex justify-between items-center shadow-sm">
+    <!-- Top Navigation -->
+    <nav class="glass-nav p-4 sticky top-0 z-50 flex justify-between items-center">
         <div class="flex items-center gap-4">
-            <a href="index.html" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-xl font-black text-[10px] uppercase transition-all flex items-center gap-2">
+            <a href="index.html" class="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-2 rounded-xl font-bold text-xs uppercase transition-all flex items-center gap-2">
                 <span>🏠</span> Home Sito
             </a>
-            <h1 class="font-black text-blue-600 uppercase italic hidden md:block text-sm tracking-tight">Master Admin Del Grosso</h1>
+            <h1 class="font-black text-brand-blue uppercase italic hidden md:block text-sm tracking-widest">Master Admin Del Grosso</h1>
         </div>
         <div class="flex gap-2">
-            <button onclick="exportExcel()" class="bg-green-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase shadow-lg">Esporta Excel</button>
-            <button onclick="location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase shadow-lg">Sincronizza Cloud</button>
+            <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-extrabold text-[11px] uppercase transition-all shadow-lg shadow-emerald-600/20">
+                Esporta Excel 📊
+            </button>
+            <button onclick="location.reload()" class="bg-brand-blue hover:bg-brand-darkBlue text-white px-4 py-2 rounded-xl font-extrabold text-[11px] uppercase transition-all shadow-lg shadow-brand-blue/20">
+                Sincronizza 🔄
+            </button>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div class="lg:col-span-8 space-y-6">
+    <!-- Main Dashboard Grid -->
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
+        
+        <!-- Left Column: Gestione Pagine e Contenuti -->
+        <div class="lg:col-span-8 space-y-8">
 
-            <div class="section-card" style="border-top: 6px solid #10b981;">
-                <h2 class="font-black uppercase text-emerald-600 mb-4 tracking-tighter text-xl">0. Carousel Home Page</h2>
-                <div class="bg-emerald-50 p-6 rounded-3xl mb-6 border border-emerald-100">
-                    <p class="text-[11px] font-black mb-4 uppercase text-emerald-800 tracking-wider">Foto Attuali (Cloudinary):</p>
-                    <div id="anteprima-carousel" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6"></div>
-                    <div class="border-t border-emerald-200 pt-4">
-                        <label class="text-[10px] font-black block mb-2 uppercase text-emerald-700">Aggiungi nuove foto:</label>
-                        <input type="file" id="c-files" class="text-[10px] mb-4 block w-full" multiple accept="image/*">
-                        <button onclick="salvaCarousel()" id="btn-c" class="btn-action bg-emerald-600 text-white shadow-xl">Salva Carousel Home</button>
+            <!-- Carousel Home Page -->
+            <div class="bg-brand-card p-6 rounded-3xl border border-emerald-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-emerald-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 0. Carousel Home Page
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
+                    <p class="text-[10px] font-black mb-3 uppercase text-emerald-400 tracking-wider">Foto Attuali (Cloudinary):</p>
+                    <div id="anteprima-carousel" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4"></div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">Aggiungi nuove foto:</label>
+                        <input type="file" id="c-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                        <button onclick="salvaCarousel()" id="btn-c" class="btn-action bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20">
+                            Salva Carousel Home
+                        </button>
                     </div>
                 </div>
             </div>
             
-            <div class="section-card" style="border-top: 6px solid #2563eb;">
-                <h2 class="font-black uppercase text-blue-600 mb-4 tracking-tighter text-xl">1. Gestione Tratte</h2>
-                <div class="bg-blue-50 p-4 rounded-3xl mb-6">
+            <!-- Gestione Tratte -->
+            <div class="bg-brand-card p-6 rounded-3xl border border-blue-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-brand-blue mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-brand-blue"></span> 1. Gestione Tratte
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
                     <input type="text" id="v-titolo" placeholder="NOME VIAGGIO" class="input-style uppercase">
-                    <input type="text" id="v-data" placeholder="DATA EVENTO" class="input-style uppercase">
+                    <input type="text" id="v-data" placeholder="DATA EVENTO (es: 15 AGOSTO 2026)" class="input-style uppercase">
                     <select id="v-modello" class="input-style">
                         <option value="53">BUS GT 53 POSTI</option>
                         <option value="63">BUS GT 63 POSTI</option>
+                        <option value="63 B">BUS GT 63 B POSTI</option>
                         <option value="30">LIMOUSINE BUS 30 POSTI</option>
                         <option value="7">MERCEDES V250d 7 POSTI</option>
                     </select>
-                    <input type="file" id="v-file" class="text-[10px] mb-4">
-                    <button onclick="salvaViaggio()" id="btn-v" class="btn-action bg-blue-600 text-white shadow-xl">Salva Viaggio</button>
+                    <input type="file" id="v-file" class="text-xs mb-4 block w-full text-zinc-400">
+                    <button onclick="salvaViaggio()" id="btn-v" class="btn-action bg-brand-blue hover:bg-brand-darkBlue text-white shadow-lg shadow-brand-blue/20">
+                        Salva Viaggio
+                    </button>
                 </div>
                 <div id="display-viaggi" class="space-y-2"></div>
             </div>
 
-            <div class="section-card" style="border-top: 6px solid #f97316;">
-                <h2 class="font-black uppercase text-orange-600 mb-4 tracking-tighter text-xl">2. Garage Flotta</h2>
-                <div class="bg-orange-50 p-4 rounded-3xl mb-6">
+            <!-- Garage Flotta -->
+            <div class="bg-brand-card p-6 rounded-3xl border border-orange-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-orange-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> 2. Garage Flotta
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
                     <input type="text" id="f-nome" placeholder="NOME MEZZO" class="input-style uppercase">
                     <textarea id="f-desc" placeholder="DESCRIZIONE TECNICA..." class="input-style h-24"></textarea>
                     <div id="anteprima-gallery-flotta" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
-                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50 text-orange-800">Aggiungi foto gallery (Cloudinary):</p>
-                    <input type="file" id="f-files" class="text-[10px] mb-4" multiple accept="image/*">
-                    <button onclick="salvaFlotta()" id="btn-f" class="btn-action bg-orange-600 text-white shadow-xl">Salva Mezzo</button>
+                    <p class="text-[10px] font-bold mb-2 uppercase text-orange-400">Aggiungi foto gallery (Cloudinary):</p>
+                    <input type="file" id="f-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                    <button onclick="salvaFlotta()" id="btn-f" class="btn-action bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/20">
+                        Salva Mezzo
+                    </button>
                 </div>
                 <div id="display-flotta" class="space-y-2"></div>
             </div>
 
-            <div class="section-card" style="border-top: 6px solid #a855f7;">
-                <h2 class="font-black uppercase text-purple-600 mb-4 tracking-tighter text-xl">3. Party On The Road</h2>
-                <div class="bg-purple-50 p-4 rounded-3xl mb-6">
+            <!-- Party On The Road -->
+            <div class="bg-brand-card p-6 rounded-3xl border border-purple-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-purple-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 3. Party On The Road
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
                     <input type="text" id="p-titolo" placeholder="TITOLO ALBUM" class="input-style uppercase">
                     <div id="anteprima-gallery-party" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
-                    <p class="text-[9px] font-bold mb-1 uppercase opacity-50 text-purple-800">Aggiungi foto/video (Cloudinary):</p>
-                    <input type="file" id="p-files" class="text-[10px] mb-4" multiple accept="image/*,video/*">
-                    <button onclick="salvaParty()" id="btn-p" class="btn-action bg-purple-600 text-white shadow-xl">Salva Album Party</button>
+                    <p class="text-[10px] font-bold mb-2 uppercase text-purple-400">Aggiungi foto/video (Cloudinary):</p>
+                    <input type="file" id="p-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*,video/*">
+                    <button onclick="salvaParty()" id="btn-p" class="btn-action bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20">
+                        Salva Album Party
+                    </button>
                 </div>
                 <div id="display-party" class="space-y-2"></div>
             </div>
+
         </div>
 
+        <!-- Right Column: Gestione Passeggeri (Supabase) -->
         <div class="lg:col-span-4">
-            <div class="section-card" style="border-top: 6px solid #000;">
-                <h2 class="font-black uppercase mb-4 text-center tracking-tighter text-xl">Passeggeri (Supabase)</h2>
-                <div class="bg-gray-100 p-4 rounded-2xl mb-6 text-center">
-                    <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs uppercase">
-                    <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2)" class="input-style text-xs">
-                    <button onclick="aggiornaPrenotazione()" id="btn-pr" class="w-full bg-black text-white py-3 rounded-xl font-bold text-[10px] uppercase shadow-lg">Salva Modifiche</button>
+            <div class="bg-brand-card p-6 rounded-3xl border border-white/10 shadow-2xl sticky top-28">
+                <h2 class="font-black uppercase mb-4 text-center tracking-tight text-lg text-white">
+                    Passeggeri (Supabase)
+                </h2>
+                <div class="bg-zinc-900/80 p-4 rounded-2xl border border-white/5 mb-6 text-center space-y-2">
+                    <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs uppercase mb-0">
+                    <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2)" class="input-style text-xs mb-0">
+                    <button onclick="aggiornaPrenotazione()" id="btn-pr" class="w-full bg-white hover:bg-zinc-200 text-black py-3 rounded-xl font-black text-xs uppercase transition-all shadow-md mt-2">
+                        Salva Modifiche
+                    </button>
                 </div>
-                <div id="display-preno" class="space-y-3"></div>
+                <div id="display-preno" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
             </div>
         </div>
+
     </div>
 
+    <!-- Script Supabase & Logic -->
     <script>
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
 
-        // CONFIGURAZIONE DEFINITIVA
+        // CONFIGURAZIONE CLOUDINARY
         const CLOUD_NAME = "dubkmnnkl"; 
         const UPLOAD_PRESET = "delgrosso_unsigned";   
 
@@ -170,12 +229,12 @@
         }
 
         function renderAll() {
-            document.getElementById('display-viaggi').innerHTML = allData.viaggi.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div><div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('tratte','${d.id}')" class="delete-btn">×</div></div>`).join('');
-            document.getElementById('display-flotta').innerHTML = allData.flotta.map(d => `<div class="item-row flex-col items-start gap-2"><div class="flex items-center w-full gap-4"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div><div onclick="caricaModificaFlotta('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('flotta_page','${d.id}')" class="delete-btn">×</div></div></div>`).join('');
-            document.getElementById('display-party').innerHTML = allData.party.map(d => `<div class="item-row flex-col items-start gap-2"><div class="flex items-center w-full gap-4"><img src="${d.foto_urls ? d.foto_urls[0] : ''}" class="thumb"><div class="flex-1 font-bold text-[10px] uppercase">${d.titolo}</div><div onclick="caricaModificaParty('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('gallery_eventi','${d.id}')" class="delete-btn">×</div></div></div>`).join('');
+            document.getElementById('display-viaggi').innerHTML = allData.viaggi.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('tratte','${d.id}')" class="delete-btn">×</div></div>`).join('');
+            document.getElementById('display-flotta').innerHTML = allData.flotta.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="caricaModificaFlotta('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('flotta_page','${d.id}')" class="delete-btn">×</div></div>`).join('');
+            document.getElementById('display-party').innerHTML = allData.party.map(d => `<div class="item-row"><img src="${d.foto_urls ? d.foto_urls[0] : ''}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="caricaModificaParty('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('gallery_eventi','${d.id}')" class="delete-btn">×</div></div>`).join('');
             document.getElementById('display-preno').innerHTML = allData.prenotazioni.map(p => {
                 const v = allData.viaggi.find(x => x.id === p.tratta_id);
-                return `<div class="p-3 bg-gray-50 border rounded-xl text-[10px]"><div class="flex justify-between"><strong>${p.nome_cliente}</strong><div class="flex gap-1"><span onclick="preparaModificaPreno('${p.id}')" class="cursor-pointer text-green-600 font-bold">MOD</span><span onclick="elimina('prenotazioni','${p.id}')" class="cursor-pointer text-red-400 font-bold ml-2">×</span></div></div><div class="mt-1 opacity-60 italic">${v ? v.titolo : 'N/D'}</div><div class="mt-1 bg-white p-1 border rounded text-center font-black">POSTI: ${p.posti_selezionati.join(' - ')}</div></div>`;
+                return `<div class="p-3 bg-zinc-900 border border-white/5 rounded-xl text-xs space-y-1"><div class="flex justify-between items-center"><strong class="text-white">${p.nome_cliente}</strong><div class="flex gap-2"><span onclick="preparaModificaPreno('${p.id}')" class="cursor-pointer text-emerald-400 font-bold">MOD</span><span onclick="elimina('prenotazioni','${p.id}')" class="cursor-pointer text-red-400 font-bold">×</span></div></div><div class="text-[10px] text-zinc-400 italic">${v ? v.titolo : 'N/D'}</div><div class="bg-black p-1.5 border border-white/10 rounded text-center font-black text-brand-blue">POSTI: ${p.posti_selezionati ? p.posti_selezionati.join(' - ') : ''}</div></div>`;
             }).join('');
         }
 
@@ -215,7 +274,7 @@
                 if(editFlottaId) await sb.from('flotta_page').update(data).eq('id', editFlottaId);
                 else await sb.from('flotta_page').insert([data]);
                 location.reload();
-            } catch(e) { alert(e.message); btn.disabled = false; }
+            } catch(e) { alert(e.message); btn.disabled = false; btn.innerText="Salva Mezzo"; }
         }
 
         function caricaModificaParty(id) {
@@ -239,7 +298,7 @@
                 if(editPartyId) await sb.from('gallery_eventi').update(data).eq('id', editPartyId);
                 else await sb.from('gallery_eventi').insert([data]);
                 location.reload();
-            } catch(e) { alert(e.message); btn.disabled = false; }
+            } catch(e) { alert(e.message); btn.disabled = false; btn.innerText="Salva Album Party"; }
         }
 
         async function salvaViaggio() {
@@ -252,7 +311,7 @@
                 if(editViaggioId) await sb.from('tratte').update(obj).eq('id', editViaggioId);
                 else await sb.from('tratte').insert([obj]);
                 location.reload();
-            } catch(e) { alert(e.message); btn.disabled = false; }
+            } catch(e) { alert(e.message); btn.disabled = false; btn.innerText="Salva Viaggio"; }
         }
 
         function preparaModificaViaggio(id) {
@@ -260,7 +319,7 @@
             document.getElementById('v-titolo').value = d.titolo; document.getElementById('v-data').value = d.data_partenza; document.getElementById('v-modello').value = d.modello_bus;
         }
 
-        function preparaModificaPreno(id) { editPrenoId = id; const p = allData.prenotazioni.find(x => x.id === id); document.getElementById('pr-nome').value = p.nome_cliente; document.getElementById('pr-posti').value = p.posti_selezionati.join(','); }
+        function preparaModificaPreno(id) { editPrenoId = id; const p = allData.prenotazioni.find(x => x.id === id); document.getElementById('pr-nome').value = p.nome_cliente; document.getElementById('pr-posti').value = p.posti_selezionati ? p.posti_selezionati.join(',') : ''; }
         
         async function aggiornaPrenotazione() {
             if(!editPrenoId) return;
@@ -271,12 +330,12 @@
         function exportExcel() {
             const data = allData.prenotazioni.map(p => { 
                 const v = allData.viaggi.find(x => x.id === p.tratta_id); 
-                return { NOME: p.nome_cliente, TRATTA: v ? v.titolo : 'N/D', POSTI: p.posti_selezionati.join(' - ') }; 
+                return { NOME: p.nome_cliente, TELEFONO: p.telefono_cliente || 'N/D', TRATTA: v ? v.titolo : 'N/D', POSTI: p.posti_selezionati ? p.posti_selezionati.join(' - ') : '' }; 
             });
-            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri"); XLSX.writeFile(wb, "Lista_DelGrosso.xlsx");
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri"); XLSX.writeFile(wb, "Lista_Passeggeri_DelGrosso.xlsx");
         }
         
-        async function elimina(tab, id) { if(confirm("Eliminare definitivamente?")) { await sb.from(tab).delete().eq('id', id); location.reload(); } }
+        async function elimina(tab, id) { if(confirm("Eliminare definitivamente questo record?")) { await sb.from(tab).delete().eq('id', id); location.reload(); } }
 
         init();
     </script>
