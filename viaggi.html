@@ -156,7 +156,7 @@
         async function caricaViaggi() {
             const container = document.getElementById('lista-viaggi');
             try {
-                const { data: viaggi } = await sb.from('tratte').select('*').order('created_at', { ascending: false });
+                const { data: viaggi } = await sb.from('tratte').select('*').eq('stato','pubblicato').order('created_at', { ascending: false });
                 const { data: prenotazioni } = await sb.from('prenotazioni').select('*');
 
                 const loading = document.getElementById('loading');

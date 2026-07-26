@@ -285,7 +285,8 @@
                     nome_cliente: nome.toUpperCase(),
                     telefono_cliente: tel,
                     tratta_id: sel.value,
-                    posti_selezionati: selezionati.map(String)
+                    posti_selezionati: selezionati.map(String),
+                    stato: 'in_attesa'
                 }]);
                 if(error) throw error;
 
