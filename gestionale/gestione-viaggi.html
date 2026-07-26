@@ -3,35 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gestione Viaggi</title>
-<link rel="stylesheet" href="css/gestionale.css">
+<title>Gestione Viaggi PRO</title>
+<link rel="stylesheet" href="css/viaggi-pro.css">
 </head>
 <body>
 
-<header>
-<h1>🚍 Gestione Viaggi</h1>
-<a href="dashboard-pro.html">⬅ Dashboard</a>
-<a href="nuovo-viaggio.html">➕ Nuovo viaggio</a>
-</header>
+<div class="container">
+<h1>🚍 Gestione Viaggi PRO</h1>
 
-<main>
-<table>
-<thead>
-<tr>
-<th>Viaggio</th>
-<th>Destinazione</th>
-<th>Data</th>
-<th>Prezzo</th>
-<th>Azioni</th>
-</tr>
-</thead>
-<tbody id="listaViaggi"></tbody>
-</table>
-</main>
+<a class="btn" href="nuovo-viaggio.html">➕ Nuovo Viaggio</a>
+
+<div id="lista"></div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
-<script src="js/viaggi.js"></script>
+<script src="js/gestione-viaggi-pro.js"></script>
 
 </body>
 </html>

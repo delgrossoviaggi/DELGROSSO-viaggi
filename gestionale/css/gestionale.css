@@ -1,10 +1,46 @@
 body{
 font-family:Arial,sans-serif;
+background:#f1f5f9;
 padding:20px;
-background:#f5f7fa;
 }
 
-button,a{
+.container{
+max-width:600px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:20px;
+box-shadow:0 5px 20px #ddd;
+}
+
+input,select,textarea{
+width:100%;
 padding:12px;
+margin:8px 0;
+box-sizing:border-box;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+textarea{
+height:100px;
+}
+
+.btn,button{
+display:inline-block;
+padding:12px 18px;
+margin:10px 0;
+background:#111827;
+color:white;
+border:none;
+border-radius:10px;
 font-weight:bold;
+text-decoration:none;
+cursor:pointer;
+}
+
+@media(max-width:700px){
+body{
+padding:10px;
+}
 }

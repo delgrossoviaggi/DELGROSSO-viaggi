@@ -2,29 +2,41 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nuovo Viaggio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuovo Viaggio - Del Grosso</title>
 <link rel="stylesheet" href="css/gestionale.css">
 </head>
 <body>
 
-<h1>➕ Nuovo Viaggio</h1>
+<div class="container">
+<h1>🚍 Nuovo Viaggio</h1>
+
+<a href="gestione-viaggi.html" class="btn">⬅ Torna ai viaggi</a>
 
 <input id="titolo" placeholder="Titolo viaggio">
 <input id="destinazione" placeholder="Destinazione">
 <input id="data" type="date">
+<input id="ora" type="time">
 <input id="prezzo" placeholder="Prezzo €">
 
 <label>🚌 Autobus assegnato</label>
-<select id="autobus"></select>
+<select id="autobus">
+<option>Caricamento mezzi...</option>
+</select>
 
 <input id="posti" readonly placeholder="Posti disponibili">
 
-<button onclick="salvaViaggio()">SALVA VIAGGIO</button>
+<textarea id="descrizione" placeholder="Descrizione"></textarea>
+
+<button onclick="salvaViaggio()" class="btn">💾 SALVA VIAGGIO</button>
+
+<p id="messaggio"></p>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
-<script src="js/viaggio-flotta.js"></script>
+<script src="js/nuovo-viaggio-fix.js"></script>
 
 </body>
 </html>
