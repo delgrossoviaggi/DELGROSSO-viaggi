@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Flotta Gestionale</title>
+<link rel="stylesheet" href="css/flotta.css">
+</head>
+<body>
+<h1>🚌 Gestione Flotta</h1>
+
+<div id="listaFlotta"></div>
+
+<h2>Nuovo Autobus</h2>
+<input id="nome" placeholder="Nome autobus">
+<select id="tipo">
+<option>Irizar Scania PB GT63</option>
+<option>Irizar Scania Century GT53</option>
+<option>Limousine Bus</option>
+</select>
+
+<input id="posti" type="number" placeholder="Posti">
+
+<button onclick="salvaBus()">Salva Autobus</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/flotta.js"></script>
+</body>
+</html>

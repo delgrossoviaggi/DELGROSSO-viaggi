@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Nuovo Viaggio - Del Grosso</title>
+<link rel="stylesheet" href="css/gestionale.css">
+</head>
+<body>
+
+<div class="card">
+<h1>🚍 Nuovo Viaggio</h1>
+
+<form id="formViaggio">
+
+<input id="titolo" placeholder="Nome viaggio" required>
+
+<input id="destinazione" placeholder="Destinazione" required>
+
+<label>Data partenza</label>
+<input id="data" type="date" required>
+
+<label>Ora partenza</label>
+<input id="ora" type="time">
+
+<input id="prezzo" type="number" placeholder="Prezzo €">
+
+<input id="autobus" placeholder="Autobus">
+
+<input id="posti" type="number" placeholder="Posti totali">
+
+<textarea id="descrizione" placeholder="Descrizione viaggio"></textarea>
+
+<input id="locandina" placeholder="URL locandina">
+
+<select id="stato">
+<option value="bozza">Bozza</option>
+<option value="pubblicato">Pubblicato</option>
+</select>
+
+<button type="submit">SALVA VIAGGIO</button>
+
+</form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/viaggi.js"></script>
+
+</body>
+</html>
