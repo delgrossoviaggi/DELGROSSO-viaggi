@@ -122,7 +122,7 @@
                 <a href="index.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Home</a>
                 <a href="viaggi.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Partenze</a>
                 <a href="flotta.html" class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Flotta</a>
-                <a href="partyontheroad.html" class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Party</a>
+                <a href="partyontheroad.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Party</a>
                 <a href="contatti.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Contatti</a>
             </div>
         </div>
@@ -168,7 +168,7 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" id="lista-mezzi">
         <div class="glow-blob-2 top-1/3 -right-20"></div>
 
-        <!-- Skeleton Loader Dinamico -->
+        <!-- Skeleton Loader Dinamico iniziale -->
         <div class="space-y-16">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
                 <div class="lg:col-span-7 h-96 bg-slate-200 rounded-2xl animate-pulse"></div>
@@ -293,6 +293,7 @@
             const main = document.getElementById('lista-mezzi');
             
             try {
+                // Interroga la tabella 'flotta_page' aggiornata dal pannello Admin
                 const { data: flotta, error } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
                 
                 if (error) throw error;
@@ -313,7 +314,7 @@
                             <!-- Gallery Sezione con switch dinamico -->
                             <div class="lg:col-span-7 space-y-4">
                                 <div class="aspect-[16/10] rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 cursor-pointer group relative shadow-md" onclick="openViewer(document.getElementById('main-img-${bus.id}').src)">
-                                    <img id="main-img-${bus.id}" src="${bus.immagine_url}" loading="lazy" alt="${bus.titolo}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+                                    <img id="main-img-${bus.id}" src="${bus.immagine_url || 'logo.JPEG'}" loading="lazy" alt="${bus.titolo}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" onerror="this.src='logo.JPEG'">
                                     <div class="absolute bottom-4 right-4 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5 shadow-lg">
                                         <span>🔍 Ingrandisci</span>
                                     </div>
@@ -323,7 +324,7 @@
                                 <div class="grid grid-cols-4 gap-3">
                                     ${allImgs.slice(0, 4).map(img => `
                                         <div class="aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-200 cursor-pointer group shadow-sm hover:border-sky-500 transition-all hover:scale-105" onclick="switchMainImg('${bus.id}', '${img}')">
-                                            <img src="${img}" loading="lazy" class="w-full h-full object-cover">
+                                            <img src="${img}" loading="lazy" class="w-full h-full object-cover" onerror="this.src='logo.JPEG'">
                                         </div>
                                     `).join('')}
                                 </div>` : ''}
