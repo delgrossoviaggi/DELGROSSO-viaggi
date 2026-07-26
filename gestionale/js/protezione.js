@@ -1,19 +1,11 @@
-async function verificaAccesso(){
+async function controlloAccesso(){
 
 const {data}=await supabaseClient.auth.getSession();
 
 if(!data.session){
-window.location.href="login.html";
+window.location.href="/gestionale/login.html";
 }
 
 }
 
-async function logoutAdmin(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href="login.html";
-
-}
-
-verificaAccesso();
+controlloAccesso();
