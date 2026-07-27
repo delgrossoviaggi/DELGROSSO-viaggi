@@ -1,0 +1,18 @@
+body{
+font-family:Arial,sans-serif;
+background:#f5f7fa;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:18px;
+margin:15px 0;
+box-shadow:0 5px 20px #ddd;
+}
+
+a{
+text-decoration:none;
+font-weight:bold;
+}
