@@ -2,6 +2,6 @@ async function logoutAdmin(){
 
 await supabaseClient.auth.signOut();
 
-window.location.href='https://www.delgrossoviaggi.it';
+window.location.href='login.html';
 
 }

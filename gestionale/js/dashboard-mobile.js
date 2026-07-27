@@ -37,7 +37,7 @@ document.getElementById('prossime').innerHTML +=
 
 async function logout(){
 await supabaseClient.auth.signOut();
-location.href="https://www.delgrossoviaggi.it";
+location.href="/gestionale/login.html";
 }
 
 caricaDashboard();

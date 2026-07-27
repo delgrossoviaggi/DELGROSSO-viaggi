@@ -32,7 +32,7 @@ box.innerHTML += `
 
 async function logout(){
 await supabaseClient.auth.signOut();
-window.location.href="https://www.delgrossoviaggi.it";
+window.location.href="/gestionale/login.html";
 }
 
 
