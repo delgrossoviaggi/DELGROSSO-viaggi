@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prenotazione Viaggio</title>
+<link rel="stylesheet" href="css/gestionale.css">
+</head>
+<body>
+
+<h1>🎫 Nuova Prenotazione</h1>
+
+<input id="viaggio" placeholder="ID Viaggio">
+<input id="nome" placeholder="Nome cliente">
+<input id="telefono" placeholder="Telefono">
+<input id="posti" type="number" placeholder="Numero posti">
+
+<button onclick="inviaPrenotazione()">CONFERMA</button>
+
+<p id="msg"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/prenotazione-sync.js"></script>
+
+</body>
+</html>
