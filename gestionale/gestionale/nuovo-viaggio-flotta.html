@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Nuovo Viaggio</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>🚍 Nuovo Viaggio</h1>
+
+<input id="titolo" placeholder="Nome viaggio">
+<input id="destinazione" placeholder="Destinazione">
+<input id="data" type="date">
+
+<select id="autobus">
+<option value="">Seleziona autobus</option>
+</select>
+
+<div id="infoBus"></div>
+
+<button onclick="salvaViaggio()">Salva Viaggio</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/viaggio-flotta.js"></script>
+
+</body>
+</html>

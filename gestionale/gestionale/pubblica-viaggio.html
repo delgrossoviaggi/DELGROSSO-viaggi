@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Pubblica Viaggio</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>🚍 Pubblica Viaggio sul Sito</h1>
+
+<input id="titolo" placeholder="Titolo viaggio">
+<input id="destinazione" placeholder="Destinazione">
+<input id="data" type="date">
+<input id="prezzo" placeholder="Prezzo €">
+<input id="locandina" placeholder="URL locandina">
+
+<select id="stato">
+<option value="bozza">Bozza</option>
+<option value="pubblicato">Pubblica sul sito</option>
+</select>
+
+<button onclick="salvaPubblicazione()">PUBBLICA VIAGGIO</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/pubblicazione.js"></script>
+
+</body>
+</html>
