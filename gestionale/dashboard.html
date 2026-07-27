@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Del Grosso Gestionale</title>
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<header>
+<h1>🚍 Del Grosso Viaggi - Gestionale</h1>
+<button onclick="logoutAdmin()">Logout</button>
+</header>
+
+<section class="cards">
+<div class="card">
+<h2 id="totViaggi">0</h2>
+<p>Viaggi pubblicati</p>
+</div>
+
+<div class="card">
+<h2 id="totPrenotazioni">0</h2>
+<p>Prenotazioni</p>
+</div>
+
+<div class="card">
+<h2 id="totPosti">0</h2>
+<p>Posti venduti</p>
+</div>
+</section>
+
+<nav>
+<a href="nuovo-viaggio.html">➕ Nuovo Viaggio</a>
+<a href="prenotazioni-admin.html">🎫 Prenotazioni</a>
+<a href="lista-passeggeri.html">📋 Passeggeri</a>
+<a href="flotta.html">🚌 Flotta</a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
