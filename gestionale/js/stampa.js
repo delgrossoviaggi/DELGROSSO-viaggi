@@ -1,0 +1,3 @@
+function stampaLista(){
+window.print();
+}
