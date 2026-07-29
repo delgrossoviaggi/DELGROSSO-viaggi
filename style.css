@@ -45,3 +45,4 @@ footer { background: #000; color: white; padding: 80px 0 0 0; margin-top: 60px; 
     .nav-links { display: none; }
     .section-title { font-size: 26px; }
 }
+.trip-card{border:1px solid #ccc;padding:20px;border-radius:10px}.btn{background:#0b5ed7;color:#fff;padding:10px 15px;text-decoration:none;border-radius:6px}input,select{display:block;width:100%;margin:10px 0;padding:10px}.seatmap{border:2px dashed #999;min-height:200px;padding:20px}
