@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Viaggi | Del Grosso Booking V2</title>
-    <meta name="description" content="Scopri e prenota i viaggi Del Grosso: partenze pubblicate, disponibilitÃ  posti, prezzo e dettagli in tempo reale.">
+    <meta name="description" content="Scopri e prenota i viaggi Del Grosso: partenze pubblicate, disponibilita posti, prezzo e dettagli in tempo reale.">
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Viaggi | Del Grosso Booking V2">
@@ -14,16 +14,13 @@
     <meta name="theme-color" content="#0f172a">
     <link rel="canonical" href="viaggi.html">
 
-    <!-- Preconnect Fonts & CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://unpkg.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS & Supabase SDK -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
@@ -70,7 +67,6 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-    <!-- Header -->
     <header class="fixed top-0 inset-x-0 z-50 glass">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="h-20 flex items-center justify-between">
@@ -88,7 +84,6 @@
         </div>
     </header>
 
-    <!-- Hero / Filtri -->
     <section class="pt-32 pb-12 bg-gradient-to-b from-slate-100 to-white border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center" data-aos="fade-up">
@@ -98,14 +93,14 @@
                 </p>
                 <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight">Trova il tuo prossimo viaggio</h1>
                 <p class="mt-4 text-sm sm:text-base text-slate-600 max-w-3xl mx-auto">
-                    Ricerca live, disponibilitÃ  posti, countdown partenza e prenotazione immediata.
+                    Ricerca live, disponibilita posti e prenotazione immediata.
                 </p>
             </div>
 
             <div class="mt-9 grid grid-cols-1 md:grid-cols-4 gap-3" data-aos="fade-up" data-aos-delay="100">
                 <label class="md:col-span-2">
                     <span class="sr-only">Ricerca viaggio</span>
-                    <input id="searchInput" type="search" autocomplete="off" placeholder="Cerca titolo, destinazione, descrizione..." class="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
+                    <input id="searchInput" type="search" autocomplete="off" placeholder="Cerca titolo o destinazione..." class="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
                 </label>
                 <label>
                     <span class="sr-only">Filtro destinazione</span>
@@ -114,9 +109,9 @@
                     </select>
                 </label>
                 <label>
-                    <span class="sr-only">Filtro disponibilitÃ </span>
+                    <span class="sr-only">Filtro disponibilita</span>
                     <select id="availabilityFilter" class="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
-                        <option value="">Tutte le disponibilitÃ </option>
+                        <option value="">Tutte le disponibilita</option>
                         <option value="disponibile">Disponibile</option>
                         <option value="ultimi">Ultimi posti</option>
                         <option value="soldout">Sold Out</option>
@@ -126,7 +121,6 @@
         </div>
     </section>
 
-    <!-- Barra Stato / Counter -->
     <section id="risultati" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div class="flex items-center justify-between gap-4 flex-wrap">
             <p id="counterLabel" class="text-xs uppercase tracking-widest font-black text-slate-500">Caricamento viaggi da Supabase...</p>
@@ -136,14 +130,12 @@
         </div>
     </section>
 
-    <!-- Griglia Viaggi Dynamic da Supabase -->
     <main id="tripsGrid" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7" aria-live="polite">
         <div class="rounded-3xl h-[430px] skeleton"></div>
         <div class="rounded-3xl h-[430px] skeleton"></div>
         <div class="rounded-3xl h-[430px] skeleton"></div>
     </main>
 
-    <!-- Stato Vuoto -->
     <section id="emptyState" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         <div class="text-center bg-white border border-slate-200 rounded-3xl py-16 px-6">
             <p class="text-2xl font-black uppercase text-slate-300">Nessun viaggio trovato</p>
@@ -151,7 +143,6 @@
         </div>
     </section>
 
-    <!-- Stato Errore -->
     <section id="errorState" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         <div class="text-center bg-white border border-red-200 rounded-3xl py-14 px-6">
             <p class="text-sm uppercase tracking-widest font-black text-red-600">Errore caricamento viaggi</p>
@@ -162,347 +153,12 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-deep text-white border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
-            <p class="text-xs text-slate-300">Â© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
+            <p class="text-xs text-slate-300">&copy; 2026 Del Grosso Viaggi &amp; Limousine Bus. Tutti i diritti riservati.</p>
         </div>
     </footer>
 
-    <!-- Logic Supabase -->
-    <script>
-        // Credenziali aggiornate al progetto delgrosso-booking
-        const SUPABASE_URL = "https://uvmhvlvjvjwffscipznt.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_Khhf8TBKg76xfnmLFFy22A_VkzLPiXX";
-        const IMAGE_PLACEHOLDER = "https://via.placeholder.com/1200x700/0f172a/ffffff?text=Del+Grosso+Viaggi";
-        const LAST_SEATS_THRESHOLD = 5;
-
-        let supabaseClient = null;
-        let allTrips = [];
-        let filteredTrips = [];
-        let countdownTimer = null;
-
-        const ui = {
-            searchInput: document.getElementById("searchInput"),
-            destinationFilter: document.getElementById("destinationFilter"),
-            availabilityFilter: document.getElementById("availabilityFilter"),
-            counterLabel: document.getElementById("counterLabel"),
-            tripsGrid: document.getElementById("tripsGrid"),
-            emptyState: document.getElementById("emptyState"),
-            errorState: document.getElementById("errorState"),
-            errorMessage: document.getElementById("errorMessage"),
-            retryButton: document.getElementById("retryButton"),
-            reloadButton: document.getElementById("reloadButton")
-        };
-
-        function initAnimations() {
-            if (typeof AOS !== "undefined") {
-                AOS.init({ duration: 650, once: true, offset: 40 });
-            }
-        }
-
-        function setupSupabaseClient() {
-            if (!window.supabase || typeof window.supabase.createClient !== "function") {
-                throw new Error("Libreria Supabase JS non disponibile o non caricata correttamente.");
-            }
-            return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-
-        function normalizeText(value) {
-            return (value || "").toString().trim().toLowerCase();
-        }
-
-        function toDateTime(dateValue, timeValue) {
-            if (!dateValue) return null;
-            const safeTime = (timeValue || "00:00").slice(0, 5);
-            const full = new Date(dateValue + "T" + safeTime + ":00");
-            return Number.isNaN(full.getTime()) ? null : full;
-        }
-
-        function formatDate(value) {
-            const date = toDateTime(value, "00:00");
-            if (!date) return "Data da definire";
-            return date.toLocaleDateString("it-IT", {
-                weekday: "short",
-                day: "2-digit",
-                month: "long",
-                year: "numeric"
-            });
-        }
-
-        function formatTime(value) {
-            if (!value) return "Orario n/d";
-            return value.slice(0, 5);
-        }
-
-        function formatPrice(value) {
-            const num = Number(value);
-            if (!Number.isFinite(num)) return "Prezzo n/d";
-            return num.toLocaleString("it-IT", {
-                style: "currency",
-                currency: "EUR",
-                maximumFractionDigits: 0
-            });
-        }
-
-        function calculateFreeSeats(trip) {
-            if (Number.isFinite(Number(trip.posti_liberi))) {
-                return Number(trip.posti_liberi);
-            }
-            const total = Number(trip.posti_totali) || 0;
-            const occupied = Number(trip.posti_occupati) || 0;
-            return Math.max(0, total - occupied);
-        }
-
-        function isSoldOut(trip) {
-            const freeSeats = calculateFreeSeats(trip);
-            const status = normalizeText(trip.stato);
-            return freeSeats <= 0 || status === "completo" || status === "sold out";
-        }
-
-        function isLastSeats(trip) {
-            const freeSeats = calculateFreeSeats(trip);
-            return freeSeats > 0 && freeSeats <= LAST_SEATS_THRESHOLD;
-        }
-
-        function getAvailabilityBadge(trip) {
-            if (isSoldOut(trip)) {
-                return '<span class="inline-flex items-center rounded-full bg-red-600 text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider">Sold Out</span>';
-            }
-            if (isLastSeats(trip)) {
-                return '<span class="inline-flex items-center rounded-full bg-amber-500 text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider">Ultimi posti</span>';
-            }
-            return '<span class="inline-flex items-center gap-1 rounded-full bg-emerald-500 text-white px-3 py-1 text-[10px] font-black uppercase tracking-wider"><span class="h-1.5 w-1.5 rounded-full bg-white"></span>Disponibile</span>';
-        }
-
-        function getCountdownText(trip) {
-            const departure = toDateTime(trip.data_partenza, trip.ora_partenza);
-            if (!departure) return "Partenza da confermare";
-            
-            const now = new Date();
-            const diff = departure.getTime() - now.getTime();
-            if (diff <= 0) return "Partenza imminente";
-            
-            const totalMinutes = Math.floor(diff / 60000);
-            const days = Math.floor(totalMinutes / (60 * 24));
-            const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-            const minutes = totalMinutes % 60;
-            
-            if (days > 0) return "Partenza tra " + days + "g " + hours + "h";
-            return "Partenza tra " + hours + "h " + minutes + "m";
-        }
-
-        function escapeHtml(text) {
-            return (text || "").toString()
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        function createTripCard(trip) {
-            const soldOut = isSoldOut(trip);
-            const bus = trip.autobus || "Bus GT";
-            const freeSeats = calculateFreeSeats(trip);
-            const totalSeats = Number(trip.posti_totali) || 0;
-            const seatsLabel = freeSeats + " liberi / " + totalSeats + " totali";
-
-            const safeTitle = escapeHtml(trip.titolo || "Viaggio Del Grosso");
-            const safeDestination = escapeHtml(trip.destinazione || "Destinazione");
-            const safeDesc = escapeHtml(trip.descrizione || "Scopri i dettagli e prenota subito online.");
-            const image = (trip.locandina || "").trim() || IMAGE_PLACEHOLDER;
-            const bookingUrl = "prenota.html?id=" + encodeURIComponent(trip.id);
-
-            return [
-                '<article class="trip-card rounded-3xl overflow-hidden flex flex-col" data-aos="fade-up">',
-                    '<div class="relative h-56 bg-slate-200 overflow-hidden">',
-                        '<img src="' + escapeHtml(image) + '" alt="' + safeTitle + '" class="h-full w-full object-cover" loading="lazy" onerror="this.src=\'' + IMAGE_PLACEHOLDER + '\'">',
-                        '<div class="absolute top-4 right-4">' + getAvailabilityBadge(trip) + '</div>',
-                    '</div>',
-                    '<div class="p-6 flex flex-col gap-4 flex-1">',
-                        '<div>',
-                            '<p class="text-[11px] font-black uppercase tracking-widest text-sky-700">' + safeDestination + '</p>',
-                            '<h2 class="mt-1 text-xl font-black uppercase leading-tight">' + safeTitle + '</h2>',
-                            '<p class="mt-2 text-sm text-slate-600 line-clamp-3">' + safeDesc + '</p>',
-                        '</div>',
-                        '<div class="grid grid-cols-2 gap-2 text-[11px] font-semibold text-slate-600">',
-                            '<span class="rounded-xl bg-slate-100 px-3 py-2">Data: ' + escapeHtml(formatDate(trip.data_partenza)) + '</span>',
-                            '<span class="rounded-xl bg-slate-100 px-3 py-2">Ora: ' + escapeHtml(formatTime(trip.ora_partenza)) + '</span>',
-                            '<span class="rounded-xl bg-slate-100 px-3 py-2">Bus: ' + escapeHtml(bus) + '</span>',
-                            '<span class="rounded-xl bg-slate-100 px-3 py-2">Posti: ' + escapeHtml(seatsLabel) + '</span>',
-                        '</div>',
-                        '<p class="rounded-xl bg-sky-50 text-sky-700 px-3 py-2 text-xs font-black uppercase tracking-wide trip-countdown" data-date="' + escapeHtml(trip.data_partenza || "") + '" data-time="' + escapeHtml(trip.ora_partenza || "") + '">' + escapeHtml(getCountdownText(trip)) + '</p>',
-                        '<div class="mt-auto flex items-end justify-between gap-4 pt-2">',
-                            '<div>',
-                                '<p class="text-[10px] uppercase tracking-widest text-slate-500 font-black">Quota a persona</p>',
-                                '<p class="text-2xl font-black text-slate-900">' + escapeHtml(formatPrice(trip.prezzo)) + '</p>',
-                            '</div>',
-                            (soldOut
-                                ? '<button type="button" disabled class="h-12 px-6 rounded-2xl bg-slate-200 text-slate-400 text-xs font-black uppercase tracking-wider cursor-not-allowed">SOLD OUT</button>'
-                                : '<a href="' + bookingUrl + '" class="h-12 px-6 inline-flex items-center justify-center rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-wider hover:bg-black transition">PRENOTA ORA</a>'),
-                        '</div>',
-                    '</div>',
-                '</article>'
-            ].join("");
-        }
-
-        function renderSkeleton() {
-            ui.tripsGrid.innerHTML = [
-                '<div class="rounded-3xl h-[430px] skeleton"></div>',
-                '<div class="rounded-3xl h-[430px] skeleton"></div>',
-                '<div class="rounded-3xl h-[430px] skeleton"></div>'
-            ].join("");
-            ui.emptyState.classList.add("hidden");
-            ui.errorState.classList.add("hidden");
-            ui.tripsGrid.classList.remove("hidden");
-        }
-
-        function renderTrips(list) {
-            filteredTrips = list.slice();
-            if (!filteredTrips.length) {
-                ui.tripsGrid.classList.add("hidden");
-                ui.emptyState.classList.remove("hidden");
-                ui.counterLabel.textContent = "0 viaggi trovati";
-                stopCountdownUpdater();
-                return;
-            }
-
-            ui.emptyState.classList.add("hidden");
-            ui.errorState.classList.add("hidden");
-            ui.tripsGrid.classList.remove("hidden");
-            ui.counterLabel.textContent = filteredTrips.length + (filteredTrips.length === 1 ? " viaggio disponibile" : " viaggi disponibili");
-            ui.tripsGrid.innerHTML = filteredTrips.map(createTripCard).join("");
-
-            startCountdownUpdater();
-            if (typeof AOS !== "undefined") {
-                AOS.refreshHard();
-            }
-        }
-
-        function showError(message) {
-            ui.tripsGrid.classList.add("hidden");
-            ui.emptyState.classList.add("hidden");
-            ui.errorState.classList.remove("hidden");
-            ui.errorMessage.textContent = message;
-            ui.counterLabel.textContent = "Errore durante la connessione a Supabase";
-            stopCountdownUpdater();
-        }
-
-        function updateCountdownLabels() {
-            const nodes = document.querySelectorAll(".trip-countdown");
-            nodes.forEach(function (node) {
-                const date = node.getAttribute("data-date");
-                const time = node.getAttribute("data-time");
-                node.textContent = getCountdownText({ data_partenza: date, ora_partenza: time });
-            });
-        }
-
-        function startCountdownUpdater() {
-            stopCountdownUpdater();
-            updateCountdownLabels();
-            countdownTimer = window.setInterval(updateCountdownLabels, 60000);
-        }
-
-        function stopCountdownUpdater() {
-            if (countdownTimer !== null) {
-                window.clearInterval(countdownTimer);
-                countdownTimer = null;
-            }
-        }
-
-        function refreshDestinationFilterOptions() {
-            const values = [];
-            const seen = {};
-            allTrips.forEach(function (trip) {
-                const value = (trip.destinazione || "").trim();
-                if (value && !seen[value.toLowerCase()]) {
-                    seen[value.toLowerCase()] = true;
-                    values.push(value);
-                }
-            });
-            values.sort((a, b) => a.localeCompare(b, "it"));
-            ui.destinationFilter.innerHTML = '<option value="">Tutte le destinazioni</option>' +
-                values.map(v => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>').join("");
-        }
-
-        function applyFilters() {
-            const query = normalizeText(ui.searchInput.value);
-            const destination = normalizeText(ui.destinationFilter.value);
-            const availability = normalizeText(ui.availabilityFilter.value);
-
-            const result = allTrips.filter(function (trip) {
-                const text = [trip.titolo, trip.destinazione, trip.descrizione].map(normalizeText).join(" ");
-                const matchesSearch = !query || text.indexOf(query) !== -1;
-                const matchesDestination = !destination || normalizeText(trip.destinazione) === destination;
-                
-                let matchesAvailability = true;
-                if (availability === "disponibile") {
-                    matchesAvailability = !isSoldOut(trip) && !isLastSeats(trip);
-                } else if (availability === "ultimi") {
-                    matchesAvailability = isLastSeats(trip);
-                } else if (availability === "soldout") {
-                    matchesAvailability = isSoldOut(trip);
-                }
-                return matchesSearch && matchesDestination && matchesAvailability;
-            });
-
-            renderTrips(result);
-        }
-
-        async function fetchTrips() {
-            renderSkeleton();
-            ui.reloadButton.classList.add("hidden");
-            try {
-                // Recupera tutti i viaggi senza applicare filtri di tipo lato DB per tollerare colonne text/boolean
-                const response = await supabaseClient
-                    .from("viaggi")
-                    .select("*")
-                    .order("data_partenza", { ascending: true });
-
-                if (response.error) {
-                    throw new Error(response.error.message || "Impossibile recuperare i dati dalla tabella viaggi.");
-                }
-
-                // Filtra sul client per accettare pubblicato = true / "true" / "1" / 1
-                const rawData = Array.isArray(response.data) ? response.data : [];
-                allTrips = rawData.filter(t => {
-                    const val = normalizeText(t.pubblicato);
-                    return val === "true" || val === "1" || t.pubblicato === true;
-                });
-
-                refreshDestinationFilterOptions();
-                applyFilters();
-                ui.reloadButton.classList.remove("hidden");
-            } catch (error) {
-                console.error("[viaggi.html] Errore Supabase:", error);
-                showError((error && error.message) ? error.message : "Errore durante il caricamento dei viaggi.");
-                ui.reloadButton.classList.remove("hidden");
-            }
-        }
-
-        function attachEvents() {
-            ui.searchInput.addEventListener("input", applyFilters);
-            ui.destinationFilter.addEventListener("change", applyFilters);
-            ui.availabilityFilter.addEventListener("change", applyFilters);
-            ui.retryButton.addEventListener("click", fetchTrips);
-            ui.reloadButton.addEventListener("click", fetchTrips);
-        }
-
-        async function initPage() {
-            initAnimations();
-            try {
-                supabaseClient = setupSupabaseClient();
-            } catch (error) {
-                console.error("[viaggi.html] Init Supabase fallito:", error);
-                showError(error.message);
-                return;
-            }
-            attachEvents();
-            await fetchTrips();
-        }
-
-        initPage();
-    </script>
+    <script type="module" src="./src/public/viaggi.js"></script>
 </body>
 </html>
