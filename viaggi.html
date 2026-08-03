@@ -175,13 +175,13 @@
         }
 
         function isSoldOut(viaggio) {
-            return viaggio.stato === 'Completo' || (viaggio.posti_liberi !== null && viaggio.posti_liberi <= 0 && viaggio.posti_totali > 0);
+            return viaggio.stato === 'Completo';
         }
 
         function renderCard(v) {
-            const img = v.locandina || v.immagine || PLACEHOLDER;
+            const img = v.locandina || PLACEHOLDER;
             const soldOut = isSoldOut(v);
-            const posti = v.posti_liberi != null ? v.posti_liberi : (v.posti_totali || 0);
+            const posti = v.posti_totali || 0;
             return `
             <article data-aos="fade-up" class="card-trip rounded-3xl overflow-hidden flex flex-col">
                 <div class="relative overflow-hidden h-52 bg-slate-900">
@@ -247,8 +247,7 @@
             try {
                 const { data, error } = await sb
                     .from('viaggi')
-                    .select('id, titolo, destinazione, data_partenza, ora_partenza, prezzo, locandina, immagine, posti_totali, posti_liberi, posti_occupati, stato')
-                    .eq('pubblicato', 'SI')
+                    .select('id, titolo, destinazione, data_partenza, ora_partenza, prezzo, locandina,  posti_totali,   stato')
                     .in('stato', ['Attivo', 'Completo'])
                     .order('data_partenza', { ascending: true });
 

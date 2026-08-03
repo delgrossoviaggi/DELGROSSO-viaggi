@@ -314,16 +314,15 @@
             try {
                 const { data, error } = await sb
                     .from('viaggi')
-                    .select('id, titolo, destinazione, data_partenza, ora_partenza, prezzo, locandina, immagine, autobus, posti_totali, posti_liberi, posti_occupati, stato')
+                    .select('id, titolo, destinazione, data_partenza, ora_partenza, prezzo, locandina,  autobus, posti_totali,   stato')
                     .eq('id', id)
-                    .eq('pubblicato', 'SI')
                     .single();
 
                 if (error || !data) throw error || new Error('Viaggio non trovato');
 
                 viaggio = data;
 
-                const img = data.locandina || data.immagine || PLACEHOLDER;
+                const img = data.locandina || PLACEHOLDER;
                 document.getElementById('vLocandina').src = img;
                 document.getElementById('vDestinazione').textContent = data.destinazione || '—';
                 document.getElementById('vTitolo').textContent = data.titolo || '—';
@@ -331,7 +330,7 @@
                 document.getElementById('vOra').textContent = data.ora_partenza ? data.ora_partenza.slice(0, 5) : '—';
                 document.getElementById('vPrezzo').textContent = formatPrezzo(data.prezzo);
 
-                const postiLiberi = data.posti_liberi != null ? data.posti_liberi : (data.posti_totali || 0);
+                const postiLiberi = data.posti_totali || 0;
                 document.getElementById('vPosti').textContent = postiLiberi > 0 ? postiLiberi : '—';
 
                 if (data.autobus) {
