@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -96,7 +96,7 @@
                 <a href="index.html" class="flex items-center gap-3">
                     <img src="logo.JPEG" alt="Del Grosso" class="h-10 w-auto rounded-xl bg-slate-900 p-1" onerror="this.src='https://via.placeholder.com/160x60/0f172a/ffffff?text=DEL+GROSSO'">
                 </a>
-                <a href="viaggi.html" class="inline-flex items-center gap-2 border border-slate-200 bg-white px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition">← Torna ai viaggi</a>
+                <a href="viaggi.html" class="inline-flex items-center gap-2 border border-slate-200 bg-white px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition">â† Torna ai viaggi</a>
             </div>
         </div>
     </header>
@@ -255,7 +255,7 @@
 
     <footer class="border-t border-slate-200 bg-white">
         <div class="max-w-7xl mx-auto px-4 py-8 text-center">
-            <p class="text-xs text-slate-500">© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
+            <p class="text-xs text-slate-500">Â© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
         </div>
     </footer>
 
@@ -426,7 +426,7 @@
             const response = await appState.sb
                 .schema("public")
                 .from("prenotazioni")
-                .select("posti, posti_selezionati, stato")
+                .select("posti, stato")
                 .eq("viaggio_id", viaggioId);
 
             if (response.error) {
@@ -439,7 +439,7 @@
                 if (status === "annullata" || status === "cancellata" || status === "cancelled") {
                     return;
                 }
-                const fields = [row.posti, row.posti_selezionati];
+                const fields = [row.posti];
                 fields.forEach(function (field) {
                     if (!field) {
                         return;
@@ -856,3 +856,4 @@
     </script>
 </body>
 </html>
+
