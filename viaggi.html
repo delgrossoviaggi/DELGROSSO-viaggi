@@ -1,1 +1,283 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Viaggi</title><link rel='stylesheet' href='style.css'></head><body><h1>Viaggi Disponibili</h1><input placeholder='Cerca destinazione'><div class='trip-card'><h2>I viaggi pubblicati dal gestionale compariranno qui.</h2><a class='btn' href='prenota.html'>PRENOTA ORA</a></div></body></html>
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Partenze | Del Grosso Viaggi & Limousine Bus</title>
+    <meta name="description" content="Scopri tutti i viaggi organizzati da Del Grosso Viaggi. Prenota il tuo posto online.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { 'ocean': { 800: '#1e40af' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-nav {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(203,213,225,0.5);
+        }
+        .card-trip {
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: transform .3s, box-shadow .3s;
+        }
+        .card-trip:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.10);
+        }
+        .skeleton { animation: pulse 1.5s cubic-bezier(.4,0,.6,1) infinite; background: #e2e8f0; border-radius: 12px; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+        input[type=search]:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.15); }
+    </style>
+</head>
+<body class="bg-slate-50 selection:bg-sky-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="fixed top-0 inset-x-0 z-50 glass-nav shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <div class="bg-slate-900 p-2 rounded-2xl transition-transform duration-300 group-hover:scale-105 shadow-md">
+                        <img src="logo.JPEG" class="h-9 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
+                    </div>
+                </a>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">Home</a>
+                    <a href="viaggi.html" class="text-xs font-black uppercase tracking-widest text-sky-600 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> Partenze
+                    </a>
+                    <a href="flotta.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">La Flotta</a>
+                    <a href="partyontheroad.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-indigo-600 transition-colors">Party</a>
+                    <a href="contatti.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-slate-900 transition-colors">Contatti</a>
+                </nav>
+                <a href="contatti.html" class="hidden sm:inline-flex bg-gradient-to-r from-sky-600 to-ocean-800 hover:opacity-95 text-white px-7 py-3 rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-sky-600/20 hover:scale-105">
+                    Richiedi Preventivo
+                </a>
+            </div>
+            <div class="md:hidden flex overflow-x-auto gap-6 py-3 border-t border-slate-200 text-nowrap">
+                <a href="index.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Home</a>
+                <a href="viaggi.html" class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Partenze</a>
+                <a href="flotta.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Flotta</a>
+                <a href="partyontheroad.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Party</a>
+                <a href="contatti.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Contatti</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-16 bg-gradient-to-b from-slate-100 via-slate-50 to-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div data-aos="fade-down" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 text-sky-700 text-[10px] font-black uppercase tracking-widest mb-4 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+                Aggiornato in tempo reale
+            </div>
+            <h1 data-aos="fade-up" class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase italic tracking-tight text-slate-900 leading-none">
+                LE NOSTRE <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-blue-700 to-ocean-800">PARTENZE</span>
+            </h1>
+            <p data-aos="fade-up" data-aos-delay="100" class="text-slate-600 text-xs sm:text-sm max-w-2xl mx-auto mt-4 font-medium leading-relaxed">
+                Tutti i viaggi organizzati da Del Grosso Viaggi. Scegli la tua destinazione e prenota il posto in pochi secondi.
+            </p>
+
+            <!-- Barra di ricerca -->
+            <div data-aos="fade-up" data-aos-delay="200" class="mt-8 max-w-lg mx-auto">
+                <div class="relative">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input
+                        id="searchInput"
+                        type="search"
+                        placeholder="Cerca destinazione o titolo..."
+                        class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 placeholder-slate-400 transition-all shadow-sm"
+                    >
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contatore risultati -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-2 flex items-center justify-between">
+        <p id="risultatiLabel" class="text-xs font-black uppercase tracking-widest text-slate-400"></p>
+    </div>
+
+    <!-- Grid viaggi -->
+    <main id="gridViaggi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
+        <!-- Skeleton di caricamento -->
+        <div class="skeleton h-96 rounded-3xl"></div>
+        <div class="skeleton h-96 rounded-3xl"></div>
+        <div class="skeleton h-96 rounded-3xl"></div>
+    </main>
+
+    <!-- Messaggio nessun risultato -->
+    <div id="noResults" class="hidden max-w-7xl mx-auto px-4 pb-24 text-center py-16">
+        <p class="text-2xl font-black uppercase italic text-slate-300">Nessun viaggio trovato</p>
+        <p class="text-sm text-slate-400 mt-2">Prova a cambiare i termini di ricerca.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white pt-16 pb-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+            <div class="bg-white p-2 rounded-2xl w-max mx-auto mb-6 shadow-xl">
+                <img src="logo.JPEG" class="h-9 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
+            </div>
+            <p class="text-slate-400 text-xs">© 2026 Del Grosso Viaggi & Limousine Bus - P.IVA: 04499320713. Tutti i diritti riservati.</p>
+            <p class="text-[10px] font-bold tracking-widest uppercase text-slate-600">Developer & Design: Nicola Pio Cristino</p>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init({ duration: 700, once: true, offset: 40 });
+
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        const PLACEHOLDER = 'https://via.placeholder.com/600x400/1e293b/ffffff?text=Del+Grosso+Viaggi';
+
+        let allViaggi = [];
+
+        function formatData(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function formatPrezzo(v) {
+            return Number(v || 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 });
+        }
+
+        function badgeStato(viaggio) {
+            if (viaggio.stato === 'Completo' || viaggio.posti_liberi === 0) {
+                return `<span class="absolute top-4 right-4 bg-red-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-lg">Sold Out</span>`;
+            }
+            if (viaggio.posti_liberi > 0 && viaggio.posti_liberi <= 5) {
+                return `<span class="absolute top-4 right-4 bg-amber-500 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-lg">Ultimi ${viaggio.posti_liberi} posti</span>`;
+            }
+            return `<span class="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>Disponibile</span>`;
+        }
+
+        function isSoldOut(viaggio) {
+            return viaggio.stato === 'Completo' || (viaggio.posti_liberi !== null && viaggio.posti_liberi <= 0 && viaggio.posti_totali > 0);
+        }
+
+        function renderCard(v) {
+            const img = v.locandina || v.immagine || PLACEHOLDER;
+            const soldOut = isSoldOut(v);
+            const posti = v.posti_liberi != null ? v.posti_liberi : (v.posti_totali || 0);
+            return `
+            <article data-aos="fade-up" class="card-trip rounded-3xl overflow-hidden flex flex-col">
+                <div class="relative overflow-hidden h-52 bg-slate-900">
+                    <img
+                        src="${img}"
+                        alt="${v.titolo}"
+                        class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        onerror="this.src='${PLACEHOLDER}'"
+                        loading="lazy"
+                    >
+                    ${badgeStato(v)}
+                </div>
+                <div class="p-6 flex flex-col flex-1 gap-3">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-sky-600 mb-1">${v.destinazione || '—'}</p>
+                        <h2 class="text-lg font-black uppercase italic text-slate-900 leading-tight">${v.titolo || '—'}</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] font-semibold text-slate-500">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-sky-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            ${formatData(v.data_partenza)}
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            ${posti > 0 ? `${posti} posti liberi` : (v.posti_totali ? `${v.posti_totali} posti` : 'Posti disponibili')}
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-3 flex items-center justify-between border-t border-slate-100">
+                        <div>
+                            <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">A partire da</p>
+                            <p class="text-2xl font-black italic text-sky-600">${formatPrezzo(v.prezzo)}</p>
+                        </div>
+                        ${soldOut
+                            ? `<button disabled class="bg-slate-200 text-slate-400 px-5 py-3 rounded-2xl text-[11px] font-black uppercase tracking-wider cursor-not-allowed">Sold Out</button>`
+                            : `<a href="prenota.html?id=${v.id}" class="bg-gradient-to-r from-sky-600 to-ocean-800 hover:opacity-90 text-white px-5 py-3 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all hover:scale-105 shadow-md shadow-sky-600/20">PRENOTA ORA</a>`
+                        }
+                    </div>
+                </div>
+            </article>`;
+        }
+
+        function renderGrid(viaggi) {
+            const grid = document.getElementById('gridViaggi');
+            const noResults = document.getElementById('noResults');
+            const label = document.getElementById('risultatiLabel');
+
+            if (!viaggi.length) {
+                grid.innerHTML = '';
+                grid.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                label.textContent = '';
+                return;
+            }
+            noResults.classList.add('hidden');
+            grid.classList.remove('hidden');
+            label.textContent = `${viaggi.length} ${viaggi.length === 1 ? 'viaggio trovato' : 'viaggi trovati'}`;
+            grid.innerHTML = viaggi.map(renderCard).join('');
+            AOS.refresh();
+        }
+
+        async function caricaViaggi() {
+            const grid = document.getElementById('gridViaggi');
+            try {
+                const { data, error } = await sb
+                    .from('viaggi')
+                    .select('id, titolo, destinazione, data_partenza, ora_partenza, prezzo, locandina, immagine, posti_totali, posti_liberi, posti_occupati, stato')
+                    .eq('pubblicato', 'SI')
+                    .in('stato', ['Attivo', 'Completo'])
+                    .order('data_partenza', { ascending: true });
+
+                if (error) throw error;
+
+                allViaggi = data || [];
+                renderGrid(allViaggi);
+            } catch (err) {
+                console.error('[viaggi.html] caricaViaggi:', err);
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <p class="text-slate-400 font-black uppercase tracking-widest text-sm">Errore nel caricamento dei viaggi</p>
+                        <p class="text-slate-300 text-xs mt-2">${err.message || err}</p>
+                        <button onclick="caricaViaggi()" class="mt-6 bg-sky-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-sky-700 transition-colors">Riprova</button>
+                    </div>`;
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            if (!q) { renderGrid(allViaggi); return; }
+            const filtrati = allViaggi.filter(v =>
+                (v.titolo || '').toLowerCase().includes(q) ||
+                (v.destinazione || '').toLowerCase().includes(q)
+            );
+            renderGrid(filtrati);
+        });
+
+        caricaViaggi();
+    </script>
+</body>
+</html>
