@@ -2,423 +2,857 @@
 <html lang="it" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prenota | Del Grosso Viaggi & Limousine Bus</title>
-    <meta name="description" content="Prenota il tuo posto sul viaggio selezionato con Del Grosso Viaggi.">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Prenota | Del Grosso Booking V2</title>
+    <meta name="description" content="Prenota il tuo viaggio Del Grosso: dettagli partenza, selezione posti con piantina esistente e conferma immediata.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Prenota | Del Grosso Booking V2">
+    <meta property="og:description" content="Seleziona i posti dal sistema piantina Del Grosso e completa la prenotazione online.">
+    <meta property="og:url" content="prenota.html">
+    <meta property="og:image" content="logo.JPEG">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="canonical" href="prenota.html">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link rel="stylesheet" href="gestionale/css/seatmap.css">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: { 'ocean': { 800: '#1e40af' } }
+                    fontFamily: {
+                        sans: ["Plus Jakarta Sans", "sans-serif"]
+                    }
                 }
             }
-        }
+        };
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-nav {
+        body { font-family: "Plus Jakarta Sans", sans-serif; }
+        .glass {
             background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(203,213,225,0.5);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(203,213,225,0.7);
         }
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #1e293b;
-            background: white;
-            transition: border-color .2s, box-shadow .2s;
-            font-family: inherit;
+        .seat-wrap #seatMap .posto {
+            width: 44px;
+            height: 44px;
+            margin: 4px;
+            border-radius: 10px;
+            border: 1px solid #bfdbfe;
+            font-size: 12px;
+            font-weight: 800;
+            background: #dcfce7;
+            color: #166534;
+            transition: transform .2s ease, box-shadow .2s ease;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(14,165,233,.15);
+        .seat-wrap #seatMap .posto:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(2,132,199,.2);
         }
-        .form-label {
-            display: block;
-            font-size: 10px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: #64748b;
-            margin-bottom: 6px;
+        .seat-wrap #seatMap .posto.selezionato {
+            background: #fde68a;
+            color: #92400e;
+            border-color: #f59e0b;
         }
-        .skeleton { animation: pulse 1.5s cubic-bezier(.4,0,.6,1) infinite; background: #e2e8f0; border-radius: 12px; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
-
-        /* Toast */
-        #toast {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: #0f172a; color: white; padding: 16px 28px; border-radius: 20px;
-            font-size: 13px; font-weight: 700; z-index: 9999;
-            transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s;
-            opacity: 0; white-space: nowrap; box-shadow: 0 20px 40px rgba(0,0,0,.3);
+        .seat-wrap #seatMap .posto.occupato {
+            background: #fecaca;
+            color: #991b1b;
+            border-color: #f87171;
+            cursor: not-allowed;
         }
-        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        #toast.success { background: #16a34a; }
-        #toast.error { background: #dc2626; }
+        .seat-wrap #seatMap .posto.bloccato {
+            background: #111827;
+            color: #e5e7eb;
+            border-color: #111827;
+            cursor: not-allowed;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+            background-size: 400% 100%;
+            animation: shimmer 1.5s ease infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: 0 0; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 selection:bg-sky-500 selection:text-white">
-
-    <!-- Header -->
-    <header class="fixed top-0 inset-x-0 z-50 glass-nav shadow-sm">
+<body class="bg-slate-50 text-slate-900">
+    <header class="fixed top-0 inset-x-0 z-50 glass">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <a href="index.html" class="flex items-center gap-3 group">
-                    <div class="bg-slate-900 p-2 rounded-2xl transition-transform duration-300 group-hover:scale-105 shadow-md">
-                        <img src="logo.JPEG" class="h-9 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
-                    </div>
+            <div class="h-20 flex items-center justify-between">
+                <a href="index.html" class="flex items-center gap-3">
+                    <img src="logo.JPEG" alt="Del Grosso" class="h-10 w-auto rounded-xl bg-slate-900 p-1" onerror="this.src='https://via.placeholder.com/160x60/0f172a/ffffff?text=DEL+GROSSO'">
                 </a>
-                <nav class="hidden md:flex items-center gap-8">
-                    <a href="index.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">Home</a>
-                    <a href="viaggi.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">Partenze</a>
-                    <a href="flotta.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">La Flotta</a>
-                    <a href="partyontheroad.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-indigo-600 transition-colors">Party</a>
-                    <a href="contatti.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-slate-900 transition-colors">Contatti</a>
-                </nav>
-                <a href="viaggi.html" class="hidden sm:inline-flex items-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-sm hover:scale-105">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    Tutte le partenze
-                </a>
-            </div>
-            <div class="md:hidden flex overflow-x-auto gap-6 py-3 border-t border-slate-200 text-nowrap">
-                <a href="index.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Home</a>
-                <a href="viaggi.html" class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Partenze</a>
-                <a href="flotta.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Flotta</a>
-                <a href="partyontheroad.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Party</a>
-                <a href="contatti.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Contatti</a>
+                <a href="viaggi.html" class="inline-flex items-center gap-2 border border-slate-200 bg-white px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition">← Torna ai viaggi</a>
             </div>
         </div>
     </header>
 
-    <!-- Contenuto principale -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-24">
-
-        <!-- Stato errore (ID mancante / viaggio non trovato) -->
-        <div id="errorState" class="hidden text-center py-20">
-            <p class="text-6xl mb-6">🚌</p>
-            <h2 class="text-2xl font-black uppercase italic text-slate-800 mb-3">Viaggio non trovato</h2>
-            <p class="text-sm text-slate-500 mb-8">L'ID del viaggio non è valido oppure il viaggio non è più disponibile.</p>
-            <a href="viaggi.html" class="inline-flex bg-gradient-to-r from-sky-600 to-ocean-800 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all">
-                ← Torna alle partenze
-            </a>
-        </div>
-
-        <!-- Skeleton di caricamento -->
-        <div id="skeletonState" class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24">
+        <section id="loadingState" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="skeleton h-80 rounded-3xl"></div>
             <div class="space-y-4">
-                <div class="skeleton h-8 w-3/4 rounded-xl"></div>
-                <div class="skeleton h-5 w-1/2 rounded-xl"></div>
-                <div class="skeleton h-24 rounded-xl"></div>
-                <div class="skeleton h-12 rounded-xl"></div>
-                <div class="skeleton h-12 rounded-xl"></div>
-                <div class="skeleton h-14 rounded-2xl"></div>
+                <div class="skeleton h-10 rounded-2xl w-3/4"></div>
+                <div class="skeleton h-20 rounded-2xl"></div>
+                <div class="skeleton h-56 rounded-2xl"></div>
             </div>
-        </div>
+        </section>
 
-        <!-- Contenuto viaggio + form -->
-        <div id="mainContent" class="hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+        <section id="notFoundState" class="hidden">
+            <div class="max-w-3xl mx-auto bg-white border border-slate-200 rounded-3xl px-8 py-12 text-center">
+                <h1 class="text-3xl font-black uppercase text-slate-900">Viaggio non trovato</h1>
+                <p class="mt-3 text-sm text-slate-600">L'ID specificato non e valido oppure il viaggio non risulta disponibile.</p>
+                <a href="viaggi.html" class="mt-8 inline-flex bg-slate-900 text-white px-7 py-3 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-black transition">Vai ai viaggi</a>
+            </div>
+        </section>
 
-                <!-- Colonna sinistra: dettagli viaggio -->
-                <div>
-                    <div class="rounded-3xl overflow-hidden bg-slate-900 mb-5 shadow-xl">
-                        <img
-                            id="vLocandina"
-                            src=""
-                            alt="Locandina viaggio"
-                            class="w-full h-64 sm:h-80 object-cover"
-                            onerror="this.style.display='none'"
-                        >
+        <section id="errorState" class="hidden">
+            <div class="max-w-3xl mx-auto bg-white border border-red-200 rounded-3xl px-8 py-12 text-center">
+                <h1 class="text-2xl font-black uppercase text-red-700">Errore caricamento</h1>
+                <p id="errorMessage" class="mt-3 text-sm text-slate-600"></p>
+                <button id="retryButton" type="button" class="mt-8 inline-flex bg-red-600 text-white px-7 py-3 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-red-700 transition">Riprova</button>
+            </div>
+        </section>
+
+        <section id="contentState" class="hidden grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <article class="xl:col-span-2 space-y-6">
+                <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm" data-aos="fade-up">
+                    <img id="tripPoster" src="" alt="Locandina viaggio" class="w-full h-64 sm:h-80 object-cover" loading="lazy">
+                    <div class="p-6 sm:p-8">
+                        <p id="tripDestination" class="text-[11px] uppercase tracking-widest font-black text-sky-700"></p>
+                        <h1 id="tripTitle" class="mt-1 text-3xl font-black uppercase"></h1>
+                        <p id="tripDescription" class="mt-4 text-sm sm:text-base text-slate-600"></p>
+                        <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Prezzo</p>
+                                <p id="tripPrice" class="mt-1 font-black"></p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Data</p>
+                                <p id="tripDate" class="mt-1 font-black"></p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Ora</p>
+                                <p id="tripTime" class="mt-1 font-black"></p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Stato</p>
+                                <p id="tripStatus" class="mt-1 font-black"></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Bus assegnato</p>
+                                <p id="tripBus" class="mt-1 font-black"></p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Posti totali</p>
+                                <p id="tripSeatsTotal" class="mt-1 font-black"></p>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 border border-slate-100 p-3">
+                                <p class="text-[10px] uppercase tracking-widest font-black text-slate-500">Posti disponibili</p>
+                                <p id="tripSeatsFree" class="mt-1 font-black text-emerald-700"></p>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm seat-wrap" data-aos="fade-up" data-aos-delay="80">
+                    <h2 class="text-lg font-black uppercase">Piantina posti</h2>
+                    <p id="seatStatus" class="mt-2 text-sm font-semibold text-slate-600"></p>
+                    <div class="mt-4 flex flex-wrap items-center gap-3 text-[11px] font-bold">
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-green-400 border border-green-500"></span> Libero</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-400 border border-red-500"></span> Occupato</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-300 border border-amber-500"></span> Selezionato</span>
+                        <span class="inline-flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-black border border-slate-700"></span> Bloccato</span>
+                    </div>
+                    <div id="seatWarning" class="hidden mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800"></div>
+                    <div id="seatMap" class="mt-5 flex flex-wrap"></div>
+                </div>
+            </article>
+
+            <aside class="space-y-6" data-aos="fade-up" data-aos-delay="130">
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h2 class="text-lg font-black uppercase">Prenotazione</h2>
+                    <form id="bookingForm" class="mt-5 space-y-4" novalidate>
                         <div>
-                            <p id="vDestinazione" class="text-[10px] font-black uppercase tracking-widest text-sky-600 mb-1"></p>
-                            <h1 id="vTitolo" class="text-2xl font-black uppercase italic text-slate-900 leading-tight"></h1>
+                            <label for="firstName" class="text-[11px] uppercase tracking-widest font-black text-slate-600">Nome *</label>
+                            <input id="firstName" type="text" class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" required>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 text-xs font-semibold text-slate-600">
-                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                                <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Data partenza</p>
-                                <p id="vData" class="font-black text-slate-800"></p>
-                            </div>
-                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                                <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Ora</p>
-                                <p id="vOra" class="font-black text-slate-800"></p>
-                            </div>
-                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                                <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Prezzo p.p.</p>
-                                <p id="vPrezzo" class="font-black text-sky-600 text-lg"></p>
-                            </div>
-                            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                                <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Posti liberi</p>
-                                <p id="vPosti" class="font-black text-emerald-600 text-lg"></p>
-                            </div>
+                        <div>
+                            <label for="lastName" class="text-[11px] uppercase tracking-widest font-black text-slate-600">Cognome *</label>
+                            <input id="lastName" type="text" class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" required>
                         </div>
-                        <div id="vBusWrap" class="hidden bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                            <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">Bus assegnato</p>
-                            <p id="vBus" class="text-xs font-black text-slate-800"></p>
+                        <div>
+                            <label for="phone" class="text-[11px] uppercase tracking-widest font-black text-slate-600">Telefono *</label>
+                            <input id="phone" type="tel" class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" required>
                         </div>
-                    </div>
+                        <div>
+                            <label for="email" class="text-[11px] uppercase tracking-widest font-black text-slate-600">Email *</label>
+                            <input id="email" type="email" class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" required>
+                        </div>
+                        <div>
+                            <label for="participants" class="text-[11px] uppercase tracking-widest font-black text-slate-600">Numero partecipanti *</label>
+                            <input id="participants" type="number" min="1" step="1" class="mt-1 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" required>
+                        </div>
+                        <div>
+                            <label for="notes" class="text-[11px] uppercase tracking-widest font-black text-slate-600">Note</label>
+                            <textarea id="notes" rows="3" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-[11px] uppercase tracking-widest font-black text-slate-600">Posti selezionati *</label>
+                            <p id="selectedSeatsText" class="mt-1 min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold text-slate-700">Nessun posto selezionato</p>
+                        </div>
+                        <p id="formError" class="hidden rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-bold text-red-700"></p>
+                        <button id="submitButton" type="submit" class="w-full h-12 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-wider hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed">Conferma prenotazione</button>
+                    </form>
                 </div>
 
-                <!-- Colonna destra: form prenotazione -->
-                <div>
-                    <div class="bg-white rounded-3xl p-7 border border-slate-200 shadow-sm">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500 to-ocean-800 flex items-center justify-center shadow-md shadow-sky-600/30">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            </div>
-                            <div>
-                                <h2 class="text-sm font-black uppercase tracking-wide text-slate-900">Dati passeggero</h2>
-                                <p class="text-[10px] text-slate-400 font-semibold">Tutti i campi sono obbligatori</p>
-                            </div>
+                <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h2 class="text-lg font-black uppercase">Riepilogo</h2>
+                    <dl class="mt-4 space-y-3 text-sm">
+                        <div class="flex justify-between gap-4">
+                            <dt class="font-semibold text-slate-500">Viaggio</dt>
+                            <dd id="summaryTrip" class="font-black text-right">-</dd>
                         </div>
-
-                        <form id="formPrenota" novalidate class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="form-label" for="f_nome">Nome</label>
-                                    <input class="form-input" id="f_nome" type="text" placeholder="Mario" autocomplete="given-name" required>
-                                </div>
-                                <div>
-                                    <label class="form-label" for="f_cognome">Cognome</label>
-                                    <input class="form-input" id="f_cognome" type="text" placeholder="Rossi" autocomplete="family-name" required>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label" for="f_telefono">Telefono</label>
-                                <input class="form-input" id="f_telefono" type="tel" placeholder="+39 320 0000000" autocomplete="tel" required>
-                            </div>
-                            <div>
-                                <label class="form-label" for="f_email">Email</label>
-                                <input class="form-input" id="f_email" type="email" placeholder="mario.rossi@email.com" autocomplete="email">
-                            </div>
-                            <div>
-                                <label class="form-label" for="f_persone">Numero di persone</label>
-                                <select class="form-input" id="f_persone" required>
-                                    <option value="">— Seleziona —</option>
-                                    <option value="1">1 persona</option>
-                                    <option value="2">2 persone</option>
-                                    <option value="3">3 persone</option>
-                                    <option value="4">4 persone</option>
-                                    <option value="5">5 persone</option>
-                                    <option value="6">6 persone</option>
-                                    <option value="7">7 persone</option>
-                                    <option value="8">8 persone</option>
-                                    <option value="9">9 persone</option>
-                                    <option value="10">10 persone</option>
-                                </select>
-                            </div>
-                            <div id="riepilogoTotale" class="hidden bg-sky-50 border border-sky-100 rounded-2xl p-4">
-                                <p class="text-[10px] font-black uppercase text-sky-600 tracking-wider mb-1">Totale stimato</p>
-                                <p id="totaleCalcolato" class="text-2xl font-black italic text-sky-700"></p>
-                                <p class="text-[10px] text-slate-400 mt-1">L'importo esatto verrà confermato da un operatore.</p>
-                            </div>
-                            <div>
-                                <label class="form-label" for="f_note">Note (opzionale)</label>
-                                <textarea class="form-input" id="f_note" rows="3" placeholder="Intolleranze, richieste particolari..."></textarea>
-                            </div>
-
-                            <button
-                                id="btnConferma"
-                                type="submit"
-                                class="w-full bg-gradient-to-r from-sky-600 to-ocean-800 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-sm font-black uppercase tracking-wider transition-all hover:scale-[1.02] shadow-lg shadow-sky-600/25 flex items-center justify-center gap-2"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                CONFERMA PRENOTAZIONE
-                            </button>
-
-                            <p class="text-[10px] text-center text-slate-400 font-semibold leading-relaxed">
-                                Cliccando confermi di aver preso visione delle condizioni di viaggio. Un operatore ti contatterà per il pagamento.
-                            </p>
-                        </form>
-                    </div>
+                        <div class="flex justify-between gap-4">
+                            <dt class="font-semibold text-slate-500">Bus</dt>
+                            <dd id="summaryBus" class="font-black text-right">-</dd>
+                        </div>
+                        <div class="flex justify-between gap-4">
+                            <dt class="font-semibold text-slate-500">Posti scelti</dt>
+                            <dd id="summarySeats" class="font-black text-right">-</dd>
+                        </div>
+                        <div class="flex justify-between gap-4">
+                            <dt class="font-semibold text-slate-500">Totale</dt>
+                            <dd id="summaryTotal" class="font-black text-right">-</dd>
+                        </div>
+                    </dl>
                 </div>
+            </aside>
+        </section>
+
+        <section id="successState" class="hidden">
+            <div class="max-w-3xl mx-auto bg-white border border-emerald-200 rounded-3xl px-8 py-12 text-center">
+                <h1 class="text-3xl font-black uppercase text-emerald-700">Prenotazione completata con successo</h1>
+                <p class="mt-3 text-sm text-slate-600">Reindirizzamento in <span id="redirectCounter" class="font-black">5</span> secondi...</p>
             </div>
-        </div>
+        </section>
     </main>
 
-    <!-- Toast -->
-    <div id="toast"></div>
-
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-white pt-12 pb-8 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
-            <p class="text-slate-400 text-xs">© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
+    <footer class="border-t border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+            <p class="text-xs text-slate-500">© 2026 Del Grosso Viaggi & Limousine Bus. Tutti i diritti riservati.</p>
         </div>
     </footer>
 
+    <script src="gestionale/js/seatmap.js"></script>
+    <script src="gestionale/js/seatmap-auto.js"></script>
+    <script src="gestionale/js/seatmap-manager-v12.js"></script>
     <script>
-        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
-        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
-        const sb = supabase.createClient(S_URL, S_KEY);
+        const SUPABASE_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const PHONE_REGEX = /^[+0-9()\s-]{7,20}$/;
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const POSTER_FALLBACK = "https://via.placeholder.com/1400x900/0f172a/ffffff?text=Del+Grosso+Viaggi";
 
-        const PLACEHOLDER = 'https://via.placeholder.com/800x500/1e293b/ffffff?text=Del+Grosso+Viaggi';
+        const appState = {
+            sb: null,
+            viaggio: null,
+            autobus: null,
+            occupiedSeats: new Set(),
+            blockedSeats: new Set(),
+            seatObserver: null,
+            submitting: false
+        };
 
-        let viaggio = null;
+        const ui = {
+            loadingState: document.getElementById("loadingState"),
+            notFoundState: document.getElementById("notFoundState"),
+            errorState: document.getElementById("errorState"),
+            errorMessage: document.getElementById("errorMessage"),
+            retryButton: document.getElementById("retryButton"),
+            contentState: document.getElementById("contentState"),
+            successState: document.getElementById("successState"),
+            tripPoster: document.getElementById("tripPoster"),
+            tripDestination: document.getElementById("tripDestination"),
+            tripTitle: document.getElementById("tripTitle"),
+            tripDescription: document.getElementById("tripDescription"),
+            tripPrice: document.getElementById("tripPrice"),
+            tripDate: document.getElementById("tripDate"),
+            tripTime: document.getElementById("tripTime"),
+            tripStatus: document.getElementById("tripStatus"),
+            tripBus: document.getElementById("tripBus"),
+            tripSeatsTotal: document.getElementById("tripSeatsTotal"),
+            tripSeatsFree: document.getElementById("tripSeatsFree"),
+            seatStatus: document.getElementById("seatStatus"),
+            seatWarning: document.getElementById("seatWarning"),
+            seatMap: document.getElementById("seatMap"),
+            bookingForm: document.getElementById("bookingForm"),
+            firstName: document.getElementById("firstName"),
+            lastName: document.getElementById("lastName"),
+            phone: document.getElementById("phone"),
+            email: document.getElementById("email"),
+            participants: document.getElementById("participants"),
+            notes: document.getElementById("notes"),
+            selectedSeatsText: document.getElementById("selectedSeatsText"),
+            formError: document.getElementById("formError"),
+            submitButton: document.getElementById("submitButton"),
+            summaryTrip: document.getElementById("summaryTrip"),
+            summaryBus: document.getElementById("summaryBus"),
+            summarySeats: document.getElementById("summarySeats"),
+            summaryTotal: document.getElementById("summaryTotal"),
+            redirectCounter: document.getElementById("redirectCounter")
+        };
 
-        /* ── Helpers ── */
-        function formatData(dateStr) {
-            if (!dateStr) return '—';
-            const d = new Date(dateStr + 'T00:00:00');
-            return d.toLocaleDateString('it-IT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-        }
-        function formatPrezzo(v) {
-            return Number(v || 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 });
-        }
-        function showToast(msg, type = '') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = 'show' + (type ? ' ' + type : '');
-            setTimeout(() => { t.className = ''; }, 4000);
-        }
-        function setLoading(loading) {
-            const btn = document.getElementById('btnConferma');
-            btn.disabled = loading;
-            btn.innerHTML = loading
-                ? `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Invio in corso...`
-                : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> CONFERMA PRENOTAZIONE`;
-        }
-
-        /* ── Calcolo totale live ── */
-        document.getElementById('f_persone').addEventListener('change', function () {
-            const n = parseInt(this.value, 10);
-            const wrap = document.getElementById('riepilogoTotale');
-            if (viaggio && n > 0) {
-                document.getElementById('totaleCalcolato').textContent = formatPrezzo(viaggio.prezzo * n);
-                wrap.classList.remove('hidden');
-            } else {
-                wrap.classList.add('hidden');
+        function initAOS() {
+            if (typeof AOS !== "undefined") {
+                AOS.init({ duration: 600, once: true, offset: 30 });
             }
-        });
+        }
 
-        /* ── Carica viaggio ── */
-        async function caricaViaggio(id) {
+        function showSection(target) {
+            const names = ["loadingState", "notFoundState", "errorState", "contentState", "successState"];
+            names.forEach(function (name) {
+                ui[name].classList.toggle("hidden", name !== target);
+            });
+        }
+
+        function parseTripIdFromUrl() {
+            const value = new URLSearchParams(window.location.search).get("id");
+            if (!value || !UUID_REGEX.test(value)) {
+                return null;
+            }
+            return value;
+        }
+
+        function normalizeText(value) {
+            return (value || "").toString().trim();
+        }
+
+        function parseMaybeJson(value) {
+            if (typeof value !== "string") {
+                return null;
+            }
             try {
-                const { data, error } = await sb
-                    .from('viaggi')
-                    .select('id, titolo, destinazione, data_partenza, ora_partenza, prezzo, locandina,  autobus, posti_totali,   stato')
-                    .eq('id', id)
-                    .single();
+                return JSON.parse(value);
+            } catch (error) {
+                return null;
+            }
+        }
 
-                if (error || !data) throw error || new Error('Viaggio non trovato');
+        function formatDate(dateValue) {
+            if (!dateValue) {
+                return "Data non disponibile";
+            }
+            const d = new Date(dateValue + "T00:00:00");
+            if (Number.isNaN(d.getTime())) {
+                return "Data non disponibile";
+            }
+            return d.toLocaleDateString("it-IT", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+        }
 
-                viaggio = data;
+        function formatTime(timeValue) {
+            return timeValue ? timeValue.slice(0, 5) : "Orario non disponibile";
+        }
 
-                const img = data.locandina || PLACEHOLDER;
-                document.getElementById('vLocandina').src = img;
-                document.getElementById('vDestinazione').textContent = data.destinazione || '—';
-                document.getElementById('vTitolo').textContent = data.titolo || '—';
-                document.getElementById('vData').textContent = formatData(data.data_partenza);
-                document.getElementById('vOra').textContent = data.ora_partenza ? data.ora_partenza.slice(0, 5) : '—';
-                document.getElementById('vPrezzo').textContent = formatPrezzo(data.prezzo);
+        function formatPrice(value) {
+            const amount = Number(value);
+            if (!Number.isFinite(amount)) {
+                return "Prezzo su richiesta";
+            }
+            return amount.toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+        }
 
-                const postiLiberi = data.posti_totali || 0;
-                document.getElementById('vPosti').textContent = postiLiberi > 0 ? postiLiberi : '—';
+        function setError(message) {
+            ui.errorMessage.textContent = message;
+            showSection("errorState");
+        }
 
-                if (data.autobus) {
-                    document.getElementById('vBus').textContent = data.autobus;
-                    document.getElementById('vBusWrap').classList.remove('hidden');
+        function initSupabase() {
+            if (!window.supabase || typeof window.supabase.createClient !== "function") {
+                throw new Error("Supabase JS non disponibile.");
+            }
+            appState.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        async function loadViaggio(id) {
+            const response = await appState.sb
+                .schema("public")
+                .from("viaggi")
+                .select("id, titolo, destinazione, descrizione, prezzo, data_partenza, ora_partenza, locandina, autobus, autobus_id, posti_totali, posti_liberi, posti_occupati, stato, pubblicato")
+                .eq("id", id)
+                .eq("pubblicato", true)
+                .maybeSingle();
+
+            if (response.error) {
+                throw new Error(response.error.message || "Errore durante la lettura del viaggio.");
+            }
+            return response.data || null;
+        }
+
+        async function loadAutobus(autobusId) {
+            if (!autobusId) {
+                return null;
+            }
+            const response = await appState.sb
+                .schema("public")
+                .from("flotta")
+                .select("*")
+                .eq("id", autobusId)
+                .maybeSingle();
+
+            if (response.error) {
+                throw new Error(response.error.message || "Errore durante la lettura dell'autobus.");
+            }
+            return response.data || null;
+        }
+
+        async function loadPrenotazioniOccupate(viaggioId) {
+            const response = await appState.sb
+                .schema("public")
+                .from("prenotazioni")
+                .select("posti, posti_selezionati, stato")
+                .eq("viaggio_id", viaggioId);
+
+            if (response.error) {
+                throw new Error(response.error.message || "Errore durante la lettura prenotazioni.");
+            }
+
+            const occupied = new Set();
+            (response.data || []).forEach(function (row) {
+                const status = normalizeText(row.stato).toLowerCase();
+                if (status === "annullata" || status === "cancellata" || status === "cancelled") {
+                    return;
                 }
-
-                document.title = `Prenota: ${data.titolo} | Del Grosso Viaggi`;
-
-                document.getElementById('skeletonState').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-
-            } catch (err) {
-                console.error('[prenota.html] caricaViaggio:', err);
-                document.getElementById('skeletonState').classList.add('hidden');
-                document.getElementById('errorState').classList.remove('hidden');
-            }
+                const fields = [row.posti, row.posti_selezionati];
+                fields.forEach(function (field) {
+                    if (!field) {
+                        return;
+                    }
+                    if (Array.isArray(field)) {
+                        field.forEach(function (item) {
+                            const seat = normalizeText(item);
+                            if (seat) {
+                                occupied.add(seat);
+                            }
+                        });
+                        return;
+                    }
+                    if (typeof field === "string") {
+                        const parsed = parseMaybeJson(field);
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(function (item) {
+                                const seat = normalizeText(item);
+                                if (seat) {
+                                    occupied.add(seat);
+                                }
+                            });
+                            return;
+                        }
+                        field.split(",").forEach(function (item) {
+                            const seat = normalizeText(item);
+                            if (seat) {
+                                occupied.add(seat);
+                            }
+                        });
+                    }
+                });
+            });
+            return occupied;
         }
 
-        /* ── Submit prenotazione ── */
-        document.getElementById('formPrenota').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const nome = document.getElementById('f_nome').value.trim();
-            const cognome = document.getElementById('f_cognome').value.trim();
-            const telefono = document.getElementById('f_telefono').value.trim();
-            const email = document.getElementById('f_email').value.trim();
-            const persone = parseInt(document.getElementById('f_persone').value, 10);
-            const note = document.getElementById('f_note').value.trim();
-
-            if (!nome) { showToast('Inserisci il nome', 'error'); return; }
-            if (!cognome) { showToast('Inserisci il cognome', 'error'); return; }
-            if (!telefono) { showToast('Inserisci il telefono', 'error'); return; }
-            if (!persone || persone < 1) { showToast('Seleziona il numero di persone', 'error'); return; }
-
-            const totale = viaggio.prezzo * persone;
-            const clienteNome = `${nome} ${cognome}`;
-
-            setLoading(true);
-
-            try {
-                const { error } = await sb.from('prenotazioni').insert({
-                    cliente_nome: clienteNome,
-                    nome_cliente: clienteNome,
-                    cliente_telefono: telefono,
-                    telefono_cliente: telefono,
-                    cliente_email: email || null,
-                    email_cliente: email || null,
-                    viaggio_id: viaggio.id,
-                    numero_persone: persone,
-                    importo: totale,
-                    totale: totale,
-                    stato: 'In Attesa',
-                    data_prenotazione: new Date().toISOString().slice(0, 10),
-                    creato_il: new Date().toISOString(),
-                    destinazione: viaggio.destinazione || null,
-                    partenza: viaggio.data_partenza || null,
-                    note: note || null
-                });
-
-                if (error) throw error;
-
-                setLoading(false);
-                showToast('✅ Prenotazione inviata! Ti contatteremo presto.', 'success');
-
-                // Breve attesa per mostrare il toast, poi redirect
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 3500);
-
-            } catch (err) {
-                console.error('[prenota.html] invioPrenotazione:', err);
-                setLoading(false);
-                showToast('❌ ' + (err.message || 'Errore durante la prenotazione. Riprova.'), 'error');
+        function extractSeatCount(viaggio, autobus) {
+            const fromViaggio = Number(viaggio.posti_totali);
+            if (Number.isInteger(fromViaggio) && fromViaggio > 0) {
+                return fromViaggio;
             }
-        });
+            if (autobus) {
+                const fromAutobus = Number(autobus.posti_totali || autobus.posti || autobus.capienza);
+                if (Number.isInteger(fromAutobus) && fromAutobus > 0) {
+                    return fromAutobus;
+                }
+            }
+            return 0;
+        }
 
-        /* ── Init ── */
-        (function init() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            if (!id) {
-                document.getElementById('skeletonState').classList.add('hidden');
-                document.getElementById('errorState').classList.remove('hidden');
+        function extractBlockedSeats(autobus) {
+            const set = new Set();
+            if (!autobus) {
+                return set;
+            }
+            const candidates = [autobus.posti_bloccati, autobus.bloccati, autobus.seats_blocked];
+            let raw = null;
+            for (let i = 0; i < candidates.length; i += 1) {
+                if (candidates[i] !== null && candidates[i] !== undefined && candidates[i] !== "") {
+                    raw = candidates[i];
+                    break;
+                }
+            }
+            if (!raw) {
+                return set;
+            }
+            if (Array.isArray(raw)) {
+                raw.forEach(function (item) {
+                    const value = normalizeText(item);
+                    if (value) {
+                        set.add(value);
+                    }
+                });
+                return set;
+            }
+            if (typeof raw === "string") {
+                const parsed = parseMaybeJson(raw);
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(function (item) {
+                        const value = normalizeText(item);
+                        if (value) {
+                            set.add(value);
+                        }
+                    });
+                    return set;
+                }
+                raw.split(",").forEach(function (item) {
+                    const value = normalizeText(item);
+                    if (value) {
+                        set.add(value);
+                    }
+                });
+            }
+            return set;
+        }
+
+        function getAutobusLabel() {
+            if (!appState.autobus) {
+                return "Nessun autobus assegnato.";
+            }
+            return normalizeText(appState.autobus.nome) || normalizeText(appState.autobus.modello) || normalizeText(appState.autobus.tipo) || "Autobus assegnato";
+        }
+
+        function renderTripDetails() {
+            const v = appState.viaggio;
+            ui.tripPoster.src = v.locandina || POSTER_FALLBACK;
+            ui.tripPoster.onerror = function () { this.src = POSTER_FALLBACK; };
+            ui.tripDestination.textContent = v.destinazione || "Destinazione non disponibile";
+            ui.tripTitle.textContent = v.titolo || "Viaggio Del Grosso";
+            ui.tripDescription.textContent = v.descrizione || "Descrizione non disponibile.";
+            ui.tripPrice.textContent = formatPrice(v.prezzo);
+            ui.tripDate.textContent = formatDate(v.data_partenza);
+            ui.tripTime.textContent = formatTime(v.ora_partenza);
+            ui.tripStatus.textContent = normalizeText(v.stato) || "Disponibile";
+            ui.tripBus.textContent = getAutobusLabel();
+            ui.tripSeatsTotal.textContent = String(Number(v.posti_totali) || 0);
+            ui.tripSeatsFree.textContent = String(Number(v.posti_liberi) || 0);
+
+            ui.summaryTrip.textContent = v.titolo || "-";
+            ui.summaryBus.textContent = getAutobusLabel();
+            ui.summarySeats.textContent = "-";
+            ui.summaryTotal.textContent = "-";
+            document.title = "Prenota: " + (v.titolo || "Viaggio") + " | Del Grosso Booking V2";
+        }
+
+        function setupSeatMapIntegration() {
+            ui.seatWarning.classList.add("hidden");
+            ui.seatWarning.textContent = "";
+
+            if (!appState.viaggio.autobus_id) {
+                ui.seatStatus.textContent = "Nessun autobus assegnato.";
+                ui.seatWarning.textContent = "Nessun autobus assegnato.";
+                ui.seatWarning.classList.remove("hidden");
+                ui.seatMap.innerHTML = "";
                 return;
             }
-            caricaViaggio(id);
-        })();
+
+            if (!appState.autobus) {
+                ui.seatStatus.textContent = "Nessun autobus assegnato.";
+                ui.seatWarning.textContent = "Nessun autobus assegnato.";
+                ui.seatWarning.classList.remove("hidden");
+                ui.seatMap.innerHTML = "";
+                return;
+            }
+
+            const postiTotali = extractSeatCount(appState.viaggio, appState.autobus);
+            if (postiTotali <= 0) {
+                ui.seatStatus.textContent = "Piantina non disponibile.";
+                ui.seatWarning.textContent = "Piantina non disponibile.";
+                ui.seatWarning.classList.remove("hidden");
+                ui.seatMap.innerHTML = "";
+                return;
+            }
+
+            if (typeof creaSeatMap !== "function") {
+                throw new Error("Sistema piantina non disponibile.");
+            }
+
+            const tipo = normalizeText(appState.autobus.tipo) || normalizeText(appState.autobus.modello) || "";
+            if (typeof getSeatMapByBus === "function") {
+                getSeatMapByBus(tipo);
+            }
+            if (typeof selezionaSeatMap === "function") {
+                selezionaSeatMap(tipo);
+            }
+
+            ui.seatMap.innerHTML = "";
+            if (Array.isArray(window.postiSelezionati)) {
+                window.postiSelezionati.length = 0;
+            } else if (typeof postiSelezionati !== "undefined" && Array.isArray(postiSelezionati)) {
+                postiSelezionati.length = 0;
+            }
+
+            creaSeatMap(postiTotali);
+
+            appState.blockedSeats = extractBlockedSeats(appState.autobus);
+
+            const buttons = ui.seatMap.querySelectorAll(".posto");
+            buttons.forEach(function (button) {
+                const seatNumber = normalizeText(button.textContent);
+                const occupied = appState.occupiedSeats.has(seatNumber);
+                const blocked = appState.blockedSeats.has(seatNumber);
+                if (occupied) {
+                    button.classList.add("occupato");
+                    button.disabled = true;
+                    button.onclick = null;
+                } else if (blocked) {
+                    button.classList.add("bloccato");
+                    button.disabled = true;
+                    button.onclick = null;
+                }
+            });
+
+            ui.seatStatus.textContent = "Posti disponibili: " + (appState.viaggio.posti_liberi || 0) + " su " + postiTotali;
+            syncSelectedSeatsUI();
+            observeSeatSelection();
+        }
+
+        function getSelectedSeatsArray() {
+            if (Array.isArray(window.postiSelezionati)) {
+                return window.postiSelezionati;
+            }
+            if (typeof postiSelezionati !== "undefined" && Array.isArray(postiSelezionati)) {
+                return postiSelezionati;
+            }
+            return [];
+        }
+
+        function observeSeatSelection() {
+            if (appState.seatObserver !== null) {
+                window.clearInterval(appState.seatObserver);
+            }
+            appState.seatObserver = window.setInterval(syncSelectedSeatsUI, 200);
+        }
+
+        function syncSelectedSeatsUI() {
+            const seats = getSelectedSeatsArray()
+                .map(function (value) { return normalizeText(value); })
+                .filter(function (value) { return Boolean(value); })
+                .sort(function (a, b) { return a.localeCompare(b, "it", { numeric: true }); });
+
+            if (!seats.length) {
+                ui.selectedSeatsText.textContent = "Nessun posto selezionato";
+                ui.summarySeats.textContent = "-";
+                ui.summaryTotal.textContent = "-";
+                return;
+            }
+            ui.selectedSeatsText.textContent = seats.join(", ");
+            ui.summarySeats.textContent = seats.join(", ");
+            ui.participants.value = String(seats.length);
+            ui.summaryTotal.textContent = formatPrice(Number(appState.viaggio.prezzo || 0) * seats.length);
+        }
+
+        function setFormError(message) {
+            if (!message) {
+                ui.formError.classList.add("hidden");
+                ui.formError.textContent = "";
+                return;
+            }
+            ui.formError.textContent = message;
+            ui.formError.classList.remove("hidden");
+        }
+
+        function setSubmitting(loading) {
+            appState.submitting = loading;
+            ui.submitButton.disabled = loading;
+            ui.submitButton.textContent = loading ? "Invio in corso..." : "Conferma prenotazione";
+        }
+
+        function validateForm() {
+            const nome = normalizeText(ui.firstName.value);
+            const cognome = normalizeText(ui.lastName.value);
+            const telefono = normalizeText(ui.phone.value);
+            const email = normalizeText(ui.email.value);
+            const partecipanti = Number(ui.participants.value);
+            const seats = getSelectedSeatsArray().map(function (v) { return normalizeText(v); }).filter(Boolean);
+
+            if (!nome) {
+                return "Inserisci il nome.";
+            }
+            if (!cognome) {
+                return "Inserisci il cognome.";
+            }
+            if (!PHONE_REGEX.test(telefono)) {
+                return "Telefono non valido.";
+            }
+            if (!EMAIL_REGEX.test(email)) {
+                return "Email non valida.";
+            }
+            if (!Number.isInteger(partecipanti) || partecipanti < 1) {
+                return "Numero partecipanti non valido.";
+            }
+            if (!seats.length) {
+                return "Seleziona almeno un posto.";
+            }
+            if (seats.length !== partecipanti) {
+                return "I partecipanti devono coincidere con i posti selezionati.";
+            }
+            if (partecipanti > Number(appState.viaggio.posti_liberi || 0)) {
+                return "Posti disponibili insufficienti.";
+            }
+            return "";
+        }
+
+        async function savePrenotazione() {
+            const seats = getSelectedSeatsArray().map(function (v) { return normalizeText(v); }).filter(Boolean);
+            const partecipanti = Number(ui.participants.value);
+            const latestViaggio = await loadViaggio(appState.viaggio.id);
+            if (!latestViaggio) {
+                throw new Error("Il viaggio non e piu disponibile.");
+            }
+            if (partecipanti > Number(latestViaggio.posti_liberi || 0)) {
+                throw new Error("Posti disponibili insufficienti.");
+            }
+
+            const latestOccupied = await loadPrenotazioniOccupate(appState.viaggio.id);
+            const conflicts = seats.filter(function (seat) { return latestOccupied.has(seat); });
+            if (conflicts.length) {
+                throw new Error("Alcuni posti non sono piu disponibili: " + conflicts.join(", "));
+            }
+
+            const nomeCompleto = normalizeText(ui.firstName.value) + " " + normalizeText(ui.lastName.value);
+            const payload = {
+                viaggio_id: latestViaggio.id,
+                nome_cliente: nomeCompleto.trim(),
+                telefono: normalizeText(ui.phone.value),
+                email: normalizeText(ui.email.value),
+                posti: seats.join(","),
+                stato: "in attesa"
+            };
+
+            const insertResponse = await appState.sb
+                .schema("public")
+                .from("prenotazioni")
+                .insert(payload)
+                .select("id")
+                .single();
+
+            if (insertResponse.error) {
+                throw new Error(insertResponse.error.message || "Errore salvataggio prenotazione.");
+            }
+
+            const newOccupied = Number(latestViaggio.posti_occupati || 0) + partecipanti;
+            const newFree = Math.max(0, Number(latestViaggio.posti_liberi || 0) - partecipanti);
+            const updateResponse = await appState.sb
+                .schema("public")
+                .from("viaggi")
+                .update({
+                    posti_occupati: newOccupied,
+                    posti_liberi: newFree
+                })
+                .eq("id", latestViaggio.id);
+
+            if (updateResponse.error) {
+                throw new Error(updateResponse.error.message || "Errore aggiornamento posti viaggio.");
+            }
+        }
+
+        function startRedirectCountdown() {
+            showSection("successState");
+            if (appState.seatObserver !== null) {
+                window.clearInterval(appState.seatObserver);
+                appState.seatObserver = null;
+            }
+            let left = 5;
+            ui.redirectCounter.textContent = String(left);
+            const interval = window.setInterval(function () {
+                left -= 1;
+                ui.redirectCounter.textContent = String(left);
+                if (left <= 0) {
+                    window.clearInterval(interval);
+                    window.location.href = "https://www.delgrossoviaggi.it";
+                }
+            }, 1000);
+        }
+
+        async function onSubmit(event) {
+            event.preventDefault();
+            if (appState.submitting) {
+                return;
+            }
+            setFormError("");
+            const validationError = validateForm();
+            if (validationError) {
+                setFormError(validationError);
+                return;
+            }
+            setSubmitting(true);
+            try {
+                await savePrenotazione();
+                startRedirectCountdown();
+            } catch (error) {
+                console.error("[prenota.html] submit:", error);
+                setFormError((error && error.message) ? error.message : "Errore durante la prenotazione.");
+            } finally {
+                setSubmitting(false);
+            }
+        }
+
+        async function bootstrap() {
+            initAOS();
+            showSection("loadingState");
+            const tripId = parseTripIdFromUrl();
+            if (!tripId) {
+                showSection("notFoundState");
+                return;
+            }
+
+            try {
+                initSupabase();
+                const viaggio = await loadViaggio(tripId);
+                if (!viaggio) {
+                    showSection("notFoundState");
+                    return;
+                }
+                appState.viaggio = viaggio;
+                appState.autobus = await loadAutobus(viaggio.autobus_id);
+                appState.occupiedSeats = await loadPrenotazioniOccupate(viaggio.id);
+                renderTripDetails();
+                setupSeatMapIntegration();
+                showSection("contentState");
+                if (typeof AOS !== "undefined") {
+                    AOS.refreshHard();
+                }
+            } catch (error) {
+                console.error("[prenota.html] bootstrap:", error);
+                setError((error && error.message) ? error.message : "Errore inatteso.");
+            }
+        }
+
+        ui.bookingForm.addEventListener("submit", onSubmit);
+        ui.retryButton.addEventListener("click", bootstrap);
+        bootstrap();
     </script>
 </body>
 </html>
