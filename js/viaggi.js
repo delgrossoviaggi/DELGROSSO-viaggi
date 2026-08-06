@@ -1,208 +1,246 @@
-import { getViaggiPubblicati } from "./api-gestionale.js";
+import {
+  calculateAvailableSeats,
+  formatDate,
+  formatTime
+} from '../../../js/delgrosso-api.js';
+import { getViaggiPubblicati } from '../bridge.js';
+import { applyRuntimeSettings, loadImpostazioni } from '../../services/settingsService.js';
+import { buildPublicBookingUrl } from '../../utils/appRoutes.js';
 
-const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=80";
-
-const state = {
-  trips: [],
-  search: "",
-  filter: "all"
-};
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x700/0f172a/ffffff?text=Del+Grosso+Viaggi';
+const REQUEST_TIMEOUT_MS = 15000;
+const LAST_SEATS_THRESHOLD = 5;
 
 const ui = {
-  loading: document.getElementById("loading-state"),
-  error: document.getElementById("error-state"),
-  empty: document.getElementById("empty-state"),
-  grid: document.getElementById("viaggi-grid"),
-  search: document.getElementById("search-input"),
-  retry: document.getElementById("retry-btn"),
-  filters: Array.from(document.querySelectorAll(".filter-btn"))
+  searchInput: document.getElementById('searchInput'),
+  destinationFilter: document.getElementById('destinationFilter'),
+  availabilityFilter: document.getElementById('availabilityFilter'),
+  counterLabel: document.getElementById('counterLabel'),
+  reloadButton: document.getElementById('reloadButton'),
+  retryButton: document.getElementById('retryButton'),
+  tripsGrid: document.getElementById('tripsGrid'),
+  emptyState: document.getElementById('emptyState'),
+  errorState: document.getElementById('errorState'),
+  errorMessage: document.getElementById('errorMessage')
 };
 
+let trips = [];
+
+function initAnimations() {
+  if (typeof window.AOS !== 'undefined') {
+    window.AOS.init({ duration: 650, once: true, offset: 40 });
+  }
+}
+
 function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-function toDate(value) {
-  const date = new Date(`${String(value || "").slice(0, 10)}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? null : date;
+function normalizeText(value) {
+  return String(value ?? '').trim().toLowerCase();
 }
 
-function formatDate(value) {
-  const date = toDate(value);
-  if (!date) return "Data da definire";
-  return date.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" });
+function withTimeout(promise, timeoutMs, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    })
+  ]);
 }
 
-function formatCurrency(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "Prezzo su richiesta";
-  return amount.toLocaleString("it-IT", { style: "currency", currency: "EUR" });
+function getAvailableSeats(trip) {
+  return calculateAvailableSeats(trip);
 }
 
-function getFreeSeats(item) {
-  if (item.posti_liberi !== null && item.posti_liberi !== undefined) return Math.max(Number(item.posti_liberi) || 0, 0);
-  const total = Math.max(Number(item.posti_totali) || 0, 0);
-  const occupied = Math.max(Number(item.posti_occupati) || 0, 0);
-  return Math.max(total - occupied, 0);
+function isSoldOut(trip) {
+  return getAvailableSeats(trip) <= 0;
 }
 
-function normalizeFilterValue(value) {
-  return String(value || "").trim().toLowerCase();
+function isLastSeats(trip) {
+  const availableSeats = getAvailableSeats(trip);
+  return availableSeats > 0 && availableSeats <= LAST_SEATS_THRESHOLD;
 }
 
-function showLoading() {
-  ui.loading.classList.remove("hidden");
-  ui.error.classList.add("hidden");
-  ui.empty.classList.add("hidden");
-  ui.grid.innerHTML = "";
+function renderLoading() {
+  ui.counterLabel.textContent = 'Caricamento viaggi...';
+  ui.tripsGrid.classList.remove('hidden');
+  ui.emptyState.classList.add('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.tripsGrid.innerHTML = [
+    '<div class="trip-skeleton"></div>',
+    '<div class="trip-skeleton"></div>',
+    '<div class="trip-skeleton"></div>'
+  ].join('');
 }
 
-function showError() {
-  ui.loading.classList.add("hidden");
-  ui.error.classList.remove("hidden");
-  ui.empty.classList.add("hidden");
-  ui.grid.innerHTML = "";
+function renderError(message) {
+  ui.tripsGrid.classList.add('hidden');
+  ui.emptyState.classList.add('hidden');
+  ui.errorState.classList.remove('hidden');
+  ui.errorMessage.textContent = message;
+  ui.counterLabel.textContent = 'Errore durante il caricamento dei viaggi';
 }
 
-function getFilteredTrips() {
-  const term = normalizeFilterValue(state.search);
-  return state.trips.filter((trip) => {
-    const freeSeats = getFreeSeats(trip);
-    const text = `${trip.titolo || ""} ${trip.destinazione || ""}`.toLowerCase();
-    const matchesSearch = !term || text.includes(term);
-    const matchesFilter =
-      state.filter === "all" ||
-      (state.filter === "disponibili" && freeSeats > 0) ||
-      (state.filter === "soldout" && freeSeats <= 0);
-    return matchesSearch && matchesFilter;
-  });
+function renderEmpty() {
+  ui.tripsGrid.classList.add('hidden');
+  ui.emptyState.classList.remove('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.counterLabel.textContent = 'Nessun viaggio disponibile';
 }
 
-function buildCard(trip) {
-  const title = escapeHtml(trip.titolo || "Viaggio Del Grosso");
-  const destination = escapeHtml(trip.destinazione || "Destinazione da definire");
-  const description = escapeHtml(trip.descrizione || "Descrizione non disponibile.");
-  const date = escapeHtml(formatDate(trip.data_partenza));
-  const image = escapeHtml(String(trip.locandina || trip.immagine || PLACEHOLDER_IMAGE).trim() || PLACEHOLDER_IMAGE);
-  const status = escapeHtml(trip.stato || "Programmato");
-  const totalSeats = Math.max(Number(trip.posti_totali) || 0, 0);
-  const freeSeats = getFreeSeats(trip);
-  const soldOut = freeSeats <= 0;
-  const price = escapeHtml(formatCurrency(trip.prezzo));
+function getAvailabilityBadge(trip) {
+  if (isSoldOut(trip)) {
+    return '<span class="availability-pill availability-pill--soldout">Sold Out</span>';
+  }
+  if (isLastSeats(trip)) {
+    return '<span class="availability-pill availability-pill--last"><span class="availability-pill__dot"></span>Ultimi posti</span>';
+  }
+  return '<span class="availability-pill availability-pill--available"><span class="availability-pill__dot"></span>Disponibile</span>';
+}
+
+function buildTripCard(trip) {
+  const image = escapeHtml(String(trip.locandina || '').trim() || PLACEHOLDER_IMAGE);
+  const availableSeats = getAvailableSeats(trip);
+  const date = escapeHtml(formatDate(trip.data_partenza) || 'Data da definire');
+  const time = escapeHtml(formatTime(trip.ora_partenza) || '—');
+  const priceVal = trip.prezzo ? Number(trip.prezzo).toFixed(2) : '0.00';
+  const destination = escapeHtml(trip.destinazione || 'Destinazione');
+  const title = escapeHtml(trip.titolo || 'Viaggio Del Grosso');
+  const bus = escapeHtml(trip.mezzo || 'Bus GT Deluxe');
 
   return `
-    <article class="bg-brand-card rounded-2xl overflow-hidden border border-white/10 shadow-xl flex flex-col justify-between hover:border-brand-gold/50 transition-all duration-300 transform hover:-translate-y-1">
-      <div>
-        <div class="relative h-56 overflow-hidden">
-          <img src="${image}" alt="${title}" class="w-full h-full object-cover object-center">
-          <div class="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-brand-gold border border-brand-gold/30">${soldOut ? "SOLD OUT" : status}</div>
-        </div>
-        <div class="p-6 space-y-3">
-          <div class="flex items-center text-xs text-gray-400 gap-2">
-            <i class="fa-solid fa-calendar-days text-brand-gold"></i>
-            <span>${date}</span>
-          </div>
-          <h2 class="font-serif text-xl font-bold text-white">${title}</h2>
-          <p class="text-xs text-gray-400 line-clamp-3">${description}</p>
-          <div class="flex items-center gap-2 text-xs text-gray-400">
-            <i class="fa-solid fa-location-dot text-brand-gold"></i>
-            <span>${destination}</span>
-          </div>
-          <div class="flex items-center gap-2 text-xs text-gray-400">
-            <i class="fa-solid fa-chair text-brand-gold"></i>
-            <span>${freeSeats} / ${totalSeats} posti disponibili</span>
-          </div>
-        </div>
+    <article class="departure-card" data-aos="fade-up">
+      <div class="departure-card__media">
+        <img src="${image}" alt="${escapeHtml(trip.titolo || 'Viaggio Del Grosso')}" loading="lazy" onerror="this.src='${PLACEHOLDER_IMAGE}'">
+        <div class="departure-card__badge">${getAvailabilityBadge(trip)}</div>
       </div>
-      <div class="p-6 pt-0 flex items-center justify-between border-t border-white/5 mt-2 pt-4">
+      <div class="departure-card__content">
         <div>
-          <span class="text-xs text-gray-400 block">A partire da</span>
-          <span class="text-lg font-bold text-brand-gold">${price}</span>
+          <p class="departure-card__kicker">${destination}</p>
+          <h2 class="departure-card__title">${title}</h2>
         </div>
-        ${
-          soldOut
-            ? '<button type="button" disabled class="bg-red-600 text-white font-semibold px-5 py-2.5 rounded-xl text-xs cursor-not-allowed">SOLD OUT</button>'
-            : `<a href="prenota.html?id=${encodeURIComponent(trip.id)}" class="bg-gradient-to-r from-brand-gold to-brand-darkGold text-black font-semibold px-5 py-2.5 rounded-xl text-xs hover:opacity-95 transition-all shadow-lg">Prenota Ora</a>`
-        }
+        <div class="departure-card__meta">
+          <div class="departure-chip"><i class="fas fa-calendar-alt"></i>${date}</div>
+          <div class="departure-chip"><i class="fas fa-clock"></i>${time}</div>
+          <div class="departure-chip"><i class="fas fa-chair"></i>${escapeHtml(String(availableSeats))} posti liberi</div>
+          <div class="departure-chip"><i class="fas fa-bus"></i>${bus}</div>
+        </div>
+        <div class="departure-card__footer">
+          <div>
+            <span class="departure-price-label">Prezzo a persona</span>
+            <span class="departure-price">€ ${priceVal}</span>
+          </div>
+          ${isSoldOut(trip)
+            ? '<button type="button" disabled class="departure-btn departure-btn--disabled"><i class="fas fa-ban"></i> Sold Out</button>'
+            : `<a href="${buildPublicBookingUrl({ viaggioId: trip.id, codice: trip.codice })}" class="btn-primary departure-btn"><i class="fas fa-ticket"></i> Prenota</a>`}
+        </div>
       </div>
     </article>
   `;
 }
 
-function renderTrips() {
-  ui.loading.classList.add("hidden");
-  ui.error.classList.add("hidden");
-  const items = getFilteredTrips();
-  if (!items.length) {
-    ui.empty.classList.remove("hidden");
-    ui.grid.innerHTML = "";
-    return;
-  }
-  ui.empty.classList.add("hidden");
-  ui.grid.innerHTML = items.map(buildCard).join("");
+function populateDestinationFilter() {
+  const destinations = [...new Set(
+    trips
+      .map((trip) => String(trip.destinazione || '').trim())
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'it'));
+
+  ui.destinationFilter.innerHTML = [
+    '<option value="">Tutte le destinazioni</option>',
+    ...destinations.map((destination) => `<option value="${escapeHtml(destination)}">${escapeHtml(destination)}</option>`)
+  ].join('');
 }
 
-function updateFilterButtons(active) {
-  ui.filters.forEach((button) => {
-    const isActive = button.dataset.filter === active;
-    button.classList.toggle("bg-brand-gold", isActive);
-    button.classList.toggle("text-black", isActive);
-    button.classList.toggle("shadow-md", isActive);
-    button.classList.toggle("bg-[#121212]", !isActive);
-    button.classList.toggle("text-gray-300", !isActive);
-    button.classList.toggle("hover:bg-white/5", !isActive);
-    button.classList.toggle("border", !isActive);
-    button.classList.toggle("border-white/10", !isActive);
+function getFilteredTrips() {
+  const searchTerm = normalizeText(ui.searchInput.value);
+  const destination = normalizeText(ui.destinationFilter.value);
+  const availability = normalizeText(ui.availabilityFilter.value);
+
+  return trips.filter((trip) => {
+    const text = [trip.titolo, trip.destinazione].map(normalizeText).join(' ');
+    const matchesSearch = !searchTerm || text.includes(searchTerm);
+    const matchesDestination = !destination || normalizeText(trip.destinazione) === destination;
+
+    let matchesAvailability = true;
+    if (availability === 'disponibile') matchesAvailability = !isSoldOut(trip) && !isLastSeats(trip);
+    if (availability === 'ultimi') matchesAvailability = isLastSeats(trip);
+    if (availability === 'soldout') matchesAvailability = isSoldOut(trip);
+
+    return matchesSearch && matchesDestination && matchesAvailability;
   });
+}
+
+function renderTrips() {
+  const filteredTrips = getFilteredTrips();
+
+  if (!filteredTrips.length) {
+    renderEmpty();
+    return;
+  }
+
+  ui.tripsGrid.classList.remove('hidden');
+  ui.emptyState.classList.add('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.counterLabel.textContent = filteredTrips.length === 1 ? '1 viaggio disponibile' : `${filteredTrips.length} viaggi disponibili`;
+  ui.tripsGrid.innerHTML = filteredTrips.map(buildTripCard).join('');
+
+  if (typeof window.AOS !== 'undefined') {
+    window.AOS.refreshHard();
+  }
 }
 
 async function loadTrips() {
-  showLoading();
-  const response = await getViaggiPubblicati();
-  if (!response.success) {
-    showError();
-    return;
-  }
+  renderLoading();
+  ui.reloadButton.classList.add('hidden');
 
-  const rows = Array.isArray(response.data) ? response.data : [];
-  state.trips = rows.sort((a, b) => {
-    const left = toDate(a.data_partenza)?.getTime() || Number.MAX_SAFE_INTEGER;
-    const right = toDate(b.data_partenza)?.getTime() || Number.MAX_SAFE_INTEGER;
-    return left - right;
-  });
-  renderTrips();
+  try {
+    const response = await withTimeout(
+      getViaggiPubblicati(),
+      REQUEST_TIMEOUT_MS,
+      'Timeout durante il caricamento dei viaggi.'
+    );
+
+    if (response?.success === false) throw response.error;
+    trips = Array.isArray(response?.data) ? response.data : [];
+    populateDestinationFilter();
+    renderTrips();
+  } catch (error) {
+    renderError(error.message || 'Impossibile caricare i viaggi.');
+  } finally {
+    ui.reloadButton.classList.remove('hidden');
+  }
 }
 
 function bindEvents() {
-  if (ui.search) {
-    ui.search.addEventListener("input", (event) => {
-      state.search = event.target.value || "";
-      renderTrips();
-    });
-  }
-
-  if (ui.retry) {
-    ui.retry.addEventListener("click", () => {
-      loadTrips();
-    });
-  }
-
-  ui.filters.forEach((button) => {
-    button.addEventListener("click", () => {
-      state.filter = button.dataset.filter || "all";
-      updateFilterButtons(state.filter);
-      renderTrips();
-    });
+  ui.searchInput.addEventListener('input', renderTrips);
+  ui.destinationFilter.addEventListener('change', renderTrips);
+  ui.availabilityFilter.addEventListener('change', renderTrips);
+  ui.retryButton.addEventListener('click', () => {
+    loadTrips().catch((error) => renderError(error.message || 'Impossibile caricare i viaggi.'));
+  });
+  ui.reloadButton.addEventListener('click', () => {
+    loadTrips().catch((error) => renderError(error.message || 'Impossibile caricare i viaggi.'));
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+async function init() {
+  const settingsResponse = await loadImpostazioni();
+  if (settingsResponse.success !== false) {
+    applyRuntimeSettings(settingsResponse.data);
+  }
+  initAnimations();
   bindEvents();
-  updateFilterButtons(state.filter);
-  loadTrips();
+  await loadTrips();
+}
+
+init().catch((error) => {
+  renderError(error.message || 'Impossibile inizializzare la pagina viaggi.');
+  ui.reloadButton.classList.remove('hidden');
 });

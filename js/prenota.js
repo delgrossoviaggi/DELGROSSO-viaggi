@@ -1,319 +1,553 @@
 import {
-  aggiornaDisponibilita,
+  formatCurrency,
+  formatTime
+} from '../../../js/delgrosso-api.js';
+import {
+  aggiornaOccupazioneViaggio,
   creaPrenotazione,
-  getPrenotazioniByViaggio,
-  getViaggio,
-  isViaggioPubblicato
-} from "./api-gestionale.js";
+  getFlottaPubblica,
+  getPrenotazioniViaggio,
+  getViaggioPubblico
+} from '../bridge.js';
+import {
+  generateSeatLayout,
+  renderSeatMapHTML,
+  validateSeatSelection
+} from '../../services/seatMapService.js';
+import { extractOccupiedSeats } from '../../services/seatAssignmentService.js';
+import {
+  downloadReceipt,
+  generateBookingReceipt
+} from '../../services/pdfReceiptService.js';
+import {
+  openWhatsAppDispatch,
+  prepareWhatsAppDispatch
+} from '../../services/whatsAppService.js';
+import { applyRuntimeSettings, buildCompanyInfo, getCachedSettingsSync, loadImpostazioni } from '../../services/settingsService.js';
 
-const PHONE_REGEX = /^[+0-9()\s-]{7,20}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const POSTER_FALLBACK = "https://via.placeholder.com/1400x900/0f172a/ffffff?text=Del+Grosso+Viaggi";
+const PHONE_REGEX = /^[+0-9()\s-]{7,20}$/;
+const DEFAULT_SUCCESS_MESSAGE = 'La tua prenotazione è stata registrata con successo. La ricevuta PDF è stata scaricata automaticamente.';
+const PDF_WARNING_MESSAGE = 'La prenotazione è stata salvata, ma non è stato possibile generare automaticamente la ricevuta PDF.';
+let COMPANY_INFO = buildCompanyInfo(getCachedSettingsSync());
+applyRuntimeSettings(getCachedSettingsSync());
+
+const ui = {
+  loadingState: document.getElementById('loading-state'),
+  errorState: document.getElementById('error-state'),
+  bookingContent: document.getElementById('booking-content'),
+  tripImage: document.getElementById('trip-image'),
+  tripTitle: document.getElementById('trip-title'),
+  tripDate: document.getElementById('trip-date'),
+  tripTime: document.getElementById('trip-time'),
+  tripPrice: document.getElementById('trip-price'),
+  seatsAvailable: document.getElementById('seats-available'),
+  busModel: document.getElementById('bus-model'),
+  busSeats: document.getElementById('bus-seats'),
+  summarySeats: document.getElementById('summary-seats'),
+  summaryPrice: document.getElementById('summary-price'),
+  summaryTotal: document.getElementById('summary-total'),
+  continueButton: document.getElementById('continue-btn'),
+  seatmapContainer: document.getElementById('seatmap-container'),
+  passengerFormSection: document.getElementById('passenger-form-section'),
+  passengerForm: document.getElementById('passenger-form'),
+  passengerName: document.getElementById('passenger-name'),
+  passengerSurname: document.getElementById('passenger-surname'),
+  passengerPhone: document.getElementById('passenger-phone'),
+  passengerEmail: document.getElementById('passenger-email'),
+  passengerNotes: document.getElementById('passenger-notes'),
+  privacyCheckbox: document.getElementById('privacy-checkbox'),
+  backButton: document.getElementById('back-btn'),
+  confirmButton: document.getElementById('confirm-btn'),
+  successState: document.getElementById('success-state'),
+  successMessage: document.getElementById('success-message'),
+  successWhatsappLink: document.getElementById('success-whatsapp-link'),
+  feedback: document.getElementById('booking-feedback'),
+  progressFill: document.querySelector('.w-full.h-1 > div'),
+  progressSteps: Array.from(document.querySelectorAll('.progress-step')),
+  errorText: document.querySelector('#error-state p')
+};
 
 const state = {
-  tripId: null,
+  tripId: '',
+  tripCode: '',
   trip: null,
-  occupiedSeats: new Set(),
+  fleet: [],
+  selectedBus: null,
+  occupiedSeats: [],
   selectedSeats: [],
+  currentStep: 1,
   submitting: false
 };
 
-const ui = {
-  loadingState: document.getElementById("loading-state"),
-  errorState: document.getElementById("error-state"),
-  notFoundState: document.getElementById("not-found-state"),
-  contentState: document.getElementById("booking-content"),
-  successModal: document.getElementById("success-modal"),
-  errorTitle: document.getElementById("error-title"),
-  errorDesc: document.getElementById("error-desc"),
-  retryBtn: document.getElementById("retry-btn"),
-  viaggioImg: document.getElementById("viaggio-img"),
-  viaggioCat: document.getElementById("viaggio-cat"),
-  viaggioTitolo: document.getElementById("viaggio-titolo"),
-  viaggioDesc: document.getElementById("viaggio-desc"),
-  viaggioData: document.getElementById("viaggio-data"),
-  viaggioPrezzo: document.getElementById("viaggio-prezzo"),
-  seatmap: document.getElementById("seatmap-container"),
-  form: document.getElementById("prenotazione-form"),
-  inputNome: document.getElementById("nome"),
-  inputCognome: document.getElementById("cognome"),
-  inputEmail: document.getElementById("email"),
-  inputTelefono: document.getElementById("telefono"),
-  inputNote: document.getElementById("note"),
-  inputSeats: document.getElementById("posti-selezionati-input"),
-  totalPrice: document.getElementById("totale-prezzo"),
-  submitBtn: document.getElementById("submit-btn")
-};
-
-function toDate(value) {
-  const date = new Date(`${String(value || "").slice(0, 10)}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? null : date;
+function normalizeText(value) {
+  return String(value ?? '').trim();
 }
 
-function formatDate(value) {
-  const date = toDate(value);
-  if (!date) return "Data non disponibile";
-  return date.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" });
-}
-
-function formatCurrency(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "€ 0,00";
-  return amount.toLocaleString("it-IT", { style: "currency", currency: "EUR" });
+function toNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
 }
 
 function parseTripId() {
-  const raw = new URLSearchParams(window.location.search).get("id");
-  return raw ? String(raw).trim() : null;
+  const params = new URLSearchParams(window.location.search);
+  return {
+    viaggioId: normalizeText(params.get('viaggio') || params.get('id')),
+    codice: normalizeText(params.get('codice'))
+  };
 }
 
-function getAvailableSeats(trip) {
-  if (trip.posti_liberi !== null && trip.posti_liberi !== undefined) return Math.max(Number(trip.posti_liberi) || 0, 0);
-  const total = Math.max(Number(trip.posti_totali) || 0, 0);
-  const occupied = Math.max(Number(trip.posti_occupati) || 0, 0);
-  return Math.max(total - occupied, 0);
-}
-
-function showState(name) {
-  ui.loadingState.classList.toggle("hidden", name !== "loading");
-  ui.errorState.classList.toggle("hidden", name !== "error");
-  ui.notFoundState.classList.toggle("hidden", name !== "notfound");
-  ui.contentState.classList.toggle("hidden", name !== "content");
-}
-
-function setError(title, description) {
-  ui.errorTitle.textContent = title;
-  ui.errorDesc.textContent = description;
-  showState("error");
-}
-
-function parseSeatsFromBookings(bookings) {
-  const occupied = new Set();
-  (bookings || []).forEach((booking) => {
-    const seats = booking?.posti_selezionati;
-    const parsed = Array.isArray(seats) ? seats : (() => {
-      if (typeof seats !== "string") return [];
-      try {
-        const value = JSON.parse(seats);
-        return Array.isArray(value) ? value : [];
-      } catch (_error) {
-        return [];
-      }
-    })();
-    parsed.forEach((seat) => occupied.add(String(seat)));
+function formatVerboseDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return normalizeText(value) || '—';
+  return date.toLocaleDateString('it-IT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
-  return occupied;
 }
 
-function fallbackOccupiedFromCounters(trip) {
-  const occupiedCount = Math.max(Number(trip?.posti_occupati) || 0, 0);
-  const seats = new Set();
-  for (let index = 1; index <= occupiedCount; index += 1) {
-    seats.add(String(index));
+function getBusByTrip(trip) {
+  if (!trip) return null;
+
+  const directIds = [
+    normalizeText(trip.autobus_id),
+    normalizeText(trip.mezzo_id)
+  ].filter(Boolean);
+
+  for (const id of directIds) {
+    const busById = state.fleet.find((item) => String(item?.id) === id);
+    if (busById) return busById;
   }
-  return seats;
+
+  const references = [
+    normalizeText(trip.autobus),
+    normalizeText(trip.mezzo)
+  ].filter(Boolean);
+
+  for (const reference of references) {
+    const upperReference = reference.toUpperCase();
+    const match = state.fleet.find((item) => {
+      const label = `${item?.targa || ''} ${item?.marca || ''} ${item?.modello || ''}`.toUpperCase();
+      return label.includes(upperReference) || upperReference.includes(String(item?.targa || '').toUpperCase());
+    });
+    if (match) return match;
+  }
+
+  return null;
 }
 
-function renderTrip() {
-  const trip = state.trip;
-  const image = String(trip.locandina || trip.immagine || POSTER_FALLBACK).trim() || POSTER_FALLBACK;
-  ui.viaggioImg.style.backgroundImage = `url("${image}")`;
-  ui.viaggioTitolo.textContent = trip.titolo || "Viaggio Del Grosso";
-  ui.viaggioDesc.textContent = trip.descrizione || "Descrizione non disponibile.";
-  ui.viaggioData.textContent = formatDate(trip.data_partenza);
-  ui.viaggioPrezzo.textContent = formatCurrency(trip.prezzo);
-  ui.viaggioCat.textContent = trip.destinazione || "Destinazione";
+function getBusDisplayName() {
+  if (state.selectedBus) {
+    return `${state.selectedBus.targa || ''} - ${state.selectedBus.marca || ''} ${state.selectedBus.modello || ''}`.trim();
+  }
+  return normalizeText(state.trip?.autobus || state.trip?.mezzo) || '—';
+}
+
+function getSeatLayoutSource() {
+  return state.selectedBus?.seat_layout
+    || state.trip?.seat_layout
+    || state.selectedBus
+    || state.trip?.autobus
+    || state.trip?.mezzo
+    || 'GT53';
+}
+
+function getSeatLayoutData() {
+  return generateSeatLayout(getSeatLayoutSource(), state.occupiedSeats);
+}
+
+function getAvailableSeatsCount() {
+  return getSeatLayoutData().availableCount;
+}
+
+function setFeedback(message = '', tone = 'error') {
+  if (!ui.feedback) return;
+
+  ui.feedback.className = 'form-feedback hidden';
+  ui.feedback.textContent = '';
+
+  if (!message) return;
+
+  ui.feedback.textContent = message;
+  ui.feedback.classList.remove('hidden');
+  ui.feedback.classList.add(tone === 'success' ? 'form-feedback--success' : 'form-feedback--error');
+}
+
+function setErrorState(message) {
+  if (ui.errorText) ui.errorText.textContent = message;
+  ui.loadingState.classList.add('hidden');
+  ui.bookingContent.classList.add('hidden');
+  ui.passengerFormSection.classList.add('hidden');
+  ui.successState.classList.add('hidden');
+  ui.errorState.classList.remove('hidden');
+}
+
+function updateProgress() {
+  const percentage = Math.max(1, Math.min(state.currentStep, 3)) / 3 * 100;
+  if (ui.progressFill) ui.progressFill.style.width = `${percentage}%`;
+  ui.progressSteps.forEach((step) => {
+    const stepNumber = Number(step.dataset.step || 0);
+    step.classList.toggle('active', stepNumber === state.currentStep);
+  });
+}
+
+function showStep(step) {
+  state.currentStep = step;
+  ui.loadingState.classList.add('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.bookingContent.classList.toggle('hidden', step !== 1);
+  ui.passengerFormSection.classList.toggle('hidden', step !== 2);
+  ui.successState.classList.toggle('hidden', step !== 3);
+  updateProgress();
+}
+
+function renderTripInfo() {
+  const trip = state.trip || {};
+  const totalSeats = toNumber(state.selectedBus?.posti, toNumber(trip.posti_totali, 0));
+  const availableSeats = getAvailableSeatsCount();
+  const title = normalizeText(trip.titolo) || `${normalizeText(trip.partenza)} → ${normalizeText(trip.destinazione)}`.trim() || 'Viaggio Del Grosso';
+
+  ui.tripTitle.textContent = title;
+  ui.tripDate.textContent = formatVerboseDate(trip.data_partenza);
+  ui.tripTime.textContent = formatTime(trip.ora_partenza) || '—';
+  ui.tripPrice.textContent = formatCurrency(trip.prezzo);
+  ui.seatsAvailable.textContent = `${availableSeats} / ${totalSeats || '—'}`;
+  ui.busModel.textContent = getBusDisplayName();
+  ui.busSeats.textContent = totalSeats || '—';
+
+  const poster = normalizeText(trip.locandina || trip.immagine);
+  if (poster) {
+    ui.tripImage.style.backgroundImage = `url('${poster}')`;
+    ui.tripImage.innerHTML = '';
+  } else {
+    ui.tripImage.style.backgroundImage = '';
+    ui.tripImage.innerHTML = '<i class="fas fa-bus"></i>';
+  }
+
+  document.title = `${title} | Del Grosso Booking`;
+}
+
+function syncSelectedSeatClasses() {
+  const selected = new Set(state.selectedSeats);
+  ui.seatmapContainer.querySelectorAll('.seat[data-seat]').forEach((button) => {
+    if (button.disabled || button.classList.contains('occupied')) return;
+    const isSelected = selected.has(button.dataset.seat);
+    button.classList.toggle('selected', isSelected);
+    button.classList.toggle('available', !isSelected);
+  });
 }
 
 function updateSummary() {
-  const count = state.selectedSeats.length;
-  ui.inputSeats.value = count ? state.selectedSeats.join(", ") : "";
-  const total = count * (Number(state.trip?.prezzo) || 0);
-  ui.totalPrice.textContent = formatCurrency(total);
-}
+  const selectedSeats = [...state.selectedSeats].sort((left, right) => Number(left) - Number(right));
+  const selectedLabels = selectedSeats.map((seat) => String(seat).padStart(2, '0'));
+  const total = selectedSeats.length * toNumber(state.trip?.prezzo, 0);
 
-function buildSeatButton(number, occupied) {
-  const classes = occupied
-    ? "seat-occupied"
-    : state.selectedSeats.includes(number)
-      ? "seat-selected"
-      : "bg-emerald-100 text-emerald-700 border border-emerald-300 hover:shadow-md";
-  const disabled = occupied ? "disabled" : "";
-  return `<button type="button" class="posto ${classes}" data-seat="${number}" ${disabled}>${number}</button>`;
+  ui.summarySeats.textContent = selectedLabels.length ? selectedLabels.join(', ') : 'Nessuno';
+  ui.summaryPrice.textContent = formatCurrency(state.trip?.prezzo || 0);
+  ui.summaryTotal.textContent = formatCurrency(total);
+  ui.continueButton.disabled = selectedSeats.length === 0;
 }
 
 function renderSeatMap() {
-  const totalSeats = Math.max(Number(state.trip.posti_totali) || 0, 0);
-  const freeSeats = getAvailableSeats(state.trip);
-  if (freeSeats <= 0 || totalSeats <= 0) {
-    ui.seatmap.innerHTML = '<div class="w-full text-center py-4 text-sm font-semibold text-red-600">SOLD OUT</div>';
-    ui.submitBtn.disabled = true;
-    return;
-  }
-
-  const rows = [];
-  const seatsPerRow = 4;
-  for (let i = 1; i <= totalSeats; i += seatsPerRow) {
-    const chunk = [];
-    for (let j = i; j < i + seatsPerRow && j <= totalSeats; j += 1) {
-      const label = String(j);
-      chunk.push(buildSeatButton(label, state.occupiedSeats.has(label)));
-    }
-    rows.push(`<div class="flex justify-center gap-2">${chunk.join("")}</div>`);
-  }
-  ui.seatmap.innerHTML = rows.join("");
+  const seatLayout = getSeatLayoutData();
+  ui.seatmapContainer.innerHTML = renderSeatMapHTML(seatLayout);
+  syncSelectedSeatClasses();
+  updateSummary();
 }
 
-function toggleSeat(seat) {
-  if (state.occupiedSeats.has(seat)) return;
-  const freeSeats = getAvailableSeats(state.trip);
-  const isSelected = state.selectedSeats.includes(seat);
-  if (isSelected) {
-    state.selectedSeats = state.selectedSeats.filter((item) => item !== seat);
-  } else if (state.selectedSeats.length < freeSeats) {
-    state.selectedSeats = [...state.selectedSeats, seat].sort((a, b) => Number(a) - Number(b));
+function toggleSeatSelection(seatId) {
+  const normalizedSeat = normalizeText(seatId);
+  if (!normalizedSeat) return;
+
+  const alreadySelected = state.selectedSeats.includes(normalizedSeat);
+  if (alreadySelected) {
+    state.selectedSeats = state.selectedSeats.filter((seat) => seat !== normalizedSeat);
+  } else {
+    state.selectedSeats = [...state.selectedSeats, normalizedSeat].sort((left, right) => Number(left) - Number(right));
   }
-  renderSeatMap();
+
+  syncSelectedSeatClasses();
   updateSummary();
 }
 
 function validateForm() {
-  const nome = String(ui.inputNome.value || "").trim();
-  const cognome = String(ui.inputCognome.value || "").trim();
-  const email = String(ui.inputEmail.value || "").trim();
-  const telefono = String(ui.inputTelefono.value || "").trim();
-  const freeSeats = getAvailableSeats(state.trip);
+  const name = normalizeText(ui.passengerName.value);
+  const surname = normalizeText(ui.passengerSurname.value);
+  const phone = normalizeText(ui.passengerPhone.value);
+  const email = normalizeText(ui.passengerEmail.value);
 
-  if (!nome || !cognome) return "Inserisci nome e cognome.";
-  if (!EMAIL_REGEX.test(email)) return "Email non valida.";
-  if (!PHONE_REGEX.test(telefono)) return "Telefono non valido.";
-  if (!state.selectedSeats.length) return "Seleziona almeno un posto.";
-  if (state.selectedSeats.length > freeSeats) return "Posti disponibili insufficienti.";
-  return "";
+  if (!name) return 'Inserisci il nome.';
+  if (!surname) return 'Inserisci il cognome.';
+  if (!PHONE_REGEX.test(phone)) return 'Inserisci un numero di telefono valido.';
+  if (!EMAIL_REGEX.test(email)) return 'Inserisci un indirizzo email valido.';
+  if (!ui.privacyCheckbox.checked) return 'Devi accettare la privacy policy per proseguire.';
+  if (state.selectedSeats.length === 0) return 'Seleziona almeno un posto dalla piantina.';
+
+  const validation = validateSeatSelection(getSeatLayoutSource(), state.selectedSeats, state.occupiedSeats);
+  if (!validation.valid) return validation.errors[0] || 'Selezione posti non valida.';
+
+  return '';
 }
 
-function setSubmitting(value) {
-  state.submitting = value;
-  ui.submitBtn.disabled = value;
-  ui.submitBtn.textContent = value ? "Invio in corso..." : "Conferma Prenotazione";
+function setSubmitting(isSubmitting) {
+  state.submitting = isSubmitting;
+  ui.confirmButton.disabled = isSubmitting;
+  ui.backButton.disabled = isSubmitting;
+  ui.confirmButton.innerHTML = isSubmitting
+    ? '<i class="fas fa-spinner fa-spin"></i> Elaborazione…'
+    : '<i class="fas fa-check"></i> Conferma Prenotazione';
 }
 
-async function submitBooking(event) {
+async function refreshTripSnapshot() {
+  const [tripResult, bookingsResult] = await Promise.all([
+    getViaggioPubblico({ viaggioId: state.tripId, codice: state.tripCode }),
+    getPrenotazioniViaggio(state.tripId)
+  ]);
+
+  if (tripResult.success === false) throw tripResult.error;
+  if (bookingsResult.success === false) throw bookingsResult.error;
+
+  state.trip = tripResult.data || null;
+  if (!state.trip || state.trip.pubblicato !== 'SI') {
+    throw new Error('Il viaggio selezionato non è più disponibile.');
+  }
+
+  state.occupiedSeats = extractOccupiedSeats(bookingsResult.data || []);
+  state.selectedBus = getBusByTrip(state.trip);
+}
+
+async function createPublicBooking() {
+  const seatCount = state.selectedSeats.length;
+  const total = seatCount * toNumber(state.trip?.prezzo, 0);
+  const fullName = `${normalizeText(ui.passengerName.value)} ${normalizeText(ui.passengerSurname.value)}`.trim();
+  let occupancyUpdated = false;
+
+  try {
+    await refreshTripSnapshot();
+
+    const seatValidation = validateSeatSelection(getSeatLayoutSource(), state.selectedSeats, state.occupiedSeats);
+    if (!seatValidation.valid) {
+      renderTripInfo();
+      renderSeatMap();
+      showStep(1);
+      throw new Error(seatValidation.errors[0] || 'I posti selezionati non sono più disponibili.');
+    }
+
+    const tripUpdate = await aggiornaOccupazioneViaggio(state.trip.id, seatCount);
+    if (tripUpdate.success === false) throw tripUpdate.error;
+    state.trip = tripUpdate.data || state.trip;
+    occupancyUpdated = true;
+
+    const bookingResult = await creaPrenotazione({
+      viaggio_id: state.trip.id,
+      cliente: fullName,
+      telefono: normalizeText(ui.passengerPhone.value),
+      email: normalizeText(ui.passengerEmail.value),
+      posti: seatCount,
+      posti_selezionati: state.selectedSeats.join(','),
+      totale: total,
+      note: normalizeText(ui.passengerNotes.value),
+      stato: 'In Attesa'
+    });
+
+    if (bookingResult.success === false) throw bookingResult.error;
+
+    return bookingResult.data;
+  } catch (error) {
+    if (occupancyUpdated) {
+      const rollback = await aggiornaOccupazioneViaggio(state.trip.id, -seatCount);
+      if (rollback.success === false) {
+        console.error('Rollback posti non riuscito', rollback.error);
+        throw new Error(`${error.message || 'Errore durante la prenotazione.'} Inoltre non è stato possibile ripristinare automaticamente la disponibilità.`);
+      }
+      state.trip = rollback.data || state.trip;
+    }
+    throw error;
+  }
+}
+
+async function generateReceiptForBooking(booking) {
+  const receiptBooking = {
+    ...booking,
+    nome: normalizeText(ui.passengerName.value, ''),
+    cognome: normalizeText(ui.passengerSurname.value, '')
+  };
+  const pdfBlob = await generateBookingReceipt(receiptBooking, state.trip, COMPANY_INFO);
+  downloadReceipt(pdfBlob, booking.id || booking.codice || 'prenotazione');
+}
+
+function openPublicWhatsAppConfirmation(booking) {
+  const dispatch = prepareWhatsAppDispatch({
+    booking: {
+      ...booking,
+      nome: normalizeText(ui.passengerName.value, ''),
+      cognome: normalizeText(ui.passengerSurname.value, '')
+    },
+    trip: state.trip,
+    recipientPhone: COMPANY_INFO.whatsapp,
+    template: 'support-booking-notification',
+    messageTemplate: COMPANY_INFO.whatsappTemplateSupport
+  });
+
+  if (ui.successWhatsappLink) {
+    ui.successWhatsappLink.href = dispatch.waMeUrl;
+  }
+
+  return openWhatsAppDispatch(dispatch);
+}
+
+async function handleSubmit(event) {
   event.preventDefault();
   if (state.submitting) return;
 
+  setFeedback('');
   const validationError = validateForm();
   if (validationError) {
-    alert(validationError);
+    setFeedback(validationError, 'error');
     return;
   }
-
-  const result = await getViaggio(state.tripId);
-  if (!result.success) {
-    alert("Impossibile verificare la disponibilita. Riprova.");
-    return;
-  }
-  const viaggio = result.data;
-  if (!viaggio) {
-    alert("Viaggio non trovato o non disponibile.");
-    return;
-  }
-  state.trip = viaggio;
-  const freeSeats = getAvailableSeats(state.trip);
-  if (freeSeats <= 0 || state.selectedSeats.length > freeSeats) {
-    alert("Posti non piu disponibili. Aggiorna la pagina.");
-    return;
-  }
-
-  const fullName = `${String(ui.inputNome.value || "").trim()} ${String(ui.inputCognome.value || "").trim()}`.trim();
-  const count = state.selectedSeats.length;
-  const total = count * (Number(state.trip.prezzo) || 0);
 
   setSubmitting(true);
+
   try {
-    const seatUpdate = await aggiornaDisponibilita(state.tripId, count);
-    if (!seatUpdate.success) throw seatUpdate.error;
+    const booking = await createPublicBooking();
+    let successMessage = DEFAULT_SUCCESS_MESSAGE;
+    let feedbackTone = 'success';
 
-    const bookingPayload = {
-      viaggio_id: state.tripId,
-      cliente: fullName,
-      telefono: String(ui.inputTelefono.value || "").trim(),
-      email: String(ui.inputEmail.value || "").trim(),
-      posti: count,
-      posti_selezionati: state.selectedSeats,
-      totale: total,
-      stato: "In Attesa",
-      note: String(ui.inputNote?.value || "").trim()
-    };
-
-    const created = await creaPrenotazione(bookingPayload);
-    if (!created.success) {
-      await aggiornaDisponibilita(state.tripId, -count);
-      throw created.error;
+    try {
+      await generateReceiptForBooking(booking);
+    } catch (receiptError) {
+      console.error('Generazione ricevuta non riuscita', receiptError);
+      successMessage = PDF_WARNING_MESSAGE;
+      feedbackTone = 'error';
     }
 
-    ui.successModal.classList.remove("hidden");
-    window.setTimeout(() => {
-      window.location.href = "viaggi.html";
-    }, 1600);
+    let whatsappResult = null;
+    try {
+      whatsappResult = openPublicWhatsAppConfirmation(booking);
+      if (!whatsappResult.opened) {
+        successMessage = `${successMessage} Se WhatsApp non si apre automaticamente, utilizza il pulsante dedicato qui sotto.`;
+      }
+    } catch (whatsAppError) {
+      console.error('Apertura WhatsApp non riuscita', whatsAppError);
+      successMessage = `${successMessage} Non e stato possibile preparare automaticamente il messaggio WhatsApp.`;
+    }
+
+    ui.successMessage.textContent = successMessage;
+    setFeedback(successMessage, feedbackTone);
+    showStep(3);
   } catch (error) {
-    alert(error?.message || "Errore durante la prenotazione.");
+    console.error('Prenotazione pubblica non riuscita', error);
+    setFeedback(error.message || 'Errore durante la prenotazione.', 'error');
+    renderTripInfo();
+    renderSeatMap();
   } finally {
     setSubmitting(false);
   }
 }
 
-async function init() {
-  state.tripId = parseTripId();
-  if (!state.tripId) {
-    showState("notfound");
+async function bootstrap() {
+  const tripQuery = parseTripId();
+  state.tripId = tripQuery.viaggioId;
+  state.tripCode = tripQuery.codice;
+  state.trip = null;
+  state.selectedBus = null;
+  state.occupiedSeats = [];
+  state.selectedSeats = [];
+  setFeedback('');
+  ui.loadingState.classList.remove('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.bookingContent.classList.add('hidden');
+  ui.passengerFormSection.classList.add('hidden');
+  ui.successState.classList.add('hidden');
+  updateProgress();
+
+  if (!state.tripId && !state.tripCode) {
+    setErrorState('Manca l’identificativo del viaggio richiesto.');
     return;
   }
 
-  showState("loading");
-  const [tripResponse, bookingsResponse] = await Promise.all([
-    getViaggio(state.tripId),
-    getPrenotazioniByViaggio(state.tripId)
-  ]);
+  try {
+    const [tripResult, fleetResult] = await Promise.all([
+      getViaggioPubblico({ viaggioId: state.tripId, codice: state.tripCode }),
+      getFlottaPubblica()
+    ]);
 
-  if (!tripResponse.success) {
-    setError("Errore di connessione", tripResponse.error?.message || "Impossibile caricare i dettagli del viaggio.");
-    return;
-  }
-  if (!tripResponse.data) {
-    showState("notfound");
-    return;
-  }
-  if (!isViaggioPubblicato(tripResponse.data.pubblicato)) {
-    showState("notfound");
-    return;
-  }
+    if (tripResult.success === false) throw tripResult.error;
+    if (fleetResult.success === false) throw fleetResult.error;
 
-  state.trip = tripResponse.data;
-  if (getAvailableSeats(state.trip) <= 0) {
-    state.occupiedSeats = new Set(Array.from({ length: Math.max(Number(state.trip.posti_totali) || 0, 0) }, (_, i) => String(i + 1)));
-  } else {
-    const occupiedByBookings = bookingsResponse.success ? parseSeatsFromBookings(bookingsResponse.data) : new Set();
-    state.occupiedSeats = occupiedByBookings.size ? occupiedByBookings : fallbackOccupiedFromCounters(state.trip);
-  }
+    const trip = tripResult.data || null;
+    if (!trip || trip.pubblicato !== 'SI') {
+      throw new Error('Il viaggio richiesto non esiste o non è disponibile online.');
+    }
 
-  renderTrip();
-  renderSeatMap();
-  updateSummary();
-  showState("content");
+    const bookingsResult = await getPrenotazioniViaggio(trip.id);
+    if (bookingsResult.success === false) throw bookingsResult.error;
+
+    state.trip = trip;
+    state.tripId = normalizeText(trip.id);
+    state.fleet = Array.isArray(fleetResult.data) ? fleetResult.data : [];
+    state.selectedBus = getBusByTrip(trip);
+    state.occupiedSeats = extractOccupiedSeats(bookingsResult.data || []);
+
+    renderTripInfo();
+    renderSeatMap();
+    showStep(1);
+  } catch (error) {
+    console.error('Bootstrap prenotazione non riuscito', error);
+    setErrorState(error.message || 'Errore inatteso durante il caricamento del viaggio.');
+  }
 }
 
 function bindEvents() {
-  ui.retryBtn?.addEventListener("click", () => init());
-  ui.form?.addEventListener("submit", submitBooking);
-  ui.seatmap?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-seat]");
-    if (!button) return;
-    toggleSeat(String(button.dataset.seat));
+  ui.continueButton.addEventListener('click', () => {
+    if (state.selectedSeats.length === 0) {
+      setFeedback('Seleziona almeno un posto prima di continuare.', 'error');
+      return;
+    }
+
+    const validation = validateSeatSelection(getSeatLayoutSource(), state.selectedSeats, state.occupiedSeats);
+    if (!validation.valid) {
+      setFeedback(validation.errors[0] || 'Selezione posti non valida.', 'error');
+      renderSeatMap();
+      return;
+    }
+
+    setFeedback('');
+    showStep(2);
+  });
+
+  ui.backButton.addEventListener('click', () => {
+    setFeedback('');
+    showStep(1);
+  });
+
+  ui.passengerForm.addEventListener('submit', handleSubmit);
+
+  ui.seatmapContainer.addEventListener('click', (event) => {
+    const seatButton = event.target.closest('.seat[data-seat]');
+    if (!seatButton || seatButton.disabled) return;
+    toggleSeatSelection(seatButton.dataset.seat);
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+async function init() {
+  const settingsResponse = await loadImpostazioni();
+  if (settingsResponse.success !== false) {
+    COMPANY_INFO = buildCompanyInfo(settingsResponse.data);
+    applyRuntimeSettings(settingsResponse.data);
+  }
   bindEvents();
-  init();
+  bootstrap().catch((error) => {
+    console.error('Inizializzazione prenotazione non riuscita', error);
+    setErrorState(error.message || 'Impossibile inizializzare la pagina prenotazione.');
+  });
+}
+
+init().catch((error) => {
+  console.error('Caricamento impostazioni prenotazione non riuscito', error);
+  setErrorState(error.message || 'Impossibile inizializzare la pagina prenotazione.');
 });
