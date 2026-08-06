@@ -1,176 +1,1015 @@
 <!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prenota Viaggio - DelGrosso Viaggi</title>
-  <meta name="description" content="Prenota il tuo posto per il viaggio selezionato con DelGrosso Viaggi.">
-  <script>
-    (function suppressTailwindCdnWarning() {
-      const originalWarn = console.warn;
-      console.warn = function patchedWarn(...args) {
-        const text = args.map((value) => String(value)).join(" ");
-        if (text.includes("cdn.tailwindcss.com should not be used in production")) return;
-        originalWarn.apply(console, args);
-      };
-    })();
-  </script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <title>Prenota Online | Del Grosso Viaggi & Limousine Bus</title>
+  <meta name="description" content="Configura la tua prenotazione Del Grosso, scegli i posti a bordo e completa i dati passeggero online.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              gold: "#D4AF37",
-              darkGold: "#AA7C11",
-              dark: "#121212",
-              card: "#1E1E1E"
-            }
-          },
-          fontFamily: {
-            sans: ["Montserrat", "sans-serif"],
-            serif: ["Playfair Display", "serif"]
-          }
-        }
-      }
-    };
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/src/public/brand-public.css">
+  <link rel="stylesheet" href="./src/pages/prenotazioni/seat-map.css">
   <style>
-    .glass-nav { background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-    .posto { width: 44px; height: 44px; border-radius: 10px; font-size: 12px; font-weight: 800; transition: transform .2s ease, box-shadow .2s ease; }
-    .posto:hover { transform: translateY(-2px); }
-    .seat-selected { background-color: #D4AF37 !important; color: #121212 !important; border: 1px solid #AA7C11 !important; }
-    .seat-occupied { background-color: #333333 !important; color: #666666 !important; border: 1px solid #333333 !important; cursor: not-allowed; }
+    .booking-page {
+      padding-bottom: 90px;
+    }
+
+    .booking-hero {
+      padding-top: 38px;
+      padding-bottom: 18px;
+    }
+
+    .booking-hero__copy {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .booking-hero__title {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 58px);
+      font-weight: 900;
+      font-style: italic;
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+    }
+
+    .booking-hero__title span {
+      color: var(--ocean-700);
+    }
+
+    .booking-hero__text {
+      max-width: 54ch;
+      margin: 0;
+      color: #64748b;
+      font-size: 15px;
+      line-height: 1.72;
+    }
+
+    .booking-hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .booking-hero__support {
+      display: grid;
+      gap: 12px;
+    }
+
+    .support-chip {
+      padding: 18px 20px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 249, 255, 0.96));
+      border: 1px solid rgba(186, 230, 253, 0.9);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .support-chip strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ocean-800);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .support-chip span {
+      display: block;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .progress-card {
+      padding: 18px 22px 22px;
+      margin-bottom: 22px;
+    }
+
+    .progress-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+
+    .progress-head strong {
+      color: var(--slate-900);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .progress-head span {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .progress-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(248, 250, 252, 0.98);
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .progress-step.active {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(224, 242, 254, 0.82);
+      box-shadow: 0 16px 26px -22px rgba(2, 132, 199, 0.7);
+    }
+
+    .step-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .progress-step.active .step-circle {
+      background: linear-gradient(135deg, var(--ocean-500), var(--ocean-800));
+    }
+
+    .step-label {
+      color: #475569;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .w-full.h-1 {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(226, 232, 240, 0.96);
+      overflow: hidden;
+    }
+
+    .w-full.h-1 > div {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--ocean-500), var(--ocean-800));
+      transition: width 0.35s ease;
+    }
+
+    #loading-state,
+    #error-state {
+      padding: 56px 0 16px;
+    }
+
+    .loading-card,
+    .error-card,
+    .success-card {
+      padding: 42px 28px;
+      text-align: center;
+    }
+
+    .loading-spinner,
+    .status-icon {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 20px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(186, 230, 253, 0.78);
+      border-top-color: var(--ocean-600);
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-icon {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--danger);
+      font-size: 32px;
+    }
+
+    .status-icon--success {
+      background: rgba(22, 163, 74, 0.08);
+      color: var(--success);
+    }
+
+    .loading-card h2,
+    .error-card h2,
+    .success-card h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    .loading-card p,
+    .error-card p,
+    .success-card p {
+      max-width: 620px;
+      margin: 0 auto;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .booking-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .booking-sidebar {
+      position: sticky;
+      top: 104px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .trip-card,
+    .summary-card,
+    .seat-stage,
+    .form-card {
+      padding: 22px;
+    }
+
+    .trip-card__poster {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      margin-bottom: 18px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(186, 230, 253, 0.65));
+    }
+
+    #trip-image {
+      width: 100%;
+      height: 100%;
+      background-position: center;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(15, 23, 42, 0.5);
+      font-size: 48px;
+    }
+
+    .card-kicker {
+      margin: 0 0 8px;
+      color: var(--ocean-600);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    #trip-title {
+      margin: 0 0 16px;
+      color: var(--slate-900);
+      font-size: 30px;
+      font-weight: 900;
+      font-style: italic;
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+    }
+
+    .trip-details {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: rgba(248, 250, 252, 0.98);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+    }
+
+    .detail-row__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .detail-row__label i {
+      color: var(--ocean-600);
+      width: 16px;
+      flex-shrink: 0;
+    }
+
+    .detail-row__value {
+      color: var(--slate-900);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .detail-row__value--price {
+      color: var(--ocean-800);
+      font-size: 18px;
+      font-weight: 900;
+      font-style: italic;
+    }
+
+    .summary-title {
+      margin: 0 0 16px;
+      color: var(--slate-900);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .summary-box {
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .summary-divider {
+      height: 1px;
+      margin: 8px 0;
+      background: rgba(226, 232, 240, 0.95);
+    }
+
+    .summary-total {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .summary-total strong {
+      color: var(--slate-900);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .summary-total span {
+      color: var(--ocean-800);
+      font-size: 34px;
+      font-weight: 900;
+      font-style: italic;
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .booking-cta {
+      width: 100%;
+      margin-top: 18px;
+      min-height: 54px;
+      border-radius: 18px;
+    }
+
+    .booking-cta:disabled {
+      background: rgba(203, 213, 225, 0.9);
+      box-shadow: none;
+      color: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .seat-stage__head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .seat-stage__title {
+      margin: 0 0 6px;
+      color: var(--slate-900);
+      font-size: 30px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+    }
+
+    .seat-stage__sub {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .seat-stage__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .seat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(248, 250, 252, 0.98);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      color: #475569;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .seat-chip i {
+      color: var(--ocean-600);
+    }
+
+    #seatmap-container {
+      --surface: #f8fbff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --bg: #ffffff;
+      --brand: #0284c7;
+      --seat-available-bg: #16a34a;
+      --seat-available-border: #15803d;
+      --seat-occupied-bg: #ef4444;
+      --seat-occupied-border: #dc2626;
+      --seat-selected-bg: #f59e0b;
+      --seat-selected-border: #d97706;
+      --seat-selected-text: #111827;
+    }
+
+    #seatmap-container .seat-map-container {
+      margin: 0;
+      padding: 22px;
+      border-radius: 28px;
+      border: 1px solid rgba(186, 230, 253, 0.95);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.98));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), var(--soft-shadow);
+    }
+
+    #seatmap-container .seat-map-front {
+      background: linear-gradient(180deg, rgba(2, 132, 199, 0.1), rgba(14, 165, 233, 0.04));
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    #seatmap-container .seat-map-front__driver {
+      background: var(--ocean-dark);
+    }
+
+    #seatmap-container .seat-map-legend {
+      background: rgba(248, 250, 252, 0.98);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+    }
+
+    #seatmap-container .seat-map-stats strong {
+      color: var(--ocean-700);
+    }
+
+    .form-card {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .form-head {
+      margin-bottom: 24px;
+    }
+
+    .form-head h2 {
+      margin: 0 0 8px;
+      color: var(--slate-900);
+      font-size: 30px;
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+    }
+
+    .form-head p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .form-field,
+    .form-field--full {
+      display: grid;
+      gap: 8px;
+    }
+
+    .form-field--full {
+      grid-column: 1 / -1;
+    }
+
+    .form-field label,
+    .form-field--full label {
+      color: #475569;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .form-control {
+      width: 100%;
+      min-height: 54px;
+      padding: 0 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(203, 213, 225, 0.95);
+      background: rgba(248, 250, 252, 0.98);
+      color: var(--slate-900);
+      font-size: 14px;
+      font-weight: 600;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.9);
+      background: var(--white);
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+    }
+
+    textarea.form-control {
+      min-height: 128px;
+      padding-block: 14px;
+      resize: vertical;
+    }
+
+    .privacy-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(248, 250, 252, 0.98);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+    }
+
+    .privacy-box input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--ocean-600);
+      flex-shrink: 0;
+    }
+
+    .privacy-box label {
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+
+    .privacy-box a {
+      color: var(--ocean-700);
+      font-weight: 800;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 14px;
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(226, 232, 240, 0.95);
+    }
+
+    .form-back,
+    .form-confirm {
+      min-height: 54px;
+      border-radius: 18px;
+      flex: 1;
+    }
+
+    .form-back {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(203, 213, 225, 0.95);
+      color: var(--slate-700);
+    }
+
+    .form-confirm:disabled {
+      background: rgba(203, 213, 225, 0.9);
+      box-shadow: none;
+      color: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .form-feedback {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      font-size: 13px;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+
+    .form-feedback--error {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: #b91c1c;
+    }
+
+    .form-feedback--success {
+      background: rgba(22, 163, 74, 0.08);
+      border-color: rgba(22, 163, 74, 0.2);
+      color: #166534;
+    }
+
+    .success-card {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .success-actions {
+      margin-top: 26px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    @media (max-width: 1040px) {
+      .booking-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .progress-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .trip-card,
+      .summary-card,
+      .seat-stage,
+      .form-card,
+      .progress-card {
+        padding: 18px;
+      }
+    }
   </style>
 </head>
-<body class="bg-brand-dark text-white font-sans antialiased selection:bg-brand-gold selection:text-black">
-  <header class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      <a href="viaggi.html" class="flex items-center space-x-3 group">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-gold to-brand-darkGold flex items-center justify-center text-black font-bold text-lg shadow-lg">DG</div>
-        <div>
-          <span class="block font-serif font-bold text-lg tracking-wider">DELGROSSO</span>
-          <span class="block text-xs uppercase tracking-widest text-brand-gold">Viaggi & Limousine Bus</span>
+<body>
+  <div class="page-shell booking-page">
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="brand-lockup" aria-label="Del Grosso Viaggi & Limousine Bus">
+          <span class="brand-lockup__box"><img data-runtime-logo src="/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
+          <span class="brand-lockup__text">
+            <span class="brand-lockup__title">Del Grosso</span>
+            <span class="brand-lockup__sub">Viaggi &amp; Limousine Bus</span>
+          </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navigazione principale">
+          <a href="index.html">Home</a>
+          <a href="viaggi.html" class="is-active">Partenze</a>
+          <a href="richiedi-preventivo.html">Preventivi</a>
+          <a href="index.html#flotta">Flotta</a>
+          <a href="index.html#contatti">Contatti</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="btn-primary" href="viaggi.html"><i class="fas fa-arrow-left"></i> Torna alle Partenze</a>
         </div>
-      </a>
-      <a href="viaggi.html" class="bg-gradient-to-r from-brand-gold to-brand-darkGold text-black font-semibold px-6 py-2.5 rounded-full text-sm shadow-lg hover:opacity-95 transition-all">Torna ai Viaggi</a>
-    </div>
-  </header>
 
-  <main class="pt-28 pb-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div id="loading-state" class="text-center py-32">
-        <div class="w-12 h-12 border-4 border-brand-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p class="text-gray-400 text-sm">Caricamento dettagli viaggio in corso...</p>
+        <button id="mobileToggle" class="mobile-toggle" type="button" aria-label="Apri menu">
+          <i class="fas fa-bars"></i>
+        </button>
       </div>
 
-      <div id="error-state" class="hidden text-center py-20 bg-brand-card rounded-2xl border border-white/10 p-8 shadow-2xl max-w-xl mx-auto">
-        <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3 id="error-title" class="text-xl font-bold mb-2">Errore</h3>
-        <p id="error-desc" class="text-gray-400 mb-6 text-sm"></p>
-        <button id="retry-btn" class="bg-brand-gold text-black font-semibold px-6 py-2.5 rounded-xl text-sm hover:opacity-95 transition-all">Riprova</button>
-      </div>
+      <nav id="mobileStrip" class="mobile-strip hidden" aria-label="Navigazione mobile">
+        <a href="index.html">Home</a>
+        <a href="viaggi.html" class="is-active">Partenze</a>
+        <a href="richiedi-preventivo.html">Preventivi</a>
+        <a href="index.html#flotta">Flotta</a>
+        <a href="index.html#contatti">Contatti</a>
+      </nav>
+    </header>
 
-      <div id="not-found-state" class="hidden text-center py-20 bg-brand-card rounded-2xl border border-white/10 p-8 shadow-2xl max-w-xl mx-auto">
-        <div class="w-16 h-16 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fa-solid fa-map-location-dot"></i></div>
-        <h3 class="text-xl font-bold mb-2">Viaggio non trovato</h3>
-        <p class="text-gray-400 mb-6 text-sm">Il viaggio richiesto non esiste o non e disponibile.</p>
-        <a href="viaggi.html" class="bg-brand-gold text-black font-semibold px-6 py-2.5 rounded-xl text-sm hover:opacity-95 transition-all inline-block">Vai ai viaggi</a>
-      </div>
+    <main class="booking-page">
+      <section class="hero-section booking-hero">
+        <div class="booking-hero__copy" data-aos="fade-up">
+          <span class="eyebrow"><span class="eyebrow__dot"></span> Prenotazione online Del Grosso</span>
+          <h1 class="booking-hero__title">Configura la tua <span>partenza</span></h1>
+          <p class="booking-hero__text">
+            Scegli il viaggio, seleziona i posti direttamente sulla piantina ufficiale del mezzo
+            e completa la prenotazione con un flusso rapido, chiaro e perfettamente integrato
+            con il sito Del Grosso Viaggi.
+          </p>
+          <div class="booking-hero__actions">
+            <a class="btn-primary" href="viaggi.html"><i class="fas fa-ticket"></i> Vedi altre partenze</a>
+            <a class="btn-secondary" href="richiedi-preventivo.html"><i class="fas fa-file-signature"></i> Richiedi Preventivo</a>
+          </div>
+        </div>
 
-      <div id="booking-content" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8" data-aos="fade-up">
-        <div class="lg:col-span-1 space-y-6">
-          <div class="bg-brand-card rounded-2xl overflow-hidden border border-white/10 shadow-xl">
-            <div id="viaggio-img" class="h-56 bg-cover bg-center"></div>
-            <div class="p-6 space-y-4">
-              <span id="viaggio-cat" class="bg-brand-gold/10 text-brand-gold text-xs font-semibold px-3 py-1 rounded-full border border-brand-gold/30 inline-block"></span>
-              <h1 id="viaggio-titolo" class="font-serif text-2xl font-bold text-white"></h1>
-              <p id="viaggio-desc" class="text-gray-400 text-xs leading-relaxed"></p>
-              <div class="border-t border-white/10 pt-4 space-y-2 text-xs">
-                <div class="flex justify-between"><span class="text-gray-400">Data Partenza:</span><span id="viaggio-data" class="font-semibold text-white"></span></div>
-                <div class="flex justify-between"><span class="text-gray-400">Prezzo a Persona:</span><span id="viaggio-prezzo" class="font-bold text-brand-gold text-sm"></span></div>
-              </div>
+        <div class="booking-hero__support" data-aos="fade-left">
+          <div class="support-chip">
+            <strong>Prenotazione Premium</strong>
+            <span>Posti su piantina ufficiale, riepilogo immediato, compatibilità completa con il catalogo partenze Del Grosso.</span>
+          </div>
+          <div class="support-chip">
+            <strong>Assistenza Diretta</strong>
+            <span>Per gruppi, esigenze speciali o supporto immediato puoi contattare il team operativo Del Grosso in ogni fase.</span>
+          </div>
+          <div class="support-chip">
+            <strong>Ricevuta PDF &amp; QR</strong>
+            <span>Dopo la conferma viene generata automaticamente una ricevuta professionale con QR Code integrato.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-shell" style="padding-top:0;">
+        <div class="progress-card panel" data-aos="fade-up">
+          <div class="progress-head">
+            <strong>Stato prenotazione</strong>
+            <span>Dal posto a bordo alla conferma finale</span>
+          </div>
+          <div class="progress-steps">
+            <div class="progress-step active" data-step="1">
+              <span class="step-circle">1</span>
+              <span class="step-label">Scelta posti</span>
+            </div>
+            <div class="progress-step" data-step="2">
+              <span class="step-circle">2</span>
+              <span class="step-label">Dati cliente</span>
+            </div>
+            <div class="progress-step" data-step="3">
+              <span class="step-circle">3</span>
+              <span class="step-label">Conferma</span>
+            </div>
+          </div>
+          <div class="w-full h-1"><div style="width:33.33%;"></div></div>
+        </div>
+
+        <div id="loading-state">
+          <div class="loading-card panel">
+            <div class="loading-spinner"></div>
+            <h2>Prepariamo la tua partenza</h2>
+            <p>Stiamo caricando il viaggio selezionato, il mezzo assegnato e la disponibilità posti in tempo reale.</p>
+          </div>
+        </div>
+
+        <div id="error-state" class="hidden">
+          <div class="error-card panel">
+            <div class="status-icon"><i class="fas fa-triangle-exclamation"></i></div>
+            <h2>Viaggio non disponibile</h2>
+            <p>Il viaggio richiesto non esiste, non è più pubblicato oppure manca l'identificativo della partenza.</p>
+            <div class="success-actions">
+              <a href="viaggi.html" class="btn-primary"><i class="fas fa-arrow-left"></i> Torna alle Partenze</a>
             </div>
           </div>
         </div>
 
-        <div class="lg:col-span-2 space-y-6">
-          <div class="bg-brand-card rounded-2xl p-6 sm:p-8 border border-white/10 shadow-xl">
-            <h2 class="font-serif text-xl font-bold mb-6 text-white">Selezione Posti a Bordo</h2>
-            <div class="bg-[#121212] p-6 rounded-xl border border-white/10 overflow-x-auto">
-              <div class="text-center text-xs text-gray-500 uppercase tracking-widest mb-6 font-semibold border-b border-white/5 pb-3">Fronte Autobus / Autista</div>
-              <div id="seatmap-container" class="flex flex-col items-center gap-3 min-w-[280px]"></div>
-            </div>
-          </div>
+        <div id="booking-content" class="hidden">
+          <div class="booking-grid">
+            <aside class="booking-sidebar">
+              <section class="trip-card panel" data-aos="fade-up">
+                <div class="trip-card__poster">
+                  <div id="trip-image"><i class="fas fa-bus"></i></div>
+                </div>
+                <p class="card-kicker">Viaggio selezionato</p>
+                <h2 id="trip-title">-</h2>
+                <div class="trip-details">
+                  <div class="detail-row">
+                    <span class="detail-row__label"><i class="fas fa-calendar-alt"></i> Data</span>
+                    <span class="detail-row__value" id="trip-date">-</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-row__label"><i class="fas fa-clock"></i> Orario</span>
+                    <span class="detail-row__value" id="trip-time">-</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-row__label"><i class="fas fa-chair"></i> Disponibilità</span>
+                    <span class="detail-row__value" id="seats-available">-</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-row__label"><i class="fas fa-bus"></i> Mezzo</span>
+                    <span class="detail-row__value" id="bus-model">-</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-row__label"><i class="fas fa-users"></i> Posti totali</span>
+                    <span class="detail-row__value" id="bus-seats">-</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-row__label"><i class="fas fa-tag"></i> Prezzo</span>
+                    <span class="detail-row__value detail-row__value--price" id="trip-price">-</span>
+                  </div>
+                </div>
+              </section>
 
-          <div class="bg-brand-card rounded-2xl p-6 sm:p-8 border border-white/10 shadow-xl">
-            <h2 class="font-serif text-xl font-bold mb-6 text-white">Dati Passeggero e Conferma</h2>
-            <form id="prenotazione-form" class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-gray-400 mb-2" for="nome">Nome</label>
-                  <input type="text" id="nome" required class="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors text-sm" placeholder="Mario">
+              <section class="summary-card panel" data-aos="fade-up" data-aos-delay="60">
+                <h3 class="summary-title">Riepilogo prenotazione</h3>
+                <div class="summary-box">
+                  <div class="summary-row">
+                    <span>Posti selezionati</span>
+                    <strong id="summary-seats">Nessuno</strong>
+                  </div>
+                  <div class="summary-row">
+                    <span>Prezzo unitario</span>
+                    <strong id="summary-price">-</strong>
+                  </div>
                 </div>
+                <div class="summary-divider"></div>
+                <div class="summary-total">
+                  <strong>Totale</strong>
+                  <span id="summary-total">-</span>
+                </div>
+                <button id="continue-btn" type="button" class="btn-primary booking-cta" disabled><i class="fas fa-arrow-right"></i> Continua con i dati</button>
+              </section>
+            </aside>
+
+            <section class="seat-stage panel-soft" data-aos="fade-up" data-aos-delay="100">
+              <div class="seat-stage__head">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-400 mb-2" for="cognome">Cognome</label>
-                  <input type="text" id="cognome" required class="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors text-sm" placeholder="Rossi">
+                  <p class="card-kicker">Layout ufficiale del mezzo</p>
+                  <h3 class="seat-stage__title">Scegli i tuoi posti</h3>
+                  <p class="seat-stage__sub">La piantina rispetta il layout reale Del Grosso. Seleziona i posti disponibili e passa allo step successivo.</p>
+                </div>
+                <div class="seat-stage__chips">
+                  <span class="seat-chip"><i class="fas fa-circle-info"></i> GT layout certificato</span>
+                  <span class="seat-chip"><i class="fas fa-shield-halved"></i> Disponibilità live</span>
                 </div>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-gray-400 mb-2" for="email">Email</label>
-                  <input type="email" id="email" required class="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors text-sm" placeholder="mario.rossi@example.com">
+              <div id="seatmap-container"></div>
+            </section>
+          </div>
+        </div>
+
+        <div id="passenger-form-section" class="hidden">
+          <section class="form-card panel" data-aos="fade-up">
+            <div class="form-head">
+              <p class="card-kicker">Step finale</p>
+              <h2>Dati passeggero</h2>
+              <p>Inserisci i dati richiesti per confermare la prenotazione e ricevere la ricevuta PDF con QR Code.</p>
+            </div>
+            <form id="passenger-form">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="passenger-name">Nome *</label>
+                  <input id="passenger-name" class="form-control" type="text" placeholder="Es. Mario" required>
                 </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-400 mb-2" for="telefono">Telefono</label>
-                  <input type="tel" id="telefono" required class="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors text-sm" placeholder="+39 333 1234567">
+                <div class="form-field">
+                  <label for="passenger-surname">Cognome *</label>
+                  <input id="passenger-surname" class="form-control" type="text" placeholder="Es. Rossi" required>
+                </div>
+                <div class="form-field">
+                  <label for="passenger-phone">Telefono *</label>
+                  <input id="passenger-phone" class="form-control" type="tel" placeholder="+39 320 0000000" required>
+                </div>
+                <div class="form-field">
+                  <label for="passenger-email">Email *</label>
+                  <input id="passenger-email" class="form-control" type="email" placeholder="nome@dominio.it" required>
+                </div>
+                <div class="form-field--full">
+                  <label for="passenger-notes">Note</label>
+                  <textarea id="passenger-notes" class="form-control" placeholder="Richieste particolari, passeggeri con esigenze specifiche o note utili per il team Del Grosso."></textarea>
+                </div>
+                <div class="form-field--full">
+                  <div class="privacy-box">
+                    <input id="privacy-checkbox" type="checkbox" required>
+                    <label for="privacy-checkbox">Accetto la <a href="index.html#contatti">privacy policy</a> e autorizzo Del Grosso Viaggi al trattamento dei dati esclusivamente per la gestione della prenotazione.</label>
+                  </div>
                 </div>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-400 mb-2" for="note">Note</label>
-                <textarea id="note" rows="3" class="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors text-sm" placeholder="Richieste particolari..."></textarea>
+              <div class="form-actions">
+                <button id="back-btn" type="button" class="btn-ghost form-back"><i class="fas fa-arrow-left"></i> Indietro</button>
+                <button id="confirm-btn" type="submit" class="btn-primary form-confirm"><i class="fas fa-check"></i> Conferma prenotazione</button>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-400 mb-2" for="posti-selezionati-input">Posti Selezionati</label>
-                <input type="text" id="posti-selezionati-input" readonly class="w-full bg-[#121212]/50 border border-white/10 rounded-xl px-4 py-3 text-brand-gold font-bold text-sm" placeholder="Seleziona i posti dalla piantina sopra">
-              </div>
-              <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-                <div>
-                  <span class="text-xs text-gray-400 block">Totale da pagare</span>
-                  <span id="totale-prezzo" class="text-xl font-bold text-brand-gold">€ 0,00</span>
-                </div>
-                <button type="submit" id="submit-btn" class="bg-gradient-to-r from-brand-gold to-brand-darkGold text-black font-semibold px-8 py-3.5 rounded-xl text-sm hover:opacity-95 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">Conferma Prenotazione</button>
-              </div>
+              <div id="booking-feedback" class="form-feedback hidden" role="alert" aria-live="polite"></div>
             </form>
-          </div>
+          </section>
+        </div>
+
+        <div id="success-state" class="hidden">
+          <section class="success-card panel">
+            <div class="status-icon status-icon--success"><i class="fas fa-check"></i></div>
+            <h2>Prenotazione completata</h2>
+            <p id="success-message">La tua prenotazione è stata registrata con successo.</p>
+            <div class="success-actions">
+              <a href="viaggi.html" class="btn-primary"><i class="fas fa-ticket"></i> Torna alle Partenze</a>
+              <a id="success-whatsapp-link" href="https://wa.me/393205730466" class="btn-secondary" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Contatta Del Grosso</a>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__grid">
+          <section class="footer-card">
+            <div class="brand-lockup" style="margin-bottom:20px;">
+              <span class="brand-lockup__box"><img data-runtime-logo src="/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
+              <span class="brand-lockup__text">
+                <span class="brand-lockup__title" style="color:#e2e8f0;">Del Grosso</span>
+                <span class="brand-lockup__sub" style="color:#7dd3fc;">Viaggi &amp; Limousine Bus</span>
+              </span>
+            </div>
+            <h3>Contatti Diretti</h3>
+            <div class="contact-stack" data-runtime-contact-stack></div>
+          </section>
+
+          <section class="footer-card">
+            <h3>Canali Social Operativi</h3>
+            <div class="social-grid" data-runtime-social-grid></div>
+          </section>
+        </div>
+
+        <div class="footer-bottom">
+          <span>&copy; 2026 Del Grosso Viaggi &amp; Limousine Bus - P.IVA: 04499320713. Tutti i diritti riservati.</span>
+          <span>Prenotazione online, flotte GT Deluxe, assistenza diretta e ricevute digitali.</span>
         </div>
       </div>
-    </div>
-  </main>
-
-  <div id="success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-    <div class="bg-brand-card rounded-2xl border border-white/10 max-w-md w-full p-8 text-center space-y-6 shadow-2xl">
-      <div class="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto text-2xl"><i class="fa-solid fa-check"></i></div>
-      <div class="space-y-2">
-        <h3 class="font-serif text-2xl font-bold text-white">Prenotazione Confermata!</h3>
-        <p class="text-gray-400 text-xs leading-relaxed">La tua prenotazione e stata registrata con successo.</p>
-      </div>
-      <a href="viaggi.html" class="block w-full bg-gradient-to-r from-brand-gold to-brand-darkGold text-black font-semibold py-3 rounded-xl text-sm hover:opacity-95 transition-all shadow-lg">Torna ai Viaggi</a>
-    </div>
+    </footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
   <script>
-    if (typeof AOS !== "undefined") {
-      AOS.init({ duration: 700, once: true });
+    if (typeof AOS !== 'undefined') {
+      AOS.init({ duration: 700, once: true, offset: 40 });
+    }
+
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mobileStrip = document.getElementById('mobileStrip');
+
+    if (mobileToggle && mobileStrip) {
+      mobileToggle.addEventListener('click', () => {
+        mobileStrip.classList.toggle('hidden');
+        mobileToggle.innerHTML = mobileStrip.classList.contains('hidden')
+          ? '<i class="fas fa-bars"></i>'
+          : '<i class="fas fa-xmark"></i>';
+      });
     }
   </script>
-  <script type="module" src="js/prenota.js"></script>
+  <script type="module" src="/src/public/prenota.js"></script>
 </body>
 </html>
