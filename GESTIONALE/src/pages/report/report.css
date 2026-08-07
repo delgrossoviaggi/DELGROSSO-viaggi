@@ -1,0 +1,15 @@
+#reportChart {
+  min-height: 360px;
+}
+
+.filters {
+  margin-bottom: 0;
+}
+
+.grid {
+  align-items: start;
+}
+
+.panel button + button {
+  margin-left: 0;
+}
