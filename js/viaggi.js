@@ -117,7 +117,7 @@ function buildTripCard(trip) {
   return `
     <article class="departure-card" data-aos="fade-up">
       <div class="departure-card__media">
-        <img src="${image}" alt="${escapeHtml(trip.titolo || 'Viaggio Del Grosso')}" loading="lazy" onerror="this.src='${PLACEHOLDER_IMAGE}'">
+        <img src="${image}" alt="${escapeHtml(trip.titolo || 'Viaggio Del Grosso')}" loading="eager" referrerpolicy="no-referrer" onerror="this.src='${PLACEHOLDER_IMAGE}'">
         <div class="departure-card__badge">${getAvailabilityBadge(trip)}</div>
       </div>
       <div class="departure-card__content">
