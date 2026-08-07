@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Impostazioni Workspace | Del Grosso Viaggi & Limousine Bus</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="stylesheet" href="css/brand-shell.css">
+  <link rel="stylesheet" href="css/accessibility.css">
+  <link rel="stylesheet" href="css/impostazioni.css">
+</head>
+<body data-theme="light">
+
+<div class="settings-shell">
+  <aside class="settings-nav">
+    <div class="settings-brand">
+      <div class="brand-badge">DG</div>
+      <div class="brand-details">
+        <small>CRM TRAVEL SUITE</small>
+        <strong>Del Grosso Viaggi</strong>
+      </div>
+    </div>
+
+    <nav aria-label="Menu Impostazioni">
+      <a class="nav-item active" href="#azienda">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5s1.5 0 1.5 1.5v1.5s0 1.5-1.5 1.5H9m0-4.5v4.5m0 3.75h1.5s1.5 0 1.5 1.5v1.5s0 1.5-1.5 1.5H9m0-4.5v4.5"/></svg>
+        Profilo Aziendale
+      </a>
+      <a class="nav-item" href="#utenti">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0z"/></svg>
+        Gestione Utenti
+      </a>
+      <a class="nav-item" href="#aspetto">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25c0-.962.36-1.84 1.02-2.502l10.22-10.22a2.121 2.121 0 1 1 3 3L7.02 17.75M16.5 6.75l2.25 2.25"/></svg>
+        Aspetto & Preferenze
+      </a>
+      <a class="nav-item" href="#documenti-section">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-8.625a1.125 1.125 0 0 0-1.125-1.125H8.25l-3.75 3.75v10.125A1.125 1.125 0 0 0 5.625 19.5h7.125"/><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5v3.375A1.125 1.125 0 0 1 7.125 9H3.75m9.75 9 2.25 2.25 4.5-4.5"/></svg>
+        Documenti & QR
+      </a>
+      <a class="nav-item" href="#communication-section">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h5.25M3.75 18.75h16.5A1.5 1.5 0 0 0 21.75 17.25V6.75a1.5 1.5 0 0 0-1.5-1.5H3.75a1.5 1.5 0 0 0-1.5 1.5v10.5a1.5 1.5 0 0 0 1.5 1.5Z"/></svg>
+        Comunicazione
+      </a>
+      <a class="nav-item" href="#config-section">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75v10.5M12 9.75v7.5M6.75 12v3m-3 6.75h16.5a1.5 1.5 0 0 0 1.5-1.5V3.75a1.5 1.5 0 0 0-1.5-1.5H3.75a1.5 1.5 0 0 0-1.5 1.5v16.5a1.5 1.5 0 0 0 1.5 1.5Z"/></svg>
+        Supabase & Storage
+      </a>
+      <a class="nav-item" href="#backup">
+        <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+        Backup & Ripristino
+      </a>
+    </nav>
+
+    <button id="logoutBtn" type="button" class="logout-btn">
+      <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"/></svg>
+      Esci dal gestionale
+    </button>
+  </aside>
+
+  <main class="settings-content">
+    <header class="settings-header">
+      <div>
+        <span class="eyebrow">Pannello amministrativo enterprise</span>
+        <h1>Impostazioni</h1>
+        <p>Gestione centralizzata di azienda, account, policy operative, backup e monitoraggio sistema.</p>
+      </div>
+      <div class="system-badge">
+        <span class="pulse-dot"></span>
+        Configurazione connessa
+      </div>
+    </header>
+
+    <section id="azienda" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>1. Informazioni Azienda</h2>
+          <p>Anagrafica e branding operativo.</p>
+        </div>
+        <button id="saveCompanyBtn" type="button" class="btn btn-primary">Salva informazioni</button>
+      </div>
+      <div class="form-grid">
+        <label class="form-group">Ragione Sociale
+          <input id="companyNameInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Partita IVA / C.F.
+          <input id="companyVatInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Email aziendale
+          <input id="companyEmailInput" type="email" class="form-input">
+        </label>
+        <label class="form-group">Telefono aziendale
+          <input id="companyPhoneInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">WhatsApp aziendale
+          <input id="companyWhatsappInput" type="text" class="form-input" placeholder="393205730466">
+          <small class="company-whatsapp-hint">
+            Supporto clienti: 3205730466<br>
+            Assistenza clienti (Nicola): 3662127916
+          </small>
+        </label>
+        <label class="form-group span-2">Indirizzo sede
+          <input id="companyAddressInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Sito web
+          <input id="companyWebsiteInput" type="url" class="form-input" placeholder="https://...">
+        </label>
+        <label class="form-group">Email PEC
+          <input id="companyPecInput" type="email" class="form-input">
+        </label>
+        <label class="form-group">Logo URL
+          <input id="companyLogoInput" type="url" class="form-input" placeholder="https://.../logo.png">
+        </label>
+        <label class="form-group">Favicon URL
+          <input id="companyFaviconInput" type="url" class="form-input" placeholder="https://.../favicon.ico">
+        </label>
+        <label class="form-group">Support label
+          <input id="companySupportLabelInput" type="text" class="form-input" placeholder="Supporto Clienti">
+        </label>
+        <label class="form-group">Facebook
+          <input id="companyFacebookInput" type="url" class="form-input" placeholder="https://facebook.com/...">
+        </label>
+        <label class="form-group">Instagram
+          <input id="companyInstagramInput" type="url" class="form-input" placeholder="https://instagram.com/...">
+        </label>
+        <label class="form-group">LinkedIn
+          <input id="companyLinkedinInput" type="url" class="form-input" placeholder="https://linkedin.com/...">
+        </label>
+        <label class="form-group">TikTok
+          <input id="companyTiktokInput" type="url" class="form-input" placeholder="https://tiktok.com/...">
+        </label>
+        <label class="form-group">YouTube
+          <input id="companyYoutubeInput" type="url" class="form-input" placeholder="https://youtube.com/...">
+        </label>
+      </div>
+    </section>
+
+    <section id="utenti" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>2. Gestione Account</h2>
+          <p>Account locali del gestionale (senza Supabase Auth).</p>
+        </div>
+        <button id="openAccountModalBtn" type="button" class="btn btn-primary">+ Crea account</button>
+      </div>
+      <div class="table-wrap">
+        <table class="enterprise-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Ruolo</th>
+              <th>Stato</th>
+              <th>Aggiornato</th>
+              <th class="text-right">Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="roles-section" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>3. Ruoli</h2>
+          <p>Controllo distribuzione ruoli e policy account.</p>
+        </div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><span>Admin</span><strong id="roleAdminCount">0</strong></div>
+        <div class="kpi-card"><span>Operatori</span><strong id="roleOperatoreCount">0</strong></div>
+        <div class="kpi-card"><span>Collaboratori</span><strong id="roleCollaboratoreCount">0</strong></div>
+        <div class="kpi-card"><span>Account disattivi</span><strong id="roleInactiveCount">0</strong></div>
+      </div>
+      <div class="form-grid top-gap">
+        <label class="form-group">Ruolo predefinito nuovi account
+          <select id="defaultRoleInput" class="form-select">
+            <option value="operatore">Operatore</option>
+            <option value="collaboratore">Collaboratore</option>
+            <option value="admin">Amministratore</option>
+          </select>
+        </label>
+        <label class="form-group">Lunghezza minima password
+          <input id="minPasswordLengthInput" type="number" min="6" max="32" class="form-input">
+        </label>
+      </div>
+      <div class="actions-row">
+        <button id="saveRolesPolicyBtn" type="button" class="btn btn-secondary">Salva policy ruoli</button>
+      </div>
+    </section>
+
+    <section id="aspetto" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>4. Aspetto</h2>
+          <p>Tema e identità visiva del gestionale.</p>
+        </div>
+        <button id="saveAppearanceBtn" type="button" class="btn btn-primary">Salva aspetto</button>
+      </div>
+      <div class="setting-grid">
+        <label class="setting-toggle">
+          <span>Dark mode</span>
+          <input id="themeDarkInput" type="checkbox">
+        </label>
+        <label class="setting-toggle">
+          <span>Mostra logo aziendale</span>
+          <input id="showCompanyLogoInput" type="checkbox">
+        </label>
+        <label class="form-group">Colore primario
+          <input id="colorPrimaryInput" type="color" class="color-input">
+        </label>
+        <label class="form-group">Colore accento
+          <input id="colorAccentInput" type="color" class="color-input">
+        </label>
+        <label class="form-group">Colore superficie
+          <input id="colorSurfaceInput" type="color" class="color-input">
+        </label>
+        <label class="form-group">Colore testo
+          <input id="colorTextInput" type="color" class="color-input">
+        </label>
+      </div>
+    </section>
+
+    <section id="documenti-section" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>5. Ricevuta Prenotazione & QR</h2>
+          <p>Configurazione dei documenti generati automaticamente.</p>
+        </div>
+        <button id="saveDocumentsBtn" type="button" class="btn btn-primary">Salva documenti</button>
+      </div>
+      <div class="form-grid">
+        <label class="form-group">Titolo ricevuta
+          <input id="receiptTitleInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Prefisso QR
+          <input id="qrPrefixInput" type="text" class="form-input">
+        </label>
+        <label class="form-group span-2">Footer ricevuta
+          <input id="receiptFooterInput" type="text" class="form-input">
+        </label>
+        <label class="form-group span-2">Nota QR / check-in
+          <input id="qrNoteInput" type="text" class="form-input">
+        </label>
+      </div>
+    </section>
+
+    <section id="communication-section" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>6. Comunicazione</h2>
+          <p>Email operative, SMTP e template WhatsApp.</p>
+        </div>
+        <button id="saveNotificationsBtn" type="button" class="btn btn-primary">Salva comunicazione</button>
+      </div>
+      <div class="setting-grid">
+        <label class="setting-toggle"><span>Email notifiche</span><input id="emailNotificationsInput" type="checkbox"></label>
+        <label class="setting-toggle"><span>Backup automatico</span><input id="autoBackupInput" type="checkbox"></label>
+        <label class="setting-toggle"><span>Aggiornamenti automatici</span><input id="autoUpdateInput" type="checkbox"></label>
+        <label class="setting-toggle"><span>SMTP sicuro (TLS/SSL)</span><input id="smtpSecureInput" type="checkbox"></label>
+      </div>
+      <div class="form-grid top-gap">
+        <label class="form-group">Email report operativo
+          <input id="notificationsReportEmailInput" type="email" class="form-input">
+        </label>
+        <label class="form-group">SMTP Host
+          <input id="smtpHostInput" type="text" class="form-input" placeholder="smtp.provider.it">
+        </label>
+        <label class="form-group">SMTP Porta
+          <input id="smtpPortInput" type="number" min="1" class="form-input">
+        </label>
+        <label class="form-group">SMTP Username
+          <input id="smtpUsernameInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">SMTP Password
+          <input id="smtpPasswordInput" type="password" class="form-input">
+        </label>
+        <label class="form-group">Mittente nome
+          <input id="smtpFromNameInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Mittente email
+          <input id="smtpFromEmailInput" type="email" class="form-input">
+        </label>
+        <label class="form-group">Reply-To
+          <input id="smtpReplyToInput" type="email" class="form-input">
+        </label>
+        <label class="form-group span-2">Template WhatsApp supporto prenotazione
+          <textarea id="whatsAppSupportTemplateInput" class="form-input" rows="3" placeholder="Usa placeholder come {{bookingNumber}}, {{name}}, {{destination}}..."></textarea>
+        </label>
+        <label class="form-group span-2">Template WhatsApp conferma cliente
+          <textarea id="whatsAppCustomerTemplateInput" class="form-input" rows="3" placeholder="Usa placeholder come {{bookingNumber}}, {{departureDate}}, {{seats}}..."></textarea>
+        </label>
+        <label class="form-group span-2">Template WhatsApp preventivo
+          <textarea id="whatsAppQuoteTemplateInput" class="form-input" rows="3" placeholder="Usa placeholder come {{code}}, {{customer}}, {{proposal}}..."></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section id="config-section" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>7. Supabase, Storage & Runtime</h2>
+          <p>Configurazione database, storage e valori applicativi.</p>
+        </div>
+        <button id="saveConfigBtn" type="button" class="btn btn-primary">Salva configurazione</button>
+      </div>
+      <div class="form-grid">
+        <label class="form-group">Stato ambiente
+          <select id="systemStatusInput" class="form-select">
+            <option value="Online">Online</option>
+            <option value="Manutenzione">Manutenzione</option>
+            <option value="Verifica">Verifica</option>
+          </select>
+        </label>
+        <label class="form-group">Frontend stack
+          <input id="systemFrontendInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Database
+          <input id="systemDatabaseInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Valuta
+          <select id="currencyInput" class="form-select">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </label>
+        <label class="form-group span-2">Supabase URL
+          <input id="supabaseUrlInput" type="text" class="form-input">
+        </label>
+        <label class="form-group span-2">Supabase Anon Key
+          <input id="supabaseAnonKeyInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Bucket locandine
+          <input id="storageBucketLocandineInput" type="text" class="form-input">
+        </label>
+        <label class="form-group">Bucket ricevute
+          <input id="storageBucketRicevuteInput" type="text" class="form-input">
+        </label>
+        <label class="form-group span-2">Storage public base URL
+          <input id="storagePublicBaseUrlInput" type="text" class="form-input" placeholder="https://...">
+        </label>
+      </div>
+    </section>
+
+    <section id="backup" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>8. Backup</h2>
+          <p>Protezione dati e ripristino configurazioni.</p>
+        </div>
+      </div>
+      <div class="backup-grid">
+        <div class="backup-status">
+          <span>Ultimo backup</span>
+          <strong id="backupInfo">Nessun backup disponibile</strong>
+        </div>
+        <div class="actions-row">
+          <button id="backupBtn" type="button" class="btn btn-primary">Esegui backup</button>
+          <button id="restoreBtn" type="button" class="btn btn-secondary">Ripristina ultimo backup</button>
+          <button id="exportBackupBtn" type="button" class="btn btn-secondary">Esporta configurazione</button>
+          <label class="btn btn-secondary file-btn">
+            Importa configurazione
+            <input id="importBackupInput" type="file" accept="application/json">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section id="activity-section" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>9. Registro Attività</h2>
+          <p>Tracciamento operazioni amministrative.</p>
+        </div>
+        <div class="actions-row">
+          <button id="exportActivityBtn" type="button" class="btn btn-secondary">Esporta log</button>
+          <button id="clearActivityBtn" type="button" class="btn btn-danger">Svuota log</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="enterprise-table">
+          <thead>
+            <tr>
+              <th>Data/Ora</th>
+              <th>Operatore</th>
+              <th>Azione</th>
+              <th>Dettaglio</th>
+            </tr>
+          </thead>
+          <tbody id="activityTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="system-info-section" class="settings-card">
+      <div class="card-header">
+        <div>
+          <h2>10. Informazioni Sistema</h2>
+          <p>Stato runtime e versione applicativa.</p>
+        </div>
+      </div>
+      <div class="system-grid">
+        <div class="system-item"><span>Versione</span><strong id="systemVersionInfo">-</strong></div>
+        <div class="system-item"><span>Database</span><strong id="systemDatabaseInfo">-</strong></div>
+        <div class="system-item"><span>Frontend</span><strong id="systemFrontendInfo">-</strong></div>
+        <div class="system-item"><span>Stato</span><strong id="systemStatusInfo">-</strong></div>
+        <div class="system-item"><span>Storage</span><strong id="systemStorageInfo">-</strong></div>
+        <div class="system-item"><span>SMTP</span><strong id="systemSmtpInfo">-</strong></div>
+        <div class="system-item"><span>Browser</span><strong id="systemBrowserInfo">-</strong></div>
+        <div class="system-item"><span>Ultimo aggiornamento</span><strong id="systemLastUpdateInfo">-</strong></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="accountModal" class="corporate-modal">
+  <form id="accountForm" method="dialog" class="modal-content">
+    <h3 id="accountModalTitle">Nuovo account</h3>
+    <input type="hidden" id="accountIdInput">
+    <label>Nome completo
+      <input id="accountNameInput" type="text" class="form-input" required>
+    </label>
+    <label>Username
+      <input id="accountUsernameInput" type="text" class="form-input" required>
+    </label>
+    <label>Email
+      <input id="accountEmailInput" type="email" class="form-input" required>
+    </label>
+    <label>Ruolo
+      <select id="accountRoleInput" class="form-select">
+        <option value="admin">Amministratore</option>
+        <option value="operatore">Operatore</option>
+        <option value="collaboratore">Collaboratore</option>
+      </select>
+    </label>
+    <label>Password
+      <input id="accountPasswordInput" type="password" class="form-input" placeholder="Minimo 6 caratteri">
+    </label>
+    <label class="setting-toggle">
+      <span>Account attivo</span>
+      <input id="accountActiveInput" type="checkbox" checked>
+    </label>
+    <div class="modal-actions">
+      <button type="button" id="cancelAccountModalBtn" class="btn btn-secondary">Annulla</button>
+      <button type="submit" class="btn btn-primary">Salva account</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="passwordModal" class="corporate-modal">
+  <form id="passwordForm" method="dialog" class="modal-content">
+    <h3>Cambio password</h3>
+    <input type="hidden" id="passwordAccountIdInput">
+    <label>Nuova password
+      <input id="newPasswordInput" type="password" class="form-input" required>
+    </label>
+    <label>Conferma password
+      <input id="confirmPasswordInput" type="password" class="form-input" required>
+    </label>
+    <div class="modal-actions">
+      <button type="button" id="cancelPasswordModalBtn" class="btn btn-secondary">Annulla</button>
+      <button type="submit" class="btn btn-primary">Aggiorna password</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="js/brandShell.js"></script>
+<script type="module" src="js/guard.js"></script>
+<script type="module" src="js/session.js"></script>
+<script type="module" src="js/logout.js"></script>
+<script type="module" src="js/impostazioni.js"></script>
+</body>
+</html>
