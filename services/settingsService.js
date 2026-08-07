@@ -1,10 +1,9 @@
 import { getImpostazioni, saveImpostazioni } from '../js/delgrosso-api.js';
-import defaultLogoUrl from '../assets/images/logo.JPEG';
 
 const BACKUP_KEY = 'gestionale-backup-v1';
 const SETTINGS_CACHE_KEY = 'dg_runtime_settings_cache_v2';
-const DEFAULT_LOGO = defaultLogoUrl;
-const DEFAULT_FAVICON = '/favicon.png';
+const DEFAULT_LOGO = '../assets/images/logo.JPEG';
+const DEFAULT_FAVICON = '../favicon.png';
 
 function success(data) {
   return { success: true, data, error: null };
@@ -48,6 +47,16 @@ function writeLocalJson(key, value) {
 function normalizeText(value, fallback = '') {
   const text = String(value ?? '').trim();
   return text || fallback;
+}
+
+function normalizePublicAssetPath(value, fallback = '') {
+  const text = normalizeText(value, fallback);
+  if (!text) return fallback;
+  if (text === '/src/assets/images/logo.JPEG') return '../assets/images/logo.JPEG';
+  if (text === '/logo-delgrosso.svg') return '../assets/logo-delgrosso.svg';
+  if (text === '/favicon.png') return '../favicon.png';
+  if (text === '/favicon.ico') return '../favicon.ico';
+  return text;
 }
 
 function toBoolean(value, fallback = false) {
@@ -203,8 +212,8 @@ function getLegacyMappedSettings(row, currentDefaults) {
       email: normalizeText(row.email, currentDefaults.azienda.email),
       telefono: primaryPhone,
       indirizzo: normalizeText(row.indirizzo, currentDefaults.azienda.indirizzo),
-      logo: normalizeText(row.logo, currentDefaults.azienda.logo),
-      favicon: normalizeText(row.favicon, currentDefaults.azienda.favicon),
+      logo: normalizePublicAssetPath(row.logo, currentDefaults.azienda.logo),
+      favicon: normalizePublicAssetPath(row.favicon, currentDefaults.azienda.favicon),
       whatsapp: normalizeText(row.whatsapp, currentDefaults.azienda.whatsapp),
       pec: normalizeText(row.pec, currentDefaults.azienda.pec),
       website,
@@ -290,8 +299,8 @@ function toPersistedRow(settings = {}) {
     indirizzo: normalized.azienda.indirizzo,
     website: normalized.azienda.website,
     sito_web: normalized.azienda.website,
-    logo: normalized.azienda.logo,
-    favicon: normalized.azienda.favicon,
+    logo: normalizePublicAssetPath(normalized.azienda.logo, DEFAULT_LOGO),
+    favicon: normalizePublicAssetPath(normalized.azienda.favicon, DEFAULT_FAVICON),
     support_label: normalized.azienda.supportLabel,
     social_facebook: normalized.azienda.socials.facebook,
     facebook: normalized.azienda.socials.facebook,
@@ -365,8 +374,8 @@ export function buildCompanyInfo(settings = defaultSettings()) {
     address: normalized.azienda.indirizzo,
     pec: normalized.azienda.pec,
     website: normalized.azienda.website,
-    logo: normalized.azienda.logo || DEFAULT_LOGO,
-    favicon: normalized.azienda.favicon || DEFAULT_FAVICON,
+    logo: normalizePublicAssetPath(normalized.azienda.logo, DEFAULT_LOGO) || DEFAULT_LOGO,
+    favicon: normalizePublicAssetPath(normalized.azienda.favicon, DEFAULT_FAVICON) || DEFAULT_FAVICON,
     socials: normalized.azienda.socials,
     receiptTitle: normalized.documenti.receiptTitle,
     receiptFooter: normalized.documenti.receiptFooter,

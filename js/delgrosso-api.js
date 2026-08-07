@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getRequiredEnv } from '../utils/configManager.js';
+import { getOptionalEnv } from '../utils/configManager.js';
 
 const TABLES = {
   viaggi: [
@@ -164,6 +164,8 @@ const READ_SELECT_OVERRIDES = {
 };
 
 let supabaseClient = null;
+const FALLBACK_SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
 
 function normalizeError(error) {
   if (error instanceof Error) return error;
@@ -561,8 +563,8 @@ export async function deleteTableRows(table, options = {}) {
 export function getSupabase() {
   if (supabaseClient) return supabaseClient;
 
-  const url = getRequiredEnv('VITE_SUPABASE_URL');
-  const key = getRequiredEnv('VITE_SUPABASE_ANON_KEY');
+  const url = getOptionalEnv('VITE_SUPABASE_URL', FALLBACK_SUPABASE_URL);
+  const key = getOptionalEnv('VITE_SUPABASE_ANON_KEY', FALLBACK_SUPABASE_ANON_KEY);
 
   supabaseClient = createClient(url, key, {
     auth: {

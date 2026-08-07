@@ -29,21 +29,21 @@ export const ADMIN_ROUTES = {
 };
 
 const LEGACY_ADMIN_PATHS = {
-  login: '/src/pages/login/login.html',
-  dashboard: '/src/pages/dashboard/dashboard.html',
-  viaggi: '/src/pages/viaggi/index.html',
-  prenotazioni: '/src/pages/prenotazioni/index.html',
-  prenotazione: '/src/pages/prenotazioni/prenota.html',
-  clienti: '/src/pages/clienti/index.html',
-  flotta: '/src/pages/flotta/index.html',
-  pagamenti: '/src/pages/pagamenti/index.html',
-  preventivi: '/src/pages/preventivi/index.html',
-  nuovoPreventivo: '/src/pages/preventivi/nuovo.html',
-  notifiche: '/src/pages/notifiche/index.html',
-  checkin: '/src/pages/checkin/index.html',
-  statistiche: '/src/pages/report/index.html',
-  impostazioni: '/src/pages/impostazioni/index.html',
-  centroOperativo: '/src/pages/centro-operativo/index.html'
+  login: ADMIN_ROUTES.login,
+  dashboard: ADMIN_ROUTES.dashboard,
+  viaggi: ADMIN_ROUTES.viaggi,
+  prenotazioni: ADMIN_ROUTES.prenotazioni,
+  prenotazione: ADMIN_ROUTES.prenotazione,
+  clienti: ADMIN_ROUTES.clienti,
+  flotta: ADMIN_ROUTES.flotta,
+  pagamenti: ADMIN_ROUTES.pagamenti,
+  preventivi: ADMIN_ROUTES.preventivi,
+  nuovoPreventivo: ADMIN_ROUTES.nuovoPreventivo,
+  notifiche: ADMIN_ROUTES.notifiche,
+  checkin: ADMIN_ROUTES.checkin,
+  statistiche: ADMIN_ROUTES.statistiche,
+  impostazioni: ADMIN_ROUTES.impostazioni,
+  centroOperativo: ADMIN_ROUTES.centroOperativo
 };
 
 function normalizePath(value = '') {

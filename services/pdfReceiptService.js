@@ -2,9 +2,8 @@
  * Generazione Ricevute Prenotazione in PDF con QR Code
  */
 
-import { jsPDF } from 'jspdf';
-import QRCode from 'qrcode';
-import defaultLogoUrl from '../assets/images/logo.JPEG';
+import { jsPDF } from 'https://esm.sh/jspdf@3';
+import QRCode from 'https://esm.sh/qrcode@1.5.4';
 import { buildBookingQrPayload } from '../utils/qrBookingUtils.js';
 import { parseSeatSelection } from './seatAssignmentService.js';
 
@@ -320,3 +319,4 @@ export default {
   downloadReceipt,
   openReceiptInNewWindow
 };
+const defaultLogoUrl = '../assets/images/logo.JPEG';
