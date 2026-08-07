@@ -1,0 +1,57 @@
+@import "../../src/styles/brand-shell.css";
+
+.dg-brand-shell__footer-support {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+  margin-left: auto;
+}
+
+.dg-brand-shell__support-item {
+  display: grid;
+  gap: 4px;
+}
+
+.dg-brand-shell__support-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dg-muted);
+}
+
+.dg-brand-shell__support-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dg-brand-shell__support-meta strong {
+  margin: 0;
+  color: var(--dg-text);
+}
+
+.dg-brand-shell__support-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .dg-brand-shell__footer-support {
+    width: 100%;
+    justify-items: start;
+    margin-left: 0;
+  }
+}
