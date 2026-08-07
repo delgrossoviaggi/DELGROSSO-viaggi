@@ -1,1 +1,1 @@
-import '../../src/pages/prenotazioni/prenotazioni.js';
+import '../src/pages/prenotazioni/prenotazioni.js';

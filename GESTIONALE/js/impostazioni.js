@@ -1,1 +1,1 @@
-import '../../src/pages/impostazioni/impostazioni.js';
+import '../src/pages/impostazioni/impostazioni.js';

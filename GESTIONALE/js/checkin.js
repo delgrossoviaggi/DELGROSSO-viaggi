@@ -1,1 +1,1 @@
-import '../../src/pages/checkin/checkin.js';
+import '../src/pages/checkin/checkin.js';

@@ -1,1 +1,1 @@
-import '../../src/pages/login/login.js';
+import '../src/pages/login/login.js';

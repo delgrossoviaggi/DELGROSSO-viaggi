@@ -1,1 +1,1 @@
-import '../../src/pages/viaggi/viaggi.js';
+import '../src/pages/viaggi/viaggi.js';
