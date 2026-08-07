@@ -1,1 +1,25 @@
-@import "../../src/pages/login/login.css";
+:root { --blue:#0f4c81; --navy:#071f35; --orange:#f57c00; --ink:#17263b; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; font-family:Inter,"Segoe UI",Arial,sans-serif; color:var(--ink); background:#eef3f8; }
+.login-shell { min-height:100vh; display:grid; grid-template-columns:minmax(360px,1.1fr) minmax(420px,.9fr); }
+.brand-panel { position:relative; min-height:100vh; color:#fff; overflow:hidden; background:linear-gradient(135deg,#0a2c47,#0f4c81); isolation:isolate; }
+.brand-panel::before { content:""; position:absolute; inset:0; background:var(--dg-runtime-logo-url, url('../../assets/images/logo.JPEG')) center/cover; opacity:.22; transform:scale(1.08); animation:float-bg 14s ease-in-out infinite alternate; z-index:-2; }
+.brand-overlay { position:absolute; inset:0; background:linear-gradient(135deg,rgba(5,26,48,.92),rgba(15,76,129,.72)); z-index:-1; }
+.brand-content { max-width:520px; padding:clamp(42px,8vw,100px); display:flex; min-height:calc(100vh - 54px); flex-direction:column; justify-content:center; }
+.brand-logo { width:82px; height:82px; object-fit:cover; border-radius:22px; padding:7px; background:#fff; box-shadow:0 20px 40px rgba(0,0,0,.24); }
+.brand-kicker,.eyebrow { margin:28px 0 10px; color:#ffbc66; font-weight:800; letter-spacing:.13em; text-transform:uppercase; font-size:.72rem; }
+.brand-panel h1 { margin:0; font-size:clamp(2.8rem,6vw,5rem); line-height:.96; letter-spacing:-.05em; }
+.brand-copy { max-width:390px; font-size:1.08rem; line-height:1.65; color:rgba(255,255,255,.8); }
+.brand-panel footer { padding:18px clamp(42px,8vw,100px); color:rgba(255,255,255,.64); font-size:.8rem; }
+.access-panel { display:grid; place-items:center; padding:32px; background:radial-gradient(circle at top right,#fff 0,transparent 36%),#eef3f8; }
+.login-card { width:min(100%,460px); padding:clamp(30px,5vw,54px); border:1px solid rgba(15,76,129,.1); border-radius:30px; background:rgba(255,255,255,.78); box-shadow:0 28px 70px rgba(15,76,129,.14); backdrop-filter:blur(18px); animation:card-in .55s ease-out; }
+.login-card .eyebrow { margin:0 0 10px; color:var(--orange); }
+.login-card h2 { margin:0; font-size:2rem; letter-spacing:-.04em; }
+.intro { color:#68798e; margin:8px 0 28px; }
+form { display:grid; gap:9px; } label { font-weight:700; font-size:.88rem; color:#384b61; } input { width:100%; min-height:50px; border:1px solid #d7e0eb; border-radius:14px; padding:0 15px; background:#fff; font:inherit; } input:focus { outline:0; border-color:var(--blue); box-shadow:0 0 0 4px rgba(15,76,129,.1); }
+.password-field { position:relative; } .password-field input { padding-right:78px; } .password-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); border:0; background:transparent; color:var(--blue); font-weight:800; cursor:pointer; }
+.login-options { display:flex; justify-content:space-between; align-items:center; margin:7px 0 13px; } .remember { display:flex; gap:8px; align-items:center; font-weight:600; } .remember input { width:16px; min-height:16px; } .forgot-password { color:var(--blue); font-size:.84rem; font-weight:700; }
+.submit-login { min-height:54px; border:0; border-radius:15px; background:linear-gradient(135deg,var(--blue),#1566a7); color:#fff; font:800 1rem inherit; cursor:pointer; box-shadow:0 15px 25px rgba(15,76,129,.22); } .submit-login:disabled { opacity:.7; cursor:wait; }.button-loader { width:17px; height:17px; border:2px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; margin-left:8px; }
+#msg { min-height:22px; margin-top:16px; color:#c62828; font-weight:700; font-size:.9rem; }
+@keyframes card-in { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } } @keyframes spin { to { transform:rotate(360deg); } } @keyframes float-bg { to { transform:scale(1.18) translate3d(-1%,-1%,0); } }
+@media (max-width:800px) { .login-shell { grid-template-columns:1fr; } .brand-panel { min-height:300px; } .brand-content { min-height:260px; padding:40px 28px; } .brand-panel h1 { font-size:2.7rem; } .brand-copy { display:none; } .brand-panel footer { padding:0 28px 22px; } .access-panel { padding:24px 16px; } }
