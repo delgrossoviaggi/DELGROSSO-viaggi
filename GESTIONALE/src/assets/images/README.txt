@@ -1,0 +1,1 @@
+Cartella dedicata alle immagini del gestionale.

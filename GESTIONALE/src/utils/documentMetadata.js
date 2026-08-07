@@ -1,0 +1,1 @@
+export function documentMetadata(){return {tag:[],versione:'1.0',firmato:false};}

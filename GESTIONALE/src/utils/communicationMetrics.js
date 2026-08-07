@@ -1,0 +1,1 @@
+export function communicationMetrics(){return {inviate:0,aperte:0,lette:0,click:0};}

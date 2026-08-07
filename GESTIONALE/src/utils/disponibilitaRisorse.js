@@ -1,0 +1,1 @@
+export const verificaDisponibilita=()=>({mezzoDisponibile:true,autistaDisponibile:true});

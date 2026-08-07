@@ -1,1 +1,1 @@
-import '../src/pages/preventivi/preventivi.js';
+import '../../src/pages/preventivi/preventivi.js';

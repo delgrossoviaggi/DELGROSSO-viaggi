@@ -1,82 +1,71 @@
-import {
-  applySessionToPage,
-  authenticateAdmin,
-  createSession,
-  getRememberedIdentifier,
-  isAuthenticated,
-  rememberIdentifier
-} from '../../auth/session.js';
+import { login, isAuthenticated, getCurrentUser } from '../../services/localAuthService.js';
+import { applyRuntimeSettings, loadImpostazioni } from '../../services/settingsService.js';
+import { ADMIN_ROUTES } from '../../utils/appRoutes.js';
 
 const form = document.getElementById('loginForm');
-const usernameInput = document.getElementById('username');
-const passwordInput = document.getElementById('password');
-const rememberMeInput = document.getElementById('rememberMe');
-const messageEl = document.getElementById('msg');
-const togglePasswordButton = document.getElementById('togglePassword');
+const msg = document.getElementById('msg');
+const usernameEl = document.getElementById('username');
+const passwordEl = document.getElementById('password');
+const passwordToggle = document.getElementById('togglePassword');
 
-function setMessage(message, type = 'error') {
-  if (!messageEl) return;
-  messageEl.textContent = message;
-  messageEl.className = type === 'success' ? 'msg-success' : 'msg-error';
+async function checkAlreadyLogged(){
+  try{
+    if (isAuthenticated()) {
+      const user = getCurrentUser();
+      if (user) {
+        window.location.replace(ADMIN_ROUTES.dashboard);
+      }
+    }
+  }catch(e){  }
 }
 
-function redirectToDashboard() {
-  window.location.replace('dashboard.html');
-}
+checkAlreadyLogged();
+loadImpostazioni().then((response) => {
+  if (response.success === false) return;
+  applyRuntimeSettings(response.data, { applyThemePreference: true });
+}).catch(() => {});
 
-function bootstrapRememberedIdentifier() {
-  if (!usernameInput || !rememberMeInput) return;
-  const remembered = getRememberedIdentifier();
-  if (!remembered) return;
-  usernameInput.value = remembered;
-  rememberMeInput.checked = true;
-}
+passwordToggle?.addEventListener('click', () => {
+  const visible = passwordEl.type === 'text';
+  passwordEl.type = visible ? 'password' : 'text';
+  passwordToggle.textContent = visible ? 'Mostra' : 'Nascondi';
+  passwordToggle.setAttribute('aria-label', visible ? 'Mostra password' : 'Nascondi password');
+});
 
-function bindPasswordToggle() {
-  if (!togglePasswordButton || !passwordInput) return;
-  togglePasswordButton.addEventListener('click', () => {
-    const isPassword = passwordInput.type === 'password';
-    passwordInput.type = isPassword ? 'text' : 'password';
-    togglePasswordButton.textContent = isPassword ? 'Nascondi' : 'Mostra';
-    togglePasswordButton.setAttribute('aria-label', isPassword ? 'Nascondi password' : 'Mostra password');
-  });
-}
-
-function handleSubmit(event) {
-  event.preventDefault();
-  const identifier = usernameInput?.value || '';
-  const password = passwordInput?.value || '';
-
-  if (!identifier.trim() || !password.trim()) {
-    setMessage('Inserisci username/email e password.');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.textContent = '';
+  const username = usernameEl.value.trim();
+  const password = passwordEl.value;
+  if (!username || !password) {
+    msg.textContent = 'Inserisci username e password.';
     return;
   }
 
-  if (!authenticateAdmin(identifier, password)) {
-    setMessage('Credenziali non valide.');
-    return;
-  }
+  // basic validation
+  if(username.length < 2){ msg.textContent = 'Username troppo corto'; return; }
+  if(password.length < 3){ msg.textContent = 'Password troppo corta'; return; }
 
-  if (rememberMeInput?.checked) {
-    rememberIdentifier(identifier);
-  } else {
-    rememberIdentifier('');
-  }
+  // loading state
+  const submitBtn = form.querySelector('button[type=submit]');
+  submitBtn.disabled = true;
+  const label = submitBtn.querySelector('.button-label');
+  const loader = submitBtn.querySelector('.button-loader');
+  const prevText = label ? label.textContent : submitBtn.textContent;
+  if (label) label.textContent = 'Accesso in corso...';
+  else submitBtn.textContent = 'Accesso in corso...';
+  if (loader) loader.hidden = false;
 
-  createSession();
-  setMessage('Accesso effettuato con successo.', 'success');
-  redirectToDashboard();
-}
-
-if (isAuthenticated()) {
-  redirectToDashboard();
-} else {
-  applySessionToPage();
-  bootstrapRememberedIdentifier();
-  bindPasswordToggle();
-  if (form) {
-    form.addEventListener('submit', handleSubmit);
-  } else {
-    console.error('Form login non trovato.');
+  try {
+    login(username, password);
+    window.location.replace(ADMIN_ROUTES.dashboard);
+  } catch (err) {
+    console.error(err);
+    msg.textContent = err?.message || 'Errore autenticazione';
+  } finally {
+    submitBtn.disabled = false;
+    if (label) label.textContent = prevText;
+    else submitBtn.textContent = prevText;
+    if (loader) loader.hidden = true;
   }
-}
+});

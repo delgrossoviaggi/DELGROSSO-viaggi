@@ -1,1 +1,1 @@
-import '../src/pages/pagamenti/pagamenti.js';
+import '../../src/pages/pagamenti/pagamenti.js';

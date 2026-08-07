@@ -1,0 +1,1 @@
+export function verificaDisponibilita(){return true;}

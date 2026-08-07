@@ -1,18 +1,34 @@
-import { isAuthenticated } from './session.js';
+import { getCurrentUser, isAuthenticated } from "../services/localAuthService.js";
+import { ADMIN_ROUTES, isLoginRoute } from '../utils/appRoutes.js';
 
-function getPageName() {
-  const path = window.location.pathname || '';
-  const parts = path.split('/');
-  return (parts[parts.length - 1] || '').toLowerCase();
-}
+(async () => {
+ try {
+   const href = window.location.pathname || window.location.href;
+   if (!isAuthenticated()) {
+     if (!isLoginRoute(href)) {
+       window.location.replace(ADMIN_ROUTES.login);
+     }
+     return;
+   }
 
-function redirectToLogin() {
-  window.location.replace('login.html');
-}
+   const user = getCurrentUser();
+   if (!user) {
+     if (!isLoginRoute(href)) {
+       window.location.replace(ADMIN_ROUTES.login);
+     }
+     return;
+   }
 
-const pageName = getPageName();
-const isPublicPage = pageName === 'login.html' || pageName === 'index.html' || pageName === '';
+   try { window.__currentUser = user; window.__userRole = user.ruolo; } catch (error) {}
 
-if (!isPublicPage && !isAuthenticated()) {
-  redirectToLogin();
-}
+   if (isLoginRoute(href)) {
+     window.location.replace(ADMIN_ROUTES.dashboard);
+     return;
+   }
+ } catch (error) {
+   console.error('Guard error', error);
+   if (!isLoginRoute(window.location.pathname || window.location.href)) {
+     window.location.replace(ADMIN_ROUTES.login);
+   }
+ }
+})();

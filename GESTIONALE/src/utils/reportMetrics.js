@@ -1,0 +1,1 @@
+export function calcolaMetriche(){return {fatturato:0,incassi:0,clienti:0,viaggi:0};}

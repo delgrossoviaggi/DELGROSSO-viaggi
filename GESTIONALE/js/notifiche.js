@@ -1,1 +1,1 @@
-import '../src/pages/notifiche/notifiche.js';
+import '../../src/pages/notifiche/notifiche.js';

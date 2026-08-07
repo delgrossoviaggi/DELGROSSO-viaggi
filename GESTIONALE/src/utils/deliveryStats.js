@@ -1,0 +1,1 @@
+export function deliveryStats(){return {sent:0,delivered:0,failed:0};}

@@ -1,0 +1,1 @@
+export const calcolaMargine=(ricavi,costi)=>ricavi-costi;

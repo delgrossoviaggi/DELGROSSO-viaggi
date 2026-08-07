@@ -1,1 +1,1 @@
-import '../src/components/backButton.js';
+import '../../src/components/backButton.js';

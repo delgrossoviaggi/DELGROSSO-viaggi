@@ -1,0 +1,1 @@
+export const PHASES=['approval','deploy','monitor'];

@@ -1,0 +1,1 @@
+export const finalChecks=['ui','api','database','storage','routing'];

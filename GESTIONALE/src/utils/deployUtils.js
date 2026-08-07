@@ -1,0 +1,1 @@
+export const checkList=['db','storage','auth','build'];

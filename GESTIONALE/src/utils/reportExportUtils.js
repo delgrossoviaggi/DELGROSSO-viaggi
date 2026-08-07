@@ -1,0 +1,1 @@
+export const formatoDisponibile=['pdf','xlsx','csv'];

@@ -1,0 +1,1 @@
+export function calcolaStatistiche(rows=[]){return{totali:rows.length,accettati:rows.filter(r=>r.stato==='Accettato').length,attesa:rows.filter(r=>r.stato==='In attesa').length,rifiutati:rows.filter(r=>r.stato==='Rifiutato').length};}

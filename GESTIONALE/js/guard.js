@@ -1,1 +1,1 @@
-import '../src/auth/guard.js';
+import '../../src/auth/guard.js';

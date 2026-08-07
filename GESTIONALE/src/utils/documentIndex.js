@@ -1,0 +1,1 @@
+export function indicizzaDocumenti(){return {indicizzati:0};}

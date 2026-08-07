@@ -1,1 +1,1 @@
-import '../src/pages/clienti/clienti.js';
+import '../../src/pages/clienti/clienti.js';

@@ -1,0 +1,1 @@
+export function registraAudit(evento){return {timestamp:new Date().toISOString(),evento};}

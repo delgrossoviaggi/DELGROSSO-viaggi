@@ -1,4 +1,4 @@
-import '../src/components/brandShell.js';
+import '../../src/components/brandShell.js';
 
 const PRIMARY_SUPPORT = {
   label: 'Supporto clienti',

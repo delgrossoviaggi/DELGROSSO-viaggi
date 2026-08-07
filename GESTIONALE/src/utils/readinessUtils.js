@@ -1,0 +1,1 @@
+export const READINESS_ITEMS=['database','storage','api','security','performance'];

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nuovo Preventivo - Del Grosso Gestionale v1.0</title>
+  <link rel="stylesheet" href="../../styles/brand-shell.css">
+  <link rel="stylesheet" href="../../styles/accessibility.css">
+  <link rel="stylesheet" href="preventivi.css">
+</head>
+<body>
+  <h1>Nuovo Preventivo</h1>
+
+  <section class="quote-card quote-page">
+    <div class="card-head">
+      <div>
+        <p class="section-kicker">Creazione commerciale</p>
+        <h2>Nuovo Preventivo</h2>
+        <span class="quote-page-copy">Compila la richiesta completa e salva il preventivo direttamente in Supabase.</span>
+      </div>
+    </div>
+
+    <form id="newQuoteForm" class="quote-form quote-page-form">
+      <div class="form-grid">
+        <label>
+          <span>Nome *</span>
+          <input id="quoteNome" required>
+        </label>
+        <label>
+          <span>Cognome</span>
+          <input id="quoteCognome">
+        </label>
+        <label>
+          <span>Telefono *</span>
+          <input id="quoteTelefono" required>
+        </label>
+        <label>
+          <span>Email</span>
+          <input id="quoteEmail" type="email">
+        </label>
+        <label>
+          <span>Azienda</span>
+          <input id="quoteAzienda">
+        </label>
+        <label>
+          <span>Origine</span>
+          <select id="quoteOrigine">
+            <option value="gestionale">Gestionale</option>
+            <option value="sito">Sito</option>
+            <option value="telefono">Telefono</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </label>
+        <label>
+          <span>Servizio richiesto</span>
+          <select id="quoteServizio">
+            <option value="Gran Turismo">Gran Turismo</option>
+            <option value="Limousine Bus">Limousine Bus</option>
+            <option value="Navetta Eventi">Navetta Eventi</option>
+            <option value="Viaggio di Gruppo">Viaggio di Gruppo</option>
+          </select>
+        </label>
+        <label>
+          <span>Stato</span>
+          <select id="quoteStato">
+            <option value="Nuovo">Nuovo</option>
+            <option value="In Lavorazione">In Lavorazione</option>
+            <option value="Inviato">Inviato</option>
+            <option value="Accettato">Accettato</option>
+            <option value="Rifiutato">Rifiutato</option>
+            <option value="Convertito">Convertito</option>
+          </select>
+        </label>
+        <label class="form-col-2">
+          <span>Destinazione *</span>
+          <input id="quoteDestinazione" required>
+        </label>
+        <label class="form-col-2">
+          <span>Partenza da</span>
+          <input id="quotePartenza">
+        </label>
+        <label>
+          <span>Data partenza</span>
+          <input id="quoteDataPartenza" type="date">
+        </label>
+        <label>
+          <span>Data rientro</span>
+          <input id="quoteDataRitorno" type="date">
+        </label>
+        <label>
+          <span>Passeggeri</span>
+          <input id="quotePasseggeri" type="number" min="1" value="1">
+        </label>
+        <label>
+          <span>Importo preventivo (€)</span>
+          <input id="quoteImporto" type="number" min="0" step="0.01">
+        </label>
+        <label>
+          <span>Validita offerta</span>
+          <input id="quoteValidita" type="date">
+        </label>
+        <label class="form-col-2">
+          <span>Note cliente</span>
+          <textarea id="quoteNoteCliente" rows="3"></textarea>
+        </label>
+        <label class="form-col-2">
+          <span>Dettagli offerta</span>
+          <textarea id="quoteDettagli" rows="3"></textarea>
+        </label>
+        <label class="form-col-2">
+          <span>Note interne</span>
+          <textarea id="quoteNoteInterne" rows="3"></textarea>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelNewQuote" type="button" class="btn-secondary">Torna alla lista</button>
+        <button id="saveNewQuote" type="submit" class="btn-primary">Salva preventivo</button>
+      </div>
+    </form>
+  </section>
+
+  <script type="module" src="../../auth/guard.js"></script>
+  <script type="module" src="../../auth/session.js"></script>
+  <script type="module" src="../../auth/logout.js"></script>
+  <script type="module" src="../../components/backButton.js"></script>
+  <script type="module" src="../../components/brandShell.js"></script>
+  <script type="module" src="./nuovo-preventivo.js"></script>
+</body>
+</html>

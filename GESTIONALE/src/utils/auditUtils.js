@@ -1,0 +1,1 @@
+export const CHECKS=['routing','supabase','security','performance','ui'];

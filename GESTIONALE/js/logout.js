@@ -1,1 +1,1 @@
-import '../src/auth/logout.js';
+import '../../src/auth/logout.js';

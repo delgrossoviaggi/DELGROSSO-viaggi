@@ -1,0 +1,1 @@
+export const biMetrics={clienti:0,prenotazioni:0,fatturato:0};

@@ -1,0 +1,1 @@
+export const FINAL_RELEASE='Enterprise 1.0';

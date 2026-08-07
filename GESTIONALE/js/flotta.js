@@ -1,1 +1,1 @@
-import '../src/pages/flotta/flotta.js';
+import '../../src/pages/flotta/flotta.js';

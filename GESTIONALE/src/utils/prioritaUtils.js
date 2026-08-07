@@ -1,0 +1,1 @@
+export const ordinaPriorita=(items)=>items;

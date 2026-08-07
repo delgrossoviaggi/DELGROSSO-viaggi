@@ -1,0 +1,1 @@
+export function communicationReports(){return {email:0,whatsapp:0,sms:0,successRate:0};}

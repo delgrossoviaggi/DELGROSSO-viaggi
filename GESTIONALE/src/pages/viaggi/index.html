@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Viaggi - Del Grosso Gestionale v1.0</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../../styles/brand-shell.css">
+<link rel="stylesheet" href="viaggi.css">
+<link rel="stylesheet" href="../../styles/accessibility.css">
+</head>
+<body>
+
+<h1><i class="fa-solid fa-route" aria-hidden="true"></i> Gestione Viaggi</h1>
+
+<div class="toolbar">
+  <label class="sr-only" for="searchTrip">Cerca viaggio</label>
+  <input id="searchTrip" placeholder="Cerca titolo, destinazione o data..." aria-label="Cerca viaggio">
+  <button id="btnNewTrip">+ Nuovo Viaggio</button>
+</div>
+
+<div class="stats">
+<div class="card"><h3>Viaggi Totali</h3><span id="totTrips">0</span></div>
+<div class="card"><h3>Attivi</h3><span id="plannedTrips">0</span></div>
+<div class="card"><h3>Completi</h3><span id="runningTrips">0</span></div>
+<div class="card"><h3>Annullati</h3><span id="completedTrips">0</span></div>
+</div>
+
+<div id="messageBox" class="message-box" aria-live="polite" style="position:fixed;top:100px;left:50%;transform:translateX(-50%);min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:1000;font-size:0.95rem;box-shadow:0 8px 24px rgba(0,0,0,0.18);"></div>
+
+<table id="tripTable">
+<thead>
+<tr>
+<th data-sort="titolo">Titolo</th>
+<th data-sort="destinazione">Destinazione</th>
+<th data-sort="data_partenza">Data</th>
+<th data-sort="ora_partenza">Ora</th>
+<th>Prezzo</th>
+<th data-sort="autobus">Bus</th>
+<th data-sort="posti_totali">Posti</th>
+<th>Azioni</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div id="modal" class="modal" aria-hidden="true" tabindex="-1">
+  <div class="content">
+    <h2 id="modalTitle">Nuovo Viaggio</h2>
+
+    <input id="viaggio_id" type="hidden">
+
+    <label for="titolo">Titolo Viaggio</label>
+    <input id="titolo" placeholder="Titolo viaggio">
+
+    <label for="destinazione">Destinazione</label>
+    <input id="destinazione" placeholder="Destinazione">
+
+    <label for="luogo_partenza">Luogo di Partenza</label>
+    <input id="luogo_partenza" placeholder="Es. San Severo (FG)">
+
+    <label for="data_partenza">Data</label>
+    <input id="data_partenza" type="date">
+
+    <label for="ora_partenza">Ora</label>
+    <input id="ora_partenza" type="time">
+
+    <label for="prezzo">Prezzo</label>
+    <input id="prezzo" type="number" step="0.01" placeholder="35.00">
+
+    <label for="descrizione">Descrizione</label>
+    <textarea id="descrizione"></textarea>
+
+    <label for="locandina_file">Locandina</label>
+    <input id="locandina_file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+    <div class="locandina-actions">
+      <button id="uploadLocandina" type="button">Carica Locandina</button>
+      <button id="replaceLocandina" type="button">Sostituisci Locandina</button>
+      <button id="removeLocandina" type="button">Rimuovi Locandina</button>
+    </div>
+    <div id="uploadProgressBox" class="upload-progress" aria-live="polite">
+      <div id="uploadProgressText" class="upload-progress-text"></div>
+      <div class="upload-progress-bar-wrap">
+        <div id="uploadProgressBar" class="upload-progress-bar"></div>
+      </div>
+      <button id="retryUpload" type="button" class="retry-upload">Riprova</button>
+    </div>
+    <img id="locandina_preview" class="locandina-preview" alt="Anteprima locandina" />
+
+    <label for="locandina">Locandina Public URL</label>
+    <input id="locandina" placeholder="https://...">
+
+    <label for="bus_select">Bus Assegnato</label>
+    <select id="bus_select"></select>
+
+    <label for="posti_totali">Posti Totali</label>
+    <input id="posti_totali" type="number" placeholder="Posti totali">
+
+    <label for="stato">Stato</label>
+    <select id="stato">
+      <option value="Programmato">Programmato</option>
+      <option value="Confermato">Confermato</option>
+      <option value="Annullato">Annullato</option>
+    </select>
+
+    <label for="pubblicato">Pubblica sul sito web</label>
+    <select id="pubblicato">
+      <option value="NO">NO — Solo gestionale</option>
+      <option value="SI">SI — Visibile sul sito</option>
+    </select>
+
+    <div class="actions">
+      <button id="saveTrip">Salva</button>
+      <button id="closeTrip">Chiudi</button>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="../../components/brandShell.js"></script>
+<script type="module" src="../../auth/guard.js"></script>
+<script type="module" src="../../auth/session.js"></script>
+<script type="module" src="../../auth/logout.js"></script>
+<script type="module" src="../../components/backButton.js"></script>
+<script type="module" src="viaggi.js"></script>
+
+</body>
+</html>

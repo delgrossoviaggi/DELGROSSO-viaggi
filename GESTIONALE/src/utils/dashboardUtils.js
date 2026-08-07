@@ -1,0 +1,1 @@
+export const formatStato=v=>v;

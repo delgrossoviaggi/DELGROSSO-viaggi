@@ -1,0 +1,1 @@
+export const dashboardOperativa={servizi:0,partenze:0,rientri:0};

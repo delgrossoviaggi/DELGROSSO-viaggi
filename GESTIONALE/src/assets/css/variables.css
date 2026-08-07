@@ -1,0 +1,11 @@
+:root{
+  --primary:#0f4c81;
+  --secondary:#1d72b8;
+  --success:#198754;
+  --warning:#ffc107;
+  --danger:#dc3545;
+  --background:#f5f7fb;
+  --surface:#ffffff;
+  --text:#222;
+  --radius:12px;
+}
