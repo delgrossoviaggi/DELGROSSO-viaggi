@@ -1,4 +1,4 @@
-@import "../../src/styles/brand-shell.css";
+@import "../src/styles/brand-shell.css";
 
 .dg-brand-shell__footer-support {
   display: grid;

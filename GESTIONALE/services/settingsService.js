@@ -2,8 +2,8 @@ import { getImpostazioni, saveImpostazioni } from '../js/delgrosso-api.js';
 
 const BACKUP_KEY = 'gestionale-backup-v1';
 const SETTINGS_CACHE_KEY = 'dg_runtime_settings_cache_v2';
-const DEFAULT_LOGO = '../assets/images/logo.JPEG';
-const DEFAULT_FAVICON = '../favicon.png';
+const DEFAULT_LOGO = './assets/images/logo.JPEG';
+const DEFAULT_FAVICON = './favicon.png';
 const SECONDARY_PUBLIC_CONTACT = {
   label: 'Seconda Linea',
   phone: '3662127916',
@@ -57,10 +57,10 @@ function normalizeText(value, fallback = '') {
 function normalizePublicAssetPath(value, fallback = '') {
   const text = normalizeText(value, fallback);
   if (!text) return fallback;
-  if (text === '/src/assets/images/logo.JPEG') return '../assets/images/logo.JPEG';
-  if (text === '/logo-delgrosso.svg') return '../assets/logo-delgrosso.svg';
-  if (text === '/favicon.png') return '../favicon.png';
-  if (text === '/favicon.ico') return '../favicon.ico';
+  if (text === '/src/assets/images/logo.JPEG') return './assets/images/logo.JPEG';
+  if (text === '/logo-delgrosso.svg') return './assets/logo-delgrosso.svg';
+  if (text === '/favicon.png') return './favicon.png';
+  if (text === '/favicon.ico') return './favicon.ico';
   return text;
 }
 

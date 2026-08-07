@@ -1,4 +1,4 @@
-@import "../../src/pages/dashboard/dashboard.css";
+@import "../src/pages/dashboard/dashboard.css";
 
 .brand-footer__support {
   display: flex;
