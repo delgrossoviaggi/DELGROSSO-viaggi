@@ -4,6 +4,11 @@ const BACKUP_KEY = 'gestionale-backup-v1';
 const SETTINGS_CACHE_KEY = 'dg_runtime_settings_cache_v2';
 const DEFAULT_LOGO = '../assets/images/logo.JPEG';
 const DEFAULT_FAVICON = '../favicon.png';
+const SECONDARY_PUBLIC_CONTACT = {
+  label: 'Seconda Linea',
+  phone: '3662127916',
+  whatsapp: '393662127916'
+};
 
 function success(data) {
   return { success: true, data, error: null };
@@ -484,6 +489,13 @@ function renderPublicContacts(company) {
           <span class="contact-pill__value">${company.phone || 'Telefono non configurato'}</span>
         </div>
         ${company.whatsapp ? `<a class="whatsapp-badge" href="https://wa.me/${company.whatsapp}" target="_blank" rel="noopener noreferrer">WhatsApp</a>` : ''}
+      </div>
+      <div class="contact-pill">
+        <div class="contact-pill__text">
+          <span class="contact-pill__label">${SECONDARY_PUBLIC_CONTACT.label}</span>
+          <span class="contact-pill__value">${SECONDARY_PUBLIC_CONTACT.phone}</span>
+        </div>
+        <a class="whatsapp-badge" href="https://wa.me/${SECONDARY_PUBLIC_CONTACT.whatsapp}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
       </div>
       <div class="contact-pill">
         <div class="contact-pill__text">

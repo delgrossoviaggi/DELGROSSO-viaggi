@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Richiedi Preventivo | Del Grosso Viaggi &amp; Limousine Bus</title>
+  <meta name="description" content="Invia una richiesta preventivo a Del Grosso Viaggi per gruppi, transfer, navette e servizi Gran Turismo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="./css/brand-public.css">
+  <link rel="stylesheet" href="./css/preventivo.css">
+</head>
+<body>
+  <div class="page-shell quote-page">
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a href="index.html" class="brand-lockup" aria-label="Del Grosso Viaggi & Limousine Bus">
+          <span class="brand-lockup__box"><img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
+          <span class="brand-lockup__text">
+            <span class="brand-lockup__title">Del Grosso</span>
+            <span class="brand-lockup__sub">Viaggi &amp; Limousine Bus</span>
+          </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Navigazione principale">
+          <a href="index.html">Home</a>
+          <a href="viaggi.html">Partenze</a>
+          <a href="flotta.html">Flotta</a>
+          <a href="contatti.html">Contatti</a>
+          <a href="preventivo.html" class="is-active">Richiedi preventivo</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="btn-primary" href="viaggi.html"><i class="fas fa-ticket"></i> Vedi le Partenze</a>
+        </div>
+
+        <button id="mobileToggle" class="mobile-toggle" type="button" aria-label="Apri menu">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <nav id="mobileStrip" class="mobile-strip hidden" aria-label="Navigazione mobile">
+        <a href="index.html">Home</a>
+        <a href="viaggi.html">Partenze</a>
+        <a href="flotta.html">Flotta</a>
+        <a href="contatti.html">Contatti</a>
+        <a href="preventivo.html" class="is-active">Richiedi preventivo</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero-section quote-hero">
+        <div class="quote-hero__copy">
+          <span class="eyebrow"><span class="eyebrow__dot"></span> Del Grosso Business Travel</span>
+          <h1 class="quote-hero__title">Richiedi un <span>preventivo</span> su misura</h1>
+          <p class="quote-hero__text">
+            Invia la tua richiesta per gruppi, transfer, navette eventi o servizi Gran Turismo.
+            Il team Del Grosso la riceverà direttamente nel modulo commerciale e potrà ricontattarti rapidamente.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="#modulo-preventivo"><i class="fas fa-file-signature"></i> Compila il modulo</a>
+            <a id="quoteWhatsAppHero" class="btn-secondary" href="https://wa.me/393205730466" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          </div>
+        </div>
+
+        <div class="hero-visual panel-soft">
+          <div class="hero-stat-list">
+            <div class="hero-stat"><strong>GT</strong><span>Gran Turismo</span></div>
+            <div class="hero-stat"><strong>VIP</strong><span>Transfer premium</span></div>
+            <div class="hero-stat"><strong>GROUP</strong><span>Gruppi e scuole</span></div>
+            <div class="hero-stat"><strong>FAST</strong><span>Gestione diretta</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="modulo-preventivo" class="section-shell">
+        <div class="quote-grid">
+          <aside class="quote-aside">
+            <div class="support-card panel">
+              <p class="section-kicker">Come funziona</p>
+              <h2>Flusso diretto sito → Supabase</h2>
+              <div class="support-list">
+                <div class="support-item"><strong>1. Compila il modulo</strong><span>Inserisci dati di viaggio, contatti e note operative.</span></div>
+                <div class="support-item"><strong>2. Salvataggio immediato</strong><span>La richiesta viene salvata nel database e resa disponibile agli operatori.</span></div>
+                <div class="support-item"><strong>3. Contatto veloce</strong><span>Puoi anche aprire subito una conversazione WhatsApp con il team Del Grosso.</span></div>
+              </div>
+              <div class="aside-actions">
+                <a id="quoteWhatsAppAside" class="btn-secondary btn-full" href="https://wa.me/393205730466" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Contatta su WhatsApp</a>
+              </div>
+            </div>
+          </aside>
+
+          <article class="quote-form-card panel">
+            <p class="section-kicker">Modulo cliente</p>
+            <h2>Richiedi il tuo preventivo</h2>
+            <div id="formMessage" class="form-message hidden"></div>
+            <form id="publicQuoteForm" class="quote-form">
+              <div class="quote-form__grid">
+                <label>
+                  <span>Nome *</span>
+                  <input id="quoteNome" name="nome" autocomplete="given-name" required>
+                </label>
+                <label>
+                  <span>Cognome *</span>
+                  <input id="quoteCognome" name="cognome" autocomplete="family-name" required>
+                </label>
+                <label>
+                  <span>Telefono *</span>
+                  <input id="quoteTelefono" name="telefono" type="tel" inputmode="tel" autocomplete="tel" required>
+                </label>
+                <label>
+                  <span>Email *</span>
+                  <input id="quoteEmail" name="email" type="email" autocomplete="email" required>
+                </label>
+                <label class="span-2">
+                  <span>Luogo di partenza *</span>
+                  <input id="quotePartenza" name="luogo-partenza" autocomplete="address-level2" required>
+                </label>
+                <label class="span-2">
+                  <span>Destinazione *</span>
+                  <input id="quoteDestinazione" name="destinazione" autocomplete="off" required>
+                </label>
+                <label>
+                  <span>Data *</span>
+                  <input id="quoteDataPartenza" name="data" type="date" required>
+                </label>
+                <label>
+                  <span>Numero passeggeri *</span>
+                  <input id="quotePasseggeri" name="numero-passeggeri" type="number" min="1" step="1" value="1" required>
+                </label>
+                <label class="span-2">
+                  <span>Tipologia del servizio *</span>
+                  <select id="quoteServizio" name="tipologia-servizio" required>
+                    <option value="Noleggio autobus GT">Noleggio autobus GT</option>
+                    <option value="Limousine Bus">Limousine Bus</option>
+                    <option value="Transfer aeroportuale">Transfer aeroportuale</option>
+                    <option value="Cerimonia">Cerimonia</option>
+                    <option value="Escursione">Escursione</option>
+                    <option value="Evento privato">Evento privato</option>
+                    <option value="Altro">Altro</option>
+                  </select>
+                </label>
+                <label class="span-2">
+                  <span>Note</span>
+                  <textarea id="quoteNoteCliente" name="note" placeholder="Dettagli utili: itinerario, tappe, esigenze speciali, orari, servizi richiesti..."></textarea>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button id="quoteSubmit" type="submit" class="btn-primary form-submit"><i class="fas fa-paper-plane"></i> Invia richiesta</button>
+                <a id="quoteWhatsAppInline" class="btn-secondary form-submit" href="https://wa.me/393205730466" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+              </div>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div>
+          <strong data-runtime-company-name>Del Grosso Viaggi &amp; Limousine Bus</strong>
+          <p>Preventivi, partenze e servizi premium per gruppi, eventi e transfer dedicati.</p>
+        </div>
+        <div class="footer-links">
+          <a href="viaggi.html">Partenze</a>
+          <a href="prenota.html">Prenota online</a>
+          <a href="preventivo.html">Richiedi preventivo</a>
+        </div>
+        <div class="footer-links" data-runtime-social-grid></div>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="./js/preventivo.js"></script>
+</body>
+</html>

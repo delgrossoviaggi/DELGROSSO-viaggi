@@ -2,11 +2,9 @@ export const PUBLIC_ROUTES = {
   home: '/index.html',
   viaggi: '/viaggi.html',
   prenota: '/prenota.html',
-  richiediPreventivo: '/richiedi-preventivo.html',
+  richiediPreventivo: '/preventivo.html',
   flotta: '/flotta.html',
-  contatti: '/contatti.html',
-  servizi: '/servizi.html',
-  chiSiamo: '/chi-siamo.html'
+  contatti: '/contatti.html'
 };
 
 export const ADMIN_ROUTES = {
