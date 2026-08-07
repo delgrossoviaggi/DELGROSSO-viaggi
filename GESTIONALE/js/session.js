@@ -1,1 +1,1 @@
-import '../../src/auth/session.js';
+import '../src/auth/session.js';

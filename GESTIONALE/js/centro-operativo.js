@@ -1,1 +1,1 @@
-import '../../src/pages/centro-operativo/centro-operativo.js';
+import '../src/pages/centro-operativo/centro-operativo.js';

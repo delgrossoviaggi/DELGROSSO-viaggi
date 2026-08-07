@@ -1,1 +1,1 @@
-import '../../src/pages/report/report.js';
+import '../src/pages/report/report.js';
