@@ -2,10 +2,10 @@ import {
   calculateAvailableSeats,
   formatDate,
   formatTime
-} from '../../../js/delgrosso-api.js';
-import { getViaggiPubblicati } from '../bridge.js';
-import { applyRuntimeSettings, loadImpostazioni } from '../../services/settingsService.js';
-import { buildPublicBookingUrl } from '../../utils/appRoutes.js';
+} from './delgrosso-api.js';
+import { getViaggiPubblicati } from './bridge.js';
+import { applyRuntimeSettings, loadImpostazioni } from '../services/settingsService.js';
+import { buildPublicBookingUrl } from '../utils/appRoutes.js';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x700/0f172a/ffffff?text=Del+Grosso+Viaggi';
 const REQUEST_TIMEOUT_MS = 15000;

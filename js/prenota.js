@@ -1,29 +1,29 @@
 import {
   formatCurrency,
   formatTime
-} from '../../../js/delgrosso-api.js';
+} from './delgrosso-api.js';
 import {
   aggiornaOccupazioneViaggio,
   creaPrenotazione,
   getFlottaPubblica,
   getPrenotazioniViaggio,
   getViaggioPubblico
-} from '../bridge.js';
+} from './bridge.js';
 import {
   generateSeatLayout,
   renderSeatMapHTML,
   validateSeatSelection
-} from '../../services/seatMapService.js';
-import { extractOccupiedSeats } from '../../services/seatAssignmentService.js';
+} from '../services/seatMapService.js';
+import { extractOccupiedSeats } from '../services/seatAssignmentService.js';
 import {
   downloadReceipt,
   generateBookingReceipt
-} from '../../services/pdfReceiptService.js';
+} from '../services/pdfReceiptService.js';
 import {
   openWhatsAppDispatch,
   prepareWhatsAppDispatch
-} from '../../services/whatsAppService.js';
-import { applyRuntimeSettings, buildCompanyInfo, getCachedSettingsSync, loadImpostazioni } from '../../services/settingsService.js';
+} from '../services/whatsAppService.js';
+import { applyRuntimeSettings, buildCompanyInfo, getCachedSettingsSync, loadImpostazioni } from '../services/settingsService.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[+0-9()\s-]{7,20}$/;
