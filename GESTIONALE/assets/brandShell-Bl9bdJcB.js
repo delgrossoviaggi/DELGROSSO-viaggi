@@ -1,0 +1,72 @@
+import{a as e,n as t,o as n,t as r}from"./settingsService-R4BF20Fj.js";import{i,t as a}from"./appRoutes-DomIvTj9.js";import{a as o,l as s,o as c}from"./localAuthService-PJKQL-am.js";import{n as l,r as u}from"./notificationCenterService-bxuk_1BD.js";var d=`dg_theme_preference`,f={LIGHT:`light`,DARK:`dark`};function p(){if(typeof window>`u`||!window.localStorage)return null;try{let e=window.localStorage.getItem(d);return e===f.DARK?f.DARK:e===f.LIGHT?f.LIGHT:null}catch{return null}}function m(e){if(!(typeof window>`u`||!window.localStorage)&&!(!e||e!==f.LIGHT&&e!==f.DARK))try{window.localStorage.setItem(d,e)}catch{}}function h(e){if(typeof document>`u`)return;let t=e===f.DARK?f.DARK:f.LIGHT;document.documentElement.dataset.theme=t}function g(){let e=p()||f.LIGHT;return h(e),e}function _(){let e=(document.documentElement.dataset.theme||f.LIGHT)===f.DARK?f.LIGHT:f.DARK;return h(e),m(e),e}g(),r(e());var v=[{label:`Dashboard`,href:a.dashboard,match:`dashboard`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12H9v8.25H4.125A1.125 1.125 0 0 1 3 19.125v-6Zm12 7.125V4.875c0-.621.504-1.125 1.125-1.125h3.75C20.496 3.75 21 4.254 21 4.875v14.25c0 .621-.504 1.125-1.125 1.125h-3.75A1.125 1.125 0 0 1 15 19.125Zm-6 0v-12A1.125 1.125 0 0 1 10.125 7.125h3.75C14.496 7.125 15 7.629 15 8.25v12"/></svg>`},{label:`Viaggi`,href:a.viaggi,match:`viaggi`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m6 20 6-16 6 16M8.25 14h7.5"/></svg>`},{label:`Prenotazioni`,href:a.prenotazioni,match:[`prenotazioni`,`prenotazione`],icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h7.5m-9 3h10.5m-12 3h12m-13.5 7.5h15A1.5 1.5 0 0 0 20.25 18V6A1.5 1.5 0 0 0 18.75 4.5h-15A1.5 1.5 0 0 0 2.25 6v12A1.5 1.5 0 0 0 3.75 19.5Z"/></svg>`},{label:`Clienti`,href:a.clienti,match:`clienti`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a8.966 8.966 0 0 1-12 0M9.75 9.75a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM3 20.25a9 9 0 1 1 18 0"/></svg>`},{label:`Flotta`,href:a.flotta,match:`flotta`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm10.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM3 13.5h18M4.5 13.5l1.5-6h12l1.5 6M4.5 13.5V18h1.5m12-4.5V18H19.5"/></svg>`},{label:`Pagamenti`,href:a.pagamenti,match:`pagamenti`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M3.75 5.25h16.5A1.5 1.5 0 0 1 21.75 6.75v10.5a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5V6.75a1.5 1.5 0 0 1 1.5-1.5Zm12 9h3"/></svg>`},{label:`Preventivi`,href:a.preventivi,match:[`preventivi`,`nuovoPreventivo`],icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 3h6m2.25 4.5h-10.5A2.25 2.25 0 0 1 4.5 17.25V6.75A2.25 2.25 0 0 1 6.75 4.5h6.879a2.25 2.25 0 0 1 1.591.659l2.121 2.121a2.25 2.25 0 0 1 .659 1.591v8.379A2.25 2.25 0 0 1 17.25 19.5Z"/></svg>`},{label:`Notifiche`,href:a.notifiche,match:`notifiche`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.082 5.454 1.31m5.715 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>`},{label:`CHECK-IN`,href:a.checkin,match:`checkin`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5m16.5 0V6A2.25 2.25 0 0 0 18 3.75h-1.5m-9 16.5H6A2.25 2.25 0 0 1 3.75 18v-1.5m16.5 0V18A2.25 2.25 0 0 1 18 20.25h-1.5M8.25 12h7.5"/></svg>`},{label:`Statistiche`,href:a.statistiche,match:`statistiche`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v3.75m4.5-7.5v7.5m4.5-12v12m-12 3h15.75"/></svg>`},{label:`Impostazioni`,href:a.impostazioni,match:`impostazioni`,icon:`<svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.592c.55 0 1.02.398 1.11.94l.213 1.277c.066.395.34.726.707.87.37.145.79.085 1.104-.142l1.022-.739a1.125 1.125 0 0 1 1.478.1l1.832 1.833a1.125 1.125 0 0 1 .1 1.478l-.738 1.021a1.125 1.125 0 0 0-.144 1.105c.145.368.476.642.872.708l1.275.212c.543.09.941.56.941 1.11v2.593c0 .55-.398 1.02-.94 1.11l-1.277.213a1.125 1.125 0 0 0-.87.707c-.145.37-.085.79.142 1.104l.739 1.022a1.125 1.125 0 0 1-.1 1.478l-1.833 1.832a1.125 1.125 0 0 1-1.478.1l-1.021-.738a1.125 1.125 0 0 0-1.105-.144 1.125 1.125 0 0 0-.708.872l-.212 1.275c-.09.543-.56.941-1.11.941h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.277a1.125 1.125 0 0 0-.707-.87 1.125 1.125 0 0 0-1.104.142l-1.022.739a1.125 1.125 0 0 1-1.478-.1L3.206 18.66a1.125 1.125 0 0 1-.1-1.478l.738-1.021c.229-.315.289-.735.144-1.105a1.125 1.125 0 0 0-.872-.708l-1.275-.212A1.125 1.125 0 0 1 1 13.126v-2.592c0-.55.398-1.02.94-1.11l1.277-.213c.395-.066.726-.34.87-.707.145-.37.085-.79-.142-1.104l-.739-1.022a1.125 1.125 0 0 1 .1-1.478L5.14 3.206a1.125 1.125 0 0 1 1.478-.1l1.021.738c.315.229.735.289 1.105.144.368-.145.642-.476.708-.872l.212-1.275Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>`}],y=null,b=null;function x(){if(document.querySelector(`link[href*="font-awesome"], link[href*="fontawesome"]`))return;let e=document.createElement(`link`);e.rel=`stylesheet`,e.href=`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css`,e.crossOrigin=`anonymous`,document.head.appendChild(e)}function S(){if(document.querySelector(`link[rel="icon"]`))return;let e=document.createElement(`link`);e.rel=`icon`,e.type=`image/png`,e.href=`/favicon.png`,document.head.appendChild(e)}function C(){let e=o();return e?{name:e.nome,role:c(e.ruolo)}:null}function w(){let e=document.querySelector(`body > h1`);return e?.textContent?.trim()?e.textContent.trim():(document.title||``).replace(` - Del Grosso Gestionale v1.0`,``).replace(` - Del Grosso Gestionale`,``).trim()||`Del Grosso Gestionale v1.0`}function T(){if(document.querySelector(`.dg-page-view`))return;let e=document.createElement(`main`);e.className=`dg-page-view`;let t=Array.from(document.body.children),n=t.filter(e=>e.tagName!==`SCRIPT`),r=t.find(e=>e.tagName===`SCRIPT`)||null;n.forEach(t=>e.appendChild(t)),document.body.insertBefore(e,r||null)}function E(e){e&&(e.innerHTML=(document.documentElement.dataset.theme===`dark`?`dark`:`light`)==`dark`?`<span>Light Mode</span>`:`<span>Dark Mode</span>`)}function D(e,t=l()){let n=e?.querySelector(`[data-dg-notification-badge]`);if(!n)return;let r=Number(t?.totalAlerts||0);n.textContent=r>99?`99+`:String(r),n.hidden=r===0}function O(){if(document.getElementById(`dg-brand-shell`))return;let o=C();if(!o){window.location.replace(a.login);return}let c=t(e()),l=document.createElement(`div`);l.id=`dg-brand-shell`,l.className=`dg-brand-shell`,l.innerHTML=`
+    <div class="dg-brand-shell__backdrop"></div>
+    <aside class="dg-brand-shell__sidebar">
+      <div class="dg-brand-shell__sidebar-top">
+        <div class="dg-brand-shell__brand">
+          <img src="${c.logo||`/assets/logo-BKhzXkqO.JPEG`}" alt="${c.name}" />
+          <div>
+            <p class="dg-brand-shell__eyebrow">Travel CRM</p>
+            <strong>${c.name}</strong>
+            <span>Gestionale professionale</span>
+          </div>
+        </div>
+        <nav class="dg-brand-shell__nav"></nav>
+      </div>
+      <div class="dg-brand-shell__sidebar-footer">
+        <button class="dg-brand-shell__theme-button" type="button"></button>
+        <button class="dg-brand-shell__logout" type="button">Esci</button>
+      </div>
+    </aside>
+    <header class="dg-brand-shell__header">
+      <div class="dg-brand-shell__header-title">
+        <p class="dg-brand-shell__eyebrow">CRM SaaS Interface</p>
+        <strong>${w()}</strong>
+        <span>Esperienza uniforme, responsive e ottimizzata</span>
+      </div>
+      <div class="dg-brand-shell__header-actions">
+        <div class="dg-brand-shell__clock">
+          <span>Ora locale</span>
+          <strong id="dgShellClock">--:--</strong>
+        </div>
+        <div class="dg-brand-shell__meta">
+          <div class="avatar">${String(o.name||`U`).trim().charAt(0).toUpperCase()}</div>
+          <div>
+            <div><strong>${o.name}</strong></div>
+            <div>${o.role}</div>
+          </div>
+        </div>
+        <button class="dg-brand-shell__menu-toggle" type="button" aria-label="Apri menu">
+          <svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5"/></svg>
+        </button>
+      </div>
+    </header>
+  `;let d=l.querySelector(`.dg-brand-shell__nav`);v.forEach(e=>{let t=document.createElement(`a`);t.href=e.href,t.innerHTML=e.label===`Notifiche`?`${e.icon}<span>${e.label}</span><span class="dg-brand-shell__nav-badge" data-dg-notification-badge hidden>0</span>`:`${e.icon}<span>${e.label}</span>`,(Array.isArray(e.match)?e.match.some(e=>i(e)):i(e.match))&&t.classList.add(`is-active`),d.appendChild(t)}),document.body.appendChild(l),document.body.classList.add(`dg-has-brand-shell`);let f=document.createElement(`footer`);f.className=`dg-brand-shell__footer`,f.innerHTML=`
+    <div>
+      <strong>© 2026 ${c.name}</strong>
+      <span>Design system CRM • Dark/Light ready</span>
+    </div>
+    <div>${c.email||`info@delgrossoviaggi.it`}</div>
+  `,document.body.appendChild(f),[l.querySelector(`.dg-brand-shell__theme-button`)].forEach(e=>{e&&(E(e),e.addEventListener(`click`,()=>{_(),E(e),document.dispatchEvent(new window.CustomEvent(`dg-theme-changed`))}))}),l.querySelector(`.dg-brand-shell__logout`)?.addEventListener(`click`,()=>{s(),window.location.href=a.login});let p=l.querySelector(`.dg-brand-shell__menu-toggle`),m=l.querySelector(`.dg-brand-shell__backdrop`),h=e=>{document.body.classList.toggle(`dg-shell-open`,!!e)};p?.addEventListener(`click`,()=>{h(!document.body.classList.contains(`dg-shell-open`))}),m?.addEventListener(`click`,()=>h(!1)),l.querySelectorAll(`.dg-brand-shell__nav a`).forEach(e=>{e.addEventListener(`click`,()=>h(!1))});let g=l.querySelector(`#dgShellClock`),x=()=>{g&&(g.textContent=new Date().toLocaleString(`it-IT`,{day:`2-digit`,month:`2-digit`,year:`2-digit`,hour:`2-digit`,minute:`2-digit`}))};x(),y=window.setInterval(x,1e3*30),D(l),b&&b(),b=u(e=>{D(l,e)}),n().then(e=>{if(e.success===!1)return;let n=t(e.data);r(e.data);let i=l.querySelector(`.dg-brand-shell__brand img`),a=l.querySelector(`.dg-brand-shell__brand strong`);i&&(i.src=n.logo||`/assets/logo-BKhzXkqO.JPEG`,i.alt=n.name),a&&(a.textContent=n.name),f.innerHTML=`
+      <div>
+        <strong>© 2026 ${n.name}</strong>
+        <span>Design system CRM • Dark/Light ready</span>
+      </div>
+      <div>${n.email||``}</div>
+    `}).catch(()=>{})}function k(){document.body.dataset.brandShellLoaded!==`true`&&(document.body.dataset.brandShellLoaded=`true`,x(),S(),T(),O())}window.addEventListener(`beforeunload`,()=>{y&&=(window.clearInterval(y),null),b&&=(b(),null)}),document.readyState===`loading`?window.addEventListener(`DOMContentLoaded`,k):k();var A={label:`Supporto clienti`,value:`3205730466`,href:`https://wa.me/393205730466`},j={label:`Assistenza clienti (Nicola)`,value:`3662127916`,href:`https://wa.me/393662127916`};function M(){return`
+    <div class="dg-brand-shell__footer-support" data-dg-support-contacts>
+      <div class="dg-brand-shell__support-item">
+        <span class="dg-brand-shell__support-label">${A.label}</span>
+        <div class="dg-brand-shell__support-meta">
+          <strong>${A.value}</strong>
+          <a class="dg-brand-shell__support-link" href="${A.href}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </div>
+      </div>
+      <div class="dg-brand-shell__support-item">
+        <span class="dg-brand-shell__support-label">${j.label}</span>
+        <div class="dg-brand-shell__support-meta">
+          <strong>${j.value}</strong>
+          <a class="dg-brand-shell__support-link" href="${j.href}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  `}function N(){let e=document.querySelector(`.dg-brand-shell__footer`);if(!e)return;let t=e.querySelector(`[data-dg-support-contacts]`);t&&t.remove(),e.insertAdjacentHTML(`beforeend`,M())}var P=new MutationObserver(()=>{N()});function F(){N(),P.observe(document.body,{childList:!0,subtree:!0})}document.readyState===`loading`?window.addEventListener(`DOMContentLoaded`,F,{once:!0}):F(),window.addEventListener(`beforeunload`,()=>{P.disconnect()});export{h as n,m as r,f as t};
