@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Del Grosso Viaggi & Limousine Bus">
-  <rect width="400" height="400" rx="72" fill="#FFFFFF"/>
-  <circle cx="200" cy="200" r="148" fill="#0F4C81"/>
-  <path d="M132 124h136c34 0 60 27 60 60v32c0 34-26 60-60 60H132c-33 0-60-26-60-60v-32c0-33 27-60 60-60Z" fill="#F57C00"/>
-  <path d="M158 154h104c24 0 42 18 42 42v28c0 24-18 42-42 42H158c-24 0-42-18-42-42v-28c0-24 18-42 42-42Z" fill="#FFFFFF"/>
-  <path d="M176 212h48c15 0 27 12 27 27v16h-102v-16c0-15 12-27 27-27Z" fill="#0F4C81"/>
-  <path d="M140 116h120" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round"/>
-  <path d="M142 292h116" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/>
-</svg>
