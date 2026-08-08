@@ -1,5 +1,6 @@
 import { getImpostazioni, saveImpostazioni } from '../../js/delgrosso-api.js';
-import defaultLogoUrl from '../assets/images/logo.JPEG';
+
+const defaultLogoUrl = './assets/images/logo.JPEG';
 
 const BACKUP_KEY = 'gestionale-backup-v1';
 const SETTINGS_CACHE_KEY = 'dg_runtime_settings_cache_v2';
