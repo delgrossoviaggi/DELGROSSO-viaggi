@@ -1,1 +1,0 @@
-export const filtraPreventivi=(rows=[],stato='Tutti')=>stato==='Tutti'?rows:rows.filter(r=>r.stato===stato);

@@ -1,1 +1,0 @@
-export const INFRASTRUCTURE_MODE='enterprise';

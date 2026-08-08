@@ -1,1 +1,0 @@
-export function verificaScadenze(){return {revisioni:[],assicurazioni:[],bolli:[]};}

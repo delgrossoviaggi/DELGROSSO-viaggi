@@ -1,1 +1,0 @@
-export const euro=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(v||0);

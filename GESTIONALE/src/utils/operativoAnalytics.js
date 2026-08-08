@@ -1,1 +1,0 @@
-export function operativoAnalytics(){return {efficienza:0,puntualita:0,utilizzoFlotta:0};}

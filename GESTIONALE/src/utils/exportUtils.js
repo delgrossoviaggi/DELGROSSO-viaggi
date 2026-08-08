@@ -1,1 +1,0 @@
-export const esporta=(tipo)=>tipo;

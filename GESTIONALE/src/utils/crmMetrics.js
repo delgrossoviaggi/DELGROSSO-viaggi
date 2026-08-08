@@ -1,1 +1,0 @@
-export function crmMetrics(){return {lead:0,conversioni:0,campagne:0};}

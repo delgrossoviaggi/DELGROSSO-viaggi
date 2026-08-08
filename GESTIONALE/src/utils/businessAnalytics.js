@@ -1,1 +1,0 @@
-export function businessAnalytics(){return {trend:'stabile',crescita:0};}

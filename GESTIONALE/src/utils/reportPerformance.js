@@ -1,1 +1,0 @@
-export function performance(){return {occupazione:0,fatturato:0,crescita:0};}

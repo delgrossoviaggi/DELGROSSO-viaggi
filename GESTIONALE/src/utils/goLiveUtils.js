@@ -1,1 +1,0 @@
-export const GO_LIVE_STEPS=['build','backup','deploy','verify','monitor'];

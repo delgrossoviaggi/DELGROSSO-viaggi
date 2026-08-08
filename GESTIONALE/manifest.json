@@ -1,0 +1,13 @@
+{
+  "name": "Del Grosso Gestionale",
+  "short_name": "Del Grosso",
+  "start_url": "/gestionale/login.html",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,1 +1,0 @@
-export function sortClienti(rows,key='nome'){return [...rows].sort((a,b)=>String(a[key]||'').localeCompare(String(b[key]||''),'it'));}

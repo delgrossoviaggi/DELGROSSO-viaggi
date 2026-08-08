@@ -1,1 +1,0 @@
-export const STABILITY_LEVEL='Enterprise';

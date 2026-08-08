@@ -1,1 +1,0 @@
-export function calcolaStatistiche(rows=[]){return{totali:rows.length,confermate:rows.filter(r=>r.stato==='Confermata').length,inCorso:rows.filter(r=>r.stato==='In corso').length,completate:rows.filter(r=>r.stato==='Completata').length};}

@@ -1,1 +1,0 @@
-export const BUILD_STAGES=['compile','test','bundle','deploy'];

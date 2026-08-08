@@ -1,1 +1,0 @@
-export const passeggeriUtils={totali:0,presenti:0,saldiPendenti:0};

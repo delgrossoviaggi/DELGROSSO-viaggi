@@ -1,1 +1,0 @@
-export const RELEASE='1.0.0 Enterprise';

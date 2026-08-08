@@ -1,1 +1,0 @@
-Icone SVG personalizzate.

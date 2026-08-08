@@ -1,1 +1,0 @@
-export function calcolaStatistiche(rows=[]){return{totale:rows.length,incassato:0,daIncassare:0,scaduti:rows.filter(r=>r.stato==='Scaduto').length};}

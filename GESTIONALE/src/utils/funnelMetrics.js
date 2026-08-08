@@ -1,1 +1,0 @@
-export function funnelMetrics(){return {lead:0,opportunita:0,clienti:0,conversionRate:0};}

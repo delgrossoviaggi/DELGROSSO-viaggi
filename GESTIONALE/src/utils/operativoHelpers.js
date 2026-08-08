@@ -1,1 +1,0 @@
-export const statoColor=(s)=>s;

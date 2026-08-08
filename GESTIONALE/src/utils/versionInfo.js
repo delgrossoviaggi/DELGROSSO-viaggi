@@ -1,1 +1,0 @@
-export const VERSION_INFO={version:'1.0.0',edition:'Enterprise'};
