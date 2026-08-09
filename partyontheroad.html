@@ -131,7 +131,7 @@
 
     <!-- Footer Ocean Light -->
     <footer class="bg-slate-900 text-white py-12 border-t border-slate-800 text-center">
-        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">© 2026 Del Grosso Viaggi & Limousine Bus. Developer & Design: Nicola Pio Cristino</p>
+        <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">© 2026 Del Grosso Viaggi & Limousine Bus - P.IVA: 04499320713. Developer & Design: Nicola Pio Cristino</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
@@ -197,6 +197,10 @@
             const el = document.querySelector(`.glightbox-${id}`);
             if (el) el.click();
         }
+
+        const realtimeChannel = sb.channel('party-live-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_eventi' }, () => caricaEventi())
+            .subscribe();
 
         caricaEventi();
     </script>
