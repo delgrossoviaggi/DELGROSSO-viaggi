@@ -1,13 +1,18 @@
-SEND-BOOKING-CONFIRMATION
-==========================
+SEND-BOOKING-CONFIRMATION — FILE COMPLETO
+===========================================
 
-Questa è la Supabase Edge Function prevista dal progetto per inviare al cliente
-la ricevuta PDF già generata dal frontend, con il QR Code già presente.
+QUESTA FUNZIONE INVIA AUTOMATICAMENTE AL CLIENTE:
+- email di conferma;
+- riepilogo della prenotazione;
+- PDF già generato dal gestionale;
+- QR Code già presente nel PDF.
 
-FILE:
+WHATSAPP RESTA MANUALE, COME DECISO.
+
+PERCORSO NEL PROGETTO:
 supabase/functions/send-booking-confirmation/index.ts
 
-SECRET DA IMPOSTARE NEL PROGETTO SUPABASE:
+SECRETS SUPABASE DA CREARE:
 SMTP_HOST=smtps.aruba.it
 SMTP_PORT=465
 SMTP_SECURE=true
@@ -17,18 +22,16 @@ SMTP_FROM_EMAIL=prenotazioni@delgrossoviaggi.it
 SMTP_FROM_NAME=PRENOTAZIONI DELGROSSO VIAGGI
 SMTP_REPLY_TO=prenotazioni@delgrossoviaggi.it
 
-IMPORTANTE:
-La configurazione SMTP in Authentication > Emails > SMTP Settings riguarda
-le email di autenticazione Supabase. Per questa Edge Function i secret
-SMTP_* devono essere disponibili nella funzione.
+NON INSERIRE MAI LA PASSWORD NEL CODICE O SU GITHUB.
 
 DEPLOY:
-supabase functions deploy send-booking-confirmation
+Da Supabase > Edge Functions creare/aggiornare la funzione
+send-booking-confirmation e incollare il contenuto di index.ts.
 
 ENDPOINT:
 https://<PROJECT-REF>.supabase.co/functions/v1/send-booking-confirmation
 
-PAYLOAD:
+PAYLOAD ATTESO:
 {
   "booking": {
     "id": "...",
@@ -53,7 +56,9 @@ PAYLOAD:
   "pdfFilename": "Ricevuta_Prenotazione_ABC123.pdf"
 }
 
-NON modificare qrBookingUtils e non rigenerare il QR.
-Il frontend deve generare il PDF esistente, convertirlo in Base64 e chiamare
-questa funzione. Se l'invio email fallisce, la prenotazione NON va cancellata.
-WhatsApp resta manuale come deciso.
+IMPORTANTE:
+- Il frontend/gestionale deve generare il PDF e convertirlo in Base64.
+- La funzione NON rigenera il QR Code.
+- La prenotazione NON deve essere cancellata se l'email fallisce.
+- WhatsApp resta manuale.
+- Non modificare la cartella GESTIONALE durante questo passaggio se stai usando il deploy diretto da Supabase.
