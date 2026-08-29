@@ -1,33 +1,36 @@
 import nodemailer from "npm:nodemailer";
 
+type Booking = {
+  id?: string;
+  codice?: string;
+  nome?: string;
+  cognome?: string;
+  telefono?: string;
+  email?: string;
+  posti?: number;
+  posti_selezionati?: string;
+  totale?: number;
+};
+
+type Trip = {
+  id?: string;
+  titolo?: string;
+  destinazione?: string;
+  data_partenza?: string;
+  ora_partenza?: string;
+  luogo_partenza?: string;
+};
+
 type Payload = {
-  booking?: {
-    id?: string;
-    codice?: string;
-    nome?: string;
-    cognome?: string;
-    telefono?: string;
-    email?: string;
-    posti?: number;
-    posti_selezionati?: string;
-    totale?: number;
-  };
-  trip?: {
-    id?: string;
-    titolo?: string;
-    destinazione?: string;
-    data_partenza?: string;
-    ora_partenza?: string;
-    luogo_partenza?: string;
-  };
+  booking?: Booking;
+  trip?: Trip;
   pdfBase64?: string;
   pdfFilename?: string;
 };
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json; charset=utf-8",
 };
@@ -57,14 +60,14 @@ function base64ToUint8Array(value: string): Uint8Array {
 function formatDate(value?: string) {
   if (!value) return "—";
 
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
 
   return new Intl.DateTimeFormat("it-IT", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-  }).format(d);
+  }).format(date);
 }
 
 function escapeHtml(value: unknown) {
@@ -77,10 +80,7 @@ function escapeHtml(value: unknown) {
 }
 
 function isValidEmail(email: unknown): email is string {
-  return (
-    typeof email === "string" &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-  );
+  return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
 Deno.serve(async (req) => {
@@ -123,26 +123,19 @@ Deno.serve(async (req) => {
 
     const host = Deno.env.get("SMTP_HOST");
     const port = Number(Deno.env.get("SMTP_PORT") || "465");
-    const secure =
-      (Deno.env.get("SMTP_SECURE") || "true").toLowerCase() === "true";
+    const secure = (Deno.env.get("SMTP_SECURE") || "true").toLowerCase() === "true";
     const username = Deno.env.get("SMTP_USERNAME");
     const password = Deno.env.get("SMTP_PASSWORD");
-    const fromEmail =
-      Deno.env.get("SMTP_FROM_EMAIL") ||
-      "prenotazioni@delgrossoviaggi.it";
-    const fromName =
-      Deno.env.get("SMTP_FROM_NAME") ||
-      "PRENOTAZIONI DELGROSSO VIAGGI";
-    const replyTo =
-      Deno.env.get("SMTP_REPLY_TO") || fromEmail;
+    const fromEmail = Deno.env.get("SMTP_FROM_EMAIL") || "prenotazioni@delgrossoviaggi.it";
+    const fromName = Deno.env.get("SMTP_FROM_NAME") || "PRENOTAZIONI DELGROSSO VIAGGI";
+    const replyTo = Deno.env.get("SMTP_REPLY_TO") || fromEmail;
 
     if (!host || !username || !password) {
       console.error("Configurazione SMTP incompleta.");
       return json(
         {
           success: false,
-          error:
-            "Configurazione SMTP della Edge Function incompleta. Controlla i Secrets SMTP_*.",
+          error: "Configurazione SMTP della Edge Function incompleta. Controlla i Secrets SMTP_*.",
         },
         500,
       );
@@ -158,12 +151,9 @@ Deno.serve(async (req) => {
       },
     });
 
-    const nome =
-      `${booking.nome || ""} ${booking.cognome || ""}`.trim() || "Cliente";
-
+    const nome = `${booking.nome || ""} ${booking.cognome || ""}`.trim() || "Cliente";
     const numero = booking.codice || booking.id || "—";
-    const destinazione =
-      trip?.destinazione || trip?.titolo || "—";
+    const destinazione = trip?.destinazione || trip?.titolo || "—";
     const data = formatDate(trip?.data_partenza);
     const posti = booking.posti ?? "—";
 
@@ -185,51 +175,21 @@ Deno.serve(async (req) => {
 
     const html = `
       <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:#24324a;max-width:680px;margin:0 auto">
-        <h2 style="color:#008f78;margin-bottom:8px">
-          Del Grosso Viaggi &amp; Limousine Bus
-        </h2>
-
+        <h2 style="color:#008f78">Del Grosso Viaggi &amp; Limousine Bus</h2>
         <p>Buongiorno <strong>${escapeHtml(nome)}</strong>,</p>
-
-        <p>
-          la tua prenotazione è stata registrata correttamente.
-        </p>
-
-        <p>
-          In allegato trovi il riepilogo della prenotazione con il
-          <strong>QR Code</strong> da presentare al check-in.
-        </p>
-
-        <table cellpadding="7" cellspacing="0"
-          style="border-collapse:collapse;width:100%;max-width:620px">
-          <tr>
-            <td><strong>Numero prenotazione</strong></td>
-            <td>${escapeHtml(numero)}</td>
-          </tr>
-          <tr>
-            <td><strong>Viaggio</strong></td>
-            <td>${escapeHtml(destinazione)}</td>
-          </tr>
-          <tr>
-            <td><strong>Data</strong></td>
-            <td>${escapeHtml(data)}</td>
-          </tr>
-          <tr>
-            <td><strong>Posti</strong></td>
-            <td>${escapeHtml(posti)}</td>
-          </tr>
+        <p>la tua prenotazione è stata registrata correttamente.</p>
+        <p>In allegato trovi il riepilogo della prenotazione con il <strong>QR Code</strong> da presentare al check-in.</p>
+        <table cellpadding="7" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:620px">
+          <tr><td><strong>Numero prenotazione</strong></td><td>${escapeHtml(numero)}</td></tr>
+          <tr><td><strong>Viaggio</strong></td><td>${escapeHtml(destinazione)}</td></tr>
+          <tr><td><strong>Data</strong></td><td>${escapeHtml(data)}</td></tr>
+          <tr><td><strong>Posti</strong></td><td>${escapeHtml(posti)}</td></tr>
         </table>
-
-        <p style="margin-top:24px">
-          Grazie,<br>
-          <strong>Del Grosso Viaggi &amp; Limousine Bus</strong>
-        </p>
+        <p style="margin-top:24px">Grazie,<br><strong>Del Grosso Viaggi &amp; Limousine Bus</strong></p>
       </div>
     `;
 
-    const filename =
-      body.pdfFilename ||
-      `Ricevuta_Prenotazione_${booking.codice || booking.id || "prenotazione"}.pdf`;
+    const filename = body.pdfFilename || `Ricevuta_Prenotazione_${booking.codice || booking.id || "prenotazione"}.pdf`;
 
     const info = await transporter.sendMail({
       from: `"${fromName}" <${fromEmail}>`,
@@ -247,9 +207,7 @@ Deno.serve(async (req) => {
       ],
     });
 
-    console.log(
-      `Email prenotazione inviata: ${booking.email} / ${numero}`,
-    );
+    console.log(`Email prenotazione inviata: ${booking.email} / ${numero}`);
 
     return json({
       success: true,
@@ -261,8 +219,7 @@ Deno.serve(async (req) => {
     return json(
       {
         success: false,
-        error:
-          error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(error),
       },
       500,
     );
