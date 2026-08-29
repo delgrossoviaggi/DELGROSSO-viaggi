@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard - Del Grosso Gestionale v1.0</title>
-<link rel="icon" href="../favicon.png">
+<link rel="icon" href="../favicon.png">
+
+
+
   <script type="module" crossorigin src="./assets/dashboard-D2lWl-Iq.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/settingsService-BkpKGRnr.js">
   <link rel="modulepreload" crossorigin href="./assets/tripService-BzTorehO.js">
@@ -22,6 +25,559 @@
   <link rel="stylesheet" crossorigin href="./assets/messageSystem-DWNz-gIS.css">
   <link rel="stylesheet" crossorigin href="./assets/dashboard-_I4lbKeS.css">
   <link rel="stylesheet" crossorigin href="./assets/accessibility-BRl-3lTk.css">
+<style>
+
+/* =========================================================
+   DEL GROSSO GESTIONALE — DASHBOARD V2 UI OVERRIDE
+   Solo presentazione/layout: nessuna modifica a dati o servizi.
+   ========================================================= */
+
+:root{
+  --dg-topbar-h: 72px;
+  --dg-sidebar-w: 252px;
+  --dg-gap: 18px;
+}
+
+body{
+  overflow-x:hidden;
+}
+
+.app-shell{
+  grid-template-columns:var(--dg-sidebar-w) minmax(0,1fr);
+  gap:var(--dg-gap);
+  padding:18px;
+  max-width:1800px;
+  margin:0 auto;
+}
+
+.sidebar{
+  width:var(--dg-sidebar-w);
+  height:calc(100vh - 36px);
+  top:18px;
+  padding:18px 14px;
+  gap:16px;
+  border-radius:22px;
+  overflow:hidden;
+}
+
+.sidebar-brand{
+  padding:4px 6px 16px;
+  gap:11px;
+}
+
+.sidebar-brand img{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+}
+
+.sidebar-brand h2{font-size:1rem}
+.sidebar-brand span{font-size:.76rem}
+
+.sidebar-nav{
+  gap:3px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:2px;
+  scrollbar-width:thin;
+}
+
+.nav-link{
+  min-height:42px;
+  padding:9px 11px;
+  border-radius:12px;
+  font-size:.9rem;
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+
+.nav-link:hover,
+.nav-link.active{
+  transform:none;
+}
+
+.nav-link.active{
+  box-shadow:inset 3px 0 0 var(--accent);
+  background:#ffffff22;
+}
+
+.logout-button{
+  min-height:42px;
+  margin-top:auto;
+  border-radius:12px;
+  padding:10px 12px;
+}
+
+.main-content{
+  gap:16px;
+  min-width:0;
+}
+
+.breadcrumb{
+  height:24px;
+  margin:0;
+  padding-left:4px;
+  font-size:.78rem;
+}
+
+/* ---------- TOP AREA: compatta e moderna ---------- */
+
+.hero-card{
+  min-height:0;
+  padding:0;
+  border-radius:22px;
+  box-shadow:0 12px 34px #0f4c8118;
+}
+
+.hero-gradient{
+  background:linear-gradient(120deg,#0a2c47 0%,#0f4c81 58%,#e66f00 140%);
+}
+
+.hero-content{
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:18px;
+  align-items:center;
+  min-height:var(--dg-topbar-h);
+  padding:14px 18px;
+}
+
+.hero-copy{
+  min-width:0;
+}
+
+.hero-copy .eyebrow{
+  font-size:.62rem;
+  margin-bottom:2px;
+  opacity:.82;
+}
+
+.hero-copy h1{
+  margin:2px 0 3px;
+  font-size:clamp(1.25rem,2vw,1.7rem);
+  line-height:1.1;
+}
+
+.hero-copy #heroSubtitle{
+  max-width:720px;
+  font-size:.78rem;
+  line-height:1.35;
+  color:#ffffffc7;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.hero-user-meta{
+  display:none;
+}
+
+.hero-side{
+  flex-direction:row;
+  align-items:center;
+  gap:10px;
+}
+
+.hero-info-grid{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.info-pill{
+  min-width:90px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:#ffffff14;
+  border-color:#ffffff1f;
+}
+
+.info-label{
+  margin-bottom:2px;
+  font-size:.58rem;
+}
+
+.info-pill strong{
+  font-size:.78rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.accent-pill{
+  min-width:155px;
+}
+
+.hero-actions{
+  gap:7px;
+}
+
+.notification-toggle,
+.theme-toggle{
+  min-width:40px;
+  min-height:40px;
+  border-radius:11px;
+}
+
+.theme-toggle{
+  padding:0 11px;
+  font-size:.72rem;
+}
+
+/* ---------- SEARCH ---------- */
+
+.search-section{
+  padding:15px 18px;
+  border-radius:18px;
+}
+
+.search-section .section-heading{
+  margin-bottom:8px;
+}
+
+.search-section .section-heading h2{
+  font-size:.95rem;
+}
+
+.search-section .eyebrow{
+  font-size:.62rem;
+}
+
+.search-shell input{
+  min-height:42px;
+  border-radius:12px;
+}
+
+/* ---------- KPI: griglia pulita ---------- */
+
+.kpi-grid{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:10px;
+}
+
+.kpi-card{
+  min-height:112px;
+  padding:14px;
+  border-radius:16px;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+
+.kpi-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 26px #0f4c8120;
+}
+
+.kpi-label{
+  font-size:.65rem;
+}
+
+.kpi-value{
+  margin-top:5px;
+  font-size:1.35rem;
+  line-height:1.1;
+}
+
+.kpi-meta{
+  margin-top:6px;
+  font-size:.68rem;
+  line-height:1.3;
+}
+
+/* Gli indicatori finanziari secondari restano nel DOM e continuano
+   a essere aggiornati, ma non affollano la prima schermata. */
+.kpi-card:nth-child(n+7){
+  display:none;
+}
+
+/* ---------- ANALYTICS ---------- */
+
+.charts-section{
+  padding:18px;
+  border-radius:20px;
+}
+
+.section-heading{
+  gap:12px;
+}
+
+.section-heading h2{
+  font-size:1.05rem;
+}
+
+.charts-heading{
+  margin-bottom:12px;
+}
+
+.charts-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.chart-card{
+  min-width:0;
+  border-radius:16px;
+  padding:14px;
+  background:var(--surface-soft);
+  border:1px solid var(--border);
+}
+
+.chart-card__header h3{
+  font-size:.9rem;
+  margin:3px 0;
+}
+
+.chart-card__meta{
+  font-size:.68rem;
+}
+
+.chart-canvas-wrap{
+  height:190px;
+  min-height:190px;
+}
+
+.chart-period-button{
+  min-height:36px;
+  padding:7px 12px;
+  border-radius:10px;
+}
+
+/* ---------- WIDGETS ---------- */
+
+.overview-grid,
+.widgets-grid{
+  gap:12px;
+}
+
+.overview-grid{
+  grid-template-columns:1.25fr .75fr;
+}
+
+.widgets-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.app-card{
+  border-radius:18px;
+}
+
+.spotlight-card,
+.widget-card{
+  padding:16px;
+}
+
+.stack-list{
+  gap:8px;
+}
+
+.stack-item,
+.quote-status-item{
+  border-radius:12px;
+}
+
+/* ---------- NOTIFICATION CENTER: overlay ordinato ---------- */
+
+.notification-panel{
+  z-index:120;
+  width:min(420px,calc(100vw - 32px));
+  max-height:min(680px,calc(100vh - 110px));
+  overflow:auto;
+  border-radius:18px;
+  box-shadow:0 24px 70px #07111f55;
+}
+
+.notification-backdrop{
+  z-index:110;
+}
+
+.notification-panel header{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:var(--surface-strong);
+}
+
+/* ---------- TABLET ---------- */
+
+@media (max-width:1250px){
+  .app-shell{
+    grid-template-columns:220px minmax(0,1fr);
+  }
+
+  .sidebar{width:220px}
+
+  .hero-content{
+    grid-template-columns:1fr;
+    gap:10px;
+    padding:15px 16px;
+  }
+
+  .hero-side{
+    justify-content:space-between;
+  }
+
+  .hero-info-grid{
+    flex:1;
+  }
+
+  .info-pill{flex:1;min-width:0}
+
+  .kpi-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .kpi-card:nth-child(n+7){display:block}
+  .kpi-card:nth-child(n+10){display:none}
+
+  .charts-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media (max-width:900px){
+  .app-shell{
+    grid-template-columns:1fr;
+    padding:12px;
+  }
+
+  .sidebar{
+    position:relative;
+    top:auto;
+    width:100%;
+    height:auto;
+    max-height:none;
+    padding:12px;
+    border-radius:18px;
+  }
+
+  .sidebar-brand{
+    border-bottom:0;
+    padding-bottom:8px;
+  }
+
+  .sidebar-nav{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    overflow:visible;
+  }
+
+  .nav-link{
+    justify-content:center;
+    min-width:0;
+    padding:8px 5px;
+    font-size:.72rem;
+  }
+
+  .nav-icon{
+    width:17px;
+    height:17px;
+    flex:0 0 auto;
+  }
+
+  .nav-link{
+    flex-direction:column;
+    gap:3px;
+  }
+
+  .logout-button{
+    width:100%;
+    margin-top:6px;
+  }
+
+  .hero-info-grid{
+    width:100%;
+    overflow-x:auto;
+  }
+
+  .hero-actions{
+    flex:0 0 auto;
+  }
+
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .overview-grid,
+  .widgets-grid,
+  .charts-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width:600px){
+  .breadcrumb{
+    display:none;
+  }
+
+  .hero-card{
+    border-radius:16px;
+  }
+
+  .hero-content{
+    padding:13px;
+  }
+
+  .hero-copy #heroSubtitle{
+    display:none;
+  }
+
+  .hero-side{
+    flex-wrap:wrap;
+  }
+
+  .hero-info-grid{
+    order:2;
+    width:100%;
+  }
+
+  .hero-actions{
+    order:1;
+    margin-left:auto;
+  }
+
+  .info-pill{
+    min-width:88px;
+  }
+
+  .accent-pill{
+    min-width:135px;
+  }
+
+  .search-section{
+    padding:13px;
+  }
+
+  .kpi-grid{
+    gap:8px;
+  }
+
+  .kpi-card{
+    min-height:100px;
+    padding:12px;
+  }
+
+  .kpi-value{
+    font-size:1.18rem;
+  }
+
+  .charts-section{
+    padding:13px;
+  }
+
+  .chart-canvas-wrap{
+    height:175px;
+    min-height:175px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    transition:none!important;
+    animation:none!important;
+  }
+}
+
+</style>
 </head>
 <body data-theme="light">
 
@@ -398,7 +954,11 @@
   P.IVA: 04499320713 | © 2026 Del Grosso Viaggi &amp; Limousine Bus<br>
   Gestionale v1.0 | Developed by Nicola Pio Cristino
 </footer>
-
+
+
+
+
+
 
 </body>
 </html>
