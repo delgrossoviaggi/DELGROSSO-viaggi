@@ -150,9 +150,19 @@ function getBusByTrip(trip) {
 
 function getBusDisplayName() {
   if (state.selectedBus) {
-    return `${state.selectedBus.targa || ''} - ${state.selectedBus.marca || ''} ${state.selectedBus.modello || ''}`.trim();
+    const brand = normalizeText(state.selectedBus.marca);
+    const model = normalizeText(state.selectedBus.modello);
+    const publicName = `${brand} ${model}`.trim();
+    return publicName || '—';
   }
-  return normalizeText(state.trip?.autobus || state.trip?.mezzo) || '—';
+
+  // Per il pubblico non mostriamo mai la targa del mezzo.
+  const tripBus = normalizeText(state.trip?.autobus || state.trip?.mezzo);
+  if (!tripBus) return '—';
+
+  // Se il campo viaggio contiene una descrizione generica del mezzo,
+  // la mostriamo; la targa resta esclusa dalla visualizzazione pubblica.
+  return tripBus;
 }
 
 function getSeatLayoutSource() {
