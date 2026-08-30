@@ -868,13 +868,29 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 </style>
 
   <link rel="stylesheet" crossorigin href="./assets/dg-premium-ui.css">
+
+<style id="dg-dashboard-layout-hotfix">
+/* V8: dashboard shell alignment fix */
+@media (min-width: 1151px) {
+  .app-shell { display:block !important; grid-template-columns:none !important; width:100% !important; max-width:none !important; }
+  .main-content { margin-left:236px !important; width:calc(100% - 236px) !important; max-width:none !important; box-sizing:border-box !important; }
+}
+@media (min-width: 851px) and (max-width: 1150px) {
+  .app-shell { display:block !important; grid-template-columns:none !important; width:100% !important; max-width:none !important; }
+  .main-content { margin-left:218px !important; width:calc(100% - 218px) !important; max-width:none !important; box-sizing:border-box !important; }
+}
+@media (max-width: 850px) {
+  .app-shell { display:block !important; width:100% !important; max-width:none !important; }
+  .main-content { margin-left:0 !important; width:100% !important; max-width:none !important; box-sizing:border-box !important; }
+}
+</style>
 </head>
 <body data-theme="light">
 
 <div class="app-shell">
   <aside class="sidebar app-card">
     <div class="sidebar-brand">
-      <img data-runtime-logo src="./assets/images/logo-sidebar.png" alt="Del Grosso Viaggi &amp; Limousine Bus">
+      <img data-runtime-logo src="./assets/logo-BKhzXkqO.JPEG" alt="Del Grosso Viaggi &amp; Limousine Bus">
       <div>
         <p class="eyebrow">CRM Travel Suite</p>
         <h2 data-runtime-company-name>Del Grosso Viaggi</h2>
