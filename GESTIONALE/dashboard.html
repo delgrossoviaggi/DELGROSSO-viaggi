@@ -577,7 +577,26 @@ body{
   }
 }
 
+
+/* --- V3 visual polish: dashboard --- */
+.hero-card{box-shadow:0 18px 48px rgba(10,44,71,.16)!important}
+.hero-gradient{background:linear-gradient(115deg,#08263d 0%,#0f4c81 55%,#f57c00 145%)!important}
+.hero-content{min-height:86px!important}
+.hero-copy h1{letter-spacing:-.035em!important}
+.hero-actions{align-self:center!important}
+.notification-toggle{position:relative!important;box-shadow:0 8px 20px rgba(0,0,0,.14)}
+.notification-toggle.has-new{animation:dgBellPulse 1.8s ease-in-out infinite}
+@keyframes dgBellPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.0)}40%{box-shadow:0 0 0 7px rgba(220,38,38,.12)}70%{box-shadow:0 0 0 0 rgba(220,38,38,.0)}}
+.dg-notification-toast{position:fixed;right:22px;bottom:22px;z-index:120;max-width:min(390px,calc(100vw - 32px));display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid rgba(15,76,129,.16);border-radius:16px;background:rgba(255,255,255,.96);color:#142133;box-shadow:0 18px 45px rgba(0,0,0,.18);backdrop-filter:blur(16px);transform:translateY(18px);opacity:0;transition:opacity .2s ease,transform .2s ease}
+body[data-theme=dark] .dg-notification-toast{background:rgba(13,23,38,.96);color:#edf4ff;border-color:rgba(148,163,184,.16)}
+.dg-notification-toast.is-visible{opacity:1;transform:translateY(0)}
+.dg-notification-toast__icon{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#dc26261a;color:#dc2626;font-size:17px;flex:0 0 auto}
+.dg-notification-toast strong{display:block;font-size:.88rem}.dg-notification-toast span{display:block;margin-top:2px;color:#62748a;font-size:.76rem}
+body[data-theme=dark] .dg-notification-toast span{color:#98a9bd}
+@media(max-width:640px){.dg-notification-toast{right:16px;bottom:16px}.hero-content{min-height:0!important}}
+
 </style>
+  <link rel="stylesheet" crossorigin href="./assets/dg-modern-ui.css">
 </head>
 <body data-theme="light">
 
@@ -641,7 +660,7 @@ body{
       <div class="hero-gradient"></div>
       <div class="hero-content">
         <div class="hero-copy">
-          <p class="eyebrow">Dashboard Enterprise</p>
+          <p class="eyebrow">Centro operativo · Del Grosso Viaggi</p>
           <h1 id="heroGreeting">Buongiorno Nicola</h1>
           <p id="heroSubtitle">Controllo completo di viaggi, prenotazioni, clienti e flotta con focus operativo sulla giornata.</p>
           <div class="hero-user-meta">
@@ -959,6 +978,58 @@ body{
 
 
 
+
+
+<script>
+(function(){
+  function greeting(){
+    const h=new Date().getHours();
+    if(h>=5 && h<12) return 'Buongiorno';
+    if(h>=12 && h<18) return 'Buon pomeriggio';
+    if(h>=18 && h<23) return 'Buona sera';
+    return 'Buonanotte';
+  }
+  function firstName(){
+    const el=document.getElementById('loggedEmail');
+    const raw=(el?.textContent||'').trim();
+    if(!raw || raw==='...') return 'Nicola';
+    const name=raw.split('@')[0].replace(/[._-]+/g,' ').trim();
+    return name ? name.split(/\s+/)[0].replace(/^./,c=>c.toUpperCase()) : 'Nicola';
+  }
+  function updateGreeting(){
+    const el=document.getElementById('heroGreeting');
+    if(el) el.textContent=greeting()+' '+firstName()+' 👋';
+  }
+  function setupNotifications(){
+    const badge=document.getElementById('notificationBadge');
+    const btn=document.getElementById('notificationToggle');
+    if(!badge || !btn) return;
+    let ready=false,last=0;
+    const toast=(count)=>{
+      document.querySelector('.dg-notification-toast')?.remove();
+      const el=document.createElement('div');
+      el.className='dg-notification-toast';
+      el.innerHTML='<div class="dg-notification-toast__icon">🔔</div><div><strong>Nuove notifiche operative</strong><span>'+count+' alert disponibili · apri il centro notifiche</span></div>';
+      document.body.appendChild(el);
+      requestAnimationFrame(()=>el.classList.add('is-visible'));
+      setTimeout(()=>{el.classList.remove('is-visible');setTimeout(()=>el.remove(),220)},4200);
+    };
+    const check=()=>{
+      const count=parseInt((badge.textContent||'0').replace(/\D/g,''),10)||0;
+      if(count>0) btn.classList.add('has-new'); else btn.classList.remove('has-new');
+      if(ready && count>last) toast(count);
+      last=count; ready=true;
+    };
+    new MutationObserver(check).observe(badge,{childList:true,subtree:true,attributes:true,characterData:true});
+    check();
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    updateGreeting();
+    setInterval(updateGreeting,60000);
+    setupNotifications();
+  });
+})();
+</script>
 
 </body>
 </html>
