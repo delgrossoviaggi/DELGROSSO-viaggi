@@ -762,6 +762,111 @@ body::before{opacity:.16!important}
 
 </style>
   <link rel="stylesheet" crossorigin href="./assets/dg-modern-ui.css">
+
+<style id="dg-v6-redesign">
+/* =========================================================
+   DELGROSSO GESTIONALE V6 — REAL UI REDESIGN
+   Visual layer only. Existing IDs/data/services untouched.
+   ========================================================= */
+:root{
+  --v6-bg:#07111f;
+  --v6-panel:#0b1727;
+  --v6-panel-2:#0f1d2f;
+  --v6-border:rgba(148,163,184,.14);
+  --v6-text:#f7fbff;
+  --v6-muted:#8ea2b8;
+  --v6-blue:#3b82f6;
+  --v6-cyan:#22d3ee;
+  --v6-orange:#ff8a18;
+  --v6-green:#20d39a;
+  --v6-purple:#9b7cff;
+}
+html,body{background:var(--v6-bg)!important;color:var(--v6-text)!important}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+
+/* Keep the app feeling like a desktop application */
+.app-shell{max-width:none!important;grid-template-columns:236px minmax(0,1fr)!important;gap:0!important;padding:0!important;margin:0!important;min-height:100vh!important}
+.sidebar{position:fixed!important;left:0!important;top:0!important;width:236px!important;height:100vh!important;border-radius:0 22px 22px 0!important;padding:20px 14px 16px!important;background:linear-gradient(180deg,#0b2742 0%,#081a2d 52%,#071523 100%)!important;border:1px solid rgba(255,255,255,.07)!important;border-left:0!important;box-shadow:18px 0 50px rgba(0,0,0,.18)!important;z-index:80!important}
+.sidebar-brand{padding:8px 10px 18px!important;margin-bottom:10px!important;border-bottom:1px solid rgba(255,255,255,.09)!important}
+.sidebar-brand img{width:52px!important;height:52px!important;border-radius:15px!important;object-fit:cover!important;background:#fff!important;box-shadow:0 8px 22px rgba(0,0,0,.2)!important}
+.sidebar-brand h2{font-size:1.02rem!important;letter-spacing:-.02em!important}
+.sidebar-brand span{font-size:.72rem!important;color:#9bb0c7!important}
+.sidebar-nav{gap:5px!important}
+.nav-link{min-height:44px!important;border-radius:12px!important;padding:9px 11px!important;color:#a9bbce!important;font-weight:700!important;transition:background .15s,transform .15s,color .15s!important}
+.nav-link:hover{background:rgba(255,255,255,.07)!important;color:#fff!important;transform:translateX(2px)!important}
+.nav-link.active{background:linear-gradient(90deg,rgba(59,130,246,.30),rgba(59,130,246,.08))!important;color:#fff!important;box-shadow:inset 3px 0 0 var(--v6-orange),0 8px 20px rgba(0,0,0,.10)!important}
+.logout-button{background:linear-gradient(135deg,#ff8a18,#ffad3d)!important;border:0!important;box-shadow:0 10px 25px rgba(255,138,24,.18)!important;font-weight:800!important}
+
+.main-content{margin-left:236px!important;padding:18px 22px 36px!important;gap:14px!important;min-width:0!important}
+.breadcrumb{display:none!important}
+
+/* New top area: clearly separated command bar */
+.hero-card{border-radius:22px!important;border:1px solid rgba(255,255,255,.08)!important;background:linear-gradient(135deg,#0d3150 0%,#0b2641 55%,#12243a 100%)!important;box-shadow:0 20px 55px rgba(0,0,0,.20)!important;overflow:visible!important}
+.hero-gradient{background:none!important}
+.hero-content{min-height:116px!important;padding:18px 20px!important;grid-template-columns:minmax(0,1fr) auto!important;gap:22px!important}
+.hero-copy .eyebrow{color:#ff9b2e!important;font-weight:900!important;letter-spacing:.14em!important;font-size:.63rem!important}
+.hero-copy h1{font-size:clamp(1.65rem,2.3vw,2.25rem)!important;letter-spacing:-.045em!important;margin:5px 0 4px!important}
+.hero-copy #heroSubtitle{font-size:.8rem!important;color:#a9bdd1!important;white-space:normal!important;max-width:620px!important}
+.hero-side{gap:9px!important}
+.hero-info-grid{gap:8px!important}
+.info-pill{min-width:112px!important;padding:9px 11px!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:13px!important}
+.info-label{color:#8fa6bd!important;font-size:.56rem!important;letter-spacing:.09em!important}
+.info-pill strong{font-size:.74rem!important;color:#fff!important}
+.accent-pill{border-color:rgba(255,138,24,.28)!important;background:rgba(255,138,24,.08)!important}
+.notification-toggle,.theme-toggle{min-width:42px!important;min-height:42px!important;border-radius:13px!important;background:#0b1727!important;border:1px solid rgba(255,255,255,.1)!important}
+.notification-toggle:hover,.theme-toggle:hover{transform:translateY(-1px)!important}
+
+/* Status banner */
+.message-banner{border-radius:14px!important;padding:10px 14px!important;background:#0b1727!important;border-color:rgba(59,130,246,.15)!important;color:#67a8ff!important;font-size:.82rem!important}
+
+/* Search becomes a command palette block */
+.search-section{border-radius:18px!important;background:var(--v6-panel)!important;border:1px solid var(--v6-border)!important;padding:15px 17px!important;box-shadow:0 12px 32px rgba(0,0,0,.10)!important}
+.search-section .eyebrow{color:#ff9b2e!important}
+.search-section .section-heading h2{font-size:.94rem!important}
+.search-shell input{min-height:46px!important;border-radius:13px!important;background:#071321!important;border-color:rgba(148,163,184,.16)!important;color:#eaf2fb!important}
+.search-shell input::placeholder{color:#667b91!important}
+
+/* KPI cards — strong visual hierarchy */
+.kpi-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:10px!important}
+.kpi-card{min-height:116px!important;padding:15px!important;border-radius:16px!important;background:linear-gradient(180deg,#0d1b2d,#091522)!important;border:1px solid rgba(148,163,184,.12)!important;box-shadow:0 10px 28px rgba(0,0,0,.10)!important}
+.kpi-card:before{height:3px!important;opacity:.9!important}
+.kpi-label{font-size:.6rem!important;color:#8197ad!important}
+.kpi-value{font-size:1.45rem!important;margin-top:7px!important;margin-bottom:6px!important;font-weight:900!important;color:#f7fbff!important}
+.kpi-meta{font-size:.65rem!important;color:#73879d!important;line-height:1.35!important}
+.kpi-card.tone-blue .kpi-value{color:#60a5fa!important}.kpi-card.tone-green .kpi-value{color:#34d399!important}.kpi-card.tone-sky .kpi-value{color:#60a5fa!important}.kpi-card.tone-gold .kpi-value{color:#ffab42!important}.kpi-card.tone-violet .kpi-value{color:#a78bfa!important}.kpi-card.tone-orange .kpi-value{color:#fb923c!important}
+
+/* Analytics */
+.charts-section{border-radius:20px!important;background:#091421!important;border:1px solid var(--v6-border)!important;padding:18px!important;box-shadow:0 14px 38px rgba(0,0,0,.12)!important}
+.charts-heading{margin-bottom:13px!important}
+.charts-heading h2{font-size:1.05rem!important}
+.charts-period-meta{font-size:.78rem!important;color:#71869c!important}
+.chart-toolbar{background:#07111f!important;border-color:rgba(148,163,184,.12)!important;border-radius:12px!important}
+.chart-period-button{min-height:34px!important;font-size:.74rem!important;border-radius:9px!important;padding:0 14px!important}
+.charts-grid{gap:10px!important}
+.chart-card{border-radius:16px!important;padding:14px!important;background:#0b1727!important;border-color:rgba(148,163,184,.12)!important}
+.chart-card__header{margin-bottom:10px!important}.chart-card__header h3{font-size:.84rem!important}.chart-card__meta{font-size:.67rem!important;color:#73879d!important}
+.chart-canvas-wrap,.chart-canvas-wrap canvas{height:185px!important;min-height:185px!important}
+
+/* Lower widgets */
+.overview-grid,.widgets-grid,.calendar-grid{gap:10px!important}
+.app-card,.spotlight-card,.widget-card{background:#091421!important;border-color:rgba(148,163,184,.12)!important;border-radius:18px!important}
+.spotlight-card,.widget-card{padding:16px!important}
+.stack-item{background:#0b1727!important;border-color:rgba(148,163,184,.11)!important;border-radius:14px!important}
+.calendar-day{background:#0b1727!important;border-color:rgba(148,163,184,.11)!important;border-radius:14px!important}
+
+/* Notification center */
+.notification-panel{z-index:500!important;width:min(410px,calc(100vw - 28px))!important;max-height:calc(100vh - 32px)!important;top:16px!important;right:16px!important;border-radius:20px!important;background:#091421!important;border:1px solid rgba(148,163,184,.18)!important;box-shadow:0 28px 80px rgba(0,0,0,.48)!important}
+.notification-panel header{background:#091421!important;border-bottom:1px solid rgba(148,163,184,.12)!important}
+.notification-item{border-radius:14px!important;background:#0b1727!important}
+.notification-backdrop{z-index:490!important;background:rgba(0,0,0,.42)!important;backdrop-filter:blur(2px)!important}
+
+/* desktop widths */
+@media (max-width:1500px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.charts-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:1150px){.main-content{padding:14px!important}.sidebar{width:218px!important}.app-shell{grid-template-columns:218px minmax(0,1fr)!important}.main-content{margin-left:218px!important}.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.hero-content{grid-template-columns:1fr!important}.hero-side{justify-content:space-between!important}.hero-info-grid{flex:1!important}}
+@media (max-width:850px){.app-shell{display:block!important}.sidebar{position:fixed!important;transform:translateX(-105%);transition:transform .2s ease;z-index:700!important;width:270px!important}.dg-shell-open .sidebar{transform:translateX(0)}.main-content{margin-left:0!important;padding:12px!important}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.charts-grid,.overview-grid,.widgets-grid{grid-template-columns:1fr!important}.hero-content{padding:15px!important}.hero-info-grid{width:100%!important;overflow-x:auto!important}.notification-panel{top:8px!important;right:8px!important;max-height:calc(100vh - 16px)!important}}
+@media (max-width:560px){.kpi-grid{grid-template-columns:1fr 1fr!important;gap:7px!important}.kpi-card{min-height:96px!important;padding:11px!important}.kpi-value{font-size:1.15rem!important}.hero-copy h1{font-size:1.45rem!important}.info-pill{min-width:105px!important}.search-section,.charts-section{padding:13px!important}}
+</style>
+
 </head>
 <body data-theme="light">
 
