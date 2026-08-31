@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dashboard - Del Grosso Gestionale v1.0</title>
 <link rel="icon" href="../favicon.png">
 
@@ -942,6 +942,46 @@ html,body{min-width:0!important;overflow-x:hidden!important}
 @media(max-width:700px){.notification-panel{top:8px!important;right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;border-radius:18px!important}}
 @media(max-width:560px){.sidebar-brand .sidebar-logo-wrap{height:92px!important}}
 </style>
+<link rel="manifest" href="/GESTIONALE/manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="/GESTIONALE/assets/apple-touch-icon.png">
+<style id="dg-v11-ios-compat">
+html,body{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{padding-bottom:env(safe-area-inset-bottom);}
+.sidebar{height:100svh!important;max-height:100svh!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+.main-content{padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+.dg-mobile-menu-toggle{display:none;align-items:center;justify-content:center;gap:8px;min-height:46px;min-width:46px;padding:0 14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:#0b1727;color:#fff;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.22);z-index:850;}
+.dg-mobile-menu-toggle svg{width:20px;height:20px;}
+.dg-mobile-menu-backdrop{display:none;}
+.push-enable-button{min-height:42px;padding:0 13px;border:1px solid rgba(255,255,255,.14);border-radius:13px;background:#0b1727;color:#fff;font-weight:800;cursor:pointer;white-space:nowrap;}
+.push-enable-button.is-active{background:#0f9d66;color:#fff;}
+.push-enable-button:disabled{opacity:.65;cursor:wait;}
+.push-status{position:absolute;top:calc(100% + 6px);right:0;max-width:330px;font-size:.68rem;line-height:1.35;color:#b7c6d8;display:none;text-align:right;}
+.push-status[data-state="warn"],.push-status[data-state="ok"]{display:block;}
+.push-status[data-state="ok"]{color:#7ee2b8;}
+@media(max-width:850px){
+  .dg-mobile-menu-toggle{display:inline-flex;position:relative;margin:0 0 10px;}
+  .dg-mobile-menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:699;}
+  body.dg-mobile-menu-open .dg-mobile-menu-backdrop{display:block;}
+  body.dg-mobile-menu-open .sidebar{transform:translateX(0)!important;}
+  .sidebar{height:100svh!important;max-height:100svh!important;overflow-y:auto!important;top:0!important;bottom:0!important;}
+  .hero-side{align-items:flex-start!important;}
+  .hero-actions{position:relative;flex-wrap:wrap!important;align-items:center!important;}
+  .push-enable-button{flex:1 1 100%;min-height:44px;}
+  .push-status{position:static;flex:1 1 100%;text-align:left;max-width:none;}
+  .notification-panel{max-height:calc(100svh - 16px)!important;}
+}
+@media(max-width:560px){
+  .main-content{padding:10px!important;padding-bottom:calc(18px + env(safe-area-inset-bottom))!important;}
+  .hero-info-grid{gap:6px!important;}
+  .info-pill{min-width:86px!important;}
+  .kpi-grid{grid-template-columns:1fr!important;}
+  .dg-mobile-menu-toggle{width:100%;}
+}
+</style>
 </head>
 <body data-theme="light">
 
@@ -997,6 +1037,11 @@ html,body{min-width:0!important;overflow-x:hidden!important}
   </aside>
 
   <main class="main-content">
+    <button id="mobileMenuToggle" class="dg-mobile-menu-toggle" type="button" aria-label="Apri menu gestionale" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <span>Menu</span>
+    </button>
+    <div id="mobileMenuBackdrop" class="dg-mobile-menu-backdrop" hidden></div>
     <nav class="breadcrumb" aria-label="Percorso pagina">
       <a href="/GESTIONALE/dashboard.html">Home</a>
       <span aria-hidden="true">/</span>
@@ -1051,6 +1096,8 @@ html,body{min-width:0!important;overflow-x:hidden!important}
 
             </div>
 
+            <button id="pushEnableButton" data-push-enable type="button" class="push-enable-button" hidden>🔔 Attiva notifiche iPhone</button>
+            <span id="pushStatus" data-push-status class="push-status" aria-live="polite"></span>
             <button id="themeToggle" type="button" class="theme-toggle">Dark Mode</button>
           </div>
         </div>
@@ -1382,5 +1429,24 @@ html,body{min-width:0!important;overflow-x:hidden!important}
                 </footer>
               </section>
 
+<script src="/GESTIONALE/push-notifications.js"></script>
+<script>
+(function(){
+  function initMobileMenu(){
+    var toggle=document.getElementById('mobileMenuToggle');
+    var backdrop=document.getElementById('mobileMenuBackdrop');
+    if(!toggle||!backdrop)return;
+    var setOpen=function(open){
+      document.body.classList.toggle('dg-mobile-menu-open',open);
+      toggle.setAttribute('aria-expanded',String(open));
+      backdrop.hidden=!open;
+    };
+    toggle.addEventListener('click',function(){setOpen(!document.body.classList.contains('dg-mobile-menu-open'));});
+    backdrop.addEventListener('click',function(){setOpen(false);});
+    document.querySelectorAll('.sidebar .nav-link').forEach(function(link){link.addEventListener('click',function(){setOpen(false);});});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initMobileMenu,{once:true});else initMobileMenu();
+})();
+</script>
 </body>
 </html>
