@@ -1,6 +1,0 @@
-Aggiungere a dependencies del package.json:
-
-"nodemailer": "^7.0.6"
-
-Poi eseguire:
-npm install
