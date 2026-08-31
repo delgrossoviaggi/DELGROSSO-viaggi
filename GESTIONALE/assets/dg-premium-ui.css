@@ -179,3 +179,33 @@ button,a,input,select,textarea,.card,.panel,.box,.kpi-card,.nav-link{transition-
   body.dg-has-brand-shell{padding:92px 10px 20px!important}.dg-brand-shell__header,.dg-brand-shell__footer{left:10px!important;right:10px!important}.dg-brand-shell__header{min-height:68px!important}.dg-brand-shell__clock{display:none!important}
   .app-shell{display:block!important}.app-shell .sidebar{position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;margin:8px!important}.app-shell .sidebar-brand{display:flex!important}.app-shell .sidebar-brand img{width:170px!important;height:58px!important}.app-shell .sidebar-nav{display:flex!important;overflow-x:auto!important}.app-shell .nav-link{min-width:94px!important;flex-direction:column!important;gap:3px!important}.app-shell .nav-link span{display:block!important;font-size:.7rem!important}.app-shell .logout-button{display:none!important}.main-content{margin-left:0!important;padding:8px!important}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.charts-grid,.overview-grid,.widgets-grid{grid-template-columns:1fr!important}
 }
+
+/* ===== V12 iPhone / touch navigation hardening ===== */
+.dg-brand-shell__backdrop{z-index:2147482000!important;pointer-events:none!important}
+.dg-brand-shell__sidebar{z-index:2147482002!important;pointer-events:auto!important}
+.dg-brand-shell__header{z-index:2147482004!important;pointer-events:auto!important}
+.dg-brand-shell__footer{z-index:2147482003!important}
+.dg-brand-shell__nav,.dg-brand-shell__nav a,.dg-brand-shell__menu-toggle,.dg-brand-shell__dashboard-btn{pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(59,130,246,.18)!important}
+.dg-brand-shell__nav a{cursor:pointer!important;-webkit-user-select:none!important;user-select:none!important}
+@media (max-width:1200px){
+  body.dg-shell-open .dg-brand-shell__backdrop{pointer-events:auto!important}
+  .dg-brand-shell__sidebar{transform:translate3d(-110%,0,0)!important;will-change:transform;-webkit-overflow-scrolling:touch;overflow-y:auto!important}
+  body.dg-shell-open .dg-brand-shell__sidebar{transform:translate3d(0,0,0)!important}
+  .dg-brand-shell__nav a{min-height:48px!important;display:flex!important;align-items:center!important}
+}
+@media (max-width:640px){
+  body.dg-has-brand-shell{padding-left:10px!important;padding-right:10px!important;padding-bottom:86px!important}
+  .dg-brand-shell__sidebar{width:min(310px,88vw)!important;padding:18px 14px 24px!important}
+  .dg-brand-shell__header{left:10px!important;right:10px!important;top:10px!important;min-height:70px!important;padding:12px!important}
+  .dg-brand-shell__header-actions{gap:7px!important}
+  .dg-brand-shell__menu-toggle,.dg-brand-shell__dashboard-btn{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important}
+  .dg-brand-shell__meta{min-height:48px!important}
+}
+/* Dashboard legacy shell on touch devices */
+.app-shell .sidebar{z-index:2147482002!important;pointer-events:auto!important}
+.app-shell .nav-link,.app-shell .logout-button{touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(59,130,246,.18)!important;pointer-events:auto!important}
+@media(max-width:850px){
+  .app-shell .sidebar{transform:translate3d(-110%,0,0)!important;will-change:transform;overflow-y:auto!important;-webkit-overflow-scrolling:touch}
+  .app-shell.dg-mobile-menu-open .sidebar,.dg-mobile-menu-open .app-shell .sidebar{transform:translate3d(0,0,0)!important}
+  .app-shell .nav-link{min-height:48px!important}
+}
