@@ -1,4 +1,4 @@
-/* Del Grosso Gestionale - iPhone Web Push V11 */
+/* Del Grosso Gestionale - iPhone Web Push V16 */
 (() => {
   'use strict';
 
