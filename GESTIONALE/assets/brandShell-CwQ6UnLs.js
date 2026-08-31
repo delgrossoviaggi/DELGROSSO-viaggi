@@ -3,7 +3,7 @@ import{a as e,n as t,o as n,t as r}from"./settingsService-R4BF20Fj.js";import{i,
     <aside class="dg-brand-shell__sidebar">
       <div class="dg-brand-shell__sidebar-top">
         <div class="dg-brand-shell__brand">
-          <img src="${c.logo||`/assets/logo-BKhzXkqO.JPEG`}" alt="${c.name}" />
+          <img src="${c.logo||`/assets/images/logo.JPEG`}" alt="${c.name}" />
           <div>
             <p class="dg-brand-shell__eyebrow">Travel CRM</p>
             <strong>${c.name}</strong>
@@ -46,7 +46,7 @@ import{a as e,n as t,o as n,t as r}from"./settingsService-R4BF20Fj.js";import{i,
       <span>Design system CRM • Dark/Light ready</span>
     </div>
     <div>${c.email||`info@delgrossoviaggi.it`}</div>
-  `,document.body.appendChild(f),[l.querySelector(`.dg-brand-shell__theme-button`)].forEach(e=>{e&&(E(e),e.addEventListener(`click`,()=>{_(),E(e),document.dispatchEvent(new window.CustomEvent(`dg-theme-changed`))}))}),l.querySelector(`.dg-brand-shell__logout`)?.addEventListener(`click`,()=>{s(),window.location.href=a.login});let p=l.querySelector(`.dg-brand-shell__menu-toggle`),m=l.querySelector(`.dg-brand-shell__backdrop`),h=e=>{document.body.classList.toggle(`dg-shell-open`,!!e)};p?.addEventListener(`click`,()=>{h(!document.body.classList.contains(`dg-shell-open`))}),m?.addEventListener(`click`,()=>h(!1)),l.querySelectorAll(`.dg-brand-shell__nav a`).forEach(e=>{e.addEventListener(`click`,()=>h(!1))});let g=l.querySelector(`#dgShellClock`),x=()=>{g&&(g.textContent=new Date().toLocaleString(`it-IT`,{day:`2-digit`,month:`2-digit`,year:`2-digit`,hour:`2-digit`,minute:`2-digit`}))};x(),y=window.setInterval(x,1e3*30),D(l),b&&b(),b=u(e=>{D(l,e)}),n().then(e=>{if(e.success===!1)return;let n=t(e.data);r(e.data);let i=l.querySelector(`.dg-brand-shell__brand img`),a=l.querySelector(`.dg-brand-shell__brand strong`);i&&(i.src=n.logo||`/assets/logo-BKhzXkqO.JPEG`,i.alt=n.name),a&&(a.textContent=n.name),f.innerHTML=`
+  `,document.body.appendChild(f),[l.querySelector(`.dg-brand-shell__theme-button`)].forEach(e=>{e&&(E(e),e.addEventListener(`click`,()=>{_(),E(e),document.dispatchEvent(new window.CustomEvent(`dg-theme-changed`))}))}),l.querySelector(`.dg-brand-shell__logout`)?.addEventListener(`click`,()=>{s(),window.location.href=a.login});let p=l.querySelector(`.dg-brand-shell__menu-toggle`),m=l.querySelector(`.dg-brand-shell__backdrop`),h=e=>{document.body.classList.toggle(`dg-shell-open`,!!e)};p?.addEventListener(`click`,()=>{h(!document.body.classList.contains(`dg-shell-open`))}),m?.addEventListener(`click`,()=>h(!1)),l.querySelectorAll(`.dg-brand-shell__nav a`).forEach(e=>{e.addEventListener(`click`,()=>h(!1))});let g=l.querySelector(`#dgShellClock`),x=()=>{g&&(g.textContent=new Date().toLocaleString(`it-IT`,{day:`2-digit`,month:`2-digit`,year:`2-digit`,hour:`2-digit`,minute:`2-digit`}))};x(),y=window.setInterval(x,1e3*30),D(l),b&&b(),b=u(e=>{D(l,e)}),n().then(e=>{if(e.success===!1)return;let n=t(e.data);r(e.data);let i=l.querySelector(`.dg-brand-shell__brand img`),a=l.querySelector(`.dg-brand-shell__brand strong`);i&&(i.src=n.logo||`/assets/images/logo.JPEG`,i.alt=n.name),a&&(a.textContent=n.name),f.innerHTML=`
       <div>
         <strong>© 2026 ${n.name}</strong>
         <span>Design system CRM • Dark/Light ready</span>
