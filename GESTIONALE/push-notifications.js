@@ -44,7 +44,6 @@
       method: 'POST',
       headers: {
         apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
         Prefer: 'resolution=ignore-duplicates,return=minimal'
       },
@@ -52,6 +51,8 @@
     });
     if (!response.ok) {
       if (response.status === 404) throw new Error('Registrazione notifiche non riuscita (404): la tabella push_subscriptions non è ancora attiva su Supabase. Applica la migration 20260831_push_notifications.sql.');
+      if (response.status === 401) throw new Error('Registrazione notifiche non riuscita (401): chiave Supabase/API non accettata. Verifica la configurazione client.');
+      if (response.status === 403) throw new Error('Registrazione notifiche non riuscita (403): policy RLS non consente la registrazione.');
       throw new Error(`Registrazione notifiche non riuscita (${response.status}).`);
     }
     return payload;
@@ -99,9 +100,22 @@
     if (isIOS && !isStandalone) {
       setStatus('Su iPhone: aggiungi il gestionale alla schermata Home per ricevere notifiche.', false);
     } else if ('Notification' in window && Notification.permission === 'granted') {
-      button.textContent = '✓ Notifiche iPhone attive';
-      button.classList.add('is-active');
-      setStatus('Notifiche push attive su questo dispositivo.', true);
+      setStatus('Permesso iPhone già concesso. Verifico la registrazione push…', false);
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const existing = await registration.pushManager.getSubscription();
+        if (existing) {
+          await saveSubscription(existing);
+          button.textContent = '✓ Notifiche iPhone attive';
+          button.classList.add('is-active');
+          setStatus('Notifiche push attive su questo dispositivo.', true);
+        } else {
+          setStatus('Permesso concesso. Premi Attiva notifiche per completare la registrazione.', false);
+        }
+      } catch (error) {
+        button.classList.remove('is-active');
+        setStatus(error?.message || 'Registrazione push non completata.', false);
+      }
     }
 
     button.addEventListener('click', async () => {

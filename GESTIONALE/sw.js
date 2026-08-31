@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v18-github-notifications';
+const CACHE = 'dg-gestionale-v19-github-notifications';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 

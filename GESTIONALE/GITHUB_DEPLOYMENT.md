@@ -29,3 +29,9 @@ Sostituisci la cartella `GESTIONALE/` esistente con questa versione. Non copiare
 ## Sicurezza
 
 Non inserire mai in GitHub `VAPID_PRIVATE_KEY`, `service_role` o altri secret.
+
+## V19 — iPhone / GitHub hardening
+- The browser must send the Supabase publishable key in `apikey`, not as `Authorization: Bearer`.
+- The push button only reports active after the subscription is actually saved.
+- Added `assets/dg-github-v19.css` for mobile width/overflow hardening.
+- Service Worker cache bumped to V19.
