@@ -49,7 +49,10 @@
       },
       body: JSON.stringify(payload)
     });
-    if (!response.ok) throw new Error(`Registrazione notifiche non riuscita (${response.status}).`);
+    if (!response.ok) {
+      if (response.status === 404) throw new Error('Registrazione notifiche non riuscita (404): la tabella push_subscriptions non è ancora attiva su Supabase. Applica la migration 20260831_push_notifications.sql.');
+      throw new Error(`Registrazione notifiche non riuscita (${response.status}).`);
+    }
     return payload;
   }
 

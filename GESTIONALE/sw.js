@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v12-navigation';
+const CACHE = 'dg-gestionale-v13-universal';
 const SCOPE = '/GESTIONALE/';
 
 self.addEventListener('install', event => {
