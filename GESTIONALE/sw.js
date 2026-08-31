@@ -1,10 +1,23 @@
-const CACHE = 'dg-gestionale-v11-static';
+const CACHE = 'dg-gestionale-v12-navigation';
 const SCOPE = '/GESTIONALE/';
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([
     `${SCOPE}login.html`,
     `${SCOPE}dashboard.html`,
+    `${SCOPE}viaggi.html`,
+    `${SCOPE}prenotazioni.html`,
+    `${SCOPE}prenotazione.html`,
+    `${SCOPE}clienti.html`,
+    `${SCOPE}flotta.html`,
+    `${SCOPE}pagamenti.html`,
+    `${SCOPE}preventivi.html`,
+    `${SCOPE}preventivi-nuovo.html`,
+    `${SCOPE}notifiche.html`,
+    `${SCOPE}checkin.html`,
+    `${SCOPE}statistiche.html`,
+    `${SCOPE}impostazioni.html`,
+    `${SCOPE}centro-operativo.html`,
     `${SCOPE}manifest.json`,
     `${SCOPE}assets/icon-512.png`,
     `${SCOPE}assets/apple-touch-icon.png`,

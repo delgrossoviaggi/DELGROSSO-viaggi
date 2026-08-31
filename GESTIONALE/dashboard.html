@@ -1450,3 +1450,30 @@ body{padding-bottom:env(safe-area-inset-bottom);}
 </script>
 </body>
 </html>
+<style>
+/* V12: iOS touch navigation hardening for the legacy dashboard shell */
+.dg-mobile-menu-toggle{z-index:2147482007!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(59,130,246,.18)!important}
+.dg-mobile-menu-backdrop{z-index:2147482001!important;pointer-events:none!important}
+body.dg-mobile-menu-open .dg-mobile-menu-backdrop{pointer-events:auto!important}
+.app-shell>.sidebar{z-index:2147482006!important;pointer-events:auto!important;-webkit-overflow-scrolling:touch}
+.app-shell>.sidebar .nav-link{z-index:2147482008!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:rgba(59,130,246,.18)!important;min-height:48px!important}
+@media(max-width:850px){
+  .dg-mobile-menu-toggle{display:flex!important;position:fixed!important;left:12px!important;top:12px!important;width:48px!important;height:48px!important;align-items:center!important;justify-content:center!important}
+  .app-shell>.sidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;width:min(300px,88vw)!important;height:100svh!important;transform:translate3d(-110%,0,0)!important;transition:transform .2s ease!important}
+  body.dg-mobile-menu-open .app-shell>.sidebar{transform:translate3d(0,0,0)!important}
+}
+</style>
+<script>
+(function(){
+  // V12: keep native iOS link navigation. JS only closes the mobile menu.
+  function harden(){
+    document.querySelectorAll('.app-shell>.sidebar .nav-link[href]').forEach(function(link){
+      link.addEventListener('click',function(){
+        document.body.classList.remove('dg-mobile-menu-open');
+        var b=document.getElementById('mobileMenuBackdrop'); if(b) b.hidden=true;
+      },{passive:true});
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',harden,{once:true});else harden();
+})();
+</script>
