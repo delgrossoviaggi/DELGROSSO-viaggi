@@ -1,382 +1,128 @@
 <!DOCTYPE html>
-<html lang="it" class="scroll-smooth">
+<html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>La Flotta | Del Grosso Viaggi & Limousine Bus</title>
-    <meta name="description" content="Scopri i mezzi della nostra flotta: Bus Gran Turismo, Limousine Bus e Van Luxury per viaggi ed eventi VIP.">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- AOS Library per Animazioni Pro -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flotta - Del Grosso Gestionale v1.0</title>
 
-    <!-- Google Fonts: Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        ocean: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
 
-    <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f8fafc; 
-            color: #0f172a; 
-            -webkit-font-smoothing: antialiased; 
-            overflow-x: hidden; 
-        }
-
-        /* Glassmorphic Navigation Light */
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-        }
-
-        /* Card Fleet Ultra Dynamic */
-        .card-fleet { 
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
-            box-shadow: 0 4px 25px -4px rgba(2, 132, 199, 0.05);
-        }
-        .card-fleet:hover { 
-            transform: translateY(-6px);
-            border-color: #38bdf8; 
-            box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.18); 
-        }
-
-        /* Ambient Light Glows */
-        .glow-blob-1 { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, rgba(255,255,255,0) 70%); filter: blur(90px); pointer-events: none; }
-        .glow-blob-2 { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(2,132,199,0.1) 0%, rgba(255,255,255,0) 70%); filter: blur(90px); pointer-events: none; }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Viewer Fullscreen Modal */
-        #custom-viewer {
-            position: fixed; inset: 0;
-            background: rgba(3, 25, 46, 0.95); z-index: 9999;
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(12px);
-        }
-    </style>
+  <script type="module" crossorigin src="./assets/flotta-BNL_Bmus.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/settingsService-BkpKGRnr.js">
+  <link rel="modulepreload" crossorigin href="./assets/fleetService-DSMpWv9k.js">
+  <link rel="modulepreload" crossorigin href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" crossorigin href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" crossorigin href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" crossorigin href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" crossorigin href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" crossorigin href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" crossorigin href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="modulepreload" crossorigin href="./assets/brandShell-CIWNUkWr.js">
+  <link rel="stylesheet" crossorigin href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" crossorigin href="./assets/flotta-CsVEMRMt.css">
+  <link rel="stylesheet" crossorigin href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" crossorigin href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" crossorigin href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="/GESTIONALE/manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="/GESTIONALE/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
 </head>
-<body class="selection:bg-sky-500 selection:text-white">
+<body>
+<h1>Gestione Flotta</h1>
 
-    <!-- Header / Navbar Clean Light -->
-    <header class="fixed top-0 inset-x-0 z-50 glass-nav shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <a href="index.html" class="flex items-center gap-3 group">
-                    <div class="bg-slate-900 p-2 rounded-2xl transition-transform duration-300 group-hover:scale-105 shadow-md">
-                        <img src="logo.JPEG" class="h-9 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
-                    </div>
-                </a>
+<div class="toolbar">
+  <label class="sr-only" for="fleetSearch">Cerca mezzo</label>
+  <input id="fleetSearch" type="search" placeholder="Cerca per targa, marca, modello..." aria-label="Cerca mezzo">
+  <button id="fleetReloadButton" type="button">Aggiorna</button>
+  <button id="fleetNewButton" type="button">+ Nuovo Mezzo</button>
+</div>
 
-                <nav class="hidden md:flex items-center gap-8">
-                    <a href="index.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">Home</a>
-                    <a href="viaggi.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">Partenze</a>
-                    <a href="flotta.html" class="text-xs font-black uppercase tracking-widest text-sky-600 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> La Flotta
-                    </a>
-                    <a href="partyontheroad.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-indigo-600 transition-colors">Party</a>
-                    <a href="contatti.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-slate-900 transition-colors">Contatti</a>
-                </nav>
+<table id="fleetTable">
+  <thead>
+    <tr>
+      <th>Immagine</th>
+      <th>Targa</th>
+      <th>Marca</th>
+      <th>Modello</th>
+      <th>Categoria</th>
+      <th>Anno</th>
+      <th>Posti</th>
+      <th>Stato</th>
+      <th>Attivo</th>
+      <th>Azioni</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-                <div class="flex items-center gap-4">
-                    <a href="contatti.html" class="hidden sm:inline-flex bg-gradient-to-r from-sky-600 to-ocean-800 hover:opacity-95 text-white px-7 py-3 rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-sky-600/20 hover:scale-105">
-                        Richiedi Preventivo
-                    </a>
-                </div>
-            </div>
-            
-            <div class="md:hidden flex overflow-x-auto no-scrollbar gap-6 py-3 border-t border-slate-200 text-nowrap">
-                <a href="index.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Home</a>
-                <a href="viaggi.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Partenze</a>
-                <a href="flotta.html" class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Flotta</a>
-                <a href="partyontheroad.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Party</a>
-                <a href="contatti.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Contatti</a>
-            </div>
-        </div>
-    </header>
+<section class="cards">
+  <div class="card">
+    <h3>Statistiche</h3>
+    <p>Totale mezzi: <span id="fleetTotal">0</span></p>
+    <p>Mezzi attivi: <span id="fleetActive">0</span></p>
+    <p>Fuori servizio: <span id="fleetOutOfService">0</span></p>
+  </div>
+</section>
 
-    <!-- Page Title / Hero Header -->
-    <section class="pt-32 pb-16 bg-gradient-to-b from-slate-100 via-slate-50 to-f8fafc border-b border-slate-200 relative overflow-hidden">
-        <div class="glow-blob-1 -top-20 left-1/4"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            
-            <div data-aos="fade-down" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 text-sky-700 text-[10px] font-black uppercase tracking-widest mb-4 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
-                Eccellenza Tecnologica & Massima Sicurezza
-            </div>
+<div id="flottaModal" class="modal" style="display:none" aria-hidden="true">
+  <div class="content">
+    <h2 id="fleetModalTitle">Nuovo Mezzo</h2>
+    <form id="fleetForm" novalidate>
+      <input id="fleetId" type="hidden">
 
-            <h1 data-aos="fade-up" class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase italic tracking-tight text-slate-900 leading-none">
-                LA NOSTRA <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-blue-700 to-ocean-800">FLOTTA</span>
-            </h1>
-            
-            <p data-aos="fade-up" data-aos-delay="100" class="text-slate-600 text-xs sm:text-sm max-w-2xl mx-auto mt-4 font-medium leading-relaxed">
-                Scopri la flotta ufficiale Del Grosso: autobus Gran Turismo, Limousine Bus da festa e van luxury.
-            </p>
+      <label for="fleetTarga">Targa</label>
+      <input id="fleetTarga" name="targa" maxlength="20" autocomplete="off">
 
-            <!-- Counter rapidi dinamici -->
-            <div data-aos="zoom-in" data-aos-delay="200" class="mt-10 grid grid-cols-2 sm:grid-cols-3 max-w-3xl mx-auto gap-4">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm transition-all hover:scale-105">
-                    <span class="text-2xl font-black text-sky-600 italic block">BUS GT</span>
-                    <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider">Gran Turismo Deluxe</span>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm transition-all hover:scale-105">
-                    <span class="text-2xl font-black text-indigo-600 italic block">LIMO-BUS</span>
-                    <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider">Club Itinerante</span>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 sm:col-span-1 col-span-2 shadow-sm transition-all hover:scale-105">
-                    <span class="text-2xl font-black text-ocean-800 italic block">VAN VIP</span>
-                    <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider">Transfer Privati</span>
-                </div>
-            </div>
-        </div>
-    </section>
+      <label for="fleetMarca">Marca</label>
+      <input id="fleetMarca" name="marca" maxlength="80" autocomplete="off">
 
-    <!-- Main Content Grid -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative" id="lista-mezzi">
-        <div class="glow-blob-2 top-1/3 -right-20"></div>
+      <label for="fleetModello">Modello</label>
+      <input id="fleetModello" name="modello" maxlength="80" autocomplete="off">
 
-        <!-- Skeleton Loader Dinamico iniziale -->
-        <div class="space-y-16">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <div class="lg:col-span-7 h-96 bg-slate-200 rounded-2xl animate-pulse"></div>
-                <div class="lg:col-span-5 space-y-4">
-                    <div class="h-10 bg-slate-200 rounded-xl w-3/4 animate-pulse"></div>
-                    <div class="h-24 bg-slate-200 rounded-xl animate-pulse"></div>
-                    <div class="h-12 bg-slate-200 rounded-xl animate-pulse"></div>
-                </div>
-            </div>
-        </div>
-    </main>
+      <label for="fleetCategoria">Categoria</label>
+      <select id="fleetCategoria" name="categoria"></select>
 
-    <!-- Viewer Immagini Fullscreen -->
-    <div id="custom-viewer" onclick="closeViewer()">
-        <span class="absolute top-6 right-8 text-white text-4xl font-light cursor-pointer hover:text-sky-400 transition-colors">✕</span>
-        <img id="viewer-img" src="" class="max-w-[92%] max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/20">
-    </div>
+      <label for="fleetAnno">Anno</label>
+      <input id="fleetAnno" name="anno" type="number" min="1900" max="2100" inputmode="numeric">
 
-    <!-- Footer Ocean Light -->
-    <footer class="bg-slate-900 text-white pt-20 pb-12 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
-            <div>
-                <div class="bg-white p-2.5 rounded-2xl w-max mb-8 shadow-xl">
-                    <img src="logo.JPEG" class="h-10 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
-                </div>
-                <h3 class="text-xl font-black uppercase mb-6 italic tracking-tight text-slate-100">Contatti Diretti</h3>
-                <div class="space-y-4">
-                    <!-- Raffaele -->
-                    <div class="p-5 rounded-3xl bg-slate-800/80 border border-slate-700 hover:border-sky-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
-                        <div>
-                            <span class="text-sky-400 font-black text-[10px] uppercase tracking-widest block mb-1">Bus GT & Logistica</span>
-                            <a href="tel:3205730466" class="text-xl font-bold text-white hover:text-sky-400 transition-colors">320 5730466 (Raffaele)</a>
-                        </div>
-                        <a href="https://wa.me/393205730466" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all w-max shadow-md shadow-green-500/20">
-                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                            WhatsApp
-                        </a>
-                    </div>
-                    <!-- Nicola -->
-                    <div class="p-5 rounded-3xl bg-slate-800/80 border border-slate-700 hover:border-indigo-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
-                        <div>
-                            <span class="text-indigo-400 font-black text-[10px] uppercase tracking-widest block mb-1">Limousine Bus & Eventi Private</span>
-                            <a href="tel:3662127916" class="text-xl font-bold text-white hover:text-indigo-400 transition-colors">366 2127916 (Nicola)</a>
-                        </div>
-                        <a href="https://wa.me/393662127916" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all w-max shadow-md shadow-green-500/20">
-                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                            WhatsApp
-                        </a>
-                    </div>
-                </div>
-            </div>
+      <label for="fleetPosti">Posti</label>
+      <input id="fleetPosti" name="posti" type="number" min="1" max="999" inputmode="numeric">
 
-            <div>
-                <h3 class="text-xl font-black uppercase mb-6 text-slate-400 italic tracking-tight">Canali Social Operativi</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-pink-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 fill-current text-pink-500" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.162c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                            <span class="text-white">Instagram Viaggi</span>
-                        </div>
-                        <span class="text-pink-500 group-hover:translate-x-1 transition-transform">↗</span>
-                    </a>
+      <label for="fleetStato">Stato</label>
+      <select id="fleetStato" name="stato"></select>
 
-                    <a href="https://www.instagram.com/_limousine_bus/" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-pink-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 fill-current text-pink-500" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.162c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                            <span class="text-white">Instagram LimoBus</span>
-                        </div>
-                        <span class="text-pink-500 group-hover:translate-x-1 transition-transform">↗</span>
-                    </a>
+      <label for="fleetDescrizione">Descrizione</label>
+      <textarea id="fleetDescrizione" name="descrizione" rows="4"></textarea>
 
-                    <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-sky-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 fill-current text-sky-500" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                            <span class="text-white">Facebook Viaggi</span>
-                        </div>
-                        <span class="text-sky-500 group-hover:translate-x-1 transition-transform">↗</span>
-                    </a>
+      <label for="fleetImageInput">Immagine</label>
+      <input id="fleetImageInput" type="file" accept="image/*">
+      <div style="margin:8px 0">
+        <img id="fleetImagePreview" alt="Anteprima immagine mezzo" style="max-width:220px;max-height:140px;display:none;border-radius:6px;border:1px solid #ddd">
+      </div>
+      <button id="fleetRemoveImageButton" type="button" style="display:none;margin-bottom:8px">Rimuovi immagine</button>
 
-                    <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-sky-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-5 h-5 fill-current text-sky-500" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                            <span class="text-white">Facebook LimoBus</span>
-                        </div>
-                        <span class="text-sky-500 group-hover:translate-x-1 transition-transform">↗</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+      <label style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <input id="fleetAttivo" name="attivo" type="checkbox" checked>
+        Mezzo attivo
+      </label>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-800 text-center flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400">
-            <p>© 2026 Del Grosso Viaggi & Limousine Bus - P.IVA: 04499320713. Tutti i diritti riservati.</p>
-            <p class="font-bold tracking-widest uppercase text-[10px]">Developer & Design: Nicola Pio Cristino</p>
-        </div>
-    </footer>
+      <div class="actions">
+        <button id="fleetSaveButton" type="submit">Salva</button>
+        <button id="fleetCancelButton" type="button">Chiudi</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-    <!-- Script Supabase & Logic Dinamica -->
-    <script>
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 60
-        });
 
-        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
-        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
-        const sb = supabase.createClient(S_URL, S_KEY);
 
-        // Funzione per cambiare l'immagine principale al volo cliccando le miniature
-        function switchMainImg(busId, newUrl) {
-            const mainImg = document.getElementById(`main-img-${busId}`);
-            if(mainImg) {
-                mainImg.style.opacity = '0.3';
-                setTimeout(() => {
-                    mainImg.src = newUrl;
-                    mainImg.style.opacity = '1';
-                }, 150);
-            }
-        }
 
-        async function caricaFlotta() {
-            const main = document.getElementById('lista-mezzi');
-            
-            try {
-                // Interroga la tabella 'flotta_page' aggiornata dal pannello Admin
-                const { data: flotta, error } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
-                
-                if (error) throw error;
 
-                if (!flotta || flotta.length === 0) {
-                    main.innerHTML = `<p class="text-center text-slate-400 font-black uppercase tracking-widest py-20">Nessun mezzo inserito nel garage.</p>`;
-                    return;
-                }
 
-                main.innerHTML = flotta.map((bus, idx) => {
-                    const gallery = bus.foto_gallery || [];
-                    const allImgs = [...new Set([bus.immagine_url, ...gallery])].filter(u => u);
 
-                    return `
-                    <section data-aos="fade-up" class="card-fleet rounded-3xl p-6 sm:p-10 mb-12 relative overflow-hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                            
-                            <!-- Gallery Sezione con switch dinamico -->
-                            <div class="lg:col-span-7 space-y-4">
-                                <div class="aspect-[16/10] rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 cursor-pointer group relative shadow-md" onclick="openViewer(document.getElementById('main-img-${bus.id}').src)">
-                                    <img id="main-img-${bus.id}" src="${bus.immagine_url || 'logo.JPEG'}" loading="lazy" alt="${bus.titolo}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" onerror="this.src='logo.JPEG'">
-                                    <div class="absolute bottom-4 right-4 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5 shadow-lg">
-                                        <span>🔍 Ingrandisci</span>
-                                    </div>
-                                </div>
-                                
-                                ${allImgs.length > 1 ? `
-                                <div class="grid grid-cols-4 gap-3">
-                                    ${allImgs.slice(0, 4).map(img => `
-                                        <div class="aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-200 cursor-pointer group shadow-sm hover:border-sky-500 transition-all hover:scale-105" onclick="switchMainImg('${bus.id}', '${img}')">
-                                            <img src="${img}" loading="lazy" class="w-full h-full object-cover" onerror="this.src='logo.JPEG'">
-                                        </div>
-                                    `).join('')}
-                                </div>` : ''}
-                            </div>
-
-                            <!-- Dettagli del Mezzo -->
-                            <div class="lg:col-span-5 flex flex-col justify-center">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <span class="text-sky-600 font-black text-xs uppercase tracking-widest">Mezzo VIP #${idx + 1}</span>
-                                    <span class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Disponibile
-                                    </span>
-                                </div>
-
-                                <h2 class="text-3xl sm:text-4xl font-black uppercase italic tracking-tight text-slate-900 leading-tight mb-4">${bus.titolo}</h2>
-                                
-                                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed whitespace-pre-line mb-8 font-medium">${bus.descrizione || ''}</p>
-                                
-                                <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-4 items-center">
-                                    <a href="https://wa.me/393662127916?text=Ciao,%20vorrei%20informazioni%20e%20disponibilità%20per:%20${encodeURIComponent(bus.titolo)}" 
-                                       target="_blank"
-                                       class="bg-[#25D366] hover:opacity-95 text-white px-7 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-green-500/20 hover:scale-105 flex items-center gap-2">
-                                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
-                                        <span>Richiedi Preventivo</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </section>`;
-                }).join('');
-            } catch(err) {
-                console.error("Errore Flotta:", err);
-                main.innerHTML = `<p class="text-center text-slate-400 font-black uppercase tracking-widest py-20">Errore durante il caricamento della flotta.</p>`;
-            }
-        }
-
-        function openViewer(url) {
-            document.getElementById('viewer-img').src = url;
-            document.getElementById('custom-viewer').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeViewer() {
-            document.getElementById('custom-viewer').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        const realtimeChannel = sb.channel('flotta-live-sync')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'flotta_page' }, () => caricaFlotta())
-            .subscribe();
-
-        caricaFlotta();
-    </script>
 </body>
 </html>

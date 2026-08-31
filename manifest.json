@@ -1,6 +1,16 @@
 {
-"name":"Del Grosso Gestionale",
-"short_name":"Del Grosso",
-"start_url":"/GESTIONALE/login.html",
-"display":"standalone"
+  "name": "Del Grosso Viaggi Gestionale",
+  "short_name": "DG Gestionale",
+  "description": "Gestionale operativo Del Grosso Viaggi & Limousine Bus",
+  "start_url": "/GESTIONALE/login.html",
+  "scope": "/GESTIONALE/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#071523",
+  "theme_color": "#0b2742",
+  "lang": "it-IT",
+  "icons": [
+    {"src":"/GESTIONALE/assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},
+    {"src":"/GESTIONALE/assets/apple-touch-icon.png","sizes":"512x512","type":"image/png"}
+  ]
 }
