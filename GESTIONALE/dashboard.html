@@ -751,7 +751,7 @@ body::before{opacity:.16!important}
 @media(max-width:760px){
   .app-shell{display:block!important;padding:8px!important}
   .sidebar{position:relative!important;top:auto!important;width:100%!important;height:auto!important;margin-bottom:10px!important}
-  .sidebar-nav{flex-direction:row!important;overflow-x:auto!important}
+  .sidebar-nav{flex-direction:column!important;overflow-x:hidden!important;overflow-y:auto!important}
   .sidebar-brand{display:none!important}
   .logout-button{display:none!important}
   .hero-content{padding:18px!important;min-height:0!important}
@@ -1442,7 +1442,13 @@ body{padding-bottom:env(safe-area-inset-bottom);}
       toggle.setAttribute('aria-expanded',String(open));
       backdrop.hidden=!open;
     };
-    toggle.addEventListener('click',function(){setOpen(!document.body.classList.contains('dg-mobile-menu-open'));});
+    toggle.addEventListener('click',function(){
+      var open=!document.body.classList.contains('dg-mobile-menu-open');
+      setOpen(open);
+      var label=toggle.querySelector('span');
+      if(label) label.textContent=open?'Chiudi':'Menu';
+      toggle.setAttribute('aria-label',open?'Chiudi menu gestionale':'Apri menu gestionale');
+    });
     backdrop.addEventListener('click',function(){setOpen(false);});
     document.querySelectorAll('.sidebar .nav-link').forEach(function(link){link.addEventListener('click',function(){setOpen(false);});});
   }
@@ -1527,3 +1533,16 @@ body.dg-mobile-menu-open .dg-mobile-menu-backdrop{pointer-events:auto!important}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',harden,{once:true});else harden();
 })();
 </script>
+
+
+<style id="dg-v14-dashboard-final-mobile">
+@media(max-width:850px){
+  .app-shell>.sidebar .sidebar-nav{display:flex!important;flex-direction:column!important;align-items:stretch!important;width:100%!important;overflow-x:hidden!important;overflow-y:auto!important;gap:5px!important;}
+  .app-shell>.sidebar .nav-link{width:100%!important;min-width:0!important;flex:0 0 auto!important;flex-direction:row!important;justify-content:flex-start!important;white-space:nowrap!important;}
+  .app-shell>.sidebar{width:min(300px,88vw)!important;max-width:300px!important;}
+}
+@media(max-width:560px){
+  .app-shell>.sidebar{width:min(300px,88vw)!important;max-width:300px!important;}
+  .app-shell .sidebar-nav{display:flex!important;flex-direction:column!important;overflow-x:hidden!important;overflow-y:auto!important;}
+}
+</style>
