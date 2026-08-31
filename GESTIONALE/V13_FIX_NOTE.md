@@ -1,6 +1,6 @@
 # V13 — fix finali gestionale
 
-- Logo: asset duplicato in `/GESTIONALE/assets/logo-sidebar.png`; fallback runtime corretto; login usa logo reale.
+- Logo: asset duplicato in `./assets/logo-sidebar.png`; fallback runtime corretto; login usa logo reale.
 - Layout: `assets/dg-universal-v13.css` caricato come ultimo CSS su tutte le pagine interne; shell desktop/mobile uniformata.
 - Menu touch: sidebar mobile coerente e link con target touch adeguato.
 - Notifiche: drawer indipendente dal layout; `Segna tutte come lette` aggiorna il badge/UI e conserva il fingerprint delle notifiche visualizzate.

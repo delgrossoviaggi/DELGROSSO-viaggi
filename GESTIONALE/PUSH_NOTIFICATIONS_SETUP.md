@@ -7,7 +7,7 @@ Su iOS/iPadOS il Web Push funziona per le web app aggiunte alla schermata Home. 
 
 Pubblica il contenuto di `GESTIONALE/` su:
 
-`https://www.delgrossoviaggi.it/GESTIONALE/`
+`https://www.delgrossoviaggi.it./`
 
 Non cambiare maiuscole/minuscole del percorso `GESTIONALE`.
 
@@ -50,7 +50,7 @@ Il webhook viene eseguito dopo l'inserimento della prenotazione e invia il push 
 
 ## 6. iPhone
 
-1. Apri `https://www.delgrossoviaggi.it/GESTIONALE/login.html` in Safari.
+1. Apri `https://www.delgrossoviaggi.it./login.html` in Safari.
 2. Accedi al gestionale.
 3. Usa **Condividi → Aggiungi alla schermata Home**.
 4. Apri il gestionale dalla nuova icona Home.

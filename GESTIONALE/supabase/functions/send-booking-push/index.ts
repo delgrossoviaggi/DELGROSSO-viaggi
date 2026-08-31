@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
   const body = JSON.stringify({
     title: '🔔 Nuova prenotazione',
     body: `${name} · ${destination}`,
-    url: '/GESTIONALE/prenotazione.html',
+    url: './prenotazione.html',
     tag: bookingId ? `booking-${bookingId}` : 'dg-booking'
   })
 

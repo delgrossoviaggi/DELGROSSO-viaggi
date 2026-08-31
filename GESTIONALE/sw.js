@@ -1,27 +1,28 @@
-const CACHE = 'dg-gestionale-v16-notifications';
-const SCOPE = '/GESTIONALE/';
+const CACHE = 'dg-gestionale-v18-github-notifications';
+const SCOPE_URL = new URL('./', self.registration.scope);
+const SCOPE = SCOPE_URL.pathname;
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([
-    `${SCOPE}login.html`,
-    `${SCOPE}dashboard.html`,
-    `${SCOPE}viaggi.html`,
-    `${SCOPE}prenotazioni.html`,
-    `${SCOPE}prenotazione.html`,
-    `${SCOPE}clienti.html`,
-    `${SCOPE}flotta.html`,
-    `${SCOPE}pagamenti.html`,
-    `${SCOPE}preventivi.html`,
-    `${SCOPE}preventivi-nuovo.html`,
-    `${SCOPE}notifiche.html`,
-    `${SCOPE}checkin.html`,
-    `${SCOPE}statistiche.html`,
-    `${SCOPE}impostazioni.html`,
-    `${SCOPE}centro-operativo.html`,
-    `${SCOPE}manifest.json`,
-    `${SCOPE}assets/icon-512.png`,
-    `${SCOPE}assets/apple-touch-icon.png`,
-    `${SCOPE}assets/logo-sidebar.png`
+    new URL('login.html', SCOPE_URL).href,
+    new URL('dashboard.html', SCOPE_URL).href,
+    new URL('viaggi.html', SCOPE_URL).href,
+    new URL('prenotazioni.html', SCOPE_URL).href,
+    new URL('prenotazione.html', SCOPE_URL).href,
+    new URL('clienti.html', SCOPE_URL).href,
+    new URL('flotta.html', SCOPE_URL).href,
+    new URL('pagamenti.html', SCOPE_URL).href,
+    new URL('preventivi.html', SCOPE_URL).href,
+    new URL('preventivi-nuovo.html', SCOPE_URL).href,
+    new URL('notifiche.html', SCOPE_URL).href,
+    new URL('checkin.html', SCOPE_URL).href,
+    new URL('statistiche.html', SCOPE_URL).href,
+    new URL('impostazioni.html', SCOPE_URL).href,
+    new URL('centro-operativo.html', SCOPE_URL).href,
+    new URL('manifest.json', SCOPE_URL).href,
+    new URL('assets/icon-512.png', SCOPE_URL).href,
+    new URL('assets/apple-touch-icon.png', SCOPE_URL).href,
+    new URL('assets/logo-sidebar.png', SCOPE_URL).href
   ]).catch(() => {})).then(() => self.skipWaiting()));
 });
 
@@ -42,7 +43,7 @@ self.addEventListener('fetch', event => {
       const copy = response.clone();
       caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(() => {});
       return response;
-    }).catch(() => caches.match(event.request).then(r => r || caches.match(`${SCOPE}login.html`))));
+    }).catch(() => caches.match(event.request).then(r => r || caches.match(new URL('login.html', SCOPE_URL).href))));
     return;
   }
 
@@ -63,18 +64,18 @@ self.addEventListener('push', event => {
   const title = data.title || 'Nuova prenotazione';
   const options = {
     body: data.body || 'È arrivata una nuova prenotazione.',
-    icon: '/GESTIONALE/assets/icon-512.png',
-    badge: '/GESTIONALE/assets/icon-512.png',
+    icon: new URL('assets/icon-512.png', SCOPE_URL).href,
+    badge: new URL('assets/icon-512.png', SCOPE_URL).href,
     tag: data.tag || 'dg-booking',
     renotify: true,
-    data: { url: data.url || '/GESTIONALE/prenotazioni.html' }
+    data: { url: data.url || 'prenotazioni.html' }
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url || '/GESTIONALE/prenotazioni.html', self.location.origin).href;
+  const target = new URL(event.notification.data?.url || 'prenotazioni.html', SCOPE_URL).href;
   event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
     for (const client of list) {
       if ('focus' in client) {

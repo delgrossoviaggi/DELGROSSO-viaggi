@@ -1,13 +1,14 @@
-/* Del Grosso Gestionale - iPhone Web Push V16 */
+/* Del Grosso Gestionale - iPhone Web Push V18 */
 (() => {
   'use strict';
 
   const SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
   // Public VAPID key. The matching private key stays ONLY in Supabase Edge Function secrets.
-  const VAPID_PUBLIC_KEY = 'BMseCsoi12v5aRKwGXvfFqNVSe3myEG3mYhJn3UC5iNHrh6bVhc4b2bxtoMuxFdnpz5trv1inPdBNCE7zm6MQuo';
-  const SW_URL = '/GESTIONALE/sw.js';
-  const SCOPE = '/GESTIONALE/';
+  const VAPID_PUBLIC_KEY = 'BGYzb5phslgo0hOA61u4-BXteNGtEx-AbNKWno_oNpMI5y3HlwtZLeeJoTrx5cNJZTzeiQ1EpzyVyXpP27B-Xwo';
+  const APP_BASE = new URL('./', document.baseURI);
+  const SW_URL = new URL('sw.js', APP_BASE).href;
+  const SCOPE = APP_BASE.pathname;
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
