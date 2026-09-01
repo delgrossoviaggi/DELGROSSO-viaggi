@@ -7,6 +7,7 @@
 
 
 
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script type="module" src="./assets/checkin-DwCtzzpB.js"></script>
   <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
   <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
@@ -37,6 +38,7 @@
   <link rel="stylesheet" href="./assets/dg-universal-v13.css">
   <link rel="stylesheet" href="./assets/dg-github-v19.css">
   <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-qr-v22.css">
 </head>
 <body>
   <h1>CHECK-IN</h1>
@@ -77,6 +79,7 @@
 
         <div class="scanner-viewport">
           <video id="scannerVideo" playsinline muted></video>
+          <div id="qrReader" class="qr-reader-compat" aria-label="Scanner QR compatibile"></div>
           <div class="scanner-overlay">
             <div class="scanner-frame"></div>
           </div>
@@ -85,6 +88,8 @@
         <div class="scanner-actions">
           <button id="startScannerBtn" type="button" class="btn btn-primary">Avvia scanner</button>
           <button id="stopScannerBtn" type="button" class="btn btn-secondary">Ferma scanner</button>
+          <label class="btn btn-secondary qr-file-label" for="qrImageInput">📷 Scansiona da foto</label>
+          <input id="qrImageInput" type="file" accept="image/*" capture="environment" hidden>
         </div>
 
         <div class="scanner-divider">
@@ -184,6 +189,30 @@
   </section>
 
   <canvas id="scannerCanvas" hidden></canvas>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('qrImageInput');
+    if (!input || typeof window.Html5Qrcode !== 'function') return;
+    input.addEventListener('change', async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const status = document.getElementById('scannerStatus');
+      try {
+        status && (status.textContent = 'Analizzo la foto del QR…');
+        const scanner = new Html5Qrcode('qrReader');
+        const text = await scanner.scanFile(file, true);
+        document.getElementById('qrPayloadInput').value = text;
+        document.getElementById('analyzeQrBtn')?.click();
+        try { scanner.clear(); } catch (_) {}
+        input.value = '';
+      } catch (err) {
+        status && (status.textContent = 'QR non riconosciuto nella foto. Prova con una foto più nitida o usa la fotocamera.');
+        input.value = '';
+      }
+    });
+  });
+  </script>
+
 
 
 
