@@ -1,4 +1,4 @@
-/* Del Grosso Gestionale - iPhone Web Push V20 */
+/* Del Grosso Gestionale - iPhone Web Push V23 */
 (() => {
   'use strict';
 
@@ -75,13 +75,25 @@
     if (permission === 'default') permission = await Notification.requestPermission();
     if (permission !== 'granted') throw new Error('Permesso notifiche non concesso. Puoi abilitarlo nelle impostazioni dell’iPhone.');
 
+    // iOS/Android can retain a PushSubscription created with an older VAPID key.
+    // Reuse is safe only when the subscription was created for this exact key.
+    // To avoid Apple APNs VapidPkHashMismatch, refresh the browser subscription
+    // before registering it with our backend.
     let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: b64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
+    if (subscription) {
+      try {
+        await subscription.unsubscribe();
+      } catch (unsubscribeError) {
+        console.warn('Unable to replace existing push subscription:', unsubscribeError);
+      }
+      subscription = null;
     }
+
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: b64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+
     await saveSubscription(subscription);
     return { subscription, permission };
   }
@@ -108,10 +120,7 @@
         const registration = await navigator.serviceWorker.ready;
         const existing = await registration.pushManager.getSubscription();
         if (existing) {
-          await saveSubscription(existing);
-          button.textContent = '✓ Notifiche iPhone attive';
-          button.classList.add('is-active');
-          setStatus('Notifiche push attive su questo dispositivo.', true);
+          setStatus('È presente una registrazione push precedente. Premi Attiva notifiche per aggiornarla.', false);
         } else {
           setStatus('Permesso concesso. Premi Attiva notifiche per completare la registrazione.', false);
         }
