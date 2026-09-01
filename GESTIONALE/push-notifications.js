@@ -1,9 +1,9 @@
-/* Del Grosso Gestionale - iPhone Web Push V18 */
+/* Del Grosso Gestionale - iPhone Web Push V20 */
 (() => {
   'use strict';
 
   const SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoa3VheWhibWl0ZG16bW12b25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3NzIzNzcsImV4cCI6MjEwMTM0ODM3N30.FU_bdDex03h2hawHVFlmy3zjylGDSuAjR9RUjdeGgwI'; // Legacy anon key: temporary compatibility fallback while this project migrates API keys.
   // Public VAPID key. The matching private key stays ONLY in Supabase Edge Function secrets.
   const VAPID_PUBLIC_KEY = 'BGYzb5phslgo0hOA61u4-BXteNGtEx-AbNKWno_oNpMI5y3HlwtZLeeJoTrx5cNJZTzeiQ1EpzyVyXpP27B-Xwo';
   const APP_BASE = new URL('./', document.baseURI);
@@ -51,7 +51,7 @@
     });
     if (!response.ok) {
       if (response.status === 404) throw new Error('Registrazione notifiche non riuscita (404): la tabella push_subscriptions non è ancora attiva su Supabase. Applica la migration 20260831_push_notifications.sql.');
-      if (response.status === 401) throw new Error('Registrazione notifiche non riuscita (401): chiave Supabase/API non accettata. Verifica la configurazione client.');
+      if (response.status === 401) { const detail = await response.text().catch(() => ''); throw new Error(`Registrazione notifiche non riuscita (401): Supabase ha rifiutato la chiave/API. ${detail ? detail.slice(0, 180) : 'Controlla API Keys e Data API.'}`); }
       if (response.status === 403) throw new Error('Registrazione notifiche non riuscita (403): policy RLS non consente la registrazione.');
       throw new Error(`Registrazione notifiche non riuscita (${response.status}).`);
     }
