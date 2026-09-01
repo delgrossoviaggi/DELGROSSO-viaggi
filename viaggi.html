@@ -10,7 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
-  <link rel="stylesheet" href="/src/public/brand-public.css">
+  <link rel="stylesheet" href="./css/brand-public.css">
+  <link rel="stylesheet" href="./css/viaggi.css">
   <style>
     .departures-search {
       margin-top: -18px;
@@ -389,7 +390,7 @@
     <header class="site-header">
       <div class="site-header__inner">
         <a href="index.html" class="brand-lockup" aria-label="Del Grosso Viaggi & Limousine Bus">
-          <span class="brand-lockup__box"><img data-runtime-logo src="/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
+          <span class="brand-lockup__box"><img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
           <span class="brand-lockup__text">
             <span class="brand-lockup__title">Del Grosso</span>
             <span class="brand-lockup__sub">Viaggi &amp; Limousine Bus</span>
@@ -399,15 +400,13 @@
         <nav class="site-nav" aria-label="Navigazione principale">
           <a href="index.html">Home</a>
           <a href="viaggi.html" class="is-active">Partenze</a>
-          <a href="servizi.html">Servizi</a>
           <a href="flotta.html">Flotta</a>
-          <a href="chi-siamo.html">Chi siamo</a>
           <a href="contatti.html">Contatti</a>
-          <a href="richiedi-preventivo.html">Preventivi</a>
+          <a href="preventivo.html">Richiedi preventivo</a>
         </nav>
 
         <div class="header-actions">
-          <a class="btn-primary" href="richiedi-preventivo.html"><i class="fas fa-file-signature"></i> Richiedi Preventivo</a>
+          <a class="btn-primary" href="preventivo.html"><i class="fas fa-file-signature"></i> Richiedi Preventivo</a>
         </div>
 
         <button id="mobileToggle" class="mobile-toggle" type="button" aria-label="Apri menu">
@@ -418,11 +417,9 @@
       <nav id="mobileStrip" class="mobile-strip hidden" aria-label="Navigazione mobile">
         <a href="index.html">Home</a>
         <a href="viaggi.html" class="is-active">Partenze</a>
-        <a href="servizi.html">Servizi</a>
         <a href="flotta.html">Flotta</a>
-        <a href="chi-siamo.html">Chi siamo</a>
         <a href="contatti.html">Contatti</a>
-        <a href="richiedi-preventivo.html">Preventivi</a>
+        <a href="preventivo.html">Richiedi preventivo</a>
       </nav>
     </header>
 
@@ -437,13 +434,13 @@
           </p>
           <div class="hero-actions">
             <a class="btn-primary" href="#catalogo-partenze"><i class="fas fa-ticket"></i> Scopri i Viaggi</a>
-            <a class="btn-secondary" href="richiedi-preventivo.html"><i class="fas fa-file-signature"></i> Preventivo Gruppi</a>
+            <a class="btn-secondary" href="preventivo.html"><i class="fas fa-file-signature"></i> Richiedi preventivo</a>
           </div>
         </div>
 
         <div class="hero-visual panel-soft" data-aos="fade-left">
           <div class="hero-visual__image">
-            <img data-runtime-logo src="/logo-delgrosso.svg" alt="Del Grosso Viaggi">
+            <img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Viaggi">
           </div>
           <div class="hero-stat-list">
             <div class="hero-stat">
@@ -547,7 +544,7 @@
         <div class="site-footer__grid">
           <section class="footer-card">
             <div class="brand-lockup" style="margin-bottom:20px;">
-              <span class="brand-lockup__box"><img data-runtime-logo src="/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
+              <span class="brand-lockup__box"><img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
               <span class="brand-lockup__text">
                 <span class="brand-lockup__title" style="color:#e2e8f0;">Del Grosso</span>
                 <span class="brand-lockup__sub" style="color:#7dd3fc;">Viaggi &amp; Limousine Bus</span>
@@ -589,6 +586,6 @@
       });
     }
   </script>
-  <script type="module" src="/src/public/site/viaggi.js"></script>
+  <script type="module" src="./js/viaggi.js"></script>
 </body>
 </html>

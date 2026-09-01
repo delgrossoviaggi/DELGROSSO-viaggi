@@ -372,6 +372,10 @@
             document.body.style.overflow = 'auto';
         }
 
+        const realtimeChannel = sb.channel('flotta-live-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'flotta_page' }, () => caricaFlotta())
+            .subscribe();
+
         caricaFlotta();
     </script>
 </body>

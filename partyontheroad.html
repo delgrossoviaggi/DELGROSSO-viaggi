@@ -198,6 +198,10 @@
             if (el) el.click();
         }
 
+        const realtimeChannel = sb.channel('party-live-sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_eventi' }, () => caricaEventi())
+            .subscribe();
+
         caricaEventi();
     </script>
 </body>
