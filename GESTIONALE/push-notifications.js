@@ -51,7 +51,7 @@
     });
     if (!response.ok) {
       if (response.status === 404) throw new Error('Registrazione notifiche non riuscita (404): la tabella push_subscriptions non è ancora attiva su Supabase. Applica la migration 20260831_push_notifications.sql.');
-      if (response.status === 401) { const detail = await response.text().catch(() => ''); throw new Error(`Registrazione notifiche non riuscita (401): Supabase ha rifiutato la chiave/API. ${detail ? detail.slice(0, 180) : 'Controlla API Keys e Data API.'}`); }
+      if (response.status === 401) { const detail = await response.text().catch(() => ''); if (detail.includes('42501') || detail.includes('row-level security')) throw new Error(`Registrazione notifiche non riuscita: policy RLS di Supabase blocca l'inserimento in push_subscriptions (42501).`); throw new Error(`Registrazione notifiche non riuscita (401): ${detail ? detail.slice(0, 220) : 'Supabase ha rifiutato la richiesta.'}`); }
       if (response.status === 403) throw new Error('Registrazione notifiche non riuscita (403): policy RLS non consente la registrazione.');
       throw new Error(`Registrazione notifiche non riuscita (${response.status}).`);
     }
