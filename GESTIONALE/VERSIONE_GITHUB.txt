@@ -1,12 +1,3 @@
-DELGROSSO GESTIONALE — V27
-DOCUMENTI COMPLETI: RICEVUTE + CONFERME + EMAIL
-Base: V26 NOTIFICHE LEGGI TUTTO FIX
+GESTIONALE V28 – DOCUMENTI COMPLETI + EMAIL PRENOTAZIONE OPZIONALE
 
-- Registrazione Acconto/Saldo: genera e archivia ricevuta PDF
-- Dopo un pagamento, verifica/genera anche la conferma prenotazione se assente
-- Conferme e ricevute restano visibili nel Gestionale e nel fascicolo cliente
-- Edge Function send-booking-confirmation aggiornata per archiviazione + email cliente + avviso interno
-- SMTP letto direttamente da public.impostazioni
-- send-booking-confirmation configurata con verify_jwt=false
-- bookingDocumentsService usa la funzione effettivamente deployata: send-booking-confirmation
-- Cache Service Worker aggiornata a V27
+La email del cliente nella prenotazione è facoltativa. Il telefono rimane obbligatorio. Se viene inserita una email, viene validata; se lasciata vuota, la prenotazione può essere completata e il cliente può essere contattato tramite telefono/WhatsApp.
