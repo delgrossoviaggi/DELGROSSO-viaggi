@@ -9,6 +9,7 @@
   const APP_BASE = new URL('./', document.baseURI);
   const SW_URL = new URL('sw.js', APP_BASE).href;
   const SCOPE = APP_BASE.pathname;
+  const PUSH_STATE_KEY = 'dg_push_active_v24';
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isStandalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -119,7 +120,11 @@
       try {
         const registration = await navigator.serviceWorker.ready;
         const existing = await registration.pushManager.getSubscription();
-        if (existing) {
+        if (existing && localStorage.getItem(PUSH_STATE_KEY) === '1') {
+          button.textContent = '✓ Notifiche iPhone attive';
+          button.classList.add('is-active');
+          setStatus('Notifiche iPhone attive e registrate. Non è necessario riattivarle ad ogni accesso.', true);
+        } else if (existing) {
           setStatus('È presente una registrazione push precedente. Premi Attiva notifiche per aggiornarla.', false);
         } else {
           setStatus('Permesso concesso. Premi Attiva notifiche per completare la registrazione.', false);
@@ -136,6 +141,7 @@
       button.textContent = 'Attivazione…';
       try {
         await enablePush();
+        localStorage.setItem(PUSH_STATE_KEY, '1');
         button.textContent = '✓ Notifiche iPhone attive';
         button.classList.add('is-active');
         setStatus('Perfetto: questo iPhone riceverà le nuove prenotazioni.', true);
