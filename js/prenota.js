@@ -27,17 +27,8 @@ import { applyRuntimeSettings, buildCompanyInfo, getCachedSettingsSync, loadImpo
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[+0-9()\s-]{7,20}$/;
-
-const SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
-const BOOKING_EMAIL_FUNCTION_URL =
-  `${SUPABASE_URL}/functions/v1/send-booking-confirmation`;
-
 const DEFAULT_SUCCESS_MESSAGE = 'La tua prenotazione è stata registrata con successo. La ricevuta PDF è stata scaricata automaticamente.';
 const PDF_WARNING_MESSAGE = 'La prenotazione è stata salvata, ma non è stato possibile generare automaticamente la ricevuta PDF.';
-const EMAIL_SUCCESS_MESSAGE = ' La ricevuta PDF è stata inviata anche via email.';
-const EMAIL_WARNING_MESSAGE = ' La prenotazione è stata salvata e il PDF è stato scaricato, ma non è stato possibile inviare la email di conferma.';
-
 let COMPANY_INFO = buildCompanyInfo(getCachedSettingsSync());
 applyRuntimeSettings(getCachedSettingsSync());
 
@@ -150,19 +141,9 @@ function getBusByTrip(trip) {
 
 function getBusDisplayName() {
   if (state.selectedBus) {
-    const brand = normalizeText(state.selectedBus.marca);
-    const model = normalizeText(state.selectedBus.modello);
-    const publicName = `${brand} ${model}`.trim();
-    return publicName || '—';
+    return `${state.selectedBus.targa || ''} - ${state.selectedBus.marca || ''} ${state.selectedBus.modello || ''}`.trim();
   }
-
-  // Per il pubblico non mostriamo mai la targa del mezzo.
-  const tripBus = normalizeText(state.trip?.autobus || state.trip?.mezzo);
-  if (!tripBus) return '—';
-
-  // Se il campo viaggio contiene una descrizione generica del mezzo,
-  // la mostriamo; la targa resta esclusa dalla visualizzazione pubblica.
-  return tripBus;
+  return normalizeText(state.trip?.autobus || state.trip?.mezzo) || '—';
 }
 
 function getSeatLayoutSource() {
@@ -301,7 +282,7 @@ function validateForm() {
   if (!name) return 'Inserisci il nome.';
   if (!surname) return 'Inserisci il cognome.';
   if (!PHONE_REGEX.test(phone)) return 'Inserisci un numero di telefono valido.';
-  if (!EMAIL_REGEX.test(email)) return 'Inserisci un indirizzo email valido.';
+  if (email && !EMAIL_REGEX.test(email)) return 'Inserisci un indirizzo email valido.';
   if (!ui.privacyCheckbox.checked) return 'Devi accettare la privacy policy per proseguire.';
   if (state.selectedSeats.length === 0) return 'Seleziona almeno un posto dalla piantina.';
 
@@ -388,134 +369,14 @@ async function createPublicBooking() {
   }
 }
 
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      try {
-        const result = String(reader.result || '');
-        const commaIndex = result.indexOf(',');
-        resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    reader.onerror = () => {
-      reject(reader.error || new Error('Impossibile leggere il PDF per l’invio email.'));
-    };
-
-    reader.readAsDataURL(blob);
-  });
-}
-
 async function generateReceiptForBooking(booking) {
   const receiptBooking = {
     ...booking,
     nome: normalizeText(ui.passengerName.value, ''),
     cognome: normalizeText(ui.passengerSurname.value, '')
   };
-
-  const pdfBlob = await generateBookingReceipt(
-    receiptBooking,
-    state.trip,
-    COMPANY_INFO
-  );
-
-  const bookingNumber =
-    booking.codice || booking.id || 'prenotazione';
-
-  const filename =
-    `Ricevuta_Prenotazione_${bookingNumber}.pdf`;
-
-  downloadReceipt(pdfBlob, bookingNumber);
-
-  return {
-    pdfBlob,
-    filename
-  };
-}
-
-async function sendBookingConfirmationEmail(booking, pdfBlob, pdfFilename) {
-  const email = normalizeText(booking?.email);
-
-  if (!EMAIL_REGEX.test(email)) {
-    throw new Error('Email cliente mancante o non valida.');
-  }
-
-  if (!(pdfBlob instanceof Blob) || pdfBlob.size === 0) {
-    throw new Error('PDF della ricevuta mancante o vuoto.');
-  }
-
-  const pdfBase64 = await blobToBase64(pdfBlob);
-
-  const payload = {
-    booking: {
-      id: booking?.id,
-      codice: booking?.codice,
-      nome: normalizeText(ui.passengerName.value, ''),
-      cognome: normalizeText(ui.passengerSurname.value, ''),
-      telefono: normalizeText(ui.passengerPhone.value, ''),
-      email,
-      posti: booking?.posti ?? state.selectedSeats.length,
-      posti_selezionati:
-        booking?.posti_selezionati || state.selectedSeats.join(','),
-      totale:
-        booking?.totale ??
-        (state.selectedSeats.length * toNumber(state.trip?.prezzo, 0))
-    },
-    trip: {
-      id: state.trip?.id,
-      titolo: state.trip?.titolo,
-      destinazione: state.trip?.destinazione,
-      data_partenza: state.trip?.data_partenza,
-      ora_partenza: state.trip?.ora_partenza,
-      luogo_partenza:
-        state.trip?.luogo_partenza || state.trip?.partenza
-    },
-    pdfBase64,
-    pdfFilename
-  };
-
-  const response = await fetch(BOOKING_EMAIL_FUNCTION_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-    },
-    body: JSON.stringify(payload)
-  });
-
-  let result = null;
-
-  try {
-    result = await response.json();
-  } catch {
-    result = null;
-  }
-
-  if (!response.ok) {
-    const serverMessage =
-      result?.error ||
-      result?.message ||
-      `Errore HTTP ${response.status}`;
-
-    throw new Error(serverMessage);
-  }
-
-  if (result?.success === false) {
-    throw new Error(result.error || 'La Edge Function non ha inviato la email.');
-  }
-
-  console.log(
-    'Email conferma prenotazione inviata:',
-    email,
-    booking?.codice || booking?.id || 'prenotazione'
-  );
-
-  return result;
+  const pdfBlob = await generateBookingReceipt(receiptBooking, state.trip, COMPANY_INFO);
+  downloadReceipt(pdfBlob, booking.id || booking.codice || 'prenotazione');
 }
 
 function openPublicWhatsAppConfirmation(booking) {
@@ -556,36 +417,12 @@ async function handleSubmit(event) {
     let successMessage = DEFAULT_SUCCESS_MESSAGE;
     let feedbackTone = 'success';
 
-    let receiptData = null;
-
     try {
-      receiptData = await generateReceiptForBooking(booking);
+      await generateReceiptForBooking(booking);
     } catch (receiptError) {
       console.error('Generazione ricevuta non riuscita', receiptError);
       successMessage = PDF_WARNING_MESSAGE;
       feedbackTone = 'error';
-    }
-
-    if (receiptData?.pdfBlob) {
-      try {
-        await sendBookingConfirmationEmail(
-          booking,
-          receiptData.pdfBlob,
-          receiptData.filename
-        );
-
-        if (feedbackTone === 'success') {
-          successMessage += EMAIL_SUCCESS_MESSAGE;
-        }
-      } catch (emailError) {
-        console.error('Invio email conferma non riuscito', emailError);
-
-        successMessage += EMAIL_WARNING_MESSAGE;
-
-        if (feedbackTone === 'success') {
-          feedbackTone = 'error';
-        }
-      }
     }
 
     let whatsappResult = null;
