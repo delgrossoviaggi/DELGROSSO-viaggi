@@ -1,1 +1,3 @@
-V25 — Sistema documentale: conferme PDF, ricevute, email, WhatsApp e notifiche interne.
+DELGROSSO GESTIONALE — V26
+FIX NOTIFICHE: LEGGI TUTTO PERSISTENTE
+Base: V25 DOCUMENTI & COMUNICAZIONI
