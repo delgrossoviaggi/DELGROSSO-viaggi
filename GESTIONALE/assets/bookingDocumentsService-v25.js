@@ -3,7 +3,7 @@ import { issuePaymentReceipt } from './paymentReceiptService-v24.js';
 
 const SUPABASE_URL='https://chkuayhbmitdmzmmvona.supabase.co';
 const SUPABASE_KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
-const BOOKING_FN=`${SUPABASE_URL}/functions/v1/send-booking-email`;
+const BOOKING_FN=`${SUPABASE_URL}/functions/v1/send-booking-confirmation`;
 const PAYMENT_FN=`${SUPABASE_URL}/functions/v1/send-payment-receipt`;
 
 const clean=v=>String(v??'').trim();
