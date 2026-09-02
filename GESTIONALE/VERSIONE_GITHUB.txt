@@ -1,1 +1,1 @@
-DELGROSSO GESTIONALE V24 - MOBILE IPHONE + RICEVUTE ACCONTO/SALDO + PUSH
+V25 — Sistema documentale: conferme PDF, ricevute, email, WhatsApp e notifiche interne.
