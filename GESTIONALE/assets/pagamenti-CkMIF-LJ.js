@@ -32,7 +32,7 @@ import"./settingsService-BkpKGRnr.js";import{t as e}from"./tripService-BzTorehO.
       <td>${q(e.note||``)}</td>
       <td>
         <div class="table-actions">
-          <button type="button" class="editMovementBtn btn-secondary">Modifica</button>${e.receipt_storage_path?`<button type="button" class="btn-secondary" data-dg-receipt-path="${q(e.receipt_storage_path)}">Ricevuta PDF</button>`:``}
+          <button type="button" class="editMovementBtn btn-secondary">Modifica</button>${e.receipt_storage_path?`<button type="button" class="btn-secondary" data-dg-receipt-path="${q(e.receipt_storage_path)}">Ricevuta PDF</button><button type="button" class="btn-secondary" data-dg-doc-action="payment-email" data-payment-id="${q(e.id)}">📧</button><button type="button" class="btn-secondary" data-dg-doc-action="payment-wa" data-payment-id="${q(e.id)}">🟢</button>`:``}
           <button type="button" class="deleteMovementBtn">Elimina</button>
         </div>
       </td>
