@@ -45,61 +45,75 @@ Deno.serve(async req => {
       if (!to) return json({success:false,error:'Email partecipante mancante.'},400)
       const file = await supabase.storage.from('ricevute-prenotazioni').download(paymentRow.receipt_storage_path)
       if (file.error) throw file.error
-      const rr = await fetch(`${supabaseUrl}/rest/v1/impostazioni?select=*&order=created_at.desc&limit=1`,{headers:{apikey:serviceRole,Authorization:`Bearer ${serviceRole}`}})
-      if (!rr.ok) throw Error(`Impossibile leggere le impostazioni SMTP (${rr.status}).`)
-      const st=(await rr.json())?.[0]||{},c=st.comunicazione||{}
-      const host=text(c.smtpHost,'smtps.aruba.it'),port=Number(c.smtpPort||465),secure=c.smtpSecure!==false,user=text(c.smtpUsername,'prenotazioni@delgrossoviaggi.it'),pass=text(c.smtpPassword),from=text(c.smtpFromEmail,user),fromName=text(c.smtpFromName,'Del Grosso Viaggi'),replyTo=text(c.smtpReplyTo,from)
-      if(!pass)return json({success:false,error:'Password SMTP non configurata in Gestionale > Impostazioni > Comunicazione.'},400)
-      const transporter=nodemailer.createTransport({host,port,secure,auth:{user,pass}})
-      const type=paymentRow.tipo==='Saldo'?'Saldo':'Acconto', customer=text(bookingRow.cliente_nome||bookingRow.cliente||paymentRow.cliente,'Cliente'), number=text(paymentRow.receipt_number,'ricevuta')
-      await transporter.sendMail({from:{name:fromName,address:from},to,replyTo,subject:`Ricevuta ${type} ${number} - Del Grosso Viaggi`,text:`Gentile ${customer},
-
-in allegato trovi nuovamente la ricevuta ${type} relativa al pagamento effettuato.
-
-Del Grosso Viaggi`,attachments:[{filename:`Ricevuta_Pagamento_${number}.pdf`,content:new Uint8Array(await file.data.arrayBuffer()),contentType:'application/pdf'}]})
-      const now=new Date().toISOString(); await supabase.from('pagamenti').update({receipt_email_sent:true,receipt_email_sent_at:now,receipt_email_error:null}).eq('id',paymentId)
-      return json({success:true,emailSent:true,recipient:to})
-    }
-    const payment = p?.payment || {}, booking = p?.booking || {}, trip = p?.trip || {}, totals = p?.totals || {}
-    const pdfBase64 = text(p?.pdfBase64), to = text(booking.email || booking.cliente_email || payment.email)
-    if (!pdfBase64) return json({error:'PDF ricevuta mancante.'},400)
-    if (!payment.id) return json({error:'ID pagamento mancante.'},400)
-    const receiptNumber = text(payment.receipt_number,`DG-${String(payment.data_pagamento||new Date().toISOString()).slice(0,4)}-${String(payment.id).slice(0,8).toUpperCase()}`)
-    const path = `pagamenti/${receiptNumber}.pdf`
-    const bytes = Uint8Array.from(atob(pdfBase64),c=>c.charCodeAt(0))
-    const upload = await supabase.storage.from('ricevute-prenotazioni').upload(path,bytes,{contentType:'application/pdf',upsert:false})
-    if (upload.error && !String(upload.error.message||'').toLowerCase().includes('already exists')) throw upload.error
+      // Archiviazione e metadati devono essere completati PRIMA dell'invio email.
+    // Un errore SMTP non deve trasformare una ricevuta correttamente archiviata
+    // in un falso "invio fallito".
+    const now = new Date().toISOString()
+    const initialUpdate = await supabase.from('pagamenti').update({
+      receipt_number:receiptNumber,
+      receipt_generated_at:now,
+      receipt_storage_path:path,
+      receipt_email_sent:false,
+      receipt_email_sent_at:null,
+      receipt_email_error:to ? null : 'Email del partecipante mancante.'
+    }).eq('id',payment.id)
+    if (initialUpdate.error) throw initialUpdate.error
 
     if (!to) {
-      const now = new Date().toISOString()
-      await supabase.from('pagamenti').update({receipt_number:receiptNumber,receipt_generated_at:now,receipt_storage_path:path,receipt_email_sent:false,receipt_email_error:'Email partecipante mancante.'}).eq('id',payment.id)
       return json({success:true,emailSent:false,storedPath:path,receiptNumber,error:'Email del partecipante mancante: la ricevuta è stata archiviata ma non inviata.'})
     }
 
-    const rr = await fetch(`${supabaseUrl}/rest/v1/impostazioni?select=*&order=created_at.desc&limit=1`,{headers:{apikey:serviceRole,Authorization:`Bearer ${serviceRole}`}})
-    if (!rr.ok) throw Error(`Impossibile leggere le impostazioni SMTP (${rr.status}).`)
-    const st = (await rr.json())?.[0] || {}, c = st.comunicazione || {}
-    const host=text(c.smtpHost,'smtps.aruba.it'), port=Number(c.smtpPort||465), secure=c.smtpSecure!==false, user=text(c.smtpUsername,'prenotazioni@delgrossoviaggi.it'), pass=text(c.smtpPassword), from=text(c.smtpFromEmail,user), fromName=text(c.smtpFromName,'Del Grosso Viaggi'), replyTo=text(c.smtpReplyTo,from)
-    if (!pass) {
-      const now = new Date().toISOString()
-      await supabase.from('pagamenti').update({receipt_number:receiptNumber,receipt_generated_at:now,receipt_storage_path:path,receipt_email_sent:false,receipt_email_error:'Password SMTP non configurata in Gestionale > Impostazioni > Comunicazione.'}).eq('id',payment.id)
-      return json({success:true,emailSent:false,storedPath:path,receiptNumber,error:'Password SMTP non configurata in Gestionale > Impostazioni > Comunicazione.'})
+    let emailSent = false
+    let emailError = ''
+    try {
+      const rr = await fetch(`${supabaseUrl}/rest/v1/impostazioni?select=*&order=created_at.desc&limit=1`,{headers:{apikey:serviceRole,Authorization:`Bearer ${serviceRole}`}})
+      if (!rr.ok) throw Error(`Impossibile leggere le impostazioni SMTP (${rr.status}).`)
+      const st = (await rr.json())?.[0] || {}, c = st.comunicazione || {}
+      const host=text(c.smtpHost,'smtps.aruba.it'), port=Number(c.smtpPort||465), secure=c.smtpSecure!==false, user=text(c.smtpUsername,'prenotazioni@delgrossoviaggi.it'), pass=text(c.smtpPassword), from=text(c.smtpFromEmail,user), fromName=text(c.smtpFromName,'Del Grosso Viaggi'), replyTo=text(c.smtpReplyTo,from)
+      if (!pass) throw Error('Password SMTP non configurata in Gestionale > Impostazioni > Comunicazione.')
+
+      const transporter = nodemailer.createTransport({host,port,secure,auth:{user,pass}})
+      const customer=text(booking.cliente_nome || booking.cliente || payment.cliente,'Cliente')
+      const tripName=text(trip.titolo || trip.destinazione || booking.viaggio_codice || payment.viaggio,'Viaggio Del Grosso')
+      const type=payment.tipo==='Saldo'?'Saldo':'Acconto'
+      await transporter.sendMail({
+        from:{name:fromName,address:from},to,replyTo,
+        subject:`Ricevuta ${type} ${receiptNumber} - Del Grosso Viaggi`,
+        text:`Gentile ${customer},\n\nin allegato trovi la ricevuta relativa al pagamento effettuato per ${tripName}.\n\nTipo pagamento: ${type}\nImporto ricevuto: € ${Number(payment.importo||0).toFixed(2)}\nQuota totale: € ${Number(totals.totalDue||booking.totale||0).toFixed(2)}\nTotale pagato: € ${Number(totals.paidAfter||0).toFixed(2)}\nResiduo: € ${Number(totals.residualAfter||0).toFixed(2)}\n\nLa somma è stata ricevuta da DELGROSSO VIAGGI & LIMOUSINE BUS.\n\nDel Grosso Viaggi`,
+        html:`<p>Gentile <strong>${customer}</strong>,</p><p>in allegato trovi la ricevuta relativa al pagamento effettuato per <strong>${tripName}</strong>.</p><p><strong>Tipo:</strong> ${type}<br><strong>Importo ricevuto:</strong> € ${Number(payment.importo||0).toFixed(2)}<br><strong>Quota totale:</strong> € ${Number(totals.totalDue||booking.totale||0).toFixed(2)}<br><strong>Totale pagato:</strong> € ${Number(totals.paidAfter||0).toFixed(2)}<br><strong>Residuo:</strong> € ${Number(totals.residualAfter||0).toFixed(2)}</p><p>La somma è stata ricevuta da <strong>DELGROSSO VIAGGI &amp; LIMOUSINE BUS</strong>.</p>`,
+        attachments:[{filename:`Ricevuta_Pagamento_${receiptNumber}.pdf`,content:bytes,contentType:'application/pdf'}]
+      })
+      emailSent = true
+    } catch(error) {
+      emailError = error instanceof Error ? error.message : String(error)
     }
-    const transporter = nodemailer.createTransport({host,port,secure,auth:{user,pass}})
-    const customer=text(booking.cliente_nome || booking.cliente || payment.cliente,'Cliente')
-    const tripName=text(trip.titolo || trip.destinazione || booking.viaggio_codice || payment.viaggio,'Viaggio Del Grosso')
-    const type=payment.tipo==='Saldo'?'Saldo':'Acconto'
-    await transporter.sendMail({
-      from:{name:fromName,address:from},to,replyTo,
-      subject:`Ricevuta ${type} ${receiptNumber} - Del Grosso Viaggi`,
-      text:`Gentile ${customer},\n\nin allegato trovi la ricevuta relativa al pagamento effettuato per ${tripName}.\n\nTipo pagamento: ${type}\nImporto ricevuto: € ${Number(payment.importo||0).toFixed(2)}\nQuota totale: € ${Number(totals.totalDue||booking.totale||0).toFixed(2)}\nTotale pagato: € ${Number(totals.paidAfter||0).toFixed(2)}\nResiduo: € ${Number(totals.residualAfter||0).toFixed(2)}\n\nLa somma è stata ricevuta da DELGROSSO VIAGGI & LIMOUSINE BUS.\n\nDel Grosso Viaggi`,
-      html:`<p>Gentile <strong>${customer}</strong>,</p><p>in allegato trovi la ricevuta relativa al pagamento effettuato per <strong>${tripName}</strong>.</p><p><strong>Tipo:</strong> ${type}<br><strong>Importo ricevuto:</strong> € ${Number(payment.importo||0).toFixed(2)}<br><strong>Quota totale:</strong> € ${Number(totals.totalDue||booking.totale||0).toFixed(2)}<br><strong>Totale pagato:</strong> € ${Number(totals.paidAfter||0).toFixed(2)}<br><strong>Residuo:</strong> € ${Number(totals.residualAfter||0).toFixed(2)}</p><p>La somma è stata ricevuta da <strong>DELGROSSO VIAGGI &amp; LIMOUSINE BUS</strong>.</p>`,
-      attachments:[{filename:`Ricevuta_Pagamento_${receiptNumber}.pdf`,content:bytes,contentType:'application/pdf'}]
+
+    const finalUpdate = await supabase.from('pagamenti').update({
+      receipt_email_sent:emailSent,
+      receipt_email_sent_at:emailSent ? now : null,
+      receipt_email_error:emailSent ? null : (emailError || 'Invio email non riuscito.')
+    }).eq('id',payment.id)
+    if (finalUpdate.error) console.error('Aggiornamento stato email ricevuta non riuscito:', finalUpdate.error)
+
+    let signedUrl = null
+    try {
+      const signed = await supabase.storage.from('ricevute-prenotazioni').createSignedUrl(path,60*60*24*30)
+      signedUrl = signed.data?.signedUrl || null
+      if (signed.error) console.error('Signed URL ricevuta non disponibile:', signed.error)
+    } catch(error) {
+      console.error('Creazione signed URL ricevuta non riuscita:', error)
+    }
+
+    return json({
+      success:true,
+      recipient:to,
+      receiptNumber,
+      storedPath:path,
+      emailSent,
+      emailError:emailError || null,
+      signedUrl,
+      error:emailSent ? null : emailError || null
     })
-    const signed = await supabase.storage.from('ricevute-prenotazioni').createSignedUrl(path,60*60*24*30)
-    const now = new Date().toISOString()
-    await supabase.from('pagamenti').update({receipt_number:receiptNumber,receipt_generated_at:now,receipt_storage_path:path,receipt_email_sent:true,receipt_email_sent_at:now,receipt_email_error:null}).eq('id',payment.id)
-    return json({success:true,recipient:to,receiptNumber,storedPath:path,signedUrl:signed.data?.signedUrl||null})
   } catch(error) {
     console.error(error)
     return json({error:error instanceof Error?error.message:'Errore invio ricevuta.'},500)

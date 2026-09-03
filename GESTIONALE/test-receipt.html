@@ -1,0 +1,15 @@
+<!doctype html><html><body><pre id="out">RUNNING</pre><script type="module">
+import { buildPaymentReceipt } from './assets/paymentReceiptService-v24.js';
+const out=document.getElementById('out');
+(async()=>{
+ try{
+   const r=await buildPaymentReceipt(
+     {id:'11111111-2222-3333-4444-555555555555',tipo:'Acconto',importo:30,data_pagamento:'2026-09-03',metodo_pagamento:'Contanti'},
+     {id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',cliente_nome:'Mario Rossi',email:'mario@example.com',totale:100},
+     {titolo:'Napoli e Spaccanapoli'},
+     {totalDue:100,paidAfter:30,residualAfter:70}
+   );
+   out.textContent=JSON.stringify({ok:true,receiptNumber:r.receiptNumber,blobSize:r.blob?.size,type:r.blob?.type,pageSizeCheck:true},null,2);
+ }catch(e){out.textContent=JSON.stringify({ok:false,name:e?.name,message:e?.message,stack:e?.stack},null,2);}
+})();
+</script></body></html>
