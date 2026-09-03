@@ -6,7 +6,7 @@ const SUPABASE_URL='https://chkuayhbmitdmzmmvona.supabase.co';
 const SUPABASE_KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
 const BOOKING_FN=`${SUPABASE_URL}/functions/v1/send-booking-confirmation`;
 const headers={apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`};
-let rows=[]; let activeFilter='all';
+let rows=[]; let activeFilter='all'; let refreshTimer=null; let lastSyncAt=null;
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmtDate=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?String(v).slice(0,10):d.toLocaleDateString('it-IT')};
@@ -15,7 +15,7 @@ const customer=o=>String(o.cliente_nome||o.cliente||[o.nome,o.cognome].filter(Bo
 const trip=o=>String(o.viaggio||o.viaggio_codice||o.destinazione||o.titolo||'—').trim();
 
 async function rest(table,filter){
-  const url=`${SUPABASE_URL}/rest/v1/${table}?select=*&${filter}&order=created_at.desc&limit=500`;
+  const url=`${SUPABASE_URL}/rest/v1/${table}?select=*&${filter}&order=created_at.desc&limit=2000`;
   const r=await fetch(url,{headers}); const d=await r.json().catch(()=>[]);
   if(!r.ok) throw new Error(d?.message||`Errore lettura ${table} (${r.status})`); return d;
 }
@@ -44,7 +44,7 @@ function render(){
   if(!filtered.length){body.innerHTML=`<tr><td colspan="8"><div class="archive-empty">Nessun documento trovato.</div></td></tr>`;return;}
   body.innerHTML=filtered.map(r=>`<tr>
     <td><span class="archive-type ${r.kind}">${r.kind==='booking'?'📄':r.kind==='saldo'?'✅':'💶'} ${esc(label(r.kind))}</span></td>
-    <td><strong>${esc(r.number)}</strong></td><td>${esc(r.customer)}</td><td>${esc(r.trip)}</td><td>${esc(fmtDate(r.date))}</td>
+    <td><strong>${esc(r.number)}</strong><div class="archive-related">${r.kind==='booking'?`<a href="./prenotazione.html?id=${encodeURIComponent(r.id)}">Prenotazione</a>`:`<a href="./pagamenti.html?id=${encodeURIComponent(r.id)}">Pagamento</a>`}</div></td><td>${esc(r.customer)}</td><td>${esc(r.trip)}</td><td>${esc(fmtDate(r.date))}</td>
     <td>${r.amount==null?'—':`<strong>${esc(money(r.amount))}</strong>`}</td>
     <td>${r.emailSent?'<span class="archive-email-ok">✓ Inviata</span>':'<span class="archive-email-no">—</span>'}</td>
     <td><div class="archive-actions">
@@ -53,6 +53,14 @@ function render(){
       <button class="archive-btn" data-action="email" data-id="${esc(r.id)}">Reinvia email</button>
     </div></td></tr>`).join('');
 }
+function syncState(ok=true){
+  const box=$('#archive-sync-status')?.parentElement;
+  const label=$('#archive-sync-status');
+  lastSyncAt=new Date();
+  if(label) label.textContent=ok?`Sincronizzato · ${lastSyncAt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Connessione Supabase da verificare';
+  box?.classList.toggle('is-warning',!ok);
+}
+
 async function load(){
   const error=$('#archive-error'); error?.classList.remove('is-visible');
   try{
@@ -60,8 +68,8 @@ async function load(){
       rest('pagamenti','receipt_storage_path=not.is.null'),
       rest('prenotazioni','confirmation_storage_path=not.is.null')
     ]);
-    rows=normalize(payments,bookings); stats(); render();
-  }catch(e){console.error(e); if(error){error.textContent=`Impossibile caricare l'archivio: ${e.message||e}`;error.classList.add('is-visible');} $('#archive-body').innerHTML=`<tr><td colspan="8"><div class="archive-empty">Archivio non disponibile.</div></td></tr>`;}
+    rows=normalize(payments,bookings); stats(); render(); syncState(true);
+  }catch(e){console.error(e); syncState(false); if(error){error.textContent=`Impossibile caricare l'archivio: ${e.message||e}`;error.classList.add('is-visible');} $('#archive-body').innerHTML=`<tr><td colspan="8"><div class="archive-empty">Archivio non disponibile.</div></td></tr>`;}
 }
 async function act(action,id,button){
   const row=rows.find(x=>String(x.id)===String(id)); if(!row)return;
@@ -87,4 +95,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('#archive-body')?.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)act(b.dataset.action,b.dataset.id,b)});
   $('#archive-refresh')?.addEventListener('click',load);
   load();
+  refreshTimer=window.setInterval(()=>{ if(document.visibilityState==='visible') load(); },10000);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') load(); });
+  window.addEventListener('focus',()=>load());
+  window.addEventListener('beforeunload',()=>{ if(refreshTimer) window.clearInterval(refreshTimer); });
 });
