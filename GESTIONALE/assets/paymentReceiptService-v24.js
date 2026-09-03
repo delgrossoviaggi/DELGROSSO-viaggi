@@ -98,11 +98,25 @@ export async function issuePaymentReceipt(payment, booking, trip, totals = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.success) throw new Error(data.error || `Invio ricevuta non riuscito (${response.status}).`);
-  return { ...built, ...data, emailSent: data.emailSent !== false };
+  const emailPresent = String(booking?.email || booking?.cliente_email || payment?.email || '').trim().length > 0;
+  const emailSent = data.emailSent !== false;
+  if (!emailPresent) downloadPaymentReceipt(built.blob, built.receiptNumber);
+  return { ...built, ...data, emailSent, localDownloaded: !emailPresent };
 }
 
 export function downloadPaymentReceipt(blob, number = 'ricevuta') {
   const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download=`Ricevuta_Pagamento_${number}.pdf`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+export async function downloadStoredReceipt(path, number = 'ricevuta') {
+  const response = await fetch(FUNCTION_URL, { method:'POST', headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'}, body:JSON.stringify({action:'signed_url',path}) });
+  const data = await response.json().catch(()=>({}));
+  if (!response.ok || !data.signedUrl) throw new Error(data.error || 'Ricevuta non disponibile.');
+  const pdfResponse = await fetch(data.signedUrl);
+  if (!pdfResponse.ok) throw new Error(`Download ricevuta non riuscito (${pdfResponse.status}).`);
+  const blob = await pdfResponse.blob();
+  downloadPaymentReceipt(blob, number);
+  return true;
 }
 
 export async function openStoredReceipt(path) {
@@ -115,4 +129,4 @@ export async function openStoredReceipt(path) {
 
 export function getReceiptNumber(payment){ return payment?.receipt_number || receiptNumber(payment); }
 
-window.DGPaymentReceipt = { buildPaymentReceipt, issuePaymentReceipt, downloadPaymentReceipt, openStoredReceipt, getReceiptNumber };
+window.DGPaymentReceipt = { buildPaymentReceipt, issuePaymentReceipt, downloadPaymentReceipt, downloadStoredReceipt, openStoredReceipt, getReceiptNumber };

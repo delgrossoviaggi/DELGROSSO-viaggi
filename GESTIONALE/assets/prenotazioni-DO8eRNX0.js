@@ -26,7 +26,7 @@ import{a as e,n as t,o as n}from"./settingsService-BkpKGRnr.js";import{t as r}fr
     <td>${q(e.note||``)}</td>
     <td>
       <div class="pay-row-actions">
-        <button class="editPayBtn btn-secondary" type="button" title="Modifica">Modifica</button>${e.receipt_storage_path?`<button class="btn-secondary" type="button" data-dg-receipt-path="${q(e.receipt_storage_path)}" title="Apri ricevuta">Ricevuta PDF</button><button class="btn-secondary" type="button" data-dg-doc-action="payment-email" data-payment-id="${q(e.id)}" title="Invia email">📧</button><button class="btn-secondary" type="button" data-dg-doc-action="payment-wa" data-payment-id="${q(e.id)}" title="WhatsApp">🟢</button>`:``}
+        <button class="editPayBtn btn-secondary" type="button" title="Modifica">Modifica</button>${e.receipt_storage_path?`<button class="btn-secondary" type="button" data-dg-receipt-download="${q(e.receipt_storage_path)}" data-dg-receipt-number="${q(e.receipt_number||e.ricevuta||e.id)}" title="Scarica ricevuta PDF">Scarica PDF</button><button class="btn-secondary" type="button" data-dg-doc-action="payment-email" data-payment-id="${q(e.id)}" title="Invia email">📧</button><button class="btn-secondary" type="button" data-dg-doc-action="payment-wa" data-payment-id="${q(e.id)}" title="WhatsApp">🟢</button>`:``}
         <button class="delPayBtn btn-icon" type="button" title="Elimina">✕</button>
       </div>
     </td>
