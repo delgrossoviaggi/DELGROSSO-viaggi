@@ -10,7 +10,7 @@
   let trips=new Map();
   async function loadTrips(){
     try{
-      const r=await fetch(`${SUPABASE_URL}/rest/v1/viaggi?select=id,titolo,destinazione,codice,data_partenza&limit=2000`,{headers});
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/viaggi?select=id,titolo,destinazione,data_partenza&limit=2000`,{headers});
       if(!r.ok)return;
       const data=await r.json(); (Array.isArray(data)?data:[]).forEach(t=>trips.set(String(t.id),t));
     }catch(e){console.warn('[V38] Impossibile caricare nomi viaggi',e);}
@@ -26,7 +26,7 @@
       const tripId=link?.getAttribute('href')?.match(/[?&]trip=([^&]+)/)?.[1] || '';
       const t=trips.get(decodeURIComponent(tripId));
       if(link&&t){
-        const name=t.titolo||t.destinazione||t.codice||shortId(tripId);
+        const name=t.titolo||t.destinazione||shortId(tripId);
         link.textContent=name;
         link.title=`${t.titolo||''}${t.destinazione?` · ${t.destinazione}`:''}`;
       }else if(link){
