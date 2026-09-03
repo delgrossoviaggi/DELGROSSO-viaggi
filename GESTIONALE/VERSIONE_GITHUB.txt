@@ -1,1 +1,1 @@
-V29 - ARCHIVIO DOCUMENTI: conferme prenotazione + ricevute acconto/saldo, PDF, download e reinvio email.
+V30 — Archivio documenti integrato nel menu/banner e sincronizzato con Supabase (prenotazioni, pagamenti, storage ricevute), aggiornamento automatico e collegamenti al gestionale.
