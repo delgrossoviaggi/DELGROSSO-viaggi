@@ -14,12 +14,50 @@ const date=v=>{const d=new Date(`${clean(v).slice(0,10)}T00:00:00`);return Numbe
 async function blob64(blob){const buf=await blob.arrayBuffer();let out='',bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i+=0x8000)out+=String.fromCharCode(...bytes.subarray(i,Math.min(i+0x8000,bytes.length)));return btoa(out)}
 async function call(url,body){const r=await fetch(url,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.error||`Operazione non riuscita (${r.status})`);return d}
 
+function downloadBookingPdf(blob,booking,number='prenotazione'){
+  try{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`Conferma_Prenotazione_${code(booking)||number}.pdf`;
+    a.rel='noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    return true;
+  }catch(err){
+    console.error('Download conferma PDF non riuscito:',err);
+    return false;
+  }
+}
+
 export async function issueBookingDocuments(booking,trip={},options={}){
   if(!booking?.id) throw new Error('ID prenotazione mancante.');
+
+  // 1) Generiamo sempre il PDF localmente.
+  // 2) Lo rendiamo immediatamente disponibile all'operatore.
+  // 3) Solo dopo lo archiviamo su Supabase e proviamo l'invio email.
+  // In questo modo un eventuale problema SMTP/Edge Function non fa sparire il PDF.
   const built=await buildBookingConfirmation(booking,trip,{});
   const pdfBase64=await blob64(built);
-  const result=await call(BOOKING_FN,{action:'issue',booking:{...booking},trip:{...trip},pdfBase64,pdfFilename:`Conferma_Prenotazione_${code(booking)}.pdf`});
-  return {...result,blob:built,confirmationNumber:result.confirmationNumber};
+  const autoDownload=options.autoDownload!==false;
+  const downloaded=autoDownload?downloadBookingPdf(built,booking):false;
+
+  const result=await call(BOOKING_FN,{
+    action:'issue',
+    booking:{...booking},
+    trip:{...trip},
+    pdfBase64,
+    pdfFilename:`Conferma_Prenotazione_${code(booking)}.pdf`
+  });
+
+  return {
+    ...result,
+    blob:built,
+    downloaded,
+    confirmationNumber:result.confirmationNumber
+  };
 }
 
 export async function getBookingContext(bookingId){return call(BOOKING_FN,{action:'context',bookingId})}
