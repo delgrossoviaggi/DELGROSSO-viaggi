@@ -11,13 +11,13 @@ const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const fmtDate=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?String(v).slice(0,10):d.toLocaleDateString('it-IT')};
 const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v||0));
-const customer=o=>String(o.cliente_nome||o.cliente||[o.nome,o.cognome].filter(Boolean).join(' ')||'Cliente').trim();
+const customer=o=>String(o.cliente||o.cliente_nome||[o.nome,o.cognome].filter(Boolean).join(' ')||'Cliente').trim();
 const trip=o=>String(o.viaggio||o.viaggio_codice||o.destinazione||o.titolo||'—').trim();
 
-async function rest(table,filter){
-  const url=`${SUPABASE_URL}/rest/v1/${table}?select=*&${filter}&order=created_at.desc&limit=2000`;
+async function restArchive(){
+  const url=`${SUPABASE_URL}/rest/v1/archivio_documenti?select=*&order=data_documento.desc.nullslast&limit=2000`;
   const r=await fetch(url,{headers}); const d=await r.json().catch(()=>[]);
-  if(!r.ok) throw new Error(d?.message||`Errore lettura ${table} (${r.status})`); return d;
+  if(!r.ok) throw new Error(d?.message||`Errore lettura archivio Supabase (${r.status})`); return d;
 }
 async function signedBooking(path){
   const r=await fetch(BOOKING_FN,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({action:'signed_url',path})});
@@ -27,11 +27,23 @@ async function downloadBooking(path,number){
   const url=await signedBooking(path); const r=await fetch(url); if(!r.ok)throw new Error('Download conferma non riuscito.');
   const blob=await r.blob(); const object=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=object; a.download=`Conferma_Prenotazione_${number||'viaggio'}.pdf`; document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(object),1000);
 }
-function normalize(payments,bookings){
-  const out=[];
-  for(const p of payments){out.push({kind:String(p.tipo||'Acconto').toLowerCase()==='saldo'?'saldo':'acconto',id:p.id,number:p.receipt_number||'—',customer:customer(p),trip:trip(p),date:p.data_pagamento||p.receipt_generated_at||p.created_at,amount:p.importo,path:p.receipt_storage_path,emailSent:!!p.receipt_email_sent,raw:p});}
-  for(const b of bookings){out.push({kind:'booking',id:b.id,number:b.confirmation_number||b.codice||String(b.id||'').slice(0,8).toUpperCase(),customer:customer(b),trip:trip(b),date:b.confirmation_generated_at||b.created_at,amount:null,path:b.confirmation_storage_path,emailSent:!!b.confirmation_email_sent,raw:b});}
-  return out.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+function normalize(documents){
+  return (documents||[]).map(d=>{
+    const type=String(d.tipo_documento||'').toLowerCase();
+    const kind=type==='prenotazione'?'booking':type==='saldo'?'saldo':'acconto';
+    return {
+      kind,
+      id:d.documento_id,
+      number:d.numero_documento||'—',
+      customer:customer(d),
+      trip:trip(d),
+      date:d.data_documento,
+      amount:d.importo,
+      path:d.storage_path,
+      emailSent:!!d.email_inviata,
+      raw:d
+    };
+  }).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
 }
 function stats(){
   $('#stat-total').textContent=rows.length; $('#stat-booking').textContent=rows.filter(x=>x.kind==='booking').length; $('#stat-acconto').textContent=rows.filter(x=>x.kind==='acconto').length; $('#stat-saldo').textContent=rows.filter(x=>x.kind==='saldo').length;
@@ -64,11 +76,8 @@ function syncState(ok=true){
 async function load(){
   const error=$('#archive-error'); error?.classList.remove('is-visible');
   try{
-    const [payments,bookings]=await Promise.all([
-      rest('pagamenti','receipt_storage_path=not.is.null'),
-      rest('prenotazioni','confirmation_storage_path=not.is.null')
-    ]);
-    rows=normalize(payments,bookings); stats(); render(); syncState(true);
+    const documents=await restArchive();
+    rows=normalize(documents); stats(); render(); syncState(true);
   }catch(e){console.error(e); syncState(false); if(error){error.textContent=`Impossibile caricare l'archivio: ${e.message||e}`;error.classList.add('is-visible');} $('#archive-body').innerHTML=`<tr><td colspan="8"><div class="archive-empty">Archivio non disponibile.</div></td></tr>`;}
 }
 async function act(action,id,button){
