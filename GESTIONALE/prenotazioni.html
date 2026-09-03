@@ -45,12 +45,20 @@
   <link rel="stylesheet" href="./assets/dg-receipts-v24.css">
   <link rel="stylesheet" href="./assets/dg-documents-v25.css">
   <link rel="stylesheet" href="./assets/dg-shell-v41.css">
+  <link rel="stylesheet" href="./assets/prenotazioni-responsive-v44.css">
 </head>
 <body>
   
-<h1>Gestione Prenotazioni</h1>
- 
-<div class="toolbar">
+<section class="prenotazioni-hero">
+  <div>
+    <span class="prenotazioni-eyebrow">GESTIONALE DELGROSSO</span>
+    <h1>Prenotazioni</h1>
+    <p>Gestisci clienti, viaggi, pagamenti e presenza in modo semplice e ordinato.</p>
+  </div>
+  <div class="prenotazioni-hero-icon">📋</div>
+</section>
+
+<div class="toolbar prenotazioni-toolbar">
 <label class="sr-only" for="searchBooking">Cerca prenotazione</label>
 <input id="searchBooking" placeholder="Cerca cliente, viaggio..." aria-label="Cerca prenotazione">
 <button id="btnGoTrips" type="button">Vai al modulo Viaggi</button>
@@ -58,6 +66,7 @@
 <button id="btnNew">+ Nuova Prenotazione</button>
 </div>
 
+<div class="booking-table-wrap" aria-label="Elenco prenotazioni">
 <table id="bookingTable">
 <thead>
 <tr>
@@ -76,10 +85,11 @@
 </thead>
 <tbody></tbody>
 </table>
+</div>
 
-<div class="grid">
+<div class="grid prenotazioni-stats-grid">
 <div class="card">
-<h2>Statistiche</h2>
+<div class="stats-title"><span>Riepilogo operativo</span><small>Situazione prenotazioni</small></div>
 <p>Prenotazioni Totali: <span id="tot">0</span></p>
 <p>Confermate: <span id="conf">0</span></p>
 <p>In Attesa: <span id="wait">0</span></p>
