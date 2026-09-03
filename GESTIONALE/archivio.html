@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archivio Documenti - Del Grosso Gestionale</title>
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+  <link rel="stylesheet" href="./assets/archivio-v29.css">
+</head>
+<body>
+  <div class="archive-shell">
+    <section class="archive-hero">
+      <div><h1>🗂️ Archivio documenti</h1><p>Tutte le conferme di prenotazione e le ricevute di acconto/saldo generate dal Gestionale, sempre disponibili in PDF.</p></div>
+      <button class="archive-btn primary" id="archive-refresh" type="button">↻ Aggiorna archivio</button>
+    </section>
+    <div id="archive-error" class="archive-error"></div>
+    <section class="archive-stats">
+      <div class="archive-stat"><span>Documenti totali</span><strong id="stat-total">—</strong></div>
+      <div class="archive-stat"><span>Conferme viaggio</span><strong id="stat-booking">—</strong></div>
+      <div class="archive-stat"><span>Ricevute acconto</span><strong id="stat-acconto">—</strong></div>
+      <div class="archive-stat"><span>Ricevute saldo</span><strong id="stat-saldo">—</strong></div>
+    </section>
+    <section class="archive-panel">
+      <div class="archive-toolbar">
+        <label class="archive-search">🔎 <input id="archive-search" type="search" placeholder="Cerca cliente, viaggio o numero documento…" autocomplete="off"></label>
+        <div class="archive-filters">
+          <button class="archive-filter is-active" data-filter="all">Tutti</button>
+          <button class="archive-filter" data-filter="booking">Prenotazioni</button>
+          <button class="archive-filter" data-filter="acconto">Acconti</button>
+          <button class="archive-filter" data-filter="saldo">Saldi</button>
+        </div>
+      </div>
+      <div class="archive-table-wrap">
+        <table class="archive-table">
+          <thead><tr><th>Documento</th><th>Numero</th><th>Cliente</th><th>Viaggio</th><th>Data</th><th>Importo</th><th>Email</th><th>Azioni</th></tr></thead>
+          <tbody id="archive-body"><tr><td colspan="8"><div class="archive-loader">Caricamento archivio…</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="./assets/archivio-v29.js"></script>
+</body>
+</html>

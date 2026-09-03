@@ -1,3 +1,1 @@
-GESTIONALE V28 – DOCUMENTI COMPLETI + EMAIL PRENOTAZIONE OPZIONALE
-
-La email del cliente nella prenotazione è facoltativa. Il telefono rimane obbligatorio. Se viene inserita una email, viene validata; se lasciata vuota, la prenotazione può essere completata e il cliente può essere contattato tramite telefono/WhatsApp.
+V29 - ARCHIVIO DOCUMENTI: conferme prenotazione + ricevute acconto/saldo, PDF, download e reinvio email.
