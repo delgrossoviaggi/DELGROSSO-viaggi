@@ -1,0 +1,77 @@
+/* =========================================================
+   DELGROSSO GESTIONALE V35
+   Professional polish layer - responsive / touch / accessibility
+   ========================================================= */
+:root{
+  --dg-v35-max: 1480px;
+  --dg-v35-gap: clamp(12px,1.6vw,22px);
+  --dg-v35-radius: 18px;
+  --dg-v35-focus: #2563eb;
+}
+html{width:100%;min-width:0;overflow-x:hidden}
+body{width:100%;min-width:0;overflow-x:hidden;-webkit-text-size-adjust:100%;text-rendering:optimizeLegibility}
+button,a,input,select,textarea{font:inherit}
+button,a{ -webkit-tap-highlight-color:transparent }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid color-mix(in srgb,var(--dg-v35-focus) 38%,transparent);outline-offset:2px}
+
+body.dg-has-brand-shell .dg-page-view,
+body:has(.app-shell) .app-shell{max-width:var(--dg-v35-max)!important}
+
+/* Unified shell: clear, tactile menu control on every authenticated page */
+.dg-brand-shell__menu-toggle{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-width:52px!important;
+  min-height:48px!important;
+  padding:0 13px!important;
+  cursor:pointer!important;
+  touch-action:manipulation!important;
+  user-select:none!important;
+}
+.dg-brand-shell__menu-label{display:inline-flex;align-items:center;font-weight:800;font-size:.82rem;line-height:1}
+.dg-brand-shell__menu-toggle .dg-brand-shell__icon{flex:0 0 auto}
+.dg-brand-shell__nav a{touch-action:manipulation!important;user-select:none!important}
+.dg-brand-shell__sidebar{overscroll-behavior:contain!important}
+
+/* Surface polish */
+body.dg-has-brand-shell .card,
+body.dg-has-brand-shell .panel,
+body.dg-has-brand-shell .box,
+body.dg-has-brand-shell .content,
+body.dg-has-brand-shell .archive-panel,
+body.dg-has-brand-shell .archive-stat,
+body.dg-has-brand-shell .archive-hero{
+  min-width:0;
+}
+body.dg-has-brand-shell table{border-collapse:separate;border-spacing:0}
+body.dg-has-brand-shell th{position:sticky;top:0;z-index:1}
+body.dg-has-brand-shell .toolbar input,
+body.dg-has-brand-shell .toolbar select,
+body.dg-has-brand-shell .filters input,
+body.dg-has-brand-shell .filters select{min-height:44px}
+
+/* Prevent horizontal layout failures from long client names, emails and trip titles */
+body.dg-has-brand-shell td,
+body.dg-has-brand-shell th,
+body.dg-has-brand-shell .card,
+body.dg-has-brand-shell .panel,
+body.dg-has-brand-shell .box,
+body.dg-has-brand-shell .archive-stat{overflow-wrap:anywhere;word-break:break-word}
+
+@media (max-width:700px){
+  .dg-brand-shell__menu-label{display:none}
+  .dg-brand-shell__menu-toggle{width:48px!important;min-width:48px!important;padding:0!important}
+  body.dg-has-brand-shell .dg-brand-shell__header{min-height:58px!important}
+  body.dg-has-brand-shell .dg-brand-shell__header-actions{padding-left:58px!important}
+  body.dg-has-brand-shell .dg-brand-shell__meta>div:not(.avatar){max-width:110px;overflow:hidden}
+  body.dg-has-brand-shell .dg-brand-shell__meta strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+}
+@media (max-width:390px){
+  body.dg-has-brand-shell .dg-brand-shell__meta{display:none!important}
+  body.dg-has-brand-shell .dg-brand-shell__header-actions{padding-left:54px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .dg-brand-shell__sidebar,.dg-brand-shell__backdrop{transition:none!important}
+}
