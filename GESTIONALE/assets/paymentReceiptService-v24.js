@@ -1,4 +1,4 @@
-import { n as JsPDF } from './jspdf.es.min-DT2zzJUL.js';
+import { t as JsPDF } from './jspdf.es.min-DT2zzJUL.js';
 
 const SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
