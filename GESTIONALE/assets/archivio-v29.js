@@ -1,4 +1,3 @@
-import './brandShell-CIWNUkWr.js';
 import { openStoredReceipt, downloadStoredReceipt } from './paymentReceiptService-v24.js';
 import { openBookingConfirmation, resendBookingEmail, resendPaymentEmail } from './bookingDocumentsService-v25.js';
 
@@ -15,9 +14,22 @@ const customer=o=>String(o.cliente||o.cliente_nome||[o.nome,o.cognome].filter(Bo
 const trip=o=>String(o.viaggio||o.viaggio_codice||o.destinazione||o.titolo||'—').trim();
 
 async function restArchive(){
-  const url=`${SUPABASE_URL}/rest/v1/archivio_documenti?select=*&order=data_documento.desc.nullslast&limit=2000`;
-  const r=await fetch(url,{headers}); const d=await r.json().catch(()=>[]);
-  if(!r.ok) throw new Error(d?.message||`Errore lettura archivio Supabase (${r.status})`); return d;
+  const viewUrl=`${SUPABASE_URL}/rest/v1/archivio_documenti?select=*&order=data_documento.desc.nullslast&limit=2000`;
+  const r=await fetch(viewUrl,{headers}); const d=await r.json().catch(()=>[]);
+  if(r.ok) return Array.isArray(d)?d:[];
+  console.warn('[Archivio] Vista archivio_documenti non disponibile:',r.status,d);
+  // Fallback: same Supabase data source, no duplicate DB/table.
+  const [pRes,gRes]=await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/prenotazioni?select=*&confirmation_storage_path=not.is.null&order=confirmation_generated_at.desc&limit=2000`,{headers}),
+    fetch(`${SUPABASE_URL}/rest/v1/pagamenti?select=*&receipt_storage_path=not.is.null&order=receipt_generated_at.desc&limit=2000`,{headers})
+  ]);
+  const p=await pRes.json().catch(()=>[]), g=await gRes.json().catch(()=>[]);
+  if(!pRes.ok||!gRes.ok) throw new Error(d?.message||`Errore lettura Archivio Supabase (${r.status})`);
+  const trips=await fetch(`${SUPABASE_URL}/rest/v1/viaggi?select=id,titolo,destinazione&limit=2000`,{headers}).then(x=>x.ok?x.json():[]).catch(()=>[]);
+  const tripMap=new Map((Array.isArray(trips)?trips:[]).map(x=>[String(x.id),x]));
+  const bookingDocs=(Array.isArray(p)?p:[]).map(x=>({tipo_documento:'prenotazione',documento_id:x.id,numero_documento:x.confirmation_number,prenotazione_id:x.id,pagamento_id:null,viaggio_id:x.viaggio_id,cliente:x.cliente_nome||x.cliente,viaggio:tripMap.get(String(x.viaggio_id))?.titolo||x.viaggio_codice||'—',email:x.email,telefono:x.telefono,data_documento:x.confirmation_generated_at,importo:x.totale,storage_path:x.confirmation_storage_path,email_inviata:x.confirmation_email_sent,email_inviata_at:x.confirmation_email_sent_at,email_errore:x.confirmation_email_error,updated_at:x.updated_at}));
+  const paymentDocs=(Array.isArray(g)?g:[]).map(x=>({tipo_documento:String(x.tipo||'').toLowerCase()==='saldo'?'saldo':'acconto',documento_id:x.id,numero_documento:x.receipt_number,prenotazione_id:x.prenotazione_id,pagamento_id:x.id,cliente:x.cliente,viaggio:tripMap.get(String(x.viaggio_id))?.titolo||x.viaggio||'—',email:null,telefono:null,data_documento:x.receipt_generated_at,importo:x.importo,storage_path:x.receipt_storage_path,email_inviata:x.receipt_email_sent,email_inviata_at:x.receipt_email_sent_at,email_errore:x.receipt_email_error,updated_at:x.updated_at}));
+  return [...bookingDocs,...paymentDocs].sort((a,b)=>new Date(b.data_documento||0)-new Date(a.data_documento||0));
 }
 async function signedBooking(path){
   const r=await fetch(BOOKING_FN,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({action:'signed_url',path})});
@@ -69,7 +81,7 @@ function syncState(ok=true){
   const box=$('#archive-sync-status')?.parentElement;
   const label=$('#archive-sync-status');
   lastSyncAt=new Date();
-  if(label) label.textContent=ok?`Sincronizzato · ${lastSyncAt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Connessione Supabase da verificare';
+  if(label) label.textContent=ok?`Supabase sincronizzato · ${lastSyncAt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Connessione Supabase da verificare';
   box?.classList.toggle('is-warning',!ok);
 }
 
