@@ -38,8 +38,8 @@ import{a as e,n as t,o as n,t as r}from"./settingsService-BkpKGRnr.js";import{i,
         <a class="dg-brand-shell__dashboard-btn" href="./dashboard.html" aria-label="Dashboard" title="Dashboard">
           <svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12H9v8.25H4.125A1.125 1.125 0 0 1 3 19.125v-6Zm12 7.125V4.875c0-.621.504-1.125 1.125-1.125h3.75C20.496 3.75 21 4.254 21 4.875v14.25c0 .621-.504 1.125-1.125 1.125h-3.75A1.125 1.125 0 0 1 15 19.125Zm-6 0v-12A1.125 1.125 0 0 1 10.125 7.125h3.75C14.496 7.125 15 7.629 15 8.25v12"/></svg>
         </a>
-        <button class="dg-brand-shell__menu-toggle" type="button" aria-label="Apri menu">
-          <svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5"/></svg>
+        <button class="dg-brand-shell__menu-toggle" type="button" aria-label="Apri menu" aria-expanded="false" title="Apri menu">
+          <svg viewBox="0 0 24 24" class="dg-brand-shell__icon" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5"/></svg><span class="dg-brand-shell__menu-label">Menu</span>
         </button>
       </div>
     </header>
