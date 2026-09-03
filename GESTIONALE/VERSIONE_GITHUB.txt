@@ -1,1 +1,4 @@
-V30 — Archivio documenti integrato nel menu/banner e sincronizzato con Supabase (prenotazioni, pagamenti, storage ricevute), aggiornamento automatico e collegamenti al gestionale.
+V32 — UI RESPONSIVE UNIFICATA
+Menu unico responsive per dashboard e pagine interne. Layout adattivo per iOS, Android, tablet e PC.
+CSS globale: assets/dg-responsive-v32.css
+Nessuna modifica alla logica dati/Supabase.
