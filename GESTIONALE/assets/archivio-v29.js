@@ -43,9 +43,15 @@ function normalize(documents){
   return (documents||[]).map(d=>{
     const type=String(d.tipo_documento||'').toLowerCase();
     const kind=type==='prenotazione'?'booking':type==='saldo'?'saldo':'acconto';
+    // Le viste/risposte Supabase possono esporre l'identificativo con nomi diversi.
+    // Usiamo sempre l'ID prenotazione/pagamento reale come fallback, così le azioni
+    // dell'Archivio non inviano mai una richiesta senza bookingId.
+    const id = kind==='booking'
+      ? (d.prenotazione_id || d.documento_id || d.id)
+      : (d.pagamento_id || d.documento_id || d.id);
     return {
       kind,
-      id:d.documento_id,
+      id,
       number:d.numero_documento||'—',
       customer:customer(d),
       trip:trip(d),
@@ -94,6 +100,10 @@ async function load(){
 }
 async function act(action,id,button){
   const row=rows.find(x=>String(x.id)===String(id)); if(!row)return;
+  if((action==='email') && row.kind==='booking' && !row.id){
+    alert('Questa conferma non contiene l’ID della prenotazione. Aggiorna l’Archivio dopo aver sincronizzato la prenotazione.');
+    return;
+  }
   button.disabled=true; const old=button.textContent; button.textContent='Attendi…';
   try{
     if(row.kind==='booking'){
