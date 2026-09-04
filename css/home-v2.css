@@ -26,3 +26,10 @@
 @media(max-width:980px){.nav-tools{display:none}.brand img{width:150px;height:48px}}
 @media(max-width:980px){.nav-tools{display:flex;gap:6px}.nav-cta{display:none}.nav-access{width:40px;height:40px;min-height:40px;padding:0}.nav-access span{display:none}.nav-toggle{display:block;margin-left:2px}.brand{min-width:0}.brand img{width:145px;height:46px}}
 @media(max-width:640px){.brand img{width:122px;height:42px}.nav-access{width:36px;height:36px;min-height:36px}.nav-access svg{width:16px;height:16px}.nav-access b{width:20px;height:20px;font-size:11px}.nav-toggle{font-size:24px}}
+
+/* Accessi rapidi: icone piccole */
+.nav-access{width:36px!important;height:36px!important;min-height:36px!important;padding:0!important;gap:0!important;border-radius:10px!important}
+.nav-access span{display:none!important}
+.nav-access svg{width:16px!important;height:16px!important}
+.nav-access b{width:20px!important;height:20px!important;border-radius:6px!important;font-size:11px!important}
+@media(max-width:640px){.nav-access{width:32px!important;height:32px!important;min-height:32px!important;border-radius:9px!important}.nav-access svg{width:15px!important;height:15px!important}.nav-access b{width:19px!important;height:19px!important;font-size:10px!important}}

@@ -3,13 +3,28 @@ import {
   formatDate,
   formatTime
 } from './delgrosso-api.js';
-import { getViaggiPubblicati } from './bridge.js';
+import { getViaggiPubblicati, getFlottaPubblica } from './bridge.js';
 import { applyRuntimeSettings, loadImpostazioni } from '../services/settingsService.js';
 import { buildPublicBookingUrl } from '../utils/appRoutes.js';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x700/0f172a/ffffff?text=Del+Grosso+Viaggi';
 const REQUEST_TIMEOUT_MS = 15000;
 const LAST_SEATS_THRESHOLD = 5;
+const HOME_FALLBACK = 'assets/images/logo-sidebar.png';
+
+async function syncHomeVisual() {
+  try {
+    const result = await getFlottaPubblica();
+    const fleet = (result.data || []).filter((item) => item?.attivo !== false);
+    const image = fleet.find((item) => String(item?.immagine || '').trim())?.immagine;
+    const target = document.querySelector('.hero-visual__image');
+    if (!target || !image) return;
+    target.innerHTML = `<img src="${escapeHtml(image)}" alt="Autobus DELGROSSO Viaggi" loading="eager" referrerpolicy="no-referrer">`;
+  } catch (error) {
+    console.warn('Immagine hero Home/Supabase:', error);
+  }
+}
+
 
 const ui = {
   searchInput: document.getElementById('searchInput'),
@@ -236,6 +251,7 @@ async function init() {
     applyRuntimeSettings(settingsResponse.data);
   }
   initAnimations();
+  syncHomeVisual();
   bindEvents();
   await loadTrips();
 }

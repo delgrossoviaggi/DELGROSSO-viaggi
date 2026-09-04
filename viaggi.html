@@ -385,17 +385,17 @@
       }
     }
   </style>
+
+<style>
+.brand-lockup--home{display:flex!important;align-items:center;text-decoration:none}.brand-lockup--home .brand-lockup__box{width:190px;height:56px;display:flex;align-items:center;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}.brand-lockup--home img{display:block;width:180px;height:auto;max-height:54px;object-fit:contain}.header-actions--compact{display:flex!important;align-items:center;gap:8px}.header-access-icon{width:36px;height:36px;min-width:36px;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:rgba(7,9,11,.45);color:#fff;display:grid;place-items:center;text-decoration:none;font-weight:900;font-size:13px;line-height:1;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s ease,border-color .2s ease,background .2s ease}.header-access-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.header-access-icon--g{background:#f36f21;border-color:#f36f21;color:#fff}.header-access-icon:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.12)}.header-access-icon--g:hover{background:#ff7d2c;border-color:#ff7d2c}@media(max-width:900px){.brand-lockup--home .brand-lockup__box{width:145px;height:48px}.brand-lockup--home img{width:138px;max-height:45px}.header-actions--compact .btn-primary{display:none}.header-access-icon{width:34px;height:34px;min-width:34px}}@media(max-width:560px){.brand-lockup--home .brand-lockup__box{width:125px;height:44px}.brand-lockup--home img{width:120px;max-height:40px}.header-actions--compact{gap:6px}.header-access-icon{width:32px;height:32px;min-width:32px;border-radius:9px}.header-access-icon svg{width:15px;height:15px}}
+</style>
 </head>
 <body>
   <div class="page-shell">
     <header class="site-header">
       <div class="site-header__inner">
-        <a href="index.html" class="brand-lockup" aria-label="Del Grosso Viaggi & Limousine Bus">
-          <span class="brand-lockup__box"><img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
-          <span class="brand-lockup__text">
-            <span class="brand-lockup__title">Del Grosso</span>
-            <span class="brand-lockup__sub">Viaggi &amp; Limousine Bus</span>
-          </span>
+        <a href="index.html" class="brand-lockup brand-lockup--home" aria-label="Torna alla Home">
+          <span class="brand-lockup__box"><img data-runtime-logo src="./assets/images/logo-sidebar.png" alt="DELGROSSO Viaggi &amp; Limousine Bus"></span>
         </a>
 
         <nav class="site-nav" aria-label="Navigazione principale">
@@ -406,7 +406,11 @@
           <a href="preventivo.html">Richiedi preventivo</a>
         </nav>
 
-        <div class="header-actions">
+        <div class="header-actions header-actions--compact">
+          <a class="header-access-icon" href="admin.html" title="Admin Sito" aria-label="Admin Sito">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+          </a>
+          <a class="header-access-icon header-access-icon--g" href="GESTIONALE/login.html" title="Accesso Gestionale" aria-label="Accesso Gestionale">G</a>
           <a class="btn-primary" href="preventivo.html"><i class="fas fa-file-signature"></i> Richiedi Preventivo</a>
         </div>
 
