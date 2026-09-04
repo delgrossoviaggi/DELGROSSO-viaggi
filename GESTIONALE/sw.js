@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v45-premium';
+const CACHE = 'dg-gestionale-v46-professional-20260904';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
@@ -23,8 +23,8 @@ self.addEventListener('install', event => {
     new URL('assets/icon-512.png', SCOPE_URL).href,
     new URL('assets/apple-touch-icon.png', SCOPE_URL).href,
     new URL('assets/logo-sidebar.png', SCOPE_URL).href,
-    new URL('assets/dg-v45-premium.css', SCOPE_URL).href,
-    new URL('assets/dg-pwa-v45.js', SCOPE_URL).href
+    new URL('assets/dg-v46-professional.css', SCOPE_URL).href,
+    new URL('assets/dg-v46-ux.js', SCOPE_URL).href
   ]).catch(() => {})).then(() => self.skipWaiting()));
 });
 
