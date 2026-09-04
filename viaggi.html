@@ -389,44 +389,10 @@
 <style>
 .brand-lockup--home{display:flex!important;align-items:center;text-decoration:none}.brand-lockup--home .brand-lockup__box{width:190px;height:56px;display:flex;align-items:center;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}.brand-lockup--home img{display:block;width:180px;height:auto;max-height:54px;object-fit:contain}.header-actions--compact{display:flex!important;align-items:center;gap:8px}.header-access-icon{width:36px;height:36px;min-width:36px;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:rgba(7,9,11,.45);color:#fff;display:grid;place-items:center;text-decoration:none;font-weight:900;font-size:13px;line-height:1;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s ease,border-color .2s ease,background .2s ease}.header-access-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.header-access-icon--g{background:#f36f21;border-color:#f36f21;color:#fff}.header-access-icon:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.12)}.header-access-icon--g:hover{background:#ff7d2c;border-color:#ff7d2c}@media(max-width:900px){.brand-lockup--home .brand-lockup__box{width:145px;height:48px}.brand-lockup--home img{width:138px;max-height:45px}.header-actions--compact .btn-primary{display:none}.header-access-icon{width:34px;height:34px;min-width:34px}}@media(max-width:560px){.brand-lockup--home .brand-lockup__box{width:125px;height:44px}.brand-lockup--home img{width:120px;max-height:40px}.header-actions--compact{gap:6px}.header-access-icon{width:32px;height:32px;min-width:32px;border-radius:9px}.header-access-icon svg{width:15px;height:15px}}
 </style>
-</head>
+<link rel="stylesheet" href="css/public-pages-v3.css"><style>.site-header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:1000!important;background:rgba(7,9,11,.86)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;border-bottom:1px solid rgba(255,255,255,.08)!important}.site-nav{height:76px!important;display:flex!important;align-items:center!important}.site-header .brand img{width:175px!important;height:54px!important;object-fit:contain!important}.site-header .menu-links{display:flex!important;flex:1!important;justify-content:center!important}.site-header .header-actions{display:flex!important}.site-header .mobile-banner{display:none}.site-header .menu-toggle{display:none}@media(max-width:980px){.site-header .menu-links{display:none!important}.site-header .header-cta{display:none!important}.site-header .menu-toggle{display:block!important}.site-header .mobile-banner{display:none!important}.menu-open .site-header .mobile-banner{display:flex!important}}@media(max-width:640px){.site-nav{height:68px!important}.site-header .brand img{width:128px!important;height:43px!important}.site-header .access{width:31px!important;height:31px!important}}</style></head>
 <body>
   <div class="page-shell">
-    <header class="site-header">
-      <div class="site-header__inner">
-        <a href="index.html" class="brand-lockup brand-lockup--home" aria-label="Torna alla Home">
-          <span class="brand-lockup__box"><img data-runtime-logo src="./assets/images/logo-sidebar.png" alt="DELGROSSO Viaggi &amp; Limousine Bus"></span>
-        </a>
-
-        <nav class="site-nav" aria-label="Navigazione principale">
-          <a href="index.html">Home</a>
-          <a href="viaggi.html" class="is-active">Partenze</a>
-          <a href="flotta.html">Flotta</a>
-          <a href="contatti.html">Contatti</a>
-          <a href="preventivo.html">Richiedi preventivo</a>
-        </nav>
-
-        <div class="header-actions header-actions--compact">
-          <a class="header-access-icon" href="admin.html" title="Admin Sito" aria-label="Admin Sito">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
-          </a>
-          <a class="header-access-icon header-access-icon--g" href="GESTIONALE/login.html" title="Accesso Gestionale" aria-label="Accesso Gestionale">G</a>
-          <a class="btn-primary" href="preventivo.html"><i class="fas fa-file-signature"></i> Richiedi Preventivo</a>
-        </div>
-
-        <button id="mobileToggle" class="mobile-toggle" type="button" aria-label="Apri menu">
-          <i class="fas fa-bars"></i>
-        </button>
-      </div>
-
-      <nav id="mobileStrip" class="mobile-strip hidden" aria-label="Navigazione mobile">
-        <a href="index.html">Home</a>
-        <a href="viaggi.html" class="is-active">Partenze</a>
-        <a href="flotta.html">Flotta</a>
-        <a href="contatti.html">Contatti</a>
-        <a href="preventivo.html">Richiedi preventivo</a>
-      </nav>
-    </header>
+    <header class="site-header"><div class="container site-nav"><a class="brand" href="index.html"><img src="assets/images/logo-sidebar.png" alt="DELGROSSO Viaggi & Limousine Bus"></a><nav class="menu-links"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">Flotta</a><a href="partyontheroad.html">Party</a><a href="contatti.html">Contatti</a><a href="preventivo.html">Preventivi</a></nav><div class="header-actions"><a class="access" href="admin.html" title="Admin Sito" aria-label="Admin Sito"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></a><a class="access" href="GESTIONALE/login.html" title="Gestionale" aria-label="Gestionale"><b>G</b></a><a class="header-cta" href="preventivo.html">Richiedi preventivo</a><button class="menu-toggle" type="button" aria-label="Apri menu" onclick="document.body.classList.toggle('menu-open')">☰</button></div></div><nav class="mobile-banner"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">Flotta</a><a href="partyontheroad.html">Party</a><a href="contatti.html">Contatti</a><a href="preventivo.html">Preventivi</a></nav></header>
 
     <main>
       <section class="hero-section">
