@@ -1,6 +1,7 @@
 import {
   formatCurrency,
-  formatTime
+  formatTime,
+  getSupabase
 } from './delgrosso-api.js';
 import {
   aggiornaOccupazioneViaggio,
@@ -19,15 +20,11 @@ import {
   downloadReceipt,
   generateBookingReceipt
 } from '../services/pdfReceiptService.js';
-import {
-  openWhatsAppDispatch,
-  prepareWhatsAppDispatch
-} from '../services/whatsAppService.js';
 import { applyRuntimeSettings, buildCompanyInfo, getCachedSettingsSync, loadImpostazioni } from '../services/settingsService.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[+0-9()\s-]{7,20}$/;
-const DEFAULT_SUCCESS_MESSAGE = 'La tua prenotazione è stata registrata con successo. La ricevuta PDF è stata scaricata automaticamente.';
+const DEFAULT_SUCCESS_MESSAGE = 'La tua prenotazione è stata registrata con successo. La conferma PDF è stata archiviata e scaricata automaticamente.';
 const PDF_WARNING_MESSAGE = 'La prenotazione è stata salvata, ma non è stato possibile generare automaticamente la ricevuta PDF.';
 let COMPANY_INFO = buildCompanyInfo(getCachedSettingsSync());
 applyRuntimeSettings(getCachedSettingsSync());
@@ -369,6 +366,40 @@ async function createPublicBooking() {
   }
 }
 
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = String(reader.result || '');
+      const commaIndex = result.indexOf(',');
+      resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error || new Error('Conversione PDF non riuscita.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function archiveAndEmailBookingConfirmation(booking, pdfBlob) {
+  const receiptBooking = {
+    ...booking,
+    nome: normalizeText(ui.passengerName.value, ''),
+    cognome: normalizeText(ui.passengerSurname.value, '')
+  };
+  const pdfBase64 = await blobToBase64(pdfBlob);
+  const filename = `Conferma_Prenotazione_${booking.codice || booking.id || 'DELGROSSO'}.pdf`;
+  const { data, error } = await getSupabase().functions.invoke('send-booking-confirmation', {
+    body: {
+      booking: receiptBooking,
+      trip: state.trip,
+      pdfBase64,
+      pdfFilename: filename
+    }
+  });
+  if (error) throw error;
+  if (!data?.success) throw new Error(data?.error || 'Archiviazione conferma non riuscita.');
+  return data;
+}
+
 async function generateReceiptForBooking(booking) {
   const receiptBooking = {
     ...booking,
@@ -376,28 +407,19 @@ async function generateReceiptForBooking(booking) {
     cognome: normalizeText(ui.passengerSurname.value, '')
   };
   const pdfBlob = await generateBookingReceipt(receiptBooking, state.trip, COMPANY_INFO);
-  downloadReceipt(pdfBlob, booking.id || booking.codice || 'prenotazione');
+  const confirmation = await archiveAndEmailBookingConfirmation(booking, pdfBlob);
+  downloadReceipt(pdfBlob, confirmation?.confirmationNumber || booking.id || booking.codice || 'prenotazione');
+  return confirmation;
 }
 
-function openPublicWhatsAppConfirmation(booking) {
-  const dispatch = prepareWhatsAppDispatch({
-    booking: {
-      ...booking,
-      nome: normalizeText(ui.passengerName.value, ''),
-      cognome: normalizeText(ui.passengerSurname.value, '')
-    },
-    trip: state.trip,
-    recipientPhone: COMPANY_INFO.whatsapp,
-    template: 'support-booking-notification',
-    messageTemplate: COMPANY_INFO.whatsappTemplateSupport
-  });
-
-  if (ui.successWhatsappLink) {
-    ui.successWhatsappLink.href = dispatch.waMeUrl;
-  }
-
-  return openWhatsAppDispatch(dispatch);
+function prepareSupportWhatsAppLink(booking) {
+  const phone = normalizeText(COMPANY_INFO.whatsapp);
+  if (!phone || !ui.successWhatsappLink) return null;
+  const digits = phone.replace(/[^\d+]/g, '').replace(/^\+/, '');
+  ui.successWhatsappLink.href = `https://wa.me/${digits}`;
+  return ui.successWhatsappLink.href;
 }
+
 
 async function handleSubmit(event) {
   event.preventDefault();
@@ -418,22 +440,23 @@ async function handleSubmit(event) {
     let feedbackTone = 'success';
 
     try {
-      await generateReceiptForBooking(booking);
+      const confirmation = await generateReceiptForBooking(booking);
+      if (normalizeText(booking.email) && confirmation?.emailSent === false) {
+        successMessage = `Prenotazione registrata e PDF archiviato, ma l'email non è stata inviata: ${confirmation?.emailError || confirmation?.error || 'errore SMTP.'}`;
+        feedbackTone = 'error';
+      } else if (!normalizeText(booking.email)) {
+        successMessage = 'Prenotazione registrata con successo. La conferma PDF è stata archiviata e scaricata; nessuna email inviata perché non è stato indicato un indirizzo email.';
+      }
     } catch (receiptError) {
-      console.error('Generazione ricevuta non riuscita', receiptError);
-      successMessage = PDF_WARNING_MESSAGE;
+      console.error('Generazione/archiviazione conferma non riuscita', receiptError);
+      successMessage = `${PDF_WARNING_MESSAGE} ${receiptError?.message || ''}`.trim();
       feedbackTone = 'error';
     }
 
-    let whatsappResult = null;
     try {
-      whatsappResult = openPublicWhatsAppConfirmation(booking);
-      if (!whatsappResult.opened) {
-        successMessage = `${successMessage} Se WhatsApp non si apre automaticamente, utilizza il pulsante dedicato qui sotto.`;
-      }
-    } catch (whatsAppError) {
-      console.error('Apertura WhatsApp non riuscita', whatsAppError);
-      successMessage = `${successMessage} Non e stato possibile preparare automaticamente il messaggio WhatsApp.`;
+      prepareSupportWhatsAppLink(booking);
+    } catch (supportWhatsAppError) {
+      console.error('Preparazione contatto WhatsApp non riuscita', supportWhatsAppError);
     }
 
     ui.successMessage.textContent = successMessage;

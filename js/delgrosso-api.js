@@ -40,6 +40,13 @@ const TABLES = {
     'checkin_note',
     'note',
     'posti_selezionati',
+    'confirmation_token',
+    'notification_channel',
+    'notification_status',
+    'notification_message_sid',
+    'notification_sent_at',
+    'notification_attempted_at',
+    'notification_error',
     'created_at',
     'updated_at'
   ],
@@ -655,6 +662,30 @@ export async function updateViaggio(id, payload) {
 
 export async function deleteViaggio(id) {
   return deleteRow('viaggi', id);
+}
+
+export async function getPrenotazioniPostiViaggio(tripId) {
+  const id = String(tripId ?? '').trim();
+  if (!id) return failure(new Error('Identificativo viaggio non valido.'));
+  try {
+    const select = 'viaggio_id,tratta_id,posti_selezionati,posti';
+    const [byViaggio, byTratta] = await Promise.all([
+      getSupabase().from('prenotazioni').select(select).eq('viaggio_id', id),
+      getSupabase().from('prenotazioni').select(select).eq('tratta_id', id)
+    ]);
+    if (byViaggio.error) return failure(byViaggio.error);
+    if (byTratta.error) return failure(byTratta.error);
+    const seen = new Set();
+    const rows = [...(byViaggio.data || []), ...(byTratta.data || [])].filter((row) => {
+      const key = `${row.viaggio_id || ''}|${row.tratta_id || ''}|${row.posti_selezionati || ''}|${row.posti || ''}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return success(rows);
+  } catch (error) {
+    return failure(error);
+  }
 }
 
 export async function getPrenotazioni() {

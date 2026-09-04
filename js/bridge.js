@@ -1,4 +1,5 @@
 import { tripService } from '../services/tripService.js';
+import { getPrenotazioniPostiViaggio } from './delgrosso-api.js';
 import { bookingService } from '../services/bookingService.js';
 import { fleetService } from '../services/fleetService.js';
 import { quoteService } from '../services/quoteService.js';
@@ -37,17 +38,7 @@ export async function creaPrenotazione(data) {
 }
 
 export async function getPrenotazioniViaggio(tripId) {
-  const result = await bookingService.getAll();
-  if (result.success === false) return result;
-
-  const normalizedTripId = String(tripId ?? '').trim();
-  const rows = (result.data || []).filter((booking) => {
-    const viaggioId = String(booking?.viaggio_id ?? '').trim();
-    const trattaId = String(booking?.tratta_id ?? '').trim();
-    return viaggioId === normalizedTripId || trattaId === normalizedTripId;
-  });
-
-  return { ...result, data: rows };
+  return getPrenotazioniPostiViaggio(tripId);
 }
 
 export async function getFlottaPubblica() {
