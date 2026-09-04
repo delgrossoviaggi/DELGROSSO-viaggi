@@ -1,4 +1,742 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Sito | DELGROSSO Viaggi</title><link rel="icon" href="favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"><style>
-:root{--o:#f36f21;--ink:#07090b;--panel:#11161c;--line:#27303a;--muted:#98a2ad;--white:#fff;--blue:#1599d8;--green:#25d366}*{box-sizing:border-box}body{margin:0;background:#0a0d11;color:#fff;font-family:Inter,system-ui,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1400px,calc(100% - 32px));margin:auto}.top{height:74px;background:rgba(7,9,11,.94);border-bottom:1px solid var(--line);display:flex;align-items:center}.top .wrap{display:flex;align-items:center;gap:20px}.logo{width:160px;height:48px;object-fit:contain}.top-title{flex:1}.top-title strong{display:block;font-size:13px;letter-spacing:.15em;text-transform:uppercase}.top-title span{font-size:10px;color:var(--muted)}.top a,.top button{border:1px solid var(--line);background:#121820;color:#fff;border-radius:9px;padding:10px 13px;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.top .orange{background:var(--o);border-color:var(--o)}main{padding:35px 0 70px}.auth-logo{display:block;width:min(280px,75%);height:90px;object-fit:contain;margin:0 auto 22px}.auth{max-width:480px;margin:60px auto;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:34px;box-shadow:0 30px 90px rgba(0,0,0,.35)}.auth h1{font-size:34px;margin:0 0 8px;text-transform:uppercase}.auth p{color:var(--muted);font-size:12px;line-height:1.7}.field{margin:15px 0}.field label{display:block;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#b7c0c9;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#0b1015;color:#fff;outline:none}.field textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:10px;background:var(--o);color:#fff;padding:13px 17px;font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.msg{margin-top:12px;padding:12px;border-radius:10px;background:#171d24;color:#d8e0e7;font-size:11px;line-height:1.5}.hidden{display:none!important}.app{display:grid;grid-template-columns:235px 1fr;gap:20px}.side{background:#0d1217;border:1px solid var(--line);border-radius:18px;padding:14px;height:max-content;position:sticky;top:20px}.side button{width:100%;text-align:left;border:0;background:transparent;color:#b8c0c8;padding:13px 12px;border-radius:9px;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.side button.active,.side button:hover{background:#18212a;color:#fff}.side button.active{box-shadow:inset 3px 0 var(--o)}.content{min-width:0}.hero{background:linear-gradient(110deg,#11171d,#0c1015);border:1px solid var(--line);border-radius:18px;padding:28px;margin-bottom:18px}.hero .k{color:var(--o);font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.hero h2{font-size:34px;line-height:.95;text-transform:uppercase;margin:9px 0}.hero p{color:var(--muted);font-size:12px;line-height:1.7;margin:0}.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.panel h3{margin:0;font-size:17px;text-transform:uppercase}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:#0c1116;border:1px solid var(--line);border-radius:14px;padding:16px}.stat small{color:var(--muted);font-size:8px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.stat strong{display:block;font-size:28px;margin-top:5px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:720px}.table th,.table td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:10px}.table th{color:#89939e;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.actions{display:flex;gap:7px;flex-wrap:wrap}.mini{border:1px solid var(--line);background:#151c23;color:#fff;padding:8px 10px;border-radius:8px;font-size:8px;font-weight:900;text-transform:uppercase}.mini.danger{color:#ff9a9a}.forms{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.upload{border:1px dashed #3b4652;border-radius:14px;padding:18px;background:#0b1015}.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.gallery img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px}.toast{position:fixed;right:18px;bottom:18px;background:#fff;color:#0b1015;padding:13px 16px;border-radius:10px;font-size:10px;font-weight:800;box-shadow:0 20px 50px rgba(0,0,0,.3);z-index:20}@media(max-width:900px){.app{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:6px}.side button{min-width:max-content}.stats{grid-template-columns:1fr 1fr}.forms{grid-template-columns:1fr}.full{grid-column:auto}.gallery{grid-template-columns:1fr 1fr}}@media(max-width:560px){.top-title{display:none}.top .wrap{justify-content:space-between}.stats{grid-template-columns:1fr}.wrap{width:min(100% - 20px,1400px)}main{padding-top:20px}}
-</style></head><body><header class="top"><div class="wrap"><a href="index.html"><img class="logo" src="assets/images/logo-sidebar.png" alt="DELGROSSO"></a><div class="top-title"><strong>ADMIN SITO</strong><span>Gestione contenuti pubblici DELGROSSO Viaggi</span></div><a href="index.html">← Sito</a><a class="orange" id="logout">Esci</a></div></header><main><div class="wrap"><section id="login" class="auth"><img class="auth-logo" src="assets/images/logo.JPEG" alt="DELGROSSO Viaggi"><div class="k">AREA RISERVATA</div><h1>Accesso Admin</h1><p>Inserisci la password amministratore per accedere alla gestione del sito.</p><form id="loginForm"><div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" required autofocus></div><button class="btn" type="submit">Accedi all'Admin</button><div id="loginMsg" class="msg hidden"></div></form></section><section id="adminApp" class="app hidden"><aside class="side"><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="viaggi">Viaggi</button><button data-tab="flotta">Flotta</button><button data-tab="party">Party On The Road</button><button data-tab="locandine">Locandine</button></aside><div class="content"><div class="hero"><div class="k">DELGROSSO VIAGGI · CONTENT MANAGER</div><h2 id="heroTitle">Controllo sito</h2><p id="userLine">Area riservata.</p></div><section class="tab" id="tab-dashboard"><div class="stats"><div class="stat"><small>Viaggi</small><strong id="sTrips">0</strong></div><div class="stat"><small>Flotta</small><strong id="sFleet">0</strong></div><div class="stat"><small>Locandine</small><strong id="sPosters">0</strong></div><div class="stat"><small>Sessione</small><strong>OK</strong></div></div><div class="panel"><h3>Operatività</h3><p style="color:var(--muted);font-size:11px;line-height:1.7">Qui puoi controllare i contenuti pubblici. Le foto già presenti in Supabase vengono utilizzate senza creare un nuovo archivio.</p></div></section><section class="tab hidden" id="tab-viaggi"><div class="panel"><div class="panel-head"><h3>Viaggi</h3><button class="mini" id="refreshTrips">Aggiorna</button></div><form id="tripForm" class="forms"><div class="field"><label>Titolo</label><input id="tTitolo" required></div><div class="field"><label>Destinazione</label><input id="tDest" required></div><div class="field"><label>Data</label><input id="tData" type="date"></div><div class="field"><label>Ora</label><input id="tOra" type="time"></div><div class="field"><label>Luogo partenza</label><input id="tLuogo"></div><div class="field"><label>Prezzo</label><input id="tPrezzo" type="number" step="0.01"></div><div class="field"><label>Posti totali</label><input id="tPosti" type="number" value="63"></div><div class="field"><label>Pubblicato</label><select id="tPub"><option value="SI">SI</option><option value="NO">NO</option></select></div><div class="field full"><label>Descrizione</label><textarea id="tDesc"></textarea></div><div class="field full"><button class="btn">Crea viaggio</button></div></form><div class="table-wrap"><table class="table"><thead><tr><th>Viaggio</th><th>Data</th><th>Posti</th><th>Stato</th><th></th></tr></thead><tbody id="tripsBody"></tbody></table></div></div></section><section class="tab hidden" id="tab-flotta"><div class="panel"><div class="panel-head"><h3>Flotta</h3><button class="mini" id="refreshFleet">Aggiorna</button></div><form id="fleetForm" class="forms"><div class="field"><label>Marca</label><input id="fMarca" required></div><div class="field"><label>Modello</label><input id="fModello" required></div><div class="field"><label>Categoria</label><input id="fCat" value="Gran Turismo"></div><div class="field"><label>Posti</label><input id="fPosti" type="number"></div><div class="field"><label>Targa</label><input id="fTarga"></div><div class="field"><label>Immagine URL</label><input id="fImg" placeholder="URL Supabase Storage"></div><div class="field full"><label>Descrizione</label><textarea id="fDesc"></textarea></div><div class="field full"><button class="btn">Aggiungi mezzo</button></div></form><div class="table-wrap"><table class="table"><thead><tr><th>Mezzo</th><th>Categoria</th><th>Posti</th><th>Immagine</th><th></th></tr></thead><tbody id="fleetBody"></tbody></table></div></div></section><section class="tab hidden" id="tab-party"><div class="panel"><div class="panel-head"><h3>Party On The Road</h3></div><div class="upload"><p style="margin-top:0;color:var(--muted);font-size:11px">Carica immagini nel bucket <strong style="color:#fff">bus-images</strong> o <strong style="color:#fff">buses</strong>. La pagina Party recupera automaticamente le immagini già presenti.</p><input id="partyFiles" type="file" accept="image/*" multiple><button class="btn" id="partyUpload" type="button">Carica immagini</button><div id="partyMsg" class="msg hidden"></div></div><div id="partyGallery" class="gallery" style="margin-top:15px"></div></div></section><section class="tab hidden" id="tab-locandine"><div class="panel"><div class="panel-head"><h3>Locandine</h3></div><div class="upload"><input id="posterFiles" type="file" accept="image/*" multiple><button class="btn" id="posterUpload" type="button">Carica in locandine</button><div id="posterMsg" class="msg hidden"></div></div><div id="posterGallery" class="gallery" style="margin-top:15px"></div></div></section></div></section></div></main><div id="toast" class="toast hidden"></div>
-<script type="module">import{getSupabase,listTableRows,createTableRow,deleteTableRows}from'./js/delgrosso-api.js';const sb=getSupabase();const $=id=>document.getElementById(id);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function msg(el,text,show=true){el.textContent=text;el.classList.toggle('hidden',!show)}function toast(t){$('toast').textContent=t;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2500)}async function loadTrips(){const r=await listTableRows('viaggi',{select:'id,titolo,destinazione,data_partenza,posti_totali,posti_liberi,posti_occupati,stato,pubblicato',orderBy:[{column:'data_partenza',ascending:true}]});const d=r.data||[];$('sTrips').textContent=d.length;$('tripsBody').innerHTML=d.map(x=>`<tr><td><strong>${esc(x.titolo||x.destinazione)}</strong><br><span style="color:#89939e">${esc(x.destinazione||'')}</span></td><td>${esc(x.data_partenza||'-')}</td><td>${esc(x.posti_liberi??'-')}/${esc(x.posti_totali??'-')}</td><td>${esc(x.stato||x.pubblicato||'-')}</td><td><button class="mini danger" data-del-trip="${x.id}">Elimina</button></td></tr>`).join('');document.querySelectorAll('[data-del-trip]').forEach(b=>b.onclick=async()=>{if(confirm('Eliminare questo viaggio?')){const r=await deleteTableRows('viaggi',{filters:[{column:'id',operator:'eq',value:b.dataset.delTrip}]});if(r.success){toast('Viaggio eliminato');loadTrips()}else toast(r.error?.message||'Errore')}})}async function loadFleet(){const r=await listTableRows('flotta',{select:'id,marca,modello,categoria,posti,immagine,attivo',orderBy:[{column:'created_at',ascending:true}]});const d=r.data||[];$('sFleet').textContent=d.length;$('fleetBody').innerHTML=d.map(x=>`<tr><td><strong>${esc(x.marca||'')} ${esc(x.modello||'')}</strong></td><td>${esc(x.categoria||'-')}</td><td>${esc(x.posti||'-')}</td><td>${x.immagine?'<span style="color:#25d366">OK</span>':'-'}</td><td><button class="mini danger" data-del-fleet="${x.id}">Elimina</button></td></tr>`).join('');document.querySelectorAll('[data-del-fleet]').forEach(b=>b.onclick=async()=>{if(confirm('Eliminare questo mezzo?')){const r=await deleteTableRows('flotta',{filters:[{column:'id',operator:'eq',value:b.dataset.delFleet}]});if(r.success){toast('Mezzo eliminato');loadFleet()}else toast(r.error?.message||'Errore')}})}async function storageGallery(bucket,target,countId){try{async function rec(prefix='',depth=0){if(depth>5)return[];const{data,error}=await sb.storage.from(bucket).list(prefix,{limit:100,sortBy:{column:'created_at',order:'desc'}});if(error)throw error;const out=[];for(const x of data||[]){if(!x?.name)continue;const path=prefix?`${prefix}/${x.name}`:x.name;if(x.id===null||x.metadata===null)out.push(...await rec(path,depth+1));else out.push(sb.storage.from(bucket).getPublicUrl(path).data.publicUrl)}return out}const urls=[...new Set(await rec())];$(target).innerHTML=urls.slice(0,24).map(u=>`<img src="${u}" loading="lazy" alt="DELGROSSO">`).join('');if(countId)$(countId).textContent=urls.length}catch(e){$(target).innerHTML='<p style="color:#98a2ad;font-size:11px">Bucket non disponibile o non accessibile.</p>'}}async function start(){if(sessionStorage.getItem("admin_auth")==="true"){showApp();return}setTimeout(()=>$("password")?.focus(),50)}$("loginForm").onsubmit=e=>{e.preventDefault();const pass=$("password").value;if(pass!=="Delgrosso@26"){msg($("loginMsg"),"Password non corretta");$("password").select();return}sessionStorage.setItem("admin_auth","true");showApp()};$("logout").onclick=()=>{sessionStorage.removeItem("admin_auth");location.reload()};function showApp(){$('login').classList.add('hidden');$('adminApp').classList.remove('hidden');$('userLine').textContent='Accesso amministratore';loadTrips();loadFleet();storageGallery('bus-images','partyGallery');storageGallery('locandine','posterGallery');document.querySelectorAll('.side button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.side button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));$('tab-'+b.dataset.tab).classList.remove('hidden');$('heroTitle').textContent=b.textContent});$('refreshTrips').onclick=loadTrips;$('refreshFleet').onclick=loadFleet;$('tripForm').onsubmit=async e=>{e.preventDefault();const p={titolo:$('tTitolo').value,destinazione:$('tDest').value,data_partenza:$('tData').value||null,ora_partenza:$('tOra').value||null,luogo_partenza:$('tLuogo').value||null,prezzo:Number($('tPrezzo').value||0),posti_totali:Number($('tPosti').value||63),posti_liberi:Number($('tPosti').value||63),posti_occupati:0,pubblicato:$('tPub').value,stato:'attivo',descrizione:$('tDesc').value||null};const r=await createTableRow('viaggi',p);toast(r.success?'Viaggio creato':(r.error?.message||'Errore'));if(r.success){e.target.reset();loadTrips()}};$('fleetForm').onsubmit=async e=>{e.preventDefault();const p={marca:$('fMarca').value,modello:$('fModello').value,categoria:$('fCat').value,posti:Number($('fPosti').value||0),targa:$('fTarga').value||null,immagine:$('fImg').value||null,descrizione:$('fDesc').value||null,attivo:true,stato:'disponibile'};const r=await createTableRow('flotta',p);toast(r.success?'Mezzo creato':(r.error?.message||'Errore'));if(r.success){e.target.reset();loadFleet()}};async function upload(files,bucket,el){if(!files.length)return;for(const f of files){const path=`admin/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${f.name.replace(/[^a-zA-Z0-9._-]/g,'-')}`;const r=await sb.storage.from(bucket).upload(path,f,{upsert:true});if(r.error){msg(el,r.error.message);return}}msg(el,'Upload completato');storageGallery(bucket,bucket==='locandine'?'posterGallery':'partyGallery',bucket==='locandine'?'sPosters':null)}$('partyUpload').onclick=()=>upload($('partyFiles').files,'bus-images',$('partyMsg'));$('posterUpload').onclick=()=>upload($('posterFiles').files,'locandine',$('posterMsg'))}start();</script></body></html>
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Master Admin PRO | Del Grosso Viaggi</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- XLSX Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
+
+    <script>
+        // Autenticazione: stessa password e stessa sessione dell'admin precedente.
+        // La grafica di accesso è gestita dal pannello #admin-login più sotto.
+        const ADMIN_PASSWORD = "Delgrosso@26";
+        if (sessionStorage.getItem("admin_auth") === "true") {
+            document.documentElement.classList.add("admin-unlocked");
+        }
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { brand: { blue: '#2563eb', darkBlue: '#1d4ed8', dark: '#09090b', card: '#121215' } }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root{
+            --brand:#1d4ed8;
+            --brand-2:#2563eb;
+            --brand-soft:#60a5fa;
+            --bg:#070a12;
+            --panel:#0e1421;
+            --panel-2:#111827;
+            --line:rgba(255,255,255,.09);
+            --text:#f8fafc;
+            --muted:#94a3b8;
+        }
+
+        *{box-sizing:border-box}
+        body{
+            font-family:'Plus Jakarta Sans',sans-serif;
+            background:
+              radial-gradient(circle at 12% 0%,rgba(37,99,235,.16),transparent 28%),
+              radial-gradient(circle at 88% 8%,rgba(14,165,233,.10),transparent 24%),
+              linear-gradient(180deg,#070a12 0%,#090d16 45%,#070a10 100%);
+            color:var(--text);
+            -webkit-font-smoothing:antialiased;
+        }
+
+        body:before{
+            content:"";
+            position:fixed; inset:0; pointer-events:none; z-index:-1;
+            background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+                             linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+            background-size:36px 36px;
+            mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 80%);
+        }
+
+        .glass-nav{
+            background:rgba(7,10,18,.78);
+            backdrop-filter:blur(20px) saturate(140%);
+            border-bottom:1px solid rgba(255,255,255,.08);
+            box-shadow:0 12px 35px rgba(0,0,0,.22);
+        }
+
+        .admin-shell{max-width:1480px;margin:auto}
+        .admin-brand{
+            display:flex;align-items:center;gap:12px;
+        }
+        .admin-logo{
+            width:48px;height:48px;object-fit:contain;border-radius:14px;
+            background:rgba(255,255,255,.96);padding:5px;
+            border:1px solid rgba(255,255,255,.2);
+            box-shadow:0 8px 25px rgba(37,99,235,.20);
+        }
+        .admin-title{font-weight:900;letter-spacing:.04em}
+        .admin-subtitle{font-size:9px;font-weight:800;color:#64748b;letter-spacing:.16em}
+
+        .section-card{
+            position:relative;overflow:hidden;
+            background:linear-gradient(145deg,rgba(17,24,39,.96),rgba(9,13,22,.96));
+            border:1px solid var(--line);
+            border-radius:26px;
+            padding:24px;
+            box-shadow:0 20px 55px rgba(0,0,0,.22);
+        }
+        .section-card:after{
+            content:"";position:absolute;top:0;left:24px;right:24px;height:1px;
+            background:linear-gradient(90deg,transparent,rgba(96,165,250,.45),transparent);
+        }
+        .section-card:hover{border-color:rgba(255,255,255,.13)}
+
+        .section-head{
+            display:flex;align-items:center;justify-content:space-between;gap:12px;
+            margin-bottom:18px;
+        }
+        .section-label{
+            display:flex;align-items:center;gap:10px;
+            font-size:16px;font-weight:900;letter-spacing:-.02em;
+        }
+        .section-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 18px currentColor}
+        .section-number{
+            font-size:9px;font-weight:900;letter-spacing:.16em;
+            color:#64748b;text-transform:uppercase;
+        }
+
+        .inner-panel{
+            background:rgba(2,6,23,.54);
+            border:1px solid rgba(255,255,255,.065);
+            border-radius:19px;padding:18px;
+        }
+
+        .input-style{
+            width:100%;padding:.92rem 1rem;
+            background:#0b1220;
+            border:1px solid rgba(255,255,255,.09);
+            border-radius:13px;
+            font-weight:700;margin-bottom:.7rem;outline:none;
+            font-size:12px;color:white;transition:.2s;
+        }
+        .input-style::placeholder{color:#64748b}
+        .input-style:focus{
+            border-color:rgba(59,130,246,.8);
+            box-shadow:0 0 0 4px rgba(37,99,235,.10);
+        }
+
+        .btn-action{
+            width:100%;padding:.95rem 1rem;border-radius:13px;
+            font-weight:900;text-transform:uppercase;font-size:10px;
+            cursor:pointer;transition:.2s;border:none;letter-spacing:.07em;
+        }
+        .btn-action:hover{transform:translateY(-1px);filter:brightness(1.08)}
+        .btn-action:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+        .item-row{
+            display:flex;align-items:center;gap:12px;padding:11px;
+            background:rgba(15,23,42,.74);
+            border:1px solid rgba(255,255,255,.065);
+            border-radius:14px;margin-bottom:8px;
+            transition:.18s;
+        }
+        .item-row:hover{background:rgba(30,41,59,.76);border-color:rgba(255,255,255,.12)}
+        .thumb{
+            width:58px;height:46px;object-fit:cover;border-radius:10px;
+            background:#111827;border:1px solid rgba(255,255,255,.10);
+        }
+        .delete-btn,.edit-btn{
+            font-weight:900;padding:6px 10px;border-radius:9px;font-size:10px;
+            cursor:pointer;transition:.18s;
+        }
+        .delete-btn{
+            background:rgba(239,68,68,.10);color:#f87171;
+            border:1px solid rgba(239,68,68,.24);
+        }
+        .delete-btn:hover{background:#ef4444;color:white}
+        .edit-btn{
+            background:rgba(34,197,94,.10);color:#4ade80;
+            border:1px solid rgba(34,197,94,.24);
+        }
+        .edit-btn:hover{background:#22c55e;color:white}
+
+        .preview-grid-item{
+            position:relative;height:78px;border-radius:12px;overflow:hidden;
+            border:1px solid rgba(255,255,255,.09);background:#0b1220;
+        }
+        .preview-grid-item img{width:100%;height:100%;object-fit:cover}
+        .remove-photo-badge{
+            position:absolute;top:0;right:0;background:#ef4444;color:white;
+            width:25px;height:25px;font-size:14px;display:flex;
+            align-items:center;justify-content:center;border-radius:0 0 0 9px;
+            cursor:pointer;font-weight:bold;z-index:10;
+        }
+
+        .admin-action{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:10px 14px;border-radius:12px;font-size:10px;
+            font-weight:900;text-transform:uppercase;letter-spacing:.04em;
+            transition:.2s;border:1px solid rgba(255,255,255,.08);
+        }
+        .admin-action:hover{transform:translateY(-1px)}
+
+        /* Access screen */
+        #admin-login{
+            position:fixed;inset:0;z-index:9999;display:flex;
+            align-items:center;justify-content:center;padding:20px;
+            background:
+              radial-gradient(circle at 50% 20%,rgba(37,99,235,.24),transparent 30%),
+              #050810;
+        }
+        .login-card{
+            width:min(420px,100%);padding:32px;border-radius:30px;
+            background:rgba(12,18,31,.94);
+            border:1px solid rgba(255,255,255,.10);
+            box-shadow:0 30px 100px rgba(0,0,0,.58);
+            backdrop-filter:blur(25px);
+        }
+        .login-logo{
+            display:block;width:92px;height:92px;object-fit:contain;
+            margin:0 auto 18px;border-radius:24px;background:white;padding:9px;
+            box-shadow:0 16px 45px rgba(37,99,235,.24);
+        }
+        .login-input{
+            width:100%;padding:15px 16px;border-radius:14px;
+            background:#070d18;border:1px solid rgba(255,255,255,.11);
+            color:white;outline:none;font-weight:700;
+        }
+        .login-input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.10)}
+        .login-btn{
+            width:100%;margin-top:12px;padding:15px;border:0;border-radius:14px;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            color:white;font-weight:900;text-transform:uppercase;
+            letter-spacing:.08em;font-size:11px;cursor:pointer;
+            box-shadow:0 12px 30px rgba(37,99,235,.25);
+        }
+        .login-error{
+            display:none;margin-top:12px;padding:10px 12px;border-radius:11px;
+            background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);
+            color:#fca5a5;font-size:11px;font-weight:800;text-align:center;
+        }
+        html.admin-unlocked #admin-login{display:none!important}
+
+        @media(max-width:640px){
+            .section-card{padding:18px;border-radius:21px}
+            .inner-panel{padding:14px}
+            .admin-logo{width:42px;height:42px}
+            .admin-subtitle{display:none}
+            .top-actions .admin-action span.label{display:none}
+        }
+    </style>
+</head>
+<body class="pb-20 selection:bg-brand-blue selection:text-white">
+    <!-- ACCESSO ADMIN: stessa password, nuova grafica -->
+    <div id="admin-login">
+        <div class="login-card">
+            <img class="login-logo" src="assets/images/logo-sidebar.png" alt="Del Grosso Viaggi">
+            <div class="text-center">
+                <div class="text-[10px] font-black uppercase tracking-[.22em] text-blue-400 mb-2">Area Riservata</div>
+                <h2 class="text-2xl font-black text-white">Master Admin</h2>
+                <p class="text-xs text-slate-400 mt-2 mb-6">Inserisci la password per accedere alla gestione del sito.</p>
+            </div>
+            <form onsubmit="event.preventDefault(); loginAdmin();">
+                <input id="admin-password" class="login-input" type="password" autocomplete="current-password"
+                       placeholder="Password amministratore">
+                <button class="login-btn" type="submit">Accedi all'Admin</button>
+                <div id="login-error" class="login-error">Password non corretta. Riprova.</div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Top Navigation -->
+    <nav class="glass-nav p-3 sm:p-4 sticky top-0 z-50">
+        <div class="admin-shell flex justify-between items-center gap-3">
+            <div class="admin-brand min-w-0">
+                <img src="assets/images/logo-sidebar.png" class="admin-logo" alt="Del Grosso Viaggi">
+                <div class="min-w-0">
+                    <div class="admin-title text-sm sm:text-base uppercase truncate">Del Grosso Viaggi</div>
+                    <div class="admin-subtitle">MASTER ADMIN • GESTIONE SITO</div>
+                </div>
+            </div>
+            <div class="top-actions flex gap-2">
+                <a href="index.html" class="admin-action bg-white/5 hover:bg-white/10 text-white">
+                    <span>🏠</span><span class="label">Home Sito</span>
+                </a>
+                <button onclick="exportExcel()" class="admin-action bg-emerald-600/90 hover:bg-emerald-500 text-white">
+                    <span>📊</span><span class="label">Esporta Excel</span>
+                </button>
+                <button onclick="location.reload()" class="admin-action bg-blue-600 hover:bg-blue-500 text-white">
+                    <span>🔄</span><span class="label">Sincronizza</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Grid -->
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
+        
+        <!-- Left Column: Gestione Pagine e Contenuti -->
+        <div class="lg:col-span-8 space-y-8">
+
+            <!-- Carousel Home Page -->
+            <div class="section-card">
+                <div class="section-head"><div class="section-label text-emerald-400"><span class="section-dot bg-emerald-500"></span>Carousel Home Page</div><div class="section-number">01 • HOME</div></div>
+                <div class="inner-panel mb-4">
+                    <p class="text-[10px] font-black mb-3 uppercase text-emerald-400 tracking-wider">Foto Attuali (Cloudinary):</p>
+                    <div id="anteprima-carousel" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4"></div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">Aggiungi nuove foto:</label>
+                        <input type="file" id="c-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                        <button onclick="salvaCarousel()" id="btn-c" class="btn-action bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20">
+                            Salva Carousel Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+
+            <!-- Carousel Flotta -->
+            <div class="section-card">
+                <div class="section-head"><div class="section-label text-cyan-400"><span class="section-dot bg-cyan-500"></span>Carousel Flotta</div><div class="section-number">02 • FLOTTA</div></div>
+                <div class="inner-panel mb-4">
+                    <div id="anteprima-carousel-flotta" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4"></div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">Aggiungi immagini al Carousel Flotta:</label>
+                        <input type="file" id="cf-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                        <button onclick="salvaCarouselFlotta()" id="btn-cf" class="btn-action bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-600/20">
+                            Salva Carousel Flotta
+                        </button>
+                    </div>
+                </div>
+                <div id="display-carousel-flotta" class="space-y-2"></div>
+            </div>
+
+            <!-- Gestione Tratte -->
+            <div class="section-card">
+                <div class="section-head"><div class="section-label text-blue-400"><span class="section-dot bg-blue-500"></span>Gestione Tratte</div><div class="section-number">03 • VIAGGI</div></div>
+                <div class="inner-panel mb-4">
+                    <input type="text" id="v-titolo" placeholder="NOME VIAGGIO" class="input-style uppercase">
+                    <input type="text" id="v-data" placeholder="DATA EVENTO (es: 15 AGOSTO 2026)" class="input-style uppercase">
+                    <select id="v-modello" class="input-style">
+                        <option value="53">BUS GT 53 POSTI</option>
+                        <option value="63">BUS GT 63 POSTI</option>
+                        <option value="63 B">BUS GT 63 B POSTI</option>
+                        <option value="30">LIMOUSINE BUS 30 POSTI</option>
+                        <option value="7">MERCEDES V250d 7 POSTI</option>
+                    </select>
+                    <input type="file" id="v-file" class="text-xs mb-4 block w-full text-zinc-400">
+                    <button onclick="salvaViaggio()" id="btn-v" class="btn-action bg-brand-blue hover:bg-brand-darkBlue text-white shadow-lg shadow-brand-blue/20">
+                        Salva Viaggio
+                    </button>
+                </div>
+                <div id="display-viaggi" class="space-y-2"></div>
+            </div>
+
+            <!-- Garage Flotta -->
+            <div class="section-card">
+                <div class="section-head"><div class="section-label text-orange-400"><span class="section-dot bg-orange-500"></span>Garage Flotta</div><div class="section-number">04 • MEZZI</div></div>
+                <div class="inner-panel mb-4">
+                    <input type="text" id="f-nome" placeholder="NOME MEZZO" class="input-style uppercase">
+                    <textarea id="f-desc" placeholder="DESCRIZIONE TECNICA..." class="input-style h-24"></textarea>
+                    <div id="anteprima-gallery-flotta" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
+                    <p class="text-[10px] font-bold mb-2 uppercase text-orange-400">Aggiungi foto gallery (Cloudinary):</p>
+                    <input type="file" id="f-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                    <button onclick="salvaFlotta()" id="btn-f" class="btn-action bg-orange-600 hover:bg-orange-500 text-white shadow-lg shadow-orange-600/20">
+                        Salva Mezzo
+                    </button>
+                </div>
+                <div id="display-flotta" class="space-y-2"></div>
+            </div>
+
+            <!-- Party On The Road -->
+            <div class="section-card">
+                <div class="section-head"><div class="section-label text-purple-400"><span class="section-dot bg-purple-500"></span>Party On The Road</div><div class="section-number">05 • MEDIA</div></div>
+                <div class="inner-panel mb-4">
+                    <input type="text" id="p-titolo" placeholder="TITOLO ALBUM" class="input-style uppercase">
+                    <div id="anteprima-gallery-party" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
+                    <p class="text-[10px] font-bold mb-2 uppercase text-purple-400">Aggiungi foto/video (Cloudinary):</p>
+                    <input type="file" id="p-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*,video/*">
+                    <button onclick="salvaParty()" id="btn-p" class="btn-action bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20">
+                        Salva Album Party
+                    </button>
+                </div>
+                <div id="display-party" class="space-y-2"></div>
+            </div>
+
+            <!-- Locandine: alimentate dalla tabella tratte -->
+            <div class="section-card">
+                <div class="section-head mb-2"><div class="section-label text-pink-400"><span class="section-dot bg-pink-500"></span>Locandine</div><div class="section-number">06 • PUBBLICAZIONI</div></div>
+                <p class="text-[10px] text-zinc-400 uppercase font-bold mb-4">Le locandine pubbliche sono le immagini delle partenze presenti nella tabella <strong class="text-pink-300">tratte</strong>. Modificale dalla sezione Gestione Viaggi.</p>
+                <div id="display-locandine" class="space-y-2"></div>
+            </div>
+
+
+        </div>
+
+        <!-- Right Column: Gestione Passeggeri (Supabase) -->
+        <div class="lg:col-span-4">
+            <div class="bg-brand-card p-6 rounded-3xl border border-white/10 shadow-2xl sticky top-28">
+                <h2 class="font-black uppercase mb-4 text-center tracking-tight text-lg text-white">
+                    Passeggeri (Supabase)
+                </h2>
+                <div class="inner-panel mb-6 text-center space-y-2">
+                    <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs uppercase mb-0">
+                    <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2)" class="input-style text-xs mb-0">
+                    <button onclick="aggiornaPrenotazione()" id="btn-pr" class="w-full bg-white hover:bg-zinc-200 text-black py-3 rounded-xl font-black text-xs uppercase transition-all shadow-md mt-2">
+                        Salva Modifiche
+                    </button>
+                </div>
+                <div id="display-preno" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script Supabase & Logic -->
+    <script>
+
+        function loginAdmin() {
+            const input = document.getElementById("admin-password");
+            const error = document.getElementById("login-error");
+            if (input.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem("admin_auth", "true");
+                document.documentElement.classList.add("admin-unlocked");
+                error.style.display = "none";
+                input.value = "";
+            } else {
+                error.style.display = "block";
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        // CONFIGURAZIONE CLOUDINARY
+        const CLOUD_NAME = "dubkmnnkl"; 
+        const UPLOAD_PRESET = "delgrosso_unsigned";   
+
+        let editViaggioId = null, editFlottaId = null, editPartyId = null, editPrenoId = null;
+        let allData = { viaggi: [], flotta: [], party: [], prenotazioni: [], carousel: [], carouselFlotta: [], locandine: [] };
+        
+        let fotoCorrentiFlotta = [];
+        let fotoCorrentiParty = [];
+        let fotoCorrentiCarousel = [];
+        let carouselFlottaData = [];
+
+        async function uploadCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (!data.secure_url) throw new Error(data.error?.message || "Upload fallito");
+            return data.secure_url;
+        }
+
+        function checkSupabase(result, action) {
+            if (result.error) throw new Error(`${action}: ${result.error.message}`);
+            return result.data;
+        }
+
+        function mostraErroreAdmin(error) {
+            console.error(error);
+            const msg = error?.message || String(error);
+            alert(`❌ ERRORE ADMIN / SUPABASE\n\n${msg}`);
+        }
+
+        async function init() {
+            try {
+                const [vReq, fReq, pReq, prReq, cReq, cfReq] = await Promise.all([
+                    sb.from('tratte').select('*').order('created_at', {ascending: false}),
+                    sb.from('flotta_page').select('*').order('created_at', {ascending: false}),
+                    sb.from('gallery_eventi').select('*').order('created_at', {ascending: false}),
+                    sb.from('prenotazioni').select('*').order('created_at', {ascending: false}),
+                    sb.from('carousel_home').select('*').order('created_at', {ascending: false}).limit(1),
+                    sb.from('carousel_flotta').select('*').order('created_at', {ascending: false})
+                ]);
+
+                [vReq, fReq, pReq, prReq, cReq, cfReq].forEach((r, i) => {
+                    if (r.error) throw new Error(`Errore lettura Supabase (${['tratte','flotta_page','gallery_eventi','prenotazioni','carousel_home','carousel_flotta'][i]}): ${r.error.message}`);
+                });
+
+                allData.viaggi = vReq.data || [];
+                allData.flotta = fReq.data || [];
+                allData.party = pReq.data || [];
+                allData.prenotazioni = prReq.data || [];
+                allData.locandine = allData.viaggi || [];
+                allData.carouselFlotta = cfReq.data || [];
+                carouselFlottaData = allData.carouselFlotta.map(x => ({ id: x.id, titolo: x.titolo || '', immagine_url: x.immagine_url || '' }));
+
+                if(cReq.data && cReq.data.length > 0) {
+                    allData.carouselId = cReq.data[0].id;
+                    fotoCorrentiCarousel = Array.isArray(cReq.data[0].foto_urls) ? cReq.data[0].foto_urls : [];
+                } else {
+                    allData.carouselId = null;
+                    fotoCorrentiCarousel = [];
+                }
+
+                renderAll();
+                renderAnteprimaCarousel();
+                renderCarouselFlotta();
+            } catch(e) { mostraErroreAdmin(e); }
+        }
+
+        function renderAll() {
+            document.getElementById('display-viaggi').innerHTML = allData.viaggi.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('tratte','${d.id}')" class="delete-btn">×</div></div>`).join('');
+            document.getElementById('display-flotta').innerHTML = allData.flotta.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="caricaModificaFlotta('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('flotta_page','${d.id}')" class="delete-btn">×</div></div>`).join('');
+            document.getElementById('display-party').innerHTML = allData.party.map(d => `<div class="item-row"><img src="${d.foto_urls ? d.foto_urls[0] : ''}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="caricaModificaParty('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('gallery_eventi','${d.id}')" class="delete-btn">×</div></div>`).join('');
+            document.getElementById('display-locandine').innerHTML = allData.locandine.map(d => `<div class="item-row"><img src="${d.immagine_url || ''}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo || 'Locandina'}</div><div class="text-[10px] text-emerald-400 font-bold">PUBBLICATA</div><div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div></div>`).join('');
+            document.getElementById('display-preno').innerHTML = allData.prenotazioni.map(p => {
+                const v = allData.viaggi.find(x => x.id === p.tratta_id);
+                return `<div class="p-3 bg-zinc-900 border border-white/5 rounded-xl text-xs space-y-1"><div class="flex justify-between items-center"><strong class="text-white">${p.nome_cliente}</strong><div class="flex gap-2"><span onclick="preparaModificaPreno('${p.id}')" class="cursor-pointer text-emerald-400 font-bold">MOD</span><span onclick="elimina('prenotazioni','${p.id}')" class="cursor-pointer text-red-400 font-bold">×</span></div></div><div class="text-[10px] text-zinc-400 italic">${v ? v.titolo : 'N/D'}</div><div class="bg-black p-1.5 border border-white/10 rounded text-center font-black text-brand-blue">POSTI: ${p.posti_selezionati ? p.posti_selezionati.join(' - ') : ''}</div></div>`;
+            }).join('');
+        }
+
+        function renderAnteprimaCarousel() {
+            document.getElementById('anteprima-carousel').innerHTML = fotoCorrentiCarousel.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiCarousel.splice(${i},1);renderAnteprimaCarousel()" class="remove-photo-badge">×</div></div>`).join('');
+        }
+
+
+        function renderCarouselFlotta() {
+            const preview = document.getElementById('anteprima-carousel-flotta');
+            const list = document.getElementById('display-carousel-flotta');
+            if (!preview || !list) return;
+
+            preview.innerHTML = carouselFlottaData.map((d, i) => `
+                <div class="preview-grid-item">
+                    <img src="${d.immagine_url || ''}" class="w-full h-full object-cover">
+                    <div onclick="eliminaCarouselFlotta('${d.id}')" class="remove-photo-badge">×</div>
+                </div>
+            `).join('');
+
+            list.innerHTML = carouselFlottaData.map(d => `
+                <div class="item-row">
+                    <img src="${d.immagine_url || ''}" class="thumb">
+                    <div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo || 'Immagine Carousel Flotta'}</div>
+                    <div onclick="eliminaCarouselFlotta('${d.id}')" class="delete-btn">×</div>
+                </div>
+            `).join('');
+        }
+
+        async function salvaCarouselFlotta() {
+            const btn = document.getElementById('btn-cf');
+            btn.disabled = true;
+            btn.innerText = "UPLOAD...";
+            try {
+                const files = document.getElementById('cf-files').files;
+                if (!files.length) throw new Error("Seleziona almeno un'immagine.");
+
+                for (const f of files) {
+                    const url = await uploadCloudinary(f);
+                    const titolo = f.name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ').trim().toUpperCase();
+                    checkSupabase(
+                        await sb.from('carousel_flotta').insert([{ titolo, immagine_url: url }]),
+                        'Salvataggio Carousel Flotta'
+                    );
+                }
+
+                document.getElementById('cf-files').value = '';
+                await init();
+            } catch(e) {
+                mostraErroreAdmin(e);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Salva Carousel Flotta";
+            }
+        }
+
+        async function eliminaCarouselFlotta(id) {
+            if (!confirm("Eliminare questa immagine dal Carousel Flotta?")) return;
+            try {
+                checkSupabase(
+                    await sb.from('carousel_flotta').delete().eq('id', id),
+                    'Eliminazione Carousel Flotta'
+                );
+                await init();
+            } catch(e) {
+                mostraErroreAdmin(e);
+            }
+        }
+
+        async function salvaCarousel() {
+            const btn = document.getElementById('btn-c');
+            btn.innerText = "UPLOAD...";
+            btn.disabled = true;
+            try {
+                const files = document.getElementById('c-files').files;
+                for (const f of files) fotoCorrentiCarousel.push(await uploadCloudinary(f));
+
+                if (allData.carouselId) {
+                    checkSupabase(
+                        await sb.from('carousel_home').update({ foto_urls: fotoCorrentiCarousel }).eq('id', allData.carouselId),
+                        'Salvataggio Carousel'
+                    );
+                } else {
+                    const result = checkSupabase(
+                        await sb.from('carousel_home').insert([{ foto_urls: fotoCorrentiCarousel }]).select().single(),
+                        'Creazione Carousel'
+                    );
+                    allData.carouselId = result.id;
+                }
+
+                document.getElementById('c-files').value = '';
+                await init();
+            } catch(e) {
+                mostraErroreAdmin(e);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Salva Carousel Home";
+            }
+        }
+
+        function caricaModificaFlotta(id) {
+            editFlottaId = id; const d = allData.flotta.find(x => x.id === id);
+            document.getElementById('f-nome').value = d.titolo; document.getElementById('f-desc').value = d.descrizione;
+            fotoCorrentiFlotta = d.foto_gallery || [];
+            document.getElementById('anteprima-gallery-flotta').classList.remove('hidden');
+            renderAnteprimaFlotta();
+        }
+
+        function renderAnteprimaFlotta() {
+            document.getElementById('anteprima-gallery-flotta').innerHTML = fotoCorrentiFlotta.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiFlotta.splice(${i},1);renderAnteprimaFlotta()" class="remove-photo-badge">×</div></div>`).join('');
+        }
+
+        async function salvaFlotta() {
+            const btn = document.getElementById('btn-f'); btn.disabled = true; btn.innerText = "UPLOAD...";
+            try {
+                const files = document.getElementById('f-files').files;
+                for(let f of files) { fotoCorrentiFlotta.push(await uploadCloudinary(f)); }
+                if (!document.getElementById('f-nome').value.trim()) throw new Error("Inserisci il nome del mezzo.");
+                if (!fotoCorrentiFlotta.length) throw new Error("Inserisci almeno una foto del mezzo.");
+
+                const data = {
+                    titolo: document.getElementById('f-nome').value.toUpperCase(),
+                    descrizione: document.getElementById('f-desc').value,
+                    immagine_url: fotoCorrentiFlotta[0],
+                    foto_urls: fotoCorrentiFlotta,
+                    foto_gallery: fotoCorrentiFlotta
+                };
+                if(editFlottaId) {
+                    checkSupabase(await sb.from('flotta_page').update(data).eq('id', editFlottaId), 'Salvataggio Flotta');
+                } else {
+                    checkSupabase(await sb.from('flotta_page').insert([data]), 'Creazione Flotta');
+                }
+                await init();
+                editFlottaId = null;
+                fotoCorrentiFlotta = [];
+                document.getElementById('f-nome').value = '';
+                document.getElementById('f-desc').value = '';
+                document.getElementById('f-files').value = '';
+                document.getElementById('anteprima-gallery-flotta').classList.add('hidden');
+            } catch(e) { mostraErroreAdmin(e); }
+            finally { btn.disabled = false; btn.innerText="Salva Mezzo"; }
+        }
+
+        function caricaModificaParty(id) {
+            editPartyId = id; const d = allData.party.find(x => x.id === id);
+            document.getElementById('p-titolo').value = d.titolo;
+            fotoCorrentiParty = d.foto_urls || [];
+            document.getElementById('anteprima-gallery-party').classList.remove('hidden');
+            renderAnteprimaParty();
+        }
+
+        function renderAnteprimaParty() {
+            document.getElementById('anteprima-gallery-party').innerHTML = fotoCorrentiParty.map((url, i) => `<div class="preview-grid-item"><img src="${url}" class="w-full h-full object-cover"><div onclick="fotoCorrentiParty.splice(${i},1);renderAnteprimaParty()" class="remove-photo-badge">×</div></div>`).join('');
+        }
+
+        async function salvaParty() {
+            const btn = document.getElementById('btn-p'); btn.disabled = true; btn.innerText = "UPLOAD...";
+            try {
+                const files = document.getElementById('p-files').files;
+                for(let f of files) { fotoCorrentiParty.push(await uploadCloudinary(f)); }
+                if (!document.getElementById('p-titolo').value.trim()) throw new Error("Inserisci il titolo dell'album.");
+                if (!fotoCorrentiParty.length) throw new Error("Inserisci almeno una foto/video.");
+                const data = { titolo: document.getElementById('p-titolo').value.toUpperCase(), foto_urls: fotoCorrentiParty };
+                if(editPartyId) checkSupabase(await sb.from('gallery_eventi').update(data).eq('id', editPartyId), 'Salvataggio Party');
+                else checkSupabase(await sb.from('gallery_eventi').insert([data]), 'Creazione Party');
+                await init();
+                editPartyId = null;
+                fotoCorrentiParty = [];
+                document.getElementById('p-titolo').value = '';
+                document.getElementById('p-files').value = '';
+                document.getElementById('anteprima-gallery-party').classList.add('hidden');
+            } catch(e) { mostraErroreAdmin(e); }
+            finally { btn.disabled = false; btn.innerText="Salva Album Party"; }
+        }
+
+        async function salvaViaggio() {
+            const btn = document.getElementById('btn-v'); btn.disabled = true; btn.innerText = "UPLOAD...";
+            try {
+                const f = document.getElementById('v-file').files[0];
+                let url = editViaggioId ? allData.viaggi.find(x => x.id === editViaggioId).immagine_url : null;
+                if(f) url = await uploadCloudinary(f);
+                if (!document.getElementById('v-titolo').value.trim()) throw new Error("Inserisci il nome del viaggio.");
+                const obj = {
+                    titolo: document.getElementById('v-titolo').value.toUpperCase(),
+                    data_partenza: document.getElementById('v-data').value.toUpperCase(),
+                    modello_bus: document.getElementById('v-modello').value,
+                    immagine_url: url
+                };
+                if(editViaggioId) checkSupabase(await sb.from('tratte').update(obj).eq('id', editViaggioId), 'Salvataggio Tratta');
+                else checkSupabase(await sb.from('tratte').insert([obj]), 'Creazione Tratta');
+                await init();
+                editViaggioId = null;
+                document.getElementById('v-titolo').value = '';
+                document.getElementById('v-data').value = '';
+                document.getElementById('v-file').value = '';
+            } catch(e) { mostraErroreAdmin(e); }
+            finally { btn.disabled = false; btn.innerText="Salva Viaggio"; }
+        }
+
+        function preparaModificaViaggio(id) {
+            editViaggioId = id; const d = allData.viaggi.find(x => x.id === id);
+            document.getElementById('v-titolo').value = d.titolo; document.getElementById('v-data').value = d.data_partenza; document.getElementById('v-modello').value = d.modello_bus;
+        }
+
+        function preparaModificaPreno(id) { editPrenoId = id; const p = allData.prenotazioni.find(x => x.id === id); document.getElementById('pr-nome').value = p.nome_cliente; document.getElementById('pr-posti').value = p.posti_selezionati ? p.posti_selezionati.join(',') : ''; }
+        
+        async function aggiornaPrenotazione() {
+            if(!editPrenoId) return;
+            const obj = { nome_cliente: document.getElementById('pr-nome').value.toUpperCase(), posti_selezionati: document.getElementById('pr-posti').value.split(',').map(x => x.trim()) };
+            checkSupabase(await sb.from('prenotazioni').update(obj).eq('id', editPrenoId), 'Aggiornamento Prenotazione'); await init(); editPrenoId = null;
+        }
+
+        function exportExcel() {
+            const data = allData.prenotazioni.map(p => { 
+                const v = allData.viaggi.find(x => x.id === p.tratta_id); 
+                return { NOME: p.nome_cliente, TELEFONO: p.telefono_cliente || 'N/D', TRATTA: v ? v.titolo : 'N/D', POSTI: p.posti_selezionati ? p.posti_selezionati.join(' - ') : '' }; 
+            });
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Passeggeri"); XLSX.writeFile(wb, "Lista_Passeggeri_DelGrosso.xlsx");
+        }
+        
+        async function elimina(tab, id) { if(confirm("Eliminare definitivamente questo record?")) { try { checkSupabase(await sb.from(tab).delete().eq('id', id), `Eliminazione ${tab}`); await init(); } catch(e) { mostraErroreAdmin(e); } } }
+
+        const siteTables = ['carousel_home','carousel_flotta','tratte','flotta_page','gallery_eventi','prenotazioni'];
+        const realtimeChannel = sb.channel('site-content-sync');
+        siteTables.forEach(table => {
+            realtimeChannel.on('postgres_changes', { event: '*', schema: 'public', table }, () => init());
+        });
+        realtimeChannel.subscribe();
+
+        init();
+    </script>
+</body>
+</html>
