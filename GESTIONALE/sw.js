@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v27-documenti-completi';
+const CACHE = 'dg-gestionale-clean-20260904';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
