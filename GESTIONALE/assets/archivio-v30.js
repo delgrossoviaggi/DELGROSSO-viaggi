@@ -43,10 +43,15 @@ function normalize(documents){
   return (documents||[]).map(d=>{
     const type=String(d.tipo_documento||'').toLowerCase();
     const kind=type==='prenotazione'?'booking':type==='saldo'?'saldo':'acconto';
+    const bookingId=d.prenotazione_id||((kind==='booking')?d.documento_id:null)||d.booking_id||null;
+    const paymentId=d.pagamento_id||((kind!=='booking')?d.documento_id:null)||d.payment_id||null;
     return {
       kind,
-      id:(d.tipo_documento||'').toLowerCase()==='prenotazione' ? (d.prenotazione_id||d.documento_id||d.id) : (d.pagamento_id||d.documento_id||d.id),
-      number:d.numero_documento||((d.tipo_documento||'').toLowerCase()==='prenotazione'?d.confirmation_number:d.receipt_number)||'—',
+      id:kind==='booking'?bookingId:paymentId,
+      bookingId,
+      paymentId,
+      documentId:d.documento_id||null,
+      number:d.numero_documento||((kind==='booking')?d.confirmation_number:d.receipt_number)||'—',
       customer:customer(d),
       trip:trip(d),
       date:d.data_documento,
@@ -55,7 +60,7 @@ function normalize(documents){
       emailSent:!!d.email_inviata,
       raw:d
     };
-  }).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  }).filter(r=>r.id).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
 }
 function stats(){
   $('#stat-total').textContent=rows.length; $('#stat-booking').textContent=rows.filter(x=>x.kind==='booking').length; $('#stat-acconto').textContent=rows.filter(x=>x.kind==='acconto').length; $('#stat-saldo').textContent=rows.filter(x=>x.kind==='saldo').length;
@@ -97,21 +102,23 @@ async function act(action,id,button){
   button.disabled=true; const old=button.textContent; button.textContent='Attendi…';
   try{
     if(row.kind==='booking'){
-      if(action==='open')await openBookingConfirmation(row.path);
-      if(action==='download')await downloadBooking(row.path,row.number);
-      if(action==='email')await resendBookingEmail(row.id);
-      if(action==='open'&&!row.path)throw new Error('PDF della conferma non ancora archiviato.');
-      if(action==='download'&&!row.path)throw new Error('PDF della conferma non ancora archiviato.');
+      if((action==='open'||action==='download')&&!row.path) throw new Error('PDF della conferma non ancora archiviato.');
+      if(action==='open') await openBookingConfirmation(row.path);
+      if(action==='download') await downloadBooking(row.path,row.number);
+      if(action==='email'){
+        const booking={...(row.raw||{}),id:row.bookingId};
+        await resendBookingEmail(booking,{titolo:row.trip});
+      }
     }else{
-      if(action==='open')await openStoredReceipt(row.path);
-      if(action==='download')await downloadStoredReceipt(row.path,row.number);
-      if(action==='email')await resendPaymentEmail(row.id);
+      if((action==='open'||action==='download')&&!row.path) throw new Error('PDF della ricevuta non ancora archiviato.');
+      if(action==='open') await openStoredReceipt(row.path);
+      if(action==='download') await downloadStoredReceipt(row.path,row.number);
+      if(action==='email') await resendPaymentEmail(row.paymentId);
     }
     if(action==='email'){button.textContent='Inviata ✓';setTimeout(()=>{button.textContent=old;button.disabled=false},1400);return;}
   }catch(e){console.error(e);alert(e.message||'Operazione non riuscita.');}
   button.textContent=old;button.disabled=false;
 }
-
 document.addEventListener('DOMContentLoaded',()=>{
   $('#archive-search')?.addEventListener('input',render);
   document.querySelectorAll('.archive-filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.archive-filter').forEach(b=>b.classList.remove('is-active'));btn.classList.add('is-active');activeFilter=btn.dataset.filter||'all';render()}));
