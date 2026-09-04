@@ -1,562 +1,158 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Partenze | Del Grosso Viaggi & Limousine Bus</title>
-  <meta name="description" content="Scopri le prossime partenze Del Grosso, filtra per destinazione e prenota online il tuo posto a bordo.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
-  <link rel="stylesheet" href="./css/brand-public.css">
-  <link rel="stylesheet" href="./css/viaggi.css">
-  <link rel="stylesheet" href="./css/public-v2-pages.css">
-  <style>
-    .departures-search {
-      margin-top: -18px;
-      margin-bottom: 30px;
-      padding: 22px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viaggi - Del Grosso Gestionale v4.6</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    .departures-search__grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.3fr) 0.8fr 0.8fr auto;
-      gap: 14px;
-      align-items: center;
-    }
 
-    .field-shell {
-      position: relative;
-    }
 
-    .field-shell i {
-      position: absolute;
-      top: 50%;
-      left: 16px;
-      transform: translateY(-50%);
-      color: #64748b;
-      font-size: 14px;
-      pointer-events: none;
-    }
-
-    .field-control {
-      width: 100%;
-      min-height: 54px;
-      border: 1px solid rgba(203, 213, 225, 0.94);
-      border-radius: 18px;
-      background: rgba(248, 250, 252, 0.96);
-      color: var(--slate-900);
-      padding: 0 16px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    }
-
-    .field-shell .field-control {
-      padding-left: 44px;
-    }
-
-    .field-control:focus {
-      outline: none;
-      border-color: rgba(56, 189, 248, 0.86);
-      background: var(--white);
-      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
-    }
-
-    .search-submit {
-      min-height: 54px;
-      padding-inline: 22px;
-      border-radius: 18px;
-    }
-
-    .departures-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .toolbar-copy strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--slate-900);
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    #counterLabel {
-      color: #64748b;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    #tripsGrid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 24px;
-    }
-
-    .departure-card {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-      border-radius: 30px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.94);
-      border: 1px solid rgba(226, 232, 240, 0.96);
-      box-shadow: var(--soft-shadow);
-      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
-    }
-
-    .departure-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(56, 189, 248, 0.48);
-      box-shadow: 0 24px 40px -24px rgba(2, 132, 199, 0.32);
-    }
-
-    .departure-card__media {
-      position: relative;
-      aspect-ratio: 16 / 10;
-      overflow: hidden;
-      background: linear-gradient(135deg, rgba(2, 132, 199, 0.16), rgba(186, 230, 253, 0.62));
-    }
-
-    .departure-card__media::after {
-      content: '';
-      position: absolute;
-      inset: auto 0 0;
-      height: 44%;
-      background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.78));
-      pointer-events: none;
-    }
-
-    .departure-card__media img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.4s ease;
-    }
-
-    .departure-card:hover .departure-card__media img {
-      transform: scale(1.04);
-    }
-
-    .departure-card__badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      z-index: 2;
-    }
-
-    .departure-card__content {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      gap: 18px;
-      padding: 22px 22px 24px;
-    }
-
-    .departure-card__kicker {
-      margin: 0 0 8px;
-      color: var(--ocean-600);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-    }
-
-    .departure-card__title {
-      margin: 0;
-      color: var(--slate-900);
-      font-size: 24px;
-      font-weight: 900;
-      line-height: 1.02;
-      font-style: italic;
-      text-transform: uppercase;
-      letter-spacing: -0.04em;
-    }
-
-    .departure-card__meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .departure-chip {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.96));
-      border: 1px solid rgba(226, 232, 240, 0.95);
-      color: #475569;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .departure-chip i {
-      color: var(--ocean-600);
-      width: 16px;
-      flex-shrink: 0;
-    }
-
-    .departure-card__footer {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 18px;
-      margin-top: auto;
-      padding-top: 18px;
-      border-top: 1px solid rgba(226, 232, 240, 0.92);
-    }
-
-    .departure-price-label {
-      display: block;
-      margin-bottom: 4px;
-      color: #64748b;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    .departure-price {
-      color: var(--slate-900);
-      font-size: 32px;
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -0.05em;
-      font-style: italic;
-    }
-
-    .departure-btn {
-      min-width: 170px;
-      border-radius: 18px;
-      padding: 14px 20px;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .departure-btn--disabled {
-      background: rgba(226, 232, 240, 0.9);
-      color: #94a3b8;
-      border: 1px solid rgba(203, 213, 225, 0.9);
-      cursor: not-allowed;
-    }
-
-    .availability-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .availability-pill__dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: currentColor;
-    }
-
-    .availability-pill--available {
-      background: rgba(34, 197, 94, 0.14);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      color: var(--success);
-    }
-
-    .availability-pill--last {
-      background: rgba(245, 158, 11, 0.14);
-      border: 1px solid rgba(245, 158, 11, 0.32);
-      color: var(--warning);
-    }
-
-    .availability-pill--soldout {
-      background: rgba(239, 68, 68, 0.14);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: var(--danger);
-    }
-
-    .trip-skeleton {
-      min-height: 430px;
-      border-radius: 30px;
-      background: linear-gradient(120deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.98), rgba(255, 255, 255, 0.92));
-      background-size: 200% 100%;
-      border: 1px solid rgba(226, 232, 240, 0.92);
-      animation: shimmer 1.6s infinite linear;
-      box-shadow: var(--soft-shadow);
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    .state-card {
-      padding: 44px 28px;
-      text-align: center;
-    }
-
-    .state-card__icon {
-      width: 78px;
-      height: 78px;
-      margin: 0 auto 20px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(2, 132, 199, 0.08);
-      color: var(--ocean-600);
-      font-size: 30px;
-    }
-
-    .state-card__icon--error {
-      background: rgba(239, 68, 68, 0.08);
-      color: var(--danger);
-    }
-
-    .state-card__title {
-      margin: 0 0 10px;
-      font-size: 26px;
-      font-weight: 900;
-      font-style: italic;
-      text-transform: uppercase;
-      letter-spacing: -0.03em;
-    }
-
-    .state-card__text {
-      max-width: 520px;
-      margin: 0 auto;
-      color: #64748b;
-      font-size: 14px;
-      line-height: 1.7;
-    }
-
-    @media (max-width: 1120px) {
-      #tripsGrid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .departures-search__grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 860px) {
-      .departures-search__grid {
-        grid-template-columns: 1fr;
-      }
-
-      .departures-toolbar {
-        flex-direction: column;
-        align-items: start;
-      }
-    }
-
-    @media (max-width: 720px) {
-      #tripsGrid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .departure-card__meta,
-      .departure-card__footer {
-        grid-template-columns: 1fr;
-        display: grid;
-      }
-
-      .departure-btn {
-        width: 100%;
-      }
-    }
-  </style>
-
-<style>
-.brand-lockup--home{display:flex!important;align-items:center;text-decoration:none}.brand-lockup--home .brand-lockup__box{width:190px;height:56px;display:flex;align-items:center;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}.brand-lockup--home img{display:block;width:180px;height:auto;max-height:54px;object-fit:contain}.header-actions--compact{display:flex!important;align-items:center;gap:8px}.header-access-icon{width:36px;height:36px;min-width:36px;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:rgba(7,9,11,.45);color:#fff;display:grid;place-items:center;text-decoration:none;font-weight:900;font-size:13px;line-height:1;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s ease,border-color .2s ease,background .2s ease}.header-access-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.header-access-icon--g{background:#f36f21;border-color:#f36f21;color:#fff}.header-access-icon:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.12)}.header-access-icon--g:hover{background:#ff7d2c;border-color:#ff7d2c}@media(max-width:900px){.brand-lockup--home .brand-lockup__box{width:145px;height:48px}.brand-lockup--home img{width:138px;max-height:45px}.header-actions--compact .btn-primary{display:none}.header-access-icon{width:34px;height:34px;min-width:34px}}@media(max-width:560px){.brand-lockup--home .brand-lockup__box{width:125px;height:44px}.brand-lockup--home img{width:120px;max-height:40px}.header-actions--compact{gap:6px}.header-access-icon{width:32px;height:32px;min-width:32px;border-radius:9px}.header-access-icon svg{width:15px;height:15px}}
-</style>
-<link rel="stylesheet" href="css/public-pages-v3.css"><style>.site-header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:1000!important;background:rgba(7,9,11,.86)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;border-bottom:1px solid rgba(255,255,255,.08)!important}.site-nav{height:76px!important;display:flex!important;align-items:center!important}.site-header .brand img{width:175px!important;height:54px!important;object-fit:contain!important}.site-header .menu-links{display:flex!important;flex:1!important;justify-content:center!important}.site-header .header-actions{display:flex!important}.site-header .mobile-banner{display:none}.site-header .menu-toggle{display:none}@media(max-width:980px){.site-header .menu-links{display:none!important}.site-header .header-cta{display:none!important}.site-header .menu-toggle{display:block!important}.site-header .mobile-banner{display:none!important}.menu-open .site-header .mobile-banner{display:flex!important}}@media(max-width:640px){.site-nav{height:68px!important}.site-header .brand img{width:128px!important;height:43px!important}.site-header .access{width:31px!important;height:31px!important}}</style></head>
+  <script type="module" src="./assets/viaggi-DtoeZTws.js"></script>
+  <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
+  <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
+  <link rel="modulepreload" href="./assets/fleetService-DSMpWv9k.js">
+  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="stylesheet" href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" href="./assets/viaggi-CjSv1-Az.css">
+  <link rel="stylesheet" href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-shell-v41.css">
+  <link rel="stylesheet" href="./assets/dg-v46-professional.css">
+</head>
 <body>
-  <div class="page-shell">
-    <header class="site-header"><div class="container site-nav"><a class="brand" href="index.html"><img src="assets/images/logo-sidebar.png" alt="DELGROSSO Viaggi & Limousine Bus"></a><nav class="menu-links"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">Flotta</a><a href="partyontheroad.html">Party</a><a href="contatti.html">Contatti</a><a href="preventivo.html">Preventivi</a></nav><div class="header-actions"><a class="access" href="admin.html" title="Admin Sito" aria-label="Admin Sito"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></a><a class="access" href="GESTIONALE/login.html" title="Gestionale" aria-label="Gestionale"><b>G</b></a><a class="header-cta" href="preventivo.html">Richiedi preventivo</a><button class="menu-toggle" type="button" aria-label="Apri menu" onclick="document.body.classList.toggle('menu-open')">☰</button></div></div><nav class="mobile-banner"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">Flotta</a><a href="partyontheroad.html">Party</a><a href="contatti.html">Contatti</a><a href="preventivo.html">Preventivi</a></nav></header>
 
-    <main>
-      <section class="hero-section">
-        <div class="hero-copy" data-aos="fade-up">
-          <span class="eyebrow"><span class="eyebrow__dot"></span> Del Grosso Viaggi &amp; Limousine Bus</span>
-          <h1 class="hero-title">Prossime <span>Partenze</span></h1>
-          <p class="hero-text">
-            Organizza il tuo prossimo viaggio con lo stile Del Grosso: partenze selezionate,
-            bus Gran Turismo, assistenza rapida e prenotazione online in pochi passaggi.
-          </p>
-          <div class="hero-actions">
-            <a class="btn-primary" href="#catalogo-partenze"><i class="fas fa-ticket"></i> Scopri i Viaggi</a>
-            <a class="btn-secondary" href="preventivo.html"><i class="fas fa-file-signature"></i> Richiedi preventivo</a>
-          </div>
-        </div>
+<h1><i class="fa-solid fa-route" aria-hidden="true"></i> Gestione Viaggi</h1>
 
-        <div class="hero-visual panel-soft" data-aos="fade-left">
-          <div class="hero-visual__image">
-            <img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Viaggi">
-          </div>
-          <div class="hero-stat-list">
-            <div class="hero-stat">
-              <strong>53-63</strong>
-              <span>Posti GT Deluxe</span>
-            </div>
-            <div class="hero-stat">
-              <strong>VIP</strong>
-              <span>Esperienza Premium</span>
-            </div>
-            <div class="hero-stat">
-              <strong>24/7</strong>
-              <span>Assistenza Clienti</span>
-            </div>
-            <div class="hero-stat">
-              <strong>LIMO</strong>
-              <span>Party on the Road</span>
-            </div>
-          </div>
-        </div>
-      </section>
+<div class="toolbar">
+  <label class="sr-only" for="searchTrip">Cerca viaggio</label>
+  <input id="searchTrip" placeholder="Cerca titolo, destinazione o data..." aria-label="Cerca viaggio">
+  <button id="btnNewTrip">+ Nuovo Viaggio</button>
+</div>
 
-      <section class="cred-band" aria-label="Punti di forza" data-aos="fade-up">
-        <div class="cred-item">
-          <strong>100%</strong>
-          <span>Comfort &amp; Sicurezza</span>
-        </div>
-        <div class="cred-item">
-          <strong>53-63</strong>
-          <span>Posti Bus GT Deluxe</span>
-        </div>
-        <div class="cred-item">
-          <strong>LIMO</strong>
-          <span>Discoteca Itinerante</span>
-        </div>
-        <div class="cred-item">
-          <strong>24/7</strong>
-          <span>Assistenza Clienti</span>
-        </div>
-      </section>
+<div class="stats">
+<div class="card"><h3>Viaggi Totali</h3><span id="totTrips">0</span></div>
+<div class="card"><h3>Attivi</h3><span id="plannedTrips">0</span></div>
+<div class="card"><h3>Completi</h3><span id="runningTrips">0</span></div>
+<div class="card"><h3>Annullati</h3><span id="completedTrips">0</span></div>
+</div>
 
-      <section id="catalogo-partenze" class="section-shell">
-        <div class="section-head" data-aos="fade-up">
-          <div>
-            <span class="section-kicker">Itinerari Esclusivi</span>
-            <h2 class="section-title">Catalogo <span>Partenze</span></h2>
-          </div>
-          <a class="section-link" href="contatti.html">Hai bisogno di supporto? <span>&rarr;</span></a>
-        </div>
+<div id="messageBox" class="message-box" aria-live="polite" style="position:fixed;top:100px;left:50%;transform:translateX(-50%);min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:1000;font-size:0.95rem;box-shadow:0 8px 24px rgba(0,0,0,0.18);"></div>
 
-        <div class="departures-search panel" data-aos="fade-up" data-aos-delay="60">
-          <div class="departures-search__grid">
-            <label class="field-shell" for="searchInput">
-              <i class="fas fa-magnifying-glass"></i>
-              <input id="searchInput" class="field-control" type="text" placeholder="Cerca destinazione o viaggio">
-            </label>
-            <select id="destinationFilter" class="field-control" aria-label="Filtro destinazione">
-              <option value="">Tutte le destinazioni</option>
-            </select>
-            <select id="availabilityFilter" class="field-control" aria-label="Filtro disponibilità">
-              <option value="">Disponibilità</option>
-              <option value="disponibile">Disponibile</option>
-              <option value="ultimi">Ultimi posti</option>
-              <option value="soldout">Sold Out</option>
-            </select>
-            <button class="btn-primary search-submit" type="button"><i class="fas fa-sliders"></i> Filtri</button>
-          </div>
-        </div>
+<table id="tripTable">
+<thead>
+<tr>
+<th data-sort="titolo">Titolo</th>
+<th data-sort="destinazione">Destinazione</th>
+<th data-sort="data_partenza">Data</th>
+<th data-sort="ora_partenza">Ora</th>
+<th>Prezzo</th>
+<th data-sort="autobus">Bus</th>
+<th data-sort="posti_totali">Posti</th>
+<th>Azioni</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-        <div class="departures-toolbar">
-          <div class="toolbar-copy">
-            <strong>Risultati disponibili</strong>
-            <span id="counterLabel">Caricamento partenze...</span>
-          </div>
-          <button id="reloadButton" class="btn-ghost hidden" type="button"><i class="fas fa-rotate-right"></i> Aggiorna</button>
-        </div>
+<div id="modal" class="modal" aria-hidden="true" tabindex="-1">
+  <div class="content">
+    <h2 id="modalTitle">Nuovo Viaggio</h2>
 
-        <div id="tripsGrid" aria-live="polite"></div>
+    <input id="viaggio_id" type="hidden">
 
-        <div id="emptyState" class="hidden">
-          <div class="state-card panel">
-            <div class="state-card__icon"><i class="fas fa-suitcase-rolling"></i></div>
-            <h3 class="state-card__title">Nessuna partenza trovata</h3>
-            <p class="state-card__text">Modifica i filtri oppure riprova più tardi: nuove partenze Del Grosso vengono pubblicate costantemente.</p>
-          </div>
-        </div>
+    <label for="titolo">Titolo Viaggio</label>
+    <input id="titolo" placeholder="Titolo viaggio">
 
-        <div id="errorState" class="hidden">
-          <div class="state-card panel">
-            <div class="state-card__icon state-card__icon--error"><i class="fas fa-triangle-exclamation"></i></div>
-            <h3 class="state-card__title">Errore di caricamento</h3>
-            <p id="errorMessage" class="state-card__text">Si è verificato un problema durante il recupero delle partenze online.</p>
-            <button id="retryButton" class="btn-primary" type="button" style="margin-top:24px;"><i class="fas fa-rotate-right"></i> Riprova</button>
-          </div>
-        </div>
-      </section>
-    </main>
+    <label for="destinazione">Destinazione</label>
+    <input id="destinazione" placeholder="Destinazione">
 
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <div class="site-footer__grid">
-          <section class="footer-card">
-            <div class="brand-lockup" style="margin-bottom:20px;">
-              <span class="brand-lockup__box"><img data-runtime-logo src="./assets/logo-delgrosso.svg" alt="Del Grosso Logo"></span>
-              <span class="brand-lockup__text">
-                <span class="brand-lockup__title" style="color:#e2e8f0;">Del Grosso</span>
-                <span class="brand-lockup__sub" style="color:#7dd3fc;">Viaggi &amp; Limousine Bus</span>
-              </span>
-            </div>
-            <h3>Contatti Diretti</h3>
-            <div class="contact-stack" data-runtime-contact-stack></div>
-          </section>
+    <label for="luogo_partenza">Luogo di Partenza</label>
+    <input id="luogo_partenza" placeholder="Es. San Severo (FG)">
 
-          <section class="footer-card">
-            <h3>Canali Social Operativi</h3>
-            <div class="social-grid" data-runtime-social-grid></div>
-          </section>
-        </div>
+    <label for="data_partenza">Data</label>
+    <input id="data_partenza" type="date">
 
-        <div class="footer-bottom">
-          <span>&copy; 2026 Del Grosso Viaggi &amp; Limousine Bus - P.IVA: 04499320713. Tutti i diritti riservati.</span>
-          <span>Esperienze premium, viaggi organizzati, party bus ed eventi privati.</span>
-        </div>
+    <label for="ora_partenza">Ora</label>
+    <input id="ora_partenza" type="time">
+
+    <label for="prezzo">Prezzo</label>
+    <input id="prezzo" type="number" step="0.01" placeholder="35.00">
+
+    <label for="descrizione">Descrizione</label>
+    <textarea id="descrizione"></textarea>
+
+    <label for="locandina_file">Locandina</label>
+    <input id="locandina_file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+    <div class="locandina-actions">
+      <button id="uploadLocandina" type="button">Carica Locandina</button>
+      <button id="replaceLocandina" type="button">Sostituisci Locandina</button>
+      <button id="removeLocandina" type="button">Rimuovi Locandina</button>
+    </div>
+    <div id="uploadProgressBox" class="upload-progress" aria-live="polite">
+      <div id="uploadProgressText" class="upload-progress-text"></div>
+      <div class="upload-progress-bar-wrap">
+        <div id="uploadProgressBar" class="upload-progress-bar"></div>
       </div>
-    </footer>
+      <button id="retryUpload" type="button" class="retry-upload">Riprova</button>
+    </div>
+    <img id="locandina_preview" class="locandina-preview" alt="Anteprima locandina" />
+
+    <label for="locandina">Locandina Public URL</label>
+    <input id="locandina" placeholder="https://...">
+
+    <label for="bus_select">Bus Assegnato</label>
+    <select id="bus_select"></select>
+
+    <label for="posti_totali">Posti Totali</label>
+    <input id="posti_totali" type="number" placeholder="Posti totali">
+
+    <label for="stato">Stato</label>
+    <select id="stato">
+      <option value="Programmato">Programmato</option>
+      <option value="Confermato">Confermato</option>
+      <option value="Annullato">Annullato</option>
+    </select>
+
+    <label for="pubblicato">Pubblica sul sito web</label>
+    <select id="pubblicato">
+      <option value="NO">NO — Solo gestionale</option>
+      <option value="SI">SI — Visibile sul sito</option>
+    </select>
+
+    <div class="actions">
+      <button id="saveTrip">Salva</button>
+      <button id="closeTrip">Chiudi</button>
+    </div>
+
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-  <script>
-    if (typeof AOS !== 'undefined') {
-      AOS.init({ duration: 700, once: true, offset: 40 });
-    }
 
-    const mobileToggle = document.getElementById('mobileToggle');
-    const mobileStrip = document.getElementById('mobileStrip');
 
-    if (mobileToggle && mobileStrip) {
-      mobileToggle.addEventListener('click', () => {
-        mobileStrip.classList.toggle('hidden');
-        mobileToggle.innerHTML = mobileStrip.classList.contains('hidden')
-          ? '<i class="fas fa-bars"></i>'
-          : '<i class="fas fa-xmark"></i>';
-      });
-    }
-  </script>
-  <script type="module" src="./js/viaggi.js"></script>
+
+
+
+
+
+  <script src="./assets/dg-shell-v41.js"></script>
+  <script src="./assets/dg-v46-ux.js"></script>
 </body>
 </html>
