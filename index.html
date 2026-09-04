@@ -1,29 +1,501 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Accesso Gestionale | Del Grosso Viaggi</title>
-  <script type="module" src="./assets/index-BDlsTAnA.js"></script>
-  <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
-  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
-  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#0b2742">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DG Gestionale">
-<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
-  <link rel="stylesheet" href="./assets/dg-github-v19.css">
-  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
-  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
-  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
-  <link rel="stylesheet" href="./assets/dg-v46-professional.css">
-</head>
-<body>
-  <div id="app"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Del Grosso Viaggi & Limousine Bus | Experience VIP & Luxury Events</title>
+    <meta name="description" content="Noleggio Autobus Gran Turismo per gite ed eventi in tutta Italia, e l'esclusivo Limousine Bus per i tuoi party VIP in mobilità.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- AOS Library per Animazioni Pro -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-  <script src="./assets/dg-v46-ux.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        ocean: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 500: '#0284c7', 600: '#0284c7', 800: '#075985', 900: '#0c4a6e', dark: '#03192e',
+                        },
+                        silver: { 100: '#f8fafc', 200: '#f1f5f9', 300: '#e2e8f0', 400: '#cbd5e1' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc; 
+            color: #0f172a; 
+            -webkit-font-smoothing: antialiased; 
+            overflow-x: hidden; 
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        /* Hero Carousel Full HD & Effetti Casuali */
+        .carousel-wrap { position: relative; width: 100%; height: 90vh; min-height: 650px; background: #030712; overflow: hidden; }
+        
+        .slide { 
+            position: absolute; 
+            inset: 0; 
+            opacity: 0; 
+            visibility: hidden;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            width: 100%; 
+            height: 100%; 
+            transform: scale(1.05);
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            visibility: visible;
+            z-index: 10; 
+            transform: scale(1) translate(0, 0) rotate(0deg);
+        }
+
+        .slide-img-hd { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            object-position: center; 
+            filter: brightness(0.9) contrast(1.05);
+        }
+
+        .carousel-overlay { 
+            position: absolute; 
+            inset: 0; 
+            z-index: 15; 
+            background: linear-gradient(to right, rgba(3,7,18,0.7) 0%, rgba(3,7,18,0.3) 60%, transparent 100%);
+            pointer-events: none; 
+        }
+
+        .card-ocean { 
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            box-shadow: 0 4px 20px -2px rgba(2, 132, 199, 0.05);
+        }
+        .card-ocean:hover { 
+            transform: translateY(-8px); 
+            border-color: #38bdf8; 
+            box-shadow: 0 20px 40px -10px rgba(2, 132, 199, 0.18); 
+        }
+
+        .glow-blob-1 { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(56,189,248,0.12) 0%, rgba(255,255,255,0) 70%); filter: blur(80px); pointer-events: none; }
+        .glow-blob-2 { position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(2,132,199,0.1) 0%, rgba(255,255,255,0) 70%); filter: blur(80px); pointer-events: none; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="selection:bg-sky-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="fixed top-0 inset-x-0 z-50 glass-nav shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <div class="bg-slate-900 p-2 rounded-2xl transition-transform duration-300 group-hover:scale-105 shadow-md">
+                        <img src="logo.JPEG" class="h-9 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
+                    </div>
+                </a>
+
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="text-xs font-black uppercase tracking-widest text-sky-600 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> Home
+                    </a>
+                    <a href="viaggi.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">Partenze</a>
+                    <a href="flotta.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-sky-600 transition-colors">La Flotta</a>
+                    <a href="partyontheroad.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-indigo-600 transition-colors">Party</a>
+                    <a href="contatti.html" class="text-xs font-bold uppercase tracking-widest text-slate-600 hover:text-slate-900 transition-colors">Contatti</a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <a href="contatti.html" class="hidden sm:inline-flex bg-gradient-to-r from-sky-600 to-ocean-800 hover:opacity-95 text-white px-7 py-3 rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-sky-600/20 hover:scale-105">
+                        Richiedi Preventivo
+                    </a>
+                    <a href="admin.html" title="Area Riservata" class="p-2 text-slate-400 hover:text-slate-700 transition-colors">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                    </a>
+                    <!-- Icona G (Gestionale) -->
+                    <a href="https://www.delgrossoviaggi.it/GESTIONALE/login.html" title="Gestionale" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs flex items-center justify-center transition-colors shadow-sm border border-slate-200">
+                        G
+                    </a>
+                </div>
+            </div>
+            
+            <div class="md:hidden flex overflow-x-auto no-scrollbar gap-6 py-3 border-t border-slate-200 text-nowrap">
+                <a href="index.html" class="text-[11px] font-extrabold uppercase tracking-wider text-sky-600">Home</a>
+                <a href="viaggi.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Partenze</a>
+                <a href="flotta.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Flotta</a>
+                <a href="partyontheroad.html" class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Party</a>
+                <a href="contatti.html" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Contatti</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section con Carousel Full HD e Effetti Dinamici -->
+    <section id="home" class="carousel-wrap pt-20">
+        <div class="carousel-overlay"></div>
+        
+        <!-- Contenuto Testuale: Badge in alto e tutto il blocco testuale in basso a sinistra -->
+        <div class="relative z-20 max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-between py-10">
+            <!-- Badge in alto -->
+            <div>
+                <div data-aos="fade-down" data-aos-duration="1000" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-sky-400/40 text-sky-300 text-[9px] font-black uppercase tracking-widest w-max backdrop-blur-xl shadow-xl">
+                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+                    Del Grosso Viaggi & Limousine Bus
+                </div>
+            </div>
+
+            <!-- Titolo ridotto, Descrizione e Pulsanti raggruppati in basso a sinistra -->
+            <div data-aos="fade-up" data-aos-duration="1200" class="max-w-xl pb-4">
+                <h1 class="text-2xl sm:text-4xl font-black uppercase italic tracking-tight text-white leading-[1.1] drop-shadow-2xl mb-2">
+                    VIAGGI DI LUSSO. <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-200 to-cyan-300">ESPERIENZE VIP.</span>
+                </h1>
+                
+                <p class="text-[11px] sm:text-xs text-slate-200 font-medium leading-relaxed drop-shadow-md mb-5">
+                    Noleggio Autobus Gran Turismo per gite ed eventi in tutta Italia, e l'esclusivo Limousine Bus per i tuoi party VIP in mobilità.
+                </p>
+
+                <div class="flex flex-wrap gap-3 items-center">
+                    <a href="viaggi.html" class="bg-gradient-to-r from-sky-500 to-ocean-800 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-3 rounded-xl font-black uppercase text-[11px] tracking-wider transition-all shadow-xl shadow-sky-900/50 hover:scale-105 flex items-center gap-2 border border-sky-400/20">
+                        Prossime Partenze ➔
+                    </a>
+                    <a href="partyontheroad.html" class="bg-slate-900/80 backdrop-blur-md hover:bg-slate-800 border border-indigo-500/50 text-white px-4 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-wider transition-all shadow-lg hover:scale-105 hover:border-indigo-400">
+                        Party On The Road 🔥
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container Slide Dinamiche -->
+        <div id="carousel-container" class="absolute inset-0 z-0">
+            <div class="slide active">
+                <img src="logo.JPEG" alt="Del Grosso Banner" class="slide-img-hd">
+            </div>
+        </div>
+    </section>
+
+    <!-- Barra della Credibilità -->
+    <section class="bg-white border-b border-slate-200 py-10 relative z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+            <div data-aos="zoom-in" data-aos-delay="100" class="p-4 rounded-3xl bg-slate-50 border border-slate-100">
+                <span class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-800 italic tracking-tight block">100%</span>
+                <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1 block">Comfort & Sicurezza</span>
+            </div>
+            <div data-aos="zoom-in" data-aos-delay="200" class="p-4 rounded-3xl bg-slate-50 border border-slate-100">
+                <span class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-800 italic tracking-tight block">53-63</span>
+                <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1 block">Posti Bus GT Deluxe</span>
+            </div>
+            <div data-aos="zoom-in" data-aos-delay="300" class="p-4 rounded-3xl bg-slate-50 border border-slate-100">
+                <span class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-sky-600 italic tracking-tight block">LIMO-BUS</span>
+                <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1 block">Discoteca Itinerante</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: PARTENZE / VIAGGI -->
+    <section class="py-24 bg-slate-50 relative overflow-hidden">
+        <div class="glow-blob-1 top-20 left-10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6" data-aos="fade-up">
+                <div>
+                    <span class="text-sky-600 font-extrabold uppercase text-xs tracking-[0.3em] block mb-2">Itinerari Esclusivi</span>
+                    <h2 class="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-slate-900">PROSSIME PARTENZE</h2>
+                </div>
+                <a href="viaggi.html" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 hover:text-sky-600 transition-colors flex items-center gap-2 group">
+                    Tutte le partenze <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+            </div>
+            <div id="grid-viaggi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: LA FLOTTA -->
+    <section class="py-24 bg-white relative border-t border-slate-200 overflow-hidden">
+        <div class="glow-blob-2 bottom-10 right-10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6" data-aos="fade-up">
+                <div>
+                    <span class="text-ocean-800 font-extrabold uppercase text-xs tracking-[0.3em] block mb-2">Garage d'Élite</span>
+                    <h2 class="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-slate-900">LA NOSTRA FLOTTA</h2>
+                </div>
+                <a href="flotta.html" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 hover:text-sky-600 transition-colors flex items-center gap-2 group">
+                    Vedi tutti i mezzi <span class="group-hover:translate-x-1 transition-transform">→</span>
+                </a>
+            </div>
+            <div id="grid-flotta" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: PARTY ON THE ROAD -->
+    <section class="py-24 bg-slate-100 relative border-t border-slate-200 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-8" data-aos="fade-up">
+                <div>
+                    <span class="text-indigo-600 font-extrabold uppercase text-xs tracking-[0.3em] block mb-2">The Ultimate Club Experience</span>
+                    <h2 class="text-3xl sm:text-5xl lg:text-6xl font-black uppercase italic tracking-tight text-slate-900 leading-none">
+                        PARTY <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-sky-600 to-blue-800">ON THE ROAD</span>
+                    </h2>
+                </div>
+                <a href="partyontheroad.html" class="bg-gradient-to-r from-indigo-600 to-sky-600 hover:opacity-95 text-white px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-indigo-600/20 hover:scale-105">
+                    Sfoglia Gallery completa →
+                </a>
+            </div>
+            <div id="grid-party-home" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+
+    <!-- SECTION 4: LOCANDINE -->
+    <section class="py-20 bg-white relative border-t border-slate-200 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="mb-10" data-aos="fade-up">
+                <span class="text-pink-600 font-extrabold uppercase text-xs tracking-[0.3em] block mb-2">In Evidenza</span>
+                <h2 class="text-3xl sm:text-5xl font-black uppercase italic tracking-tight text-slate-900">LOCANDINE & EVENTI</h2>
+            </div>
+            <div id="grid-locandine-home" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white pt-20 pb-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
+            <div>
+                <div class="bg-white p-2.5 rounded-2xl w-max mb-8 shadow-xl">
+                    <img src="logo.JPEG" class="h-10 w-auto object-contain" alt="Del Grosso Logo" onerror="this.src='https://via.placeholder.com/150x50?text=DEL+GROSSO'">
+                </div>
+                <h3 class="text-xl font-black uppercase mb-6 italic tracking-tight text-slate-100">Contatti Diretti</h3>
+                <div class="space-y-4">
+                    <div class="p-5 rounded-3xl bg-slate-800/80 border border-slate-700 hover:border-sky-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+                        <div>
+                            <span class="text-sky-400 font-black text-[10px] uppercase tracking-widest block mb-1">Bus GT & Logistica</span>
+                            <a href="tel:3205730466" class="text-xl font-bold text-white hover:text-sky-400 transition-colors">320 5730466 (Raffaele)</a>
+                        </div>
+                        <a href="https://wa.me/393205730466" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all w-max shadow-md shadow-green-500/20">
+                            WhatsApp
+                        </a>
+                    </div>
+                    <div class="p-5 rounded-3xl bg-slate-800/80 border border-slate-700 hover:border-indigo-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+                        <div>
+                            <span class="text-indigo-400 font-black text-[10px] uppercase tracking-widest block mb-1">Limousine Bus & Eventi Private</span>
+                            <a href="tel:3662127916" class="text-xl font-bold text-white hover:text-indigo-400 transition-colors">366 2127916 (Nicola)</a>
+                        </div>
+                        <a href="https://wa.me/393662127916" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all w-max shadow-md shadow-green-500/20">
+                            WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-black uppercase mb-6 text-slate-400 italic tracking-tight">Canali Social Operativi</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <a href="https://www.instagram.com/delgrosso_viaggi_/" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-pink-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
+                        <span class="text-white">Instagram Viaggi</span>
+                        <span class="text-pink-500 group-hover:translate-x-1 transition-transform">↗</span>
+                    </a>
+                    <a href="https://www.instagram.com/_limousine_bus/" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-pink-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
+                        <span class="text-white">Instagram LimoBus</span>
+                        <span class="text-pink-500 group-hover:translate-x-1 transition-transform">↗</span>
+                    </a>
+                    <a href="https://www.facebook.com/people/DelGrosso-Viaggi-LimousineBus/61585620590672/" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-sky-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
+                        <span class="text-white">Facebook Viaggi</span>
+                        <span class="text-sky-500 group-hover:translate-x-1 transition-transform">↗</span>
+                    </a>
+                    <a href="https://www.facebook.com/profile.php?id=61552174581411" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 hover:border-sky-500/50 text-xs font-black uppercase tracking-wider flex items-center justify-between transition-all group hover:scale-[1.02]">
+                        <span class="text-white">Facebook LimoBus</span>
+                        <span class="text-sky-500 group-hover:translate-x-1 transition-transform">↗</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-800 text-center flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+            <p>© 2026 Del Grosso Viaggi & Limousine Bus - P.IVA: 04499320713. Tutti i diritti riservati.</p>
+            <p class="font-bold tracking-widest uppercase text-[10px]">Developer & Design: Nicola Pio Cristino</p>
+        </div>
+    </footer>
+
+    <!-- Script Carousel con Effetti Visivi Casuali Full HD -->
+    <script>
+        AOS.init({ duration: 800, once: true, offset: 80 });
+
+        const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
+        const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
+        const sb = supabase.createClient(S_URL, S_KEY);
+
+        let currentIndex = 0;
+        let slideInterval;
+        let slides = [];
+
+        const randomEffects = [
+            'transform: scale(1.15) rotate(1deg); filter: brightness(1) contrast(1.1);',
+            'transform: scale(1) translateY(-20px); filter: brightness(0.95);',
+            'transform: scale(1.08) translateX(15px); filter: brightness(1.05);',
+            'transform: scale(1.1) rotate(-1deg); filter: brightness(0.9);',
+            'transform: scale(1.05) translateY(15px); filter: brightness(1.02);'
+        ];
+
+        function updateCarousel(index) {
+            slides.forEach((s, idx) => {
+                s.classList.remove('active');
+                if(idx === index) {
+                    s.classList.add('active');
+                    const randomStyle = randomEffects[Math.floor(Math.random() * randomEffects.length)];
+                    const imgEl = s.querySelector('.slide-img-hd');
+                    if(imgEl) {
+                        imgEl.style.cssText = randomStyle;
+                    }
+                }
+            });
+        }
+
+        async function init() {
+            try {
+                const { data: cData } = await sb.from('carousel_home').select('*').order('created_at', { ascending: false });
+                const container = document.getElementById('carousel-container');
+                
+                if(cData && cData.length > 0) {
+                    let urls = [];
+                    cData.forEach(record => {
+                        if (Array.isArray(record.foto_urls)) {
+                            urls.push(...record.foto_urls);
+                        } else if (typeof record.foto_urls === 'string') {
+                            try { urls.push(...JSON.parse(record.foto_urls)); } catch(e) {}
+                        }
+                    });
+                    
+                    if(urls.length > 0) {
+                        container.innerHTML = urls.map((url, i) => `
+                            <div class="slide ${i === 0 ? 'active' : ''}">
+                                <img src="${url}" loading="${i === 0 ? 'eager' : 'lazy'}" alt="Del Grosso Banner Full HD" class="slide-img-hd">
+                            </div>
+                        `).join('');
+                        
+                        slides = document.querySelectorAll('.slide');
+                        
+                        if(urls.length > 1) {
+                            startCarousel();
+                        }
+                    }
+                }
+            } catch(e) { console.error("Error Carousel:", e); }
+
+            // PARTENZE / VIAGGI
+            try {
+                const { data: vData } = await sb.from('tratte').select('*').order('created_at', { ascending: false });
+                if(vData && vData.length > 0) {
+                    document.getElementById('grid-viaggi').innerHTML = vData.map((v, idx) => `
+                        <div data-aos="fade-up" data-aos-delay="${idx * 100}" class="group rounded-3xl card-ocean overflow-hidden cursor-pointer" onclick="location.href='viaggi.html'">
+                            <div class="h-64 overflow-hidden relative">
+                                <img src="${v.immagine_url || 'logo.JPEG'}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute top-4 right-4 bg-gradient-to-r from-sky-600 to-ocean-800 text-white text-[10px] font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-md">
+                                    Bus ${v.modello_bus} Posti
+                                </div>
+                            </div>
+                            <div class="p-7">
+                                <span class="text-sky-600 font-black text-xs uppercase tracking-widest block mb-1">${v.data_partenza}</span>
+                                <h3 class="font-black uppercase text-xl italic tracking-tight text-slate-900 leading-tight">${v.titolo}</h3>
+                                <div class="mt-6 pt-5 border-t border-slate-100 flex justify-between items-center">
+                                    <span class="text-xs font-black uppercase text-slate-700 tracking-wider">Prenota Posto</span>
+                                    <span class="w-8 h-8 rounded-full bg-gradient-to-r from-sky-500 to-ocean-800 text-white flex items-center justify-center font-bold text-sm shadow-md group-hover:scale-110 transition-transform">→</span>
+                                </div>
+                            </div>
+                        </div>`).join('');
+                }
+            } catch(e) { console.error("Error Viaggi:", e); }
+
+            // LA FLOTTA
+            try {
+                const { data: fData } = await sb.from('flotta_page').select('*').order('created_at', { ascending: true });
+                if(fData && fData.length > 0) {
+                    document.getElementById('grid-flotta').innerHTML = fData.map((f, idx) => `
+                        <div data-aos="fade-up" data-aos-delay="${idx * 100}" class="group rounded-3xl card-ocean overflow-hidden cursor-pointer" onclick="location.href='flotta.html'">
+                            <div class="h-60 overflow-hidden relative">
+                                <img src="${f.immagine_url || 'logo.JPEG'}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            </div>
+                            <div class="p-7 relative">
+                                <h3 class="text-xl font-black uppercase italic text-slate-900 tracking-tight leading-tight">${f.titolo}</h3>
+                                <p class="text-xs text-slate-500 mt-2 line-clamp-2">${f.descrizione || ''}</p>
+                                <span class="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-sky-600 mt-5">
+                                    Dettagli Mezzo <span>→</span>
+                                </span>
+                            </div>
+                        </div>`).join('');
+                }
+            } catch(e) { console.error("Error Flotta:", e); }
+
+            // PARTY PREVIEW
+            try {
+                const { data: pData } = await sb.from('gallery_eventi').select('*').limit(4).order('created_at', { ascending: false });
+                if(pData && pData.length > 0) {
+                    document.getElementById('grid-party-home').innerHTML = pData.map((p, idx) => `
+                        <div data-aos="zoom-in" data-aos-delay="${idx * 100}" class="group rounded-3xl card-ocean overflow-hidden h-72 relative cursor-pointer" onclick="location.href='partyontheroad.html'">
+                            <img src="${p.foto_urls ? p.foto_urls[0] : 'logo.JPEG'}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent p-6 flex flex-col justify-end">
+                                <h3 class="text-lg font-black uppercase italic text-white tracking-tight">${p.titolo}</h3>
+                                <span class="text-[10px] text-sky-300 font-black uppercase tracking-widest mt-1 block">Vedi Album →</span>
+                            </div>
+                        </div>`).join('');
+                }
+            } catch(e) { console.error("Error Party:", e); }
+
+            // LOCANDINE: alimentate dalla tabella TRATTE
+            try {
+                const locGrid = document.getElementById('grid-locandine-home');
+                if (locGrid) {
+                    const locandine = (vData || []).slice(0, 4);
+                    locGrid.innerHTML = locandine.map((l, idx) => `
+                        <a href="viaggi.html" data-aos="fade-up" data-aos-delay="${idx * 80}" class="group rounded-3xl overflow-hidden border border-slate-200 bg-slate-50 shadow-sm hover:-translate-y-2 hover:shadow-xl transition-all">
+                            <img src="${l.immagine_url || 'logo.JPEG'}" loading="lazy" alt="${l.titolo || 'Locandina Del Grosso Viaggi'}" class="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="p-4">
+                                <div class="font-black uppercase italic text-sm text-slate-900">${l.titolo || 'Locandina'}</div>
+                                <div class="text-[10px] text-sky-600 font-black uppercase tracking-widest mt-1">Scopri la partenza →</div>
+                            </div>
+                        </a>`).join('');
+                }
+            } catch(e) { console.error("Error Locandine/Tratte:", e); }
+        }
+
+        function startCarousel() {
+            slideInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % slides.length;
+                updateCarousel(currentIndex);
+            }, 6000);
+        }
+
+        const siteTables = ['carousel_home','tratte','flotta_page','gallery_eventi'];
+        const realtimeChannel = sb.channel('public-site-sync');
+        siteTables.forEach(table => {
+            realtimeChannel.on('postgres_changes', { event: '*', schema: 'public', table }, () => init());
+        });
+        realtimeChannel.subscribe((status) => {
+            if (status === 'CHANNEL_ERROR') console.warn('Supabase Realtime non disponibile per il sito.');
+        });
+
+        init();
+    </script>
 </body>
 </html>
