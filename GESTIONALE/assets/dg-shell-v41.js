@@ -8,18 +8,18 @@
     dashboard:'./dashboard.html', viaggi:'./viaggi.html', prenotazioni:'./prenotazioni.html',
     clienti:'./clienti.html', flotta:'./flotta.html', pagamenti:'./pagamenti.html',
     archivio:'./archivio.html', preventivi:'./preventivi.html', notifiche:'./notifiche.html',
-    checkin:'./checkin.html', statistiche:'./statistiche.html', impostazioni:'./impostazioni.html'
+    checkin:'./checkin.html', statistiche:'./statistiche.html', centrooperativo:'./centro-operativo.html', impostazioni:'./impostazioni.html'
   };
   const NAV = [
     ['Dashboard','dashboard','⌂'], ['Viaggi','viaggi','◫'], ['Prenotazioni','prenotazioni','▤'],
     ['Clienti','clienti','♙'], ['Flotta','flotta','▱'], ['Pagamenti','pagamenti','€'],
     ['Archivio','archivio','▣'], ['Preventivi','preventivi','▤'], ['Notifiche','notifiche','♢'],
-    ['CHECK-IN','checkin','⌗'], ['Statistiche','statistiche','▥'], ['Impostazioni','impostazioni','⚙']
+    ['CHECK-IN','checkin','⌗'], ['Statistiche','statistiche','▥'], ['Centro Operativo','centrooperativo','◉'], ['Impostazioni','impostazioni','⚙']
   ];
   const TITLES = {
     dashboard:'Dashboard',viaggi:'Viaggi',prenotazioni:'Prenotazioni',clienti:'Clienti',flotta:'Flotta',
     pagamenti:'Pagamenti',archivio:'Archivio documenti',preventivi:'Preventivi',notifiche:'Notifiche',
-    checkin:'CHECK-IN',statistiche:'Statistiche',impostazioni:'Impostazioni'
+    checkin:'CHECK-IN',statistiche:'Statistiche',centrooperativo:'Centro Operativo',impostazioni:'Impostazioni'
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const getSession = () => {
@@ -55,7 +55,7 @@
       <div class="dg-v41-backdrop" hidden></div>
       <header class="dg-v41-header" role="banner">
         <div class="dg-v41-heading"><span>DELGROSSO VIAGGI · GESTIONALE</span><strong>${esc(TITLES[key] || 'Gestionale')}</strong></div>
-        <div class="dg-v41-status"><span class="dg-v41-dot"></span><span>Operativo · V45</span></div>
+        <div class="dg-v41-status"><span class="dg-v41-dot"></span><span>Operativo · V46</span></div>
       </header>
       <aside id="dg-v41-drawer" class="dg-v41-drawer" aria-label="Navigazione Gestionale" aria-hidden="true">
         <div class="dg-v41-brand">

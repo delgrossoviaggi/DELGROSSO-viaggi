@@ -42,3 +42,11 @@ body.dg-v41-ready #bookingTable td:nth-child(3) a{display:inline-block;max-width
 body.dg-v41-ready .dg-booking-code{background:rgba(47,125,240,.13);border:1px solid rgba(47,125,240,.2);color:#d8ebff}
 body.dg-v41-ready .empty-state,body.dg-v41-ready .archive-empty{padding:34px 18px;text-align:center;color:var(--dg-muted)}
 @media(max-width:600px){body.dg-v41-ready .actions,body.dg-v41-ready .toolbar-actions,body.dg-v41-ready .pay-form-actions,body.dg-v41-ready .prenota-actions,body.dg-v41-ready .op-actions{display:grid;grid-template-columns:1fr}body.dg-v41-ready .actions>* ,body.dg-v41-ready .toolbar-actions>*,body.dg-v41-ready .pay-form-actions>*,body.dg-v41-ready .prenota-actions>*,body.dg-v41-ready .op-actions>*{width:100%}}
+\n/* V46 shell refinement */
+.dg-v41-header{backdrop-filter:blur(20px);transition:box-shadow .18s ease,background .18s ease,border-color .18s ease}
+.dg-v41-drawer{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.dg-v41-nav a{transition:transform .14s ease,background .14s ease,color .14s ease}
+html[data-theme="light"] .dg-v41-header,body[data-theme="light"] .dg-v41-header{background:rgba(255,255,255,.96)!important;border-color:#d7e0ea!important}
+html[data-theme="light"] .dg-v41-heading span,body[data-theme="light"] .dg-v41-heading span{color:#1769aa!important}
+html[data-theme="light"] .dg-v41-heading strong,body[data-theme="light"] .dg-v41-heading strong{color:#172033!important}
+html[data-theme="light"] .dg-v41-status,body[data-theme="light"] .dg-v41-status{color:#526176!important}
