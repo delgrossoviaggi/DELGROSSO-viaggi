@@ -1,6 +1,425 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Flotta | DELGROSSO Viaggi</title><link rel="icon" href="favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap"><link rel="stylesheet" href="css/public-pages-v3.css"></head><body>
-<header class="site-header"><div class="container site-nav"><a class="brand" href="index.html" aria-label="DELGROSSO Viaggi Home"><img src="assets/images/logo-sidebar.png" alt="DELGROSSO Viaggi & Limousine Bus"></a><nav class="menu-links"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">Flotta</a><a href="partyontheroad.html">Party</a><a href="contatti.html">Contatti</a><a href="preventivo.html">Preventivi</a></nav><div class="header-actions"><a class="access" href="admin.html" title="Admin Sito" aria-label="Admin Sito"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></a><a class="access" href="GESTIONALE/login.html" title="Gestionale" aria-label="Gestionale"><b>G</b></a><a class="header-cta" href="preventivo.html">Richiedi preventivo</a><button class="menu-toggle" type="button" aria-label="Apri menu" onclick="document.body.classList.toggle('menu-open')">☰</button></div></div><nav class="mobile-banner"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">Flotta</a><a href="partyontheroad.html">Party</a><a href="contatti.html">Contatti</a><a href="preventivo.html">Preventivi</a><span class="mobile-banner-divider"></span><a class="access-mobile" href="admin.html" title="Admin Sito" aria-label="Admin Sito"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></a><a class="access-mobile access-g" href="GESTIONALE/login.html" title="Gestionale" aria-label="Gestionale"><b>G</b></a></nav></header>
-<section class="page-hero"><div class="container hero-inner"><div class="kicker">DELGROSSO · GT · NCC · LIMOUSINE</div><h1>LA NOSTRA <span>FLOTTA</span></h1><p>Mezzi reali, comfort reale. Scopri gli autobus e i veicoli che utilizziamo per viaggi organizzati, gruppi, transfer ed eventi.</p></div></section>
-<section class="section"><div class="container"><div id="fleetGrid" class="grid cards-2"></div></div></section>
-<footer class="footer"><div class="container footer-grid"><div><img src="assets/logo-delgrosso.svg" alt="DELGROSSO"><p>Comfort, sicurezza ed esperienza per ogni destinazione.</p></div><div><h4>Esplora</h4><ul><li><a href="viaggi.html">Partenze</a></li><li><a href="partyontheroad.html">Party</a></li><li><a href="preventivo.html">Preventivi</a></li></ul></div><div><h4>Contatti</h4><ul><li><a href="tel:3205730466">320 573 0466</a></li><li><a href="tel:3662127916">366 212 7916</a></li><li>San Severo (FG)</li></ul></div><div><h4>Website</h4><ul><li><a href="index.html">delgrossoviaggi.it</a></li></ul></div></div><div class="container footer-bottom"><span>© 2026 DELGROSSO Viaggi & Limousine Bus</span><span>Design & development: Nicola Pio Cristino</span></div></footer>
-<script type="module">import{getFlottaPubblica}from'./js/bridge.js';const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const fallback='assets/images/logo-sidebar.png';async function load(){const r=await getFlottaPubblica();const data=(r.data||[]).filter(x=>x?.attivo!==false);const g=document.getElementById('fleetGrid');if(!data.length){g.innerHTML='<div class="card"><div class="card-body"><small>FLOTTA</small><h3>In aggiornamento</h3><p>Stiamo caricando i mezzi disponibili.</p></div></div>';return}g.innerHTML=data.map((x,i)=>`<article class="card"><div class="card-media"><img src="${esc(x.immagine||fallback)}" alt="${esc(x.marca||'DELGROSSO')} ${esc(x.modello||'Autobus')}" onerror="this.src='${fallback}'"></div><div class="card-body"><small>${esc(x.categoria||'GRAN TURISMO')}</small><h3>${esc(x.marca||'DELGROSSO')} ${esc(x.modello||'')}</h3><p>${esc(x.descrizione||'Mezzo Gran Turismo DELGROSSO, pensato per comfort, sicurezza e viaggi di gruppo.')} ${x.posti?`· ${esc(x.posti)} posti`:''}</p></div></article>`).join('')}load()</script></body></html>
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flotta | DELGROSSO Viaggi</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="css/public-pages-v3.css">
+<style>
+  .fleet-card-clickable { cursor:pointer; }
+  .fleet-card-clickable:focus-visible { outline:3px solid #f97316; outline-offset:4px; }
+
+  #fleetDetailModal {
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(5,10,18,.82);
+    backdrop-filter:blur(10px);
+  }
+  #fleetDetailModal.is-open { display:flex; }
+
+  .fleet-modal {
+    width:min(1100px,100%);
+    max-height:min(90vh,900px);
+    overflow:auto;
+    background:#fff;
+    border-radius:24px;
+    box-shadow:0 30px 100px rgba(0,0,0,.35);
+    position:relative;
+  }
+  .fleet-modal__close {
+    position:absolute;
+    top:14px;
+    right:14px;
+    z-index:4;
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:rgba(15,23,42,.82);
+    color:#fff;
+    font-size:24px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .fleet-modal__close:hover { background:#f97316; }
+
+  .fleet-modal__gallery {
+    padding:22px 22px 0;
+  }
+  .fleet-modal__main {
+    height:min(52vh,520px);
+    border-radius:18px;
+    overflow:hidden;
+    background:#f1f5f9;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .fleet-modal__main img {
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .fleet-modal__thumbs {
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding:14px 2px 4px;
+  }
+  .fleet-modal__thumb {
+    flex:0 0 86px;
+    width:86px;
+    height:64px;
+    border:2px solid transparent;
+    border-radius:10px;
+    overflow:hidden;
+    padding:0;
+    background:#e2e8f0;
+    cursor:pointer;
+  }
+  .fleet-modal__thumb.is-active { border-color:#f97316; }
+  .fleet-modal__thumb img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .fleet-modal__body {
+    padding:24px 28px 30px;
+  }
+  .fleet-modal__eyebrow {
+    margin:0 0 6px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#f97316;
+  }
+  .fleet-modal__title {
+    margin:0 0 14px;
+    font-size:clamp(25px,4vw,42px);
+    line-height:1.05;
+    font-weight:900;
+    text-transform:uppercase;
+    color:#0f172a;
+  }
+  .fleet-modal__meta {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .fleet-modal__pill {
+    padding:7px 11px;
+    border-radius:999px;
+    background:#f1f5f9;
+    color:#334155;
+    font-size:12px;
+    font-weight:700;
+  }
+  .fleet-modal__description {
+    margin:0;
+    white-space:pre-line;
+    color:#475569;
+    font-size:15px;
+    line-height:1.75;
+  }
+
+  body.modal-open { overflow:hidden; }
+
+  @media (max-width:700px) {
+    #fleetDetailModal { padding:10px; }
+    .fleet-modal { border-radius:18px; max-height:94vh; }
+    .fleet-modal__gallery { padding:12px 12px 0; }
+    .fleet-modal__main { height:38vh; border-radius:13px; }
+    .fleet-modal__body { padding:18px 18px 24px; }
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container site-nav">
+    <a class="brand" href="index.html" aria-label="DELGROSSO Viaggi Home">
+      <img src="assets/images/logo-sidebar.png" alt="DELGROSSO Viaggi & Limousine Bus">
+    </a>
+    <nav class="menu-links">
+      <a href="index.html">Home</a>
+      <a href="viaggi.html">Partenze</a>
+      <a href="flotta.html">Flotta</a>
+      <a href="partyontheroad.html">Party</a>
+      <a href="contatti.html">Contatti</a>
+      <a href="preventivo.html">Preventivi</a>
+    </nav>
+    <div class="header-actions">
+      <a class="access" href="admin.html" title="Admin Sito" aria-label="Admin Sito">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </a>
+      <a class="access" href="GESTIONALE/login.html" title="Gestionale" aria-label="Gestionale"><b>G</b></a>
+      <a class="header-cta" href="preventivo.html">Richiedi preventivo</a>
+      <button class="menu-toggle" type="button" aria-label="Apri menu" onclick="document.body.classList.toggle('menu-open')">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-banner">
+    <a href="index.html">Home</a>
+    <a href="viaggi.html">Partenze</a>
+    <a href="flotta.html">Flotta</a>
+    <a href="partyontheroad.html">Party</a>
+    <a href="contatti.html">Contatti</a>
+    <a href="preventivo.html">Preventivi</a>
+    <span class="mobile-banner-divider"></span>
+    <a class="access-mobile" href="admin.html" title="Admin Sito" aria-label="Admin Sito">
+      <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    </a>
+    <a class="access-mobile access-g" href="GESTIONALE/login.html" title="Gestionale" aria-label="Gestionale"><b>G</b></a>
+  </nav>
+</header>
+
+<section class="page-hero">
+  <div class="container hero-inner">
+    <div class="kicker">DELGROSSO · GT · NCC · LIMOUSINE</div>
+    <h1>LA NOSTRA <span>FLOTTA</span></h1>
+    <p>Mezzi reali, comfort reale. Scopri gli autobus e i veicoli che utilizziamo per viaggi organizzati, gruppi, transfer ed eventi.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div id="fleetGrid" class="grid cards-2"></div>
+  </div>
+</section>
+
+<!-- Dettaglio mezzo: descrizione + tutte le foto -->
+<div id="fleetDetailModal" aria-hidden="true">
+  <div class="fleet-modal" role="dialog" aria-modal="true" aria-labelledby="fleetDetailTitle" onclick="event.stopPropagation()">
+    <button class="fleet-modal__close" type="button" id="fleetModalClose" aria-label="Chiudi">×</button>
+    <div class="fleet-modal__gallery">
+      <div class="fleet-modal__main">
+        <img id="fleetModalMainImage" src="" alt="">
+      </div>
+      <div id="fleetModalThumbs" class="fleet-modal__thumbs"></div>
+    </div>
+    <div class="fleet-modal__body">
+      <p id="fleetModalCategory" class="fleet-modal__eyebrow"></p>
+      <h2 id="fleetDetailTitle" class="fleet-modal__title"></h2>
+      <div id="fleetModalMeta" class="fleet-modal__meta"></div>
+      <p id="fleetModalDescription" class="fleet-modal__description"></p>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <img src="assets/logo-delgrosso.svg" alt="DELGROSSO">
+      <p>Comfort, sicurezza ed esperienza per ogni destinazione.</p>
+    </div>
+    <div><h4>Esplora</h4><ul><li><a href="viaggi.html">Partenze</a></li><li><a href="partyontheroad.html">Party</a></li><li><a href="preventivo.html">Preventivi</a></li></ul></div>
+    <div><h4>Contatti</h4><ul><li><a href="tel:3205730466">320 573 0466</a></li><li><a href="tel:3662127916">366 212 7916</a></li><li>San Severo (FG)</li></ul></div>
+    <div><h4>Website</h4><ul><li><a href="index.html">delgrossoviaggi.it</a></li></ul></div>
+  </div>
+  <div class="container footer-bottom"><span>© 2026 DELGROSSO Viaggi & Limousine Bus</span><span>Design & development: Nicola Pio Cristino</span></div>
+</footer>
+
+<script type="module">
+import { getFlottaPubblica } from './js/bridge.js';
+
+const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+}[char]));
+
+const normalize = (value) => String(value ?? '')
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, ' ');
+
+const fallback = 'assets/images/logo-sidebar.png';
+
+const PUBLIC_SUPABASE_URL = 'https://exphxbeqwpwrsigdmilc.supabase.co';
+const PUBLIC_SUPABASE_KEY = 'sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c';
+
+let fleetRows = [];
+let legacyDetails = [];
+
+async function loadLegacyFleetDetails() {
+  try {
+    const endpoint =
+      `${PUBLIC_SUPABASE_URL}/rest/v1/flotta_page?select=*&order=created_at.asc`;
+
+    const response = await fetch(endpoint, {
+      headers: {
+        apikey: PUBLIC_SUPABASE_KEY,
+        Authorization: `Bearer ${PUBLIC_SUPABASE_KEY}`
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) throw new Error(`flotta_page HTTP ${response.status}`);
+
+    const rows = await response.json();
+    legacyDetails = Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.warn('Dettagli/galleria flotta non disponibili:', error);
+    legacyDetails = [];
+  }
+}
+
+function normalizeGallery(value) {
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+    } catch (_) {}
+    return value.split(',').map((item) => item.trim()).filter(Boolean);
+  }
+
+  return [];
+}
+
+function findLegacyDetails(bus) {
+  const model = normalize(bus.modello);
+  const brand = normalize(bus.marca);
+  const title = normalize(`${bus.marca || ''} ${bus.modello || ''}`);
+
+  return legacyDetails.find((item) => {
+    const legacyTitle = normalize(item.titolo);
+    if (!legacyTitle) return false;
+    return legacyTitle === title
+      || legacyTitle.includes(model)
+      || title.includes(legacyTitle)
+      || (brand && model && legacyTitle.includes(brand) && legacyTitle.includes(model));
+  }) || null;
+}
+
+function getBusImages(bus) {
+  const legacy = findLegacyDetails(bus);
+  const gallery = legacy ? normalizeGallery(legacy.foto_gallery) : [];
+  const primary = String(legacy?.immagine_url || bus.immagine || '').trim();
+
+  return [...new Set([primary, ...gallery].filter((url) => /^https?:\/\//i.test(url) || /^data:image\//i.test(url)))];
+}
+
+function openFleetDetail(index) {
+  const bus = fleetRows[index];
+  if (!bus) return;
+
+  const legacy = findLegacyDetails(bus);
+  const images = getBusImages(bus);
+  const title = legacy?.titolo || `${bus.marca || 'DELGROSSO'} ${bus.modello || 'Autobus'}`;
+  const description = legacy?.descrizione || bus.descrizione || 'Comfort, sicurezza ed esperienza per ogni destinazione.';
+
+  document.getElementById('fleetDetailTitle').textContent = title;
+  document.getElementById('fleetModalCategory').textContent = bus.categoria || legacy?.categoria || 'GRAN TURISMO';
+
+  const meta = [];
+  if (bus.posti) meta.push(`${bus.posti} posti`);
+  if (bus.anno) meta.push(`Anno ${bus.anno}`);
+  if (bus.targa) meta.push(bus.targa);
+  document.getElementById('fleetModalMeta').innerHTML = meta.map((item) => `<span class="fleet-modal__pill">${esc(item)}</span>`).join('');
+
+  document.getElementById('fleetModalDescription').textContent = description;
+
+  const mainImage = document.getElementById('fleetModalMainImage');
+  const thumbs = document.getElementById('fleetModalThumbs');
+
+  if (!images.length) {
+    mainImage.src = fallback;
+    mainImage.alt = title;
+    thumbs.innerHTML = '';
+  } else {
+    mainImage.src = images[0];
+    mainImage.alt = title;
+
+    thumbs.innerHTML = images.map((image, imageIndex) => `
+      <button class="fleet-modal__thumb ${imageIndex === 0 ? 'is-active' : ''}" type="button" data-image-index="${imageIndex}" aria-label="Foto ${imageIndex + 1}">
+        <img src="${esc(image)}" alt="">
+      </button>
+    `).join('');
+
+    thumbs.querySelectorAll('.fleet-modal__thumb').forEach((button) => {
+      button.addEventListener('click', () => {
+        const imageIndex = Number(button.dataset.imageIndex);
+        mainImage.src = images[imageIndex];
+        thumbs.querySelectorAll('.fleet-modal__thumb').forEach((item) => item.classList.remove('is-active'));
+        button.classList.add('is-active');
+      });
+    });
+  }
+
+  const modal = document.getElementById('fleetDetailModal');
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeFleetDetail() {
+  const modal = document.getElementById('fleetDetailModal');
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+}
+
+async function load() {
+  const grid = document.getElementById('fleetGrid');
+
+  try {
+    const [fleetResult] = await Promise.all([
+      getFlottaPubblica(),
+      loadLegacyFleetDetails()
+    ]);
+
+    fleetRows = (fleetResult.data || []).filter((item) => item?.attivo !== false);
+
+    if (!fleetRows.length) {
+      grid.innerHTML = '<div class="card"><div class="card-body"><small>FLOTTA</small><h3>In aggiornamento</h3><p>Stiamo caricando i mezzi disponibili.</p></div></div>';
+      return;
+    }
+
+    grid.innerHTML = fleetRows.map((bus, index) => `
+      <article class="card fleet-card-clickable" tabindex="0" role="button" data-fleet-index="${index}" aria-label="Apri dettagli ${esc(bus.marca || '')} ${esc(bus.modello || '')}">
+        <div class="card-media">
+          <img src="${esc(bus.immagine || fallback)}" alt="${esc(bus.marca || 'DELGROSSO')} ${esc(bus.modello || 'Autobus')}" onerror="this.src='${fallback}'">
+        </div>
+        <div class="card-body">
+          <small>${esc(bus.categoria || 'GRAN TURISMO')}</small>
+          <h3>${esc(bus.marca || 'DELGROSSO')} ${esc(bus.modello || '')}</h3>
+          <p>${esc(bus.descrizione || 'Mezzo Gran Turismo DELGROSSO, pensato per comfort, sicurezza e viaggi di gruppo.')} ${bus.posti ? `· ${esc(bus.posti)} posti` : ''}</p>
+        </div>
+      </article>
+    `).join('');
+
+    grid.querySelectorAll('[data-fleet-index]').forEach((card) => {
+      const index = Number(card.dataset.fleetIndex);
+      card.addEventListener('click', () => openFleetDetail(index));
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openFleetDetail(index);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Errore caricamento flotta:', error);
+    grid.innerHTML = '<div class="card"><div class="card-body"><small>FLOTTA</small><h3>Errore caricamento</h3><p>Riprova tra qualche secondo.</p></div></div>';
+  }
+}
+
+document.getElementById('fleetModalClose').addEventListener('click', closeFleetDetail);
+document.getElementById('fleetDetailModal').addEventListener('click', closeFleetDetail);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeFleetDetail();
+});
+
+load();
+</script>
+</body>
+</html>
