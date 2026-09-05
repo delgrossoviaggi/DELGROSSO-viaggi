@@ -18,11 +18,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,900&display=swap" rel="stylesheet">
 
     <script>
-        // Autenticazione: stessa password e stessa sessione dell'admin precedente.
-        // La grafica di accesso è gestita dal pannello #admin-login più sotto.
-        const ADMIN_PASSWORD = "Delgrosso@26";
-        if (sessionStorage.getItem("admin_auth") === "true") {
-            document.documentElement.classList.add("admin-unlocked");
+        if (sessionStorage.getItem("admin_auth") !== "true") {
+            const pass = prompt("Password Amministratore:");
+            if (pass === "Delgrosso@26") { sessionStorage.setItem("admin_auth", "true"); }
+            else { window.location.href = "index.html"; }
         }
 
         tailwind.config = {
@@ -36,254 +35,38 @@
     </script>
 
     <style>
-        :root{
-            --brand:#1d4ed8;
-            --brand-2:#2563eb;
-            --brand-soft:#60a5fa;
-            --bg:#070a12;
-            --panel:#0e1421;
-            --panel-2:#111827;
-            --line:rgba(255,255,255,.09);
-            --text:#f8fafc;
-            --muted:#94a3b8;
-        }
-
-        *{box-sizing:border-box}
-        body{
-            font-family:'Plus Jakarta Sans',sans-serif;
-            background:
-              radial-gradient(circle at 12% 0%,rgba(37,99,235,.16),transparent 28%),
-              radial-gradient(circle at 88% 8%,rgba(14,165,233,.10),transparent 24%),
-              linear-gradient(180deg,#070a12 0%,#090d16 45%,#070a10 100%);
-            color:var(--text);
-            -webkit-font-smoothing:antialiased;
-        }
-
-        body:before{
-            content:"";
-            position:fixed; inset:0; pointer-events:none; z-index:-1;
-            background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
-                             linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
-            background-size:36px 36px;
-            mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 80%);
-        }
-
-        .glass-nav{
-            background:rgba(7,10,18,.78);
-            backdrop-filter:blur(20px) saturate(140%);
-            border-bottom:1px solid rgba(255,255,255,.08);
-            box-shadow:0 12px 35px rgba(0,0,0,.22);
-        }
-
-        .admin-shell{max-width:1480px;margin:auto}
-        .admin-brand{
-            display:flex;align-items:center;gap:12px;
-        }
-        .admin-logo{
-            width:48px;height:48px;object-fit:contain;border-radius:14px;
-            background:rgba(255,255,255,.96);padding:5px;
-            border:1px solid rgba(255,255,255,.2);
-            box-shadow:0 8px 25px rgba(37,99,235,.20);
-        }
-        .admin-title{font-weight:900;letter-spacing:.04em}
-        .admin-subtitle{font-size:9px;font-weight:800;color:#64748b;letter-spacing:.16em}
-
-        .section-card{
-            position:relative;overflow:hidden;
-            background:linear-gradient(145deg,rgba(17,24,39,.96),rgba(9,13,22,.96));
-            border:1px solid var(--line);
-            border-radius:26px;
-            padding:24px;
-            box-shadow:0 20px 55px rgba(0,0,0,.22);
-        }
-        .section-card:after{
-            content:"";position:absolute;top:0;left:24px;right:24px;height:1px;
-            background:linear-gradient(90deg,transparent,rgba(96,165,250,.45),transparent);
-        }
-        .section-card:hover{border-color:rgba(255,255,255,.13)}
-
-        .section-head{
-            display:flex;align-items:center;justify-content:space-between;gap:12px;
-            margin-bottom:18px;
-        }
-        .section-label{
-            display:flex;align-items:center;gap:10px;
-            font-size:16px;font-weight:900;letter-spacing:-.02em;
-        }
-        .section-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 18px currentColor}
-        .section-number{
-            font-size:9px;font-weight:900;letter-spacing:.16em;
-            color:#64748b;text-transform:uppercase;
-        }
-
-        .inner-panel{
-            background:rgba(2,6,23,.54);
-            border:1px solid rgba(255,255,255,.065);
-            border-radius:19px;padding:18px;
-        }
-
-        .input-style{
-            width:100%;padding:.92rem 1rem;
-            background:#0b1220;
-            border:1px solid rgba(255,255,255,.09);
-            border-radius:13px;
-            font-weight:700;margin-bottom:.7rem;outline:none;
-            font-size:12px;color:white;transition:.2s;
-        }
-        .input-style::placeholder{color:#64748b}
-        .input-style:focus{
-            border-color:rgba(59,130,246,.8);
-            box-shadow:0 0 0 4px rgba(37,99,235,.10);
-        }
-
-        .btn-action{
-            width:100%;padding:.95rem 1rem;border-radius:13px;
-            font-weight:900;text-transform:uppercase;font-size:10px;
-            cursor:pointer;transition:.2s;border:none;letter-spacing:.07em;
-        }
-        .btn-action:hover{transform:translateY(-1px);filter:brightness(1.08)}
-        .btn-action:disabled{opacity:.55;cursor:not-allowed;transform:none}
-
-        .item-row{
-            display:flex;align-items:center;gap:12px;padding:11px;
-            background:rgba(15,23,42,.74);
-            border:1px solid rgba(255,255,255,.065);
-            border-radius:14px;margin-bottom:8px;
-            transition:.18s;
-        }
-        .item-row:hover{background:rgba(30,41,59,.76);border-color:rgba(255,255,255,.12)}
-        .thumb{
-            width:58px;height:46px;object-fit:cover;border-radius:10px;
-            background:#111827;border:1px solid rgba(255,255,255,.10);
-        }
-        .delete-btn,.edit-btn{
-            font-weight:900;padding:6px 10px;border-radius:9px;font-size:10px;
-            cursor:pointer;transition:.18s;
-        }
-        .delete-btn{
-            background:rgba(239,68,68,.10);color:#f87171;
-            border:1px solid rgba(239,68,68,.24);
-        }
-        .delete-btn:hover{background:#ef4444;color:white}
-        .edit-btn{
-            background:rgba(34,197,94,.10);color:#4ade80;
-            border:1px solid rgba(34,197,94,.24);
-        }
-        .edit-btn:hover{background:#22c55e;color:white}
-
-        .preview-grid-item{
-            position:relative;height:78px;border-radius:12px;overflow:hidden;
-            border:1px solid rgba(255,255,255,.09);background:#0b1220;
-        }
-        .preview-grid-item img{width:100%;height:100%;object-fit:cover}
-        .remove-photo-badge{
-            position:absolute;top:0;right:0;background:#ef4444;color:white;
-            width:25px;height:25px;font-size:14px;display:flex;
-            align-items:center;justify-content:center;border-radius:0 0 0 9px;
-            cursor:pointer;font-weight:bold;z-index:10;
-        }
-
-        .admin-action{
-            display:inline-flex;align-items:center;gap:8px;
-            padding:10px 14px;border-radius:12px;font-size:10px;
-            font-weight:900;text-transform:uppercase;letter-spacing:.04em;
-            transition:.2s;border:1px solid rgba(255,255,255,.08);
-        }
-        .admin-action:hover{transform:translateY(-1px)}
-
-        /* Access screen */
-        #admin-login{
-            position:fixed;inset:0;z-index:9999;display:flex;
-            align-items:center;justify-content:center;padding:20px;
-            background:
-              radial-gradient(circle at 50% 20%,rgba(37,99,235,.24),transparent 30%),
-              #050810;
-        }
-        .login-card{
-            width:min(420px,100%);padding:32px;border-radius:30px;
-            background:rgba(12,18,31,.94);
-            border:1px solid rgba(255,255,255,.10);
-            box-shadow:0 30px 100px rgba(0,0,0,.58);
-            backdrop-filter:blur(25px);
-        }
-        .login-logo{
-            display:block;width:92px;height:92px;object-fit:contain;
-            margin:0 auto 18px;border-radius:24px;background:white;padding:9px;
-            box-shadow:0 16px 45px rgba(37,99,235,.24);
-        }
-        .login-input{
-            width:100%;padding:15px 16px;border-radius:14px;
-            background:#070d18;border:1px solid rgba(255,255,255,.11);
-            color:white;outline:none;font-weight:700;
-        }
-        .login-input:focus{border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.10)}
-        .login-btn{
-            width:100%;margin-top:12px;padding:15px;border:0;border-radius:14px;
-            background:linear-gradient(135deg,#2563eb,#1d4ed8);
-            color:white;font-weight:900;text-transform:uppercase;
-            letter-spacing:.08em;font-size:11px;cursor:pointer;
-            box-shadow:0 12px 30px rgba(37,99,235,.25);
-        }
-        .login-error{
-            display:none;margin-top:12px;padding:10px 12px;border-radius:11px;
-            background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);
-            color:#fca5a5;font-size:11px;font-weight:800;text-align:center;
-        }
-        html.admin-unlocked #admin-login{display:none!important}
-
-        @media(max-width:640px){
-            .section-card{padding:18px;border-radius:21px}
-            .inner-panel{padding:14px}
-            .admin-logo{width:42px;height:42px}
-            .admin-subtitle{display:none}
-            .top-actions .admin-action span.label{display:none}
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #09090b; color: #f4f4f5; -webkit-font-smoothing: antialiased; }
+        .glass-nav { background: rgba(9, 9, 11, 0.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .input-style { width: 100%; padding: 0.85rem 1rem; background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; font-weight: 700; margin-bottom: 0.75rem; outline: none; font-size: 13px; color: white; transition: border-color 0.2s; }
+        .input-style:focus { border-color: #2563eb; }
+        .btn-action { width: 100%; padding: 1rem; border-radius: 1rem; font-weight: 900; text-transform: uppercase; font-size: 11px; cursor: pointer; transition: all 0.2s; border: none; letter-spacing: 0.05em; }
+        .item-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #18181b; border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; margin-bottom: 8px; }
+        .thumb { width: 55px; height: 45px; object-fit: cover; border-radius: 8px; background: #27272a; border: 1px solid rgba(255,255,255,0.1); }
+        .delete-btn { background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 800; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .delete-btn:hover { background: #ef4444; color: white; }
+        .edit-btn { background: rgba(34, 197, 94, 0.15); color: #4ade80; font-weight: 800; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .edit-btn:hover { background: #22c55e; color: white; }
+        .preview-grid-item { position: relative; height: 70px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .remove-photo-badge { position: absolute; top: 0; right: 0; background: #ef4444; color: white; width: 24px; height: 24px; font-size: 14px; display: flex; align-items: center; justify-content: center; border-radius: 0 0 0 8px; cursor: pointer; font-weight: bold; z-index: 10; }
     </style>
 </head>
 <body class="pb-20 selection:bg-brand-blue selection:text-white">
-    <!-- ACCESSO ADMIN: stessa password, nuova grafica -->
-    <div id="admin-login">
-        <div class="login-card">
-            <img class="login-logo" src="assets/images/logo-sidebar.png" alt="Del Grosso Viaggi">
-            <div class="text-center">
-                <div class="text-[10px] font-black uppercase tracking-[.22em] text-blue-400 mb-2">Area Riservata</div>
-                <h2 class="text-2xl font-black text-white">Master Admin</h2>
-                <p class="text-xs text-slate-400 mt-2 mb-6">Inserisci la password per accedere alla gestione del sito.</p>
-            </div>
-            <form onsubmit="event.preventDefault(); loginAdmin();">
-                <input id="admin-password" class="login-input" type="password" autocomplete="current-password"
-                       placeholder="Password amministratore">
-                <button class="login-btn" type="submit">Accedi all'Admin</button>
-                <div id="login-error" class="login-error">Password non corretta. Riprova.</div>
-            </form>
-        </div>
-    </div>
-
 
     <!-- Top Navigation -->
-    <nav class="glass-nav p-3 sm:p-4 sticky top-0 z-50">
-        <div class="admin-shell flex justify-between items-center gap-3">
-            <div class="admin-brand min-w-0">
-                <img src="assets/images/logo-sidebar.png" class="admin-logo" alt="Del Grosso Viaggi">
-                <div class="min-w-0">
-                    <div class="admin-title text-sm sm:text-base uppercase truncate">Del Grosso Viaggi</div>
-                    <div class="admin-subtitle">MASTER ADMIN • GESTIONE SITO</div>
-                </div>
-            </div>
-            <div class="top-actions flex gap-2">
-                <a href="index.html" class="admin-action bg-white/5 hover:bg-white/10 text-white">
-                    <span>🏠</span><span class="label">Home Sito</span>
-                </a>
-                <button onclick="exportExcel()" class="admin-action bg-emerald-600/90 hover:bg-emerald-500 text-white">
-                    <span>📊</span><span class="label">Esporta Excel</span>
-                </button>
-                <button onclick="location.reload()" class="admin-action bg-blue-600 hover:bg-blue-500 text-white">
-                    <span>🔄</span><span class="label">Sincronizza</span>
-                </button>
-                <button onclick="esciAdmin()" class="admin-action bg-red-500/10 hover:bg-red-500 text-red-300 hover:text-white border-red-500/20">
-                    <span>🚪</span><span class="label">Esci</span>
-                </button>
-            </div>
+    <nav class="glass-nav p-4 sticky top-0 z-50 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-2 rounded-xl font-bold text-xs uppercase transition-all flex items-center gap-2">
+                <span>🏠</span> Home Sito
+            </a>
+            <h1 class="font-black text-brand-blue uppercase italic hidden md:block text-sm tracking-widest">Master Admin Del Grosso</h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-extrabold text-[11px] uppercase transition-all shadow-lg shadow-emerald-600/20">
+                Esporta Excel 📊
+            </button>
+            <button onclick="location.reload()" class="bg-brand-blue hover:bg-brand-darkBlue text-white px-4 py-2 rounded-xl font-extrabold text-[11px] uppercase transition-all shadow-lg shadow-brand-blue/20">
+                Sincronizza 🔄
+            </button>
         </div>
     </nav>
 
@@ -293,83 +76,49 @@
         <!-- Left Column: Gestione Pagine e Contenuti -->
         <div class="lg:col-span-8 space-y-8">
 
-            <!-- CAROUSEL UNIFICATO: Home + Flotta -->
-            <div class="section-card">
-                <div class="section-head">
-                    <div>
-                        <div class="section-label text-blue-400">
-                            <span class="section-dot bg-blue-500"></span>
-                            Carousel
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">
-                            Foto attuali Cloudinary + Carousel Flotta
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="section-number">01 • MEDIA</div>
-                        <button onclick="sincronizzaCarousels()" class="admin-action bg-blue-600/90 hover:bg-blue-500 text-white">
-                            🔄 Sincronizza Carousel
+            <!-- Carousel Home Page -->
+            <div class="bg-brand-card p-6 rounded-3xl border border-emerald-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-emerald-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 0. Carousel Home Page
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
+                    <p class="text-[10px] font-black mb-3 uppercase text-emerald-400 tracking-wider">Foto Attuali (Cloudinary):</p>
+                    <div id="anteprima-carousel" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4"></div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">Aggiungi nuove foto:</label>
+                        <input type="file" id="c-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                        <button onclick="salvaCarousel()" id="btn-c" class="btn-action bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20">
+                            Salva Carousel Home
                         </button>
                     </div>
                 </div>
+            </div>
+            
 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                    <!-- Foto attuali / Carousel Home -->
-                    <div class="inner-panel">
-                        <div class="flex items-center justify-between gap-3 mb-4">
-                            <div>
-                                <div class="text-sm font-black text-emerald-400 uppercase">Foto attuali</div>
-                                <div class="text-[9px] text-slate-500 font-bold uppercase mt-1">Cloudinary • Home</div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black text-emerald-400 uppercase">Online</span>
-                        </div>
-
-                        <div id="anteprima-carousel" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4"></div>
-
-                        <div class="border-t border-white/10 pt-4">
-                            <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">
-                                Aggiungi nuove foto al Carousel Home
-                            </label>
-                            <input type="file" id="c-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
-                            <button onclick="salvaCarousel()" id="btn-c" class="btn-action bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20">
-                                Salva Carousel Home
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Carousel Flotta -->
-                    <div class="inner-panel">
-                        <div class="flex items-center justify-between gap-3 mb-4">
-                            <div>
-                                <div class="text-sm font-black text-cyan-400 uppercase">Carousel Flotta</div>
-                                <div class="text-[9px] text-slate-500 font-bold uppercase mt-1">Cloudinary • Flotta</div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[9px] font-black text-cyan-400 uppercase">Online</span>
-                        </div>
-
-                        <div id="anteprima-carousel-flotta" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4"></div>
-
-                        <div class="border-t border-white/10 pt-4">
-                            <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">
-                                Aggiungi immagini al Carousel Flotta
-                            </label>
-                            <input type="file" id="cf-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
-                            <button onclick="salvaCarouselFlotta()" id="btn-cf" class="btn-action bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-600/20">
-                                Salva Carousel Flotta
-                            </button>
-                        </div>
-
-                        <div class="mt-4 pt-4 border-t border-white/10">
-                            <div id="display-carousel-flotta" class="space-y-2"></div>
-                        </div>
+            <!-- Carousel Flotta -->
+            <div class="bg-brand-card p-6 rounded-3xl border border-cyan-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-cyan-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> 0B. Carousel Flotta
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
+                    <div id="anteprima-carousel-flotta" class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4"></div>
+                    <div class="border-t border-white/10 pt-4">
+                        <label class="text-[10px] font-black block mb-2 uppercase text-zinc-400">Aggiungi immagini al Carousel Flotta:</label>
+                        <input type="file" id="cf-files" class="text-xs mb-4 block w-full text-zinc-400" multiple accept="image/*">
+                        <button onclick="salvaCarouselFlotta()" id="btn-cf" class="btn-action bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-600/20">
+                            Salva Carousel Flotta
+                        </button>
                     </div>
                 </div>
+                <div id="display-carousel-flotta" class="space-y-2"></div>
             </div>
 
             <!-- Gestione Tratte -->
-            <div class="section-card">
-                <div class="section-head"><div class="section-label text-blue-400"><span class="section-dot bg-blue-500"></span>Gestione Tratte</div><div class="section-number">03 • VIAGGI</div></div>
-                <div class="inner-panel mb-4">
+            <div class="bg-brand-card p-6 rounded-3xl border border-blue-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-brand-blue mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-brand-blue"></span> 1. Gestione Tratte
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
                     <input type="text" id="v-titolo" placeholder="NOME VIAGGIO" class="input-style uppercase">
                     <input type="text" id="v-data" placeholder="DATA EVENTO (es: 15 AGOSTO 2026)" class="input-style uppercase">
                     <select id="v-modello" class="input-style">
@@ -388,9 +137,11 @@
             </div>
 
             <!-- Garage Flotta -->
-            <div class="section-card">
-                <div class="section-head"><div class="section-label text-orange-400"><span class="section-dot bg-orange-500"></span>Garage Flotta</div><div class="section-number">04 • MEZZI</div></div>
-                <div class="inner-panel mb-4">
+            <div class="bg-brand-card p-6 rounded-3xl border border-orange-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-orange-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> 2. Garage Flotta
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
                     <input type="text" id="f-nome" placeholder="NOME MEZZO" class="input-style uppercase">
                     <textarea id="f-desc" placeholder="DESCRIZIONE TECNICA..." class="input-style h-24"></textarea>
                     <div id="anteprima-gallery-flotta" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
@@ -404,9 +155,11 @@
             </div>
 
             <!-- Party On The Road -->
-            <div class="section-card">
-                <div class="section-head"><div class="section-label text-purple-400"><span class="section-dot bg-purple-500"></span>Party On The Road</div><div class="section-number">05 • MEDIA</div></div>
-                <div class="inner-panel mb-4">
+            <div class="bg-brand-card p-6 rounded-3xl border border-purple-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-purple-400 mb-4 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 3. Party On The Road
+                </h2>
+                <div class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 mb-4">
                     <input type="text" id="p-titolo" placeholder="TITOLO ALBUM" class="input-style uppercase">
                     <div id="anteprima-gallery-party" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 hidden"></div>
                     <p class="text-[10px] font-bold mb-2 uppercase text-purple-400">Aggiungi foto/video (Cloudinary):</p>
@@ -419,8 +172,10 @@
             </div>
 
             <!-- Locandine: alimentate dalla tabella tratte -->
-            <div class="section-card">
-                <div class="section-head mb-2"><div class="section-label text-pink-400"><span class="section-dot bg-pink-500"></span>Locandine</div><div class="section-number">06 • PUBBLICAZIONI</div></div>
+            <div class="bg-brand-card p-6 rounded-3xl border border-pink-500/30 shadow-2xl">
+                <h2 class="font-black uppercase text-pink-400 mb-2 tracking-tight text-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> 4. Locandine
+                </h2>
                 <p class="text-[10px] text-zinc-400 uppercase font-bold mb-4">Le locandine pubbliche sono le immagini delle partenze presenti nella tabella <strong class="text-pink-300">tratte</strong>. Modificale dalla sezione Gestione Viaggi.</p>
                 <div id="display-locandine" class="space-y-2"></div>
             </div>
@@ -434,7 +189,7 @@
                 <h2 class="font-black uppercase mb-4 text-center tracking-tight text-lg text-white">
                     Passeggeri (Supabase)
                 </h2>
-                <div class="inner-panel mb-6 text-center space-y-2">
+                <div class="bg-zinc-900/80 p-4 rounded-2xl border border-white/5 mb-6 text-center space-y-2">
                     <input type="text" id="pr-nome" placeholder="NOME CLIENTE" class="input-style text-xs uppercase mb-0">
                     <input type="text" id="pr-posti" placeholder="POSTI (es: 1, 2)" class="input-style text-xs mb-0">
                     <button onclick="aggiornaPrenotazione()" id="btn-pr" class="w-full bg-white hover:bg-zinc-200 text-black py-3 rounded-xl font-black text-xs uppercase transition-all shadow-md mt-2">
@@ -449,33 +204,6 @@
 
     <!-- Script Supabase & Logic -->
     <script>
-
-
-        function esciAdmin() {
-            sessionStorage.removeItem("admin_auth");
-            document.documentElement.classList.remove("admin-unlocked");
-            const input = document.getElementById("admin-password");
-            const error = document.getElementById("login-error");
-            if (input) input.value = "";
-            if (error) error.style.display = "none";
-            window.scrollTo(0, 0);
-        }
-
-        function loginAdmin() {
-            const input = document.getElementById("admin-password");
-            const error = document.getElementById("login-error");
-            if (input.value === ADMIN_PASSWORD) {
-                sessionStorage.setItem("admin_auth", "true");
-                document.documentElement.classList.add("admin-unlocked");
-                error.style.display = "none";
-                input.value = "";
-            } else {
-                error.style.display = "block";
-                input.value = "";
-                input.focus();
-            }
-        }
-
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
@@ -514,27 +242,6 @@
             console.error(error);
             const msg = error?.message || String(error);
             alert(`❌ ERRORE ADMIN / SUPABASE\n\n${msg}`);
-        }
-
-        async function sincronizzaCarousels() {
-            const btn = document.querySelector('[onclick="sincronizzaCarousels()"]');
-            const original = btn ? btn.innerHTML : "";
-            try {
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = "⏳ Sincronizzazione...";
-                }
-                await init();
-                renderAnteprimaCarousel();
-                renderCarouselFlotta();
-            } catch (e) {
-                mostraErroreAdmin(e);
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = original || "🔄 Sincronizza Carousel";
-                }
-            }
         }
 
         async function init() {
