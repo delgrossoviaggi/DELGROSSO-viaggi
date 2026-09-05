@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="it"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Report - Del Grosso Gestionale v4.8</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+
+  <script type="module" src="./assets/statistiche-BYGeRI3f.js"></script>
+  <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
+  <link rel="modulepreload" href="./assets/browser-Bi1SjHOd.js">
+  <link rel="modulepreload" href="./assets/jspdf.es.min-DT2zzJUL.js">
+  <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
+  <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
+  <link rel="modulepreload" href="./assets/fleetService-DSMpWv9k.js">
+  <link rel="modulepreload" href="./assets/clientService-CSK9V6N0.js">
+  <link rel="modulepreload" href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="modulepreload" href="./assets/auto-Di6OnzQw.js">
+  <link rel="modulepreload" href="./assets/xlsxExport-Ci5qKKp3.js">
+  <link rel="stylesheet" href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" href="./assets/statistiche-o0yG2fx6.css">
+  <link rel="stylesheet" href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-shell-v41.css">
+  <link rel="stylesheet" href="./assets/dg-v46-professional.css">
+</head><body>
+<h1><i class="fa-solid fa-chart-column" aria-hidden="true"></i> Report e Statistiche</h1>
+ 
+<div class="filters">
+<label class="sr-only" for="dateFrom">Data iniziale</label>
+<input id="dateFrom" type="date" aria-label="Data iniziale">
+<label class="sr-only" for="dateTo">Data finale</label>
+<input id="dateTo" type="date" aria-label="Data finale">
+<label class="sr-only" for="periodo">Periodo</label>
+<select id="periodo" aria-label="Periodo">
+<option>Tutti i report</option>
+<option>Incassi</option>
+<option>Prenotazioni</option>
+<option>Passeggeri</option>
+<option>Clienti</option>
+<option>Viaggi</option>
+<option>Flotta</option>
+</select>
+<button id="generateReport">Genera Report</button>
+</div>
+
+<div class="cards">
+<div class="card"><h3>Incassi</h3><span id="incassi">€ 0,00</span></div>
+<div class="card"><h3>Prenotazioni</h3><span id="pren">0</span></div>
+<div class="card"><h3>Passeggeri</h3><span id="pass">0</span></div>
+<div class="card"><h3>Clienti</h3><span id="cli">0</span></div>
+<div class="card"><h3>Viaggi</h3><span id="via">0</span></div>
+</div>
+
+<canvas id="reportChart"></canvas>
+
+<div class="grid">
+<div class="panel">
+<h2>Report Disponibili</h2>
+<table id="reportTable">
+<thead><tr><th>Metrica</th><th>Valore</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="panel">
+<h2>Esportazioni</h2>
+<button id="exportPdf"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> PDF</button>
+<button id="exportExcel"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Excel</button>
+<button id="exportCsv"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> CSV</button>
+<button id="exportPrint">Stampa</button>
+</div>
+</div>
+
+
+
+
+
+
+
+  <script src="./assets/dg-shell-v41.js"></script>
+  <script src="./assets/dg-v46-ux.js"></script>
+</body></html>
