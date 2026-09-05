@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Prenotazioni - Del Grosso Gestionale v4.8.2</title>
-<meta name="dg-build" content="V48.2-CLEAN">
+<title>Prenotazioni - Del Grosso Gestionale v4.8</title>
+<meta name="dg-build" content="V51">
 
 
 
 
-  <script type="module" src="./assets/prenotazioni-v482-stable.js?v=482"></script>
+  <script type="module" src="./assets/prenotazioni-DO8eRNX0.js"></script>
   <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
   <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
   <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
@@ -47,7 +47,7 @@
   <link rel="stylesheet" href="./assets/dg-shell-v41.css">
   <link rel="stylesheet" href="./assets/prenotazioni-responsive-v44.css">
   <link rel="stylesheet" href="./assets/dg-v46-professional.css">
-<script>(async()=>{try{const k='dg_clean_v482_done';if(localStorage.getItem(k)!=='1'){localStorage.setItem(k,'1');if('serviceWorker'in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}if('caches'in window){const ks=await caches.keys();await Promise.all(ks.map(x=>caches.delete(x)));}location.reload();}}catch(e){console.warn('DG clean-up:',e)}})();</script>
+  <link rel="stylesheet" href="./assets/dg-v51.css?v=5101">
 </head>
 <body>
   
@@ -244,7 +244,7 @@
 
     <div class="actions">
       <button id="change-seat" type="button" class="btn-secondary hidden">Cambia posto</button>
-      <button id="save">Salva</button>
+      <button id="save" class="dg-v51-save-ready">Salva Prenotazione</button>
       <button id="close">Chiudi</button>
     </div>
 
@@ -288,7 +288,7 @@
 <script type="module" src="./assets/paymentReceiptService-v24.js"></script>
 <script type="module" src="./assets/dg-receipt-download-v28.js"></script>
 <script type="module" src="./assets/bookingDocumentsService-v25.js"></script>
-  <script src="./assets/dg-shell-v41.js"></script>
-  <script src="./assets/dg-v46-ux.js"></script>
+  <script src="./assets/dg-sync-v51.js?v=5101"></script>
+  <script src="./assets/dg-shell-v51.js?v=5101"></script>
 </body>
 </html>
