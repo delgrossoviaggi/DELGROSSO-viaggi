@@ -9,139 +9,68 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap">
 <link rel="stylesheet" href="css/public-pages-v3.css">
 <style>
-  .fleet-card-clickable { cursor:pointer; }
-  .fleet-card-clickable:focus-visible { outline:3px solid #f97316; outline-offset:4px; }
-
-  #fleetDetailModal {
-    position:fixed;
-    inset:0;
-    z-index:9999;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-    background:rgba(5,10,18,.82);
-    backdrop-filter:blur(10px);
+  :root {
+    --fleet-orange:#f97316;
+    --fleet-orange-dark:#ea580c;
+    --fleet-ink:#0b1220;
+    --fleet-muted:#64748b;
+    --fleet-border:rgba(15,23,42,.09);
   }
-  #fleetDetailModal.is-open { display:flex; }
-
-  .fleet-modal {
-    width:min(1100px,100%);
-    max-height:min(90vh,900px);
-    overflow:auto;
-    background:#fff;
-    border-radius:24px;
-    box-shadow:0 30px 100px rgba(0,0,0,.35);
-    position:relative;
-  }
-  .fleet-modal__close {
-    position:absolute;
-    top:14px;
-    right:14px;
-    z-index:4;
-    width:42px;
-    height:42px;
-    border:0;
-    border-radius:50%;
-    background:rgba(15,23,42,.82);
-    color:#fff;
-    font-size:24px;
-    line-height:1;
-    cursor:pointer;
-  }
-  .fleet-modal__close:hover { background:#f97316; }
-
-  .fleet-modal__gallery {
-    padding:22px 22px 0;
-  }
-  .fleet-modal__main {
-    height:min(52vh,520px);
-    border-radius:18px;
-    overflow:hidden;
-    background:#f1f5f9;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .fleet-modal__main img {
-    width:100%;
-    height:100%;
-    object-fit:contain;
-  }
-  .fleet-modal__thumbs {
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    padding:14px 2px 4px;
-  }
-  .fleet-modal__thumb {
-    flex:0 0 86px;
-    width:86px;
-    height:64px;
-    border:2px solid transparent;
-    border-radius:10px;
-    overflow:hidden;
-    padding:0;
-    background:#e2e8f0;
-    cursor:pointer;
-  }
-  .fleet-modal__thumb.is-active { border-color:#f97316; }
-  .fleet-modal__thumb img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-  }
-
-  .fleet-modal__body {
-    padding:24px 28px 30px;
-  }
-  .fleet-modal__eyebrow {
-    margin:0 0 6px;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.12em;
-    text-transform:uppercase;
-    color:#f97316;
-  }
-  .fleet-modal__title {
-    margin:0 0 14px;
-    font-size:clamp(25px,4vw,42px);
-    line-height:1.05;
-    font-weight:900;
-    text-transform:uppercase;
-    color:#0f172a;
-  }
-  .fleet-modal__meta {
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-bottom:18px;
-  }
-  .fleet-modal__pill {
-    padding:7px 11px;
-    border-radius:999px;
-    background:#f1f5f9;
-    color:#334155;
-    font-size:12px;
-    font-weight:700;
-  }
-  .fleet-modal__description {
-    margin:0;
-    white-space:pre-line;
-    color:#475569;
-    font-size:15px;
-    line-height:1.75;
-  }
-
-  body.modal-open { overflow:hidden; }
-
-  @media (max-width:700px) {
-    #fleetDetailModal { padding:10px; }
-    .fleet-modal { border-radius:18px; max-height:94vh; }
-    .fleet-modal__gallery { padding:12px 12px 0; }
-    .fleet-modal__main { height:38vh; border-radius:13px; }
-    .fleet-modal__body { padding:18px 18px 24px; }
-  }
+  .fleet-page-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin-bottom:34px}
+  .fleet-page-intro__copy{max-width:760px}
+  .fleet-page-intro__eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 0 10px;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--fleet-orange)}
+  .fleet-page-intro__eyebrow:before{content:"";width:28px;height:2px;background:var(--fleet-orange);border-radius:999px}
+  .fleet-page-intro h2{margin:0;font-size:clamp(28px,4vw,46px);line-height:1.02;font-weight:900;letter-spacing:-.035em;color:var(--fleet-ink)}
+  .fleet-page-intro p{margin:12px 0 0;color:#64748b;font-size:15px;line-height:1.7;max-width:680px}
+  .fleet-stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .fleet-stat{min-width:100px;padding:12px 15px;border:1px solid var(--fleet-border);border-radius:16px;background:#fff;box-shadow:0 8px 28px rgba(15,23,42,.06)}
+  .fleet-stat strong{display:block;font-size:22px;line-height:1;font-weight:900;color:var(--fleet-ink)}
+  .fleet-stat span{display:block;margin-top:5px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8}
+  .fleet-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+  .fleet-card{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid var(--fleet-border);border-radius:24px;box-shadow:0 14px 40px rgba(15,23,42,.08);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .fleet-card:hover{transform:translateY(-6px);box-shadow:0 24px 55px rgba(15,23,42,.14);border-color:rgba(249,115,22,.35)}
+  .fleet-card:focus-visible{outline:3px solid rgba(249,115,22,.45);outline-offset:4px}
+  .fleet-card__media{position:relative;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,#e2e8f0,#f8fafc)}
+  .fleet-card__media:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,6,23,.02) 45%,rgba(2,6,23,.52) 100%);pointer-events:none}
+  .fleet-card__media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s ease}
+  .fleet-card:hover .fleet-card__media img{transform:scale(1.045)}
+  .fleet-card__badge{position:absolute;left:14px;top:14px;z-index:2;padding:7px 10px;border-radius:999px;background:rgba(2,6,23,.78);color:#fff;font-size:9px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;backdrop-filter:blur(8px)}
+  .fleet-card__hint{position:absolute;right:14px;bottom:14px;z-index:2;padding:8px 11px;border-radius:999px;background:#fff;color:#0f172a;font-size:10px;font-weight:900;box-shadow:0 7px 20px rgba(0,0,0,.16)}
+  .fleet-card__body{padding:20px 20px 18px;display:flex;flex:1;flex-direction:column}
+  .fleet-card__eyebrow{margin:0 0 7px;color:var(--fleet-orange);font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+  .fleet-card__title{margin:0;color:#0f172a;font-size:23px;line-height:1.05;font-weight:900;letter-spacing:-.025em;text-transform:uppercase}
+  .fleet-card__desc{margin:10px 0 16px;color:#64748b;font-size:13px;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .fleet-card__specs{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto;padding-top:14px;border-top:1px solid #eef2f7}
+  .fleet-card__spec{padding:7px 9px;border-radius:10px;background:#f8fafc;color:#475569;font-size:10px;font-weight:800}
+  .fleet-card__cta{display:flex;align-items:center;justify-content:space-between;margin-top:16px;color:#0f172a;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+  .fleet-card__cta span:last-child{color:var(--fleet-orange);font-size:17px;transition:transform .2s ease}.fleet-card:hover .fleet-card__cta span:last-child{transform:translateX(4px)}
+  .fleet-empty{grid-column:1/-1;padding:55px 25px;text-align:center;border:1px dashed #cbd5e1;border-radius:22px;background:#f8fafc;color:#64748b}
+  .fleet-empty strong{display:block;color:#0f172a;font-size:20px;margin-bottom:6px}
+  #fleetDetailModal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,6,23,.78);backdrop-filter:blur(12px)}
+  #fleetDetailModal.is-open{display:flex}
+  .fleet-modal{width:min(1160px,100%);max-height:min(94vh,920px);overflow:auto;background:#fff;border-radius:28px;box-shadow:0 35px 110px rgba(0,0,0,.4);position:relative}
+  .fleet-modal__close{position:absolute;top:16px;right:16px;z-index:5;width:44px;height:44px;border:1px solid rgba(255,255,255,.2);border-radius:50%;background:rgba(2,6,23,.78);color:#fff;font-size:25px;line-height:1;cursor:pointer;backdrop-filter:blur(8px)}
+  .fleet-modal__close:hover{background:var(--fleet-orange)}
+  .fleet-modal__gallery{padding:18px 18px 0}
+  .fleet-modal__main{height:min(56vh,560px);border-radius:20px;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
+  .fleet-modal__main img{width:100%;height:100%;object-fit:contain}
+  .fleet-modal__thumbs{display:flex;gap:10px;overflow-x:auto;padding:13px 2px 4px}
+  .fleet-modal__thumb{flex:0 0 88px;width:88px;height:66px;border:2px solid transparent;border-radius:11px;overflow:hidden;padding:0;background:#e2e8f0;cursor:pointer}
+  .fleet-modal__thumb.is-active{border-color:var(--fleet-orange)}
+  .fleet-modal__thumb img{width:100%;height:100%;object-fit:cover}
+  .fleet-modal__body{padding:22px 28px 30px}
+  .fleet-modal__eyebrow{margin:0 0 7px;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--fleet-orange)}
+  .fleet-modal__title{margin:0 0 13px;font-size:clamp(27px,4vw,44px);line-height:1.02;font-weight:900;letter-spacing:-.035em;text-transform:uppercase;color:#0f172a}
+  .fleet-modal__meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .fleet-modal__pill{padding:8px 11px;border-radius:999px;background:#f1f5f9;color:#334155;font-size:11px;font-weight:800}
+  .fleet-modal__description{margin:0;color:#475569;font-size:15px;line-height:1.75;white-space:pre-line}
+  .fleet-modal__footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:24px;padding-top:18px;border-top:1px solid #e2e8f0}
+  .fleet-modal__footer small{color:#94a3b8;font-size:11px;font-weight:700}
+  .fleet-modal__cta{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:12px;background:var(--fleet-orange);color:#fff;font-size:11px;font-weight:900;text-transform:uppercase;text-decoration:none;box-shadow:0 10px 24px rgba(249,115,22,.25)}
+  .fleet-modal__cta:hover{background:var(--fleet-orange-dark)}
+  body.modal-open{overflow:hidden}
+  @media (max-width:980px){.fleet-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fleet-page-intro{align-items:flex-start;flex-direction:column}.fleet-stats{justify-content:flex-start}}
+  @media (max-width:640px){.fleet-grid{grid-template-columns:1fr}.fleet-page-intro h2{font-size:32px}.fleet-stats{width:100%}.fleet-stat{flex:1;min-width:0}.fleet-card__title{font-size:21px}.fleet-modal{border-radius:20px}.fleet-modal__gallery{padding:10px 10px 0}.fleet-modal__main{height:39vh;border-radius:14px}.fleet-modal__body{padding:18px 18px 24px}.fleet-modal__footer{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -192,7 +121,15 @@
 
 <section class="section">
   <div class="container">
-    <div id="fleetGrid" class="grid cards-2"></div>
+    <div class="fleet-page-intro">
+      <div class="fleet-page-intro__copy">
+        <div class="fleet-page-intro__eyebrow">La flotta DELGROSSO</div>
+        <h2>Mezzi scelti per viaggiare <span style="color:#f97316">al meglio.</span></h2>
+        <p>Scopri i nostri autobus GT, la Limousine Bus e i veicoli NCC. Apri ogni scheda per vedere tutte le fotografie, le caratteristiche e la descrizione completa del mezzo.</p>
+      </div>
+      <div class="fleet-stats" id="fleetStats" aria-label="Riepilogo flotta"></div>
+    </div>
+    <div id="fleetGrid" class="fleet-grid"></div>
   </div>
 </section>
 
@@ -211,6 +148,10 @@
       <h2 id="fleetDetailTitle" class="fleet-modal__title"></h2>
       <div id="fleetModalMeta" class="fleet-modal__meta"></div>
       <p id="fleetModalDescription" class="fleet-modal__description"></p>
+      <div class="fleet-modal__footer">
+        <small>DELGROSSO Viaggi &amp; Limousine Bus · Comfort · Sicurezza · Esperienza</small>
+        <a class="fleet-modal__cta" href="preventivo.html">Richiedi un preventivo <span>→</span></a>
+      </div>
     </div>
   </div>
 </div>
@@ -250,19 +191,12 @@ let legacyDetails = [];
 
 async function loadLegacyFleetDetails() {
   try {
-    const endpoint =
-      `${PUBLIC_SUPABASE_URL}/rest/v1/flotta_page?select=*&order=created_at.asc`;
-
+    const endpoint = `${PUBLIC_SUPABASE_URL}/rest/v1/flotta_page?select=*&order=created_at.asc`;
     const response = await fetch(endpoint, {
-      headers: {
-        apikey: PUBLIC_SUPABASE_KEY,
-        Authorization: `Bearer ${PUBLIC_SUPABASE_KEY}`
-      },
+      headers: { apikey: PUBLIC_SUPABASE_KEY, Authorization: `Bearer ${PUBLIC_SUPABASE_KEY}` },
       cache: 'no-store'
     });
-
     if (!response.ok) throw new Error(`flotta_page HTTP ${response.status}`);
-
     const rows = await response.json();
     legacyDetails = Array.isArray(rows) ? rows : [];
   } catch (error) {
@@ -273,7 +207,6 @@ async function loadLegacyFleetDetails() {
 
 function normalizeGallery(value) {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
-
   if (typeof value === 'string' && value.trim()) {
     try {
       const parsed = JSON.parse(value);
@@ -281,51 +214,140 @@ function normalizeGallery(value) {
     } catch (_) {}
     return value.split(',').map((item) => item.trim()).filter(Boolean);
   }
-
   return [];
 }
 
+function cleanText(value) {
+  return normalize(value).replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 function findLegacyDetails(bus) {
-  const model = normalize(bus.modello);
-  const brand = normalize(bus.marca);
-  const title = normalize(`${bus.marca || ''} ${bus.modello || ''}`);
+  const candidates = [
+    bus?.id, bus?.titolo,
+    `${bus?.marca || ''} ${bus?.modello || ''}`,
+    bus?.modello,
+    bus?.categoria
+  ].map(cleanText).filter(Boolean);
 
   return legacyDetails.find((item) => {
-    const legacyTitle = normalize(item.titolo);
-    if (!legacyTitle) return false;
-    return legacyTitle === title
-      || legacyTitle.includes(model)
-      || title.includes(legacyTitle)
-      || (brand && model && legacyTitle.includes(brand) && legacyTitle.includes(model));
+    const title = cleanText(item?.titolo);
+    if (!title) return false;
+    if (candidates.some((candidate) => candidate === title || title.includes(candidate) || candidate.includes(title))) return true;
+
+    // Alias dei mezzi usati nel gestionale / vecchia flotta.
+    const aliases = {
+      'pb a': ['pb 53', 'gt 53', '53 posti', 'irizar scania pb'],
+      'pb b': ['pb 63 b', 'gt 63 b', '63 b posti', 'irizar scania pb'],
+      'pb': ['pb gt 63', 'gt 63', '63 posti', 'irizar scania pb'],
+      'century': ['gt 53', '53 posti', 'irizar century'],
+      'limousine': ['limousine bus', 'party bus'],
+      'v250d': ['mercedes v250d', '7 posti']
+    };
+    return Object.entries(aliases).some(([key, values]) =>
+      candidates.some((candidate) => candidate.includes(key)) && values.some((value) => title.includes(cleanText(value)))
+    );
   }) || null;
 }
 
-function getBusImages(bus) {
-  const legacy = findLegacyDetails(bus);
-  const gallery = legacy ? normalizeGallery(legacy.foto_gallery) : [];
-  const primary = String(legacy?.immagine_url || bus.immagine || '').trim();
+function buildLegacyBus(item) {
+  const title = String(item?.titolo || '').trim();
+  const lower = title.toLowerCase();
+  let posti = '';
+  if (/63/.test(lower)) posti = '63';
+  else if (/53/.test(lower)) posti = '53';
+  else if (/7 posti|v250d/.test(lower)) posti = '7';
+  else if (/30|limousine/.test(lower)) posti = '30';
 
+  let categoria = 'GRAN TURISMO';
+  if (/limousine|party/.test(lower)) categoria = 'LIMOUSINE BUS';
+  if (/mercedes|v250d/.test(lower)) categoria = 'NCC';
+
+  return {
+    __legacyOnly: true,
+    id: `legacy-${item.id || title}`,
+    titolo: title,
+    marca: title.split(/\s+/).slice(0, 2).join(' '),
+    modello: title,
+    categoria,
+    posti,
+    anno: item?.anno || '',
+    targa: item?.targa || '',
+    immagine: item?.immagine_url || '',
+    descrizione: item?.descrizione || ''
+  };
+}
+
+function getBusImages(bus) {
+  const legacy = bus.__legacySource || findLegacyDetails(bus);
+  const gallery = legacy ? [
+    ...normalizeGallery(legacy.foto_gallery),
+    ...normalizeGallery(legacy.foto_urls)
+  ] : [];
+  const primary = String(legacy?.immagine_url || legacy?.immagine || bus.immagine || '').trim();
   return [...new Set([primary, ...gallery].filter((url) => /^https?:\/\//i.test(url) || /^data:image\//i.test(url)))];
+}
+
+function displayTitle(bus) {
+  const legacy = bus.__legacySource;
+  return legacy?.titolo || bus.titolo || `${bus.marca || 'DELGROSSO'} ${bus.modello || 'Autobus'}`;
+}
+
+function displayDescription(bus) {
+  const legacy = bus.__legacySource;
+  return legacy?.descrizione || bus.descrizione || 'Mezzo DELGROSSO pensato per comfort, sicurezza e viaggi di gruppo.';
+}
+
+function displayCategory(bus) {
+  return bus.categoria || bus.__legacySource?.categoria || 'GRAN TURISMO';
+}
+
+function mergeFleetRows(currentRows) {
+  const rows = [...currentRows];
+  const usedLegacy = new Set();
+
+  rows.forEach((bus) => {
+    const legacy = findLegacyDetails(bus);
+    if (legacy) bus.__legacySource = legacy;
+  });
+
+  legacyDetails.forEach((legacy) => {
+    const legacyTitle = cleanText(legacy?.titolo);
+    if (!legacyTitle) return;
+    const alreadyPresent = rows.some((bus) => {
+      const title = cleanText(displayTitle(bus));
+      return title === legacyTitle || title.includes(legacyTitle) || legacyTitle.includes(title);
+    });
+    if (!alreadyPresent) {
+      rows.push(buildLegacyBus(legacy));
+      rows[rows.length - 1].__legacySource = legacy;
+    }
+    usedLegacy.add(legacy.id);
+  });
+
+  return rows;
 }
 
 function openFleetDetail(index) {
   const bus = fleetRows[index];
   if (!bus) return;
 
-  const legacy = findLegacyDetails(bus);
+  const legacy = bus.__legacySource || findLegacyDetails(bus);
   const images = getBusImages(bus);
-  const title = legacy?.titolo || `${bus.marca || 'DELGROSSO'} ${bus.modello || 'Autobus'}`;
-  const description = legacy?.descrizione || bus.descrizione || 'Comfort, sicurezza ed esperienza per ogni destinazione.';
+  const title = displayTitle(bus);
+  const description = displayDescription(bus);
+  const category = displayCategory(bus);
 
   document.getElementById('fleetDetailTitle').textContent = title;
-  document.getElementById('fleetModalCategory').textContent = bus.categoria || legacy?.categoria || 'GRAN TURISMO';
+  document.getElementById('fleetModalCategory').textContent = category;
 
   const meta = [];
-  if (bus.posti) meta.push(`${bus.posti} posti`);
-  if (bus.anno) meta.push(`Anno ${bus.anno}`);
-  if (bus.targa) meta.push(bus.targa);
+  const posti = bus.posti || legacy?.posti;
+  const anno = bus.anno || legacy?.anno;
+  const targa = bus.targa || legacy?.targa;
+  if (posti) meta.push(`${posti} posti`);
+  if (anno) meta.push(`Anno ${anno}`);
+  if (targa) meta.push(targa);
   document.getElementById('fleetModalMeta').innerHTML = meta.map((item) => `<span class="fleet-modal__pill">${esc(item)}</span>`).join('');
-
   document.getElementById('fleetModalDescription').textContent = description;
 
   const mainImage = document.getElementById('fleetModalMainImage');
@@ -338,13 +360,11 @@ function openFleetDetail(index) {
   } else {
     mainImage.src = images[0];
     mainImage.alt = title;
-
     thumbs.innerHTML = images.map((image, imageIndex) => `
       <button class="fleet-modal__thumb ${imageIndex === 0 ? 'is-active' : ''}" type="button" data-image-index="${imageIndex}" aria-label="Foto ${imageIndex + 1}">
         <img src="${esc(image)}" alt="">
       </button>
     `).join('');
-
     thumbs.querySelectorAll('.fleet-modal__thumb').forEach((button) => {
       button.addEventListener('click', () => {
         const imageIndex = Number(button.dataset.imageIndex);
@@ -368,48 +388,83 @@ function closeFleetDetail() {
   document.body.classList.remove('modal-open');
 }
 
-async function load() {
-  const grid = document.getElementById('fleetGrid');
+function renderFleetStats() {
+  const stats = document.getElementById('fleetStats');
+  if (!stats) return;
+  const total = fleetRows.length;
+  const gt = fleetRows.filter((bus) => /gt|gran turismo|pb|century/i.test(`${displayCategory(bus)} ${displayTitle(bus)}`)).length;
+  const luxury = fleetRows.filter((bus) => /limousine|v250d|mercedes|ncc/i.test(`${displayCategory(bus)} ${displayTitle(bus)}`)).length;
+  stats.innerHTML = `
+    <div class="fleet-stat"><strong>${total}</strong><span>Mezzi</span></div>
+    <div class="fleet-stat"><strong>${gt}</strong><span>GT</span></div>
+    <div class="fleet-stat"><strong>${luxury}</strong><span>NCC / Luxury</span></div>`;
+}
 
+function renderFleet() {
+  const grid = document.getElementById('fleetGrid');
+  renderFleetStats();
+
+  if (!fleetRows.length) {
+    grid.innerHTML = '<div class="fleet-empty"><strong>Flotta in aggiornamento</strong>Stiamo caricando i nostri mezzi. Riprova tra qualche secondo.</div>';
+    return;
+  }
+
+  grid.innerHTML = fleetRows.map((bus, index) => {
+    const images = getBusImages(bus);
+    const image = images[0] || fallback;
+    const title = displayTitle(bus);
+    const description = displayDescription(bus);
+    const category = displayCategory(bus);
+    const specs = [
+      bus.posti || bus.__legacySource?.posti,
+      bus.anno || bus.__legacySource?.anno,
+      bus.targa || bus.__legacySource?.targa
+    ].filter(Boolean);
+
+    return `
+      <article class="fleet-card fleet-card-clickable" tabindex="0" role="button" data-fleet-index="${index}" aria-label="Scopri ${esc(title)}">
+        <div class="fleet-card__media">
+          <img src="${esc(image)}" alt="${esc(title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='${fallback}'">
+          <span class="fleet-card__badge">${esc(category)}</span>
+          <span class="fleet-card__hint">${images.length > 1 ? `${images.length} foto · ` : ''}Scopri →</span>
+        </div>
+        <div class="fleet-card__body">
+          <div class="fleet-card__eyebrow">DELGROSSO · ${esc(category)}</div>
+          <h3 class="fleet-card__title">${esc(title)}</h3>
+          <p class="fleet-card__desc">${esc(description)}</p>
+          <div class="fleet-card__specs">
+            ${specs.map((item) => `<span class="fleet-card__spec">${esc(item)}${String(item) === String(bus.posti || bus.__legacySource?.posti) ? ' POSTI' : ''}</span>`).join('')}
+          </div>
+          <div class="fleet-card__cta"><span>Apri scheda completa</span><span>→</span></div>
+        </div>
+      </article>`;
+  }).join('');
+
+  grid.querySelectorAll('[data-fleet-index]').forEach((card) => {
+    const index = Number(card.dataset.fleetIndex);
+    card.addEventListener('click', () => openFleetDetail(index));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openFleetDetail(index);
+      }
+    });
+  });
+}
+
+async function load() {
   try {
     const [fleetResult] = await Promise.all([
       getFlottaPubblica(),
       loadLegacyFleetDetails()
     ]);
 
-    fleetRows = (fleetResult.data || []).filter((item) => item?.attivo !== false);
-
-    if (!fleetRows.length) {
-      grid.innerHTML = '<div class="card"><div class="card-body"><small>FLOTTA</small><h3>In aggiornamento</h3><p>Stiamo caricando i mezzi disponibili.</p></div></div>';
-      return;
-    }
-
-    grid.innerHTML = fleetRows.map((bus, index) => `
-      <article class="card fleet-card-clickable" tabindex="0" role="button" data-fleet-index="${index}" aria-label="Apri dettagli ${esc(bus.marca || '')} ${esc(bus.modello || '')}">
-        <div class="card-media">
-          <img src="${esc(bus.immagine || fallback)}" alt="${esc(bus.marca || 'DELGROSSO')} ${esc(bus.modello || 'Autobus')}" onerror="this.src='${fallback}'">
-        </div>
-        <div class="card-body">
-          <small>${esc(bus.categoria || 'GRAN TURISMO')}</small>
-          <h3>${esc(bus.marca || 'DELGROSSO')} ${esc(bus.modello || '')}</h3>
-          <p>${esc(bus.descrizione || 'Mezzo Gran Turismo DELGROSSO, pensato per comfort, sicurezza e viaggi di gruppo.')} ${bus.posti ? `· ${esc(bus.posti)} posti` : ''}</p>
-        </div>
-      </article>
-    `).join('');
-
-    grid.querySelectorAll('[data-fleet-index]').forEach((card) => {
-      const index = Number(card.dataset.fleetIndex);
-      card.addEventListener('click', () => openFleetDetail(index));
-      card.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openFleetDetail(index);
-        }
-      });
-    });
+    const currentRows = (fleetResult.data || []).filter((item) => item?.attivo !== false);
+    fleetRows = mergeFleetRows(currentRows);
+    renderFleet();
   } catch (error) {
     console.error('Errore caricamento flotta:', error);
-    grid.innerHTML = '<div class="card"><div class="card-body"><small>FLOTTA</small><h3>Errore caricamento</h3><p>Riprova tra qualche secondo.</p></div></div>';
+    document.getElementById('fleetGrid').innerHTML = '<div class="fleet-empty"><strong>Impossibile caricare la flotta</strong>Riprova tra qualche secondo.</div>';
   }
 }
 
