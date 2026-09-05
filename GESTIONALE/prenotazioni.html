@@ -3,13 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Prenotazioni - Del Grosso Gestionale v5.0</title>
-<meta name="dg-build" content="V50">
+<title>Prenotazioni - Del Grosso Gestionale v5.0.2</title>
+<meta name="dg-build" content="V50.2">
 
 
 
 
-  <script type="module" src="./assets/prenotazioni-DO8eRNX0.js?v=50"></script>
+  <script>
+(async()=>{
+  const FLAG="dg_v502_cache_reset";
+  if(!sessionStorage.getItem(FLAG)){
+    sessionStorage.setItem(FLAG,"1");
+    try{const regs=await navigator.serviceWorker?.getRegistrations?.()||[]; await Promise.all(regs.map(r=>r.unregister()));}catch(e){}
+    try{const keys=await caches?.keys?.()||[]; await Promise.all(keys.map(k=>caches.delete(k)));}catch(e){}
+    const u=new URL(location.href); u.searchParams.set("dg_reload","502"); location.replace(u.href); return;
+  }
+})();
+</script>
+<script type="module" src="./assets/prenotazioni-v502.js?v=502"></script>
   <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
   <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
   <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
