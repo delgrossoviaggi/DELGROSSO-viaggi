@@ -55,7 +55,7 @@
       <div class="dg-v41-backdrop" hidden></div>
       <header class="dg-v41-header" role="banner">
         <div class="dg-v41-heading"><span>DELGROSSO VIAGGI · GESTIONALE</span><strong>${esc(TITLES[key] || 'Gestionale')}</strong></div>
-        <div class="dg-v41-status"><span class="dg-v41-dot"></span><span>Operativo · V48.1</span></div>
+        <div class="dg-v41-status"><span class="dg-v41-dot"></span><span>Operativo · V48.2 CLEAN</span></div>
       </header>
       <aside id="dg-v41-drawer" class="dg-v41-drawer" aria-label="Navigazione Gestionale" aria-hidden="true">
         <div class="dg-v41-brand">
