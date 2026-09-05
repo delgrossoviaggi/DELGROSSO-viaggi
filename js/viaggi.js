@@ -11,20 +11,144 @@ const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x700/0f172a/ffffff?te
 const REQUEST_TIMEOUT_MS = 15000;
 const LAST_SEATS_THRESHOLD = 5;
 const HOME_FALLBACK = 'assets/images/logo-sidebar.png';
+const PUBLIC_CAROUSEL_SUPABASE_URL = 'https://exphxbeqwpwrsigdmilc.supabase.co';
+const PUBLIC_CAROUSEL_SUPABASE_KEY = 'sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c';
+const HERO_SLIDE_INTERVAL_MS = 6000;
 
-async function syncHomeVisual() {
-  try {
-    const result = await getFlottaPubblica();
-    const fleet = (result.data || []).filter((item) => item?.attivo !== false);
-    const image = fleet.find((item) => String(item?.immagine || '').trim())?.immagine;
-    const target = document.querySelector('.hero-visual__image');
-    if (!target || !image) return;
-    target.innerHTML = `<img src="${escapeHtml(image)}" alt="Autobus DELGROSSO Viaggi" loading="eager" referrerpolicy="no-referrer">`;
-  } catch (error) {
-    console.warn('Immagine hero Home/Supabase:', error);
+async function loadPublicCarouselImages() {
+  const endpoint =
+    `${PUBLIC_CAROUSEL_SUPABASE_URL}/rest/v1/carousel_home?select=foto_urls&order=created_at.desc&limit=1`;
+
+  const response = await fetch(endpoint, {
+    headers: {
+      apikey: PUBLIC_CAROUSEL_SUPABASE_KEY,
+      Authorization: `Bearer ${PUBLIC_CAROUSEL_SUPABASE_KEY}`
+    },
+    cache: 'no-store'
+  });
+
+  if (!response.ok) {
+    throw new Error(`Carousel Supabase HTTP ${response.status}`);
   }
+
+  const rows = await response.json();
+  const row = Array.isArray(rows) ? rows[0] : null;
+
+  return [...new Set(
+    (Array.isArray(row?.foto_urls) ? row.foto_urls : [])
+      .map((value) => String(value ?? '').trim())
+      .filter((value) => /^https?:\/\//i.test(value) || /^data:image\//i.test(value))
+  )];
 }
 
+function setupHeroCarousel(target, images) {
+  if (!target || !images.length) return;
+
+  target.innerHTML = '';
+  target.style.position = 'relative';
+  target.style.overflow = 'hidden';
+
+  const slides = images.map((src, index) => {
+    const image = document.createElement('img');
+
+    image.src = src;
+    image.alt = 'Autobus DELGROSSO Viaggi';
+    image.loading = index === 0 ? 'eager' : 'lazy';
+    image.referrerPolicy = 'no-referrer';
+    image.decoding = 'async';
+
+    image.style.cssText = [
+      'position:absolute',
+      'left:50%',
+      'top:50%',
+      'transform:translate(-50%,-50%)',
+      'width:min(72%,340px)',
+      'height:auto',
+      'max-width:340px',
+      'opacity:0',
+      'transition:opacity 650ms ease',
+      'z-index:1',
+      'pointer-events:none'
+    ].join(';');
+
+    image.addEventListener('error', () => image.remove());
+
+    target.appendChild(image);
+    return image;
+  });
+
+  slides[0].style.opacity = '1';
+
+  if (slides.length < 2) return;
+
+  let currentIndex = 0;
+
+  const showNext = () => {
+    const current = slides[currentIndex];
+    let nextIndex = (currentIndex + 1) % slides.length;
+    let attempts = 0;
+
+    while (attempts < slides.length && !slides[nextIndex].isConnected) {
+      nextIndex = (nextIndex + 1) % slides.length;
+      attempts++;
+    }
+
+    if (!slides[nextIndex].isConnected || nextIndex === currentIndex) return;
+
+    const next = slides[nextIndex];
+
+    next.style.zIndex = '2';
+    current.style.zIndex = '1';
+    next.style.opacity = '1';
+    current.style.opacity = '0';
+
+    currentIndex = nextIndex;
+  };
+
+  let timer = window.setInterval(showNext, HERO_SLIDE_INTERVAL_MS);
+
+  target.addEventListener('mouseenter', () => {
+    window.clearInterval(timer);
+  });
+
+  target.addEventListener('mouseleave', () => {
+    window.clearInterval(timer);
+    timer = window.setInterval(showNext, HERO_SLIDE_INTERVAL_MS);
+  });
+}
+
+async function syncHomeVisual() {
+  const target = document.querySelector('.hero-visual__image');
+  if (!target) return;
+
+  try {
+    const carouselImages = await loadPublicCarouselImages();
+
+    if (carouselImages.length) {
+      setupHeroCarousel(target, carouselImages);
+      return;
+    }
+  } catch (error) {
+    console.warn('Carousel hero Viaggi/Supabase:', error);
+  }
+
+  try {
+    const result = await getFlottaPubblica();
+    const fleet = (result.data || []).filter(
+      (item) => item?.attivo !== false
+    );
+
+    const image = fleet.find(
+      (item) => String(item?.immagine || '').trim()
+    )?.immagine;
+
+    if (image) {
+      setupHeroCarousel(target, [image]);
+    }
+  } catch (error) {
+    console.warn('Fallback immagine hero Viaggi:', error);
+  }
+}
 
 const ui = {
   searchInput: document.getElementById('searchInput'),
