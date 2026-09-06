@@ -1,0 +1,151 @@
+
+<script type="module">
+import { getFlottaPubblica } from './js/bridge.js';
+
+const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+}[char]));
+
+const normalize = (value) => String(value ?? '')
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, ' ');
+
+const fallback = 'assets/images/logo-sidebar.png';
+
+const PUBLIC_SUPABASE_URL = 'https://exphxbeqwpwrsigdmilc.supabase.co';
+const PUBLIC_SUPABASE_KEY = 'sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c';
+
+let fleetRows = [];
+let legacyDetails = [];
+
+async function loadLegacyFleetDetails() {
+  try {
+    const endpoint =
+      `${PUBLIC_SUPABASE_URL}/rest/v1/flotta_page?select=*&order=created_at.asc`;
+
+    const response = await fetch(endpoint, {
+      headers: {
+        apikey: PUBLIC_SUPABASE_KEY,
+        Authorization: `Bearer ${PUBLIC_SUPABASE_KEY}`
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) throw new Error(`flotta_page HTTP ${response.status}`);
+
+    const rows = await response.json();
+    legacyDetails = Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.warn('Dettagli/galleria flotta non disponibili:', error);
+    legacyDetails = [];
+  }
+}
+
+function normalizeGallery(value) {
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+    } catch (_) {}
+    return value.split(',').map((item) => item.trim()).filter(Boolean);
+  }
+
+  return [];
+}
+
+function findLegacyDetails(bus) {
+  const model = normalize(bus.modello);
+  const brand = normalize(bus.marca);
+  const title = normalize(`${bus.marca || ''} ${bus.modello || ''}`);
+
+  return legacyDetails.find((item) => {
+    const legacyTitle = normalize(item.titolo);
+    if (!legacyTitle) return false;
+    return legacyTitle === title
+      || legacyTitle.includes(model)
+      || title.includes(legacyTitle)
+      || (brand && model && legacyTitle.includes(brand) && legacyTitle.includes(model));
+  }) || null;
+}
+
+function getBusImages(bus) {
+  const legacy = findLegacyDetails(bus);
+  const gallery = legacy ? normalizeGallery(legacy.foto_gallery) : [];
+  const primary = String(legacy?.immagine_url || bus.immagine || '').trim();
+
+  return [...new Set([primary, ...gallery].filter((url) => /^https?:\/\//i.test(url) || /^data:image\//i.test(url)))];
+}
+
+function openFleetDetail(index) {
+  const bus = fleetRows[index];
+  if (!bus) return;
+
+  const legacy = findLegacyDetails(bus);
+  const images = getBusImages(bus);
+  const title = legacy?.titolo || `${bus.marca || 'DELGROSSO'} ${bus.modello || 'Autobus'}`;
+  const description = legacy?.descrizione || bus.descrizione || 'Comfort, sicurezza ed esperienza per ogni destinazione.';
+
+  document.getElementById('fleetDetailTitle').textContent = title;
+  document.getElementById('fleetModalCategory').textContent = bus.categoria || legacy?.categoria || 'GRAN TURISMO';
+
+  const meta = [];
+  if (bus.posti) meta.push(`${bus.posti} posti`);
+  if (bus.anno) meta.push(`Anno ${bus.anno}`);
+  if (bus.targa) meta.push(bus.targa);
+  document.getElementById('fleetModalMeta').innerHTML = meta.map((item) => `<span class="fleet-modal__pill">${esc(item)}</span>`).join('');
+
+  document.getElementById('fleetModalDescription').textContent = description;
+
+  const mainImage = document.getElementById('fleetModalMainImage');
+  const thumbs = document.getElementById('fleetModalThumbs');
+
+  if (!images.length) {
+    mainImage.src = fallback;
+    mainImage.alt = title;
+    thumbs.innerHTML = '';
+  } else {
+    mainImage.src = images[0];
+    mainImage.alt = title;
+
+    thumbs.innerHTML = images.map((image, imageIndex) => `
+      <button class="fleet-modal__thumb ${imageIndex === 0 ? 'is-active' : ''}" type="button" data-image-index="${imageIndex}" aria-label="Foto ${imageIndex + 1}">
+        <img src="${esc(image)}" alt="">
+      </button>
+    `).join('');
+
+    thumbs.querySelectorAll('.fleet-modal__thumb').forEach((button) => {
+      button.addEventListener('click', () => {
+        const imageIndex = Number(button.dataset.imageIndex);
+        mainImage.src = images[imageIndex];
+        thumbs.querySelectorAll('.fleet-modal__thumb').forEach((item) => item.classList.remove('is-active'));
+        button.classList.add('is-active');
+      });
+    });
+  }
+
+  const modal = document.getElementById('fleetDetailModal');
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeFleetDetail() {
+  const modal = document.getElementById('fleetDetailModal');
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+}
+
+async function load() {
+  const grid = document.getElementById('fleetGrid');
+
+  try {
+    const [fleetResult] = await Promise.all([
+      getFlottaPubblica(),
+      loadLegacyFleetDetails()
+    ]);
+
+    fleetRows = (fleetResult.data || []).filter((item) => item?.attivo !== false);

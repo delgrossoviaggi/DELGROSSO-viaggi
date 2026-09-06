@@ -293,14 +293,17 @@
                 const gallery = Array.isArray(legacy.foto_gallery) ? legacy.foto_gallery
                     : Array.isArray(legacy.foto_urls) ? legacy.foto_urls : [];
                 const primary = legacy.immagine_url || gallery[0] || null;
+                const seats = inferFleetSeats(title);
+                // Legacy rows may not have a seat count; public.flotta now allows NULL for this field.
 
                 const payload = {
                     titolo: title.toUpperCase(),
                     marca: 'DELGROSSO',
                     modello: title.toUpperCase(),
                     categoria: inferFleetCategory(title),
-                    posti: inferFleetSeats(title),
+                    posti: seats,
                     stato: 'Disponibile',
+                    targa: legacy.targa || null,
                     immagine: primary,
                     foto_gallery: gallery,
                     descrizione: legacy.descrizione || '',
@@ -494,8 +497,9 @@
                     marca: current?.marca || 'DELGROSSO',
                     modello: current?.modello || title,
                     categoria: current?.categoria || inferFleetCategory(title),
-                    posti: current?.posti || inferFleetSeats(title),
+                    posti: current?.posti ?? inferFleetSeats(title),
                     stato: current?.stato || 'Disponibile',
+                    targa: current?.targa || null,
                     immagine: fotoCorrentiFlotta[0],
                     foto_gallery: fotoCorrentiFlotta,
                     descrizione: document.getElementById('f-desc').value,
