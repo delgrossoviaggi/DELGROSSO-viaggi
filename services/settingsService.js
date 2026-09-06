@@ -6,8 +6,8 @@ const DEFAULT_LOGO = '../assets/images/logo.JPEG';
 const DEFAULT_FAVICON = '../favicon.png';
 const SECONDARY_PUBLIC_CONTACT = {
   label: 'Seconda Linea',
-  phone: '3662127916',
-  whatsapp: '393662127916'
+  phone: '3205730466',
+  whatsapp: '393205730466'
 };
 
 function success(data) {

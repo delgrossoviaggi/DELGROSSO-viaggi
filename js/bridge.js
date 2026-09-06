@@ -1,7 +1,6 @@
 import { tripService } from '../services/tripService.js';
 import { getPrenotazioniPostiViaggio } from './delgrosso-api.js';
 import { bookingService } from '../services/bookingService.js';
-import { fleetService } from '../services/fleetService.js';
 import { quoteService } from '../services/quoteService.js';
 
 export async function getViaggiPubblicati() {
@@ -41,48 +40,25 @@ export async function getPrenotazioniViaggio(tripId) {
   return getPrenotazioniPostiViaggio(tripId);
 }
 
-const PUBLIC_SITE_SUPABASE_URL = 'https://exphxbeqwpwrsigdmilc.supabase.co';
-const PUBLIC_SITE_SUPABASE_KEY = 'sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c';
+const SITE_SUPABASE_URL = 'https://exphxbeqwpwrsigdmilc.supabase.co';
+const SITE_SUPABASE_KEY = 'sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c';
 
 export async function getFlottaPubblica() {
   try {
-    const endpoint =
-      `${PUBLIC_SITE_SUPABASE_URL}/rest/v1/flotta_page` +
-      '?select=id,titolo,descrizione,immagine_url,foto_urls,foto_gallery' +
-      '&order=created_at.desc';
-
-    const response = await fetch(endpoint, {
-      headers: {
-        apikey: PUBLIC_SITE_SUPABASE_KEY,
-        Authorization: `Bearer ${PUBLIC_SITE_SUPABASE_KEY}`
-      },
+    const response = await fetch(`${SITE_SUPABASE_URL}/rest/v1/flotta_page?select=id,titolo,descrizione,immagine_url,foto_urls,foto_gallery&order=created_at.desc`, {
+      headers: { apikey: SITE_SUPABASE_KEY, Authorization: `Bearer ${SITE_SUPABASE_KEY}` },
       cache: 'no-store'
     });
-
-    if (!response.ok) {
-      throw new Error(`Supabase sito flotta_page: HTTP ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Supabase SITO flotta_page: HTTP ${response.status}`);
     const rows = await response.json();
-
-    return {
-      success: true,
-      data: (Array.isArray(rows) ? rows : []).map((row) => ({
-        ...row,
-        immagine: row.immagine_url || '',
-        foto_gallery: Array.isArray(row.foto_gallery)
-          ? row.foto_gallery
-          : (Array.isArray(row.foto_urls) ? row.foto_urls : [])
-      })),
-      error: null
-    };
+    return { success:true, data:(Array.isArray(rows)?rows:[]).map(r=>({
+      ...r,
+      immagine:r.immagine_url||'',
+      foto_gallery:Array.isArray(r.foto_gallery)&&r.foto_gallery.length?r.foto_gallery:(Array.isArray(r.foto_urls)?r.foto_urls:[])
+    })), error:null };
   } catch (error) {
-    console.error('Flotta pubblica / Supabase sito:', error);
-    return {
-      success: false,
-      data: [],
-      error
-    };
+    console.error('Flotta pubblica:', error);
+    return { success:false, data:[], error };
   }
 }
 
