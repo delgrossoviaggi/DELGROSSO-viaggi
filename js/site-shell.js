@@ -1,3 +1,4 @@
-export function initNav(){const b=document.querySelector('.menu');if(!b)return;const n=document.querySelector('.navlinks');b.onclick=()=>n.classList.toggle('open');}
+export function initNav(){const b=document.querySelector('.menu');if(!b)return;const n=document.querySelector('.navlinks');b.onclick=()=>n.classList.toggle('open')}
 export function setActive(){const p=location.pathname.split('/').pop()||'index.html';document.querySelectorAll('.navlinks a').forEach(a=>{if(a.getAttribute('href')===p)a.classList.add('active')})}
 export function year(){document.querySelectorAll('[data-year]').forEach(x=>x.textContent=new Date().getFullYear())}
+export function lightbox(){const box=document.querySelector('.lightbox');if(!box)return;document.addEventListener('click',e=>{const img=e.target.closest('[data-lightbox]');if(img){box.querySelector('img').src=img.src;box.classList.add('open')}});box.addEventListener('click',e=>{if(e.target===box||e.target.closest('button'))box.classList.remove('open')})}
