@@ -1,0 +1,9 @@
+SOSTITUZIONE FUNZIONE uploadCloudinary()
+
+Nel file admin.html del repository attuale:
+1. Cerca la funzione `async function uploadCloudinary(file)`.
+2. Sostituisci SOLO quella funzione con il contenuto di questo file.
+3. Non sostituire l'intero admin.html.
+
+La funzione usa il Cloudinary endpoint /image/upload e restituisce errori più leggibili.
+Non modifica Supabase, Gestionale o altre funzioni dell'Admin.
