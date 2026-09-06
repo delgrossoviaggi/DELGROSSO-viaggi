@@ -1,8 +1,5 @@
-/*
-DELGROSSO ADMIN — FIX UPLOAD CLOUDINARY
-Sostituire ESCLUSIVAMENTE la funzione uploadCloudinary() esistente in admin.html.
-Non modificare Supabase Gestionale.
-*/
+// DELGROSSO - Cloudinary upload fix
+// Sostituire SOLO la funzione uploadCloudinary() presente in admin.html con questa.
 
 async function uploadCloudinary(file) {
     if (!file) throw new Error("Nessun file selezionato.");
@@ -24,7 +21,6 @@ async function uploadCloudinary(file) {
     formData.append("upload_preset", UPLOAD_PRESET);
 
     let response;
-
     try {
         response = await fetch(endpoint, {
             method: "POST",
@@ -38,7 +34,6 @@ async function uploadCloudinary(file) {
     }
 
     let data = null;
-
     try {
         data = await response.json();
     } catch (_) {
@@ -48,12 +43,12 @@ async function uploadCloudinary(file) {
     }
 
     if (!response.ok || !data?.secure_url) {
-        const message =
+        const cloudinaryMessage =
             data?.error?.message ||
             data?.error?.http_code ||
             `HTTP ${response.status}`;
 
-        throw new Error(`Upload Cloudinary fallito: ${message}`);
+        throw new Error(`Upload Cloudinary fallito: ${cloudinaryMessage}`);
     }
 
     return data.secure_url;
