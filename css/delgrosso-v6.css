@@ -1,0 +1,309 @@
+
+/* =========================================================
+   DELGROSSO VIAGGI — V6 VISUAL SYSTEM
+   SOLO PRESENTAZIONE / LAYOUT
+   NON modifica Supabase, API, Gestionale o logiche JS.
+   ========================================================= */
+
+:root{
+  --dg-orange:#ff5a1f;
+  --dg-orange-2:#ff7a32;
+  --dg-black:#07090c;
+  --dg-black-2:#0d1117;
+  --dg-ink:#11151b;
+  --dg-muted:#68717d;
+  --dg-line:#e7e9ed;
+  --dg-white:#fff;
+  --dg-soft:#f5f6f8;
+  --dg-radius:24px;
+  --dg-shadow:0 22px 70px rgba(7,9,12,.10);
+  --dg-shadow-hover:0 30px 80px rgba(7,9,12,.16);
+
+  /* Compatibilità con il tema esistente delle partenze/prenotazioni */
+  --ocean-500:var(--dg-orange);
+  --ocean-600:var(--dg-orange);
+  --ocean-700:#e84b14;
+  --ocean-800:#c83f0f;
+  --ocean-dark:var(--dg-black);
+  --slate-900:var(--dg-ink);
+  --slate-700:#39414b;
+  --white:#fff;
+  --soft-shadow:var(--dg-shadow);
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(circle at 80% -10%,rgba(255,90,31,.10),transparent 34rem),
+    linear-gradient(180deg,#fff 0%,#f7f8fa 100%);
+  color:var(--dg-ink);
+}
+body::selection{background:rgba(255,90,31,.22)}
+
+a{transition:color .2s ease,transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}
+
+/* ---------- Header comune ---------- */
+.site-header{
+  position:sticky!important;
+  top:0;
+  z-index:1000;
+  background:rgba(7,9,12,.92)!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.14);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.site-header__inner,.container.site-nav{
+  min-height:76px!important;
+}
+.brand-lockup__box,.brand{
+  border-radius:14px!important;
+  overflow:hidden;
+}
+.brand-lockup__box{
+  background:#fff!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.brand-lockup__title,.brand .brand-lockup__title{color:#fff}
+.brand-lockup__sub{color:#ff9a6d!important}
+.site-nav a,.menu-links a{
+  color:#d9dee5!important;
+  font-weight:800!important;
+}
+.site-nav a:hover,.site-nav a.is-active,.menu-links a:hover{
+  color:#fff!important;
+}
+.site-nav a.is-active::after{
+  background:var(--dg-orange)!important;
+}
+.btn-primary,.header-cta,.departure-btn:not(.departure-btn--disabled),.form-confirm:not(:disabled){
+  background:linear-gradient(135deg,var(--dg-orange),var(--dg-orange-2))!important;
+  border-color:transparent!important;
+  color:#fff!important;
+  box-shadow:0 14px 30px rgba(255,90,31,.24)!important;
+}
+.btn-primary:hover,.header-cta:hover,.departure-btn:not(.departure-btn--disabled):hover,.form-confirm:not(:disabled):hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 38px rgba(255,90,31,.32)!important;
+}
+.btn-secondary,.btn-ghost,.form-back{
+  border-color:#d9dde3!important;
+  background:#fff!important;
+  color:#171b21!important;
+}
+.btn-secondary:hover,.btn-ghost:hover,.form-back:hover{
+  border-color:var(--dg-orange)!important;
+  color:var(--dg-orange)!important;
+}
+
+/* ---------- Hero comune ---------- */
+.hero-section,.page-hero,.booking-hero{
+  position:relative;
+}
+.hero-section::before,.page-hero::before,.booking-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 85% 25%,rgba(255,90,31,.14),transparent 28rem),
+    radial-gradient(circle at 5% 70%,rgba(0,0,0,.05),transparent 24rem);
+}
+.hero-title,.booking-hero__title,.page-hero h1{
+  color:var(--dg-ink)!important;
+  letter-spacing:-.055em!important;
+  font-weight:950!important;
+}
+.hero-title span,.booking-hero__title span,.page-hero h1 span{
+  color:var(--dg-orange)!important;
+}
+.eyebrow,.section-kicker,.card-kicker,.kicker{
+  color:var(--dg-orange)!important;
+}
+.eyebrow__dot{
+  background:var(--dg-orange)!important;
+  box-shadow:0 0 0 6px rgba(255,90,31,.10);
+}
+
+/* ---------- Partenze: format più editoriale ---------- */
+.departures-search,.panel,.panel-soft,.departure-card,.trip-card,.summary-card,.seat-stage,.form-card,.progress-card{
+  border-color:rgba(17,21,27,.09)!important;
+}
+.departures-search,.panel{
+  border-radius:26px!important;
+  box-shadow:var(--dg-shadow)!important;
+}
+.departures-search{
+  background:rgba(255,255,255,.92)!important;
+}
+.field-control,.form-control{
+  background:#fff!important;
+  border-color:#dfe3e8!important;
+  border-radius:16px!important;
+}
+.field-control:focus,.form-control:focus{
+  border-color:rgba(255,90,31,.65)!important;
+  box-shadow:0 0 0 4px rgba(255,90,31,.10)!important;
+}
+#tripsGrid{
+  gap:28px!important;
+}
+.departure-card{
+  border-radius:26px!important;
+  background:#fff!important;
+  box-shadow:var(--dg-shadow)!important;
+  overflow:hidden;
+}
+.departure-card:hover{
+  border-color:rgba(255,90,31,.28)!important;
+  box-shadow:var(--dg-shadow-hover)!important;
+  transform:translateY(-8px)!important;
+}
+.departure-card__media{
+  aspect-ratio:16/9!important;
+  background:#111!important;
+}
+.departure-card__content{padding:24px!important}
+.departure-card__kicker{color:var(--dg-orange)!important}
+.departure-card__title{
+  color:var(--dg-ink)!important;
+  font-size:clamp(22px,2.2vw,30px)!important;
+}
+.departure-chip{
+  background:#f7f8fa!important;
+  border-color:#e6e8ec!important;
+}
+.departure-chip i{color:var(--dg-orange)!important}
+.departure-price{color:var(--dg-orange)!important}
+.availability-pill--available{color:#15803d!important}
+.availability-pill--last{color:#b45309!important}
+.availability-pill--soldout{color:#b91c1c!important}
+
+/* ---------- Flotta ---------- */
+.page-hero{
+  background:
+    linear-gradient(115deg,#07090c 0%,#111820 62%,#1a0d08 100%)!important;
+  color:#fff!important;
+  padding:100px 0 90px!important;
+  overflow:hidden;
+}
+.page-hero .hero-inner{position:relative;z-index:1}
+.page-hero .kicker{color:#ff9a6d!important}
+.page-hero h1{color:#fff!important}
+.page-hero p{color:#c8ced7!important;max-width:720px}
+.section{
+  padding-top:76px!important;
+  padding-bottom:76px!important;
+}
+.grid.cards-2{
+  gap:28px!important;
+}
+.card{
+  border:1px solid #e5e7eb!important;
+  border-radius:28px!important;
+  background:#fff!important;
+  box-shadow:var(--dg-shadow)!important;
+  overflow:hidden;
+  transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease;
+}
+.card:hover{
+  transform:translateY(-7px);
+  box-shadow:var(--dg-shadow-hover)!important;
+  border-color:rgba(255,90,31,.28)!important;
+}
+.card-media{
+  min-height:300px;
+  background:#eef0f3!important;
+}
+.card-media img{
+  transition:transform .45s ease!important;
+}
+.card:hover .card-media img{transform:scale(1.035)}
+.card-body{padding:26px!important}
+.card-body small{color:var(--dg-orange)!important;font-weight:900!important;letter-spacing:.13em}
+.card-body h3{
+  color:var(--dg-ink)!important;
+  font-size:clamp(24px,3vw,34px)!important;
+  letter-spacing:-.045em!important;
+}
+.card-body p{color:#606a76!important;line-height:1.7}
+
+/* Modale flotta */
+#fleetDetailModal{background:rgba(4,6,9,.88)!important}
+.fleet-modal{
+  border-radius:28px!important;
+  box-shadow:0 40px 120px rgba(0,0,0,.5)!important;
+}
+.fleet-modal__close:hover{background:var(--dg-orange)!important}
+.fleet-modal__eyebrow{color:var(--dg-orange)!important}
+.fleet-modal__title{letter-spacing:-.05em!important}
+.fleet-modal__thumb.is-active{border-color:var(--dg-orange)!important}
+
+/* ---------- Prenotazione: layout invariato, look V6 ---------- */
+.booking-page .support-chip{
+  border-color:rgba(255,90,31,.16)!important;
+  background:linear-gradient(180deg,#fff,#fff7f3)!important;
+}
+.progress-step.active{
+  border-color:rgba(255,90,31,.35)!important;
+  background:rgba(255,90,31,.07)!important;
+}
+.progress-step.active .step-circle{
+  background:linear-gradient(135deg,var(--dg-orange),#d94812)!important;
+}
+.w-full.h-1 > div{
+  background:linear-gradient(90deg,var(--dg-orange),#ff8a4c)!important;
+}
+#seatmap-container .seat-map-container{
+  border-color:rgba(255,90,31,.20)!important;
+  background:linear-gradient(180deg,#fff,#fff8f4)!important;
+}
+#seatmap-container .seat-map-front{
+  border-color:rgba(255,90,31,.24)!important;
+  background:rgba(255,90,31,.05)!important;
+}
+#seatmap-container .seat-map-front__driver{background:var(--dg-black)!important}
+#seatmap-container .seat-map-stats strong{color:var(--dg-orange)!important}
+
+/* ---------- Footer ---------- */
+.site-footer,.footer{
+  background:#07090c!important;
+  color:#cbd2db!important;
+  margin-top:70px;
+}
+.site-footer__inner,.footer-grid{padding-top:58px!important;padding-bottom:28px!important}
+.site-footer h3,.footer h4{color:#fff!important}
+.site-footer a,.footer a{color:#aeb7c2!important}
+.site-footer a:hover,.footer a:hover{color:#ff9a6d!important}
+.footer-bottom,.site-footer__inner .footer-bottom{
+  border-top-color:rgba(255,255,255,.10)!important;
+  color:#7e8996!important;
+}
+
+/* ---------- Mobile ---------- */
+.mobile-toggle,.menu-toggle{
+  border-radius:14px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:rgba(255,255,255,.07)!important;
+  color:#fff!important;
+}
+.mobile-strip,.mobile-banner{
+  background:#090b0f!important;
+  border-top:1px solid rgba(255,255,255,.08)!important;
+}
+.mobile-strip a,.mobile-banner a{color:#e5e7eb!important}
+.mobile-strip a:hover,.mobile-banner a:hover{color:#ff9a6d!important}
+
+@media (max-width:760px){
+  .site-header__inner,.container.site-nav{min-height:68px!important}
+  .hero-section{padding-top:48px!important}
+  .page-hero{padding:72px 0 64px!important}
+  .section{padding-top:52px!important;padding-bottom:52px!important}
+  .card-media{min-height:220px}
+  .departure-card__content{padding:20px!important}
+  .departure-card__title{font-size:24px!important}
+  .page-hero h1{font-size:clamp(42px,13vw,70px)!important}
+}
