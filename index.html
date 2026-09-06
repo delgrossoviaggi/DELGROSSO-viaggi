@@ -147,18 +147,19 @@ async function loadHome() {
     console.warn('Viaggi/locandine Supabase:', e);
   }
 
-  // 3) FLOTTA: sincronizzata con Supabase.
+  // 3) FLOTTA: FONTE UNICA = public.flotta del Supabase Gestionale.
   try {
-    const fleet = (await publicRows('flotta_page', '*', 'created_at.desc')).filter(f => f && f.attivo !== false);
-    const fleetUrls = unique(fleet.map(f => f.immagine_url || f.immagine));
+    const fleet = (await publicRows('flotta', '*', 'created_at.asc')).filter(f => f && f.attivo !== false);
+    const title = f => f?.titolo || f?.modello || f?.marca || 'Mezzo DELGROSSO';
+    const fleetUrls = unique(fleet.map(f => f.immagine));
     const main = fleet[0];
-    if (main) setImage('fleetMain', main.immagine_url || main.immagine, main.titolo || 'Autobus DELGROSSO');
+    if (main) setImage('fleetMain', main.immagine, title(main));
     const grid = document.getElementById('fleetGrid');
     if (grid) {
       grid.innerHTML = fleet.slice(1, 6).map(f => `
-        <a class="fleet-card reveal in" href="flotta.html" aria-label="Scopri ${esc(f.titolo || 'mezzo DELGROSSO')}">
-          <img src="${esc(f.immagine_url || f.immagine || FALLBACK)}" alt="${esc(f.titolo || 'Mezzo DELGROSSO')}" onerror="this.src='${FALLBACK}'">
-          <div><h3>${esc(f.titolo || 'Mezzo DELGROSSO')}</h3><p>${esc(f.descrizione || 'Comfort e sicurezza a bordo.')}</p></div>
+        <a class="fleet-card reveal in" href="flotta.html" aria-label="Scopri ${esc(title(f))}">
+          <img src="${esc(f.immagine || FALLBACK)}" alt="${esc(title(f))}" onerror="this.src='${FALLBACK}'">
+          <div><h3>${esc(title(f))}</h3><p>${esc(f.descrizione || 'Comfort e sicurezza a bordo.')}</p></div>
         </a>`).join('');
     }
     const serviceImgs = fleetUrls.slice(0, 4);

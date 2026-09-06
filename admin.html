@@ -204,9 +204,18 @@
 
     <!-- Script Supabase & Logic -->
     <script>
+        // Supabase pubblico storico: viaggi, party, prenotazioni, carousel.
         const S_URL = "https://exphxbeqwpwrsigdmilc.supabase.co";
         const S_KEY = "sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c";
         const sb = supabase.createClient(S_URL, S_KEY);
+
+        // Supabase Gestionale: FONTE UNICA UFFICIALE DELLA FLOTTA.
+        const FLEET_URL = "https://chkuayhbmitdmzmmvona.supabase.co";
+        const FLEET_KEY = "sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je";
+        const fleetSb = supabase.createClient(FLEET_URL, FLEET_KEY);
+
+        // Archivio storico usato solo per il recupero iniziale dei mezzi già presenti nell'Admin.
+        // Dopo la sincronizzazione, tutte le modifiche della flotta passano da public.flotta.
 
         // CONFIGURAZIONE CLOUDINARY
         const CLOUD_NAME = "dubkmnnkl"; 
@@ -244,11 +253,78 @@
             alert(`❌ ERRORE ADMIN / SUPABASE\n\n${msg}`);
         }
 
+        function inferFleetCategory(title) {
+            const value = String(title || '').toLowerCase();
+            if (value.includes('limousine')) return 'LIMOUSINE BUS';
+            if (value.includes('mercedes') || value.includes('van') || value.includes('ncc')) return 'NCC / LUXURY';
+            return 'GT';
+        }
+
+        function inferFleetSeats(title) {
+            const match = String(title || '').match(/(\d+)\s*POSTI/i);
+            return match ? Number(match[1]) : null;
+        }
+
+        function fleetTitle(row) {
+            return String(row?.titolo || row?.modello || row?.marca || 'Mezzo DELGROSSO').trim();
+        }
+
+        async function syncLegacyFleetToCanonical() {
+            const { data: legacyRows, error: legacyError } = await sb
+                .from('flotta_page')
+                .select('*')
+                .order('created_at', { ascending: true });
+            if (legacyError) throw new Error(`Archivio flotta storico: ${legacyError.message}`);
+
+            const { data: canonicalRows, error: canonicalError } = await fleetSb
+                .from('flotta')
+                .select('*')
+                .order('created_at', { ascending: true });
+            if (canonicalError) throw new Error(`Flotta ufficiale: ${canonicalError.message}`);
+
+            const existingLegacyIds = new Set((canonicalRows || []).map(row => String(row.legacy_id || '')).filter(Boolean));
+            let imported = 0;
+
+            for (const legacy of (legacyRows || [])) {
+                const legacyId = String(legacy.id || '').trim();
+                if (!legacyId || existingLegacyIds.has(legacyId)) continue;
+
+                const title = fleetTitle(legacy);
+                const gallery = Array.isArray(legacy.foto_gallery) ? legacy.foto_gallery
+                    : Array.isArray(legacy.foto_urls) ? legacy.foto_urls : [];
+                const primary = legacy.immagine_url || gallery[0] || null;
+
+                const payload = {
+                    titolo: title.toUpperCase(),
+                    marca: 'DELGROSSO',
+                    modello: title.toUpperCase(),
+                    categoria: inferFleetCategory(title),
+                    posti: inferFleetSeats(title),
+                    stato: 'Disponibile',
+                    immagine: primary,
+                    foto_gallery: gallery,
+                    descrizione: legacy.descrizione || '',
+                    attivo: true,
+                    legacy_id: legacyId
+                };
+
+                const { error } = await fleetSb.from('flotta').insert(payload);
+                if (error) throw new Error(`Importazione ${title}: ${error.message}`);
+                existingLegacyIds.add(legacyId);
+                imported += 1;
+            }
+
+            if (imported) console.info(`FLOTTA: importati ${imported} mezzi dall'archivio storico.`);
+        }
+
         async function init() {
             try {
+                // Prima recuperiamo una sola volta i mezzi già presenti nel vecchio Garage.
+                await syncLegacyFleetToCanonical();
+
                 const [vReq, fReq, pReq, prReq, cReq, cfReq] = await Promise.all([
                     sb.from('tratte').select('*').order('created_at', {ascending: false}),
-                    sb.from('flotta_page').select('*').order('created_at', {ascending: false}),
+                    fleetSb.from('flotta').select('*').order('created_at', {ascending: false}),
                     sb.from('gallery_eventi').select('*').order('created_at', {ascending: false}),
                     sb.from('prenotazioni').select('*').order('created_at', {ascending: false}),
                     sb.from('carousel_home').select('*').order('created_at', {ascending: false}).limit(1),
@@ -256,7 +332,7 @@
                 ]);
 
                 [vReq, fReq, pReq, prReq, cReq, cfReq].forEach((r, i) => {
-                    if (r.error) throw new Error(`Errore lettura Supabase (${['tratte','flotta_page','gallery_eventi','prenotazioni','carousel_home','carousel_flotta'][i]}): ${r.error.message}`);
+                    if (r.error) throw new Error(`Errore lettura Supabase (${['tratte','flotta','gallery_eventi','prenotazioni','carousel_home','carousel_flotta'][i]}): ${r.error.message}`);
                 });
 
                 allData.viaggi = vReq.data || [];
@@ -283,7 +359,7 @@
 
         function renderAll() {
             document.getElementById('display-viaggi').innerHTML = allData.viaggi.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('tratte','${d.id}')" class="delete-btn">×</div></div>`).join('');
-            document.getElementById('display-flotta').innerHTML = allData.flotta.map(d => `<div class="item-row"><img src="${d.immagine_url}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="caricaModificaFlotta('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('flotta_page','${d.id}')" class="delete-btn">×</div></div>`).join('');
+            document.getElementById('display-flotta').innerHTML = allData.flotta.map(d => `<div class="item-row"><img src="${d.immagine || ''}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${fleetTitle(d)}</div><div onclick="caricaModificaFlotta('${d.id}')" class="edit-btn">MOD</div><div onclick="eliminaFlotta('${d.id}')" class="delete-btn">×</div></div>`).join('');
             document.getElementById('display-party').innerHTML = allData.party.map(d => `<div class="item-row"><img src="${d.foto_urls ? d.foto_urls[0] : ''}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo}</div><div onclick="caricaModificaParty('${d.id}')" class="edit-btn">MOD</div><div onclick="elimina('gallery_eventi','${d.id}')" class="delete-btn">×</div></div>`).join('');
             document.getElementById('display-locandine').innerHTML = allData.locandine.map(d => `<div class="item-row"><img src="${d.immagine_url || ''}" class="thumb"><div class="flex-1 font-extrabold text-xs uppercase text-white">${d.titolo || 'Locandina'}</div><div class="text-[10px] text-emerald-400 font-bold">PUBBLICATA</div><div onclick="preparaModificaViaggio('${d.id}')" class="edit-btn">MOD</div></div>`).join('');
             document.getElementById('display-preno').innerHTML = allData.prenotazioni.map(p => {
@@ -391,8 +467,10 @@
 
         function caricaModificaFlotta(id) {
             editFlottaId = id; const d = allData.flotta.find(x => x.id === id);
-            document.getElementById('f-nome').value = d.titolo; document.getElementById('f-desc').value = d.descrizione;
-            fotoCorrentiFlotta = d.foto_gallery || [];
+            if (!d) return;
+            document.getElementById('f-nome').value = fleetTitle(d);
+            document.getElementById('f-desc').value = d.descrizione || '';
+            fotoCorrentiFlotta = Array.isArray(d.foto_gallery) ? [...d.foto_gallery] : (d.immagine ? [d.immagine] : []);
             document.getElementById('anteprima-gallery-flotta').classList.remove('hidden');
             renderAnteprimaFlotta();
         }
@@ -409,17 +487,25 @@
                 if (!document.getElementById('f-nome').value.trim()) throw new Error("Inserisci il nome del mezzo.");
                 if (!fotoCorrentiFlotta.length) throw new Error("Inserisci almeno una foto del mezzo.");
 
+                const title = document.getElementById('f-nome').value.trim().toUpperCase();
+                const current = editFlottaId ? allData.flotta.find(x => x.id === editFlottaId) : null;
                 const data = {
-                    titolo: document.getElementById('f-nome').value.toUpperCase(),
+                    titolo: title,
+                    marca: current?.marca || 'DELGROSSO',
+                    modello: current?.modello || title,
+                    categoria: current?.categoria || inferFleetCategory(title),
+                    posti: current?.posti || inferFleetSeats(title),
+                    stato: current?.stato || 'Disponibile',
+                    immagine: fotoCorrentiFlotta[0],
+                    foto_gallery: fotoCorrentiFlotta,
                     descrizione: document.getElementById('f-desc').value,
-                    immagine_url: fotoCorrentiFlotta[0],
-                    foto_urls: fotoCorrentiFlotta,
-                    foto_gallery: fotoCorrentiFlotta
+                    attivo: current?.attivo !== false,
+                    legacy_id: current?.legacy_id || null
                 };
                 if(editFlottaId) {
-                    checkSupabase(await sb.from('flotta_page').update(data).eq('id', editFlottaId), 'Salvataggio Flotta');
+                    checkSupabase(await fleetSb.from('flotta').update(data).eq('id', editFlottaId), 'Salvataggio Flotta');
                 } else {
-                    checkSupabase(await sb.from('flotta_page').insert([data]), 'Creazione Flotta');
+                    checkSupabase(await fleetSb.from('flotta').insert([data]), 'Creazione Flotta');
                 }
                 await init();
                 editFlottaId = null;
@@ -510,13 +596,18 @@
         }
         
         async function elimina(tab, id) { if(confirm("Eliminare definitivamente questo record?")) { try { checkSupabase(await sb.from(tab).delete().eq('id', id), `Eliminazione ${tab}`); await init(); } catch(e) { mostraErroreAdmin(e); } } }
+        async function eliminaFlotta(id) { if(confirm("Eliminare definitivamente questo mezzo dalla flotta ufficiale?")) { try { checkSupabase(await fleetSb.from('flotta').delete().eq('id', id), 'Eliminazione Flotta'); await init(); } catch(e) { mostraErroreAdmin(e); } } }
 
-        const siteTables = ['carousel_home','carousel_flotta','tratte','flotta_page','gallery_eventi','prenotazioni'];
+        const siteTables = ['carousel_home','carousel_flotta','tratte','gallery_eventi','prenotazioni'];
         const realtimeChannel = sb.channel('site-content-sync');
         siteTables.forEach(table => {
             realtimeChannel.on('postgres_changes', { event: '*', schema: 'public', table }, () => init());
         });
         realtimeChannel.subscribe();
+
+        const fleetRealtimeChannel = fleetSb.channel('fleet-content-sync');
+        fleetRealtimeChannel.on('postgres_changes', { event: '*', schema: 'public', table: 'flotta' }, () => init());
+        fleetRealtimeChannel.subscribe();
 
         init();
     </script>
