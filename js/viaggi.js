@@ -19,9 +19,7 @@ function money(v) {
 }
 
 function capacity(trip) {
-  const m = String(trip.modello_bus || '').toLowerCase();
-  if (m.includes('53')) return 53;
-  return 63;
+  return Number(trip.posti_totali || trip.capacita || 63);
 }
 
 function availabilityState(trip) {
@@ -46,7 +44,7 @@ function render() {
   if (!grid) return;
 
   const filtered = trips.filter(t => {
-    const hay = `${t.titolo || ''} ${t.modello_bus || ''}`.toLowerCase();
+    const hay = `${t.titolo || ''} ${t.destinazione || ''} ${t.luogo_partenza || ''} ${t.autobus || t.modello_bus || ''}`.toLowerCase();
     if (q && !hay.includes(q)) return false;
     if (destination && t.titolo !== destination) return false;
     if (stateFilter && availabilityState(t).key !== stateFilter) return false;
@@ -65,7 +63,8 @@ function render() {
         <div><p class="departure-card__kicker">Del Grosso Viaggi</p><h3 class="departure-card__title">${escapeHtml(t.titolo || 'Partenza')}</h3></div>
         <div class="departure-card__meta">
           <div class="departure-chip"><i class="fas fa-calendar"></i><span>${escapeHtml(dateLabel(t.data_partenza))}</span></div>
-          <div class="departure-chip"><i class="fas fa-bus"></i><span>${escapeHtml(t.modello_bus || 'GT Deluxe')}</span></div>
+          <div class="departure-chip"><i class="fas fa-clock"></i><span>${escapeHtml(t.ora_partenza || 'Orario da definire')}</span></div>
+          <div class="departure-chip"><i class="fas fa-bus"></i><span>${escapeHtml(t.autobus || t.modello_bus || 'GT Deluxe')}</span></div>
         </div>
         <div class="departure-card__footer">
           <div><span class="departure-price-label">Quota</span><strong class="departure-price">${money(t.prezzo)}</strong></div>

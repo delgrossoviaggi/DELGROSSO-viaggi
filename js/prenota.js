@@ -82,7 +82,7 @@ $('passenger-form')?.addEventListener('submit', async e => {
   try {
     // RPC atomica: il controllo definitivo dei posti avviene dentro Supabase.
     const result = await createPublicBooking({
-      trattaId: trip.id,
+      viaggioId: trip.id,
       nome: $('passenger-name').value,
       cognome: $('passenger-surname').value,
       telefono: $('passenger-phone').value,

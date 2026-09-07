@@ -1,16 +1,16 @@
 import { supabase } from '../js/supabase.js';
 
-export async function createPublicBooking({ trattaId, nome, cognome, telefono, email = '', note = '', posti }) {
+export async function createPublicBooking({ viaggioId, nome, cognome, telefono, email = '', note = '', posti }) {
   const cleanSeats = [...new Set((posti || []).map(String).map(s => s.trim()).filter(Boolean))];
   if (!cleanSeats.length) throw new Error('Seleziona almeno un posto.');
 
   const { data, error } = await supabase.rpc('create_public_booking', {
-    p_tratta_id: trattaId,
-    p_nome: nome.trim(),
-    p_cognome: cognome.trim(),
-    p_telefono: telefono.trim(),
-    p_email: email.trim(),
-    p_note: note.trim(),
+    p_viaggio_id: viaggioId,
+    p_nome: String(nome || '').trim(),
+    p_cognome: String(cognome || '').trim(),
+    p_telefono: String(telefono || '').trim(),
+    p_email: String(email || '').trim(),
+    p_note: String(note || '').trim(),
     p_posti: cleanSeats
   });
 
