@@ -1,104 +1,246 @@
-import { getPublicTrips, getBookedSeats } from './services/viaggiService.js';
+import {
+  calculateAvailableSeats,
+  formatDate,
+  formatTime
+} from '../../../js/delgrosso-api.js';
+import { getViaggiPubblicati } from '../bridge.js';
+import { applyRuntimeSettings, loadImpostazioni } from '../../services/settingsService.js';
+import { buildPublicBookingUrl } from '../../utils/appRoutes.js';
 
-const $ = id => document.getElementById(id);
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x700/0f172a/ffffff?text=Del+Grosso+Viaggi';
+const REQUEST_TIMEOUT_MS = 15000;
+const LAST_SEATS_THRESHOLD = 5;
+
+const ui = {
+  searchInput: document.getElementById('searchInput'),
+  destinationFilter: document.getElementById('destinationFilter'),
+  availabilityFilter: document.getElementById('availabilityFilter'),
+  counterLabel: document.getElementById('counterLabel'),
+  reloadButton: document.getElementById('reloadButton'),
+  retryButton: document.getElementById('retryButton'),
+  tripsGrid: document.getElementById('tripsGrid'),
+  emptyState: document.getElementById('emptyState'),
+  errorState: document.getElementById('errorState'),
+  errorMessage: document.getElementById('errorMessage')
+};
+
 let trips = [];
-let availability = new Map();
 
-function parseDate(raw) {
-  if (!raw) return null;
-  const s = String(raw).trim();
-  const match = s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
-  if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
-  const d = new Date(s);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function money(v) {
-  const n = Number(v);
-  return n > 0 ? new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(n) : 'Prezzo su richiesta';
-}
-
-function capacity(trip) {
-  return Number(trip.posti_totali || trip.capacita || 63);
-}
-
-function availabilityState(trip) {
-  const total = capacity(trip);
-  const booked = (availability.get(trip.id) || []).length;
-  const free = Math.max(0, total - booked);
-  if (free <= 0) return { free, key:'soldout', label:'Sold Out' };
-  if (free <= 8) return { free, key:'ultimi', label:`Ultimi ${free} posti` };
-  return { free, key:'disponibile', label:`${free} posti disponibili` };
-}
-
-function dateLabel(raw) {
-  const d = parseDate(raw);
-  return d ? new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(d) : (raw || 'Data da definire');
-}
-
-function render() {
-  const q = ($('searchInput')?.value || '').trim().toLowerCase();
-  const destination = $('destinationFilter')?.value || '';
-  const stateFilter = $('availabilityFilter')?.value || '';
-  const grid = $('tripsGrid');
-  if (!grid) return;
-
-  const filtered = trips.filter(t => {
-    const hay = `${t.titolo || ''} ${t.destinazione || ''} ${t.luogo_partenza || ''} ${t.autobus || t.modello_bus || ''}`.toLowerCase();
-    if (q && !hay.includes(q)) return false;
-    if (destination && t.titolo !== destination) return false;
-    if (stateFilter && availabilityState(t).key !== stateFilter) return false;
-    return true;
-  });
-
-  grid.innerHTML = filtered.map(t => {
-    const a = availabilityState(t);
-    const disabled = a.free <= 0;
-    return `<article class="departure-card">
-      <div class="departure-card__media">
-        ${t.immagine_url ? `<img src="${escapeHtml(t.immagine_url)}" alt="${escapeHtml(t.titolo || 'Viaggio Del Grosso')}" loading="lazy">` : '<div style="height:100%;display:grid;place-items:center;font-size:48px;color:#64748b"><i class="fas fa-bus"></i></div>'}
-        <div class="departure-card__badge"><span class="availability-pill availability-pill--${a.key}"><span class="availability-pill__dot"></span>${escapeHtml(a.label)}</span></div>
-      </div>
-      <div class="departure-card__content">
-        <div><p class="departure-card__kicker">Del Grosso Viaggi</p><h3 class="departure-card__title">${escapeHtml(t.titolo || 'Partenza')}</h3></div>
-        <div class="departure-card__meta">
-          <div class="departure-chip"><i class="fas fa-calendar"></i><span>${escapeHtml(dateLabel(t.data_partenza))}</span></div>
-          <div class="departure-chip"><i class="fas fa-clock"></i><span>${escapeHtml(t.ora_partenza || 'Orario da definire')}</span></div>
-          <div class="departure-chip"><i class="fas fa-bus"></i><span>${escapeHtml(t.autobus || t.modello_bus || 'GT Deluxe')}</span></div>
-        </div>
-        <div class="departure-card__footer">
-          <div><span class="departure-price-label">Quota</span><strong class="departure-price">${money(t.prezzo)}</strong></div>
-          ${disabled ? '<button class="departure-btn departure-btn--disabled" disabled>Posti esauriti</button>' : `<a class="btn-primary departure-btn" href="prenota.html?viaggio=${encodeURIComponent(t.id)}"><i class="fas fa-ticket"></i> Prenota ora</a>`}
-        </div>
-      </div>
-    </article>`;
-  }).join('');
-
-  $('counterLabel').textContent = `${filtered.length} ${filtered.length === 1 ? 'partenza disponibile' : 'partenze disponibili'}`;
-  $('emptyState')?.classList.toggle('hidden', filtered.length !== 0);
-}
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-}
-
-async function load() {
-  $('errorState')?.classList.add('hidden');
-  $('tripsGrid').innerHTML = Array.from({length:3}, () => '<div class="trip-skeleton"></div>').join('');
-  try {
-    trips = await getPublicTrips();
-    const destinations = [...new Set(trips.map(t => t.titolo).filter(Boolean))].sort();
-    if ($('destinationFilter')) $('destinationFilter').innerHTML = '<option value="">Tutte le destinazioni</option>' + destinations.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');
-    await Promise.all(trips.map(async t => { availability.set(t.id, await getBookedSeats(t.id)); }));
-    render();
-  } catch (e) {
-    $('tripsGrid').innerHTML = '';
-    $('errorMessage').textContent = e.message || 'Impossibile caricare le partenze.';
-    $('errorState')?.classList.remove('hidden');
+function initAnimations() {
+  if (typeof window.AOS !== 'undefined') {
+    window.AOS.init({ duration: 650, once: true, offset: 40 });
   }
 }
 
-['searchInput','destinationFilter','availabilityFilter'].forEach(id => $(id)?.addEventListener('input', render));
-$('reloadButton')?.addEventListener('click', load);
-$('retryButton')?.addEventListener('click', load);
-load();
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeText(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+function withTimeout(promise, timeoutMs, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    })
+  ]);
+}
+
+function getAvailableSeats(trip) {
+  return calculateAvailableSeats(trip);
+}
+
+function isSoldOut(trip) {
+  return getAvailableSeats(trip) <= 0;
+}
+
+function isLastSeats(trip) {
+  const availableSeats = getAvailableSeats(trip);
+  return availableSeats > 0 && availableSeats <= LAST_SEATS_THRESHOLD;
+}
+
+function renderLoading() {
+  ui.counterLabel.textContent = 'Caricamento viaggi...';
+  ui.tripsGrid.classList.remove('hidden');
+  ui.emptyState.classList.add('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.tripsGrid.innerHTML = [
+    '<div class="trip-skeleton"></div>',
+    '<div class="trip-skeleton"></div>',
+    '<div class="trip-skeleton"></div>'
+  ].join('');
+}
+
+function renderError(message) {
+  ui.tripsGrid.classList.add('hidden');
+  ui.emptyState.classList.add('hidden');
+  ui.errorState.classList.remove('hidden');
+  ui.errorMessage.textContent = message;
+  ui.counterLabel.textContent = 'Errore durante il caricamento dei viaggi';
+}
+
+function renderEmpty() {
+  ui.tripsGrid.classList.add('hidden');
+  ui.emptyState.classList.remove('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.counterLabel.textContent = 'Nessun viaggio disponibile';
+}
+
+function getAvailabilityBadge(trip) {
+  if (isSoldOut(trip)) {
+    return '<span class="availability-pill availability-pill--soldout">Sold Out</span>';
+  }
+  if (isLastSeats(trip)) {
+    return '<span class="availability-pill availability-pill--last"><span class="availability-pill__dot"></span>Ultimi posti</span>';
+  }
+  return '<span class="availability-pill availability-pill--available"><span class="availability-pill__dot"></span>Disponibile</span>';
+}
+
+function buildTripCard(trip) {
+  const image = escapeHtml(String(trip.locandina || '').trim() || PLACEHOLDER_IMAGE);
+  const availableSeats = getAvailableSeats(trip);
+  const date = escapeHtml(formatDate(trip.data_partenza) || 'Data da definire');
+  const time = escapeHtml(formatTime(trip.ora_partenza) || '—');
+  const priceVal = trip.prezzo ? Number(trip.prezzo).toFixed(2) : '0.00';
+  const destination = escapeHtml(trip.destinazione || 'Destinazione');
+  const title = escapeHtml(trip.titolo || 'Viaggio Del Grosso');
+  const bus = escapeHtml(trip.mezzo || 'Bus GT Deluxe');
+
+  return `
+    <article class="departure-card" data-aos="fade-up">
+      <div class="departure-card__media">
+        <img src="${image}" alt="${escapeHtml(trip.titolo || 'Viaggio Del Grosso')}" loading="eager" referrerpolicy="no-referrer" onerror="this.src='${PLACEHOLDER_IMAGE}'">
+        <div class="departure-card__badge">${getAvailabilityBadge(trip)}</div>
+      </div>
+      <div class="departure-card__content">
+        <div>
+          <p class="departure-card__kicker">${destination}</p>
+          <h2 class="departure-card__title">${title}</h2>
+        </div>
+        <div class="departure-card__meta">
+          <div class="departure-chip"><i class="fas fa-calendar-alt"></i>${date}</div>
+          <div class="departure-chip"><i class="fas fa-clock"></i>${time}</div>
+          <div class="departure-chip"><i class="fas fa-chair"></i>${escapeHtml(String(availableSeats))} posti liberi</div>
+          <div class="departure-chip"><i class="fas fa-bus"></i>${bus}</div>
+        </div>
+        <div class="departure-card__footer">
+          <div>
+            <span class="departure-price-label">Prezzo a persona</span>
+            <span class="departure-price">€ ${priceVal}</span>
+          </div>
+          ${isSoldOut(trip)
+            ? '<button type="button" disabled class="departure-btn departure-btn--disabled"><i class="fas fa-ban"></i> Sold Out</button>'
+            : `<a href="${buildPublicBookingUrl({ viaggioId: trip.id, codice: trip.codice })}" class="btn-primary departure-btn"><i class="fas fa-ticket"></i> Prenota</a>`}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function populateDestinationFilter() {
+  const destinations = [...new Set(
+    trips
+      .map((trip) => String(trip.destinazione || '').trim())
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'it'));
+
+  ui.destinationFilter.innerHTML = [
+    '<option value="">Tutte le destinazioni</option>',
+    ...destinations.map((destination) => `<option value="${escapeHtml(destination)}">${escapeHtml(destination)}</option>`)
+  ].join('');
+}
+
+function getFilteredTrips() {
+  const searchTerm = normalizeText(ui.searchInput.value);
+  const destination = normalizeText(ui.destinationFilter.value);
+  const availability = normalizeText(ui.availabilityFilter.value);
+
+  return trips.filter((trip) => {
+    const text = [trip.titolo, trip.destinazione].map(normalizeText).join(' ');
+    const matchesSearch = !searchTerm || text.includes(searchTerm);
+    const matchesDestination = !destination || normalizeText(trip.destinazione) === destination;
+
+    let matchesAvailability = true;
+    if (availability === 'disponibile') matchesAvailability = !isSoldOut(trip) && !isLastSeats(trip);
+    if (availability === 'ultimi') matchesAvailability = isLastSeats(trip);
+    if (availability === 'soldout') matchesAvailability = isSoldOut(trip);
+
+    return matchesSearch && matchesDestination && matchesAvailability;
+  });
+}
+
+function renderTrips() {
+  const filteredTrips = getFilteredTrips();
+
+  if (!filteredTrips.length) {
+    renderEmpty();
+    return;
+  }
+
+  ui.tripsGrid.classList.remove('hidden');
+  ui.emptyState.classList.add('hidden');
+  ui.errorState.classList.add('hidden');
+  ui.counterLabel.textContent = filteredTrips.length === 1 ? '1 viaggio disponibile' : `${filteredTrips.length} viaggi disponibili`;
+  ui.tripsGrid.innerHTML = filteredTrips.map(buildTripCard).join('');
+
+  if (typeof window.AOS !== 'undefined') {
+    window.AOS.refreshHard();
+  }
+}
+
+async function loadTrips() {
+  renderLoading();
+  ui.reloadButton.classList.add('hidden');
+
+  try {
+    const response = await withTimeout(
+      getViaggiPubblicati(),
+      REQUEST_TIMEOUT_MS,
+      'Timeout durante il caricamento dei viaggi.'
+    );
+
+    if (response?.success === false) throw response.error;
+    trips = Array.isArray(response?.data) ? response.data : [];
+    populateDestinationFilter();
+    renderTrips();
+  } catch (error) {
+    renderError(error.message || 'Impossibile caricare i viaggi.');
+  } finally {
+    ui.reloadButton.classList.remove('hidden');
+  }
+}
+
+function bindEvents() {
+  ui.searchInput.addEventListener('input', renderTrips);
+  ui.destinationFilter.addEventListener('change', renderTrips);
+  ui.availabilityFilter.addEventListener('change', renderTrips);
+  ui.retryButton.addEventListener('click', () => {
+    loadTrips().catch((error) => renderError(error.message || 'Impossibile caricare i viaggi.'));
+  });
+  ui.reloadButton.addEventListener('click', () => {
+    loadTrips().catch((error) => renderError(error.message || 'Impossibile caricare i viaggi.'));
+  });
+}
+
+async function init() {
+  const settingsResponse = await loadImpostazioni();
+  if (settingsResponse.success !== false) {
+    applyRuntimeSettings(settingsResponse.data);
+  }
+  initAnimations();
+  bindEvents();
+  await loadTrips();
+}
+
+init().catch((error) => {
+  renderError(error.message || 'Impossibile inizializzare la pagina viaggi.');
+  ui.reloadButton.classList.remove('hidden');
+});
