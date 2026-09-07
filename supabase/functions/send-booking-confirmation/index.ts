@@ -49,7 +49,7 @@ async function signed(path: string) {
   return r.data?.signedUrl || null;
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ success: false, error: "Metodo non consentito. Usa POST." }, 405);
   try {
