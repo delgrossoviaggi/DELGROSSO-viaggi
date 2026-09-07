@@ -13,7 +13,7 @@
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.item{border:1px solid #dbe7f0;border-radius:18px;padding:15px;background:#f8fbfd}.item.full{grid-column:1/-1}.label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:5px}.value{font-size:15px;font-weight:700;color:#0f172a}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:14px;text-decoration:none;font-weight:800}.primary{background:#0f4c81;color:#fff}.secondary{background:#eef6fb;color:#0f4c81}.loading{text-align:center;color:#64748b;padding:30px}.error{color:#a61b1b;background:#fff2f2;border:1px solid #fecaca;border-radius:16px;padding:16px;display:none}.hidden{display:none!important}
     @media(max-width:600px){.card{padding:22px;border-radius:22px}.grid{grid-template-columns:1fr}.item.full{grid-column:auto}.actions .btn{width:100%}}
   </style>
-<link rel="stylesheet" href="css/delgrosso-v10.css"><link rel="stylesheet" href="css/delgrosso-v11.css"><link rel="stylesheet" href="css/delgrosso-v12.css"></head>
+<link rel="stylesheet" href="css/delgrosso-v10.css"></head>
 <body>
   <main class="wrap">
     <section class="card">
@@ -37,23 +37,6 @@
       <div id="error" class="error"></div>
     </section>
   </main>
-  <script type="module">
-    import { getPublicConfirmation } from './services/bookingNotificationService.js';
-    const $ = (id) => document.getElementById(id);
-    const params = new URLSearchParams(location.search);
-    const bookingId = params.get('booking') || params.get('id');
-    const token = params.get('token');
-    const money = (value) => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(value)||0);
-    (async()=>{
-      try {
-        if(!bookingId || !token) throw new Error('Il link di conferma non è completo.');
-        const result = await getPublicConfirmation(bookingId, token);
-        if(result.success === false) throw new Error(result.error || 'Prenotazione non trovata.');
-        const data = result.data || {};
-        $('numero').textContent=data.numero||'—'; $('cliente').textContent=data.cliente||'—'; $('destinazione').textContent=data.destinazione||'—'; $('data').textContent=data.data||'—'; $('ora').textContent=data.ora||'—'; $('partenza').textContent=data.partenza||'—'; $('posti').textContent=data.posti||'—'; $('totale').textContent=money(data.totale); $('stato').textContent=data.stato||'—';
-        $('loading').classList.add('hidden'); $('content').classList.remove('hidden');
-      } catch(error) { $('loading').classList.add('hidden'); $('error').textContent=error.message||'Impossibile verificare la prenotazione.'; $('error').style.display='block'; }
-    })();
-  </script>
+  <script type="module" src="./js/conferma.js"></script>
 </body>
 </html>

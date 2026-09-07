@@ -1,40 +1,30 @@
-DELGROSSO SITE V7 - PATCH SICURA
-=================================
+DELGROSSO — VIAGGI + PRENOTAZIONI PUBBLICHE
 
-Questa patch nasce dal controllo del backup DELGROSSO_SITO(1).zip e del repository pubblico dopo il commit d64ea02.
+Questa cartella contiene SOLO i file che vanno nel SITO PUBBLICO.
+Il gestionale resta separato.
+Entrambi usano lo stesso Supabase: exphxbeqwpwrsigdmilc.
 
-OBIETTIVO
-- Flotta pubblica: leggere ESCLUSIVAMENTE dal Supabase SITO, tabella flotta_page.
-- Admin upload: rendere più robusto l'upload Cloudinary.
-- NON modificare il Supabase Gestionale.
-- NON modificare la cartella GESTIONALE.
-- NON sostituire l'intero sito.
+FILE DA COPIARE NEL SITO:
+- viaggi.html
+- prenota.html
+- conferma.html
+- js/supabase.js
+- js/viaggi.js
+- js/prenota.js
+- js/conferma.js
+- services/viaggiService.js
+- services/prenotazioniService.js
+- services/bookingNotificationService.js
 
-FILE DA INSERIRE
-1) js/bridge.js
-   Sostituisce il bridge attuale. getFlottaPubblica() usa il Supabase SITO.
-   Le altre funzioni (Partenze/Preventivo/Prenotazione) restano invariate.
+PRIMA DI PUBBLICARE:
+1. Eseguire schema_operativo.sql nel SQL Editor del progetto Supabase.
+2. Verificare che la pagina gestionale continui a vedere le tratte.
+3. Inserire/valorizzare il campo prezzo nelle tratte se si vuole mostrare il prezzo online.
+4. Pubblicare il sito.
 
-2) js/admin-uploadCloudinary-fixed.js
-   È una copia di riferimento della nuova funzione uploadCloudinary.
-   NON viene caricata automaticamente da admin.html.
-
-3) PATCH/admin-uploadCloudinary-function.txt
-   Spiega come sostituire SOLO la funzione in admin.html.
-
-IMPORTANTE
-- Non copiare nulla dentro GESTIONALE/.
-- Non cambiare tabelle o colonne del Supabase Gestionale.
-- Non sostituire index.html, viaggi.html, prenota.html o preventivo.html con versioni del backup.
-  Il backup contiene versioni precedenti alla V6 e non deve sovrascrivere il repository attuale.
-
-ORDINE CONSIGLIATO
-1. Sostituire js/bridge.js.
-2. In admin.html sostituire SOLO uploadCloudinary().
-3. Testare Flotta pubblica.
-4. Testare upload Carousel Home, Carousel Flotta e Flotta.
-5. Solo dopo fare il successivo audit di Home / Partenze / Preventivo.
-
-ROLLBACK
-Prima di sostituire js/bridge.js, salvare una copia del file attuale.
-Prima di modificare admin.html, salvare una copia.
+SICUREZZA:
+- Il browser usa esclusivamente la publishable/anon key.
+- Le prenotazioni pubbliche vengono create tramite RPC atomica.
+- Il sito non legge direttamente l'elenco delle prenotazioni.
+- La conferma pubblica richiede ID + token.
+- I posti vengono ricontrollati lato database per evitare doppie prenotazioni contemporanee.

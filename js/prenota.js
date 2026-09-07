@@ -1,7 +1,104 @@
+import { getTripById, getBookedSeats } from './services/viaggiService.js';
+import { createPublicBooking } from './services/prenotazioniService.js';
 
-import {getTrip,getTripBookings,createBooking} from './gestionale.js';
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const id=new URLSearchParams(location.search).get('viaggio');const msg=document.querySelector('#msg');let trip,selected=[];
-const setMsg=(t,cls='notice')=>{msg.className=cls;msg.textContent=t};
-(async()=>{try{if(!id)throw new Error('Viaggio non specificato.');trip=await getTrip(id);if(!trip)throw new Error('Viaggio non trovato.');document.querySelector('#tripTitle').textContent=trip.titolo||trip.destinazione;document.querySelector('#tripInfo').innerHTML=`${esc(trip.destinazione||'')} · ${trip.data_partenza?new Date(trip.data_partenza).toLocaleDateString('it-IT'):''} · € ${Number(trip.prezzo||0).toFixed(2)} a persona`;const bookings=await getTripBookings(id);const busy=new Set(bookings.flatMap(b=>Array.isArray(b.posti_selezionati)?b.posti_selezionati:String(b.posti_selezionati||'').split(',').map(Number):[]));const total=Math.min(Number(trip.posti_totali||53),63);document.querySelector('#seats').innerHTML=Array.from({length:total},(_,i)=>{const n=i+1,b=busy.has(n);return `<button type="button" class="seat ${b?'busy':''}" ${b?'disabled':''} data-seat="${n}">${n}</button>`}).join('');document.querySelectorAll('.seat:not(.busy)').forEach(b=>b.onclick=()=>{const n=Number(b.dataset.seat);if(selected.includes(n)){selected=selected.filter(x=>x!==n);b.classList.remove('selected')}else{selected.push(n);b.classList.add('selected')}document.querySelector('#selected').textContent=`Posti scelti: ${selected.sort((a,b)=>a-b).join(', ')||'nessuno'}`})}catch(e){setMsg(e.message,'error')}})();
-document.querySelector('#bookingForm').onsubmit=async e=>{e.preventDefault();try{if(!selected.length)throw new Error('Seleziona almeno un posto.');const fd=new FormData(e.target);const posti=selected.length;const payload={viaggio_id:trip.id,cliente:fd.get('nome'),telefono:fd.get('telefono'),email:fd.get('email')||null,posti,totale:posti*Number(trip.prezzo||0),stato:'Confermato',posti_selezionati:selected,note:fd.get('note')||null};await createBooking(payload);document.querySelector('#formWrap').classList.add('hidden');document.querySelector('#success').classList.remove('hidden');document.querySelector('#successText').textContent=`Prenotazione registrata per ${posti} ${posti===1?'posto':'posti'} sul viaggio ${trip.titolo||trip.destinazione}.`}catch(e){setMsg(e.message,'error')}};
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const tripId = params.get('viaggio') || params.get('tratta') || params.get('id');
+let trip = null;
+let booked = new Set();
+let selected = new Set();
+
+function money(v) { return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v)||0); }
+function capacity(t) { return String(t?.modello_bus||'').includes('53') ? 53 : 63; }
+function esc(v) { return String(v ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function setStep(n) {
+  document.querySelectorAll('.progress-step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) <= n));
+  const bar = document.querySelector('.progress-card .w-full.h-1 > div');
+  if (bar) bar.style.width = `${Math.min(100,n/3*100)}%`;
+}
+function seatLayout(total) {
+  const seats = [];
+  for (let i=1;i<=total;i++) seats.push(String(i).padStart(2,'0'));
+  return seats;
+}
+function renderSeats() {
+  const total = capacity(trip);
+  const seats = seatLayout(total);
+  $('seatmap-container').innerHTML = `<div class="seat-map-container" style="display:grid;gap:18px">
+    <div class="seat-map-front" style="padding:14px;border-radius:18px;text-align:center;font-weight:900;letter-spacing:.12em">FRONTE BUS</div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(44px,1fr));gap:10px;max-width:560px;margin:auto;width:100%">
+      ${seats.map(s => { const isBooked = booked.has(s) || booked.has(String(Number(s))); const isSelected = selected.has(s); return `<button type="button" data-seat="${s}" ${isBooked?'disabled':''} aria-label="Posto ${s}" style="min-height:52px;border-radius:14px;border:2px solid ${isBooked?'#dc2626':isSelected?'#d97706':'#15803d'};background:${isBooked?'#ef4444':isSelected?'#f59e0b':'#16a34a'};color:${isSelected?'#111827':'#fff'};font-weight:900;cursor:${isBooked?'not-allowed':'pointer'};opacity:${isBooked?.8:1}">${s}</button>`; }).join('')}
+    </div>
+    <div style="display:flex;justify-content:center;gap:18px;font-size:12px;font-weight:800"><span>🟢 Disponibile</span><span>🟠 Selezionato</span><span>🔴 Occupato</span></div>
+  </div>`;
+  $('seatmap-container').querySelectorAll('[data-seat]').forEach(btn => btn.addEventListener('click', () => {
+    const s = btn.dataset.seat;
+    selected.has(s) ? selected.delete(s) : selected.add(s);
+    updateSummary(); renderSeats();
+  }));
+}
+function updateSummary() {
+  const seats = [...selected].sort((a,b)=>Number(a)-Number(b));
+  const price = Number(trip?.prezzo)||0;
+  $('summary-seats').textContent = seats.length ? seats.join(', ') : 'Nessuno';
+  $('summary-price').textContent = price ? money(price) : 'Su richiesta';
+  $('summary-total').textContent = price ? money(price*seats.length) : 'Su richiesta';
+  $('seats-available').textContent = `${capacity(trip)-booked.size} / ${capacity(trip)}`;
+  $('continue-btn').disabled = !seats.length;
+}
+function fillTrip() {
+  $('trip-title').textContent = trip.titolo || '-';
+  $('trip-date').textContent = trip.data_partenza || '-';
+  $('trip-time').textContent = 'Come indicato nella partenza';
+  $('bus-model').textContent = trip.modello_bus || 'GT';
+  $('bus-seats').textContent = capacity(trip);
+  $('trip-price').textContent = trip.prezzo ? money(trip.prezzo) : 'Su richiesta';
+  if (trip.immagine_url) $('trip-image').style.backgroundImage = `url("${String(trip.immagine_url).replace(/"/g,'&quot;')}")`;
+}
+function showError(msg) { $('loading-state')?.classList.add('hidden'); $('booking-content')?.classList.add('hidden'); $('error-state')?.classList.remove('hidden'); const p=$('error-state').querySelector('p'); if(p && msg) p.textContent=msg; }
+function showFeedback(msg, type='error') { const el=$('booking-feedback'); el.textContent=msg; el.className=`form-feedback form-feedback--${type}`; }
+
+async function init() {
+  try {
+    if (!tripId) throw new Error('Manca l’identificativo della partenza.');
+    trip = await getTripById(tripId);
+    if (!trip) throw new Error('La partenza non è disponibile.');
+    booked = new Set(await getBookedSeats(trip.id));
+    fillTrip(); renderSeats(); updateSummary();
+    $('loading-state')?.classList.add('hidden'); $('booking-content')?.classList.remove('hidden');
+  } catch(e) { showError(e.message); }
+}
+
+$('continue-btn')?.addEventListener('click', () => {
+  $('booking-content').classList.add('hidden'); $('passenger-form-section').classList.remove('hidden'); $('passenger-form-section').scrollIntoView({behavior:'smooth',block:'start'}); setStep(2);
+});
+$('back-btn')?.addEventListener('click', () => {
+  $('passenger-form-section').classList.add('hidden'); $('booking-content').classList.remove('hidden'); setStep(1);
+});
+$('passenger-form')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!selected.size) return showFeedback('Seleziona almeno un posto.');
+  const btn=$('confirm-btn'); btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Verifica disponibilità...';
+  try {
+    // RPC atomica: il controllo definitivo dei posti avviene dentro Supabase.
+    const result = await createPublicBooking({
+      trattaId: trip.id,
+      nome: $('passenger-name').value,
+      cognome: $('passenger-surname').value,
+      telefono: $('passenger-phone').value,
+      email: $('passenger-email').value,
+      note: $('passenger-notes').value,
+      posti: [...selected]
+    });
+    setStep(3);
+    $('passenger-form-section').classList.add('hidden'); $('success-state').classList.remove('hidden');
+    $('success-message').textContent = `Prenotazione ${result.numero} registrata. Posti: ${result.posti.join(', ')}.`;
+    const link = $('success-whatsapp-link'); if(link) link.href=`https://wa.me/393205730466?text=${encodeURIComponent(`Ciao Del Grosso, ho appena effettuato la prenotazione ${result.numero}.`)}`;
+  } catch(e) {
+    showFeedback(e.message || 'Prenotazione non completata. Riprova.', 'error');
+    // Ricarica disponibilità dopo eventuale conflitto.
+    try { booked = new Set(await getBookedSeats(trip.id)); renderSeats(); updateSummary(); } catch {}
+  } finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Conferma prenotazione'; }
+});
+
+init();
