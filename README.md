@@ -1,17 +1,11 @@
-# DELGROSSO Viaggi — Public Site V11
+# DELGROSSO Viaggi
 
-V11 is a public-site visual redesign only.
+Repository pulita del sito pubblico e del Gestionale.
 
-## Protected architecture
-- `GESTIONALE/` is not included in this public package and must remain untouched in the repository.
-- Viaggi, Partenze, Prenota and Richiedi Preventivo keep their existing Gestionale/Supabase-Gestionale logic.
-- Public fleet/media content continues to use the dedicated Site Supabase through the existing bridge/site-content layer.
+- Sito pubblico: root
+- Gestionale: `/GESTIONALE/`
+- Stack Gestionale: HTML/CSS/JavaScript ES6 + Vite build + Supabase; nessun React.
+- Non sono inclusi vecchi bundle/versioni, file SQL di verifica storici o funzioni Edge legacy non usate dal flusso attuale.
 
-## Visual layer
-- One final public visual system: `css/delgrosso-v11.css`.
-- Responsive desktop/tablet/mobile layout.
-- Modern colorful gradients, premium cards, micro-interactions, reveal animations and unified navigation.
-- Existing business/data logic is intentionally preserved.
-
-## Cleanup
-Development/version notes and patch artifacts from the public root were removed. The actual Gestionale must not be deleted or modified when applying this package.
+## Flusso documenti
+Le conferme/prenotazioni vengono archiviate in Supabase; l'email viene inviata solo quando il cliente ha fornito un indirizzo valido. Se manca l'email, l'operatore scarica il PDF e lo invia manualmente.

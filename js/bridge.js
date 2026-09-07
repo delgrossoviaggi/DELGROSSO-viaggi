@@ -40,12 +40,12 @@ export async function getPrenotazioniViaggio(tripId) {
   return getPrenotazioniPostiViaggio(tripId);
 }
 
-const SITE_SUPABASE_URL = 'https://exphxbeqwpwrsigdmilc.supabase.co';
-const SITE_SUPABASE_KEY = 'sb_publishable_jEq6R22qxk2SHGI5YEmEow_SfZG7j8c';
+const SITE_SUPABASE_URL = 'https://bhsanrbadsqcpbtxupmr.supabase.co';
+const SITE_SUPABASE_KEY = 'sb_publishable_jcc3RIJmNnXZdhcmFuIKFg_EpxO_rBp';
 
 export async function getFlottaPubblica() {
   try {
-    const response = await fetch(`${SITE_SUPABASE_URL}/rest/v1/flotta_page?select=id,titolo,descrizione,immagine_url,foto_urls,foto_gallery&order=created_at.desc`, {
+    const response = await fetch(`${SITE_SUPABASE_URL}/rest/v1/flotta_page?select=id,titolo,descrizione,immagine_url,foto_urls,foto_gallery,categoria,posti,pubblicato,attivo&pubblicato=eq.true&attivo=eq.true&order=sort_order.asc,created_at.desc`, {
       headers: { apikey: SITE_SUPABASE_KEY, Authorization: `Bearer ${SITE_SUPABASE_KEY}` },
       cache: 'no-store'
     });
