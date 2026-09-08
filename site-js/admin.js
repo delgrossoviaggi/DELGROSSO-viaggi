@@ -21,22 +21,55 @@ async function assertNoDuplicateNames(input,existingRows=[],folder=''){
  const conflicts=names.filter(n=>existing.has(n)||existing.has(safeUploadName(n)));
  if(conflicts.length)throw new Error(`Upload bloccato: esiste già un'immagine con lo stesso nome: ${[...new Set(conflicts)].join(', ')}`);
  // Also check the storage folder so duplicate filenames are blocked even if the DB row is missing.
- if(folder){const {data,error}=await getSupabase().storage.from('site-media').list(folder,{limit:1000});if(error)throw error;const storageNames=new Set((data||[]).map(x=>String(x.name||'').toLowerCase()));const c=names.filter(n=>storageNames.has(n)||storageNames.has(safeUploadName(n)));if(c.length)throw new Error(`Upload bloccato: nel deposito esiste già un'immagine con lo stesso nome: ${[...new Set(c)].join(', ')}`);}
+ if(folder){try{const {data,error}=await getSupabase().storage.from('site-media').list(folder,{limit:1000});if(!error){const storageNames=new Set((data||[]).map(x=>String(x.name||'').toLowerCase()));const c=names.filter(n=>storageNames.has(n)||storageNames.has(safeUploadName(n)));if(c.length)throw new Error(`Upload bloccato: nel deposito esiste già un'immagine con lo stesso nome: ${[...new Set(c)].join(', ')}`);}}catch(error){if(/Upload bloccato: nel deposito/.test(error.message||''))throw error;console.warn('[DELGROSSO ADMIN] Storage list non disponibile, continuo con controllo upload:',error);}}
 }
-async function refresh(){
+async function withTimeout(promise, ms=12000, label='Operazione'){
+  return await Promise.race([
+    promise,
+    new Promise((_, reject)=>setTimeout(()=>reject(new Error(`${label}: tempo scaduto. Controlla la connessione e riprova.`)),ms))
+  ]);
+}
+async function refresh({silent=false}={}){
  const sb=getSupabase();
- setSyncState(false,'Sincronizzazione Supabase sito in corso…');
- const [home,viaggi,fleet,party,posts]=await Promise.all([
-  sb.from('site_media').select('*').eq('category','carousel').order('sort_order').order('created_at',{ascending:false}),
-  sb.from('site_carousel_viaggi').select('*').order('sort_order').order('created_at',{ascending:false}),
-  sb.from('site_fleet').select('*').order('sort_order').order('created_at',{ascending:false}),
-  sb.from('site_party_events').select('*').order('sort_order').order('created_at',{ascending:false}),
-  sb.from('site_posts').select('*').order('created_at',{ascending:false})
- ]);
- for(const [name,r] of [['Carousel Home',home],['Carousel Partenze',viaggi],['Flotta',fleet],['Party',party],['Post',posts]])if(r.error)throw new Error(`${name}: ${r.error.message}`);
- state.home=home.data||[];state.viaggi=viaggi.data||[];state.fleet=fleet.data||[];state.party=party.data||[];state.posts=posts.data||[];
+ if(!silent)setSyncState(false,'Sincronizzazione Supabase sito in corso…');
+ const requests=[
+  ['Carousel Home',()=>sb.from('site_media').select('*').eq('category','carousel').order('sort_order').order('created_at',{ascending:false})],
+  ['Carousel Partenze',()=>sb.from('site_carousel_viaggi').select('*').order('sort_order').order('created_at',{ascending:false})],
+  ['Flotta',()=>sb.from('site_fleet').select('*').order('sort_order').order('created_at',{ascending:false})],
+  ['Party',()=>sb.from('site_party_events').select('*').order('sort_order').order('created_at',{ascending:false})],
+  ['Post',()=>sb.from('site_posts').select('*').order('created_at',{ascending:false})]
+ ];
+ const results=await Promise.all(requests.map(async ([name,fn])=>{
+  try{const r=await withTimeout(fn(),12000,name);if(r.error)throw r.error;return {name,ok:true,data:r.data||[]};}
+  catch(error){console.error('[DELGROSSO ADMIN]',name,error);return {name,ok:false,data:[],error};}
+ }));
+ const failed=[];
+ for(const r of results){
+  if(!r.ok){failed.push(`${r.name}: ${r.error?.message||'errore'}`);continue;}
+  if(r.name==='Carousel Home')state.home=r.data;
+  if(r.name==='Carousel Partenze')state.viaggi=r.data;
+  if(r.name==='Flotta')state.fleet=r.data;
+  if(r.name==='Party')state.party=r.data;
+  if(r.name==='Post')state.posts=r.data;
+ }
  $('#countHome').textContent=state.home.length;$('#countViaggi').textContent=state.viaggi.length;$('#countFleet').textContent=state.fleet.length;$('#countParty').textContent=state.party.length;$('#countPosts').textContent=state.posts.length;renderLists();
+ if(failed.length){
+   setSyncState(false,`⚠ Sync parziale · ${failed.length} sezione/i non disponibili`);
+   if(!silent)msg(`Sincronizzazione parziale: ${failed.join(' | ')}`,'error');
+ }else{
+   setSyncState(true,`✓ Supabase sito sincronizzato · ${new Date().toLocaleTimeString('it-IT')}`);
+ }
+ return {failed};
 }
+let autoSyncTimer=null;let syncInFlight=false;
+function startAutoSync(){
+ if(autoSyncTimer)clearInterval(autoSyncTimer);
+ const run=async()=>{if(document.visibilityState!=='visible'||syncInFlight)return;syncInFlight=true;try{await refresh({silent:true});}catch(error){console.warn('[DELGROSSO ADMIN] auto-sync',error);}finally{syncInFlight=false;}};
+ autoSyncTimer=setInterval(run,15000);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh({silent:true}).catch(()=>{});},{passive:true});
+ window.addEventListener('online',()=>refresh({silent:true}).catch(()=>{}),{passive:true});
+}
+
 function renderLists(){
  const media=x=>`<div class="admin-row"><img src="${esc(x.public_url||x.image_url||x.cover_url||'')}" alt=""><div><b>${esc(x.title||x.titolo||'Immagine')}</b><small>${esc(x.description||'')}</small></div><div class="row-actions"><button data-del="${x.id}" data-table="site_media">Elimina</button></div></div>`;
  $('#listHome').innerHTML=state.home.map(media).join('')||'<p class="muted">Nessuna immagine.</p>';
@@ -54,7 +87,7 @@ async function saveFleet(){const btn=$('#fleetSave');setButtonBusy(btn,true);try
 function resetFleet(){editingFleet=null;$('#fleetTitle').value='';$('#fleetDescription').value='';$('#fleetSeats').value='';$('#fleetOrder').value='0';$('#fleetPublished').checked=true;$('#fleetFiles').value='';$('#fleetCancel').hidden=true;}
 async function saveParty(){const btn=$('#partySave');setButtonBusy(btn,true);try{const files=await uploadMany($('#partyFiles'),'party-on-the-road',editingParty?[]:state.party);let gallery=editingParty?.gallery_urls?[...editingParty.gallery_urls]:[];gallery.push(...files.map(x=>x.url));const data={title:$('#partyTitle').value.trim(),event_date:$('#partyDate').value||null,description:$('#partyDescription').value.trim(),cover_url:gallery[0]||editingParty?.cover_url||null,gallery_urls:gallery,published:$('#partyPublished').checked,sort_order:Number($('#partyOrder').value)||0};if(!data.title||!gallery.length)throw new Error('Inserisci titolo e almeno una foto.');const q=editingParty?getSupabase().from('site_party_events').update(data).eq('id',editingParty.id):getSupabase().from('site_party_events').insert(data);const {error}=await q;if(error)throw new Error(`Party: ${error.message}`);resetParty();await refresh();msg('Evento Party salvato e sincronizzato con Supabase.');}finally{setButtonBusy(btn,false,'Salva album Party');setTimeout(resetProgress,1200);}}
 function resetParty(){editingParty=null;$('#partyTitle').value='';$('#partyDate').value='';$('#partyDescription').value='';$('#partyOrder').value='0';$('#partyPublished').checked=true;$('#partyFiles').value='';$('#partyCancel').hidden=true;}
-async function savePost(){const btn=$('#postSave');setButtonBusy(btn,true);try{let cover=editingPost?.cover_url||null;if($('#postFile').files[0]){await assertNoDuplicateNames($('#postFile'),'posts',editingPost?[editingPost]:state.posts);cover=(await uploadSiteFile($('#postFile').files[0],'posts',p=>updateProgress(0,p,`${p}%`))).url;}const data={title:$('#postTitle').value.trim(),excerpt:$('#postExcerpt').value.trim(),body:$('#postBody').value.trim(),category:$('#postCategory').value.trim()||'News',cover_url:cover,published:$('#postPublished').checked,published_at:$('#postPublished').checked?(editingPost?.published_at||new Date().toISOString()):null,sort_order:Number($('#postOrder').value)||0};if(!data.title)throw new Error('Inserisci il titolo del post.');const q=editingPost?getSupabase().from('site_posts').update(data).eq('id',editingPost.id):getSupabase().from('site_posts').insert(data);const {error}=await q;if(error)throw new Error(`Post: ${error.message}`);resetPost();await refresh();msg('Post salvato e sincronizzato con Supabase.');}finally{setButtonBusy(btn,false,'Salva post');setTimeout(resetProgress,1200);}}
+async function savePost(){const btn=$('#postSave');setButtonBusy(btn,true);try{let cover=editingPost?.cover_url||null;if($('#postFile').files[0]){await assertNoDuplicateNames($('#postFile'),editingPost?[editingPost]:state.posts,'posts');cover=(await uploadSiteFile($('#postFile').files[0],'posts',p=>updateProgress(0,p,`${p}%`))).url;}const data={title:$('#postTitle').value.trim(),excerpt:$('#postExcerpt').value.trim(),body:$('#postBody').value.trim(),category:$('#postCategory').value.trim()||'News',cover_url:cover,published:$('#postPublished').checked,published_at:$('#postPublished').checked?(editingPost?.published_at||new Date().toISOString()):null,sort_order:Number($('#postOrder').value)||0};if(!data.title)throw new Error('Inserisci il titolo del post.');const q=editingPost?getSupabase().from('site_posts').update(data).eq('id',editingPost.id):getSupabase().from('site_posts').insert(data);const {error}=await q;if(error)throw new Error(`Post: ${error.message}`);resetPost();await refresh();msg('Post salvato e sincronizzato con Supabase.');}finally{setButtonBusy(btn,false,'Salva post');setTimeout(resetProgress,1200);}}
 function resetPost(){editingPost=null;for(const id of ['postTitle','postExcerpt','postBody','postCategory','postOrder'])$('#'+id).value=id==='postCategory'?'News':id==='postOrder'?'0':'';$('#postPublished').checked=true;$('#postFile').value='';$('#postCancel').hidden=true;}
 function openEditFleet(id){editingFleet=state.fleet.find(x=>x.id===id);if(!editingFleet)return;$('#fleetTitle').value=editingFleet.title;$('#fleetDescription').value=editingFleet.description||'';$('#fleetSeats').value=editingFleet.seats||'';$('#fleetOrder').value=editingFleet.sort_order||0;$('#fleetPublished').checked=editingFleet.published;$('#fleetCancel').hidden=false;scrollToForm('fleetCard');}
 function openEditParty(id){editingParty=state.party.find(x=>x.id===id);if(!editingParty)return;$('#partyTitle').value=editingParty.title;$('#partyDate').value=editingParty.event_date||'';$('#partyDescription').value=editingParty.description||'';$('#partyOrder').value=editingParty.sort_order||0;$('#partyPublished').checked=editingParty.published;$('#partyCancel').hidden=false;scrollToForm('partyCard');}
@@ -98,8 +131,8 @@ function bind(){
   if(input) input.addEventListener('change',async e=>{try{assertNoDuplicateSelection(e.target);const [section,folder]=fileMaps[id];await showSelectedStatus(e.target,state[section]||[],folder);if(e.target.files.length)msg(`✓ ${e.target.files.length} file selezionat${e.target.files.length===1?'o':'i'}. Pronto per il caricamento.`);}catch(x){e.target.value='';resetProgress();msg(x.message,'error')}});
  }
  document.querySelectorAll('[data-pick]').forEach(btn=>btn.addEventListener('click',()=>{const input=document.getElementById(btn.dataset.pick);if(input){try{input.click();}catch(e){msg('Impossibile aprire la Libreria Foto. Riprova da Safari.','error');}}}));
- on('syncRefresh','click',()=>refresh().then(()=>msg('✓ Supabase del sito sincronizzato.')).catch(e=>msg(e.message,'error')));
+ on('syncRefresh','click',async()=>{const b=$('#syncRefresh');setButtonBusy(b,true,'↻ Sincronizza');try{const r=await refresh();if(!r.failed.length)msg('✓ Supabase del sito sincronizzato.');}catch(e){msg(e.message,'error')}finally{setButtonBusy(b,false,'↻ Sincronizza')}});
 }
 
-async function boot(){const s=await getSession();if(!s){$('#login').hidden=false;$('#panel').hidden=true;return;}if(!(await isAdmin()))throw new Error('Questo account non è autorizzato come Admin del sito.');currentUser=s.user;$('#adminEmail').textContent=s.user.email;$('#login').hidden=true;$('#panel').hidden=false;await refresh();}
+async function boot(){const s=await getSession();if(!s){$('#login').hidden=false;$('#panel').hidden=true;return;}if(!(await isAdmin()))throw new Error('Questo account non è autorizzato come Admin del sito.');currentUser=s.user;$('#adminEmail').textContent=s.user.email;$('#login').hidden=true;$('#panel').hidden=false;await refresh();startAutoSync();}
 bind();boot().catch(e=>msg(e.message,'error'));

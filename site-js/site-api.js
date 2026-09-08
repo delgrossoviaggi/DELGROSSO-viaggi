@@ -33,7 +33,7 @@ export async function uploadSiteFile(file,folder='uploads',onProgress){
   const url=`${SITE_CONFIG.supabaseUrl}/storage/v1/object/${SITE_CONFIG.storageBucket}/${path.split('/').map(encodeURIComponent).join('/')}`;
   await new Promise((resolve,reject)=>{
     const xhr=new XMLHttpRequest();
-    xhr.open('POST',url,true);
+    xhr.open('POST',url,true);xhr.timeout=120000;
     xhr.setRequestHeader('apikey',SITE_CONFIG.supabaseAnonKey);
     xhr.setRequestHeader('Authorization',`Bearer ${session.access_token}`);
     xhr.setRequestHeader('x-upsert','false');
@@ -41,7 +41,7 @@ export async function uploadSiteFile(file,folder='uploads',onProgress){
     xhr.upload.onprogress=e=>{if(e.lengthComputable&&typeof onProgress==='function')onProgress(Math.round(e.loaded/e.total*100));};
     xhr.onload=()=>{let body={};try{body=JSON.parse(xhr.responseText||'{}')}catch{};if(xhr.status>=200&&xhr.status<300){if(typeof onProgress==='function')onProgress(100);resolve();}else{const raw=String(body.message||body.error_description||body.error||xhr.responseText||'').replace(/<[^>]*>/g,' ').trim();const message=(xhr.status===409||/exist|already|duplicate/i.test(raw))?'Esiste già un file con lo stesso nome.':(xhr.status===415||/mime|content.?type|not allowed|allowed/i.test(raw))?'Formato immagine non consentito dal deposito del sito.':(xhr.status===413)?'Immagine troppo grande (massimo 50 MB).':(raw||`Upload fallito (${xhr.status}).`);reject(new Error(`${message} [HTTP ${xhr.status}]`));}};
     xhr.onerror=()=>reject(new Error('Connessione al Supabase del sito non riuscita durante il caricamento.'));
-    xhr.onabort=()=>reject(new Error('Caricamento annullato.'));
+    xhr.ontimeout=()=>reject(new Error('Caricamento scaduto dopo 120 secondi. Controlla la connessione e riprova.'));xhr.onabort=()=>reject(new Error('Caricamento annullato.'));
     xhr.send(file);
   });
   return {path,url:sb.storage.from(SITE_CONFIG.storageBucket).getPublicUrl(path).data.publicUrl,originalName:file.name};
