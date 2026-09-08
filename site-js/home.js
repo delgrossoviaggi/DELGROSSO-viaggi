@@ -3,7 +3,7 @@ const $=s=>document.querySelector(s);
 async function loadCarousel(){
  const el=$('#homeCarousel'); if(!el)return; const r=await getHomeCarousel();
  if(!r.ok||!r.data.length){el.innerHTML='<div class="hero-slide hero-fallback"><div><span>DELGROSSO VIAGGI</span><h1>Il tuo prossimo viaggio<br><em>inizia qui.</em></h1><p>Partenze, esperienze e servizi su strada.</p></div></div>';return;}
- el.innerHTML=r.data.map((x,i)=>`<div class="hero-slide ${i===0?'active':''}" data-index="${i}" style="background-image:url('${escapeHtml(publicUrl(x.public_url))}')"><div class="hero-overlay"></div><div class="hero-slide-content"><span>${escapeHtml(x.description||'DELGROSSO VIAGGI')}</span><h1>${escapeHtml(x.description||'Il tuo prossimo viaggio')}<br><em>inizia qui.</em></h1></div></div>`).join('');
+ el.innerHTML=r.data.map((x,i)=>{const url=escapeHtml(publicUrl(x.public_url));return `<div class="hero-slide ${i===0?'active':''}" data-index="${i}"><div class="hero-slide-bg" style="background-image:url('${url}')"></div><img class="hero-slide-image" src="${url}" alt="DELGROSSO Viaggi" loading="${i===0?'eager':'lazy'}" decoding="async"><div class="hero-overlay"></div><div class="hero-slide-content"><span>${escapeHtml(x.description||'DELGROSSO VIAGGI')}</span><h1>${escapeHtml(x.description||'Il tuo prossimo viaggio')}<br><em>inizia qui.</em></h1></div></div>`}).join('');
  if(r.data.length>1){let i=0;setInterval(()=>{const slides=[...el.querySelectorAll('.hero-slide')];slides[i]?.classList.remove('active');i=(i+1)%slides.length;slides[i]?.classList.add('active');},5000);}
 }
 async function loadPosts(){

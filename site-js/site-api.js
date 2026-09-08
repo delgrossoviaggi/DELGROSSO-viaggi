@@ -23,14 +23,28 @@ export const getPartyEvents=()=>query('site_party_events','*',q=>q.eq('published
 export const getPosts=()=>query('site_posts','*',q=>q.eq('published',true).order('published_at',{ascending:false,nullsFirst:false}).order('sort_order').order('created_at',{ascending:false}));
 export const getSettings=()=>query('site_settings','*',q=>q.limit(1));
 
-export async function uploadSiteFile(file,folder='uploads'){
+export async function uploadSiteFile(file,folder='uploads',onProgress){
   if(!file)throw new Error('Nessun file selezionato.');
-  const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
   const safe=(file.name.replace(/[^a-zA-Z0-9._-]/g,'-').replace(/-+/g,'-').slice(0,70)||'file');
   const path=`${folder}/${safe}`;
-  const {error}=await getSupabase().storage.from(SITE_CONFIG.storageBucket).upload(path,file,{upsert:false,contentType:file.type||undefined});
-  if(error)throw error;
-  return {path,url:getSupabase().storage.from(SITE_CONFIG.storageBucket).getPublicUrl(path).data.publicUrl,originalName:file.name};
+  const sb=getSupabase();
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token)throw new Error('Sessione Admin non valida o scaduta. Effettua di nuovo l’accesso.');
+  const url=`${SITE_CONFIG.supabaseUrl}/storage/v1/object/${SITE_CONFIG.storageBucket}/${path.split('/').map(encodeURIComponent).join('/')}`;
+  await new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',url,true);
+    xhr.setRequestHeader('apikey',SITE_CONFIG.supabaseAnonKey);
+    xhr.setRequestHeader('Authorization',`Bearer ${session.access_token}`);
+    xhr.setRequestHeader('x-upsert','false');
+    xhr.setRequestHeader('Content-Type',file.type||'application/octet-stream');
+    xhr.upload.onprogress=e=>{if(e.lengthComputable&&typeof onProgress==='function')onProgress(Math.round(e.loaded/e.total*100));};
+    xhr.onload=()=>{let body={};try{body=JSON.parse(xhr.responseText||'{}')}catch{};if(xhr.status>=200&&xhr.status<300){if(typeof onProgress==='function')onProgress(100);resolve();}else{const message=(xhr.status===409||xhr.status===400&&/exist|already|duplicate/i.test(String(body.message||body.error||'')))?'Esiste già un file con lo stesso nome.':(body.message||body.error||`Upload fallito (${xhr.status}).`);reject(new Error(message));}};
+    xhr.onerror=()=>reject(new Error('Connessione al Supabase del sito non riuscita durante il caricamento.'));
+    xhr.onabort=()=>reject(new Error('Caricamento annullato.'));
+    xhr.send(file);
+  });
+  return {path,url:sb.storage.from(SITE_CONFIG.storageBucket).getPublicUrl(path).data.publicUrl,originalName:file.name};
 }
 export async function removeSiteFile(path){if(!path)return;const {error}=await getSupabase().storage.from(SITE_CONFIG.storageBucket).remove([path]);if(error)console.warn(error);}
 export async function getSession(){return (await getSupabase().auth.getSession()).data.session;}

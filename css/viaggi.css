@@ -1,1 +1,7 @@
 table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:10px}
+/* Carousel Partenze — immagini reali, senza deformazioni e con transizione affidabile */
+.hero-visual__image{position:relative!important;overflow:hidden!important;min-height:285px!important;}
+.site-viaggi-carousel{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;border-radius:26px!important;}
+.site-viaggi-carousel__slide{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;object-fit:contain!important;object-position:center!important;opacity:0!important;visibility:hidden!important;transition:opacity .8s ease,visibility .8s ease!important;background:#0b1016!important;}
+.site-viaggi-carousel__slide.is-active{opacity:1!important;visibility:visible!important;}
+.site-viaggi-carousel:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,8,12,.05),rgba(5,8,12,.16));}
