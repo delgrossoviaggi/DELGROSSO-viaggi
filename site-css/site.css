@@ -30,3 +30,31 @@ body{background:#fff;color:var(--ink)}
 /* Partenze carousel: preserve original photo proportions */
 .site-viaggi-carousel{background:#0b0d10!important}
 .site-viaggi-carousel__slide{object-fit:contain!important;object-position:center!important;background:#0b0d10!important}
+
+/* ADMIN MOBILE / IPHONE */
+.native-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.mobile-file-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative}
+.file-picker-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 17px;border-radius:13px;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);color:#fff;font-weight:900;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.file-picker-btn:active{transform:scale(.98)}
+.file-picker-hint{font-size:12px;color:#64748b;font-weight:700}
+.mobile-admin-tip{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid #bfdbfe;border-radius:16px;background:#eff6ff;color:#1e3a8a}
+.mobile-admin-tip strong{white-space:nowrap}
+.mobile-admin-tip span{font-size:13px;line-height:1.5}
+@media(max-width:700px){
+  .admin-wrap{padding:95px 0 40px}
+  .admin-card{padding:18px;border-radius:20px}
+  .admin-top{align-items:flex-start;flex-direction:column}
+  .admin-top .admin-btn{width:100%}
+  .admin-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .admin-actions .admin-btn{width:100%;min-height:48px}
+  .mobile-file-picker{display:grid;grid-template-columns:1fr;width:100%}
+  .file-picker-btn{width:100%;min-height:52px;font-size:15px}
+  .file-picker-hint{text-align:center}
+  .mobile-admin-tip{display:block}
+  .mobile-admin-tip strong,.mobile-admin-tip span{display:block}
+  .mobile-admin-tip span{margin-top:5px}
+  .admin-form input,.admin-form textarea,.admin-form select{font-size:16px;min-height:48px}
+  .admin-form textarea{min-height:130px}
+  .admin-row{padding:12px;gap:10px}
+  .admin-row img{width:58px;height:58px}
+}
