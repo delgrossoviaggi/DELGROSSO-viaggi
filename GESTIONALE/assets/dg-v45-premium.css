@@ -1,0 +1,57 @@
+
+/* DEL GROSSO GESTIONALE V45 — PREMIUM UI LAYER
+   Presentation-only layer over the clean supplied build.
+*/
+:root{
+  --dg-v45-bg:#07111f;
+  --dg-v45-panel:rgba(13,29,48,.88);
+  --dg-v45-panel-2:rgba(17,38,61,.82);
+  --dg-v45-border:rgba(255,255,255,.10);
+  --dg-v45-text:#f5f8fc;
+  --dg-v45-muted:#9fb0c3;
+  --dg-v45-accent:#f28a24;
+}
+html{background:var(--dg-v45-bg);}
+body{
+  background:
+    radial-gradient(900px 500px at 90% -10%,rgba(242,138,36,.13),transparent 60%),
+    radial-gradient(800px 500px at -10% 10%,rgba(15,76,129,.25),transparent 60%),
+    linear-gradient(180deg,#07111f 0%,#0a1625 100%) !important;
+  color:var(--dg-v45-text);
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.045;
+  background-image:linear-gradient(rgba(255,255,255,.25) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(255,255,255,.25) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+button,.btn,.button{
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
+}
+button:hover,.btn:hover,.button:hover{filter:brightness(1.06);}
+button:active,.btn:active,.button:active{transform:translateY(1px);}
+.card,.panel,.section,.hero-card,.search-section,.kpi-card,
+.table-card,.form-card,.modal-content{
+  border:1px solid var(--dg-v45-border);
+  box-shadow:0 14px 40px rgba(0,0,0,.22);
+}
+input,select,textarea{
+  border-color:rgba(255,255,255,.12) !important;
+  background:rgba(5,15,27,.72) !important;
+  color:var(--dg-v45-text) !important;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none !important;
+  border-color:rgba(242,138,36,.65) !important;
+  box-shadow:0 0 0 3px rgba(242,138,36,.12) !important;
+}
+table{border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;}
+thead th{background:rgba(255,255,255,.045);}
+tbody tr{transition:background .15s ease;}
+tbody tr:hover{background:rgba(255,255,255,.035);}
+@media(max-width:760px){
+  body{font-size:15px;}
+  button,.btn,.button,a.nav-link{min-height:44px;}
+  .card,.panel,.section,.hero-card,.search-section{border-radius:16px;}
+}
+.seat-map-front__driver{display:none !important;}
