@@ -1,5 +1,0 @@
-import {getPartyEvents,escapeHtml,publicUrl,formatDate} from './site-api.js';
-const el=document.querySelector('#partyGallery');
-const r=await getPartyEvents();
-if(!r.ok||!r.data.length){el.innerHTML='<div class="party-empty"><span>PARTY ON THE ROAD</span><h2>Le prossime feste saranno qui.</h2><p>Pubblicheremo foto reali degli eventi vissuti a bordo della Limousine Bus DELGROSSO.</p></div>'}
-else{el.innerHTML=r.data.map(x=>{const imgs=Array.isArray(x.gallery_urls)?x.gallery_urls:[];return `<article class="party-event"><div class="party-event-head"><div><span>PARTY ON THE ROAD</span><h2>${escapeHtml(x.title)}</h2></div>${x.event_date?`<time>${escapeHtml(formatDate(x.event_date))}</time>`:''}</div>${x.description?`<p>${escapeHtml(x.description)}</p>`:''}<div class="party-masonry">${imgs.map(u=>`<a href="${escapeHtml(publicUrl(u))}" target="_blank" rel="noopener"><img loading="lazy" src="${escapeHtml(publicUrl(u))}" alt="${escapeHtml(x.title)}"></a>`).join('')}</div></article>`}).join('')}
