@@ -9,7 +9,7 @@ const PAYMENT_FN=`${SUPABASE_URL}/functions/v1/send-payment-receipt`;
 const clean=v=>String(v??'').trim();
 const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v||0));
 const name=b=>clean(b?.cliente_nome||b?.cliente||`${b?.nome||''} ${b?.cognome||''}`)||'Cliente';
-const code=b=>clean(b?.codice||b?.id)||'prenotazione';
+const code=b=>clean(b?.id_prenotazione||b?.confirmation_number||b?.codice||b?.id)||'prenotazione';
 const date=v=>{const d=new Date(`${clean(v).slice(0,10)}T00:00:00`);return Number.isNaN(d.getTime())?clean(v)||'—':d.toLocaleDateString('it-IT')};
 async function blob64(blob){const buf=await blob.arrayBuffer();let out='',bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i+=0x8000)out+=String.fromCharCode(...bytes.subarray(i,Math.min(i+0x8000,bytes.length)));return btoa(out)}
 async function call(url,body){const r=await fetch(url,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.error||`Operazione non riuscita (${r.status})`);return d}
@@ -33,7 +33,8 @@ function downloadBookingPdf(blob,booking,number='prenotazione'){
 }
 
 export async function issueBookingDocuments(booking,trip={},options={}){
-  if(!booking?.id) throw new Error('ID prenotazione mancante.');
+  if(booking?.id_prenotazione&&!booking?.id){const ctx=await getBookingContext(booking.id_prenotazione);booking={...(ctx.booking||{}),...booking};if(!Object.keys(trip||{}).length)trip=ctx.trip||{}}
+  if(!booking?.id) throw new Error('ID prenotazione mancante: impossibile individuare la prenotazione nel Gestionale.');
 
   // 1) Generiamo sempre il PDF localmente.
   // 2) Lo rendiamo immediatamente disponibile all'operatore.
@@ -61,7 +62,7 @@ export async function issueBookingDocuments(booking,trip={},options={}){
 }
 
 export async function getBookingContext(bookingId){return call(BOOKING_FN,{action:'context',bookingId})}
-export async function resendBookingEmail(booking,trip={}){if(typeof booking==='string'){const ctx=await getBookingContext(booking);booking=ctx.booking||{};trip=ctx.trip||{}}return call(BOOKING_FN,{action:'resend_email',booking:{...booking},trip:{...trip}})}
+export async function resendBookingEmail(booking,trip={}){if(typeof booking==='string'){const ctx=await getBookingContext(booking);booking=ctx.booking||{};trip=ctx.trip||{}}else if(booking?.id_prenotazione&&!booking?.id){const ctx=await getBookingContext(booking.id_prenotazione);booking={...(ctx.booking||{}),...booking};trip=Object.keys(trip||{}).length?trip:(ctx.trip||{})}return call(BOOKING_FN,{action:'resend_email',booking:{...booking,id:booking.id||booking.uuid||booking.booking_id},trip:{...trip}})}
 export async function openBookingConfirmation(path){const d=await call(BOOKING_FN,{action:'signed_url',path});window.open(d.signedUrl,'_blank','noopener');return d.signedUrl}
 export async function bookingWhatsApp(booking,trip={},path=''){
   if(typeof booking==='string'){const ctx=await getBookingContext(booking);booking=ctx.booking||{};trip=ctx.trip||{};path=booking.confirmation_storage_path||''}
