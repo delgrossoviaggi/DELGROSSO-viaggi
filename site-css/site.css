@@ -32,9 +32,9 @@ body{background:#fff;color:var(--ink)}
 .site-viaggi-carousel__slide{object-fit:contain!important;object-position:center!important;background:#0b0d10!important}
 
 /* ADMIN MOBILE / IPHONE */
-.native-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.native-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:auto;clip:rect(0 0 0 0);clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 .mobile-file-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative}
-.file-picker-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 17px;border-radius:13px;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);color:#fff;font-weight:900;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.file-picker-btn{display:inline-flex;appearance:none;-webkit-appearance:none;border:0;align-items:center;justify-content:center;min-height:46px;padding:12px 17px;border-radius:13px;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);color:#fff;font-weight:900;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .file-picker-btn:active{transform:scale(.98)}
 .file-picker-hint{font-size:12px;color:#64748b;font-weight:700}
 .mobile-admin-tip{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid #bfdbfe;border-radius:16px;background:#eff6ff;color:#1e3a8a}

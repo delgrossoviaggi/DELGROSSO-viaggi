@@ -39,7 +39,7 @@ export async function uploadSiteFile(file,folder='uploads',onProgress){
     xhr.setRequestHeader('x-upsert','false');
     xhr.setRequestHeader('Content-Type',file.type||'application/octet-stream');
     xhr.upload.onprogress=e=>{if(e.lengthComputable&&typeof onProgress==='function')onProgress(Math.round(e.loaded/e.total*100));};
-    xhr.onload=()=>{let body={};try{body=JSON.parse(xhr.responseText||'{}')}catch{};if(xhr.status>=200&&xhr.status<300){if(typeof onProgress==='function')onProgress(100);resolve();}else{const message=(xhr.status===409||xhr.status===400&&/exist|already|duplicate/i.test(String(body.message||body.error||'')))?'Esiste già un file con lo stesso nome.':(body.message||body.error||`Upload fallito (${xhr.status}).`);reject(new Error(message));}};
+    xhr.onload=()=>{let body={};try{body=JSON.parse(xhr.responseText||'{}')}catch{};if(xhr.status>=200&&xhr.status<300){if(typeof onProgress==='function')onProgress(100);resolve();}else{const raw=String(body.message||body.error_description||body.error||xhr.responseText||'').replace(/<[^>]*>/g,' ').trim();const message=(xhr.status===409||/exist|already|duplicate/i.test(raw))?'Esiste già un file con lo stesso nome.':(xhr.status===415||/mime|content.?type|not allowed|allowed/i.test(raw))?'Formato immagine non consentito dal deposito del sito.':(xhr.status===413)?'Immagine troppo grande (massimo 50 MB).':(raw||`Upload fallito (${xhr.status}).`);reject(new Error(`${message} [HTTP ${xhr.status}]`));}};
     xhr.onerror=()=>reject(new Error('Connessione al Supabase del sito non riuscita durante il caricamento.'));
     xhr.onabort=()=>reject(new Error('Caricamento annullato.'));
     xhr.send(file);

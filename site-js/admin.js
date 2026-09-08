@@ -6,6 +6,7 @@ function msg(text,type='ok'){const e=$('#adminMessage')||$('#loginMessage');if(e
 function setSyncState(ok,text){const st=$('#syncStatus'),tx=$('#syncText');if(tx)tx.textContent=text;if(st){st.classList.toggle('online',!!ok);}}
 function fileNames(input){return [...(input?.files||[])].map(f=>f.name.trim().toLowerCase());}
 function assertNoDuplicateSelection(input){const names=fileNames(input);const dup=names.filter((n,i)=>names.indexOf(n)!==i);if(dup.length)throw new Error(`Immagini duplicate nella selezione: ${[...new Set(dup)].join(', ')}`);}
+function safeUploadName(name=''){return String(name).replace(/[^a-zA-Z0-9._-]/g,'-').replace(/-+/g,'-').slice(0,70).toLowerCase()||'file';}
 function basename(path=''){return String(path).split('/').pop().replace(/^\d+-[a-f0-9-]+-/i,'').toLowerCase();}
 function inputExistingNames(rows=[]){return new Set(rows.flatMap(x=>[x.title,x.storage_path].filter(Boolean).map(basename)));}
 function setButtonBusy(button,busy,label){if(!button)return;button.disabled=busy;if(busy){button.dataset.originalLabel=button.textContent;button.textContent='⏳ Elaborazione…';}else if(button.dataset.originalLabel){button.textContent=label||button.dataset.originalLabel;delete button.dataset.originalLabel;}}
@@ -13,14 +14,14 @@ function progressBox(){return $('#uploadProgress');}
 function resetProgress(){const e=progressBox();if(!e)return;e.hidden=true;e.innerHTML='';}
 function renderProgress(items){const e=progressBox();if(!e)return;e.hidden=false;e.innerHTML=items.map((x,i)=>`<div class=\"upload-item\"><div class=\"upload-item-head\"><b>${esc(x.name)}</b><span id=\"uploadStatus-${i}\">${esc(x.status||'In attesa')}</span></div><div class=\"upload-track\"><i id=\"uploadBar-${i}\" style=\"width:${Number(x.pct)||0}%\"></i></div></div>`).join('');}
 function updateProgress(i,pct,status){const bar=document.getElementById(`uploadBar-${i}`),st=document.getElementById(`uploadStatus-${i}`);if(bar)bar.style.width=`${Math.max(0,Math.min(100,pct))}%`;if(st)st.textContent=status;}
-async function showSelectedStatus(input,rows=[],folder=''){const files=[...(input?.files||[])];if(!files.length){resetProgress();return;}const names=inputExistingNames(rows);let storageNames=new Set();try{const {data}=await getSupabase().storage.from('site-media').list(folder,{limit:1000});storageNames=new Set((data||[]).map(x=>String(x.name||'').toLowerCase()));}catch{};const items=files.map(f=>{const n=basename(f.name);const exists=names.has(n)||storageNames.has(f.name.trim().toLowerCase());const mb=(Number(f.size||0)/1024/1024).toFixed(1);return {name:f.name,pct:exists?100:0,status:exists?'✓ GIÀ INSERITO':`Pronto · ${mb} MB`};});renderProgress(items);}
+async function showSelectedStatus(input,rows=[],folder=''){const files=[...(input?.files||[])];if(!files.length){resetProgress();return;}const names=inputExistingNames(rows);let storageNames=new Set();try{const {data}=await getSupabase().storage.from('site-media').list(folder,{limit:1000});storageNames=new Set((data||[]).map(x=>String(x.name||'').toLowerCase()));}catch{};const items=files.map(f=>{const n=basename(f.name);const exists=names.has(n)||storageNames.has(f.name.trim().toLowerCase())||storageNames.has(safeUploadName(f.name));const mb=(Number(f.size||0)/1024/1024).toFixed(1);return {name:f.name,pct:exists?100:0,status:exists?'✓ GIÀ INSERITO':`Pronto · ${mb} MB`};});renderProgress(items);}
 async function assertNoDuplicateNames(input,existingRows=[],folder=''){
  assertNoDuplicateSelection(input);const names=fileNames(input);if(!names.length)return;
  const existing=new Set(existingRows.flatMap(x=>[x.title,x.storage_path,x.public_url,x.cover_url,...(Array.isArray(x.gallery_urls)?x.gallery_urls:[])].filter(Boolean).map(basename)));
- const conflicts=names.filter(n=>existing.has(n));
+ const conflicts=names.filter(n=>existing.has(n)||existing.has(safeUploadName(n)));
  if(conflicts.length)throw new Error(`Upload bloccato: esiste già un'immagine con lo stesso nome: ${[...new Set(conflicts)].join(', ')}`);
  // Also check the storage folder so duplicate filenames are blocked even if the DB row is missing.
- if(folder){const {data,error}=await getSupabase().storage.from('site-media').list(folder,{limit:1000});if(error)throw error;const storageNames=new Set((data||[]).map(x=>String(x.name||'').toLowerCase()));const c=names.filter(n=>storageNames.has(n));if(c.length)throw new Error(`Upload bloccato: nel deposito esiste già un'immagine con lo stesso nome: ${[...new Set(c)].join(', ')}`);}
+ if(folder){const {data,error}=await getSupabase().storage.from('site-media').list(folder,{limit:1000});if(error)throw error;const storageNames=new Set((data||[]).map(x=>String(x.name||'').toLowerCase()));const c=names.filter(n=>storageNames.has(n)||storageNames.has(safeUploadName(n)));if(c.length)throw new Error(`Upload bloccato: nel deposito esiste già un'immagine con lo stesso nome: ${[...new Set(c)].join(', ')}`);}
 }
 async function refresh(){
  const sb=getSupabase();
@@ -91,7 +92,12 @@ function bind(){
  for(const [id,fn] of Object.entries(commands)) on(id,'click',()=>fn().catch(e=>msg(e.message,'error')));
  on('fleetCancel','click',resetFleet);on('partyCancel','click',resetParty);on('postCancel','click',resetPost);
  document.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d)del(d.dataset.table,d.dataset.del).catch(x=>msg(x.message,'error'));const f=e.target.closest('[data-edit-fleet]');if(f)openEditFleet(f.dataset.editFleet);const p=e.target.closest('[data-edit-party]');if(p)openEditParty(p.dataset.editParty);const n=e.target.closest('[data-edit-post]');if(n)openEditPost(n.dataset.editPost);});
- const fileMaps={homeFiles:['home','carousel-home'],viaggiFiles:['viaggi','carousel-viaggi'],fleetFiles:['fleet','flotta'],partyFiles:['party','party-on-the-road'],postFile:['posts','posts']};for(const id of Object.keys(fileMaps))document.getElementById(id)?.addEventListener('change',async e=>{try{assertNoDuplicateSelection(e.target);const [section,folder]=fileMaps[id];await showSelectedStatus(e.target,state[section]||[],folder);}catch(x){e.target.value='';resetProgress();msg(x.message,'error')}});
+ const fileMaps={homeFiles:['home','carousel-home'],viaggiFiles:['viaggi','carousel-viaggi'],fleetFiles:['fleet','flotta'],partyFiles:['party','party-on-the-road'],postFile:['posts','posts']};
+ for(const id of Object.keys(fileMaps)){
+  const input=document.getElementById(id);
+  if(input) input.addEventListener('change',async e=>{try{assertNoDuplicateSelection(e.target);const [section,folder]=fileMaps[id];await showSelectedStatus(e.target,state[section]||[],folder);if(e.target.files.length)msg(`✓ ${e.target.files.length} file selezionat${e.target.files.length===1?'o':'i'}. Pronto per il caricamento.`);}catch(x){e.target.value='';resetProgress();msg(x.message,'error')}});
+ }
+ document.querySelectorAll('[data-pick]').forEach(btn=>btn.addEventListener('click',()=>{const input=document.getElementById(btn.dataset.pick);if(input){try{input.click();}catch(e){msg('Impossibile aprire la Libreria Foto. Riprova da Safari.','error');}}}));
  on('syncRefresh','click',()=>refresh().then(()=>msg('✓ Supabase del sito sincronizzato.')).catch(e=>msg(e.message,'error')));
 }
 
