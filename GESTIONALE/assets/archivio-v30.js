@@ -25,10 +25,10 @@ async function restArchive(){
   ]);
   const p=await pRes.json().catch(()=>[]), g=await gRes.json().catch(()=>[]);
   if(!pRes.ok||!gRes.ok) throw new Error(d?.message||`Errore lettura Archivio Supabase (${r.status})`);
-  const trips=await fetch(`${SUPABASE_URL}/rest/v1/viaggi?select=id,id_viaggio,titolo,destinazione&limit=2000`,{headers}).then(x=>x.ok?x.json():[]).catch(()=>[]);
+  const trips=await fetch(`${SUPABASE_URL}/rest/v1/viaggi?select=id,titolo,destinazione&limit=2000`,{headers}).then(x=>x.ok?x.json():[]).catch(()=>[]);
   const tripMap=new Map((Array.isArray(trips)?trips:[]).map(x=>[String(x.id),x]));
-  const bookingDocs=(Array.isArray(p)?p:[]).map(x=>({tipo_documento:'prenotazione',documento_id:x.id,numero_documento:x.confirmation_number||x.id_prenotazione, id_prenotazione:x.id_prenotazione||x.confirmation_number,prenotazione_id:x.id,pagamento_id:null,viaggio_id:x.viaggio_id,cliente:x.cliente_nome||x.cliente,viaggio:tripMap.get(String(x.viaggio_id))?.titolo||x.viaggio_codice||'—',email:x.email,telefono:x.telefono,data_documento:x.confirmation_generated_at,importo:x.totale,storage_path:x.confirmation_storage_path,email_inviata:x.confirmation_email_sent,email_inviata_at:x.confirmation_email_sent_at,email_errore:x.confirmation_email_error,updated_at:x.updated_at,id_prenotazione:x.id_prenotazione||x.confirmation_number,id_viaggio:tripMap.get(String(x.viaggio_id))?.id_viaggio||null}));
-  const paymentDocs=(Array.isArray(g)?g:[]).map(x=>({tipo_documento:String(x.tipo||'').toLowerCase()==='saldo'?'saldo':'acconto',documento_id:x.id,numero_documento:x.receipt_number,prenotazione_id:x.prenotazione_id,pagamento_id:x.id,cliente:x.cliente,viaggio:tripMap.get(String(x.viaggio_id))?.titolo||x.viaggio||'—',email:null,telefono:null,data_documento:x.receipt_generated_at,importo:x.importo,storage_path:x.receipt_storage_path,email_inviata:x.receipt_email_sent,email_inviata_at:x.receipt_email_sent_at,email_errore:x.receipt_email_error,updated_at:x.updated_at,id_prenotazione:x.id_prenotazione||null,id_viaggio:tripMap.get(String(x.viaggio_id))?.id_viaggio||null}));
+  const bookingDocs=(Array.isArray(p)?p:[]).map(x=>({tipo_documento:'prenotazione',documento_id:x.id,numero_documento:x.confirmation_number,prenotazione_id:x.id,pagamento_id:null,viaggio_id:x.viaggio_id,cliente:x.cliente_nome||x.cliente,viaggio:tripMap.get(String(x.viaggio_id))?.titolo||x.viaggio_codice||'—',email:x.email,telefono:x.telefono,data_documento:x.confirmation_generated_at,importo:x.totale,storage_path:x.confirmation_storage_path,email_inviata:x.confirmation_email_sent,email_inviata_at:x.confirmation_email_sent_at,email_errore:x.confirmation_email_error,updated_at:x.updated_at}));
+  const paymentDocs=(Array.isArray(g)?g:[]).map(x=>({tipo_documento:String(x.tipo||'').toLowerCase()==='saldo'?'saldo':'acconto',documento_id:x.id,numero_documento:x.receipt_number,prenotazione_id:x.prenotazione_id,pagamento_id:x.id,cliente:x.cliente,viaggio:tripMap.get(String(x.viaggio_id))?.titolo||x.viaggio||'—',email:null,telefono:null,data_documento:x.receipt_generated_at,importo:x.importo,storage_path:x.receipt_storage_path,email_inviata:x.receipt_email_sent,email_inviata_at:x.receipt_email_sent_at,email_errore:x.receipt_email_error,updated_at:x.updated_at}));
   return [...bookingDocs,...paymentDocs].sort((a,b)=>new Date(b.data_documento||0)-new Date(a.data_documento||0));
 }
 async function signedBooking(path){
@@ -43,7 +43,7 @@ function normalize(documents){
   return (documents||[]).map(d=>{
     const type=String(d.tipo_documento||'').toLowerCase();
     const kind=type==='prenotazione'?'booking':type==='saldo'?'saldo':'acconto';
-    const bookingId=d.prenotazione_id||d.booking_id||((kind==='booking')?d.documento_id:null)||null;
+    const bookingId=d.prenotazione_id||((kind==='booking')?d.documento_id:null)||d.booking_id||null;
     const paymentId=d.pagamento_id||((kind!=='booking')?d.documento_id:null)||d.payment_id||null;
     return {
       kind,
@@ -51,7 +51,7 @@ function normalize(documents){
       bookingId,
       paymentId,
       documentId:d.documento_id||null,
-      number:d.id_prenotazione||d.numero_documento||((kind==='booking')?d.confirmation_number:d.receipt_number)||'—',
+      number:d.numero_documento||((kind==='booking')?d.confirmation_number:d.receipt_number)||'—',
       customer:customer(d),
       trip:trip(d),
       date:d.data_documento,
@@ -106,7 +106,7 @@ async function act(action,id,button){
       if(action==='open') await openBookingConfirmation(row.path);
       if(action==='download') await downloadBooking(row.path,row.number);
       if(action==='email'){
-        const booking={...(row.raw||{}),id:row.bookingId,id_prenotazione:row.raw?.id_prenotazione||row.number};
+        const booking={...(row.raw||{}),id:row.bookingId};
         await resendBookingEmail(booking,{titolo:row.trip});
       }
     }else{
