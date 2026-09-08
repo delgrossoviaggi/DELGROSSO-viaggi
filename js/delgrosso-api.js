@@ -701,7 +701,7 @@ export async function createPublicBooking(payload = {}) {
   if (!posti.length) return failure(new Error('Seleziona almeno un posto.'));
 
   try {
-    const { data, error } = await getSupabase().rpc('create_public_booking', {
+    const { data: rpcRawData, error } = await getSupabase().rpc('create_public_booking', {
       p_viaggio_id: viaggioId,
       p_nome: nome,
       p_cognome: cognome,
@@ -712,19 +712,34 @@ export async function createPublicBooking(payload = {}) {
     });
 
     if (error) return failure(error);
-    if (!data?.success) return failure(new Error(data?.error || 'Prenotazione non riuscita.'));
 
-    const booking = await getPrenotazione(data.id);
-    if (booking.success === false) return booking;
+    // Be tolerant of both the current object response and PostgREST
+    // single-row/array responses used by older versions of the RPC.
+    const data = Array.isArray(rpcRawData) ? (rpcRawData[0] || {}) : (rpcRawData || {});
+    if (data.success === false) return failure(new Error(data.error || 'Prenotazione non riuscita.'));
 
+    const bookingId = data.id || data.booking_id || data.prenotazione_id || data.id_prenotazione;
+    let booking = { success: true, data: null };
+    if (bookingId && /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(String(bookingId))) {
+      booking = await getPrenotazione(bookingId);
+      if (booking.success === false) return booking;
+    }
+
+    const stored = booking.data || {};
     return success({
-      ...(booking.data || {}),
-      id: data.id,
-      codice: data.numero || booking.data?.codice || '',
-      confirmation_number: data.numero || booking.data?.confirmation_number || '',
-      confirmation_token: data.token || booking.data?.confirmation_token || '',
-      posti_selezionati: Array.isArray(data.posti) ? data.posti.join(',') : (booking.data?.posti_selezionati || posti.join(',')),
-      totale: Number(data.totale ?? booking.data?.totale ?? 0)
+      ...stored,
+      id: bookingId || stored.id || '',
+      id_prenotazione: data.id_prenotazione || stored.id_prenotazione || data.numero || '',
+      codice: data.numero || stored.codice || data.codice || '',
+      confirmation_number: data.numero || stored.confirmation_number || data.confirmation_number || '',
+      confirmation_token: data.token || stored.confirmation_token || data.confirmation_token || '',
+      posti_selezionati: Array.isArray(data.posti) ? data.posti.join(',') : (stored.posti_selezionati || posti.join(',')),
+      totale: Number(data.totale ?? stored.totale ?? 0),
+      nome,
+      cognome,
+      telefono,
+      email,
+      note
     });
   } catch (error) {
     return failure(error);

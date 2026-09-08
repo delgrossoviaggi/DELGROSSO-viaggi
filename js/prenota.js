@@ -477,13 +477,16 @@ async function bootstrap() {
   }
 
   try {
-    const [tripResult, fleetResult] = await Promise.all([
-      getViaggioPubblico({ viaggioId: state.tripId, codice: state.tripCode }),
-      getFlottaPubblica()
-    ]);
+    // The fleet table is operational data and may be protected by RLS.
+    // It must never block a public booking: the trip already contains the
+    // authoritative bus reference, while fleet data is only an enhancement
+    // for resolving the exact seat layout.
+    const tripResult = await getViaggioPubblico({
+      viaggioId: state.tripId,
+      codice: state.tripCode
+    });
 
     if (tripResult.success === false) throw tripResult.error;
-    if (fleetResult.success === false) throw fleetResult.error;
 
     const trip = tripResult.data || null;
     if (!trip || trip.pubblicato !== 'SI') {
@@ -495,7 +498,20 @@ async function bootstrap() {
 
     state.trip = trip;
     state.tripId = normalizeText(trip.id);
-    state.fleet = Array.isArray(fleetResult.data) ? fleetResult.data : [];
+    state.fleet = [];
+
+    // Fleet lookup is optional for the public page. If it is readable, use it;
+    // otherwise the exact bus reference stored on the trip remains the source
+    // for the seat-layout resolver and the booking flow continues normally.
+    try {
+      const fleetResult = await getFlottaPubblica();
+      if (fleetResult.success !== false) {
+        state.fleet = Array.isArray(fleetResult.data) ? fleetResult.data : [];
+      }
+    } catch (fleetError) {
+      console.warn('Flotta non disponibile pubblicamente; uso il riferimento bus del viaggio.', fleetError);
+    }
+
     state.selectedBus = getBusByTrip(trip);
     state.occupiedSeats = extractOccupiedSeats(bookingsResult.data || []);
 
