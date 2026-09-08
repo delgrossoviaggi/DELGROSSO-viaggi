@@ -1,6 +1,7 @@
 import { tripService } from '../services/tripService.js';
-import { getPrenotazioniPostiViaggio } from './delgrosso-api.js';
+import { getPrenotazioniPostiViaggio, createPublicBooking, createPublicQuote } from './delgrosso-api.js';
 import { bookingService } from '../services/bookingService.js';
+import { fleetService } from '../services/fleetService.js';
 import { quoteService } from '../services/quoteService.js';
 
 export async function getViaggiPubblicati() {
@@ -36,30 +37,16 @@ export async function creaPrenotazione(data) {
   return bookingService.create(data);
 }
 
+export async function creaPrenotazionePubblica(data) {
+  return createPublicBooking(data);
+}
+
 export async function getPrenotazioniViaggio(tripId) {
   return getPrenotazioniPostiViaggio(tripId);
 }
 
-const SITE_SUPABASE_URL = 'https://bhsanrbadsqcpbtxupmr.supabase.co';
-const SITE_SUPABASE_KEY = 'sb_publishable_jcc3RIJmNnXZdhcmFuIKFg_EpxO_rBp';
-
 export async function getFlottaPubblica() {
-  try {
-    const response = await fetch(`${SITE_SUPABASE_URL}/rest/v1/flotta_page?select=id,titolo,descrizione,immagine_url,foto_urls,foto_gallery,categoria,posti,pubblicato,attivo&pubblicato=eq.true&attivo=eq.true&order=sort_order.asc,created_at.desc`, {
-      headers: { apikey: SITE_SUPABASE_KEY, Authorization: `Bearer ${SITE_SUPABASE_KEY}` },
-      cache: 'no-store'
-    });
-    if (!response.ok) throw new Error(`Supabase SITO flotta_page: HTTP ${response.status}`);
-    const rows = await response.json();
-    return { success:true, data:(Array.isArray(rows)?rows:[]).map(r=>({
-      ...r,
-      immagine:r.immagine_url||'',
-      foto_gallery:Array.isArray(r.foto_gallery)&&r.foto_gallery.length?r.foto_gallery:(Array.isArray(r.foto_urls)?r.foto_urls:[])
-    })), error:null };
-  } catch (error) {
-    console.error('Flotta pubblica:', error);
-    return { success:false, data:[], error };
-  }
+  return fleetService.getAll();
 }
 
 export async function aggiornaOccupazioneViaggio(tripId, delta) {
@@ -67,9 +54,5 @@ export async function aggiornaOccupazioneViaggio(tripId, delta) {
 }
 
 export async function creaPreventivoPubblico(data) {
-  return quoteService.create({
-    ...data,
-    origine: 'sito',
-    stato: 'Nuovo'
-  });
+  return createPublicQuote(data);
 }

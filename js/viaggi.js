@@ -2,14 +2,36 @@ import {
   calculateAvailableSeats,
   formatDate,
   formatTime
-} from '../../../js/delgrosso-api.js';
-import { getViaggiPubblicati } from '../bridge.js';
-import { applyRuntimeSettings, loadImpostazioni } from '../../services/settingsService.js';
-import { buildPublicBookingUrl } from '../../utils/appRoutes.js';
+} from './delgrosso-api.js';
+import { getViaggiPubblicati, getFlottaPubblica } from './bridge.js';
+import { getViaggiCarousel, publicUrl as sitePublicUrl, escapeHtml as siteEscapeHtml } from '../site-js/site-api.js';
+import { buildPublicBookingUrl } from '../utils/appRoutes.js';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x700/0f172a/ffffff?text=Del+Grosso+Viaggi';
 const REQUEST_TIMEOUT_MS = 15000;
 const LAST_SEATS_THRESHOLD = 5;
+const HOME_FALLBACK = 'assets/images/logo-sidebar.png';
+
+async function syncHomeVisual() {
+  try {
+    const result = await getViaggiCarousel();
+    const items = (result.data || []).filter((item) => item?.image_url);
+    const target = document.querySelector('.hero-visual__image');
+    if (!target || !items.length) return;
+    target.innerHTML = `<div class="site-viaggi-carousel">${items.map((item, index) => `<img class="site-viaggi-carousel__slide ${index === 0 ? 'is-active' : ''}" src="${siteEscapeHtml(sitePublicUrl(item.image_url))}" alt="${siteEscapeHtml(item.title || 'DELGROSSO Partenze')}" loading="${index === 0 ? 'eager' : 'lazy'}" referrerpolicy="no-referrer">`).join('')}</div>`;
+    if (items.length > 1) {
+      let current = 0;
+      setInterval(() => {
+        const slides = [...target.querySelectorAll('.site-viaggi-carousel__slide')];
+        slides[current]?.classList.remove('is-active');
+        current = (current + 1) % slides.length;
+        slides[current]?.classList.add('is-active');
+      }, 4500);
+    }
+  } catch (error) {
+    console.warn('Carousel Partenze/Supabase sito:', error);
+  }
+}
 
 const ui = {
   searchInput: document.getElementById('searchInput'),
@@ -112,7 +134,7 @@ function buildTripCard(trip) {
   const priceVal = trip.prezzo ? Number(trip.prezzo).toFixed(2) : '0.00';
   const destination = escapeHtml(trip.destinazione || 'Destinazione');
   const title = escapeHtml(trip.titolo || 'Viaggio Del Grosso');
-  const bus = escapeHtml(trip.mezzo || 'Bus GT Deluxe');
+  const bus = escapeHtml(trip.autobus || trip.mezzo || 'Bus GT Deluxe');
 
   return `
     <article class="departure-card" data-aos="fade-up">
@@ -231,11 +253,8 @@ function bindEvents() {
 }
 
 async function init() {
-  const settingsResponse = await loadImpostazioni();
-  if (settingsResponse.success !== false) {
-    applyRuntimeSettings(settingsResponse.data);
-  }
   initAnimations();
+  syncHomeVisual();
   bindEvents();
   await loadTrips();
 }

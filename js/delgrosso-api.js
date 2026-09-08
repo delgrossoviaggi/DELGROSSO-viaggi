@@ -570,14 +570,16 @@ export async function deleteTableRows(table, options = {}) {
 export function getSupabase() {
   if (supabaseClient) return supabaseClient;
 
-  const url = getOptionalEnv('VITE_SUPABASE_URL', FALLBACK_SUPABASE_URL);
-  const key = getOptionalEnv('VITE_SUPABASE_ANON_KEY', FALLBACK_SUPABASE_ANON_KEY);
+  // PUBLIC SITE: the three public flows (viaggi/prenota/preventivo)
+  // must always use the Gestionale Supabase project.
+  const url = FALLBACK_SUPABASE_URL;
+  const key = FALLBACK_SUPABASE_ANON_KEY;
 
   supabaseClient = createClient(url, key, {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
     }
   });
 
@@ -667,25 +669,92 @@ export async function deleteViaggio(id) {
 export async function getPrenotazioniPostiViaggio(tripId) {
   const id = String(tripId ?? '').trim();
   if (!id) return failure(new Error('Identificativo viaggio non valido.'));
+
   try {
-    const select = 'viaggio_id,tratta_id,posti_selezionati,posti';
-    const [byViaggio, byTratta] = await Promise.all([
-      getSupabase().from('prenotazioni').select(select).eq('viaggio_id', id),
-      getSupabase().from('prenotazioni').select(select).eq('tratta_id', id)
-    ]);
-    if (byViaggio.error) return failure(byViaggio.error);
-    if (byTratta.error) return failure(byTratta.error);
-    const seen = new Set();
-    const rows = [...(byViaggio.data || []), ...(byTratta.data || [])].filter((row) => {
-      const key = `${row.viaggio_id || ''}|${row.tratta_id || ''}|${row.posti_selezionati || ''}|${row.posti || ''}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+    const { data, error } = await getSupabase().rpc('get_public_booked_seats', {
+      p_viaggio_id: id
     });
-    return success(rows);
+
+    if (error) return failure(error);
+    return success(Array.isArray(data) ? data.map((seat) => ({ posti_selezionati: String(seat) })) : []);
   } catch (error) {
     return failure(error);
   }
+}
+
+export async function createPublicBooking(payload = {}) {
+  const viaggioId = String(payload.viaggio_id || payload.viaggioId || '').trim();
+  const nome = String(payload.nome || '').trim();
+  const cognome = String(payload.cognome || '').trim();
+  const telefono = String(payload.telefono || '').trim();
+  const email = String(payload.email || '').trim();
+  const note = String(payload.note || '').trim();
+  const posti = Array.isArray(payload.posti_selezionati)
+    ? payload.posti_selezionati.map((seat) => String(seat).trim()).filter(Boolean)
+    : String(payload.posti_selezionati || '')
+        .split(',')
+        .map((seat) => seat.trim())
+        .filter(Boolean);
+
+  if (!viaggioId) return failure(new Error('Identificativo viaggio mancante.'));
+  if (!nome || !cognome) return failure(new Error('Nome e cognome sono obbligatori.'));
+  if (!posti.length) return failure(new Error('Seleziona almeno un posto.'));
+
+  try {
+    const { data, error } = await getSupabase().rpc('create_public_booking', {
+      p_viaggio_id: viaggioId,
+      p_nome: nome,
+      p_cognome: cognome,
+      p_telefono: telefono,
+      p_email: email,
+      p_note: note,
+      p_posti: posti
+    });
+
+    if (error) return failure(error);
+    if (!data?.success) return failure(new Error(data?.error || 'Prenotazione non riuscita.'));
+
+    const booking = await getPrenotazione(data.id);
+    if (booking.success === false) return booking;
+
+    return success({
+      ...(booking.data || {}),
+      id: data.id,
+      codice: data.numero || booking.data?.codice || '',
+      confirmation_number: data.numero || booking.data?.confirmation_number || '',
+      confirmation_token: data.token || booking.data?.confirmation_token || '',
+      posti_selezionati: Array.isArray(data.posti) ? data.posti.join(',') : (booking.data?.posti_selezionati || posti.join(',')),
+      totale: Number(data.totale ?? booking.data?.totale ?? 0)
+    });
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function createPublicQuote(payload = {}) {
+  const { data, error } = await getSupabase().rpc('create_public_quote', {
+    p_nome: String(payload.nome || '').trim(),
+    p_cognome: String(payload.cognome || '').trim(),
+    p_telefono: String(payload.telefono || '').trim(),
+    p_email: String(payload.email || '').trim(),
+    p_servizio: String(payload.servizio_richiesto || payload.servizio || '').trim(),
+    p_passeggeri: Math.max(Number(payload.passeggeri ?? payload.numero_passeggeri ?? 1) || 1, 1),
+    p_destinazione: String(payload.destinazione || '').trim(),
+    p_partenza: String(payload.luogo_partenza || payload.partenza || '').trim(),
+    p_data_partenza: payload.data_partenza || payload.data_viaggio || null,
+    p_note: String(payload.note_cliente || payload.messaggio || '').trim()
+  });
+
+  if (error) return failure(error);
+  if (!data?.success) return failure(new Error(data?.error || 'Richiesta preventivo non riuscita.'));
+
+  const quote = await getTableRow('preventivi', data.id);
+  if (quote.success === false) return quote;
+  return success(quote.data || {
+    id: data.id,
+    codice: data.codice,
+    numero_preventivo: data.codice
+  });
 }
 
 export async function getPrenotazioni() {
