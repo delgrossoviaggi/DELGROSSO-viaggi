@@ -1,0 +1,23 @@
+
+/* DELGROSSO — GLOBAL HEADER: identical navigation banner on every public page */
+.dg-global-header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:10000!important;height:auto!important;background:rgba(7,9,11,.92)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;border-bottom:1px solid rgba(255,255,255,.10)!important;box-shadow:0 12px 36px rgba(0,0,0,.18)!important}
+.dg-global-header .container{width:min(1240px,calc(100% - 40px));margin:0 auto}
+.dg-global-header .site-nav{height:76px!important;display:flex!important;align-items:center!important;gap:24px!important}
+.dg-global-header .brand{display:flex!important;align-items:center!important;min-width:190px!important;height:58px!important}
+.dg-global-header .brand img{width:180px!important;height:56px!important;object-fit:contain!important;object-position:left center!important;display:block!important}
+.dg-global-header .menu-links{display:flex!important;align-items:center!important;justify-content:center!important;gap:24px!important;flex:1!important}
+.dg-global-header .menu-links a{color:#fff!important;font-size:10px!important;font-weight:900!important;letter-spacing:.13em!important;text-transform:uppercase!important;opacity:.82!important;transition:.2s ease!important;text-decoration:none!important}
+.dg-global-header .menu-links a:hover,.dg-global-header .menu-links a.active{opacity:1!important;color:#ff7a21!important}
+.dg-global-header .header-actions{display:flex!important;align-items:center!important;gap:7px!important}
+.dg-global-header .access{width:34px!important;height:34px!important;border:1px solid rgba(255,255,255,.20)!important;background:rgba(255,255,255,.06)!important;border-radius:9px!important;display:grid!important;place-items:center!important;color:#fff!important;text-decoration:none!important}
+.dg-global-header .access svg{width:15px!important;height:15px!important;fill:none!important;stroke:currentColor!important}
+.dg-global-header .access b{font-size:13px!important;color:#fff!important}
+.dg-global-header .header-cta{padding:12px 18px!important;border-radius:999px!important;background:linear-gradient(135deg,#ff5b00,#ff7a21)!important;color:#fff!important;font-size:10px!important;font-weight:950!important;letter-spacing:.13em!important;text-transform:uppercase!important;text-decoration:none!important;box-shadow:0 10px 24px rgba(255,98,0,.22)!important}
+.dg-global-header .menu-toggle{display:none!important;background:transparent!important;border:0!important;color:#fff!important;font-size:25px!important;cursor:pointer!important}
+.dg-global-header .mobile-banner{display:none!important}
+body{padding-top:76px!important}
+body:has(.dg-global-header){padding-top:76px!important}
+/* Existing hero layouts already reserve their own visual spacing; remove accidental double offset where necessary. */
+.dg-global-header~.color-strip{margin-top:0}
+@media(max-width:900px){.dg-global-header .menu-links,.dg-global-header .header-actions .access,.dg-global-header .header-actions .header-cta{display:none!important}.dg-global-header .header-actions{margin-left:auto!important}.dg-global-header .menu-toggle{display:block!important}.dg-global-header .mobile-banner{display:none!important;background:#080a0d!important;border-top:1px solid rgba(255,255,255,.08)!important;padding:10px 20px 14px!important}.menu-open .dg-global-header .mobile-banner{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px 18px!important}.dg-global-header .mobile-banner a{color:#fff!important;padding:11px 4px!important;text-decoration:none!important;font-size:10px!important;font-weight:900!important;letter-spacing:.12em!important;text-transform:uppercase!important;border-bottom:1px solid rgba(255,255,255,.07)!important}.dg-global-header .mobile-banner a.active{color:#ff7a21!important}}
+@media(max-width:520px){.dg-global-header .container{width:calc(100% - 24px)}.dg-global-header .brand{min-width:0!important}.dg-global-header .brand img{width:150px!important;height:52px!important}.dg-global-header .site-nav{height:68px!important}.dg-global-header{min-height:68px!important}body,body:has(.dg-global-header){padding-top:68px!important}}

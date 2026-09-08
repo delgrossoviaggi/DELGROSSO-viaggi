@@ -2,7 +2,8 @@ import {getSupabase,signIn,signOut,getSession,isAdmin,uploadSiteFile,removeSiteF
 const $=s=>document.querySelector(s);const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let currentUser=null;
 const state={home:[],viaggi:[],fleet:[],party:[],posts:[]};
-function msg(text,type='ok'){const e=$('#adminMessage')||$('#loginMessage');if(!e)return;e.textContent=text;e.className=`admin-message ${type}`;setTimeout(()=>e.textContent='',6000)}
+function msg(text,type='ok'){const e=$('#adminMessage')||$('#loginMessage');if(e){e.textContent=text;e.className=`admin-message ${type}`;setTimeout(()=>e.textContent='',6000);}const st=$('#syncStatus'),tx=$('#syncText');if(type==='error'&&st&&tx){st.classList.remove('online');tx.textContent='⚠ Sincronizzazione: errore';}}
+function setSyncState(ok,text){const st=$('#syncStatus'),tx=$('#syncText');if(tx)tx.textContent=text;if(st){st.classList.toggle('online',!!ok);}}
 function fileNames(input){return [...(input?.files||[])].map(f=>f.name.trim().toLowerCase());}
 function assertNoDuplicateSelection(input){const names=fileNames(input);const dup=names.filter((n,i)=>names.indexOf(n)!==i);if(dup.length)throw new Error(`Immagini duplicate nella selezione: ${[...new Set(dup)].join(', ')}`);}
 function basename(path=''){return String(path).split('/').pop().replace(/^\d+-[a-f0-9-]+-/i,'').toLowerCase();}
@@ -23,6 +24,7 @@ async function assertNoDuplicateNames(input,existingRows=[],folder=''){
 }
 async function refresh(){
  const sb=getSupabase();
+ setSyncState(false,'Sincronizzazione Supabase sito in corso…');
  const [home,viaggi,fleet,party,posts]=await Promise.all([
   sb.from('site_media').select('*').eq('category','carousel').order('sort_order').order('created_at',{ascending:false}),
   sb.from('site_carousel_viaggi').select('*').order('sort_order').order('created_at',{ascending:false}),
@@ -82,13 +84,16 @@ async function deleteAllPhotos(section){
  await refresh();msg(`Tutte le foto di ${cfg.label} sono state eliminate.`);
 }
 function bind(){
- $('#loginForm').addEventListener('submit',async e=>{e.preventDefault();try{let login=$('#email').value.trim();if(login.toLowerCase()==='delgrosso@admin')login='info@delgrossoviaggi.it';const {error}=await signIn(login,$('#password').value);if(error)throw error;await boot();}catch(e){msg(e.message,'error')}});
- $('#logout').onclick=async()=>{await signOut();location.reload()};
- $('#homeSave').onclick=()=>saveHome().catch(e=>msg(e.message,'error'));$('#viaggiSave').onclick=()=>saveViaggi().catch(e=>msg(e.message,'error'));$('#fleetSave').onclick=()=>saveFleet().catch(e=>msg(e.message,'error'));$('#partySave').onclick=()=>saveParty().catch(e=>msg(e.message,'error'));$('#postSave').onclick=()=>savePost().catch(e=>msg(e.message,'error')); $('#homeDeleteAll').onclick=()=>deleteAllPhotos('home').catch(e=>msg(e.message,'error'));$('#viaggiDeleteAll').onclick=()=>deleteAllPhotos('viaggi').catch(e=>msg(e.message,'error'));$('#fleetDeleteAll').onclick=()=>deleteAllPhotos('fleet').catch(e=>msg(e.message,'error'));$('#partyDeleteAll').onclick=()=>deleteAllPhotos('party').catch(e=>msg(e.message,'error'));$('#postDeleteAll').onclick=()=>deleteAllPhotos('posts').catch(e=>msg(e.message,'error'));
- $('#fleetCancel').onclick=resetFleet;$('#partyCancel').onclick=resetParty;$('#postCancel').onclick=resetPost;
+ const on=(id,event,fn)=>{const el=document.getElementById(id);if(el)el.addEventListener(event,fn);};
+ on('loginForm','submit',async e=>{e.preventDefault();try{let login=$('#email').value.trim();if(login.toLowerCase()==='delgrosso@admin')login='info@delgrossoviaggi.it';const {error}=await signIn(login,$('#password').value);if(error)throw error;await boot();}catch(e){msg(e.message,'error')}});
+ on('logout','click',async()=>{await signOut();location.reload()});
+ const commands={homeSave:()=>saveHome(),viaggiSave:()=>saveViaggi(),fleetSave:()=>saveFleet(),partySave:()=>saveParty(),postSave:()=>savePost(),homeDeleteAll:()=>deleteAllPhotos('home'),viaggiDeleteAll:()=>deleteAllPhotos('viaggi'),fleetDeleteAll:()=>deleteAllPhotos('fleet'),partyDeleteAll:()=>deleteAllPhotos('party'),postDeleteAll:()=>deleteAllPhotos('posts')};
+ for(const [id,fn] of Object.entries(commands)) on(id,'click',()=>fn().catch(e=>msg(e.message,'error')));
+ on('fleetCancel','click',resetFleet);on('partyCancel','click',resetParty);on('postCancel','click',resetPost);
  document.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d)del(d.dataset.table,d.dataset.del).catch(x=>msg(x.message,'error'));const f=e.target.closest('[data-edit-fleet]');if(f)openEditFleet(f.dataset.editFleet);const p=e.target.closest('[data-edit-party]');if(p)openEditParty(p.dataset.editParty);const n=e.target.closest('[data-edit-post]');if(n)openEditPost(n.dataset.editPost);});
  const fileMaps={homeFiles:['home','carousel-home'],viaggiFiles:['viaggi','carousel-viaggi'],fleetFiles:['fleet','flotta'],partyFiles:['party','party-on-the-road'],postFile:['posts','posts']};for(const id of Object.keys(fileMaps))document.getElementById(id)?.addEventListener('change',async e=>{try{assertNoDuplicateSelection(e.target);const [section,folder]=fileMaps[id];await showSelectedStatus(e.target,state[section]||[],folder);}catch(x){e.target.value='';resetProgress();msg(x.message,'error')}});
- $('#syncRefresh').onclick=()=>refresh().then(()=>msg('✓ Supabase del sito sincronizzato.')).catch(e=>msg(e.message,'error'));
+ on('syncRefresh','click',()=>refresh().then(()=>msg('✓ Supabase del sito sincronizzato.')).catch(e=>msg(e.message,'error')));
 }
+
 async function boot(){const s=await getSession();if(!s){$('#login').hidden=false;$('#panel').hidden=true;return;}if(!(await isAdmin()))throw new Error('Questo account non è autorizzato come Admin del sito.');currentUser=s.user;$('#adminEmail').textContent=s.user.email;$('#login').hidden=true;$('#panel').hidden=false;await refresh();}
 bind();boot().catch(e=>msg(e.message,'error'));
