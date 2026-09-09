@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v47-professional-20260909';
+const CACHE = 'dg-gestionale-v48-stability-20260909';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
@@ -41,26 +41,15 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
   if (!url.pathname.startsWith(SCOPE)) return;
-
-  // Never cache API/auth calls. HTML is network-first so deployments are not trapped in stale pages.
   if (url.pathname.includes('/rest/') || url.pathname.includes('/auth/') || url.pathname.includes('/functions/')) return;
-
-  if (url.pathname.endsWith('.html')) {
-    event.respondWith(fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(() => {});
+  // V48: network-first for every same-origin app asset. Cache is fallback only, so a new deployment
+  // cannot remain stuck on an old JS/CSS/HTML version.
+  event.respondWith(
+    fetch(event.request, {cache:'no-store'}).then(response => {
+      if (response && response.ok) caches.open(CACHE).then(c=>c.put(event.request,response.clone())).catch(()=>{});
       return response;
-    }).catch(() => caches.match(event.request).then(r => r || caches.match(new URL('login.html', SCOPE_URL).href))));
-    return;
-  }
-
-  if (url.pathname.startsWith(`${SCOPE}assets/`) || url.pathname.endsWith('/manifest.json')) {
-    event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(() => {});
-      return response;
-    })));
-  }
+    }).catch(() => caches.match(event.request).then(cached => cached || (url.pathname.endsWith('.html') ? caches.match(new URL('login.html',SCOPE_URL).href) : Response.error())))
+  );
 });
 
 self.addEventListener('push', event => {
