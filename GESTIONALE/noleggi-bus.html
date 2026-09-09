@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Noleggi Bus - Del Grosso Gestionale V48</title>
-<meta name="dg-build" content="V48">
+<title>Noleggi Bus - Del Grosso Gestionale V51</title>
+<meta name="dg-build" content="V51">
 <link rel="stylesheet" href="./assets/dg-shell-v41.css">
 <link rel="stylesheet" href="./assets/dg-universal-v13.css">
 <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
@@ -15,6 +15,7 @@
 <script src="./assets/dg-shell-v41.js"></script>
 <link rel="stylesheet" href="./assets/dg-v48-stability.css">
   <link rel="stylesheet" href="./assets/dg-v49-locked-ui.css">
+  <link rel="stylesheet" href="./assets/dg-v51-noleggi-ricevute.css">
 </head>
 <body>
 <main class="nb-page">
@@ -85,6 +86,19 @@
    <div id="nbConflict" class="nb-alert" hidden></div>
    <div class="nb-dialog-actions"><button id="nbCancel" type="button" class="nb-secondary">Annulla</button><button class="nb-primary" type="submit">Salva noleggio</button></div>
   </form>
+ </div>
+</div>
+<div id="nbPaymentsModal" class="nb-modal" hidden>
+ <div class="nb-dialog nb-pay-dialog" role="dialog" aria-modal="true" aria-labelledby="nbPaymentsTitle">
+  <div class="nb-dialog-head"><div><span>GESTIONE INCASSI</span><h2 id="nbPaymentsTitle">Pagamenti noleggio</h2><small id="nbPayRentalId"></small></div><button id="nbPaymentsClose" type="button" aria-label="Chiudi">×</button></div>
+  <section class="nb-payment-summary">
+   <article><span>Totale noleggio</span><strong id="nbPayTotal">€ 0,00</strong></article>
+   <article><span>Incassato</span><strong id="nbPayPaid">€ 0,00</strong></article>
+   <article><span>Residuo</span><strong id="nbPayDue">€ 0,00</strong></article>
+  </section>
+  <div class="nb-payment-actions"><button id="nbPayAcconto" type="button" class="nb-primary">💶 Registra acconto + ricevuta</button><button id="nbPaySaldo" type="button" class="nb-secondary">✅ Registra saldo + ricevuta</button></div>
+  <div class="nb-table-wrap"><table id="nbPaymentsTable"><thead><tr><th>Tipo</th><th>Importo</th><th>Metodo</th><th>Data</th><th>Ricevuta</th><th>Azioni</th></tr></thead><tbody id="nbPaymentsBody"></tbody></table></div>
+  <div class="nb-dialog-actions"><button id="nbPaymentsCancel" type="button" class="nb-secondary">Chiudi</button></div>
  </div>
 </div>
 <div id="nbToast" class="nb-toast" aria-live="polite"></div>
