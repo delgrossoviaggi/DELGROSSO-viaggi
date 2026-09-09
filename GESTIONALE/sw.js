@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v46-professional-20260908';
+const CACHE = 'dg-gestionale-v47-professional-20260909';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
@@ -19,12 +19,17 @@ self.addEventListener('install', event => {
     new URL('statistiche.html', SCOPE_URL).href,
     new URL('impostazioni.html', SCOPE_URL).href,
     new URL('centro-operativo.html', SCOPE_URL).href,
+    new URL('noleggi-bus.html', SCOPE_URL).href,
     new URL('manifest.json', SCOPE_URL).href,
     new URL('assets/icon-512.png', SCOPE_URL).href,
     new URL('assets/apple-touch-icon.png', SCOPE_URL).href,
     new URL('assets/logo-sidebar.png', SCOPE_URL).href,
     new URL('assets/dg-v46-professional.css', SCOPE_URL).href,
-    new URL('assets/dg-v46-ux.js', SCOPE_URL).href
+    new URL('assets/dg-v46-ux.js', SCOPE_URL).href,
+    new URL('assets/noleggi-bus-v47.js', SCOPE_URL).href,
+    new URL('assets/dg-v47-noleggi.css', SCOPE_URL).href,
+    new URL('assets/dg-shell-v41.js', SCOPE_URL).href,
+    new URL('assets/dg-shell-v41.css', SCOPE_URL).href
   ]).catch(() => {})).then(() => self.skipWaiting()));
 });
 

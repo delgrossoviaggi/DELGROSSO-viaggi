@@ -70,7 +70,7 @@
     <div><label for="nbTimeEnd">Ora ritorno</label><input id="nbTimeEnd" type="time"></div>
     <div><label for="nbPassengers">Passeggeri</label><input id="nbPassengers" type="number" min="1" placeholder="Numero"></div>
     <div><label for="nbServiceType">Tipo servizio</label><select id="nbServiceType"><option>Andata e ritorno</option><option>Solo andata</option><option>Trasferimento</option><option>Più giorni</option><option>Evento</option><option>Altro</option></select></div>
-    <div class="nb-span-2"><label for="nbBus">Bus / mezzo</label><select id="nbBus" required><option value="">-- Seleziona il nome del bus --</option></select><small class="nb-help">La selezione avviene per nome del mezzo. La targa è visibile solo nel quadro interno.</small></div>
+    <div class="nb-span-2"><label>Bus / mezzi assegnati</label><div id="nbBusList" class="nb-bus-list" role="group" aria-label="Seleziona uno o più bus per il noleggio"><div class="nb-help">Caricamento flotta…</div></div><small class="nb-help">Puoi assegnare <strong>più bus GT allo stesso noleggio</strong> (ad esempio 2 GT). La selezione avviene per nome del mezzo; la targa resta un dato interno.</small></div>
    </div></div>
    <div class="nb-section"><h3>Economico</h3><div class="nb-grid nb-grid-4">
     <div><label for="nbPrice">Prezzo concordato (€)</label><input id="nbPrice" type="number" min="0" step="0.01" required></div>
