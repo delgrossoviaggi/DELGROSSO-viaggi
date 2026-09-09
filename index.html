@@ -2,29 +2,301 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Accesso Gestionale | Del Grosso Viaggi</title>
-  <script type="module" src="./assets/index-BDlsTAnA.js"></script>
-  <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
-  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
-  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#0b2742">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DG Gestionale">
-<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
-  <link rel="stylesheet" href="./assets/dg-github-v19.css">
-  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
-  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
-  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
-  <link rel="stylesheet" href="./assets/dg-v46-professional.css">
-  <link rel="stylesheet" href="./assets/dg-universal-devices-v1.css">
-</head>
-<body>
-  <div id="app"></div>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b0d">
+  <meta name="description" content="DELGROSSO Viaggi & Limousine Bus - Sito temporaneamente in manutenzione. Per prenotazioni contattaci via WhatsApp o email.">
+  <title>DELGROSSO Viaggi | Sito in manutenzione</title>
 
-  <script src="./assets/dg-v46-ux.js"></script>
+  <style>
+    :root{
+      --bg:#070708;
+      --card:rgba(20,20,23,.78);
+      --white:#fff;
+      --muted:#b8b8be;
+      --line:rgba(255,255,255,.12);
+      --accent:#d7d7da;
+      --wa:#25D366;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    body{
+      min-height:100vh;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--white);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.10), transparent 25%),
+        radial-gradient(circle at 85% 80%, rgba(255,255,255,.07), transparent 28%),
+        linear-gradient(135deg,#050506 0%,#121216 48%,#050506 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow-x:hidden;
+      position:relative;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+      background-size:45px 45px;
+      mask-image:linear-gradient(to bottom,transparent,#000 20%,#000 80%,transparent);
+    }
+
+    .glow{
+      position:fixed;
+      width:420px;
+      height:420px;
+      border-radius:50%;
+      filter:blur(90px);
+      opacity:.10;
+      background:#fff;
+      pointer-events:none;
+    }
+    .glow.one{top:-220px;left:-160px}
+    .glow.two{right:-180px;bottom:-230px}
+
+    main{
+      width:min(940px,92%);
+      padding:34px 0;
+      position:relative;
+      z-index:2;
+    }
+
+    .panel{
+      border:1px solid var(--line);
+      border-radius:30px;
+      padding:48px 34px 38px;
+      text-align:center;
+      background:var(--card);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      box-shadow:0 25px 80px rgba(0,0,0,.55);
+    }
+
+    .logo-wrap{
+      width:min(620px,90%);
+      margin:0 auto 22px;
+      padding:12px 18px;
+      border-radius:22px;
+      background:#fff;
+      box-shadow:0 15px 45px rgba(0,0,0,.35);
+    }
+
+    .logo-wrap img{
+      display:block;
+      width:100%;
+      max-height:190px;
+      object-fit:contain;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:9px 15px;
+      color:#e9e9eb;
+      background:rgba(255,255,255,.055);
+      font-size:.78rem;
+      font-weight:700;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      margin:12px 0 20px;
+    }
+
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#fff;
+      box-shadow:0 0 15px rgba(255,255,255,.9);
+      animation:pulse 1.8s infinite;
+    }
+
+    @keyframes pulse{
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:.4;transform:scale(.72)}
+    }
+
+    h1{
+      font-size:clamp(2rem,5vw,4rem);
+      line-height:1.03;
+      letter-spacing:-.045em;
+      margin-bottom:17px;
+    }
+
+    h1 span{
+      display:block;
+      color:#cfcfd4;
+      font-size:.52em;
+      letter-spacing:.04em;
+      margin-top:10px;
+      font-weight:500;
+    }
+
+    .intro{
+      max-width:680px;
+      margin:0 auto;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:1.03rem;
+    }
+
+    .divider{
+      width:90px;
+      height:1px;
+      background:linear-gradient(90deg,transparent,#fff,transparent);
+      margin:27px auto;
+      opacity:.6;
+    }
+
+    .contact-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:15px;
+      max-width:720px;
+      margin:0 auto;
+    }
+
+    .contact{
+      text-decoration:none;
+      color:#fff;
+      border:1px solid var(--line);
+      border-radius:19px;
+      padding:20px 18px;
+      display:flex;
+      align-items:center;
+      gap:15px;
+      text-align:left;
+      background:rgba(255,255,255,.045);
+      transition:.25s ease;
+    }
+
+    .contact:hover{
+      transform:translateY(-3px);
+      border-color:rgba(255,255,255,.28);
+      background:rgba(255,255,255,.085);
+    }
+
+    .icon{
+      width:48px;height:48px;
+      min-width:48px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      font-size:24px;
+      background:rgba(255,255,255,.09);
+    }
+
+    .contact.whatsapp .icon{background:rgba(37,211,102,.16)}
+    .label{
+      font-size:.73rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:#99999f;
+      margin-bottom:5px;
+      font-weight:700;
+    }
+
+    .value{
+      font-size:1rem;
+      font-weight:700;
+      word-break:break-word;
+    }
+
+    .note{
+      margin-top:20px;
+      color:#85858b;
+      font-size:.82rem;
+    }
+
+    .footer{
+      margin-top:28px;
+      padding-top:20px;
+      border-top:1px solid var(--line);
+      color:#77777d;
+      font-size:.78rem;
+      letter-spacing:.04em;
+    }
+
+    .footer strong{color:#aaaab0}
+
+    @media(max-width:650px){
+      .panel{padding:30px 18px 27px;border-radius:23px}
+      .logo-wrap{width:100%;padding:8px 10px}
+      .logo-wrap img{max-height:135px}
+      .contact-grid{grid-template-columns:1fr}
+      .intro{font-size:.94rem}
+      main{width:94%}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="glow one"></div>
+  <div class="glow two"></div>
+
+  <main>
+    <section class="panel">
+
+      <div class="logo-wrap">
+        <img src="logo.jpeg" alt="DELGROSSO Viaggi & Limousine Bus">
+      </div>
+
+      <div class="badge">
+        <span class="dot"></span>
+        Manutenzione in corso
+      </div>
+
+      <h1>
+        Stiamo preparando qualcosa di nuovo.
+        <span>Il nostro sito tornerà presto online.</span>
+      </h1>
+
+      <p class="intro">
+        Stiamo lavorando per offrirti un'esperienza ancora più completa,
+        semplice e veloce. <strong>Le prenotazioni e le richieste di informazioni
+        restano attive.</strong>
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="contact-grid">
+        <a class="contact whatsapp"
+           href="https://wa.me/393662127916?text=Ciao%20Nicola%2C%20vorrei%20avere%20informazioni%20su%20un%20viaggio%2Fprenotazione."
+           target="_blank" rel="noopener">
+          <div class="icon">💬</div>
+          <div>
+            <div class="label">Solo WhatsApp · Nicola</div>
+            <div class="value">+39 366 212 7916</div>
+          </div>
+        </a>
+
+        <a class="contact"
+           href="mailto:info@delgrossoviaggi.it?subject=Richiesta%20informazioni%20-%20DELGROSSO%20Viaggi">
+          <div class="icon">✉️</div>
+          <div>
+            <div class="label">Email</div>
+            <div class="value">info@delgrossoviaggi.it</div>
+          </div>
+        </a>
+      </div>
+
+      <p class="note">
+        Per prenotazioni, viaggi, noleggio bus e informazioni, scrivici direttamente.
+      </p>
+
+      <div class="footer">
+        <strong>DELGROSSO Viaggi & Limousine Bus</strong><br>
+        © 2026 · Tutti i diritti riservati
+      </div>
+
+    </section>
+  </main>
 </body>
 </html>
