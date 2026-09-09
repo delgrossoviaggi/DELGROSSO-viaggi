@@ -1,0 +1,92 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { issueNoleggioPaymentReceipt, openNoleggioStoredReceipt, downloadNoleggioStoredReceipt, resendNoleggioPaymentEmail } from './noleggioPaymentReceiptService-v1.js';
+
+const URL='https://chkuayhbmitdmzmmvona.supabase.co';
+const KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
+const db=createClient(URL,KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
+let charters=[], clients=[], fleet=[], editing=null, currentPayments=[];
+
+function session(){try{return JSON.parse(localStorage.getItem('dg_session')||'null')}catch{return null}}
+function authGuard(){if(!session()?.authenticated){location.href='./login.html';return false}return true}
+function toast(msg,error=false){const el=$('nbToast');el.textContent=msg;el.className=`nb-toast show ${error?'error':''}`;clearTimeout(window.__nbToast);window.__nbToast=setTimeout(()=>el.classList.remove('show'),3200)}
+function esc(v=''){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function busName(b){return b?.titolo||`${b?.marca||''} ${b?.modello||''}`.trim()||'Mezzo'}
+function customerName(c){return `${c?.nome||''} ${c?.cognome||''}`.trim()}
+
+async function load(){
+ const [{data:c,error:ce},{data:f,error:fe},{data:n,error:ne}]=await Promise.all([
+  db.from('clienti').select('id,nome,cognome,telefono,email').order('cognome').order('nome'),
+  db.from('flotta').select('id,titolo,marca,modello,targa,posti,categoria,stato,attivo').order('titolo'),
+  db.from('noleggi_bus').select('*, noleggi_bus_mezzi(id,flotta_id,targa_snapshot,posti_snapshot), noleggi_bus_pagamenti(id,noleggio_id,tipo,importo,metodo,data_pagamento,note,receipt_number,receipt_path,receipt_generated_at,receipt_email_sent,receipt_email_error)').order('data_partenza',{ascending:false}).order('created_at',{ascending:false})
+ ]);
+ if(ce) throw ce;if(fe) throw fe;if(ne) throw ne;
+ clients=c||[];fleet=f||[];charters=n||[];populateSelectors();render();
+}
+function populateSelectors(){
+ const cs=$('nbClient'), old=cs.value;cs.innerHTML='<option value="">-- Seleziona cliente --</option>'+clients.map(c=>`<option value="${c.id}">${esc(customerName(c))}${c.telefono?` · ${esc(c.telefono)}`:''}</option>`).join('');if(old)cs.value=old;
+ const bs=$('nbBusList');const selected=new Set([...document.querySelectorAll('#nbBusList input[name=\"nbBus\"]:checked')].map(x=>x.value));bs.innerHTML=fleet.map(b=>`<label class=\"nb-bus-option\"><input type=\"checkbox\" name=\"nbBus\" value=\"${b.id}\" ${selected.has(b.id)?'checked':''}><span><strong>${esc(busName(b))}</strong><small>${esc(b.posti||'?')} posti${b.categoria?` · ${esc(b.categoria)}`:''}</small></span></label>`).join('')||'<div class=\"nb-help\">Nessun mezzo disponibile in flotta.</div>';bs.querySelectorAll('input[name=\"nbBus\"]').forEach(x=>x.onchange=conflictCheck);
+}
+function render(){
+ const q=($('nbSearch').value||'').trim().toLowerCase(),sf=$('nbStatusFilter').value,pf=$('nbPaymentFilter').value;
+ const rows=charters.filter(x=>{const text=[x.id_noleggio,x.referente,x.azienda,x.telefono,x.email,x.tratta_partenza,x.tratta_destinazione,x.fermate].join(' ').toLowerCase();const okq=!q||text.includes(q);const okS=!sf||x.stato_noleggio===sf;const okP=!pf||x.stato_pagamento===pf;return okq&&okS&&okP});
+ const total=charters.filter(x=>x.stato_noleggio!=='Annullato').reduce((s,x)=>s+Number(x.prezzo_concordato||0),0),paid=charters.filter(x=>x.stato_noleggio!=='Annullato').reduce((s,x)=>s+Number(x.acconto||0),0),active=charters.filter(x=>!['Annullato','Completato'].includes(x.stato_noleggio)).length;
+ const busSet=new Set(charters.filter(x=>!['Annullato','Completato'].includes(x.stato_noleggio)).flatMap(x=>(x.noleggi_bus_mezzi||[]).map(m=>m.flotta_id)).filter(Boolean));
+ $('kpiActive').textContent=active;$('kpiTotal').textContent=money(total);$('kpiPaid').textContent=money(paid);$('kpiDue').textContent=money(Math.max(total-paid,0));$('kpiBuses').textContent=String(busSet.size);$('nbCount').textContent=`${rows.length} ${rows.length===1?'risultato':'risultati'}`;
+ $('nbTable').querySelector('tbody').innerHTML=rows.map(row=>{const buses=(row.noleggi_bus_mezzi||[]).map(m=>{const b=fleet.find(z=>z.id===m.flotta_id);return b?`${busName(b)}${m.targa_snapshot?` · ${m.targa_snapshot}`:''}`:'Mezzo';}).join('<br>')||'—';const paid=Number(row.acconto||0),res=Math.max(Number(row.prezzo_concordato||0)-paid,0);return `<tr><td><strong>${esc(row.id_noleggio)}</strong></td><td>${esc(row.referente||customerName(clients.find(c=>c.id===row.cliente_id))||row.azienda||'—')}${row.azienda?`<small>${esc(row.azienda)}</small>`:''}</td><td>${esc(row.tratta_partenza||'')} → ${esc(row.tratta_destinazione||'')}</td><td>${esc(row.data_partenza||'')}${row.ora_partenza?`<small>${esc(row.ora_partenza)}</small>`:''}</td><td>${buses}</td><td>${money(row.prezzo_concordato)}</td><td>${money(paid)}</td><td>${money(res)}</td><td><span class="nb-badge pay-${String(row.stato_pagamento||'').toLowerCase().replaceAll(' ','-')}">${esc(row.stato_pagamento||'Da pagare')}</span></td><td><span class="nb-badge state-${String(row.stato_noleggio||'').toLowerCase().replaceAll(' ','-')}">${esc(row.stato_noleggio||'Richiesto')}</span></td><td><div class="nb-row-actions"><button type="button" data-edit="${row.id}">Apri</button><button type="button" data-payments="${row.id}" class="nb-pay-btn">💶 Pagamenti</button><button type="button" data-del="${row.id}" class="danger">Elimina</button></div></td></tr>`}).join('')||'<tr><td colspan="11" class="nb-empty">Nessun noleggio trovato.</td></tr>';
+ document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEdit(b.dataset.edit));document.querySelectorAll('[data-payments]').forEach(b=>b.onclick=()=>openPayments(b.dataset.payments));document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>removeCharter(b.dataset.del));
+}
+function resetForm(){editing=null;currentPayments=[];$('nbPaymentStatus').disabled=false;$('nbDeposit').readOnly=false;$('nbForm').reset();$('nbId').value='';$('nbModalTitle').textContent='Nuovo noleggio';$('nbBalance').value='0.00';$('nbConflict').hidden=true;populateSelectors()}
+function openNew(){resetForm();$('nbDateStart').value=new Date().toISOString().slice(0,10);$('nbModal').hidden=false;setTimeout(()=>$('nbPartenza').focus(),50)}
+function openEdit(id){const x=charters.find(c=>c.id===id);if(!x)return;editing=x;$('nbModalTitle').textContent=`Modifica ${x.id_noleggio}`;$('nbId').value=x.id;$('nbClient').value=x.cliente_id||'';$('nbReferente').value=x.referente||'';$('nbAzienda').value=x.azienda||'';$('nbTelefono').value=x.telefono||'';$('nbEmail').value=x.email||'';$('nbNote').value=x.note||'';$('nbPartenza').value=x.tratta_partenza||'';$('nbDestinazione').value=x.tratta_destinazione||'';$('nbFermate').value=x.fermate||'';$('nbDateStart').value=x.data_partenza||'';$('nbTimeStart').value=x.ora_partenza||'';$('nbDateEnd').value=x.data_ritorno||'';$('nbTimeEnd').value=x.ora_ritorno||'';$('nbPassengers').value=x.passeggeri||'';$('nbServiceType').value=x.servizio_tipo||'Andata e ritorno';const linked=new Set((x.noleggi_bus_mezzi||[]).map(m=>m.flotta_id));document.querySelectorAll('#nbBusList input[name="nbBus"]').forEach(input=>input.checked=linked.has(input.value));$('nbPrice').value=Number(x.prezzo_concordato||0).toFixed(2);$('nbDeposit').value=Number(x.acconto||0).toFixed(2);$('nbPaymentStatus').value=x.stato_pagamento||'Da pagare';$('nbPaymentStatus').disabled=true;$('nbDeposit').readOnly=true;$('nbStatus').value=x.stato_noleggio||'Richiesto';updateBalance();$('nbModal').hidden=false}
+function closeModal(){$('nbModal').hidden=true;editing=null}
+function updateBalance(){const p=Number($('nbPrice').value||0),a=Number($('nbDeposit').value||0);$('nbBalance').value=Math.max(p-a,0).toFixed(2);if(p>0&&a>=p)$('nbPaymentStatus').value='Saldata';else if(a>0)$('nbPaymentStatus').value='Acconto ricevuto';else $('nbPaymentStatus').value='Da pagare'}
+function dateRange(){const ds=$('nbDateStart').value,de=$('nbDateEnd').value||ds;const start=`${ds}T${$('nbTimeStart').value||'00:00'}:00`,end=`${de}T${$('nbTimeEnd').value||'23:59'}:59`;return{start,end}}
+function selectedBusIds(){return [...document.querySelectorAll('#nbBusList input[name=\"nbBus\"]:checked')].map(x=>x.value)}
+function conflictCheck(){const buses=selectedBusIds(),ds=$('nbDateStart').value;if(!buses.length||!ds){$('nbConflict').hidden=true;return true}const {start,end}=dateRange(),x0=new Date(start).getTime(),x1=new Date(end).getTime();const conflicts=charters.filter(x=>x.id!==editing?.id&&!['Annullato','Completato'].includes(x.stato_noleggio)&&(x.noleggi_bus_mezzi||[]).some(m=>buses.includes(m.flotta_id)&&x.data_partenza&&new Date(`${x.data_partenza}T${x.ora_partenza||'00:00'}:00`).getTime()<=x1&&new Date(`${x.data_ritorno||x.data_partenza}T${x.ora_ritorno||'23:59'}:59`).getTime()>=x0));const box=$('nbConflict');if(conflicts.length){const names=conflicts.map(c=>c.id_noleggio).join(', ');box.hidden=false;box.textContent=`⚠️ Attenzione: uno o più bus selezionati risultano già impegnati (${names}). Controlla date e orari prima di salvare.`;return false}box.hidden=true;return true}
+
+async function save(e){e.preventDefault();if(!authGuard())return;const wasEditing=!!editing;const part=$('nbPartenza').value.trim(),dest=$('nbDestinazione').value.trim(),date=$('nbDateStart').value,buses=selectedBusIds(),price=Number($('nbPrice').value||0),dep=Number($('nbDeposit').value||0);if(!part||!dest||!date||!buses.length||price<=0){toast('Compila partenza, destinazione, data, almeno un bus e prezzo.',true);return}if(dep<0||dep>price){toast('L’acconto non può essere superiore al prezzo concordato.',true);return}if($('nbDateEnd').value&&$('nbDateEnd').value<date){toast('La data di ritorno non può precedere la partenza.',true);return}if(!conflictCheck())return;const selectedFleet=fleet.filter(x=>buses.includes(x.id));const payload={cliente_id:$('nbClient').value||null,referente:$('nbReferente').value.trim()||null,azienda:$('nbAzienda').value.trim()||null,telefono:$('nbTelefono').value.trim()||null,email:$('nbEmail').value.trim()||null,tratta_partenza:part,tratta_destinazione:dest,fermate:$('nbFermate').value.trim()||null,data_partenza:date,ora_partenza:$('nbTimeStart').value||null,data_ritorno:$('nbDateEnd').value||date,ora_ritorno:$('nbTimeEnd').value||null,passeggeri:Number($('nbPassengers').value||0)||null,servizio_tipo:$('nbServiceType').value,prezzo_concordato:price,acconto:dep,saldo:Math.max(price-dep,0),stato_pagamento:$('nbPaymentStatus').value,stato_noleggio:$('nbStatus').value,note:$('nbNote').value.trim()||null,updated_at:new Date().toISOString()};
+ const oldAssignments=editing?[...(editing.noleggi_bus_mezzi||[])]:[];let row,err;if(editing){({data:row,error:err}=await db.from('noleggi_bus').update(payload).eq('id',editing.id).select().single())}else{({data:row,error:err}=await db.from('noleggi_bus').insert(payload).select().single())}if(err){toast(`Errore salvataggio: ${err.message}`,true);return}
+ await db.from('noleggi_bus_mezzi').delete().eq('noleggio_id',row.id);const assignments=selectedFleet.map(b=>({noleggio_id:row.id,flotta_id:b.id,targa_snapshot:b.targa||null,posti_snapshot:b.posti||null}));const {error:me}=assignments.length?await db.from('noleggi_bus_mezzi').insert(assignments):{error:null};if(me){if(editing){await db.from('noleggi_bus_mezzi').delete().eq('noleggio_id',row.id);if(oldAssignments.length) await db.from('noleggi_bus_mezzi').insert(oldAssignments.map(m=>({noleggio_id:row.id,flotta_id:m.flotta_id,targa_snapshot:m.targa_snapshot||null,posti_snapshot:m.posti_snapshot||null})))}else{await db.from('noleggi_bus').delete().eq('id',row.id)}toast(`Assegnazione bus non riuscita: ${me.message}`,true);return}if(!wasEditing && dep>0){
+   const {data:pay,error:pe}=await db.from('noleggi_bus_pagamenti').insert({noleggio_id:row.id,tipo:'Acconto',importo:dep,metodo:'Da specificare',data_pagamento:new Date().toISOString().slice(0,10),note:'Acconto iniziale registrato alla creazione del noleggio.'}).select().single();
+   if(pe){toast(`Noleggio salvato, ma registrazione acconto fallita: ${pe.message}`,true)}else{try{const rec=await issueNoleggioPaymentReceipt(pay,row,{paidAfter:dep,residualAfter:Math.max(price-dep,0)});toast(rec.emailSent===false?'Noleggio salvato. Ricevuta acconto archiviata; email non inviata.':'Noleggio salvato: ricevuta acconto generata e archiviata.')}catch(er){toast(`Noleggio salvato, ma ricevuta acconto non generata: ${er.message}`,true)}}
+ }
+ await load();closeModal();if(!(!wasEditing&&dep>0))toast(wasEditing?'Noleggio aggiornato':'Noleggio salvato');}
+async function openPayments(id){
+ const x=charters.find(c=>c.id===id); if(!x)return;
+ editing=x; currentPayments=[...(x.noleggi_bus_pagamenti||[])].sort((a,b)=>new Date(b.data_pagamento||0)-new Date(a.data_pagamento||0));
+ renderPaymentModal(x); $('nbPaymentsModal').hidden=false;
+}
+function renderPaymentModal(x){
+ const total=Number(x.prezzo_concordato||0), paid=currentPayments.reduce((s,p)=>s+(String(p.tipo).toLowerCase()==='rimborso'?-1:1)*Number(p.importo||0),0), due=Math.max(total-paid,0);
+ $('nbPayRentalId').textContent=x.id_noleggio||'—'; $('nbPayTotal').textContent=money(total); $('nbPayPaid').textContent=money(paid); $('nbPayDue').textContent=money(due);
+ $('nbPaymentsBody').innerHTML=currentPayments.map(p=>`<tr><td>${esc(String(p.tipo||'Acconto'))}</td><td>${money(p.importo)}</td><td>${esc(p.metodo||'—')}</td><td>${esc(p.data_pagamento||'—')}</td><td>${p.receipt_number?esc(p.receipt_number):'—'}</td><td><div class="nb-row-actions">${p.receipt_path?`<button type="button" data-pay-open="${esc(p.id)}">PDF</button><button type="button" data-pay-email="${esc(p.id)}">📧</button>`:'<span class="nb-help">Non generata</span>'}</div></td></tr>`).join('')||'<tr><td colspan="6" class="nb-empty">Nessun pagamento registrato.</td></tr>';
+ document.querySelectorAll('[data-pay-open]').forEach(b=>b.onclick=async()=>{try{const p=currentPayments.find(x=>x.id===b.dataset.payOpen);if(p?.receipt_path)await openNoleggioStoredReceipt(p.receipt_path)}catch(e){toast(e.message,true)}});
+ document.querySelectorAll('[data-pay-email]').forEach(b=>b.onclick=async()=>{try{await resendNoleggioPaymentEmail(b.dataset.payEmail);toast('Ricevuta reinviata via email')}catch(e){toast(e.message,true)}});
+}
+function closePayments(){$('nbPaymentsModal').hidden=true;editing=null;currentPayments=[]}
+async function registerPayment(tipo){
+ const x=editing;if(!x)return;
+ const total=Number(x.prezzo_concordato||0), paid=currentPayments.reduce((s,p)=>s+(String(p.tipo).toLowerCase()==='rimborso'?-1:1)*Number(p.importo||0),0), due=Math.max(total-paid,0);
+ if(tipo==='Saldo'&&due<=0){toast('Il noleggio risulta già saldato.',true);return}
+ const raw=prompt(`${tipo} — inserisci importo (€):`,tipo==='Saldo'?due.toFixed(2):Math.max(Number(x.acconto||0),0).toFixed(2));
+ if(raw===null)return; const amount=Number(String(raw).replace(',','.')); if(!Number.isFinite(amount)||amount<=0){toast('Importo non valido.',true);return} if(amount>due){toast('L’importo supera il residuo del noleggio.',true);return}
+ const metodo=prompt('Metodo di pagamento (Contanti, Bonifico, POS, Carta...):','Bonifico')||'';
+ const data=prompt('Data pagamento (AAAA-MM-GG):',new Date().toISOString().slice(0,10))||new Date().toISOString().slice(0,10);
+ const note=prompt('Note (facoltative):','')||null;
+ const {data:pay,error}=await db.from('noleggi_bus_pagamenti').insert({noleggio_id:x.id,tipo,importo:amount,metodo,data_pagamento:data,note}).select().single();
+ if(error){toast(`Errore registrazione pagamento: ${error.message}`,true);return}
+ const newPaid=paid+amount,newDue=Math.max(total-newPaid,0);
+ const {error:up}=await db.from('noleggi_bus').update({acconto:Math.min(newPaid,total),saldo:newDue,stato_pagamento:newDue<=0?'Saldata':'Acconto ricevuto',updated_at:new Date().toISOString()}).eq('id',x.id);
+ if(up){toast(`Pagamento registrato ma aggiornamento riepilogo fallito: ${up.message}`,true);return}
+ try{
+   const rec=await issueNoleggioPaymentReceipt(pay,x,{paidAfter:newPaid,residualAfter:newDue});
+   toast(rec.emailSent===false?'Pagamento registrato. Ricevuta archiviata; email non inviata.':`Pagamento ${tipo.toLowerCase()} registrato e ricevuta archiviata${rec.emailSent?' + inviata via email':''}.`);
+ }catch(e){toast(`Pagamento registrato, ma ricevuta non generata: ${e.message}`,true)}
+ await load(); const fresh=charters.find(c=>c.id===x.id); if(fresh){editing=fresh;currentPayments=[...(fresh.noleggi_bus_pagamenti||[])].sort((a,b)=>new Date(b.data_pagamento||0)-new Date(a.data_pagamento||0));renderPaymentModal(fresh)}
+}
+
+async function removeCharter(id){if(!confirm('Eliminare definitivamente questo noleggio?'))return;const {error}=await db.from('noleggi_bus').delete().eq('id',id);if(error){toast(error.message,true);return}await load();toast('Noleggio eliminato')}
+$('btnNewCharter').onclick=openNew;$('nbClose').onclick=closeModal;$('nbCancel').onclick=closeModal;$('nbForm').onsubmit=save;$('nbPrice').oninput=updateBalance;$('nbDeposit').oninput=updateBalance;$('nbDateStart').onchange=conflictCheck;$('nbDateEnd').onchange=conflictCheck;$('nbTimeStart').onchange=conflictCheck;$('nbTimeEnd').onchange=conflictCheck;$('nbSearch').oninput=render;$('nbStatusFilter').onchange=render;$('nbPaymentFilter').onchange=render;$('nbRefresh').onclick=()=>load().catch(e=>toast(e.message,true));$('nbPayAcconto').onclick=()=>registerPayment('Acconto');$('nbPaySaldo').onclick=()=>registerPayment('Saldo');$('nbPaymentsClose').onclick=closePayments;$('nbPaymentsCancel').onclick=closePayments;$('nbClient').onchange=()=>{const c=clients.find(x=>x.id===$('nbClient').value);if(c){$('nbReferente').value=customerName(c);$('nbTelefono').value=c.telefono||'';$('nbEmail').value=c.email||''}};window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('nbModal').hidden)closeModal()});
+if(authGuard())load().catch(e=>toast(`Errore caricamento: ${e.message}`,true));
