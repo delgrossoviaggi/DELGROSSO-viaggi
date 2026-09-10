@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v49-locked-ui-20260909';
+const CACHE = 'dg-gestionale-v52-supabase-sync-20260910';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
