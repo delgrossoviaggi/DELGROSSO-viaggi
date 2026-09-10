@@ -1,21 +1,22 @@
 DELGROSSO VIAGGI — SITE PRO
 
-SUPABASE SITO
-URL: https://bhsanrbadsqcpbtxupmr.supabase.co
-Admin: l'area admin usa Supabase Auth + tabella public.site_admins.
+Questa versione usa esclusivamente il progetto Supabase:
+https://bhsanrbadsqcpbtxupmr.supabase.co
 
-IMPORTANTE
-L'errore "new row violates row-level security policy" compariva perché Storage e tabelle del sito consentono scrittura solo a utenti authenticated che risultano in site_admins. La nuova admin.html effettua quindi il login Supabase prima di permettere upload/salvataggi.
+Ottimizzazioni principali:
+- niente Tailwind CDN/AOS/GLightbox sulle pagine principali: CSS/JS locali e vanilla per maggiore velocità;
+- homepage cinematografica con carousel reale da carousel_home;
+- partenze da viaggi pubblicati (pubblicato = SI);
+- flotta da site_fleet;
+- Party da site_party_events;
+- News da site_posts;
+- contatti da site_settings (fallback info_azienda);
+- Admin Pro con upload multiplo drag/file picker, anteprima e progressione, direttamente su Storage bucket site-media;
+- struttura responsive pensata prima per mobile/iPhone;
+- nessuna migrazione SQL inclusa e nessuna modifica allo schema Supabase.
 
-L'utente amministratore deve avere un account Supabase Auth il cui user_id sia presente in public.site_admins. Il pacchetto non contiene password hardcoded.
-
-STORAGE
-Bucket: site-media
-Categorie usate: carousel, fleet, party, posters.
-I file vengono registrati anche in public.site_media.
-
-GESTIONALE
-Le pagine operative Partenze/Viaggi/Prenota/Richiedi Preventivo devono usare il Supabase Gestionale:
-https://chkuayhbmitdmzmmvona.supabase.co
-
-Non inserire service-role key nel frontend.
+ATTENZIONE:
+1. Il bucket Storage deve essere 'site-media' e consentire l'upload all'utente/admin che usa il pannello.
+2. L'Admin deve avere le policy Storage/DB già configurate nel progetto. Se il progetto richiede autenticazione, il login Supabase va aggiunto alle policy prima di consentire upload.
+3. Prenotazioni: la pagina usa la tabella public.prenotazioni del progetto indicato e non tocca alcun altro progetto.
+4. Il file admin.html è un CMS frontend; non inserire password segrete nel codice.
