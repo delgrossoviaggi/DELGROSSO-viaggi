@@ -1,9 +1,6 @@
-const SITE_SUPABASE_URL='https://bhsanrbadsqcpbtxupmr.supabase.co';
-const SITE_SUPABASE_KEY='sb_publishable_jcc3RIJmNnXZdhcmFuIKFg_EpxO_rBp';
-const GESTIONALE_SUPABASE_URL='https://chkuayhbmitdmzmmvona.supabase.co';
-const GESTIONALE_SUPABASE_KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
-const sb=window.supabase.createClient(SITE_SUPABASE_URL,SITE_SUPABASE_KEY);
-const gestSb=window.supabase.createClient(GESTIONALE_SUPABASE_URL,GESTIONALE_SUPABASE_KEY);
+const SUPABASE_URL='https://bhsanrbadsqcpbtxupmr.supabase.co';
+const SUPABASE_KEY='sb_publishable_jcc3RIJmNnXZdhcmFuIKFg_EpxO_rBp';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const media=arr=>Array.isArray(arr)?arr:[];
 const fmtDate=d=>d?new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00')):'';
@@ -14,7 +11,7 @@ function applySettings(s){document.querySelectorAll('[data-setting]').forEach(el
 async function home(){
  const [c,v,f,p,posts]=await Promise.all([
   sb.from('carousel_home').select('*').eq('pubblicato',true).order('sort_order').order('created_at',{ascending:false}),
-  gestSb.from('viaggi').select('*').eq('pubblicato','SI').order('data_partenza',{ascending:true}).limit(6),
+  sb.from('viaggi').select('*').eq('pubblicato','SI').order('data_partenza',{ascending:true}).limit(6),
   sb.from('site_fleet').select('*').eq('published',true).order('sort_order').limit(4),
   sb.from('site_party_events').select('*').eq('published',true).order('sort_order').order('created_at',{ascending:false}).limit(4),
   sb.from('site_posts').select('*').eq('published',true).order('sort_order').order('published_at',{ascending:false}).limit(3)
@@ -30,6 +27,6 @@ async function home(){
 function tripCard(x){return `<article class="trip-card"><div class="trip-img">${x.locandina?`<img loading="lazy" src="${esc(x.locandina)}" alt="${esc(x.titolo)}">`:''}</div><div class="trip-body"><div class="trip-date">${esc(fmtDate(x.data_partenza))}</div><div class="trip-title">${esc(x.titolo||x.destinazione)}</div><div class="trip-meta"><span>${esc(x.luogo_partenza||'Partenza da concordare')}</span><strong class="trip-price">${x.prezzo!=null?`€ ${Number(x.prezzo).toFixed(0)}`:''}</strong></div><div class="actions" style="margin-top:16px"><a class="btn btn-blue" href="prenota.html?viaggio=${encodeURIComponent(x.id)}">Prenota posto</a></div></div></article>`}
 async function fleet(){const {data}=await sb.from('site_fleet').select('*').eq('published',true).order('sort_order').order('created_at');const g=document.querySelector('#fleetFull');g.innerHTML=(data||[]).length?data.map(x=>`<article class="fleet-card"><img loading="lazy" src="${esc(x.cover_url||'')}" alt="${esc(x.title)}"><div class="fleet-info"><h3>${esc(x.title)}</h3><p>${esc(x.description||'')} ${x.seats?`· ${x.seats} posti`:''}</p></div></article>`).join(''):`<div class="empty">Nessun mezzo pubblicato.</div>`;applySettings(await loadSettings());}
 async function party(){const {data}=await sb.from('site_party_events').select('*').eq('published',true).order('sort_order').order('created_at',{ascending:false});const g=document.querySelector('#partyGallery');g.innerHTML=(data||[]).length?data.flatMap(e=>{const a=[e.cover_url,...media(e.gallery_urls)].filter(Boolean);return a.map((u,i)=>`<a class="gallery-item" href="${esc(u)}" target="_blank"><img loading="lazy" src="${esc(u)}" alt="${esc(e.title)}"></a>`)}).join(''):`<div class="empty">Nessun evento pubblicato.</div>`;applySettings(await loadSettings());}
-async function trips(){const {data}=await gestSb.from('viaggi').select('*').eq('pubblicato','SI').order('data_partenza',{ascending:true});const g=document.querySelector('#tripFull');g.innerHTML=(data||[]).length?data.map(tripCard).join(''):`<div class="empty">Nessuna partenza disponibile.</div>`;applySettings(await loadSettings());}
+async function trips(){const {data}=await sb.from('viaggi').select('*').eq('pubblicato','SI').order('data_partenza',{ascending:true});const g=document.querySelector('#tripFull');g.innerHTML=(data||[]).length?data.map(tripCard).join(''):`<div class="empty">Nessuna partenza disponibile.</div>`;applySettings(await loadSettings());}
 async function contacts(){applySettings(await loadSettings());}
 headerActive();mobileNav();
