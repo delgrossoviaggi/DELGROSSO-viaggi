@@ -1,8 +1,8 @@
-/* DELGROSSO GESTIONALE — VIAGGI V55
+/* DELGROSSO GESTIONALE — VIAGGI V57
  * Fonte unica: Supabase Gestionale.
  * Nessuna dipendenza dal vecchio tripService/fleetService per la lettura.
  */
-import { n as routes } from './appRoutes-BbuDm13X.js';
+import { t as routes } from './appRoutes-BbuDm13X.js';
 import { n as notify, t as confirmAction } from './messageSystem-jVMshBDs.js';
 
 const SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
@@ -54,12 +54,12 @@ async function loadTrips(){
     if(q.error) throw q.error;
     rows=jsonRows(q.data);
   }catch(firstError){
-    console.warn('[VIAGGI V55] client Supabase non riuscito, provo REST diretto',firstError);
+    console.warn('[VIAGGI V57] client Supabase non riuscito, provo REST diretto',firstError);
     try{
       rows=jsonRows(await fetchRest('viaggi?select=*&order=data_partenza.asc,ora_partenza.asc'));
       source='Supabase REST';
     }catch(secondError){
-      const snap=localStorage.getItem('dg_viaggi_snapshot_v55');
+      const snap=localStorage.getItem('dg_viaggi_snapshot_v57');
       if(snap){try{rows=jsonRows(JSON.parse(snap).rows);source='snapshot locale';}catch{}}
       if(!rows.length) throw secondError;
       source='snapshot locale';
@@ -67,7 +67,7 @@ async function loadTrips(){
   }
   state.trips=rows;
   state.source=source;
-  localStorage.setItem('dg_viaggi_snapshot_v55',JSON.stringify({at:new Date().toISOString(),rows}));
+  localStorage.setItem('dg_viaggi_snapshot_v57',JSON.stringify({at:new Date().toISOString(),rows}));
 }
 async function loadFleet(){
   try{
@@ -75,7 +75,7 @@ async function loadFleet(){
     if(q.error) throw q.error; state.fleet=jsonRows(q.data);
   }catch(e){
     try{state.fleet=jsonRows(await fetchRest('flotta?select=*&order=marca.asc,modello.asc'));}
-    catch{state.fleet=[];console.warn('[VIAGGI V55] flotta non caricata',e);}
+    catch{state.fleet=[];console.warn('[VIAGGI V57] flotta non caricata',e);}
   }
 }
 function busLabel(v){
@@ -133,7 +133,7 @@ async function del(id){
 }
 async function refresh(showMessage=false){
   try{await Promise.all([loadTrips(),loadFleet()]);fillBus();render();if(showMessage)msg(`${state.trips.length} viaggi caricati da ${state.source}.`);}
-  catch(e){console.error('[VIAGGI V55]',e);msg(`Impossibile caricare i viaggi: ${e.message||e}`,'error');}
+  catch(e){console.error('[VIAGGI V57]',e);msg(`Impossibile caricare i viaggi: ${e.message||e}`,'error');}
 }
 function bind(){
   el.search?.addEventListener('input',e=>{state.query=e.target.value||'';render();});
@@ -144,7 +144,7 @@ function bind(){
   window.addEventListener('dg:supabase:changed',e=>{if(e.detail?.table==='viaggi')refresh().catch(()=>{});});
   window.addEventListener('online',()=>refresh().catch(()=>{}));
 }
-async function realtime(){try{const sb=await getClient();const ch=sb.channel('dg-viaggi-v55').on('postgres_changes',{event:'*',schema:'public',table:'viaggi'},()=>refresh().catch(()=>{})).subscribe();window.addEventListener('beforeunload',()=>sb.removeChannel(ch));}catch(e){console.warn('[VIAGGI V55] realtime',e);}}
+async function realtime(){try{const sb=await getClient();const ch=sb.channel('dg-viaggi-v55').on('postgres_changes',{event:'*',schema:'public',table:'viaggi'},()=>refresh().catch(()=>{})).subscribe();window.addEventListener('beforeunload',()=>sb.removeChannel(ch));}catch(e){console.warn('[VIAGGI V57] realtime',e);}}
 async function init(){
   const start=()=>{cacheElements();bind();refresh().then(realtime);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
