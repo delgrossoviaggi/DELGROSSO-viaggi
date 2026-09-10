@@ -1,8 +1,5 @@
 /* DELGROSSO V50 — Noleggi Bus integration for Dashboard & Statistics */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-const URL='https://chkuayhbmitdmzmmvona.supabase.co';
-const KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
-const db=createClient(URL,KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+const db=await window.DG_SUPABASE_SYNC.getClient();
 const money=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
 const $=id=>document.getElementById(id);
 async function load(){
