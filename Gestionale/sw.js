@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v57-supabase-admin-20260910';
+const CACHE = 'dg-gestionale-v58-dark-readable-20260910';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
@@ -35,7 +35,9 @@ self.addEventListener('install', event => {
     new URL('assets/dg-v54-login.js', SCOPE_URL).href,
     new URL('assets/dg-supabase-sync-v3.js', SCOPE_URL).href,
     new URL('assets/dg-v57-admin-access.js', SCOPE_URL).href,
-    new URL('assets/logo-delgrosso-v54.png', SCOPE_URL).href
+    new URL('assets/logo-delgrosso-v54.png', SCOPE_URL).href,
+    new URL('assets/dg-v58-dark-contrast.css', SCOPE_URL).href,
+    new URL('assets/dg-v58-theme.js', SCOPE_URL).href
   ]).catch(() => {})).then(() => self.skipWaiting()));
 });
 
