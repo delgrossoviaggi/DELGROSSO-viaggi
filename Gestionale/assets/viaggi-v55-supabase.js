@@ -2,12 +2,18 @@
  * Fonte unica: Supabase Gestionale.
  * Nessuna dipendenza dal vecchio tripService/fleetService per la lettura.
  */
-import { getClient } from './dg-supabase-sync-v2.js';
 import { n as routes } from './appRoutes-BbuDm13X.js';
 import { n as notify, t as confirmAction } from './messageSystem-jVMshBDs.js';
 
 const SUPABASE_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
+let _client = null;
+async function getClient(){
+  if(_client) return _client;
+  const mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  _client = mod.createClient(SUPABASE_URL, SUPABASE_KEY, {db:{schema:'public'},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  return _client;
+}
 const state = { trips: [], fleet: [], query: '', sortKey: 'data_partenza', sortDir: 'asc', editingId: null, source: '' };
 
 function $(id){ return document.getElementById(id); }

@@ -1,4 +1,4 @@
-import { getClient } from './dg-supabase-sync-v2.js';
+import { getClient } from './dg-supabase-sync-v3.js';
 import { t as tripService } from './tripService-BzTorehO.js';
 import { t as fleetService } from './fleetService-DSMpWv9k.js';
 import { n as routes } from './appRoutes-BbuDm13X.js';
