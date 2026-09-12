@@ -1,4 +1,0 @@
-
-/* DELGROSSO GESTIONALE V48 — universal stability UI */
-.dg-v48-stability-toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translate(-50%,18px);z-index:2147483647;max-width:min(92vw,560px);padding:12px 15px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(10,24,38,.96);color:#fff;box-shadow:0 18px 45px rgba(0,0,0,.28);font:700 13px/1.35 system-ui,sans-serif;opacity:0;pointer-events:none;transition:.2s ease}.dg-v48-stability-toast.show{opacity:1;transform:translate(-50%,0)}.dg-v48-stability-toast[data-kind=error]{border-color:rgba(255,120,90,.45)}.dg-v48-shell-active>.app-shell>.sidebar{display:none!important}
-@media(max-width:700px){.dg-v48-stability-toast{font-size:12px;max-width:calc(100vw - 24px);bottom:max(12px,env(safe-area-inset-bottom))}}
