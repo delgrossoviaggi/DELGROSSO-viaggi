@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v60-operativo-20260912';
+const CACHE = 'dg-gestionale-v61-adaptive-20260912';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
