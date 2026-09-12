@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v59-supabase-auth-20260912';
+const CACHE = 'dg-gestionale-v60-operativo-20260912';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
@@ -42,6 +42,8 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
+  event.waitUntil(caches.delete('dg-gestionale-v59-supabase-auth-20260912'));
+
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
