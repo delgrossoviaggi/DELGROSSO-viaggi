@@ -1,4 +1,4 @@
-const CACHE = 'dg-gestionale-v61-adaptive-20260912';
+const CACHE = 'dg-gestionale-v63-login-fix-20260912';
 const SCOPE_URL = new URL('./', self.registration.scope);
 const SCOPE = SCOPE_URL.pathname;
 
@@ -35,14 +35,16 @@ self.addEventListener('install', event => {
     new URL('assets/dg-supabase-sync-v4.js', SCOPE_URL).href,
     new URL('setup-amministratori.html', SCOPE_URL).href,
     new URL('assets/localAuthService-BoJ5x74a.js', SCOPE_URL).href,
+    new URL('assets/login-y_-JKaeR.js', SCOPE_URL).href,
     new URL('assets/logo-delgrosso-v54.png', SCOPE_URL).href,
     new URL('assets/dg-v58-dark-contrast.css', SCOPE_URL).href,
+    new URL('assets/dg-responsive-v62.css', SCOPE_URL).href,
     new URL('assets/dg-v58-theme.js', SCOPE_URL).href
   ]).catch(() => {})).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.delete('dg-gestionale-v59-supabase-auth-20260912'));
+  event.waitUntil(Promise.all([caches.delete('dg-gestionale-v59-supabase-auth-20260912'),caches.delete('dg-gestionale-v60-operativo-20260912'),caches.delete('dg-gestionale-v61-adaptive-20260912'),caches.delete('dg-gestionale-v62-true-adaptive-20260912')]));
 
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });

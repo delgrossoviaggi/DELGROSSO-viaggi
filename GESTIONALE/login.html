@@ -69,6 +69,44 @@
 </main>
 
 
+
+<script>
+/* Mobile login safety-net: if the ES module is blocked/cached incorrectly,
+   keep the form usable and show a real error instead of silently submitting. */
+(() => {
+  const bindFallback = () => {
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+    if (!form || form.dataset.fallbackBound === '1') return;
+    form.dataset.fallbackBound = '1';
+    form.addEventListener('submit', async (e) => {
+      if (window.__DG_LOGIN_MODULE_READY) return;
+      e.preventDefault();
+      if (msg) msg.textContent = 'Accesso in corso…';
+      const user = document.getElementById('username')?.value?.trim() || '';
+      const pass = document.getElementById('password')?.value || '';
+      if (!user || !pass) { if (msg) msg.textContent = 'Inserisci username/email e password.'; return; }
+      try {
+        const mod = await import('./assets/localAuthService-BoJ5x74a.js');
+        await mod.c(user, pass);
+        window.location.replace('./dashboard.html');
+      } catch (err) {
+        console.error('DG mobile login fallback:', err);
+        if (msg) msg.textContent = err?.message || 'Impossibile completare l’accesso. Ricarica la pagina e riprova.';
+      }
+    }, { capture: true });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindFallback);
+  else bindFallback();
+  window.addEventListener('error', () => {
+    if (!window.__DG_LOGIN_MODULE_READY) bindFallback();
+  });
+  window.addEventListener('unhandledrejection', () => {
+    if (!window.__DG_LOGIN_MODULE_READY) bindFallback();
+  });
+})();
+</script>
+
   <script src="./assets/dg-v46-ux.js"></script>
   <script src="./assets/dg-v54-login.js"></script>
   <script src="./assets/dg-v58-theme.js"></script>
