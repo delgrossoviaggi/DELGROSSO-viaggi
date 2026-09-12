@@ -1,0 +1,9 @@
+import{o as applySettings,t as applyTheme}from"./settingsService-BkpKGRnr.js";
+import{t as routes}from"./appRoutes-BbuDm13X.js";
+import{c as login,isAuthenticated as isAuth}from"./localAuthService-BoJ5x74a.js";
+import"./backButton-BaCuvMXq.js";
+const form=document.getElementById('loginForm'),msg=document.getElementById('msg'),username=document.getElementById('username'),password=document.getElementById('password'),toggle=document.getElementById('togglePassword');
+applySettings().then(r=>{if(r.success!==false)applyTheme(r.data,{applyThemePreference:true})}).catch(()=>{});
+if(isAuth())window.location.replace(routes.dashboard);
+toggle?.addEventListener('click',()=>{const show=password.type==='text';password.type=show?'password':'text';toggle.textContent=show?'Mostra':'Nascondi';});
+form?.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='';const u=username.value.trim(),p=password.value;if(!u||!p){msg.textContent='Inserisci username/email e password.';return}const btn=form.querySelector('button[type=submit]'),label=btn?.querySelector('.button-label'),loader=btn?.querySelector('.button-loader'),old=label?.textContent||btn?.textContent;btn&&(btn.disabled=true);if(label)label.textContent='Accesso in corso...';if(loader)loader.hidden=false;try{await login(u,p);window.location.replace(routes.dashboard)}catch(err){console.error(err);msg.textContent=err?.message||'Errore di autenticazione. Verifica che l’account sia stato creato in Supabase Auth.'}finally{if(btn)btn.disabled=false;if(label)label.textContent=old;if(loader)loader.hidden=true}});
