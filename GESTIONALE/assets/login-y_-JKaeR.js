@@ -2,6 +2,7 @@ import{o as applySettings,t as applyTheme}from"./settingsService-BkpKGRnr.js";
 import{t as routes}from"./appRoutes-BbuDm13X.js";
 import{c as login,isAuthenticated as isAuth}from"./localAuthService-BoJ5x74a.js";
 import"./backButton-BaCuvMXq.js";
+window.__DG_LOGIN_MODULE_READY=true;
 const form=document.getElementById('loginForm'),msg=document.getElementById('msg'),username=document.getElementById('username'),password=document.getElementById('password'),toggle=document.getElementById('togglePassword');
 applySettings().then(r=>{if(r.success!==false)applyTheme(r.data,{applyThemePreference:true})}).catch(()=>{});
 if(isAuth())window.location.replace(routes.dashboard);
