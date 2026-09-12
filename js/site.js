@@ -31,3 +31,13 @@ async function party(){const {data}=await sb.from('site_party_events').select('*
 async function trips(){const g=document.querySelector('#tripFull');try{const data=await getGestionaleTrips();g.innerHTML=(data||[]).length?data.map(tripCard).join(''):`<div class="empty">Nessuna partenza disponibile.</div>`;}catch(e){console.error(e);g.innerHTML='<div class="empty">Non riesco a collegarmi al Gestionale. Riprova tra poco.</div>';}applySettings(await loadSettings());}
 async function contacts(){applySettings(await loadSettings());}
 headerActive();mobileNav();
+
+
+function siteUX(){
+  const loader=document.querySelector('.page-loader');
+  window.addEventListener('load',()=>setTimeout(()=>loader?.classList.add('hide'),180),{once:true});
+  document.querySelectorAll('img').forEach((img,i)=>{if(i>0 && !img.loading) img.loading='lazy'; img.decoding='async';});
+  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-view');observer.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -35px'});
+  document.querySelectorAll('.section-head,.trip-card,.fleet-card,.party-feature,.contact-card,.gallery-item,.quote,.trip-toolbar').forEach(el=>{el.classList.add('reveal');observer.observe(el)});
+}
+siteUX();
