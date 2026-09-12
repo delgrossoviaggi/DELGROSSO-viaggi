@@ -114,7 +114,7 @@ async function getClient() {
     db: { schema: 'public' },
     auth: {
       autoRefreshToken: true,
-      persistSession: false,
+      persistSession: true,
       detectSessionInUrl: false,
     },
     global: {
