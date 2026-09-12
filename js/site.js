@@ -11,7 +11,7 @@ function applySettings(s){document.querySelectorAll('[data-setting]').forEach(el
 async function home(){
  const [c,v,f,p,posts]=await Promise.all([
   sb.from('carousel_home').select('*').eq('pubblicato',true).order('sort_order').order('created_at',{ascending:false}),
-  (typeof getGestionaleTrips==='function' ? getGestionaleTrips().then(x=>x.slice(0,6)) : sb.from('viaggi').select('*').eq('pubblicato','SI').order('data_partenza',{ascending:true}).limit(6).then(r=>r.data||[])),
+  getGestionaleTrips().then(x=>x.slice(0,6)),
   sb.from('site_fleet').select('*').eq('published',true).order('sort_order').limit(4),
   sb.from('site_party_events').select('*').eq('published',true).order('sort_order').order('created_at',{ascending:false}).limit(4),
   sb.from('site_posts').select('*').eq('published',true).order('sort_order').order('published_at',{ascending:false}).limit(3)
