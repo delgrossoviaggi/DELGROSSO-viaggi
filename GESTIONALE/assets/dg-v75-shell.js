@@ -5,12 +5,12 @@
  const excluded=new Set(['login.html','index.html','setup-amministratori.html']); if(excluded.has(page)||!document.body)return;
  document.body.classList.add('dg-v75-app');
  const titles={
-  'dashboard.html':'Dashboard','viaggi.html':'Viaggi','prenotazioni.html':'Prenotazioni','noleggi-bus.html':'Noleggi Bus','checkin.html':'Check-in','centro-operativo.html':'Centro Operativo','clienti.html':'Clienti','flotta.html':'Flotta','pagamenti.html':'Pagamenti','preventivi.html':'Preventivi','statistiche.html':'Statistiche','archivio.html':'Archivio','notifiche.html':'Notifiche','impostazioni.html':'Impostazioni','preventivi-nuovo.html':'Nuovo Preventivo','prenotazione.html':'Nuova Prenotazione','agenda.html':'Agenda Operativa','economia.html':'Economia & Margini','dossier-viaggio.html':'Dossier Viaggio'
+  'dashboard.html':'Dashboard','viaggi.html':'Viaggi','prenotazioni.html':'Prenotazioni','noleggi-bus.html':'Noleggi Bus','checkin.html':'Check-in','centro-operativo.html':'Centro Operativo','clienti.html':'Clienti','flotta.html':'Flotta','pagamenti.html':'Pagamenti','preventivi.html':'Preventivi','statistiche.html':'Statistiche','archivio.html':'Archivio','notifiche.html':'Notifiche','impostazioni.html':'Impostazioni','preventivi-nuovo.html':'Nuovo Preventivo','prenotazione.html':'Nuova Prenotazione','agenda.html':'Agenda Operativa','economia.html':'Economia & Margini','dossier-viaggio.html':'Dossier Viaggio','control-room-viaggio.html':'Control Room Viaggio'
  };
  const groups=[
   ['OPERATIVO',[['🏠','Dashboard','dashboard.html'],['🧭','Viaggi','viaggi.html'],['🎫','Prenotazioni','prenotazioni.html'],['🚌','Noleggi Bus','noleggi-bus.html'],['🛂','Check-in','checkin.html'],['📅','Agenda Operativa','agenda.html'],['🎯','Centro Operativo','centro-operativo.html']]],
   ['CLIENTI & FLOTTA',[['👥','Clienti','clienti.html'],['🧑‍💼','Dossier Cliente','dossier-cliente.html'],['🚍','Flotta','flotta.html']]],
-  ['COMMERCIALE',[['💳','Pagamenti','pagamenti.html'],['🧾','Preventivi','preventivi.html'],['📊','Economia & Margini','economia.html'],['🗺️','Dossier Viaggio','dossier-viaggio.html'],['📈','Statistiche','statistiche.html'],['🗂️','Archivio','archivio.html']]],
+  ['COMMERCIALE',[['💳','Pagamenti','pagamenti.html'],['🧾','Preventivi','preventivi.html'],['📊','Economia & Margini','economia.html'],['🗺️','Dossier Viaggio','dossier-viaggio.html'],['🚨','Control Room Viaggio','control-room-viaggio.html'],['📈','Statistiche','statistiche.html'],['🗂️','Archivio','archivio.html']]],
   ['SISTEMA',[['🔔','Notifiche','notifiche.html'],['⚙️','Impostazioni','impostazioni.html']]]
  ];
  const quick={
