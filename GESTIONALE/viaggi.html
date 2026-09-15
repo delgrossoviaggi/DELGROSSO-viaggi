@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Viaggi - Del Grosso Gestionale V56 Supabase + Admin Fix</title>
+<title>Viaggi 2.0 — Del Grosso Gestionale</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 
@@ -64,46 +64,54 @@
 <link rel="stylesheet" href="./assets/dg-v102-advanced.css">
   <link rel="stylesheet" href="./assets/dg-v103-advanced.css?v=103">
 <link rel="stylesheet" href="./assets/dg-v104-precision.css?v=104">
+<link rel="stylesheet" href="./assets/dg-v105-viaggi-cost.css?v=105">
+<link rel="stylesheet" href="./assets/dg-v106-viaggi-2.css?v=106">
 </head>
-<body class="dg-v65-page dg-v75-app">
+<body class="dg-v65-page dg-v75-app dg-v106-viaggi">
 
-<h1><i class="fa-solid fa-route" aria-hidden="true"></i> Gestione Viaggi</h1>
+<div class="dg106-wrap">
+  <section class="dg106-hero">
+    <div class="dg106-eyebrow">Travel Management • Operations</div>
+    <h2>Viaggi 2.0</h2>
+    <p>Una cabina di regia unica per pianificare partenze, posti, bus, costi, ricavi e stato operativo di ogni viaggio.</p>
+    <div class="dg106-hero-actions">
+      <button class="dg106-btn primary" id="btnNewTrip">＋ Nuovo viaggio</button>
+      <button class="dg106-btn ghost" id="btnRefreshTrips" type="button">↻ Aggiorna dati</button>
+    </div>
+  </section>
 
-<div class="toolbar">
-  <label class="sr-only" for="searchTrip">Cerca viaggio</label>
-  <input id="searchTrip" placeholder="Cerca titolo, destinazione o data..." aria-label="Cerca viaggio">
-  <button id="btnNewTrip">+ Nuovo Viaggio</button><button id="btnRefreshTrips" type="button">↻ Aggiorna</button>
+  <section class="dg106-kpis" aria-label="Riepilogo viaggi">
+    <div class="dg106-kpi"><div class="label">Totale viaggi</div><div class="value" id="totTrips">0</div><div class="sub">tutti i viaggi presenti</div></div>
+    <div class="dg106-kpi"><div class="label">Programmanti</div><div class="value" id="plannedTrips">0</div><div class="sub">non annullati</div></div>
+    <div class="dg106-kpi"><div class="label">Confermati</div><div class="value" id="runningTrips">0</div><div class="sub">operatività confermata</div></div>
+    <div class="dg106-kpi"><div class="label">Annullati</div><div class="value" id="completedTrips">0</div><div class="sub">da verificare</div></div>
+    <div class="dg106-kpi"><div class="label">Ricavi pianificati</div><div class="value" id="dg106Revenue">€ 0,00</div><div class="sub">posti × prezzo</div></div>
+    <div class="dg106-kpi"><div class="label">Costi pianificati</div><div class="value" id="dg106Costs">€ 0,00</div><div class="sub">costo reale inserito</div></div>
+  </section>
+
+  <section class="dg106-toolbar">
+    <div class="dg106-search"><input id="searchTrip" placeholder="Cerca per ID, titolo, destinazione, bus o data…" aria-label="Cerca viaggio"></div>
+    <select id="dg106StatusFilter" class="dg106-filter" aria-label="Filtra per stato"><option value="">Tutti gli stati</option><option value="Programmato">Programmato</option><option value="Confermato">Confermato</option><option value="Annullato">Annullato</option></select>
+    <select id="dg106PublicationFilter" class="dg106-filter" aria-label="Filtra pubblicazione"><option value="">Pubblicazione</option><option value="SI">Pubblicati</option><option value="NO">Solo gestionale</option></select>
+  </section>
+
+  <section class="dg106-table-card">
+    <div class="dg106-table-head"><div><strong>Programmazione viaggi</strong><br><span>Gestione completa della flotta e della redditività</span></div><span id="dg106TableCount">0 risultati</span></div>
+    <div class="dg106-scroll">
+      <table id="tripTable">
+        <thead><tr><th>ID Viaggio</th><th data-sort="titolo">Viaggio</th><th data-sort="destinazione">Destinazione</th><th data-sort="data_partenza">Data</th><th data-sort="ora_partenza">Ora</th><th>Prezzo</th><th>Costo</th><th>Bus</th><th>Posti</th><th>Stato</th><th>Azioni</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
-<div class="stats">
-<div class="card"><h3>Viaggi Totali</h3><span id="totTrips">0</span></div>
-<div class="card"><h3>Attivi</h3><span id="plannedTrips">0</span></div>
-<div class="card"><h3>Completi</h3><span id="runningTrips">0</span></div>
-<div class="card"><h3>Annullati</h3><span id="completedTrips">0</span></div>
-</div>
-
-<div id="messageBox" class="message-box" aria-live="polite" style="position:fixed;top:100px;left:50%;transform:translateX(-50%);min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:1000;font-size:0.95rem;box-shadow:0 8px 24px rgba(0,0,0,0.18);"></div>
-
-<table id="tripTable">
-<thead>
-<tr>
-<th>ID Viaggio</th>
-<th data-sort="titolo">Titolo</th>
-<th data-sort="destinazione">Destinazione</th>
-<th data-sort="data_partenza">Data</th>
-<th data-sort="ora_partenza">Ora</th>
-<th>Prezzo</th>
-<th data-sort="autobus">Bus</th>
-<th data-sort="posti_totali">Posti</th>
-<th>Azioni</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+<div id="messageBox" class="message-box" aria-live="polite" style="position:fixed;top:100px;left:50%;transform:translateX(-50%);min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:1000;font-size:.95rem;box-shadow:0 8px 24px rgba(0,0,0,.18)"></div>
 
 <div id="modal" class="modal" aria-hidden="true" tabindex="-1">
   <div class="content">
     <h2 id="modalTitle">Nuovo Viaggio</h2>
+    <div class="dg106-form-grid">
 
     <input id="viaggio_id" type="hidden">
 
@@ -124,6 +132,9 @@
 
     <label for="prezzo">Prezzo</label>
     <input id="prezzo" type="number" step="0.01" placeholder="35.00">
+
+    <label for="costo_totale">Costo totale viaggio</label>
+    <input id="costo_totale" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
 
     <label for="descrizione">Descrizione</label>
     <textarea id="descrizione"></textarea>
@@ -165,6 +176,9 @@
       <option value="NO">NO — Solo gestionale</option>
       <option value="SI">SI — Visibile sul sito</option>
     </select>
+
+    <div class="dg106-money-note full">💶 Gli importi vengono salvati con precisione al centesimo. Nessun arrotondamento automatico.</div>
+    </div>
 
     <div class="actions">
       <button id="saveTrip">Salva</button>
