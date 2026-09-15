@@ -23,13 +23,14 @@ function cacheElements(){
   el.tbody=document.querySelector('#tripTable tbody'); el.modal=$('modal'); el.modalTitle=$('modalTitle');
   el.save=$('saveTrip'); el.close=$('closeTrip'); el.bus=$('bus_select');
   el.stats={total:$('totTrips'),active:$('plannedTrips'),complete:$('runningTrips'),cancelled:$('completedTrips')};
-  el.form=Object.fromEntries(['viaggio_id','titolo','destinazione','luogo_partenza','data_partenza','ora_partenza','prezzo','descrizione','locandina','posti_totali','stato','pubblicato'].map(id=>[id,$(id)]));
+  el.form=Object.fromEntries(['viaggio_id','titolo','destinazione','luogo_partenza','data_partenza','ora_partenza','prezzo','descrizione','locandina','posti_totali','stato','pubblicato','costo_totale'].map(id=>[id,$(id)]));
 }
 function msg(text,type='info'){
   try{ notify({type:type==='error'?'error':'info',title:'Viaggi',message:String(text||'')}); }
   catch{ console[type==='error'?'error':'log'](text); }
 }
-function money(v){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v)||0);}
+function money(v){const n=Number(v);return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(n)?n:0);}
+function tripCost(v){const keys=['costo_totale','costi_totali','costo_bus','costo_mezzo','costo_autista','costi','spese'];for(const k of keys){const n=Number(v?.[k]);if(Number.isFinite(n))return n;}return 0;}
 function fmtDate(v){if(!v)return '-';const d=new Date(`${String(v).slice(0,10)}T00:00:00`);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('it-IT');}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function jsonRows(data){return Array.isArray(data)?data:[];}
@@ -97,7 +98,7 @@ function render(){
   if(el.stats.active)el.stats.active.textContent=state.trips.filter(v=>String(v.stato||'').toLowerCase()!=='annullato').length;
   if(el.stats.complete)el.stats.complete.textContent=state.trips.filter(v=>String(v.stato||'').toLowerCase()==='confermato').length;
   if(el.stats.cancelled)el.stats.cancelled.textContent=state.trips.filter(v=>String(v.stato||'').toLowerCase()==='annullato').length;
-  el.tbody.innerHTML=rows.length?rows.map(v=>`<tr><td><strong>${esc(v.id_viaggio||`DG-V-${String(v.id||'').replace(/-/g,'').slice(0,8).toUpperCase()}`)}</strong></td><td>${esc(v.titolo||'-')}</td><td>${esc(v.destinazione||'-')}</td><td>${esc(fmtDate(v.data_partenza))}</td><td>${esc(String(v.ora_partenza||'').slice(0,5)||'-')}</td><td>${money(v.prezzo)}</td><td>${esc(busLabel(v))}</td><td>${esc(v.posti_totali??0)}</td><td><button type="button" data-action="open" data-id="${esc(v.id)}">Apri Viaggio</button> <button type="button" data-action="dossier" data-id="${esc(v.id)}">Dossier 360°</button> <button type="button" data-action="edit" data-id="${esc(v.id)}">Modifica</button> <button type="button" data-action="delete" data-id="${esc(v.id)}">Elimina</button></td></tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:30px">Nessun viaggio trovato</td></tr>`;
+  el.tbody.innerHTML=rows.length?rows.map(v=>`<tr><td><strong>${esc(v.id_viaggio||`DG-V-${String(v.id||'').replace(/-/g,'').slice(0,8).toUpperCase()}`)}</strong></td><td>${esc(v.titolo||'-')}</td><td>${esc(v.destinazione||'-')}</td><td>${esc(fmtDate(v.data_partenza))}</td><td>${esc(String(v.ora_partenza||'').slice(0,5)||'-')}</td><td>${money(v.prezzo)}</td><td><strong class="dg-trip-cost">${money(tripCost(v))}</strong></td><td>${esc(busLabel(v))}</td><td>${esc(v.posti_totali??0)}</td><td><button type="button" data-action="open" data-id="${esc(v.id)}">Apri Viaggio</button> <button type="button" data-action="dossier" data-id="${esc(v.id)}">Dossier 360°</button> <button type="button" data-action="edit" data-id="${esc(v.id)}">Modifica</button> <button type="button" data-action="delete" data-id="${esc(v.id)}">Elimina</button></td></tr>`).join(''):`<tr><td colspan="10" style="text-align:center;padding:30px">Nessun viaggio trovato</td></tr>`;
   document.body.dataset.viaggiSource=state.source;
 }
 function fillBus(selected=''){
@@ -117,7 +118,7 @@ function closeModal(){el.modal?.classList.remove('open');el.modal?.setAttribute(
 function payload(){
   const f=state.fleet.find(x=>String(x.id)===String(el.bus?.value));
   const posti=Number(el.form.posti_totali?.value||0);
-  return {titolo:el.form.titolo.value.trim(),destinazione:el.form.destinazione.value.trim(),luogo_partenza:el.form.luogo_partenza.value.trim(),data_partenza:el.form.data_partenza.value,ora_partenza:el.form.ora_partenza.value||null,prezzo:Number(el.form.prezzo.value||0),descrizione:el.form.descrizione.value.trim(),locandina:el.form.locandina.value.trim()||null,autobus_id:el.bus?.value||null,autobus:f?`${f.marca||''} ${f.modello||''}`.trim()||f.targa||'':'',posti_totali:posti,posti_occupati:state.editingId?undefined:0,posti_liberi:state.editingId?undefined:posti,stato:el.form.stato.value||'Programmato',pubblicato:el.form.pubblicato.value||'NO'};
+  return {titolo:el.form.titolo.value.trim(),destinazione:el.form.destinazione.value.trim(),luogo_partenza:el.form.luogo_partenza.value.trim(),data_partenza:el.form.data_partenza.value,ora_partenza:el.form.ora_partenza.value||null,prezzo:Number(el.form.prezzo.value||0),descrizione:el.form.descrizione.value.trim(),costo_totale:Math.round((Number(el.form.costo_totale?.value||0)||0)*100)/100,locandina:el.form.locandina.value.trim()||null,autobus_id:el.bus?.value||null,autobus:f?`${f.marca||''} ${f.modello||''}`.trim()||f.targa||'':'',posti_totali:posti,posti_occupati:state.editingId?undefined:0,posti_liberi:state.editingId?undefined:posti,stato:el.form.stato.value||'Programmato',pubblicato:el.form.pubblicato.value||'NO'};
 }
 async function save(){
   const p=payload(); if(!p.titolo||!p.destinazione||!p.data_partenza){msg('Compila titolo, destinazione e data di partenza.','error');return;}
