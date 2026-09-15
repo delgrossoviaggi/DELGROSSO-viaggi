@@ -14,7 +14,7 @@ async function getClient(){
   _client = mod.createClient(SUPABASE_URL, SUPABASE_KEY, {db:{schema:'public'},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   return _client;
 }
-const state = { trips: [], fleet: [], query: '', statusFilter: '', publicationFilter: '', sortKey: 'data_partenza', sortDir: 'asc', editingId: null, source: '', authenticated: false };
+const state = { trips: [], bookings: [], fleet: [], query: '', statusFilter: '', publicationFilter: '', sortKey: 'data_partenza', sortDir: 'asc', editingId: null, source: '', authenticated: false };
 
 function $(id){ return document.getElementById(id); }
 const el = {};
@@ -47,6 +47,11 @@ async function fetchRest(path, options={}){
   }finally{clearTimeout(timer);}
 }
 
+function bookingIsActive(b){return !['annullata','annullato','cancellata','cancellato'].includes(String(b?.stato||'').trim().toLowerCase())}
+function parseSeats(v){const raw=Array.isArray(v)?v.join(','):String(v??'');return raw.split(/[,;\s]+/).map(x=>String(x).trim()).filter(Boolean).filter(x=>/^\d+$/.test(x))}
+function realOccupied(trip){const id=String(trip?.id||trip?.id_viaggio||'');const rows=state.bookings.filter(b=>bookingIsActive(b)&&String(b?.viaggio_id||b?.tratta_id||'')===id);const set=new Set();let fallback=0;for(const b of rows){const seats=parseSeats(b?.posti_selezionati);if(seats.length) seats.forEach(x=>set.add(x)); else fallback+=Math.max(Number(b?.posti||0),0)}return set.size||fallback}
+function realFree(trip){return Math.max(Math.max(Number(trip?.posti_totali||0),0)-realOccupied(trip),0)}
+async function loadBookings(){try{const sb=await getClient();const q=await sb.from('prenotazioni').select('*');if(q.error)throw q.error;state.bookings=jsonRows(q.data)}catch(e){try{state.bookings=jsonRows(await fetchRest('prenotazioni?select=*'))}catch{state.bookings=[];console.warn('[VIAGGI V107] prenotazioni non caricate',e)}}}
 async function loadTrips(){
   let rows=[]; let source='Supabase';
   state.authenticated=true;
@@ -68,6 +73,7 @@ async function loadTrips(){
     }
   }
   state.trips=rows;
+  await loadBookings();
   state.source=source;
   localStorage.setItem('dg_viaggi_snapshot_v59',JSON.stringify({at:new Date().toISOString(),rows}));
 }
@@ -115,7 +121,7 @@ function render(){
   el.tbody.innerHTML=rows.length?rows.map(v=>{
     const status=String(v.stato||'Programmato'); const low=status.toLowerCase();
     const statusClass=low==='annullato'?'danger':low==='confermato'?'ok':'warn';
-    const capacity=Number(v.posti_totali)||0; const occ=Number(v.posti_occupati)||0; const free=Math.max(capacity-occ,0);
+    const capacity=Math.max(Number(v.posti_totali)||0,0); const occ=realOccupied(v); const free=Math.max(capacity-occ,0);
     return `<tr><td><span class="dg106-id">${esc(v.id_viaggio||`DG-V-${String(v.id||'').replace(/-/g,'').slice(0,8).toUpperCase()}`)}</span></td><td><div class="dg106-title">${esc(v.titolo||'-')}</div></td><td>${esc(v.destinazione||'-')}</td><td><span class="dg106-date">${esc(fmtDate(v.data_partenza))}</span></td><td>${esc(String(v.ora_partenza||'').slice(0,5)||'-')}</td><td>${money(v.prezzo)}</td><td><strong class="dg-trip-cost">${money(tripCost(v))}</strong></td><td><div class="dg106-bus" title="${esc(busLabel(v))}">${esc(busLabel(v))}</div></td><td><strong>${capacity}</strong><div style="font-size:10px;color:#64748b">${occ} occupati · ${free} liberi</div></td><td><span class="dg106-status ${statusClass}">${esc(status)}</span></td><td><div class="dg106-actions"><button type="button" data-action="open" data-id="${esc(v.id)}">Apri</button><button type="button" data-action="dossier" data-id="${esc(v.id)}">360°</button><button type="button" data-action="edit" data-id="${esc(v.id)}">Modifica</button><button class="danger" type="button" data-action="delete" data-id="${esc(v.id)}">Elimina</button></div></td></tr>`;
   }).join(''):`<tr><td colspan="11" class="dg106-empty">Nessun viaggio trovato con i filtri selezionati.</td></tr>`;
   document.body.dataset.viaggiSource=state.source;
