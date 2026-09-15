@@ -19,7 +19,7 @@
 <div class="live-dashboard"><div><span>PARTENZE LIVE</span><b id="statTrips">—</b><small>in calendario</small></div><div><span>POSTI DISPONIBILI</span><b id="statSeats">—</b><small>aggiornati automaticamente</small></div><div><span>PROSSIMA PARTENZA</span><b id="statNext">—</b><small id="statNextMeta">disponibilità aggiornata</small></div></div><div class="trip-filters" role="tablist" aria-label="Filtra partenze"><button class="trip-filter active" data-filter="all">Tutte</button><button class="trip-filter" data-filter="available">Disponibili</button><button class="trip-filter" data-filter="soon">Ultimi posti</button><button class="trip-filter" data-filter="sold">Sold out</button></div>
 
 <div id="tripFull" class="trip-grid"></div></div></section>
-</main>
+<div class="wrap" style="padding-bottom:24px"><button id="v12-filter-reset" class="btn btn-outline" type="button">Azzera filtri</button></div></main>
 <footer><div class="wrap copyright"><span>© <span data-current-year>2026</span> Del Grosso Viaggi</span><span>Travel with experience.</span></div></footer>
 <div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">🚍 Partenze</a><a href="prenota.html">✦ Prenota</a></div><script src="js/site.js"></script><script src="js/gestionale.js"></script>
 <script>
@@ -30,4 +30,6 @@ const all=trips||[],totalFree=all.reduce((n,t)=>n+gestTripAvailability(t).free,0
 c.textContent=`${filtered.length} ${filtered.length===1?'partenza':'partenze'} · dati live`;if(result)result.innerHTML=`<span class="live-dot"></span> ${filtered.length} risultati`;g.innerHTML=filtered.length?filtered.map(tripCard).join(''):'<div class="empty" style="grid-column:1/-1">Nessuna partenza corrisponde alla ricerca.</div>'};
 try{const trips=await getGestionaleTrips();window.__dgTrips=trips;render(trips);document.querySelectorAll('.trip-filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.trip-filter').forEach(x=>x.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;render(window.__dgTrips||[])}));search?.addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();render(window.__dgTrips||[])});dateFilter?.addEventListener('change',()=>render(window.__dgTrips||[]));sort?.addEventListener('change',()=>render(window.__dgTrips||[]));window.__dgTripRender=render;startTripAutoRefresh('#tripFull');setTimeout(v8Polish,250);}catch(e){console.error(e);c.textContent='Errore collegamento';g.innerHTML='<div class="empty" style="grid-column:1/-1">Non riesco a collegarmi al Gestionale. Riprova tra poco.</div>'}})();
 </script>
-</body></html>
+<script>
+(()=>{const b=document.getElementById('v12-filter-reset');if(!b)return;b.onclick=()=>{document.querySelectorAll('input[type="search"],input[type="date"]').forEach(x=>x.value='');document.querySelectorAll('select').forEach(x=>x.selectedIndex=0);document.querySelectorAll('[aria-pressed="true"]').forEach(x=>x.setAttribute('aria-pressed','false'));location.hash='';document.dispatchEvent(new Event('input',{bubbles:true}));};})();
+</script></body></html>
