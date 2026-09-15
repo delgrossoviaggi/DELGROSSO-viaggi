@@ -1,3 +1,4 @@
+import{money as exactMoney}from'./dg-v98-money.js';
 /* DEL GROSSO GESTIONALE V102 — Advanced Executive. Lazy-loaded services to avoid cross-page module collisions. */
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};

@@ -10,7 +10,7 @@ let trips=[],bookings=[],payments=[];
 function getTrip(){return trips.find(t=>String(t.id)===String(tripId)||String(t.id_viaggio)===String(tripId));}
 function activeBooking(b){return!/^annullata|annullato$/i.test(String(b?.stato||''));}
 function state(b){const s=String(b?.stato||'').trim();if(s)return s;return'In Attesa'}
-function pax(b){return Math.max(1,Number(b?.num_persone??b?.numero_persone??b?.passeggeri??1)||1)}
+function pax(b){if(Array.isArray(b?.posti_selezionati))return b.posti_selezionati.length;const n=Number(b?.posti??b?.num_persone??b?.numero_persone??b?.passeggeri??1)||1;return Math.max(1,n)}
 function total(b){return Number(b?.totale??b?.importo??0)||0}
 function paidFor(b){return payments.filter(p=>String(p?.prenotazione_id||'')===String(b?.id)).reduce((s,p)=>s+(Number(p?.importo??p?.totale??0)||0),0)}
 function inject(){const host=document.querySelector('.main-content')||document.body;const el=document.createElement('section');el.id='dg95';el.className='dg95';el.innerHTML='<div class="dg95-empty">Caricamento dossier viaggio…</div>';host.prepend(el)}
