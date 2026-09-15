@@ -14,7 +14,7 @@ async function getClient(){
   _client = mod.createClient(SUPABASE_URL, SUPABASE_KEY, {db:{schema:'public'},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   return _client;
 }
-const state = { trips: [], fleet: [], query: '', sortKey: 'data_partenza', sortDir: 'asc', editingId: null, source: '', authenticated: false };
+const state = { trips: [], fleet: [], query: '', statusFilter: '', publicationFilter: '', sortKey: 'data_partenza', sortDir: 'asc', editingId: null, source: '', authenticated: false };
 
 function $(id){ return document.getElementById(id); }
 const el = {};
@@ -87,9 +87,19 @@ function busLabel(v){
 }
 function filtered(){
   const q=state.query.trim().toLowerCase();
-  const rows=state.trips.filter(v=>!q||[v.id_viaggio,v.titolo,v.destinazione,v.data_partenza,v.luogo_partenza,v.autobus].some(x=>String(x||'').toLowerCase().includes(q)));
+  const sf=state.statusFilter.toLowerCase(); const pf=state.publicationFilter.toLowerCase();
+  const rows=state.trips.filter(v=>{
+    const hay=[v.id_viaggio,v.titolo,v.destinazione,v.data_partenza,v.luogo_partenza,v.autobus].some(x=>String(x||'').toLowerCase().includes(q));
+    const status=!sf||String(v.stato||'').toLowerCase()===sf;
+    const pub=!pf||String(v.pubblicato||'').toLowerCase()===pf;
+    return (!q||hay)&&status&&pub;
+  });
   const k=state.sortKey,dir=state.sortDir==='asc'?1:-1;
   return rows.sort((a,b)=>String(a?.[k]??'').localeCompare(String(b?.[k]??''),'it',{numeric:true})*dir);
+}
+function tripRevenue(v){
+  const seats=Number(v.posti_totali)||0, price=Number(v.prezzo)||0;
+  return Math.round(seats*price*100)/100;
 }
 function render(){
   if(!el.tbody)return;
@@ -98,7 +108,16 @@ function render(){
   if(el.stats.active)el.stats.active.textContent=state.trips.filter(v=>String(v.stato||'').toLowerCase()!=='annullato').length;
   if(el.stats.complete)el.stats.complete.textContent=state.trips.filter(v=>String(v.stato||'').toLowerCase()==='confermato').length;
   if(el.stats.cancelled)el.stats.cancelled.textContent=state.trips.filter(v=>String(v.stato||'').toLowerCase()==='annullato').length;
-  el.tbody.innerHTML=rows.length?rows.map(v=>`<tr><td><strong>${esc(v.id_viaggio||`DG-V-${String(v.id||'').replace(/-/g,'').slice(0,8).toUpperCase()}`)}</strong></td><td>${esc(v.titolo||'-')}</td><td>${esc(v.destinazione||'-')}</td><td>${esc(fmtDate(v.data_partenza))}</td><td>${esc(String(v.ora_partenza||'').slice(0,5)||'-')}</td><td>${money(v.prezzo)}</td><td><strong class="dg-trip-cost">${money(tripCost(v))}</strong></td><td>${esc(busLabel(v))}</td><td>${esc(v.posti_totali??0)}</td><td><button type="button" data-action="open" data-id="${esc(v.id)}">Apri Viaggio</button> <button type="button" data-action="dossier" data-id="${esc(v.id)}">Dossier 360°</button> <button type="button" data-action="edit" data-id="${esc(v.id)}">Modifica</button> <button type="button" data-action="delete" data-id="${esc(v.id)}">Elimina</button></td></tr>`).join(''):`<tr><td colspan="10" style="text-align:center;padding:30px">Nessun viaggio trovato</td></tr>`;
+  const revenue=state.trips.filter(v=>String(v.stato||'').toLowerCase()!=='annullato').reduce((a,v)=>a+tripRevenue(v),0);
+  const costs=state.trips.filter(v=>String(v.stato||'').toLowerCase()!=='annullato').reduce((a,v)=>a+tripCost(v),0);
+  const revEl=document.getElementById('dg106Revenue'), costEl=document.getElementById('dg106Costs'), countEl=document.getElementById('dg106TableCount');
+  if(revEl)revEl.textContent=money(revenue); if(costEl)costEl.textContent=money(costs); if(countEl)countEl.textContent=`${rows.length} risultati`;
+  el.tbody.innerHTML=rows.length?rows.map(v=>{
+    const status=String(v.stato||'Programmato'); const low=status.toLowerCase();
+    const statusClass=low==='annullato'?'danger':low==='confermato'?'ok':'warn';
+    const capacity=Number(v.posti_totali)||0; const occ=Number(v.posti_occupati)||0; const free=Math.max(capacity-occ,0);
+    return `<tr><td><span class="dg106-id">${esc(v.id_viaggio||`DG-V-${String(v.id||'').replace(/-/g,'').slice(0,8).toUpperCase()}`)}</span></td><td><div class="dg106-title">${esc(v.titolo||'-')}</div></td><td>${esc(v.destinazione||'-')}</td><td><span class="dg106-date">${esc(fmtDate(v.data_partenza))}</span></td><td>${esc(String(v.ora_partenza||'').slice(0,5)||'-')}</td><td>${money(v.prezzo)}</td><td><strong class="dg-trip-cost">${money(tripCost(v))}</strong></td><td><div class="dg106-bus" title="${esc(busLabel(v))}">${esc(busLabel(v))}</div></td><td><strong>${capacity}</strong><div style="font-size:10px;color:#64748b">${occ} occupati · ${free} liberi</div></td><td><span class="dg106-status ${statusClass}">${esc(status)}</span></td><td><div class="dg106-actions"><button type="button" data-action="open" data-id="${esc(v.id)}">Apri</button><button type="button" data-action="dossier" data-id="${esc(v.id)}">360°</button><button type="button" data-action="edit" data-id="${esc(v.id)}">Modifica</button><button class="danger" type="button" data-action="delete" data-id="${esc(v.id)}">Elimina</button></div></td></tr>`;
+  }).join(''):`<tr><td colspan="11" class="dg106-empty">Nessun viaggio trovato con i filtri selezionati.</td></tr>`;
   document.body.dataset.viaggiSource=state.source;
 }
 function fillBus(selected=''){
@@ -139,6 +158,8 @@ async function refresh(showMessage=false){
 }
 function bind(){
   el.search?.addEventListener('input',e=>{state.query=e.target.value||'';render();});
+  document.getElementById('dg106StatusFilter')?.addEventListener('change',e=>{state.statusFilter=e.target.value||'';render();});
+  document.getElementById('dg106PublicationFilter')?.addEventListener('change',e=>{state.publicationFilter=e.target.value||'';render();});
   el.newBtn?.addEventListener('click',()=>openModal()); el.refresh?.addEventListener('click',()=>refresh(true)); el.close?.addEventListener('click',closeModal); el.save?.addEventListener('click',save); el.modal?.addEventListener('click',e=>{if(e.target===el.modal)closeModal();});
   el.tbody?.addEventListener('click',async e=>{const b=e.target.closest('button[data-action]');if(!b)return;const id=b.dataset.id,v=state.trips.find(x=>String(x.id)===String(id));if(b.dataset.action==='edit'&&v)openModal(v);else if(b.dataset.action==='delete')await del(id);else if(b.dataset.action==='open')window.location.href=`${routes.centroOperativo}?trip=${encodeURIComponent(id)}`;else if(b.dataset.action==='dossier')window.location.href=`./dossier-viaggio.html?trip=${encodeURIComponent(id)}`;});
   document.querySelectorAll('#tripTable thead th[data-sort]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.sort;state.sortDir=state.sortKey===k&&state.sortDir==='asc'?'desc':'asc';state.sortKey=k;render();}));
