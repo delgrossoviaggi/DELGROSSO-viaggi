@@ -1,9 +1,9 @@
 /* DEL GROSSO V95 — Dossier Viaggio 360°, read-only. */
 import{t as tripService}from'./tripService-BzTorehO.js';
 import{t as bookingService}from'./bookingService-CitenMQF.js';
-import{c as paymentService}from'./notificationCenterService-CaZQlods.js';
+import{c as paymentService}from'./notificationCenterService-CaZQlods.js';import{money as exactMoney}from'./dg-v98-money.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v)||0);
+const money=exactMoney;
 const date=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('it-IT')};
 const qs=new URLSearchParams(location.search);const tripId=qs.get('trip');
 let trips=[],bookings=[],payments=[];

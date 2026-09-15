@@ -2,8 +2,9 @@
 import { t as tripService } from './tripService-BzTorehO.js';
 import { t as bookingService } from './bookingService-CitenMQF.js';
 import { c as paymentService } from './notificationCenterService-CaZQlods.js';
+import { money as exactMoney } from './dg-v98-money.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v)||0);
+const money=exactMoney;
 const d=v=>String(v?.data_partenza||'').slice(0,10);
 const title=v=>String(v?.titolo||v?.destinazione||'Viaggio senza titolo').trim();
 const active=v=>!/annull|archiv/i.test(String(v?.stato||''));

@@ -2,7 +2,7 @@ import { issueNoleggioPaymentReceipt, openNoleggioStoredReceipt, downloadNoleggi
 
 const db=await window.DG_SUPABASE_SYNC.getClient();
 const $=id=>document.getElementById(id);
-const money=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
+const money=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
 let charters=[], clients=[], fleet=[], editing=null, currentPayments=[];
 
 function session(){try{return JSON.parse(localStorage.getItem('dg_session')||'null')}catch{return null}}

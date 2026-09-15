@@ -4,9 +4,10 @@ import { t as fleetService } from './fleetService-DSMpWv9k.js';
 import { t as clientService } from './clientService-CSK9V6N0.js';
 import { t as quoteService } from './quoteService-sIJzU3x8.js';
 import { c as paymentService } from './notificationCenterService-CaZQlods.js';
+import { money as exactMoney } from './dg-v98-money.js';
 
 const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money = v => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v)||0);
+const money = exactMoney;
 const num = v => new Intl.NumberFormat('it-IT').format(Number(v)||0);
 const isoDay = d => { const x=new Date(d); return Number.isNaN(x.getTime())?'':x.toISOString().slice(0,10); };
 const today = () => { const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); };

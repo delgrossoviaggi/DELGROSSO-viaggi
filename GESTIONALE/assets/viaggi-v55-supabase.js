@@ -29,7 +29,7 @@ function msg(text,type='info'){
   try{ notify({type:type==='error'?'error':'info',title:'Viaggi',message:String(text||'')}); }
   catch{ console[type==='error'?'error':'log'](text); }
 }
-function money(v){return Number(v||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});}
+function money(v){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v)||0);}
 function fmtDate(v){if(!v)return '-';const d=new Date(`${String(v).slice(0,10)}T00:00:00`);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('it-IT');}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function jsonRows(data){return Array.isArray(data)?data:[];}
