@@ -1,0 +1,20 @@
+/* V25: fascicolo cliente - conferme e ricevute, con reinvio email/WhatsApp */
+(()=>{
+ const URL='https://chkuayhbmitdmzmmvona.supabase.co',KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v||0));
+ const norm=s=>String(s||'').trim().toLowerCase();
+ async function get(path){const r=await fetch(`${URL}/rest/v1/${path}`,{headers:{apikey:KEY,Authorization:`Bearer ${KEY}`}});if(!r.ok)throw Error(await r.text());return r.json()}
+ async function render(){
+  const modal=document.querySelector('.client-modal');if(!modal||getComputedStyle(modal).display==='none')return;if(modal.querySelector('.dg-client-documents-v25'))return;
+  const id=modal.querySelector('#cli_id')?.value;if(!id)return;
+  const name=`${modal.querySelector('#cli_nome')?.value||''} ${modal.querySelector('#cli_cognome')?.value||''}`.trim(),phone=modal.querySelector('#cli_telefono')?.value||'',email=modal.querySelector('#cli_email')?.value||'';
+  const pren=await get(`prenotazioni?select=id,cliente,telefono,email,viaggio_id,codice,totale,posti,data,data_prenotazione,confirmation_number,confirmation_storage_path,confirmation_generated_at,confirmation_email_sent&order=created_at.desc`);
+  const ids=pren.filter(p=>(phone&&norm(p.telefono)===norm(phone))||(email&&norm(p.email)===norm(email))||(name&&norm(p.cliente)===norm(name))).map(p=>p.id);
+  const bookings=pren.filter(p=>ids.includes(p.id));let payments=[];for(const pid of ids){const rows=await get(`pagamenti?select=id,prenotazione_id,tipo,importo,data_pagamento,receipt_number,receipt_storage_path,receipt_email_sent&prenotazione_id=eq.${encodeURIComponent(pid)}&order=data_pagamento.desc`);payments.push(...rows)}
+  const bookingRows=bookings.filter(b=>b.confirmation_storage_path).map(b=>`<div class="dg-doc-card"><strong>📄 Conferma prenotazione ${esc(b.confirmation_number||b.codice||b.id)}</strong><div class="dg-doc-meta">${esc(b.data||b.data_prenotazione||'')} · ${esc(b.codice||b.id||'')}</div><div class="dg-doc-actions"><button type="button" data-dg-doc-action="booking-pdf" data-path="${esc(b.confirmation_storage_path)}">Apri PDF</button><button type="button" data-dg-doc-action="booking-email" data-booking-id="${esc(b.id)}">📧 Reinvia Email</button><button type="button" data-dg-doc-action="booking-wa" data-booking-id="${esc(b.id)}">🟢 WhatsApp</button></div><div class="dg-doc-status">Email: ${b.confirmation_email_sent?'inviata':'non inviata'}</div></div>`).join('');
+  const paymentRows=payments.map(p=>`<div class="dg-doc-card"><strong>🧾 ${esc(p.tipo||'Pagamento')} ${esc(p.receipt_number||'')}</strong><div class="dg-doc-meta">${esc(p.data_pagamento||'')} · ${money(p.importo)}</div><div class="dg-doc-actions">${p.receipt_storage_path?`<button type="button" data-dg-receipt-path="${esc(p.receipt_storage_path)}">Apri PDF</button><button type="button" data-dg-doc-action="payment-email" data-payment-id="${esc(p.id)}">📧 Reinvia Email</button><button type="button" data-dg-doc-action="payment-wa" data-payment-id="${esc(p.id)}">🟢 WhatsApp</button>`:'<small>PDF non ancora archiviato</small>'}</div><div class="dg-doc-status">Email: ${p.receipt_email_sent?'inviata':'non inviata'}</div></div>`).join('');
+  const box=document.createElement('section');box.className='history-box dg-client-documents-v25';box.innerHTML=`<h3>📂 Fascicolo documenti</h3><h4>Conferme prenotazione</h4>${bookingRows||'<p>Nessuna conferma archiviata.</p>'}<h4>Ricevute Acconto / Saldo</h4>${paymentRows||'<p>Nessuna ricevuta archiviata.</p>'}`;modal.querySelector('.history-box')?.appendChild(box);
+ }
+ const mo=new MutationObserver(()=>setTimeout(()=>render().catch(()=>{}),80));mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});window.addEventListener('dg:client-open',()=>render().catch(()=>{}));
+})();
