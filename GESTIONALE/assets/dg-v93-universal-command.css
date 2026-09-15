@@ -1,0 +1,75 @@
+/* DEL GROSSO GESTIONALE V93 — UNIVERSAL COMMAND / READABILITY GUARD
+   Final presentation layer only. No data access, no writes, no polling. */
+:root{--dg93-ink:#000;--dg93-muted:#3d5367;--dg93-line:#d7e2eb;--dg93-surface:#fff;--dg93-blue:#0b5f8f}
+html,body{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
+body.dg-v75-app{min-height:100dvh!important;color:#000!important;background:#071827!important}
+/* Every non-shell direct child is a business workspace. */
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette){
+  min-width:0!important;max-width:100%!important;box-sizing:border-box!important;color:#000!important;opacity:1!important;filter:none!important;mix-blend-mode:normal!important
+}
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette) :where(*):not(svg):not(path){box-sizing:border-box}
+/* Hard readability contract. Legacy theme rules cannot make business text white/faded. */
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette) :where(h1,h2,h3,h4,h5,h6,p,span,strong,b,label,small,li,legend,summary,td,th,caption,dt,dd,div,button,input,select,textarea){
+  color:#000!important;-webkit-text-fill-color:#000!important;writing-mode:horizontal-tb!important;text-orientation:mixed!important;word-break:normal!important;opacity:1!important;filter:none!important
+}
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette) :where(a){color:#075fa0!important;-webkit-text-fill-color:#075fa0!important;opacity:1!important}
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette) :where(input,select,textarea){background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important;caret-color:#000!important;opacity:1!important}
+/* White action text is intentional only on clearly primary buttons. */
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette) :where(button.primary,button[data-variant="primary"],.primary,.btn-primary,[class*="primary"]){color:#fff!important;-webkit-text-fill-color:#fff!important}
+/* Business surfaces are always readable in both Light and Dark themes. */
+body.dg-v75-app> :not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom):not(.dg-v75-overlay):not(.dg-v75-context):not(.dg-v75-palette) :where(.card,.panel,.box,article,.section-card,.table-wrap,.table-container,.table-responsive,.data-table-wrap,.archive-panel,.archive-stat,.quote-card,.op-card,.form-card,.settings-card,.toolbar,.filters,.quotes-toolbar,.modal-content,.dialog-content,.modal-dialog){background:#fff!important;color:#000!important;border-color:var(--dg93-line)!important}
+/* Tables: keep desktop tables usable and never let legacy rules create giant columns. */
+body.dg-v75-app table{max-width:100%!important;color:#000!important}
+body.dg-v75-app table td,body.dg-v75-app table th{color:#000!important;-webkit-text-fill-color:#000!important;writing-mode:horizontal-tb!important;word-break:normal!important;overflow-wrap:anywhere!important;opacity:1!important;vertical-align:middle!important}
+body.dg-v75-app table th{color:#173246!important;-webkit-text-fill-color:#173246!important;background:#edf4f8!important}
+body.dg-v75-app table a{color:#075fa0!important;-webkit-text-fill-color:#075fa0!important}
+/* Prevent a child from forcing the page wider. */
+body.dg-v75-app :where(.grid,.cards,.stats,.form-grid,.pay-form-grid,.kpi-grid,.charts-grid,.overview-grid,.widgets-grid,.toolbar,.filters,.actions,.toolbar-actions,.dg76-grid,.dg76-cockpit,.op-layout,.quote-layout){min-width:0!important;max-width:100%!important}
+body.dg-v75-app :where(.grid,.cards,.stats){grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important}
+body.dg-v75-app :where(.toolbar,.filters,.actions,.toolbar-actions){max-width:100%!important;min-width:0!important}
+/* iPhone / small tablet: one coherent command bar. */
+@media(max-width:767px){
+  body.dg-v75-app{padding:76px 8px calc(88px + env(safe-area-inset-bottom))!important}
+  .dg-v75-topbar{left:0!important;right:0!important;top:0!important;height:64px!important;padding:max(6px,env(safe-area-inset-top)) 7px 6px!important;gap:5px!important;z-index:5000!important}
+  .dg-v75-menu{display:grid!important;flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:44px!important;font-size:21px!important}
+  .dg-v75-logo-mini{display:grid!important;flex:0 0 34px!important;width:34px!important;min-width:34px!important;height:34px!important;border-radius:10px!important}
+  .dg-v75-title{flex:1 1 auto!important;min-width:0!important;max-width:none!important;font-size:13px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .dg-v75-sub,.dg-v75-search,.dg-v75-status{display:none!important}
+  .dg-v75-spacer{display:none!important}
+  .dg-v75-icon-btn{display:grid!important;flex:0 0 40px!important;width:40px!important;min-width:40px!important;height:40px!important}
+  .dg-v75-new{display:grid!important;place-items:center!important;flex:0 0 42px!important;width:42px!important;min-width:42px!important;height:42px!important;padding:0!important;font-size:0!important}
+  .dg-v75-new::before{content:"＋"!important;font-size:22px!important;line-height:1!important}
+  .dg-v75-sidebar{top:0!important;bottom:0!important;left:0!important;width:min(88vw,360px)!important;max-width:360px!important;padding-top:max(10px,env(safe-area-inset-top))!important;z-index:5100!important;transform:translate3d(-106%,0,0)!important;border-radius:0 22px 22px 0!important;box-shadow:18px 0 50px rgba(0,0,0,.24)!important;transition:transform .22s cubic-bezier(.2,.8,.2,1)!important}
+  .dg-v75-sidebar.open{transform:translate3d(0,0,0)!important}
+  .dg-v75-overlay{display:block!important;position:fixed!important;inset:0!important;z-index:5050!important;background:rgba(3,15,27,.52)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .2s ease,visibility .2s ease!important}
+  .dg-v75-overlay.open{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+  .dg-v75-nav a{min-height:50px!important;font-size:13px!important;padding:10px 12px!important}
+  .dg-v75-bottom{left:max(6px,env(safe-area-inset-left))!important;right:max(6px,env(safe-area-inset-right))!important;bottom:max(6px,env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;min-height:66px!important;padding:6px!important;gap:4px!important;border-radius:21px!important;z-index:5000!important;background:rgba(255,255,255,.97)!important;backdrop-filter:blur(22px) saturate(160%)!important;-webkit-backdrop-filter:blur(22px) saturate(160%)!important;box-shadow:0 16px 44px rgba(0,0,0,.2)!important}
+  .dg-v75-bottom a{min-width:0!important;min-height:52px!important;height:52px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:2px!important;padding:3px!important;border-radius:15px!important;color:#53697d!important;font-size:8px!important;font-weight:900!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important}
+  .dg-v75-bottom a.active{color:#075fa0!important;background:#e7f4fb!important}
+  .dg-v75-bottom span{font-size:19px!important;line-height:19px!important}
+  body.dg-v75-app :where(input,select,textarea){min-height:46px!important;font-size:16px!important}
+  body.dg-v75-app :where(button,a,[role="button"]){touch-action:manipulation!important}
+  body.dg-v75-app :where(.grid,.cards,.stats){grid-template-columns:1fr 1fr!important}
+  body.dg-v75-app :where(.toolbar,.filters,.actions,.toolbar-actions,.pay-form-actions,.prenota-actions,.op-actions){display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  /* All data tables, including legacy pages without <main>, become cards. */
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table){display:block!important;width:100%!important;min-width:0!important;overflow:visible!important;border:0!important;box-shadow:none!important;background:transparent!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) thead{display:none!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) tbody{display:block!important;width:100%!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) tr{display:block!important;width:100%!important;min-width:0!important;margin:0 0 10px!important;padding:10px!important;background:#fff!important;border:1px solid var(--dg93-line)!important;border-radius:16px!important;box-shadow:0 7px 22px rgba(6,24,39,.06)!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) td{display:grid!important;grid-template-columns:88px minmax(0,1fr)!important;gap:8px!important;width:100%!important;min-width:0!important;padding:6px 3px!important;border:0!important;background:#fff!important;font-size:12px!important;line-height:1.35!important;white-space:normal!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) td::before{content:attr(data-label)!important;color:#60778a!important;-webkit-text-fill-color:#60778a!important;font-size:9px!important;line-height:1.2!important;font-weight:900!important;letter-spacing:.05em!important;text-transform:uppercase!important;padding-top:2px!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) td:last-child{display:block!important;margin-top:5px!important;padding-top:9px!important;border-top:1px solid #edf1f5!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) td:last-child::before{display:none!important}
+  body.dg-v75-app :where(.modal,.dialog,.popup){padding:8px!important}
+  body.dg-v75-app :where(.modal-content,.dialog-content,.modal-dialog,.modal .content,.popup-content){width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;margin:auto!important;border-radius:19px!important;overflow:auto!important}
+}
+@media(max-width:390px){
+  body.dg-v75-app{padding-left:6px!important;padding-right:6px!important}
+  .dg-v75-logo-mini{display:none!important}
+  .dg-v75-title{font-size:12px!important}
+  .dg-v75-icon-btn{flex-basis:38px!important;width:38px!important;min-width:38px!important}
+  .dg-v75-new{flex-basis:40px!important;width:40px!important;min-width:40px!important}
+  body.dg-v75-app :where(.grid,.cards,.stats){grid-template-columns:1fr!important}
+  body.dg-v75-app table:not(.no-responsive):not(.seat-map-table) td{grid-template-columns:82px minmax(0,1fr)!important}
+}

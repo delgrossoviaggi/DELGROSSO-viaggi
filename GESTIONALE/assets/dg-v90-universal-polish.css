@@ -1,0 +1,88 @@
+/* DEL GROSSO GESTIONALE V90 — UNIVERSAL POLISH / READABILITY / RESPONSIVE
+   Final presentation layer. No data access, no Supabase writes, no polling. */
+:root{--dg90-ink:#000;--dg90-muted:#263746;--dg90-line:#d8e2eb;--dg90-surface:#fff;--dg90-soft:#f4f8fb;--dg90-primary:#0f5f91}
+*{box-sizing:border-box}
+html,body{max-width:100%!important;min-width:0!important;overflow-x:hidden!important}
+body.dg-v75-app{color:#000!important;background:#eef3f8!important}
+/* Absolute readability contract for the business workspace. */
+body.dg-v75-app main,
+body.dg-v75-app main *:not(svg):not(path),
+body.dg-v75-app .dg90-workspace,
+body.dg-v75-app .dg90-workspace *:not(svg):not(path){
+  color:#000!important;
+  -webkit-text-fill-color:#000!important;
+  writing-mode:horizontal-tb!important;
+}
+/* Exceptions: brand/navigation and intentional action buttons keep their contrast. */
+body.dg-v75-app .dg-v75-topbar,
+body.dg-v75-app .dg-v75-topbar *:not(input),
+body.dg-v75-app .dg-v75-sidebar,
+body.dg-v75-app .dg-v75-sidebar * ,
+body.dg-v75-app .dg-v75-bottom,
+body.dg-v75-app .dg-v75-bottom *{ -webkit-text-fill-color:initial!important; }
+body.dg-v75-app .dg-v75-sidebar{color:#fff!important}
+body.dg-v75-app .dg-v75-sidebar *{color:inherit!important}
+body.dg-v75-app .dg-v75-topbar{color:#102335!important}
+body.dg-v75-app .dg-v75-topbar input{color:#000!important;-webkit-text-fill-color:#000!important}
+body.dg-v75-app .dg-v75-new,
+body.dg-v75-app .dg-v75-nav a.active,
+body.dg-v75-app .dg-v75-bottom a.active{color:#fff!important;-webkit-text-fill-color:#fff!important}
+body.dg-v75-app main button.primary,
+body.dg-v75-app main button[data-variant="primary"],
+body.dg-v75-app main .primary{color:#fff!important;-webkit-text-fill-color:#fff!important}
+/* Make all normal business surfaces genuinely light so black text is always readable in both themes. */
+body.dg-v75-app main .card,body.dg-v75-app main .panel,body.dg-v75-app main .box,body.dg-v75-app main article,
+body.dg-v75-app main .app-card,body.dg-v75-app main .form-card,body.dg-v75-app main .settings-card,
+body.dg-v75-app main .quote-card,body.dg-v75-app main .op-card,body.dg-v75-app main .widget-card,
+body.dg-v75-app main .toolbar,body.dg-v75-app main .filters,body.dg-v75-app main .table-wrap,
+body.dg-v75-app main .table-container,body.dg-v75-app main .table-responsive,body.dg-v75-app main .section-card,
+body.dg-v75-app main .modal,body.dg-v75-app main .modal-content,body.dg-v75-app main .dialog,body.dg-v75-app main .popup{
+  background:#fff!important;color:#000!important;border-color:var(--dg90-line)!important
+}
+body.dg-v75-app main input,body.dg-v75-app main select,body.dg-v75-app main textarea{
+  background:#fff!important;color:#000!important;-webkit-text-fill-color:#000!important;caret-color:#000!important
+}
+body.dg-v75-app main input::placeholder,body.dg-v75-app main textarea::placeholder{color:#516576!important;-webkit-text-fill-color:#516576!important;opacity:1!important}
+body.dg-v75-app main table{width:100%!important;max-width:100%!important;border-collapse:separate!important;border-spacing:0!important;table-layout:fixed!important;color:#000!important}
+body.dg-v75-app main table th{color:#173246!important;-webkit-text-fill-color:#173246!important;background:#edf4f8!important;font-weight:900!important}
+body.dg-v75-app main table td{color:#000!important;-webkit-text-fill-color:#000!important;background:#fff!important;vertical-align:middle!important;overflow-wrap:anywhere!important;word-break:normal!important}
+body.dg-v75-app main table a{color:#075fa0!important;-webkit-text-fill-color:#075fa0!important;text-decoration:underline!important}
+body.dg-v75-app main table button{color:#000!important;-webkit-text-fill-color:#000!important}
+/* Never allow a narrow column to turn names/titles into one-character vertical text. */
+body.dg-v75-app main :where(h1,h2,h3,h4,h5,h6,p,label,span,strong,b,small,td,th,a){
+  writing-mode:horizontal-tb!important;text-orientation:mixed!important;word-break:normal!important;overflow-wrap:anywhere!important
+}
+/* Fluid containers. */
+body.dg-v75-app main,.dg-v75-context{min-width:0!important;max-width:100%!important}
+body.dg-v75-app main>*{min-width:0!important;max-width:100%!important}
+body.dg-v75-app .dg76-grid,body.dg-v75-app .dg76-cockpit,body.dg-v75-app .kpi-grid,body.dg-v75-app .charts-grid,
+body.dg-v75-app .overview-grid,body.dg-v75-app .widgets-grid,body.dg-v75-app .stats,body.dg-v75-app .cards,
+body.dg-v75-app .grid{min-width:0!important;max-width:100%!important}
+body.dg-v75-app .stats,body.dg-v75-app .cards{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+body.dg-v75-app .toolbar,body.dg-v75-app .filters{min-width:0!important;max-width:100%!important;flex-wrap:wrap!important}
+body.dg-v75-app .toolbar input,body.dg-v75-app .filters input{flex:1 1 280px!important;min-width:160px!important}
+/* Medium screens: preserve information but stop squeezing tables. */
+@media(max-width:1250px){
+  body.dg-v75-app main table{table-layout:auto!important}
+  body.dg-v75-app main table th,body.dg-v75-app main table td{padding:10px 9px!important}
+  body.dg-v75-app main .stats,body.dg-v75-app main .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+/* Compact/tablet: all business tables become readable cards. */
+@media(max-width:1050px){
+  body.dg-v75-app main table.dg90-responsive-table{display:block!important;width:100%!important}
+  body.dg-v75-app main table.dg90-responsive-table thead{display:none!important}
+  body.dg-v75-app main table.dg90-responsive-table tbody{display:block!important;width:100%!important}
+  body.dg-v75-app main table.dg90-responsive-table tr{display:block!important;width:100%!important;margin:0 0 12px!important;padding:12px!important;background:#fff!important;border:1px solid var(--dg90-line)!important;border-radius:16px!important;box-shadow:0 7px 22px rgba(6,24,39,.06)!important}
+  body.dg-v75-app main table.dg90-responsive-table td{display:grid!important;grid-template-columns:minmax(82px,30%) minmax(0,1fr)!important;gap:10px!important;width:100%!important;padding:7px 2px!important;border:0!important;font-size:12px!important;line-height:1.35!important}
+  body.dg-v75-app main table.dg90-responsive-table td::before{content:attr(data-label)!important;color:#536a7b!important;-webkit-text-fill-color:#536a7b!important;font-size:9px!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:.05em!important}
+  body.dg-v75-app main table.dg90-responsive-table td:last-child{border-top:1px solid #edf1f5!important;margin-top:5px!important;padding-top:10px!important}
+  body.dg-v75-app main table.dg90-responsive-table td:last-child::before{display:none!important}
+}
+@media(max-width:700px){
+  body.dg-v75-app{padding-left:8px!important;padding-right:8px!important}
+  body.dg-v75-app main .stats,body.dg-v75-app main .cards{grid-template-columns:1fr 1fr!important}
+  body.dg-v75-app main .toolbar,body.dg-v75-app main .filters{display:grid!important;grid-template-columns:1fr!important}
+  body.dg-v75-app main .toolbar input,body.dg-v75-app main .filters input{grid-column:1!important;width:100%!important}
+  body.dg-v75-app main table.dg90-responsive-table td{grid-template-columns:90px minmax(0,1fr)!important}
+}
+@media(max-width:420px){body.dg-v75-app main .stats,body.dg-v75-app main .cards{grid-template-columns:1fr!important}}
