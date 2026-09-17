@@ -1,0 +1,50 @@
+/* DELGROSSO GESTIONALE V61 — ADAPTIVE LAYOUT
+   Layout fluido per iPhone, iPad, Android, tablet, notebook e desktop.
+   Solo presentazione: nessuna modifica a dati o logica gestionale. */
+:root{--dg-safe-top:max(12px,env(safe-area-inset-top));--dg-safe-right:max(12px,env(safe-area-inset-right));--dg-safe-bottom:max(18px,env(safe-area-inset-bottom));--dg-safe-left:max(12px,env(safe-area-inset-left));}
+html{width:100%;min-width:0;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{width:100%;min-width:0;max-width:100%;overflow-x:hidden;padding-left:var(--dg-safe-left);padding-right:var(--dg-safe-right);padding-bottom:var(--dg-safe-bottom);}
+*,*::before,*::after{box-sizing:border-box;min-width:0;}
+img,svg,video,canvas,iframe{max-width:100%;height:auto;}
+button,a,input,select,textarea{max-width:100%;}
+input,select,textarea{font-size:16px!important;}
+/* Never let fixed desktop widths break a phone/tablet. */
+.container,.content,.main-content,.app-shell,.page,.page-content,.dashboard,.panel,.card,.modal,.modal-content,.dialog,.dialog-content{max-width:100%;}
+/* Data tables stay usable with internal horizontal scroll. */
+.table-wrap,.table-responsive,.table-container,.data-table-wrap{width:100%;max-width:100%;overflow-x:auto!important;-webkit-overflow-scrolling:touch;}
+table{max-width:none;}
+/* iPhone / Android phones */
+@media (max-width:767px){
+  body{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}
+  .dg-page-view,.app-shell,.main-content{width:100%!important;max-width:100%!important;margin-left:auto!important;margin-right:auto!important;}
+  .grid,.container,.cards,.stats,.form-grid,.pay-form-grid,.quote-stats{grid-template-columns:1fr!important;width:100%!important;}
+  .toolbar,.filters,.actions{display:grid!important;grid-template-columns:1fr!important;width:100%!important;}
+  .toolbar>* ,.filters>* ,.actions>*{width:100%!important;max-width:100%!important;}
+  .modal,.dialog,.popup{padding:10px!important;}
+  .modal-content,.dialog-content,.popup-content{width:100%!important;max-width:100%!important;max-height:calc(100dvh - 20px)!important;overflow:auto!important;}
+  table{min-width:620px;}
+  .dg-brand-shell__header{padding-top:var(--dg-safe-top)!important;}
+}
+/* iPhone Pro portrait/landscape and compact phones. */
+@media (max-width:430px){
+  :root{--dg-radius:16px;}
+  body{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));}
+  button,.button,.btn,[role=button],a.nav-link{min-height:48px;}
+  .card,.panel,.box,.content{border-radius:var(--dg-radius)!important;}
+  .stats,.cards{grid-template-columns:1fr 1fr!important;gap:8px!important;}
+  h1{font-size:clamp(1.2rem,6vw,1.55rem)!important;line-height:1.2;}
+}
+@media (max-width:360px){.stats,.cards{grid-template-columns:1fr!important;}}
+/* Tablet / iPad */
+@media (min-width:768px) and (max-width:1199px){
+  .grid,.container,.form-grid,.pay-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .cards,.stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+/* Wide screens */
+@media (min-width:1200px){
+  .dg-page-view,.app-shell{width:100%;max-width:1680px;margin-left:auto;margin-right:auto;}
+}
+@media (orientation:landscape) and (max-height:600px){
+  .modal-content,.dialog-content,.popup-content{max-height:calc(100dvh - 12px)!important;}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important;}}

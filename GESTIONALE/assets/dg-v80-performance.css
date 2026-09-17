@@ -1,0 +1,6 @@
+/* DEL GROSSO V80 — fast, resilient UI defaults */
+html{scroll-behavior:auto!important;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{overflow-x:hidden;}
+button,[role="button"],a,input,select,textarea{touch-action:manipulation;}
+button[data-dg-busy],button[disabled]{cursor:default;}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}}

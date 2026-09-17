@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viaggi 2.0 — Del Grosso Gestionale</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+
+  <script src="./assets/dg-v48-stability.js"></script>
+<script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
+<script src="./assets/dg-v56-admin-access.js"></script>
+<script type="module" src="./assets/viaggi-v55-supabase.js?v=124"></script>
+  <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
+  <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
+  <link rel="modulepreload" href="./assets/fleetService-DSMpWv9k.js">
+  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="stylesheet" href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" href="./assets/viaggi-CjSv1-Az.css">
+  <link rel="stylesheet" href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-v46-professional.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
+  <link rel="stylesheet" href="./assets/dg-universal-devices-v1.css">
+<link rel="stylesheet" href="./assets/dg-v48-stability.css">
+  <link rel="stylesheet" href="./assets/dg-v49-locked-ui.css">
+  <link rel="stylesheet" href="./assets/dg-v54-executive.css">
+  <link rel="stylesheet" href="./assets/dg-v58-dark-contrast.css">
+  <link rel="stylesheet" href="./assets/dg-universal-v61.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v62.css">
+
+<link rel="stylesheet" href="./assets/dg-adaptive-v65.css">
+  <link rel="stylesheet" href="./assets/dg-universal-v73.css">
+  <link rel="stylesheet" href="./assets/dg-v75-design.css?v=80">
+  <link rel="stylesheet" href="./assets/dg-v76-agency.css?v=76">
+  <link rel="stylesheet" href="./assets/dg-v84-black-text.css?v=86">
+<link rel="stylesheet" href="./assets/dg-v80-performance.css?v=86">
+<link rel="stylesheet" href="./assets/dg-v85-stability.css?v=86">
+<link rel="stylesheet" href="./assets/dg-v82-fortress.css?v=86"><link rel="stylesheet" href="./assets/dg-v87-layout.css?v=87">  <link rel="stylesheet" href="./assets/dg-v88-universal-layout.css?v=88">
+<link rel="stylesheet" href="./assets/dg-v89-ultimate-ui.css?v=89">
+<link rel="stylesheet" href="./assets/dg-v90-universal-polish.css?v=90">
+  <link rel="stylesheet" href="./assets/dg-v91-universal-contract.css?v=91">
+  <link rel="stylesheet" href="./assets/dg-v92-iphone-menu.css?v=92">
+  <link rel="stylesheet" href="./assets/dg-v93-universal-command.css?v=93">
+<link rel="stylesheet" href="./assets/dg-v94-business.css"><link rel="stylesheet" href="./assets/dg-v95-trip-dossier.css?v=96"><link rel="stylesheet" href="./assets/dg-v97-visual-system.css?v=97">  <link rel="stylesheet" href="./assets/dg-v99-executive.css?v=99">
+<link rel="stylesheet" href="./assets/dg-v102-advanced.css">
+  <link rel="stylesheet" href="./assets/dg-v103-advanced.css?v=103">
+<link rel="stylesheet" href="./assets/dg-v104-precision.css?v=104">
+<link rel="stylesheet" href="./assets/dg-v105-viaggi-cost.css?v=105">
+<link rel="stylesheet" href="./assets/dg-v106-viaggi-2.css?v=106">
+  <link rel="stylesheet" href="./assets/dg-v107-real-seats.css">
+  <link rel="stylesheet" href="./assets/dg-v108-desktop-seat-clear.css?v=108">
+  <link rel="stylesheet" href="./assets/dg-v112-universal-mobile.css?v=114">
+<link rel="stylesheet" href="./assets/dg-v123-duplicate-guard.css?v=124">
+</head>
+<body class="dg-v65-page dg-v75-app dg-v106-viaggi">
+
+<div class="dg106-wrap">
+  <section class="dg106-hero">
+    <div class="dg106-eyebrow">Travel Management • Operations</div>
+    <h2>Viaggi 2.0</h2>
+    <p>Una cabina di regia unica per pianificare partenze, posti, bus, costi, ricavi e stato operativo di ogni viaggio.</p>
+    <div class="dg106-hero-actions">
+      <button class="dg106-btn primary" id="btnNewTrip">＋ Nuovo viaggio</button>
+      <button class="dg106-btn ghost" id="btnRefreshTrips" type="button">↻ Aggiorna dati</button>
+    </div>
+  </section>
+
+  <section class="dg106-kpis" aria-label="Riepilogo viaggi">
+    <div class="dg106-kpi"><div class="label">Totale viaggi</div><div class="value" id="totTrips">0</div><div class="sub">tutti i viaggi presenti</div></div>
+    <div class="dg106-kpi"><div class="label">Programmanti</div><div class="value" id="plannedTrips">0</div><div class="sub">non annullati</div></div>
+    <div class="dg106-kpi"><div class="label">Confermati</div><div class="value" id="runningTrips">0</div><div class="sub">operatività confermata</div></div>
+    <div class="dg106-kpi"><div class="label">Annullati</div><div class="value" id="completedTrips">0</div><div class="sub">da verificare</div></div>
+    <div class="dg106-kpi"><div class="label">Ricavi pianificati</div><div class="value" id="dg106Revenue">€ 0,00</div><div class="sub">posti × prezzo</div></div>
+    <div class="dg106-kpi"><div class="label">Costi pianificati</div><div class="value" id="dg106Costs">€ 0,00</div><div class="sub">costo reale inserito</div></div>
+  </section>
+
+  <section class="dg106-toolbar">
+    <div class="dg106-search"><input id="searchTrip" placeholder="Cerca per ID, titolo, destinazione, bus o data…" aria-label="Cerca viaggio"></div>
+    <select id="dg106StatusFilter" class="dg106-filter" aria-label="Filtra per stato"><option value="">Tutti gli stati</option><option value="Programmato">Programmato</option><option value="Confermato">Confermato</option><option value="Annullato">Annullato</option></select>
+    <select id="dg106PublicationFilter" class="dg106-filter" aria-label="Filtra pubblicazione"><option value="">Pubblicazione</option><option value="SI">Pubblicati</option><option value="NO">Solo gestionale</option></select>
+  </section>
+
+  <section class="dg106-table-card">
+    <div class="dg106-table-head"><div><strong>Programmazione viaggi</strong><br><span>Gestione completa della flotta e della redditività</span></div><span id="dg106TableCount">0 risultati</span></div>
+    <div class="dg106-scroll">
+      <table id="tripTable">
+        <thead><tr><th>ID Viaggio</th><th data-sort="titolo">Viaggio</th><th data-sort="destinazione">Destinazione</th><th data-sort="data_partenza">Data</th><th data-sort="ora_partenza">Ora</th><th>Prezzo</th><th>Costo</th><th>Locandina</th><th>Bus</th><th>Posti</th><th>Stato</th><th>Azioni</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div id="messageBox" class="message-box" aria-live="polite" style="position:fixed;top:100px;left:50%;transform:translateX(-50%);min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(0,0,0,0.8);color:#fff;display:none;z-index:1000;font-size:.95rem;box-shadow:0 8px 24px rgba(0,0,0,.18)"></div>
+
+<div id="modal" class="modal" aria-hidden="true" tabindex="-1">
+  <div class="content">
+    <h2 id="modalTitle">Nuovo Viaggio</h2>
+    <div class="dg106-form-grid">
+
+    <input id="viaggio_id" type="hidden">
+
+    <label for="titolo">Titolo Viaggio</label>
+    <input id="titolo" placeholder="Titolo viaggio">
+
+    <label for="destinazione">Destinazione</label>
+    <input id="destinazione" placeholder="Destinazione" autocomplete="off">
+    <div class="dg115-template-box">
+      <div class="dg115-template-head"><strong>♻️ Riutilizza una destinazione</strong><span>La data resta quella del nuovo viaggio.</span></div>
+      <div class="dg115-template-row">
+        <select id="trip_template" aria-label="Modello destinazione"><option value="">— Seleziona una destinazione esistente —</option></select>
+        <button id="useTripTemplate" type="button">Usa modello</button>
+      </div>
+      <div id="tripTemplateHint" class="dg115-template-hint" aria-live="polite"></div>
+    </div>
+
+    <label for="luogo_partenza">Luogo di Partenza</label>
+    <input id="luogo_partenza" placeholder="Es. San Severo (FG)">
+
+    <label for="data_partenza">Data</label>
+    <input id="data_partenza" type="date">
+
+    <label for="ora_partenza">Ora</label>
+    <input id="ora_partenza" type="time">
+
+    <label for="prezzo">Prezzo</label>
+    <input id="prezzo" type="number" step="0.01" placeholder="35.00">
+
+    <label for="costo_totale">Costo totale viaggio</label>
+    <input id="costo_totale" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+
+    <label for="descrizione">Descrizione</label>
+    <textarea id="descrizione"></textarea>
+
+    <label for="locandina_file">Locandina</label>
+    <input id="locandina_file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+    <div class="locandina-actions">
+      <button id="uploadLocandina" type="button">Carica Locandina</button>
+      <button id="replaceLocandina" type="button">Sostituisci Locandina</button>
+      <button id="removeLocandina" type="button">Rimuovi Locandina</button>
+    </div>
+    <div id="uploadProgressBox" class="upload-progress" aria-live="polite">
+      <div id="uploadProgressText" class="upload-progress-text"></div>
+      <div class="upload-progress-bar-wrap">
+        <div id="uploadProgressBar" class="upload-progress-bar"></div>
+      </div>
+      <button id="retryUpload" type="button" class="retry-upload">Riprova</button>
+    </div>
+    <img id="locandina_preview" class="locandina-preview" alt="Anteprima locandina" />
+
+    <label for="locandina">Locandina Public URL</label>
+    <input id="locandina" placeholder="https://..." autocomplete="url">
+    <div id="posterFormStatus" class="dg120-poster-status" aria-live="polite"></div>
+
+    <label for="bus_select">Bus Assegnato</label>
+    <select id="bus_select"></select>
+
+    <label for="posti_totali">Posti Totali</label>
+    <input id="posti_totali" type="number" placeholder="Posti totali">
+
+    <label for="stato">Stato</label>
+    <select id="stato">
+      <option value="Programmato">Programmato</option>
+      <option value="Confermato">Confermato</option>
+      <option value="Annullato">Annullato</option>
+    </select>
+
+    <label for="pubblicato">Pubblica sul sito web</label>
+    <select id="pubblicato">
+      <option value="NO">NO — Solo gestionale</option>
+      <option value="SI">SI — Visibile sul sito</option>
+    </select>
+
+    <div class="dg106-money-note full">💶 Gli importi vengono salvati con precisione al centesimo. Nessun arrotondamento automatico.</div>
+    </div>
+
+    <div class="actions">
+      <button id="saveTrip">Salva</button>
+      <button id="closeTrip">Chiudi</button>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+
+
+
+  <script src="./assets/dg-v46-ux.js?v=73"></script>
+
+  <script src="./assets/dg-v58-theme.js"></script>
+  <script src="./assets/dg-v75-shell.js?v=96"></script>
+  <script src="./assets/dg-v76-agency.js?v=83"></script>
+  <script src="./assets/dg-v80-performance.js?v=86"></script>
+<script src="./assets/dg-v84-black-text.js?v=86"></script>
+<script src="./assets/dg-v85-stability.js?v=86"></script>
+<script src="./assets/dg-v82-fortress.js?v=86"></script><script src="./assets/dg-v90-universal-polish.js?v=90"></script>
+  <script src="./assets/dg-v91-universal-contract.js?v=91"></script>
+  <script src="./assets/dg-v93-universal-command.js?v=93"></script>
+  <script src="./assets/dg-v99-executive.js?v=99"></script>
+<script type="module" src="./assets/dg-v102-advanced.js"></script>
+  <script type="module" src="./assets/dg-v103-advanced.js?v=103"></script>
+<script type="module" src="./assets/dg-v104-precision.js?v=104"></script>
+  <link rel="stylesheet" href="./assets/dg-v115-trip-template.css?v=121">
+  <script src="./assets/dg-v112-universal-mobile.js?v=120"></script>
+</body>
+</html>

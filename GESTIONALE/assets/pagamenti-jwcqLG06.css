@@ -1,0 +1,33 @@
+.toolbar{flex-wrap:wrap;align-items:center;gap:12px;display:flex}.toolbar input,.toolbar select{min-width:180px}.toolbar .is-active{box-shadow:0 0 0 2px #0f4c812e}.stats{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin:20px 0;display:grid}.stats .box{padding:20px}.stats .box h3{color:var(--dg-muted);text-transform:uppercase;letter-spacing:.08em;margin:0;font-size:.86rem}.stats .box span{color:var(--dg-text);margin-top:10px;font-size:1.7rem;font-weight:800;display:block}.module-intro{color:var(--dg-muted);margin:12px 0 0}.panel{flex-wrap:wrap;align-items:center;gap:10px;display:flex}.panel h2{width:100%;margin:0 0 4px}#paymentsTable td strong,#paymentsTable td small{display:block}#paymentsTable td small{color:var(--dg-muted);margin-top:4px}.status-badge,.movement-badge{border-radius:999px;justify-content:center;align-items:center;min-width:118px;padding:7px 12px;font-size:.78rem;font-weight:800;display:inline-flex}.status-paid,.movement-badge--saldo{color:#0f9d66;background:#0f9d6624}.status-partial,.movement-badge--deposit{color:#b45309;background:#f57c0024}.status-refunded,.movement-badge--refund{color:#b91c1c;background:#dc262624}.status-pending,.movement-badge--other{color:var(--dg-primary);background:#0f4c811f}.table-actions{flex-wrap:wrap;gap:8px;display:flex}.amount-positive{color:var(--dg-success);font-weight:800}.amount-negative{color:var(--dg-danger);font-weight:800}.empty-state{text-align:center;color:var(--dg-muted);padding:22px}.payment-modal__content{width:min(1100px,100%)}.payment-modal__summary{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0;display:grid}.payment-summary-card{border:1px solid var(--dg-border);background:#0f4c810d;border-radius:20px;padding:16px}.payment-summary-card span{color:var(--dg-muted);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem;font-weight:800;display:block}.payment-summary-card strong{margin-top:8px;font-size:1.2rem;display:block}.payment-modal__layout{grid-template-columns:minmax(0,1.3fr) minmax(320px,.8fr);gap:18px;display:grid}.payment-history-card,.payment-form-card{border:1px solid var(--dg-border);background:#fffffff5;border-radius:24px;padding:18px}.payment-history-card h3,.payment-form-card h3{margin-top:0}.payment-history-card table{margin-top:12px}.payment-form-card .pay-form-grid{grid-template-columns:1fr 1fr;gap:12px;display:grid}.payment-form-actions{flex-wrap:wrap;gap:10px;margin-top:16px;display:flex}.payment-form-actions button{flex:1}@media (width<=1200px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.payment-modal__layout{grid-template-columns:1fr}}@media (width<=900px){.stats,.payment-modal__summary{grid-template-columns:1fr 1fr}}@media (width<=640px){.stats,.payment-modal__summary,.payment-form-card .pay-form-grid{grid-template-columns:1fr}.toolbar,.payment-form-actions,.table-actions{flex-direction:column}}
+
+
+/* V113 — pagamenti mobile operational UX */
+.pay-form-actions button,.payment-form-card button,.toolbar button,.table-actions button{min-height:46px;border-radius:12px;font-weight:700;}
+.payment-linked-context{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0;}
+.linked-field{padding:12px 14px;border:1px solid rgba(15,76,129,.14);border-radius:14px;background:rgba(15,76,129,.045);min-width:0;}
+.linked-field span{display:block;font-size:.74rem;opacity:.68;margin-bottom:4px;}
+.linked-field strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media (max-width:599px){
+  #paymentsTable{display:block;width:100%;min-width:0!important;}
+  #paymentsTable thead{display:none;}
+  #paymentsTable tbody,#paymentsTable tr,#paymentsTable td{display:block;width:100%;} 
+  #paymentsTable tr.dg-payment-row{margin:0 0 12px;padding:12px;border-radius:16px;border:1px solid rgba(15,76,129,.12);box-shadow:0 8px 24px rgba(10,39,66,.08);background:var(--dg-surface,#fff);}
+  #paymentsTable td{display:grid!important;grid-template-columns:105px minmax(0,1fr);gap:10px;align-items:center;padding:8px 0!important;border:0!important;text-align:left!important;min-height:38px;}
+  #paymentsTable td::before{content:attr(data-label);font-size:.74rem;font-weight:800;opacity:.62;}
+  #paymentsTable td[data-label="Azioni"]{display:block!important;padding-top:10px!important;border-top:1px solid rgba(15,76,129,.10)!important;}
+  #paymentsTable td[data-label="Azioni"]::before{display:block;margin-bottom:7px;}
+  #paymentsTable .table-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+  #paymentsTable .table-actions button{width:100%;min-width:0;}
+  .payment-linked-context{grid-template-columns:1fr;}
+  .payment-modal__summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}
+  .payment-summary-card{min-height:76px;padding:12px!important;}
+  .payment-summary-card strong{font-size:1.05rem!important;}
+  .payment-history-card{border-radius:14px;overflow-x:auto;}
+  .payment-history-card .pay-table{min-width:650px;}
+  .payment-form-card{padding-bottom:env(safe-area-inset-bottom);}
+  #savePayment{position:sticky;bottom:8px;z-index:3;box-shadow:0 8px 20px rgba(15,76,129,.22);}
+}
+@media (min-width:600px) and (max-width:1100px){
+  #paymentsTable{min-width:900px;}
+  .payment-modal__summary{grid-template-columns:repeat(4,minmax(0,1fr));}
+}
