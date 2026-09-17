@@ -341,3 +341,59 @@ window.v8Polish=function(){try{v9OldPolish?.()}catch(e){console.warn(e)}try{v9Re
   function init(){breadcrumbs();mobileActions();formGuard();year();}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
+
+
+/* V13 — automatic text contrast on image cards.
+   Samples the actual image when CORS allows canvas access; otherwise falls
+   back to a dark veil + white text, which is the safest readable treatment. */
+(function dgAutoContrast(){
+  const selectors=[
+    '.next-experience-card',
+    '.destination-card',
+    '.fleet-card'
+  ];
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const luminance=(r,g,b)=>{
+    const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+    return .2126*f(r)+.7152*f(g)+.0722*f(b);
+  };
+  function apply(card,img){
+    if(!card||!img)return;
+    card.classList.add('dg-auto-contrast');
+    let tone='light';
+    try{
+      if(!img.complete||!img.naturalWidth){card.classList.add('dg-contrast-light');return;}
+      const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
+      if(!ctx)throw new Error('canvas');
+      const w=64,h=64;c.width=w;c.height=h;
+      ctx.drawImage(img,0,0,w,h);
+      const data=ctx.getImageData(0,0,w,h).data;
+      let sum=0,count=0;
+      for(let i=0;i<data.length;i+=16){
+        sum+=luminance(data[i],data[i+1],data[i+2]);count++;
+      }
+      const avg=count?sum/count:.25;
+      /* Bright photography gets dark copy + a subtle white local veil.
+         Mid/dark photography keeps white copy with a dark local veil. */
+      tone=avg>.62?'dark':'light';
+      card.classList.remove('dg-contrast-light','dg-contrast-dark');
+      card.classList.add('dg-contrast-'+tone);
+      card.style.setProperty('--dg-image-luma',clamp(avg,0,1).toFixed(3));
+    }catch(e){
+      card.classList.remove('dg-contrast-dark');
+      card.classList.add('dg-contrast-light');
+    }
+  }
+  function scan(root=document){
+    selectors.forEach(sel=>root.querySelectorAll(sel).forEach(card=>{
+      const img=card.querySelector('img');
+      const copy=card.querySelector('.next-experience-copy,.destination-card-copy,.fleet-info');
+      if(!img||!copy)return;
+      copy.classList.add('dg-contrast-copy');
+      const run=()=>apply(card,img);
+      if(img.complete)run(); else img.addEventListener('load',run,{once:true});
+    }));
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scan(),{once:true});else scan();
+  new MutationObserver(m=>m.forEach(x=>x.addedNodes.forEach(n=>{if(n.nodeType===1)scan(n)}))).observe(document.body,{childList:true,subtree:true});
+})();

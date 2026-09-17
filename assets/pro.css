@@ -398,3 +398,18 @@ button,a,input,select,textarea{font-size:inherit}
 @media(max-width:480px){.agency-trust-grid{grid-template-columns:1fr}.agency-trust-item{padding:13px 15px}}
 
 .sync-ribbon{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important}
+
+
+/* V13 — adaptive contrast for text over photography. The text tone is chosen
+   from the real image luminance; a local veil is added only when needed. */
+.dg-auto-contrast .dg-contrast-copy{position:relative;z-index:8;color:var(--dg-text,#fff)!important;text-shadow:var(--dg-shadow,0 2px 12px rgba(0,0,0,.72))!important;}
+.dg-auto-contrast.dg-contrast-dark .dg-contrast-copy{--dg-text:#07111f;--dg-shadow:0 1px 8px rgba(255,255,255,.72)!important;}
+.dg-auto-contrast.dg-contrast-dark:has(.dg-contrast-copy)::before{content:"";position:absolute;left:0;right:0;bottom:0;height:62%;z-index:4;pointer-events:none;background:linear-gradient(0deg,rgba(255,255,255,.88),rgba(255,255,255,.35) 55%,transparent);}
+.dg-auto-contrast.dg-contrast-light .dg-contrast-copy{--dg-text:#fff;--dg-shadow:0 2px 12px rgba(0,0,0,.78)!important;}
+.dg-auto-contrast.dg-contrast-light:has(.dg-contrast-copy)::before{content:"";position:absolute;left:0;right:0;bottom:0;height:68%;z-index:4;pointer-events:none;background:linear-gradient(0deg,rgba(2,13,24,.86),rgba(2,13,24,.24) 58%,transparent);}
+.dg-auto-contrast .dg-contrast-copy *{color:inherit!important;text-shadow:inherit!important;}
+/* Keep the copy above the adaptive veil and below badges/date chips. */
+.next-experience-card.dg-auto-contrast .next-experience-date{z-index:9;}
+.destination-card.dg-auto-contrast .destination-card-copy{z-index:9;}
+.fleet-card.dg-auto-contrast .fleet-info{z-index:9;}
+@media(prefers-reduced-motion:reduce){.dg-auto-contrast .dg-contrast-copy{transition:none!important}}
