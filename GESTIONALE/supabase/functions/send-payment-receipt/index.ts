@@ -60,7 +60,7 @@ Deno.serve(async (req: Request) => {
       return json({success:true,emailSent:true,recipient:to})
     }
 
-    const payment=p?.payment||{}, booking=p?.booking||{}, trip=p?.trip||{}, totals=p?.totals||{}
+    const payment=p?.payment||{}, booking=p?.booking||{}, trip=p?.trip||{}, totals=p?.totals||{}, sendEmail=p?.sendEmail!==false
     const pdfBase64=text(p?.pdfBase64), to=text(booking.email||booking.cliente_email||payment.email)
     if(!pdfBase64)return json({success:false,error:'PDF ricevuta mancante.'},400)
     if(!payment.id)return json({success:false,error:'ID pagamento mancante.'},400)
@@ -77,6 +77,11 @@ Deno.serve(async (req: Request) => {
     if(stored.error)throw stored.error
 
     // Se manca l'email, la ricevuta resta comunque archiviata.
+    if(!sendEmail){
+      let signedUrl=null; try{const s=await supabase.storage.from('ricevute-prenotazioni').createSignedUrl(path,60*60*24*30);signedUrl=s.data?.signedUrl||null}catch(e){console.error('Signed URL ricevuta non disponibile:',e)}
+      return json({success:true,emailSent:false,emailSkipped:true,storedPath:path,receiptNumber,signedUrl,error:'Invio email non richiesto dall’operatore.'})
+    }
+
     if(!to){
       let signedUrl=null; try{const s=await supabase.storage.from('ricevute-prenotazioni').createSignedUrl(path,60*60*24*30);signedUrl=s.data?.signedUrl||null}catch(e){console.error('Signed URL non disponibile:',e)}
       return json({success:true,emailSent:false,storedPath:path,receiptNumber,signedUrl,error:'Email del partecipante mancante: la ricevuta è stata archiviata ma non inviata.'})

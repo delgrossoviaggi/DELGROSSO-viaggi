@@ -72,6 +72,7 @@
 <link rel="stylesheet" href="./assets/dg-v123-duplicate-guard.css?v=124">
   <link rel="stylesheet" href="./assets/dg-v125-professional-shell.css?v=125">
   <link rel="stylesheet" href="./assets/dg-v126-command-dock.css?v=126">
+  <link rel="stylesheet" href="./assets/dg-v145-complete-ui.css?v=145">
 </head>
 <body class="dg-v65-page dg-v75-app dg-v106-viaggi">
 
@@ -96,7 +97,7 @@
   </section>
 
   <section class="dg106-toolbar">
-    <div class="dg106-search"><input id="searchTrip" placeholder="Cerca per ID, titolo, destinazione, bus o data…" aria-label="Cerca viaggio"></div>
+    <div class="dg106-search"><input id="searchTrip" placeholder="Cerca per nome viaggio, destinazione, data o bus…" aria-label="Cerca viaggio"></div>
     <select id="dg106StatusFilter" class="dg106-filter" aria-label="Filtra per stato"><option value="">Tutti gli stati</option><option value="Programmato">Programmato</option><option value="Confermato">Confermato</option><option value="Annullato">Annullato</option></select>
     <select id="dg106PublicationFilter" class="dg106-filter" aria-label="Filtra pubblicazione"><option value="">Pubblicazione</option><option value="SI">Pubblicati</option><option value="NO">Solo gestionale</option></select>
   </section>
@@ -105,7 +106,7 @@
     <div class="dg106-table-head"><div><strong>Programmazione viaggi</strong><br><span>Gestione completa della flotta e della redditività</span></div><span id="dg106TableCount">0 risultati</span></div>
     <div class="dg106-scroll">
       <table id="tripTable">
-        <thead><tr><th>ID Viaggio</th><th data-sort="titolo">Viaggio</th><th data-sort="destinazione">Destinazione</th><th data-sort="data_partenza">Data</th><th data-sort="ora_partenza">Ora</th><th>Prezzo</th><th>Costo</th><th>Locandina</th><th>Bus</th><th>Posti</th><th>Stato</th><th>Azioni</th></tr></thead>
+        <thead><tr><th>Rif. tecnico</th><th data-sort="titolo">Nome viaggio</th><th data-sort="destinazione">Destinazione</th><th data-sort="data_partenza">Data</th><th data-sort="ora_partenza">Ora</th><th>Prezzo</th><th>Costo</th><th>Locandina</th><th>Bus</th><th>Posti</th><th>Stato</th><th>Azioni</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>

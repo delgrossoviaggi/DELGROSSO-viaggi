@@ -85,7 +85,7 @@ Deno.serve(async (req: Request) => {
       return json({ success: true, emailSent: true, recipient: to, messageId: info.messageId });
     }
 
-    const b = body?.booking || {}; const trip = body?.trip || {}; const pdf = text(body?.pdfBase64);
+    const b = body?.booking || {}; const trip = body?.trip || {}; const pdf = text(body?.pdfBase64); const sendEmail = body?.sendEmail !== false;
     if (!b.id) return json({ success: false, error: "ID prenotazione mancante." }, 400);
     if (!pdf) return json({ success: false, error: "PDF della conferma mancante." }, 400);
     const number = confirmationNumber(b), path = `conferme/${number}.pdf`, bytes = bytesFromBase64(pdf), now = new Date().toISOString();
@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
     const cfg = await smtp();
     const to = text(b.email); const name = customerName(b); const numero = bookingNumber(b); const destination = text(trip?.destinazione || trip?.titolo, "Viaggio Del Grosso");
     let emailSent = false, emailError = "", internalSent = false, internalError = "";
-    if (cfg.pass) {
+    if (cfg.pass && sendEmail) {
       const transporter = nodemailer.createTransport({ host: cfg.host, port: cfg.port, secure: cfg.secure, auth: { user: cfg.user, pass: cfg.pass } });
       if (to) {
         try {
@@ -109,6 +109,9 @@ Deno.serve(async (req: Request) => {
         await transporter.sendMail({ from: { name: cfg.fromName, address: cfg.from }, to: ["info@delgrossoviaggi.it", "prenotazioni@delgrossoviaggi.it"], replyTo: cfg.replyTo, subject: `🔔 NUOVA PRENOTAZIONE ${numero} - Del Grosso Viaggi`, text: `Nuova prenotazione registrata nel Gestionale.\n\nCliente: ${name}\nTelefono: ${text(b.telefono, "—")}\nEmail: ${text(b.email, "—")}\nViaggio: ${destination}\nData viaggio: ${formatDate(trip?.data_partenza)}\nPosti: ${text(b.posti, "—")}\nTotale: € ${Number(b.totale || 0).toFixed(2)}\nAcconto: € ${Number(b.acconto || 0).toFixed(2)}\nNumero prenotazione: ${numero}\n\nLa conferma PDF è stata archiviata nel Gestionale.`, attachments: [{ filename: `Conferma_Prenotazione_${numero}.pdf`, content: bytes, contentType: "application/pdf" }] });
         internalSent = true;
       } catch (e) { internalError = e instanceof Error ? e.message : String(e); }
+    } else if (!sendEmail) {
+      emailError = "Invio email non richiesto dall’operatore.";
+      internalError = "Notifica interna non richiesta insieme alla conferma.";
     } else {
       emailError = "Password SMTP non configurata in Gestionale > Impostazioni > Comunicazione.";
       internalError = emailError;
