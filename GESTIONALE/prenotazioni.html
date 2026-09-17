@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prenotazioni - Del Grosso Gestionale V67 Universal Mobile</title>
+<meta name="dg-build" content="V80">
+
+
+
+
+  <script src="./assets/dg-v48-stability.js"></script>
+<script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
+<script src="./assets/dg-v56-admin-access.js"></script>
+<script type="module" src="./assets/prenotazioni-DO8eRNX0.js"></script>
+<script type="module" src="./assets/dg-mobile-bookings-v4.js"></script>
+<script src="./assets/dg-bookings-seat-fix-v73.js?v=73"></script>
+  <link rel="modulepreload" href="./assets/settingsService-BkpKGRnr.js">
+  <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
+  <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
+  <link rel="modulepreload" href="./assets/fleetService-DSMpWv9k.js">
+  <link rel="modulepreload" href="./assets/clientService-CSK9V6N0.js">
+  <link rel="modulepreload" href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" href="./assets/qrBookingUtils-DHAR6Vrm.js">
+  <link rel="modulepreload" href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" href="./assets/browser-Bi1SjHOd.js">
+  <link rel="modulepreload" href="./assets/jspdf.es.min-DT2zzJUL.js">
+  <link rel="modulepreload" href="./assets/pdfReceiptService-M28dXixt.js">
+  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="stylesheet" href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" href="./assets/prenotazioni-DjMDlXY7.css">
+  <link rel="stylesheet" href="./assets/prenota-FgpWYoWC.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-receipts-v24.css">
+  <link rel="stylesheet" href="./assets/dg-documents-v25.css">
+  <link rel="stylesheet" href="./assets/prenotazioni-responsive-v44.css">
+  <link rel="stylesheet" href="./assets/dg-v46-professional.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
+  <link rel="stylesheet" href="./assets/dg-universal-devices-v1.css">
+<link rel="stylesheet" href="./assets/dg-v48-stability.css">
+  <link rel="stylesheet" href="./assets/dg-v49-locked-ui.css">
+  <link rel="stylesheet" href="./assets/dg-v54-executive.css">
+  <link rel="stylesheet" href="./assets/dg-v58-dark-contrast.css">
+  <link rel="stylesheet" href="./assets/dg-universal-v61.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v62.css">
+
+<link rel="stylesheet" href="./assets/dg-adaptive-v65.css">
+  <style>
+    /* Mobile booking workspace: no desktop-table dependency */
+    @media (max-width: 760px){
+      body{overflow-x:hidden}
+      .prenotazioni-toolbar{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+      .prenotazioni-toolbar input,.prenotazioni-toolbar button{width:100%!important;min-height:48px!important}
+      .booking-table-wrap{overflow:visible!important;border:0!important;background:transparent!important;box-shadow:none!important}
+      #bookingTable{display:block!important;width:100%!important;border:0!important}
+      #bookingTable thead{display:none!important}
+      #bookingTable tbody,#bookingTable tr,#bookingTable td{display:block!important;width:100%!important}
+      #bookingTable tbody tr{margin:0 0 14px!important;padding:12px!important;border-radius:16px!important;background:var(--card-bg,#fff)!important;box-shadow:0 4px 18px rgba(0,0,0,.08)!important;border:1px solid rgba(0,0,0,.08)!important}
+      #bookingTable td{display:grid!important;grid-template-columns:105px minmax(0,1fr)!important;gap:8px!important;padding:7px 2px!important;border:0!important;min-width:0!important;overflow-wrap:anywhere}
+      #bookingTable td::before{content:attr(data-label);font-weight:700;opacity:.68}
+      #bookingTable td:last-child{display:block!important;padding-top:12px!important;border-top:1px solid rgba(0,0,0,.08)!important}
+      #bookingTable td:last-child::before{display:none}
+      .booking-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important}
+      .booking-actions button,.booking-actions a{width:100%!important;min-height:46px!important;margin:0!important;white-space:normal!important}
+      .booking-actions .delBtn{grid-column:span 2!important}
+      .prenotazioni-stats-grid .card{width:100%!important}
+      .modal{padding:10px!important;align-items:flex-end!important}
+      .modal .content{width:100%!important;max-width:720px!important;max-height:92dvh!important;overflow:auto!important;border-radius:20px 20px 0 0!important;padding-bottom:calc(20px + env(safe-area-inset-bottom))!important}
+      .modal input,.modal select,.modal textarea,.modal button{font-size:16px!important;min-height:46px!important}
+      .payment-panel{overflow:visible!important}
+      .pay-toolbar{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+      .pay-table{display:block!important;overflow:auto!important;max-width:100%!important}
+      .pay-table table{min-width:720px!important}
+      .pay-form-grid{grid-template-columns:1fr!important}
+    }
+    @media (min-width:761px) and (max-width:1100px){
+      .booking-table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+      #bookingTable{min-width:1050px!important}
+      .booking-actions{display:flex!important;flex-wrap:wrap!important;gap:6px!important}
+    }
+  </style>
+
+  <style id="dg-v67-bookings-mobile-fix">
+    /* V67: mobile booking actions are real touch controls, not keyboard/tab dependent. */
+    .dg-mobile-confirm-v2{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer!important;}
+    .dg-mobile-confirm-v2.dg-confirmed{opacity:.85;}
+    .booking-actions button,.booking-actions a{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+
+    /* Keep the edit dialog usable on every screen, with readable labels against the dark theme. */
+    #modal .content,
+    #seatChangeModal .content{box-sizing:border-box;}
+    #modal .content > label,
+    #seatChangeModal .content label,
+    #modal .pay-form label{
+      color:#243447!important;
+      text-shadow:none!important;
+      opacity:1!important;
+      font-weight:800!important;
+    }
+    #modal .content h2,
+    #modal .content h3,
+    #seatChangeModal .content h2{color:#102a43!important;text-shadow:none!important;}
+
+    @media (max-width:760px){
+      #modal,
+      #seatChangeModal{
+        box-sizing:border-box!important;
+        padding:env(safe-area-inset-top) 8px env(safe-area-inset-bottom) 8px!important;
+        align-items:stretch!important;
+        justify-content:center!important;
+      }
+      #modal .content,
+      #seatChangeModal .content{
+        width:100%!important;
+        max-width:none!important;
+        max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px)!important;
+        min-height:0!important;
+        overflow-y:auto!important;
+        overflow-x:hidden!important;
+        -webkit-overflow-scrolling:touch!important;
+        overscroll-behavior:contain!important;
+        border-radius:18px!important;
+        padding:16px!important;
+        box-sizing:border-box!important;
+      }
+      #modal .content input,
+      #modal .content select,
+      #modal .content textarea,
+      #modal .content button,
+      #seatChangeModal .content button{
+        min-height:48px!important;
+        font-size:16px!important;
+      }
+      #modal .actions,
+      #seatChangeModal .actions{
+        position:sticky!important;
+        bottom:0!important;
+        z-index:20!important;
+        display:grid!important;
+        grid-template-columns:1fr 1fr!important;
+        gap:8px!important;
+        margin:14px -16px -16px!important;
+        padding:10px 16px calc(10px + env(safe-area-inset-bottom))!important;
+        background:rgba(255,255,255,.96)!important;
+        backdrop-filter:blur(8px)!important;
+      }
+      #modal .actions #save{grid-column:span 1!important;}
+      #modal .actions #close{grid-column:span 1!important;}
+      #seatChangeModal .actions #seatChangeConfirm{grid-column:span 1!important;}
+      #seatChangeModal .actions #seatChangeCancel{grid-column:span 1!important;}
+
+      .booking-actions{grid-template-columns:1fr 1fr!important;}
+      .booking-actions .dg-mobile-confirm-v2,
+      .booking-actions .openBtn,
+      .booking-actions .changeSeatBtn{min-height:48px!important;font-size:15px!important;}
+    }
+
+    @media (max-width:390px){
+      #modal .actions,
+      #seatChangeModal .actions,
+      .booking-actions{grid-template-columns:1fr!important;}
+    }
+  </style>
+  <link rel="stylesheet" href="./assets/dg-universal-v73.css">
+  <link rel="stylesheet" href="./assets/dg-v75-design.css?v=80">
+  <link rel="stylesheet" href="./assets/dg-v76-agency.css?v=76">
+  <link rel="stylesheet" href="./assets/dg-v78-booking-command.css?v=78">
+  <link rel="stylesheet" href="./assets/dg-v84-black-text.css?v=86">
+<link rel="stylesheet" href="./assets/dg-v80-performance.css?v=86">
+<link rel="stylesheet" href="./assets/dg-v85-stability.css?v=86">
+<link rel="stylesheet" href="./assets/dg-v82-fortress.css?v=86"><link rel="stylesheet" href="./assets/dg-v87-layout.css?v=87">  <link rel="stylesheet" href="./assets/dg-v88-universal-layout.css?v=88">
+<link rel="stylesheet" href="./assets/dg-v89-ultimate-ui.css?v=89">
+<link rel="stylesheet" href="./assets/dg-v90-universal-polish.css?v=90">
+  <link rel="stylesheet" href="./assets/dg-v91-universal-contract.css?v=91">
+  <link rel="stylesheet" href="./assets/dg-v92-iphone-menu.css?v=92">
+  <link rel="stylesheet" href="./assets/dg-v93-universal-command.css?v=93">
+<link rel="stylesheet" href="./assets/dg-v94-business.css"><link rel="stylesheet" href="./assets/dg-v95-trip-dossier.css?v=96"><link rel="stylesheet" href="./assets/dg-v97-visual-system.css?v=97">  <link rel="stylesheet" href="./assets/dg-v99-executive.css?v=99">
+<link rel="stylesheet" href="./assets/dg-v102-advanced.css">
+  <link rel="stylesheet" href="./assets/dg-v103-advanced.css?v=103">
+<link rel="stylesheet" href="./assets/dg-v104-precision.css?v=104">
+  <link rel="stylesheet" href="./assets/dg-v112-universal-mobile.css?v=114">
+  <link rel="stylesheet" href="./assets/dg-v125-professional-shell.css?v=125">
+  <link rel="stylesheet" href="./assets/dg-v126-command-dock.css?v=126">
+  <link rel="stylesheet" href="./assets/dg-v128-booking-actions.css?v=128">
+<link rel="stylesheet" href="./assets/dg-v133-booking-cockpit.css?v=133">
+</head>
+<body class="dg-v65-page dg-v75-app">
+  
+<section class="prenotazioni-hero">
+  <div>
+    <span class="prenotazioni-eyebrow">GESTIONALE DELGROSSO</span>
+    <h1>Prenotazioni</h1>
+    <p>Gestisci clienti, viaggi, pagamenti e presenza in modo semplice e ordinato.</p>
+  </div>
+  <div class="prenotazioni-hero-icon">📋</div>
+</section>
+
+<div class="toolbar prenotazioni-toolbar">
+<label class="sr-only" for="searchBooking">Cerca prenotazione</label>
+<input id="searchBooking" placeholder="Cerca cliente, viaggio..." aria-label="Cerca prenotazione">
+<button id="btnGoTrips" type="button">Vai al modulo Viaggi</button>
+<button id="btnOpenPrenota" type="button">Apri prenotazione interna</button>
+<button id="btnNew">+ Nuova Prenotazione</button>
+</div>
+
+<div class="booking-table-wrap" aria-label="Elenco prenotazioni">
+<table id="bookingTable">
+<thead>
+<tr>
+<th>ID Prenotazione</th>
+<th>Cliente</th>
+<th>Viaggio</th>
+<th>Data</th>
+<th>Posti</th>
+<th>Importo</th>
+<th>Pagato</th>
+<th>Residuo</th>
+<th>Stato pagamento</th>
+<th>Presente</th>
+<th>Azioni</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="grid prenotazioni-stats-grid">
+<div class="card">
+<div class="stats-title"><span>Riepilogo operativo</span><small>Situazione prenotazioni</small></div>
+<p>Prenotazioni Totali: <span id="tot">0</span></p>
+<p>Confermate: <span id="conf">0</span></p>
+<p>In Attesa: <span id="wait">0</span></p>
+<p>Annullate: <span id="ann">0</span></p>
+</div>
+</div>
+
+<div id="modal" class="modal" tabindex="-1">
+  <div class="content">
+    <h2>Nuova Prenotazione</h2>
+
+    <input id="prenotazione_id" type="hidden">
+
+    <label for="selectCliente">Cliente</label>
+    <select id="selectCliente"></select>
+
+    <label for="searchCliente">Ricerca cliente</label>
+    <input id="searchCliente" placeholder="Nome, cognome, telefono o email">
+
+    <label for="cliente_nome">Nuovo cliente (nome e cognome)</label>
+    <input id="cliente_nome" placeholder="Es. Mario Rossi">
+
+    <label for="cliente_telefono">Telefono nuovo cliente</label>
+    <input id="cliente_telefono" placeholder="+39 ...">
+
+    <label for="cliente_email">Email nuovo cliente</label>
+    <input id="cliente_email" placeholder="nome@email.it">
+ 
+    <label for="selectViaggio">Viaggio</label>
+    <select id="selectViaggio"></select>
+ 
+    <label for="data_prenotazione">Data Prenotazione</label>
+    <input id="data_prenotazione" type="date">
+ 
+    <label for="num_persone">Numero Persone</label>
+    <input id="num_persone" type="number" placeholder="Posti">
+ 
+    <label for="importo">Importo Totale (€) · calcolo esatto</label>
+    <input id="importo" type="number" step="0.01" placeholder="Importo €">
+ 
+    <label for="acconto">Acconto iniziale (€)</label>
+    <input id="acconto" type="number" step="0.01" placeholder="Acconto">
+  
+    <label for="saldo">Residuo stimato (€)</label>
+    <input id="saldo" type="number" step="0.01" placeholder="Saldo">
+  
+    <label for="metodo_pagamento">Metodo pagamento iniziale</label>
+    <select id="metodo_pagamento">
+      <option>Contanti</option>
+      <option>POS</option>
+      <option>Bonifico</option>
+      <option>Carta</option>
+      <option>PayPal</option>
+      <option>Altro</option>
+    </select>
+
+    <label for="stato_select">Stato</label>
+    <select id="stato_select">
+      <option>In Attesa</option>
+      <option>Acconto Ricevuto</option>
+      <option>Saldata</option>
+      <option>Confermata</option>
+      <option>Annullata</option>
+    </select>
+
+    <label for="note">Note</label>
+    <textarea id="note"></textarea>
+
+    <!-- Payment panel — visible only when editing an existing booking -->
+    <div id="paymentPanel" class="payment-panel hidden">
+      <div class="pay-header">
+        <div>
+          <h3 class="pay-heading">Pagamenti Prenotazione</h3>
+          <p class="pay-subtitle">Registra acconti, saldi e rimborsi direttamente sulla prenotazione.</p>
+        </div>
+        <div class="pay-toolbar">
+          <button id="btnQuickAcconto" type="button" class="btn-secondary">Registra Acconto</button>
+          <button id="btnQuickSaldo" type="button" class="btn-secondary">Registra Saldo</button>
+          <button id="btnQuickRimborso" type="button" class="btn-secondary">Registra Rimborso</button>
+          <a id="paymentHistoryLink" class="pay-history-link" href="./pagamenti.html">Storico Pagamenti</a>
+        </div>
+      </div>
+
+      <div class="pay-summary">
+        <div class="pay-sum-item">
+          <div class="pay-sum-label">Totale viaggio</div>
+          <div class="pay-sum-value" id="payTotale">€ 0.00</div>
+        </div>
+        <div class="pay-sum-item pay-sum-green">
+          <div class="pay-sum-label">Totale incassato</div>
+          <div class="pay-sum-value" id="payPagato">€ 0.00</div>
+        </div>
+        <div class="pay-sum-item pay-sum-red">
+          <div class="pay-sum-label">Residuo</div>
+          <div class="pay-sum-value" id="payResiduo">€ 0.00</div>
+        </div>
+        <div class="pay-sum-item pay-sum-neutral">
+          <div class="pay-sum-label">Stato pagamento</div>
+          <div class="pay-sum-value" id="payStatus">Da Pagare</div>
+        </div>
+      </div>
+
+      <table class="pay-table">
+        <thead>
+          <tr><th>Data</th><th>Ricevuta</th><th>Tipo</th><th>Importo</th><th>Metodo</th><th>Note</th><th>Azioni</th></tr>
+        </thead>
+        <tbody id="paymentTbody"></tbody>
+      </table>
+
+      <div class="pay-form">
+        <input id="payMovementId" type="hidden">
+        <div class="pay-form-grid">
+          <div>
+            <label for="payImporto">Importo (€)</label>
+            <input id="payImporto" type="number" step="0.01" min="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label for="payTipo">Tipo</label>
+            <select id="payTipo">
+              <option value="Acconto">Acconto</option>
+              <option value="Saldo">Saldo</option>
+              <option value="Rimborso">Rimborso</option>
+              <option value="Altro">Altro movimento</option>
+            </select>
+          </div>
+          <div>
+            <label for="payMetodo">Metodo</label>
+            <select id="payMetodo">
+              <option>Contanti</option>
+              <option>POS</option>
+              <option>Bonifico</option>
+              <option>Carta</option>
+              <option>PayPal</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div>
+            <label for="payData">Data pagamento</label>
+            <input id="payData" type="date">
+          </div>
+        </div>
+        <label for="payNote">Note pagamento</label>
+        <input id="payNote" type="text" placeholder="Opzionale...">
+        <div class="pay-form-actions">
+          <button id="btnRegistraPagamento" type="button" class="btn-pay-add">Salva movimento</button>
+          <button id="btnPaymentCancelEdit" type="button" class="btn-secondary hidden">Annulla modifica</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="change-seat" type="button" class="btn-secondary hidden">Cambia posto</button>
+      <button id="save" type="button">Salva</button>
+      <button id="close">Chiudi</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="seatChangeModal" class="modal hidden" tabindex="-1" aria-hidden="true">
+  <div class="content seat-change-content">
+    <h2>Cambia posto</h2>
+    <p id="seatChangeMeta" class="seat-change-meta">Seleziona i nuovi posti dalla piantina ufficiale.</p>
+
+    <div class="seat-change-summary">
+      <div class="seat-change-summary__item">
+        <span>Posti da mantenere</span>
+        <strong id="seatChangeRequired">0</strong>
+      </div>
+      <div class="seat-change-summary__item">
+        <span>Nuova selezione</span>
+        <strong id="seatChangeSelected">—</strong>
+      </div>
+    </div>
+
+    <div id="seatChangeFeedback" class="seat-change-feedback hidden" role="alert" aria-live="polite"></div>
+    <div id="seatChangeMap"></div>
+
+    <div class="actions">
+      <button id="seatChangeCancel" type="button">Chiudi</button>
+      <button id="seatChangeConfirm" type="button">Conferma cambio posto</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+<script src="./assets/dg-receipts-v24.js"></script>
+<script type="module" src="./assets/paymentReceiptService-v24.js"></script>
+<script type="module" src="./assets/dg-receipt-download-v28.js"></script>
+<script type="module" src="./assets/bookingDocumentsService-v25.js"></script>
+  <script src="./assets/dg-v46-ux.js?v=73"></script>
+<script src="./assets/prenotazioni-v47-guard.js"></script>
+
+  <script src="./assets/dg-v58-theme.js"></script>
+  <script src="./assets/dg-v75-shell.js?v=96"></script>
+  <script src="./assets/dg-v76-agency.js?v=83"></script>
+  <script src="./assets/dg-v78-booking-command.js?v=78"></script>
+  <script src="./assets/dg-v80-performance.js?v=86"></script>
+<script src="./assets/dg-v84-black-text.js?v=86"></script>
+<script src="./assets/dg-v85-stability.js?v=86"></script>
+<script src="./assets/dg-v82-fortress.js?v=86"></script><script src="./assets/dg-v90-universal-polish.js?v=90"></script>
+  <script src="./assets/dg-v91-universal-contract.js?v=91"></script>
+  <script src="./assets/dg-v93-universal-command.js?v=93"></script>
+  <script src="./assets/dg-v99-executive.js?v=99"></script>
+<script type="module" src="./assets/dg-v102-advanced.js"></script>
+  <script type="module" src="./assets/dg-v103-advanced.js?v=103"></script>
+<script type="module" src="./assets/dg-v104-precision.js?v=104"></script>
+  <script src="./assets/dg-v112-universal-mobile.js?v=114"></script>
+  <script src="./assets/dg-v125-professional-shell.js?v=125" defer></script>
+  <script src="./assets/dg-v126-command-dock.js?v=126" defer></script>
+<script src="./assets/dg-v133-booking-cockpit.js?v=133" defer></script>
+</body>
+</html><style id="dg-v69-confirm-hard-fix">
+  .booking-actions .dg-mobile-confirm-v4{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer!important;}
+  .booking-actions .dg-mobile-confirm-v4.dg-confirmed{opacity:.85;}
+</style>
+<script src="./assets/dg-v139-142-final-integrity.js?v=142"></script>
