@@ -1,6 +1,0 @@
-/* DEL GROSSO GESTIONALE V85 — stability defaults */
-html{scroll-behavior:auto!important;}
-body{overflow-anchor:none;}
-button,a,input,select,textarea{touch-action:manipulation;}
-/* Avoid accidental transition storms during boot. */
-html.dg-v85-boot *{transition:none!important;animation:none!important;}
