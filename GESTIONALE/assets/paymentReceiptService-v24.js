@@ -149,14 +149,18 @@ async function blobToBase64(blob) {
   return btoa(binary);
 }
 
-export async function issuePaymentReceipt(payment, booking, trip, totals = {}) {
+export async function issuePaymentReceipt(payment, booking, trip, totals = {}, options = {}) {
   const built = await buildPaymentReceipt(payment, booking, trip, totals);
+  if(options.sendEmail===false){
+    downloadPaymentReceipt(built.blob, built.receiptNumber);
+    return {...built,success:true,localOnly:true,emailSent:false,emailSkipped:true,localDownloaded:true};
+  }
   const pdfBase64 = await blobToBase64(built.blob);
   const response = await fetch(FUNCTION_URL, {
     method:'POST', headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' },
     body: JSON.stringify({
       payment: { ...payment, receipt_number: built.receiptNumber },
-      booking: { ...booking }, trip: { ...trip }, totals, pdfBase64
+      booking: { ...booking }, trip: { ...trip }, totals, pdfBase64, sendEmail: options.sendEmail !== false
     })
   });
   const data = await response.json().catch(() => ({}));
