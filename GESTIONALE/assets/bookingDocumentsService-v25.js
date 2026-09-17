@@ -45,6 +45,11 @@ export async function issueBookingDocuments(booking,trip={},options={}){
   const autoDownload=options.autoDownload!==false;
   const downloaded=autoDownload?downloadBookingPdf(built,booking):false;
 
+  // Invio esplicito: se l'operatore sceglie NO, il PDF viene generato/scaricato ma non viene chiamata la funzione email.
+  if(options.sendEmail===false){
+    return {success:true,localOnly:true,emailSent:false,emailSkipped:true,confirmationNumber:code(booking),blob:built,downloaded};
+  }
+
   let result={success:true,localOnly:true,confirmationNumber:code(booking)};
   try{
     result=await call(BOOKING_FN,{
@@ -52,7 +57,8 @@ export async function issueBookingDocuments(booking,trip={},options={}){
       booking:{...booking},
       trip:{...trip},
       pdfBase64,
-      pdfFilename:`Conferma_Prenotazione_${code(booking)}.pdf`
+      pdfFilename:`Conferma_Prenotazione_${code(booking)}.pdf`,
+      sendEmail: options.sendEmail !== false
     });
   }catch(err){
     // Il PDF locale è già stato generato e scaricato: un problema di rete/SMTP
