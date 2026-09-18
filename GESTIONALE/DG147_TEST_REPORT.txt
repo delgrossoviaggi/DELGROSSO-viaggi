@@ -1,0 +1,16 @@
+DELGROSSO GESTIONALE — V147 SUPABASE SYNC REPAIR
+
+STATIC TESTS
+HTML local references missing: 0
+JS syntax failures: 0
+JS files checked: 94
+
+SUPABASE CHECK (verified separately against project chkuayhbmitdmzmmvona)
+public.prenotazioni rows: 30
+public.prenotazioni active rows: 30
+
+FIX
+- Operational settings service now uses the canonical Gestionale Supabase project directly.
+- Removed the runtime localStorage override for SUPABASE URL/key from the operational DB client, preventing stale/wrong project routing.
+- Prenotazioni page now has a live Supabase fallback through DG_SUPABASE_SYNC when the service returns empty/error data.
+- Renamed the settings and Prenotazioni modules to force fresh browser/Vercel assets instead of reusing cached V146 filenames.
