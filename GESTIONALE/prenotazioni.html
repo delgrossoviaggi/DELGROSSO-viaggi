@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Prenotazioni - Del Grosso Gestionale V67 Universal Mobile</title>
-<meta name="dg-build" content="CLEAN-151">
+<meta name="dg-build" content="CLEAN-154">
 
 
 
@@ -12,10 +12,10 @@
   <script src="./assets/dg-v48-stability.js"></script>
 <script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
 <script src="./assets/dg-v56-admin-access.js"></script>
-<script type="module" src="./assets/prenotazioni-SYNC152.js"></script>
+<script type="module" src="./assets/prenotazioni-SYNC154.js"></script>
 <script type="module" src="./assets/dg-mobile-bookings-v4.js"></script>
 <script src="./assets/dg-bookings-seat-fix-v73.js?v=73"></script>
-  <link rel="modulepreload" href="./assets/settingsService-SYNC152.js">
+  <link rel="modulepreload" href="./assets/settingsService-SYNC153.js">
   <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
   <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
   <link rel="modulepreload" href="./assets/fleetService-DSMpWv9k.js">
@@ -96,6 +96,25 @@
     }
   </style>
 
+  <style id="dg-v68-change-date">
+    #dateChangeModal .content{box-sizing:border-box;color:#102a43}
+    #dateChangeModal .content h2{color:#102a43!important;margin-top:0}
+    .date-change-meta{margin:0 0 14px;color:#475569;font-weight:700}
+    .date-change-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 16px}
+    .date-change-card{padding:14px;border:1px solid rgba(16,42,67,.12);border-radius:14px;background:#f8fafc}
+    .date-change-card span{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#64748b;font-weight:800;margin-bottom:5px}
+    .date-change-card strong{display:block;font-size:16px;color:#102a43}
+    #dateChangeTrip{width:100%;min-height:48px;font-size:16px}
+    .date-change-warning{margin:12px 0;padding:12px 14px;border-radius:12px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;font-weight:700}
+    .date-change-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+    @media(max-width:760px){
+      #dateChangeModal{padding:8px!important;align-items:stretch!important;justify-content:center!important}
+      #dateChangeModal .content{width:100%!important;max-width:none!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important;border-radius:18px!important;padding:16px!important}
+      .date-change-grid{grid-template-columns:1fr}
+      .date-change-actions{position:sticky;bottom:0;background:rgba(255,255,255,.96);padding:10px 0 calc(10px + env(safe-area-inset-bottom));margin-bottom:-16px}
+    }
+    @media(max-width:390px){.date-change-actions{grid-template-columns:1fr}}
+  </style>
   <style id="dg-v67-bookings-mobile-fix">
     /* V67: mobile booking actions are real touch controls, not keyboard/tab dependent. */
     .dg-mobile-confirm-v2{touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer!important;}
@@ -401,6 +420,24 @@
       <button id="close">Chiudi</button>
     </div>
 
+  </div>
+</div>
+
+<div id="dateChangeModal" class="modal hidden" tabindex="-1" aria-hidden="true">
+  <div class="content date-change-content">
+    <h2>📅 Cambia data viaggio</h2>
+    <p id="dateChangeMeta" class="date-change-meta">Seleziona la nuova data per questa prenotazione.</p>
+    <div class="date-change-grid">
+      <div class="date-change-card"><span>Viaggio attuale</span><strong id="dateChangeCurrent">—</strong></div>
+      <div class="date-change-card"><span>Nuovo viaggio</span><strong id="dateChangeNew">—</strong></div>
+    </div>
+    <label for="dateChangeTrip">Nuova data / viaggio</label>
+    <select id="dateChangeTrip"></select>
+    <div id="dateChangeWarning" class="date-change-warning hidden" role="alert" aria-live="polite"></div>
+    <div class="date-change-actions">
+      <button id="dateChangeCancel" type="button" class="btn-secondary">Annulla</button>
+      <button id="dateChangeConfirm" type="button">Conferma cambio data</button>
+    </div>
   </div>
 </div>
 
