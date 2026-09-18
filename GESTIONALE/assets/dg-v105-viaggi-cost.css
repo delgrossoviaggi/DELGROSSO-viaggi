@@ -1,0 +1,18 @@
+/* V105 — Viaggi Costi: visualizzazione costo reale al centesimo */
+#tripTable th:nth-child(7),
+#tripTable td:nth-child(7){
+  white-space:nowrap;
+}
+#tripTable .dg-trip-cost{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:88px;
+  font-variant-numeric:tabular-nums;
+}
+#modal #costo_totale{
+  font-variant-numeric:tabular-nums;
+}
+@media (max-width:900px){
+  #tripTable{min-width:1120px;}
+}

@@ -1,0 +1,16 @@
+/* DELGROSSO V126 — universal operational command dock */
+.dg-command-dock{position:sticky;top:0;z-index:900;display:flex;align-items:center;gap:8px;padding:8px 10px;margin:0 0 14px;background:rgba(255,255,255,.94);border:1px solid #e4e9f0;border-radius:14px;box-shadow:0 8px 24px rgba(20,35,60,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.dg-command-dock__label{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#687386;white-space:nowrap;padding:0 4px}
+.dg-command-dock__items{display:flex;gap:7px;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.dg-command-dock__items::-webkit-scrollbar{display:none}
+.dg-command-dock a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 12px;border:1px solid #e4e9f0;border-radius:11px;background:#fff;color:#172033;text-decoration:none;font-size:.82rem;font-weight:750;white-space:nowrap;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.dg-command-dock a:hover{transform:translateY(-1px);border-color:#b9c6d8;background:#f7faff}
+.dg-command-dock a[aria-current="page"]{background:#0b5cff;color:#fff;border-color:#0b5cff}
+.dg-command-dock a.dg-primary{border-color:#e66f00;background:#fff7ef;color:#a94f00}
+.dg-command-dock a.dg-primary[aria-current="page"]{background:#e66f00;color:#fff;border-color:#e66f00}
+html.dark .dg-command-dock{background:rgba(21,29,43,.94);border-color:#2a3444}
+html.dark .dg-command-dock a{background:#151d2b;color:#f4f7fb;border-color:#2a3444}
+html.dark .dg-command-dock a:hover{background:#1b2637}
+html.dark .dg-command-dock__label{color:#aab4c4}
+@media(max-width:700px){.dg-command-dock{position:sticky;top:6px;margin:0 -2px 12px;padding:7px;border-radius:13px;gap:6px}.dg-command-dock__label{display:none}.dg-command-dock__items{width:100%;gap:6px}.dg-command-dock a{min-height:42px;padding:8px 11px;font-size:.8rem}}
+@media(prefers-reduced-motion:reduce){.dg-command-dock a{transition:none}}
