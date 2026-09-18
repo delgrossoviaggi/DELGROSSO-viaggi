@@ -1,4 +1,4 @@
-import{o as e,t}from"./settingsService-BkpKGRnr.js";import{t as n}from"./appRoutes-BbuDm13X.js";import{a as r}from"./localAuthService-BoJ5x74a.js";function i(){let e=document.getElementById(`app`);e&&(e.innerHTML=`
+import{o as e,t}from"./settingsService-DG147.js";import{t as n}from"./appRoutes-BbuDm13X.js";import{a as r}from"./localAuthService-BoJ5x74a.js";function i(){let e=document.getElementById(`app`);e&&(e.innerHTML=`
     <div style="min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;color:#0f4c81;">
       <div style="text-align:center;">
         <h1>Del Grosso Gestionale</h1>
