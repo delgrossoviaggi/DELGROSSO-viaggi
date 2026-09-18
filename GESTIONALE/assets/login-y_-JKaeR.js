@@ -1,4 +1,4 @@
-import{o as applySettings,t as applyTheme}from"./settingsService-CLEAN.js";
+import{o as applySettings,t as applyTheme}from"./settingsService-SYNC152.js";
 import{t as routes}from"./appRoutes-BbuDm13X.js";
 import{c as login,isAuthenticated as isAuth}from"./localAuthService-BoJ5x74a.js";
 import"./backButton-BaCuvMXq.js";
