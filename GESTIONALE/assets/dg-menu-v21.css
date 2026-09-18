@@ -1,0 +1,35 @@
+/* DEL GROSSO GESTIONALE V21 — UNIFIED MENU DRAWER */
+:root{--dg-menu-w:min(310px,88vw);--dg-menu-z:2147483000;}
+/* All non-dashboard pages: content uses full width; menu is a hidden drawer. */
+body.dg-has-brand-shell{padding:88px 20px 28px!important;}
+body.dg-has-brand-shell .dg-brand-shell__header{left:20px!important;right:20px!important;top:16px!important;min-height:58px!important;}
+body.dg-has-brand-shell .dg-brand-shell__sidebar{position:fixed!important;left:12px!important;top:12px!important;bottom:12px!important;width:var(--dg-menu-w)!important;transform:translate3d(calc(-100% - 30px),0,0)!important;transition:transform .22s ease!important;z-index:var(--dg-menu-z)!important;}
+body.dg-shell-open .dg-brand-shell__sidebar{transform:translate3d(0,0,0)!important;}
+body.dg-has-brand-shell .dg-brand-shell__menu-toggle{display:flex!important;position:fixed!important;left:max(10px,env(safe-area-inset-left))!important;top:max(10px,env(safe-area-inset-top))!important;width:52px!important;height:52px!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:16px!important;background:#0b1727!important;color:#fff!important;box-shadow:0 12px 34px rgba(0,0,0,.30)!important;z-index:calc(var(--dg-menu-z) + 4)!important;}
+body.dg-has-brand-shell .dg-brand-shell__header-actions{padding-left:66px!important;}
+body.dg-has-brand-shell .dg-brand-shell__backdrop{position:fixed!important;inset:0!important;background:rgba(0,0,0,.52)!important;backdrop-filter:blur(2px);opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .18s ease,visibility .18s ease!important;z-index:calc(var(--dg-menu-z) - 1)!important;}
+body.dg-shell-open .dg-brand-shell__backdrop{opacity:1!important;visibility:visible!important;pointer-events:auto!important;}
+body.dg-shell-open{overflow:hidden!important;overscroll-behavior:none!important;}
+/* Dashboard: same exact drawer behavior and same top-left trigger. */
+body:has(.app-shell){padding:0!important;}
+body:has(.app-shell) .app-shell{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;}
+body:has(.app-shell) .app-shell>.sidebar{position:fixed!important;left:12px!important;top:12px!important;bottom:12px!important;width:var(--dg-menu-w)!important;height:auto!important;transform:translate3d(calc(-100% - 30px),0,0)!important;transition:transform .22s ease!important;z-index:var(--dg-menu-z)!important;}
+body.dg-mobile-menu-open .app-shell>.sidebar{transform:translate3d(0,0,0)!important;}
+body:has(.app-shell) .main-content{width:100%!important;max-width:none!important;margin:0!important;padding:88px 20px 28px!important;}
+body:has(.app-shell) .dg-mobile-menu-toggle{display:flex!important;position:fixed!important;left:max(10px,env(safe-area-inset-left))!important;top:max(10px,env(safe-area-inset-top))!important;width:52px!important;height:52px!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:16px!important;background:#0b1727!important;color:#fff!important;box-shadow:0 12px 34px rgba(0,0,0,.30)!important;z-index:calc(var(--dg-menu-z) + 4)!important;}
+body:has(.app-shell) .dg-mobile-menu-backdrop{position:fixed!important;inset:0!important;background:rgba(0,0,0,.52)!important;backdrop-filter:blur(2px);opacity:0!important;visibility:hidden!important;pointer-events:none!important;z-index:calc(var(--dg-menu-z) - 1)!important;}
+body.dg-mobile-menu-open .dg-mobile-menu-backdrop{display:block!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;}
+body.dg-mobile-menu-open{overflow:hidden!important;overscroll-behavior:none!important;}
+/* Keep the menu button visible on every screen size, but never let it create horizontal overflow. */
+@media(max-width:520px){
+ body.dg-has-brand-shell{padding:78px 12px 24px!important;}
+ body.dg-has-brand-shell .dg-brand-shell__header{left:12px!important;right:12px!important;top:12px!important;}
+ body:has(.app-shell) .main-content{padding:78px 12px 24px!important;}
+ body.dg-has-brand-shell .dg-brand-shell__header-title span,
+ body.dg-has-brand-shell .dg-brand-shell__header-title .dg-brand-shell__eyebrow,
+ body.dg-has-brand-shell .dg-brand-shell__clock{display:none!important;}
+ body.dg-has-brand-shell .dg-brand-shell__header-actions{padding-left:64px!important;}
+}
+/* The menu itself must remain scrollable and touch friendly. */
+.dg-brand-shell__nav,.app-shell>.sidebar .sidebar-nav{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;min-height:0!important;}
+.dg-brand-shell__nav a,.app-shell>.sidebar .nav-link{min-height:48px!important;touch-action:manipulation!important;}

@@ -1,0 +1,60 @@
+/* DEL GROSSO GESTIONALE V76 — AGENZIA 2.0 / UNIVERSAL UI
+   Visual/UX layer only. Existing data + Supabase services remain untouched. */
+:root{--dg76-navy:#061827;--dg76-navy2:#0b3150;--dg76-blue:#087bb8;--dg76-cyan:#36c4ef;--dg76-bg:#f3f7fb;--dg76-card:#fff;--dg76-line:#dce6ee;--dg76-ink:#102436;--dg76-muted:#6d8092;--dg76-green:#13ad78;--dg76-orange:#f59b23;--dg76-red:#df5353;--dg76-purple:#7357e8;--dg76-radius:20px;--dg76-shadow:0 14px 42px rgba(6,24,39,.075)}
+html{background:var(--dg76-bg)!important;overflow-x:hidden!important;-webkit-text-size-adjust:100%!important}
+body.dg-v75-app{background:radial-gradient(circle at 82% -8%,rgba(54,196,239,.12),transparent 27%),linear-gradient(180deg,#f9fbfd 0%,#f3f7fb 60%,#edf3f8 100%)!important}
+/* One shell: legacy dashboard chrome is hidden so V75/V76 never stack two sidebars. */
+body.dg-v75-app>.app-shell{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
+body.dg-v75-app>.app-shell>.sidebar{display:none!important}
+body.dg-v75-app>.app-shell>.main-content{display:block!important;width:min(100%,1660px)!important;max-width:1660px!important;margin:0 auto!important;padding:0!important;min-width:0!important}
+body.dg-v75-app #mobileMenuToggle,body.dg-v75-app #mobileMenuBackdrop{display:none!important}
+body.dg-v75-app>.brand-footer{display:none!important}
+/* Elevated workspace */
+body.dg-v75-app .hero-card{border:1px solid rgba(255,255,255,.5)!important;box-shadow:0 18px 55px rgba(6,24,39,.12)!important}
+body.dg-v75-app .search-section,body.dg-v75-app .charts-section,body.dg-v75-app .spotlight-card,body.dg-v75-app .widget-card{border-radius:var(--dg76-radius)!important;border-color:var(--dg76-line)!important;box-shadow:var(--dg76-shadow)!important}
+body.dg-v75-app .section-heading{gap:12px!important}
+body.dg-v75-app .section-link{font-weight:850!important;color:var(--dg76-blue)!important;text-decoration:none!important}
+/* V76 quick cockpit */
+.dg-v76-cockpit{display:grid!important;grid-template-columns:minmax(0,1.45fr) repeat(4,minmax(135px,1fr))!important;gap:10px!important;margin:0 0 16px!important}
+.dg-v76-cockpit-main,.dg-v76-cockpit-card{border:1px solid var(--dg76-line)!important;background:rgba(255,255,255,.94)!important;border-radius:18px!important;box-shadow:var(--dg76-shadow)!important}
+.dg-v76-cockpit-main{padding:16px 18px!important;background:linear-gradient(135deg,#071d30,#0b3859)!important;color:#fff!important;position:relative;overflow:hidden}
+.dg-v76-cockpit-main:after{content:"";position:absolute;width:170px;height:170px;border-radius:50%;right:-70px;top:-80px;background:rgba(54,196,239,.16)}
+.dg-v76-cockpit-main small{display:block;color:#8eb1c6;font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.dg-v76-cockpit-main strong{display:block;font-size:20px;letter-spacing:-.035em;margin-top:5px}.dg-v76-cockpit-main span{display:block;color:#b8cedd;font-size:11px;margin-top:5px}
+.dg-v76-cockpit-card{padding:12px 13px!important;min-width:0}.dg-v76-cockpit-card small{display:block;color:#7c8fa0;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.dg-v76-cockpit-card strong{display:block;color:var(--dg76-ink);font-size:19px;line-height:1.1;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dg-v76-cockpit-card span{display:block;color:var(--dg76-muted);font-size:9px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg-v76-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;margin-bottom:16px!important}.dg-v76-action{display:flex!important;align-items:center!important;gap:11px!important;min-height:58px!important;padding:10px 12px!important;border:1px solid var(--dg76-line)!important;border-radius:16px!important;background:#fff!important;box-shadow:0 8px 24px rgba(6,24,39,.055)!important;color:var(--dg76-ink)!important;text-decoration:none!important;text-align:left!important}.dg-v76-action:hover{transform:translateY(-2px)!important;box-shadow:0 14px 28px rgba(6,24,39,.10)!important}.dg-v76-action i{font-style:normal;display:grid;place-items:center;width:36px;height:36px;min-width:36px;border-radius:11px;background:#eaf7fd;font-size:18px}.dg-v76-action strong{display:block;font-size:11px}.dg-v76-action span{display:block;color:var(--dg76-muted);font-size:9px;margin-top:2px}
+/* Universal data grids: desktop remains table; mobile becomes cards. */
+body.dg-v75-app table{width:100%;font-variant-numeric:tabular-nums!important}
+body.dg-v75-app table thead th{position:sticky;top:0;z-index:2;background:#edf4f8!important;color:#5e7284!important;border-bottom:1px solid #d9e4ec!important}
+body.dg-v75-app table tbody tr{background:#fff!important}
+body.dg-v75-app table tbody tr:nth-child(even){background:#fbfdff!important}
+body.dg-v75-app table tbody tr:hover{background:#f0f8fc!important}
+body.dg-v75-app .dg-v76-scroll-x{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+/* Better mobile modal ergonomics */
+@media(max-width:900px){
+ body.dg-v75-app{padding:80px 10px max(96px,calc(30px + env(safe-area-inset-bottom)))!important}
+ body.dg-v75-app>.app-shell>.main-content{width:100%!important;max-width:none!important}
+ .dg-v76-cockpit{grid-template-columns:repeat(2,minmax(0,1fr))!important}.dg-v76-cockpit-main{grid-column:1/-1}
+ .dg-v76-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ body.dg-v75-app .table-wrap,body.dg-v75-app .table-container,body.dg-v75-app .table-responsive,body.dg-v75-app .data-table-wrap,body.dg-v75-app .archive-table-wrap,body.dg-v75-app .op-table-wrap,body.dg-v75-app .table-scroll{overflow:visible!important;border:0!important;background:transparent!important;box-shadow:none!important}
+ body.dg-v75-app table.dg-v76-mobile-table{display:block!important;width:100%!important;min-width:0!important;border:0!important}
+ body.dg-v75-app table.dg-v76-mobile-table thead{display:none!important}
+ body.dg-v75-app table.dg-v76-mobile-table tbody{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:100%!important}
+ body.dg-v75-app table.dg-v76-mobile-table tbody tr{display:block!important;width:100%!important;margin:0!important;padding:12px!important;border:1px solid var(--dg76-line)!important;border-radius:18px!important;box-shadow:0 8px 26px rgba(6,24,39,.06)!important;background:#fff!important}
+ body.dg-v75-app table.dg-v76-mobile-table td{display:grid!important;grid-template-columns:88px minmax(0,1fr)!important;gap:8px!important;align-items:start!important;width:100%!important;min-width:0!important;padding:6px 3px!important;border:0!important;color:#20384b!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:12px!important;line-height:1.35!important}
+ body.dg-v75-app table.dg-v76-mobile-table td:before{content:attr(data-label)!important;color:#7b8fa0!important;font-size:8px!important;font-weight:950!important;text-transform:uppercase!important;letter-spacing:.07em!important;padding-top:2px!important}
+ body.dg-v75-app table.dg-v76-mobile-table td:last-child{display:block!important;margin-top:7px!important;padding-top:10px!important;border-top:1px solid #edf1f5!important}
+ body.dg-v75-app table.dg-v76-mobile-table td:last-child:before{display:none!important}
+ body.dg-v75-app table.dg-v76-mobile-table td button,body.dg-v75-app table.dg-v76-mobile-table td .btn{min-height:44px!important;margin:3px 3px 3px 0!important}
+ /* compact first row of a record */
+ body.dg-v75-app table.dg-v76-mobile-table tbody tr td:first-child{font-size:10px!important;color:#607487!important}
+ body.dg-v75-app .modal,.dg-v75-app .dialog,.dg-v75-app .popup{padding:8px!important}
+ body.dg-v75-app .modal-content,body.dg-v75-app .dialog-content,body.dg-v75-app .popup-content,body.dg-v75-app .modal-dialog,body.dg-v75-app .modal .content{width:min(100%,620px)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;margin:8px auto!important;border-radius:20px!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
+ body.dg-v75-app input,body.dg-v75-app select,body.dg-v75-app textarea{font-size:16px!important}
+}
+@media(max-width:560px){
+ body.dg-v75-app{padding-left:7px!important;padding-right:7px!important}
+ .dg-v76-actions{grid-template-columns:1fr 1fr!important;gap:7px!important}.dg-v76-action{min-height:54px!important;padding:8px!important}.dg-v76-action i{width:32px;height:32px;min-width:32px;font-size:16px}.dg-v76-action strong{font-size:10px}.dg-v76-action span{font-size:8px}
+ .dg-v76-cockpit{gap:7px!important}.dg-v76-cockpit-card{padding:10px!important}.dg-v76-cockpit-card strong{font-size:17px!important}
+ body.dg-v75-app table.dg-v76-mobile-table td{grid-template-columns:74px minmax(0,1fr)!important;font-size:11px!important}
+}
+@media(max-width:380px){.dg-v76-actions{grid-template-columns:1fr!important}.dg-v76-cockpit{grid-template-columns:1fr!important}.dg-v76-cockpit-main{grid-column:auto!important}}
