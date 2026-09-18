@@ -1,9 +1,9 @@
-/* DEL GROSSO GESTIONALE — CLEAN BUILD 151 */
-const CACHE=`dg-gestionale-clean-151`;
+/* DEL GROSSO GESTIONALE — SYNC BUILD 152 */
+const CACHE=`dg-gestionale-sync-152`;
 const BASE=new URL(`./`,self.registration.scope);
 const PRECACHE=[
  `login.html`,`index.html`,`dashboard.html`,`viaggi.html`,`prenotazioni.html`,`prenotazione.html`,`clienti.html`,`dossier-cliente.html`,`flotta.html`,`pagamenti.html`,`preventivi.html`,`preventivi-nuovo.html`,`notifiche.html`,`checkin.html`,`statistiche.html`,`impostazioni.html`,`centro-operativo.html`,`noleggi-bus.html`,`agenda.html`,`archivio.html`,`economia.html`,`setup-amministratori.html`,
- `assets/dg-supabase-sync-v4.js`,`assets/settingsService-CLEAN.js`,`assets/prenotazioni-CLEAN.js`,`manifest.json`
+ `assets/dg-supabase-sync-v4.js`,`assets/settingsService-SYNC152.js`,`assets/prenotazioni-SYNC152.js`,`manifest.json`
 ];
 const network=async(req)=>{const r=await fetch(req,{cache:`no-store`});if(r?.ok){const c=await caches.open(CACHE);c.put(req,r.clone()).catch(()=>{});}return r};
 self.addEventListener(`install`,e=>e.waitUntil(caches.open(CACHE).then(c=>Promise.all(PRECACHE.map(x=>c.add(new URL(x,BASE).href).catch(()=>{})))).then(()=>self.skipWaiting())));
