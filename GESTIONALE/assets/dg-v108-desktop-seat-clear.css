@@ -1,4 +1,0 @@
-/* V108 — Svuota posti viaggio: azione amministrativa solo desktop */
-.dg108-clear-seats{font-weight:800!important;border:1px solid #b45309!important;background:#fff7ed!important;color:#9a3412!important}
-.dg108-clear-seats:hover{background:#ffedd5!important}
-@media (max-width:900px){.dg108-clear-seats{display:none!important}}

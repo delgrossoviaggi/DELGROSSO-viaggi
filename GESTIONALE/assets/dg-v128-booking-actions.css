@@ -1,7 +1,0 @@
-/* DELGROSSO V128 — azioni prenotazione semplici e touch-first */
-.booking-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.booking-actions .dg-confirm-booking{font-weight:800;border-color:#138a4b}
-.booking-actions .dg-confirm-booking:not([disabled]){cursor:pointer}
-.booking-actions .dg-confirm-booking[disabled]{opacity:.78;cursor:default}
-@media(max-width:900px){.booking-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.booking-actions button{min-height:44px;width:100%}}
-@media(max-width:560px){.booking-actions{grid-template-columns:1fr}.booking-actions .delBtn{order:20}}

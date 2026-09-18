@@ -1,5 +1,0 @@
-/* V109 — Payment / receipt identity integrity */
-.payment-linked-context{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 18px}
-.linked-field{display:flex;flex-direction:column;gap:5px;padding:12px 14px;border:1px solid rgba(37,99,235,.18);border-radius:14px;background:rgba(239,246,255,.75);min-width:0}
-.linked-field span{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#64748b}.linked-field strong{font-size:15px;color:#0f2742;overflow-wrap:anywhere}
-@media(max-width:700px){.payment-linked-context{grid-template-columns:1fr}.linked-field{padding:11px 12px}.linked-field strong{font-size:14px}}

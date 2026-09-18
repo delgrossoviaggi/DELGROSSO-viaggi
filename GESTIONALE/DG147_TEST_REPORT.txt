@@ -1,2 +1,0 @@
-SUPERSEDED BY V149
-Questo report appartiene alla V147 e non descrive lo stato corrente del pacchetto. Consultare DG149_AUDIT_REPORT.txt.
