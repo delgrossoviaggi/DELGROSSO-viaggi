@@ -1,0 +1,46 @@
+DELGROSSO GESTIONALE V149 - AUDIT COMPLETO E FIX PRENOTAZIONI
+Data: 18/09/2026
+
+RISULTATO CRITICO
+Il database Supabase del gestionale contiene prenotazioni reali, ma il modulo Prenotazioni aveva un errore architetturale nella funzione di inizializzazione:
+- la variabile H è l'archivio CLIENTI usato per la ricerca/selezione cliente;
+- la tabella Prenotazioni viene caricata separatamente dalla funzione $() tramite bookingService;
+- la V148 aveva introdotto erroneamente il caricamento di `prenotazioni` dentro H, rompendo la separazione clienti/prenotazioni e la logica dei posti disponibili.
+
+V149 corregge questa separazione e rende robusto il caricamento.
+
+FIX V149
+1. settingsService-DG149.js: cache-busting del client Supabase canonico.
+2. prenotazioni-DG149.js: caricamento corretto dei CLIENTI in H.
+3. prenotazioni-DG149.js: caricamento corretto dei VIAGGI in Ve.
+4. prenotazioni-DG149.js: caricamento corretto della FLOTTA in He.
+5. prenotazioni-DG149.js: caricamento prenotazioni separato in Bookings.
+6. Fallback DG_SUPABASE_SYNC per clienti, viaggi e prenotazioni.
+7. Occupazione reale calcolata da Bookings e non dall'array clienti.
+8. Nome cliente in tabella con fallback cliente_nome -> cliente.
+9. In caso di errore reale di lettura prenotazioni viene mostrato un errore esplicito, non uno zero silenzioso.
+10. Service Worker portato a v149 e precache aggiornato.
+
+AUDIT STATICO
+- File del pacchetto: 221
+- Import locali verificati: 237
+- Import locali mancanti: 0
+- Riferimenti HTML locali mancanti: 0
+- JavaScript controllato con node --check: 0 errori
+- Riferimenti residui a vecchi moduli prenotazioni DG147/DG148 nel codice operativo: 0
+
+AUDIT SUPABASE (18/09/2026)
+Progetto: gestionale / chkuayhbmitdmzmmvona
+- prenotazioni: 31
+- prenotazioni attive: 31
+- viaggi: 13
+- clienti: 25
+- pagamenti: 3
+
+Il problema non è l'assenza dei dati nel database.
+
+INTEGRITA DATI RILEVATA
+Alcuni contatori storici `posti_occupati` / `posti_liberi` nella tabella viaggi non coincidono con le prenotazioni effettive. V149 usa la prenotazione reale per la disponibilità lato UI; non inventa dati e non modifica automaticamente i contatori del database.
+
+SICUREZZA / PERFORMANCE
+Supabase segnala policy operative anon ALL sulle tabelle gestionali e alcune SECURITY DEFINER eseguibili da anon/authenticated. Questi elementi richiedono una successiva hardening controllata e non sono stati modificati automaticamente in questa release per non interrompere il flusso pubblico di prenotazione.
