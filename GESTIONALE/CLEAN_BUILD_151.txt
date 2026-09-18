@@ -1,0 +1,5 @@
+DELGROSSO GESTIONALE — CLEAN BUILD 151
+Canonical Supabase project: https://chkuayhbmitdmzmmvona.supabase.co
+Operational booking module: assets/prenotazioni-CLEAN.js
+Canonical settings module: assets/settingsService-CLEAN.js
+Service worker cache: dg-gestionale-clean-151
