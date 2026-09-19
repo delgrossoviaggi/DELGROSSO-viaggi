@@ -13,6 +13,7 @@
 <script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
 <script src="./assets/dg-v56-admin-access.js"></script>
 <script type="module" src="./assets/prenotazioni-SYNC154.js"></script>
+<script>window.addEventListener('dg:supabase:changed',function(e){if(!e.detail||!e.detail.table)return;if(['prenotazioni','viaggi','clienti','pagamenti'].includes(e.detail.table)){window.dispatchEvent(new CustomEvent('dg:bookings-data-changed',{detail:e.detail}));}});</script>
 <script type="module" src="./assets/dg-mobile-bookings-v4.js"></script>
 <script src="./assets/dg-bookings-seat-fix-v73.js?v=73"></script>
   <link rel="modulepreload" href="./assets/settingsService-SYNC153.js">
