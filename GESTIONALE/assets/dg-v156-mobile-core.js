@@ -1,8 +1,8 @@
-/* DELGROSSO V156 — mobile-safe form guard. No automatic financial writes while offline. */
+/* DELGROSSO V159 — mobile-safe form guard. No automatic financial writes while offline. */
 (function(){
   'use strict';
   const D=window;
-  const KEY='dg_v156_payment_draft_v1';
+  const KEY='dg_v159_payment_draft_v1';
   const page=location.pathname.toLowerCase();
   const paymentPage=page.endsWith('/pagamenti.html')||page.endsWith('pagamenti.html');
   function q(s){return document.querySelector(s)}
@@ -37,11 +37,11 @@
   }
   function bind(){
     if(!paymentPage)return;
-    ['#importoInput','#tipoSelect','#metodoSelect','#dataInput','#noteInput'].forEach(sel=>q(sel)?.addEventListener('input',markDirty,{passive:true}));
+    ['#importoInput','#tipoSelect','#metodoSelect','#dataInput','#noteInput'].forEach(sel=>{const el=q(sel);if(!el)return;el.addEventListener('input',markDirty,{passive:true});el.addEventListener('change',markDirty,{passive:true})});
     q('#importoInput')?.setAttribute('inputmode','decimal');
     q('#noteInput')?.setAttribute('enterkeyhint','done');
-    q('#savePayment')?.addEventListener('click',function(){
-      if(!navigator.onLine){saveDraft();state('OFFLINE: pagamento NON registrato. Bozza salvata sul dispositivo.','error');e.preventDefault();e.stopImmediatePropagation();return}
+    q('#savePayment')?.addEventListener('click',function(event){
+      if(!navigator.onLine){saveDraft();state('OFFLINE: pagamento NON registrato. Bozza salvata sul dispositivo.','error');event.preventDefault();event.stopImmediatePropagation();return}
       const amount=Number(String(q('#importoInput')?.value||'').replace(',','.'));
       if(!Number.isFinite(amount)||amount<=0){state('Inserisci un importo valido.','error');return}
       state('Salvataggio sicuro in corso…',null);
