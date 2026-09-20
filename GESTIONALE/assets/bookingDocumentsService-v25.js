@@ -45,12 +45,10 @@ export async function issueBookingDocuments(booking,trip={},options={}){
   const autoDownload=options.autoDownload!==false;
   const downloaded=autoDownload?downloadBookingPdf(built,booking):false;
 
-  // Invio esplicito: se l'operatore sceglie NO, il PDF viene generato/scaricato ma non viene chiamata la funzione email.
-  if(options.sendEmail===false){
-    return {success:true,localOnly:true,emailSent:false,emailSkipped:true,confirmationNumber:code(booking),blob:built,downloaded};
-  }
-
-  let result={success:true,localOnly:true,confirmationNumber:code(booking)};
+  // V161: l'archiviazione è obbligatoria e indipendente dall'invio email.
+  // Anche con sendEmail=false il PDF deve essere salvato su Supabase Storage
+  // e il record prenotazione deve contenere confirmation_storage_path.
+  let result={success:true,localOnly:false,confirmationNumber:code(booking)};
   try{
     result=await call(BOOKING_FN,{
       action:'issue',
