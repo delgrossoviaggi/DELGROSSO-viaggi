@@ -1,0 +1,19 @@
+/* DELGROSSO V156 — Mobile stability / touch ergonomics */
+html{min-height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+button,input,select,textarea{touch-action:manipulation;}
+input,select,textarea{font-size:16px!important;max-width:100%;}
+button{min-height:46px;}
+@media(max-width:599px){
+  body{padding-bottom:env(safe-area-inset-bottom);}
+  .main-content,.content,.page-content,.dashboard-content,.app-content{min-width:0!important;max-width:100%!important;}
+  .modal,.dialog,[role="dialog"]{overscroll-behavior:contain;}
+  .modal .content,.modal-content,.dialog,[role="dialog"]{max-width:calc(100vw - 20px)!important;max-height:calc(100dvh - 20px)!important;overflow:auto!important;}
+  .form-actions,.actions,.toolbar,.payment-form-actions{gap:8px!important;}
+  .payment-form-card input,.payment-form-card select,.payment-form-card textarea{min-height:48px;}
+  #savePayment{min-height:52px!important;font-size:16px!important;}
+  .dg-v156-save-state{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom));z-index:20;margin-top:8px;padding:8px 10px;border-radius:12px;background:rgba(11,39,66,.94);color:#fff;font-size:13px;font-weight:700;text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.18);}
+  .dg-v156-save-state.is-error{background:#8b1e1e;}
+  .dg-v156-save-state.is-ok{background:#116b4d;}
+}
+@media(max-width:374px){button{min-height:48px;}.payment-form-actions{grid-template-columns:1fr!important;}.payment-form-actions #savePayment{grid-column:auto!important;}}

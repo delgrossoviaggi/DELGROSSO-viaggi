@@ -1,0 +1,10 @@
+#dg-v155-sync-status{position:fixed;right:16px;bottom:16px;z-index:2147483000;display:flex;align-items:center;gap:9px;min-height:38px;padding:8px 10px 8px 12px;border:1px solid rgba(16,42,67,.14);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 8px 28px rgba(15,39,64,.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font:700 12px/1.1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#102a43;letter-spacing:.01em}
+#dg-v155-sync-status .dg-v155-dot{width:9px;height:9px;border-radius:50%;background:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.16);flex:none}
+#dg-v155-sync-status[data-status="online"] .dg-v155-dot{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.14)}
+#dg-v155-sync-status[data-status="checking"] .dg-v155-dot,#dg-v155-sync-status[data-status="waiting"] .dg-v155-dot{background:#f59e0b;animation:dg-v155-pulse 1.2s infinite}
+#dg-v155-sync-status[data-status="warning"] .dg-v155-dot{background:#f59e0b}
+#dg-v155-sync-status[data-status="error"] .dg-v155-dot,#dg-v155-sync-status[data-status="offline"] .dg-v155-dot{background:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.14)}
+#dg-v155-sync-status .dg-v155-refresh{border:0;background:transparent;color:#102a43;font-size:18px;line-height:1;width:26px;height:26px;border-radius:50%;cursor:pointer;touch-action:manipulation}
+#dg-v155-sync-status .dg-v155-refresh:hover{background:#eef4f8}
+@keyframes dg-v155-pulse{50%{opacity:.35}}
+@media(max-width:760px){#dg-v155-sync-status{left:50%;right:auto;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:calc(100vw - 20px);white-space:nowrap}.dg-v155-label{overflow:hidden;text-overflow:ellipsis}}
