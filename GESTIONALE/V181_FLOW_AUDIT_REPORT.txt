@@ -1,0 +1,38 @@
+DELGROSSO GESTIONALE — V181 FLOW AUDIT
+
+Data: 20/09/2026
+Base: V180 RUNTIME HARDENING
+
+OBIETTIVO
+Verifica mirata del percorso: prenotazione -> conferma PDF -> archiviazione -> ricevute.
+
+RISULTATI DATABASE (project gestionale chkuayhbmitdmzmmvona)
+- Prenotazioni: 34
+- Prenotazioni con confirmation_storage_path valorizzato: 17
+- Prenotazioni senza confirmation_storage_path: 17
+- Pagamenti: 4
+- Pagamenti con receipt_storage_path valorizzato: 2
+- Noleggi bus pagamenti: 0
+- create_public_booking_v2 presente: SI (1 funzione)
+
+CONCLUSIONE IMPORTANTE
+La struttura DB per l'archiviazione esiste, ma 17 prenotazioni storiche non hanno ancora un PDF archiviato. V181 NON modifica automaticamente quei record: generare PDF retroattivamente richiede il percorso applicativo/Edge Function e non è corretto scrivere path fittizi nel DB.
+
+INTEGRAZIONE SITO
+Nel pacchetto gestionale V180 non sono presenti i file del sito (prenota.html, js/gestionale.js, js/ricevuta.js). Pertanto V181 non dichiara di aver applicato il collegamento sito -> gestionale per l'archiviazione. Il bridge gestionale-bridge v7 risulta ACTIVE sul progetto sito, ma il patch lato sito deve essere applicato al repository/package corrente del sito.
+
+FIX V181
+1. bookingDocumentsService-v25.js: se l'archiviazione remota fallisce, la funzione NON restituisce piu' success:true/localOnly:true. Mantiene il PDF locale ma solleva un errore esplicito, evitando che l'UI dica "archiviato" quando non lo e'.
+2. paymentReceiptService-v24.js: restituisce archived:true quando l'Edge Function conferma l'archiviazione e calcola correttamente localDownloaded anche quando sendEmail=false.
+
+NON TOCCATO
+- Supabase schema
+- prenotazioni/pagamenti come dati
+- trigger di occupazione
+- create_public_booking_v2
+- logica finanziaria
+- Edge Function gestionale-bridge v7
+
+TEST STATICI
+- JS syntax: da eseguire sul pacchetto V181
+- asset locali: da verificare dopo il packaging

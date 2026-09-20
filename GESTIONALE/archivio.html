@@ -57,7 +57,7 @@
     <section class="archive-panel">
       <div class="archive-toolbar">
         <label class="archive-search">🔎 <input id="archive-search" type="search" placeholder="Cerca cliente, viaggio o numero documento…" autocomplete="off"></label>
-        <div class="archive-filters">
+        <span id="archive-missing-count" class="archive-missing-count" aria-live="polite"></span><div class="archive-filters">
           <button class="archive-filter is-active" data-filter="all">Tutti</button>
           <button class="archive-filter" data-filter="booking">Prenotazioni</button>
           <button class="archive-filter" data-filter="acconto">Acconti</button>
@@ -98,5 +98,6 @@
 
 <script src="./assets/dg-v156-mobile-core.js?v=156" defer></script>
   
+<script src="./assets/dg-v180-runtime-guard.js"></script>
 </body>
 </html>
