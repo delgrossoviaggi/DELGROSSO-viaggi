@@ -73,6 +73,8 @@
   <link rel="stylesheet" href="./assets/dg-v126-command-dock.css?v=126">
 <link rel="stylesheet" href="./assets/dg-v133-booking-cockpit.css?v=133">
   <link rel="stylesheet" href="./assets/dg-v145-complete-ui.css?v=145">
+  <link rel="stylesheet" href="./assets/dg-v155-safety.css">
+  <link rel="stylesheet" href="./assets/dg-v156-mobile-core.css?v=156">
 </head>
 <body class="dg-v65-page dg-v75-app">
  
@@ -187,7 +189,7 @@
     <div class="pay-form-grid">
       <div>
         <label for="importoInput">Importo</label>
-        <input id="importoInput" type="number" step="0.01" min="0.01" placeholder="0.00">
+        <input id="importoInput" type="number" step="0.01" min="0.01" inputmode="decimal" autocomplete="off" placeholder="0,00">
       </div>
       <div>
         <label for="tipoSelect">Tipo</label>
@@ -216,7 +218,7 @@
     </div>
 
     <label for="noteInput">Note</label>
-    <textarea id="noteInput" placeholder="Note movimento"></textarea>
+    <textarea id="noteInput" placeholder="Note movimento" enterkeyhint="done"></textarea>
 
     <div class="payment-form-actions">
       <button id="savePayment" type="button">Salva movimento</button>
@@ -257,5 +259,8 @@
   <script src="./assets/dg-v125-professional-shell.js?v=125" defer></script>
   <script src="./assets/dg-v126-command-dock.js?v=126" defer></script>
 <script src="./assets/dg-v133-booking-cockpit.js?v=133" defer></script>
+
+<script src="./assets/dg-v155-safety.js" defer></script>
+<script src="./assets/dg-v156-mobile-core.js?v=156" defer></script>
 </body>
 </html><script src="./assets/dg-v139-142-final-integrity.js?v=142"></script>
