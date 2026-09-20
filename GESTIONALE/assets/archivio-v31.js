@@ -1,5 +1,5 @@
-import { openStoredReceipt, downloadStoredReceipt } from './paymentReceiptService-v24.js';
-import { openBookingConfirmation, resendBookingEmail, resendPaymentEmail } from './bookingDocumentsService-v25.js';
+import { openStoredReceipt, downloadStoredReceipt, issuePaymentReceipt } from './paymentReceiptService-v24.js';
+import { openBookingConfirmation, resendBookingEmail, resendPaymentEmail, issueBookingDocuments, getBookingContext } from './bookingDocumentsService-v25.js';
 import { openNoleggioStoredReceipt, downloadNoleggioStoredReceipt, resendNoleggioPaymentEmail } from './noleggioPaymentReceiptService-v1.js';
 
 const SUPABASE_URL='https://chkuayhbmitdmzmmvona.supabase.co';
@@ -101,6 +101,8 @@ function normalize(documents){
 }
 function stats(){
   $('#stat-total').textContent=rows.length; $('#stat-booking').textContent=rows.filter(x=>x.kind==='booking').length; $('#stat-acconto').textContent=rows.filter(x=>x.kind==='acconto').length; $('#stat-saldo').textContent=rows.filter(x=>x.kind==='saldo').length;
+  const missing=rows.filter(x=>!x.path).length; const box=$('#archive-missing-count');
+  if(box) box.textContent=missing?`⚠ ${missing} da archiviare`:'✓ Tutti i PDF archiviati';
 }
 function label(k,r){if(r?.source==='noleggio')return k==='saldo'?'Ricevuta saldo noleggio':'Ricevuta acconto noleggio';return k==='booking'?'Conferma prenotazione':k==='saldo'?'Ricevuta saldo':'Ricevuta acconto'}
 function render(){
@@ -115,7 +117,7 @@ function render(){
     <td>${r.emailSent?'<span class="archive-email-ok">✓ Inviata</span>':'<span class="archive-email-no">—</span>'}</td>
     <td>${r.path?'<span class="archive-email-ok">✓ Archiviato</span>':'<span class="archive-email-no">⚠ PDF non archiviato</span>'}</td>
     <td><div class="archive-actions">
-      <button class="archive-btn primary" data-action="open" data-id="${esc(r.id)}" ${r.path?'':'disabled'}>Apri PDF</button>
+      ${r.path?'':'<button class="archive-btn archive-missing-action" data-action="archive" data-id="'+esc(r.id)+'">Archivia ora</button>'}<button class="archive-btn primary" data-action="open" data-id="${esc(r.id)}" ${r.path?'':'disabled'}>Apri PDF</button>
       <button class="archive-btn" data-action="download" data-id="${esc(r.id)}" ${r.path?'':'disabled'}>Scarica</button>
       <button class="archive-btn" data-action="email" data-id="${esc(r.id)}">Reinvia email</button>
     </div></td></tr>`).join('');
@@ -140,6 +142,12 @@ async function act(action,id,button){
   button.disabled=true; const old=button.textContent; button.textContent='Attendi…';
   try{
     if(row.kind==='booking'){
+      if(action==='archive'){
+        const ctx=await getBookingContext(row.bookingId||row.id);
+        const archived=await issueBookingDocuments(ctx.booking||{},ctx.trip||{},{autoDownload:false,sendEmail:false});
+        if(!archived?.archived) throw new Error('La conferma non risulta archiviata su Supabase Storage.');
+        await load(); return;
+      }
       if((action==='open'||action==='download')&&!row.path) throw new Error('PDF della conferma non ancora archiviato.');
       if(action==='open') await openBookingConfirmation(row.path);
       if(action==='download') await downloadBooking(row.path,row.number);
@@ -153,6 +161,21 @@ async function act(action,id,button){
       if(action==='download') await downloadNoleggioStoredReceipt(row.path,row.number);
       if(action==='email') await resendNoleggioPaymentEmail(row.paymentId);
     }else{
+      if(action==='archive'){
+        if(row.source==='noleggio') throw new Error('Nessuna ricevuta noleggio da recuperare: il database non presenta PDF mancanti.');
+        const payment=row.raw||{};
+        if(!row.bookingId) throw new Error('Pagamento senza prenotazione collegata: recupero bloccato per sicurezza.');
+        const ctx=await getBookingContext(row.bookingId);
+        const archived=await issuePaymentReceipt(
+          payment,
+          ctx.booking||{},
+          ctx.trip||{},
+          { totalDue: payment.totale, paidAfter: payment.pagato },
+          { sendEmail:false, autoDownload:false }
+        );
+        if(!archived?.archived) throw new Error('La ricevuta non risulta archiviata su Supabase Storage.');
+        await load(); return;
+      }
       if((action==='open'||action==='download')&&!row.path) throw new Error('PDF della ricevuta non ancora archiviato.');
       if(action==='open') await openStoredReceipt(row.path);
       if(action==='download') await downloadStoredReceipt(row.path,row.number);
