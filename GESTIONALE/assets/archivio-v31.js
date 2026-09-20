@@ -137,16 +137,30 @@ async function load(){
     rows=normalize(documents); stats(); render(); syncState(true);
   }catch(e){console.error(e); syncState(false); if(error){error.textContent=`Impossibile caricare l'archivio: ${e.message||e}`;error.classList.add('is-visible');} $('#archive-body').innerHTML=`<tr><td colspan="8"><div class="archive-empty">Archivio non disponibile.</div></td></tr>`;}
 }
+async function recoverAndVerify(row, button, runner){
+  const old=button.textContent;
+  button.textContent='Archiviazione…';
+  await runner();
+  button.textContent='Verifica…';
+  await load();
+  const fresh=rows.find(x=>String(x.id)===String(row.id) && x.kind===row.kind);
+  if(!fresh?.path) throw new Error('Operazione completata dal servizio, ma il PDF non risulta ancora presente nell'archivio Supabase. Nessun falso “completato”.');
+  button.textContent='Archiviato ✓';
+  setTimeout(()=>{button.textContent=old;button.disabled=false},1400);
+  return fresh;
+}
 async function act(action,id,button){
   const row=rows.find(x=>String(x.id)===String(id)); if(!row)return;
   button.disabled=true; const old=button.textContent; button.textContent='Attendi…';
   try{
     if(row.kind==='booking'){
       if(action==='archive'){
-        const ctx=await getBookingContext(row.bookingId||row.id);
-        const archived=await issueBookingDocuments(ctx.booking||{},ctx.trip||{},{autoDownload:false,sendEmail:false});
-        if(!archived?.archived) throw new Error('La conferma non risulta archiviata su Supabase Storage.');
-        await load(); return;
+        await recoverAndVerify(row,button,async()=>{
+          const ctx=await getBookingContext(row.bookingId||row.id);
+          const archived=await issueBookingDocuments(ctx.booking||{},ctx.trip||{},{autoDownload:false,sendEmail:false});
+          if(!archived?.archived) throw new Error('La conferma non risulta archiviata su Supabase Storage.');
+        });
+        return;
       }
       if((action==='open'||action==='download')&&!row.path) throw new Error('PDF della conferma non ancora archiviato.');
       if(action==='open') await openBookingConfirmation(row.path);
@@ -163,18 +177,20 @@ async function act(action,id,button){
     }else{
       if(action==='archive'){
         if(row.source==='noleggio') throw new Error('Nessuna ricevuta noleggio da recuperare: il database non presenta PDF mancanti.');
-        const payment=row.raw||{};
-        if(!row.bookingId) throw new Error('Pagamento senza prenotazione collegata: recupero bloccato per sicurezza.');
-        const ctx=await getBookingContext(row.bookingId);
-        const archived=await issuePaymentReceipt(
-          payment,
-          ctx.booking||{},
-          ctx.trip||{},
-          { totalDue: payment.totale, paidAfter: payment.pagato },
-          { sendEmail:false, autoDownload:false }
-        );
-        if(!archived?.archived) throw new Error('La ricevuta non risulta archiviata su Supabase Storage.');
-        await load(); return;
+        await recoverAndVerify(row,button,async()=>{
+          const payment=row.raw||{};
+          if(!row.bookingId) throw new Error('Pagamento senza prenotazione collegata: recupero bloccato per sicurezza.');
+          const ctx=await getBookingContext(row.bookingId);
+          const archived=await issuePaymentReceipt(
+            payment,
+            ctx.booking||{},
+            ctx.trip||{},
+            { totalDue: payment.totale, paidAfter: payment.pagato },
+            { sendEmail:false, autoDownload:false }
+          );
+          if(!archived?.archived) throw new Error('La ricevuta non risulta archiviata su Supabase Storage.');
+        });
+        return;
       }
       if((action==='open'||action==='download')&&!row.path) throw new Error('PDF della ricevuta non ancora archiviato.');
       if(action==='open') await openStoredReceipt(row.path);
