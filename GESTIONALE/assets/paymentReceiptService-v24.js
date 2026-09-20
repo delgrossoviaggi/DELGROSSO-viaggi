@@ -164,8 +164,10 @@ export async function issuePaymentReceipt(payment, booking, trip, totals = {}, o
   if (!response.ok || !data.success) throw new Error(data.error || `Invio ricevuta non riuscito (${response.status}).`);
   const emailPresent = String(booking?.email || booking?.cliente_email || payment?.email || '').trim().length > 0;
   const emailSent = data.emailSent !== false;
-  if (!emailPresent || options.sendEmail===false) downloadPaymentReceipt(built.blob, built.receiptNumber);
-  return { ...built, ...data, emailSent, localDownloaded: !emailPresent };
+  const autoDownload = options.autoDownload !== false;
+  const localDownloaded = autoDownload && (!emailPresent || options.sendEmail===false);
+  if (localDownloaded) downloadPaymentReceipt(built.blob, built.receiptNumber);
+  return { ...built, ...data, archived:true, emailSent, localDownloaded };
 }
 
 export function downloadPaymentReceipt(blob, number = 'ricevuta') {
