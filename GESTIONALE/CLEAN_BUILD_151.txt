@@ -1,5 +1,5 @@
 DELGROSSO GESTIONALE — SYNC BUILD 152
 Canonical Supabase project: https://chkuayhbmitdmzmmvona.supabase.co
 Operational booking module: assets/prenotazioni-SYNC152.js
-Canonical settings module: assets/settingsService-SYNC152.js
+Canonical settings module: assets/settingsService-SYNC153.js
 Service worker cache: dg-gestionale-sync-152
