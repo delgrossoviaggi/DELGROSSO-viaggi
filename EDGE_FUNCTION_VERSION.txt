@@ -1,0 +1,5 @@
+gestionale-bridge: version 6
+Project: bhsanrbadsqcpbtxupmr
+verify_jwt: false
+Health endpoint: GET ?health=1
+Booking endpoint: POST action=booking -> /rest/v1/rpc/create_public_booking_v2

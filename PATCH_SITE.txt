@@ -1,0 +1,17 @@
+FILE SITO DA AGGIORNARE — BATCH 1
+
+1) js/gestionale.js
+- gestBridge(): AbortController + timeout 25s + retry 1 volta per action=booking.
+- cache: no-store.
+- createGestionaleBooking(): aggiunge requestId stabile e invia requestId al bridge.
+- emette CustomEvent('dg:booking-created') dopo successo.
+
+2) prenota.html
+- genera un requestId stabile per la singola richiesta di prenotazione.
+- se il bridge deve ritentare, usa lo stesso requestId.
+- dopo successo azzera il requestId e ricarica disponibilità.
+
+3) viaggi.html
+- ascolta dg:booking-created e ricarica le disponibilità senza attendere un refresh manuale.
+
+Il codice esatto è stato preparato contro i file presenti nel branch main il 20/09/2026. Prima del push va applicato al repository locale e verificato con git diff.

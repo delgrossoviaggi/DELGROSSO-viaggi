@@ -1,22 +1,13 @@
-DELGROSSO VIAGGI — SITE PRO
+DELGROSSO V158 — BATCH 1 — PRENOTAZIONI SITO -> GESTIONALE
 
-Questa versione usa esclusivamente il progetto Supabase:
-https://bhsanrbadsqcpbtxupmr.supabase.co
+OBIETTIVO
+Rendere il flusso prenotazione dal sito più affidabile, evitando che un timeout/retry possa creare duplicati e facendo arrivare la prenotazione al database operativo del Gestionale.
 
-Ottimizzazioni principali:
-- niente Tailwind CDN/AOS/GLightbox sulle pagine principali: CSS/JS locali e vanilla per maggiore velocità;
-- homepage cinematografica con carousel reale da carousel_home;
-- partenze da viaggi pubblicati (pubblicato = SI);
-- flotta da site_fleet;
-- Party da site_party_events;
-- News da site_posts;
-- contatti da site_settings (fallback info_azienda);
-- Admin Pro con upload multiplo drag/file picker, anteprima e progressione, direttamente su Storage bucket site-media;
-- struttura responsive pensata prima per mobile/iPhone;
-- nessuna migrazione SQL inclusa e nessuna modifica allo schema Supabase.
+COMPONENTI
+1) Supabase gestionale: migration SQL con create_public_booking_v2 + request_id/idempotenza.
+2) Supabase sito: Edge Function gestionale-bridge v6, con timeout/retry e health check.
+3) Sito: js/gestionale.js + prenota.html + viaggi.html da aggiornare con il patch descritto nel file PATCH_SITE.txt.
+4) GESTIONALE_V157.../ è la base completa del Gestionale, invariata in questo batch per non introdurre modifiche non necessarie.
 
-ATTENZIONE:
-1. Il bucket Storage deve essere 'site-media' e consentire l'upload all'utente/admin che usa il pannello.
-2. L'Admin deve avere le policy Storage/DB già configurate nel progetto. Se il progetto richiede autenticazione, il login Supabase va aggiunto alle policy prima di consentire upload.
-3. Prenotazioni: la pagina usa la tabella public.prenotazioni del progetto indicato e non tocca alcun altro progetto.
-4. Il file admin.html è un CMS frontend; non inserire password segrete nel codice.
+IMPORTANTE
+Il repository GitHub non è stato modificato dal connettore GitHub: la scrittura GitHub ha restituito 403. Quindi NON bisogna considerare il sito già aggiornato su GitHub/Vercel. La parte Supabase è stata applicata direttamente.
