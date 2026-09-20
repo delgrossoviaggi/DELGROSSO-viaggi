@@ -2,7 +2,7 @@
    Reads the existing DOM/data services only. It never writes to Supabase. */
 (()=>{
  const page=location.pathname.split('/').pop()||'dashboard.html';
- if(!document.body||['login.html','index.html','setup-amministratori.html'].includes(page))return;
+ if(!document.body||['login.html','index.html',].includes(page))return;
  const tableIds=['tripTable','bookingTable','clientiTable','fleetTable','nbTable','nbPaymentsTable','paymentsTable','quoteTable','reportTable','passengerTable'];
  const labels=()=>{
   tableIds.forEach(id=>{

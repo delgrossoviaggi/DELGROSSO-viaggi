@@ -7,7 +7,7 @@
     ['COMMERCIALE & CONTABILITÀ',[['💳','Pagamenti','./pagamenti.html'],['🧾','Preventivi','./preventivi.html'],['📊','Statistiche','./statistiche.html'],['🗂️','Archivio','./archivio.html']]],
     ['SISTEMA',[['🔔','Notifiche','./notifiche.html'],['🔧','Impostazioni','./impostazioni.html']]]
   ];
-  const excluded=new Set(['login.html','index.html','setup-amministratori.html']);
+  const excluded=new Set(['login.html','index.html',]);
   const page=location.pathname.split('/').pop()||'dashboard.html';
   if(excluded.has(page)||!document.body)return;
   if(document.getElementById('dg-v74-shell'))return;

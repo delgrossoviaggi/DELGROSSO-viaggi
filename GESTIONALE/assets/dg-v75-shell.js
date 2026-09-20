@@ -2,7 +2,7 @@
    Navigation/UX layer. Supabase/data services are not replaced or modified. */
 (()=>{
  const page=location.pathname.split('/').pop()||'dashboard.html';
- const excluded=new Set(['login.html','index.html','setup-amministratori.html']); if(excluded.has(page)||!document.body)return;
+ const excluded=new Set(['login.html','index.html',]); if(excluded.has(page)||!document.body)return;
  document.body.classList.add('dg-v75-app');
  const titles={
   'dashboard.html':'Dashboard','viaggi.html':'Viaggi','prenotazioni.html':'Prenotazioni','noleggi-bus.html':'Noleggi Bus','checkin.html':'Check-in','centro-operativo.html':'Centro Operativo','clienti.html':'Clienti','flotta.html':'Flotta','pagamenti.html':'Pagamenti','preventivi.html':'Preventivi','statistiche.html':'Statistiche','archivio.html':'Archivio','notifiche.html':'Notifiche','impostazioni.html':'Impostazioni','preventivi-nuovo.html':'Nuovo Preventivo','prenotazione.html':'Nuova Prenotazione','agenda.html':'Agenda Operativa','economia.html':'Economia & Margini','dossier-viaggio.html':'Dossier Viaggio','control-room-viaggio.html':'Control Room Viaggio'
