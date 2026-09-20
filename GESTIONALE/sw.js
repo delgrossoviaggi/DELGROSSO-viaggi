@@ -1,5 +1,5 @@
-/* DEL GROSSO GESTIONALE — V185 ARCHIVE RECOVERY */
-const CACHE=`dg-gestionale-v185`;
+/* DEL GROSSO GESTIONALE — V187 ARCHIVE RECOVERY */
+const CACHE=`dg-gestionale-v187`;
 const BASE=new URL(`./`,self.registration.scope);
 const PRECACHE=[
  `agenda.html`,
