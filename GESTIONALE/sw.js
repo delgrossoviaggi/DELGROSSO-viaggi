@@ -1,5 +1,5 @@
-/* DEL GROSSO GESTIONALE — V159 MOBILE/OFFLINE CACHE */
-const CACHE=`dg-gestionale-v159`;
+/* DEL GROSSO GESTIONALE — V162 MOBILE/OFFLINE CACHE */
+const CACHE=`dg-gestionale-v162`;
 const BASE=new URL(`./`,self.registration.scope);
 const PRECACHE=[
  `agenda.html`,
@@ -23,7 +23,6 @@ const PRECACHE=[
  `prenotazioni.html`,
  `preventivi-nuovo.html`,
  `preventivi.html`,
- `setup-amministratori.html`,
  `statistiche.html`,
  `viaggi.html`,
  `assets/accessibility-BRl-3lTk.css`,
@@ -54,7 +53,6 @@ const PRECACHE=[
  `assets/dg-documents-v25.css`,
  `assets/dg-github-v19.css`,
  `assets/dg-menu-v21.css`,
- `assets/dg-mobile-bookings-v1.js`,
  `assets/dg-mobile-bookings-v4.js`,
  `assets/dg-mobile-v24.css`,
  `assets/dg-modern-ui.css`,
@@ -187,12 +185,8 @@ const PRECACHE=[
  `assets/pdfReceiptService-M28dXixt.js`,
  `assets/prenota-FgpWYoWC.css`,
  `assets/prenotazione-B4iB3xl6.js`,
- `assets/prenotazioni-CLEAN.js`,
  `assets/prenotazioni-DO8eRNX0.js`,
  `assets/prenotazioni-DjMDlXY7.css`,
- `assets/prenotazioni-SYNC152.js`,
- `assets/prenotazioni-SYNC153.js`,
- `assets/prenotazioni-SYNC154.js`,
  `assets/prenotazioni-SYNC155.js`,
  `assets/prenotazioni-responsive-v44.css`,
  `assets/prenotazioni-v47-guard.js`,
