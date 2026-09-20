@@ -151,10 +151,7 @@ async function blobToBase64(blob) {
 
 export async function issuePaymentReceipt(payment, booking, trip, totals = {}, options = {}) {
   const built = await buildPaymentReceipt(payment, booking, trip, totals);
-  if(options.sendEmail===false){
-    downloadPaymentReceipt(built.blob, built.receiptNumber);
-    return {...built,success:true,localOnly:true,emailSent:false,emailSkipped:true,localDownloaded:true};
-  }
+  // V161: archivia sempre la ricevuta; l'email è una scelta separata.
   const pdfBase64 = await blobToBase64(built.blob);
   const response = await fetch(FUNCTION_URL, {
     method:'POST', headers:{ apikey:SUPABASE_KEY, Authorization:`Bearer ${SUPABASE_KEY}`, 'Content-Type':'application/json' },
@@ -167,7 +164,7 @@ export async function issuePaymentReceipt(payment, booking, trip, totals = {}, o
   if (!response.ok || !data.success) throw new Error(data.error || `Invio ricevuta non riuscito (${response.status}).`);
   const emailPresent = String(booking?.email || booking?.cliente_email || payment?.email || '').trim().length > 0;
   const emailSent = data.emailSent !== false;
-  if (!emailPresent) downloadPaymentReceipt(built.blob, built.receiptNumber);
+  if (!emailPresent || options.sendEmail===false) downloadPaymentReceipt(built.blob, built.receiptNumber);
   return { ...built, ...data, emailSent, localDownloaded: !emailPresent };
 }
 
