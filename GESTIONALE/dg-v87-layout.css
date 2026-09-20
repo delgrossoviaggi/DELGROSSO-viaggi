@@ -1,0 +1,24 @@
+/* DEL GROSSO GESTIONALE V87 — LAYOUT GUARD / VIAGGI UX
+   CSS-only guard against legacy cascade collisions. No observers, no polling. */
+body.dg-v75-app{min-width:0!important;}
+body.dg-v75-app .stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important;width:100%!important;margin:18px 0!important;align-items:stretch!important;}
+body.dg-v75-app .stats>.card{display:flex!important;flex-direction:column!important;justify-content:center!important;min-width:0!important;min-height:104px!important;padding:16px 18px!important;}
+body.dg-v75-app .stats>.card h3{margin:0!important;line-height:1.2!important;}
+body.dg-v75-app .stats>.card span{display:block!important;margin-top:9px!important;line-height:1!important;font-size:clamp(1.5rem,2.5vw,2rem)!important;font-weight:900!important;}
+body.dg-v75-app #tripTable{display:table!important;width:100%!important;min-width:820px!important;max-width:none!important;table-layout:auto!important;overflow:visible!important;}
+body.dg-v75-app #tripTable thead{display:table-header-group!important;}
+body.dg-v75-app #tripTable tbody{display:table-row-group!important;}
+body.dg-v75-app #tripTable tr{display:table-row!important;}
+body.dg-v75-app #tripTable th,body.dg-v75-app #tripTable td{display:table-cell!important;vertical-align:middle!important;}
+body.dg-v75-app #tripTable td:last-child{display:table-cell!important;border-top:0!important;margin-top:0!important;padding-top:13px!important;}
+body.dg-v75-app #tripTable td:last-child:before{display:none!important;content:none!important;}
+body.dg-v75-app .table-wrap:has(#tripTable),body.dg-v75-app .table-container:has(#tripTable){overflow-x:auto!important;}
+@media(max-width:900px){
+ body.dg-v75-app .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(max-width:560px){
+ body.dg-v75-app .stats{grid-template-columns:1fr!important;gap:9px!important;}
+ body.dg-v75-app #tripTable{min-width:760px!important;}
+}
+/* Prevent accidental text-selection from looking like broken UI while keeping selection accessible. */
+body.dg-v75-app ::selection{background:rgba(15,120,187,.28);color:#000;}

@@ -1,0 +1,100 @@
+/* DEL GROSSO GESTIONALE V88 — UNIVERSAL LAYOUT / RESPONSIVE GUARD
+   Final cascade layer. Presentation only: no data writes, no observers, no polling.
+   Goal: every page remains usable without zooming, horizontal page scrolling or manual layout tricks. */
+
+html,body{max-width:100%!important;min-width:0!important;overflow-x:hidden!important}
+body.dg-v75-app{width:100%!important;min-width:0!important}
+body.dg-v75-app main,body.dg-v75-app .main-content,body.dg-v75-app .content,body.dg-v75-app .page,body.dg-v75-app .page-content{min-width:0!important;max-width:100%!important}
+body.dg-v75-app .dg-v75-context{min-width:0!important;max-width:100%!important}
+
+/* Never let a legacy shell reserve space beside the V75 shell. */
+body.dg-v75-app .dg-brand-shell__sidebar,body.dg-v75-app .dg-brand-shell__header,
+body.dg-v75-app .dg-brand-shell__backdrop,body.dg-v75-app .dg-brand-shell__menu-toggle{display:none!important}
+body.dg-v75-app .app-shell>.sidebar{display:none!important}
+body.dg-v75-app .app-shell{min-width:0!important;max-width:100%!important}
+
+/* Desktop/tablet: the data surface scrolls, not the entire document. */
+body.dg-v75-app .table-wrap,body.dg-v75-app .table-container,body.dg-v75-app .table-responsive,
+body.dg-v75-app .data-table-wrap,body.dg-v75-app .booking-table-wrap,body.dg-v75-app .archive-table-wrap,
+body.dg-v75-app .op-table-wrap,body.dg-v75-app .nb-table-wrap{min-width:0!important;max-width:100%!important;overflow-x:auto!important;overflow-y:visible!important}
+
+/* Compact desktop / tablet. This is intentionally wider than the old 900px breakpoint,
+   so 10-11" laptops and browser zoom do not force the user into a broken desktop table. */
+@media (max-width:1100px){
+  :root{--dg-sidebar:0px!important}
+  body.dg-v75-app{padding:94px 16px 92px!important}
+  .dg-v75-sidebar{width:min(320px,88vw)!important;transform:translate3d(-108%,0,0)!important;z-index:3101!important}
+  .dg-v75-sidebar.open{transform:translate3d(0,0,0)!important}
+  .dg-v75-topbar{left:0!important;right:0!important;height:64px!important;padding:0 10px!important;gap:8px!important}
+  .dg-v75-menu{display:grid!important}
+  .dg-v75-search{display:none!important}
+  .dg-v75-title{max-width:38vw!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .dg-v75-sub{display:none!important}
+  .dg-v75-bottom{position:fixed!important;z-index:3000!important;left:max(7px,env(safe-area-inset-left))!important;right:max(7px,env(safe-area-inset-right))!important;bottom:max(7px,env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;padding:6px!important}
+
+  /* All primary operational tables become cards at this width. */
+  body.dg-v75-app table#tripTable,body.dg-v75-app table#bookingTable,body.dg-v75-app table.dg-v75-mobile-table,
+  body.dg-v75-app table#clientiTable,body.dg-v75-app table#fleetTable,body.dg-v75-app table#nbTable,
+  body.dg-v75-app table#nbPaymentsTable,body.dg-v75-app table#passengerTable,body.dg-v75-app table#paymentsTable,
+  body.dg-v75-app table#quoteTable,body.dg-v75-app table#reportTable{
+    width:100%!important;min-width:0!important;display:block!important;table-layout:auto!important;border-spacing:0!important
+  }
+  body.dg-v75-app table#tripTable thead,body.dg-v75-app table#bookingTable thead,body.dg-v75-app table.dg-v75-mobile-table thead,
+  body.dg-v75-app table#clientiTable thead,body.dg-v75-app table#fleetTable thead,body.dg-v75-app table#nbTable thead,
+  body.dg-v75-app table#nbPaymentsTable thead,body.dg-v75-app table#passengerTable thead,body.dg-v75-app table#paymentsTable thead,
+  body.dg-v75-app table#quoteTable thead,body.dg-v75-app table#reportTable thead{display:none!important}
+  body.dg-v75-app table#tripTable tbody,body.dg-v75-app table#bookingTable tbody,body.dg-v75-app table.dg-v75-mobile-table tbody,
+  body.dg-v75-app table#clientiTable tbody,body.dg-v75-app table#fleetTable tbody,body.dg-v75-app table#nbTable tbody,
+  body.dg-v75-app table#nbPaymentsTable tbody,body.dg-v75-app table#passengerTable tbody,body.dg-v75-app table#paymentsTable tbody,
+  body.dg-v75-app table#quoteTable tbody,body.dg-v75-app table#reportTable tbody{display:block!important;width:100%!important}
+  body.dg-v75-app table#tripTable tr,body.dg-v75-app table#bookingTable tr,body.dg-v75-app table.dg-v75-mobile-table tr,
+  body.dg-v75-app table#clientiTable tr,body.dg-v75-app table#fleetTable tr,body.dg-v75-app table#nbTable tr,
+  body.dg-v75-app table#nbPaymentsTable tr,body.dg-v75-app table#passengerTable tr,body.dg-v75-app table#paymentsTable tr,
+  body.dg-v75-app table#quoteTable tr,body.dg-v75-app table#reportTable tr{
+    display:block!important;width:100%!important;min-width:0!important;margin:0 0 12px!important;padding:10px!important;
+    border:1px solid var(--dg-line,#dfe7ef)!important;border-radius:16px!important;background:#fff!important;
+    box-shadow:0 6px 20px rgba(6,24,39,.055)!important
+  }
+  body.dg-v75-app table#tripTable td,body.dg-v75-app table#bookingTable td,body.dg-v75-app table.dg-v75-mobile-table td,
+  body.dg-v75-app table#clientiTable td,body.dg-v75-app table#fleetTable td,body.dg-v75-app table#nbTable td,
+  body.dg-v75-app table#nbPaymentsTable td,body.dg-v75-app table#passengerTable td,body.dg-v75-app table#paymentsTable td,
+  body.dg-v75-app table#quoteTable td,body.dg-v75-app table#reportTable td{
+    display:flex!important;align-items:flex-start!important;gap:9px!important;width:100%!important;min-width:0!important;
+    padding:6px 4px!important;border:0!important;white-space:normal!important;overflow-wrap:anywhere!important;
+    font-size:12px!important;color:#000!important
+  }
+  body.dg-v75-app table#tripTable td::before,body.dg-v75-app table#bookingTable td::before,body.dg-v75-app table.dg-v75-mobile-table td::before,
+  body.dg-v75-app table#clientiTable td::before,body.dg-v75-app table#fleetTable td::before,body.dg-v75-app table#nbTable td::before,
+  body.dg-v75-app table#nbPaymentsTable td::before,body.dg-v75-app table#passengerTable td::before,body.dg-v75-app table#paymentsTable td::before,
+  body.dg-v75-app table#quoteTable td::before,body.dg-v75-app table#reportTable td::before{
+    flex:0 0 clamp(72px,22vw,105px)!important;content:attr(data-label)!important;color:#52697c!important;
+    font-size:9px!important;text-transform:uppercase!important;letter-spacing:.05em!important;font-weight:900!important;padding-top:2px!important
+  }
+  body.dg-v75-app table#tripTable td:last-child,body.dg-v75-app table#bookingTable td:last-child,body.dg-v75-app table.dg-v75-mobile-table td:last-child,
+  body.dg-v75-app table#clientiTable td:last-child,body.dg-v75-app table#fleetTable td:last-child,body.dg-v75-app table#nbTable td:last-child,
+  body.dg-v75-app table#nbPaymentsTable td:last-child,body.dg-v75-app table#passengerTable td:last-child,body.dg-v75-app table#paymentsTable td:last-child,
+  body.dg-v75-app table#quoteTable td:last-child,body.dg-v75-app table#reportTable td:last-child{
+    margin-top:5px!important;padding-top:9px!important;border-top:1px solid #edf1f5!important;display:block!important
+  }
+  body.dg-v75-app table#tripTable td:last-child::before,body.dg-v75-app table#bookingTable td:last-child::before,body.dg-v75-app table.dg-v75-mobile-table td:last-child::before,
+  body.dg-v75-app table#clientiTable td:last-child::before,body.dg-v75-app table#fleetTable td:last-child::before,body.dg-v75-app table#nbTable td:last-child::before,
+  body.dg-v75-app table#nbPaymentsTable td:last-child::before,body.dg-v75-app table#passengerTable td:last-child::before,body.dg-v75-app table#paymentsTable td:last-child::before,
+  body.dg-v75-app table#quoteTable td:last-child::before,body.dg-v75-app table#reportTable td:last-child::before{display:none!important}
+
+  /* Grids become compact without ever exceeding the viewport. */
+  body.dg-v75-app .stats,body.dg-v75-app .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.dg-v75-app .form-grid,body.dg-v75-app .pay-form-grid,body.dg-v75-app .op-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.dg-v75-app .toolbar,body.dg-v75-app .filters,body.dg-v75-app .actions,body.dg-v75-app .toolbar-actions{min-width:0!important;max-width:100%!important}
+}
+
+@media (max-width:560px){
+  body.dg-v75-app{padding:88px 8px 88px!important}
+  body.dg-v75-app .stats,body.dg-v75-app .cards,body.dg-v75-app .form-grid,body.dg-v75-app .pay-form-grid,body.dg-v75-app .op-form-grid{grid-template-columns:1fr!important}
+  body.dg-v75-app .dg-v75-title{max-width:48vw!important;font-size:13px!important}
+  body.dg-v75-app .dg-v75-icon-btn{width:38px!important;min-width:38px!important}
+}
+
+/* Dark theme: operational content stays black as requested; only dark chrome uses light text. */
+body.dg-v75-app [data-theme="dark"],body.dg-v75-app [data-theme="dark"] *{color-scheme:dark}
+body.dg-v75-app .card,body.dg-v75-app .panel,body.dg-v75-app .box,body.dg-v75-app article,
+body.dg-v75-app .table-wrap,body.dg-v75-app .table-container,body.dg-v75-app .table-responsive{color:#000}
