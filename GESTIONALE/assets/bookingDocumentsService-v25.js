@@ -59,12 +59,16 @@ export async function issueBookingDocuments(booking,trip={},options={}){
       sendEmail: options.sendEmail !== false
     });
   }catch(err){
-    // Il PDF locale è già stato generato e scaricato: un problema di rete/SMTP
-    // non deve mai impedire all'operatore o al cliente di ricevere la conferma.
+    // V181: il PDF locale resta disponibile, ma NON dichiariamo l'operazione
+    // come completata/archiviata se il salvataggio remoto fallisce.
     console.error('Archiviazione/invio conferma non riuscito; PDF locale disponibile:',err);
-    result={success:true,localOnly:true,confirmationNumber:code(booking),emailSent:false,warning:err?.message||'Archiviazione remota non disponibile'};
+    const e=new Error(err?.message||'Archiviazione remota non disponibile. Il PDF locale è stato generato, ma la conferma NON è stata archiviata.');
+    e.localPdfAvailable=true;
+    e.confirmationNumber=code(booking);
+    e.bookingId=booking.id;
+    throw e;
   }
-  return {...result,blob:built,downloaded,confirmationNumber:result.confirmationNumber||code(booking)};
+  return {...result,archived:true,blob:built,downloaded,confirmationNumber:result.confirmationNumber||code(booking)};
 }
 
 export async function getBookingContext(bookingId){return call(BOOKING_FN,{action:'context',bookingId})}
