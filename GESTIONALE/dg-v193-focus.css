@@ -1,0 +1,12 @@
+/* DELGROSSO GESTIONALE V193 — FOCUS MODE
+   Presentation-only. No data, API, Supabase or business-rule changes. */
+:root{--dg193-navy:#08233b;--dg193-blue:#0b6aa8;--dg193-bg:#f4f7fb;--dg193-line:#e2e8f0;--dg193-text:#172536;--dg193-muted:#6b7b8c}
+.dg193-focusbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:10px 12px;border:1px solid var(--dg193-line);border-radius:14px;background:#fff;box-shadow:0 4px 16px rgba(10,35,58,.05)}
+.dg193-focusbar .left{display:flex;align-items:center;gap:9px;min-width:0}.dg193-focusbar .dot{width:9px;height:9px;border-radius:50%;background:#19a463;box-shadow:0 0 0 4px rgba(25,164,99,.1);flex:0 0 auto}.dg193-focusbar strong{font-size:.82rem;color:var(--dg193-navy)}.dg193-focusbar span{font-size:.72rem;color:var(--dg193-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dg193-focusbar button{border:1px solid var(--dg193-line);background:#f8fafc;color:var(--dg193-navy);border-radius:9px;padding:7px 10px;font-weight:800;cursor:pointer}
+.dg193-dashboard-focus .search-section,.dg193-dashboard-focus .kpi-grid,.dg193-dashboard-focus .charts-section,.dg193-dashboard-focus .overview-grid,.dg193-dashboard-focus .widgets-grid{display:none!important}
+.dg193-dashboard-focus .dg193-focusbar button::after{content:' · Approfondimenti'}
+.dg193-dashboard-details .search-section,.dg193-dashboard-details .kpi-grid,.dg193-dashboard-details .charts-section,.dg193-dashboard-details .overview-grid,.dg193-dashboard-details .widgets-grid{display:block!important}
+.dg193-dashboard-details .dg193-focusbar .dot{background:#0b6aa8;box-shadow:0 0 0 4px rgba(11,106,168,.1)}
+.dg193-page main,.dg193-page .main-content{min-width:0}
+.dg193-page .toolbar,.dg193-page .dg106-toolbar,.dg193-page .prenotazioni-toolbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px)}
+@media(max-width:850px){.dg193-focusbar{margin:0 0 10px;padding:9px 10px}.dg193-focusbar span{display:none}.dg193-focusbar button{min-height:38px}.dg193-page .toolbar,.dg193-page .dg106-toolbar,.dg193-page .prenotazioni-toolbar{position:relative;top:auto}.dg193-page .card,.dg193-page .op-card,.dg193-page .checkin-card{box-shadow:0 5px 18px rgba(10,35,58,.06)}}
