@@ -1,0 +1,18 @@
+-- DEL GROSSO GESTIONALE — SECURITY HARDENING PLAN (STAGED)
+-- IMPORTANT: DO NOT RUN THIS FILE YET.
+-- Current frontend authentication is local, while the public Supabase key is used for data access.
+-- The live project currently has anon ALL policies on operational tables. Removing them before
+-- migrating the application to Supabase Auth/Edge Functions would break the current frontend.
+--
+-- Phase 1: migrate login to Supabase Auth and create a profiles/roles table.
+-- Phase 2: replace anon ALL with least-privilege authenticated policies.
+-- Phase 3: keep public read-only access ONLY for published trips, if required by the public website.
+-- Phase 4: move privileged operations (payment, document generation, admin actions) behind RPC/Edge Functions.
+-- Phase 5: add audit log + immutable business-event records.
+-- Phase 6: add constraints/indexes after checking current data.
+--
+-- Suggested policy shape after Auth migration (example only):
+--   USING (auth.role() = 'authenticated')
+--   WITH CHECK (auth.role() = 'authenticated')
+-- and finer-grained role checks for DELETE/settings/payment administration.
+-- Never put a service_role key in browser code.

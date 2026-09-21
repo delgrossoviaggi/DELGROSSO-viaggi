@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Archivio Documenti - Del Grosso Gestionale</title>
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+  <link rel="stylesheet" href="./assets/archivio-v29.css">
+  <link rel="stylesheet" href="./assets/dg-v172-legacy-global.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
+  <link rel="stylesheet" href="./assets/dg-universal-devices-v1.css">
+
+  
+  
+  
+  <link rel="stylesheet" href="./assets/dg-universal-v61.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v62.css">
+
+<link rel="stylesheet" href="./assets/dg-adaptive-v65.css">
+  <link rel="stylesheet" href="./assets/dg-universal-v73.css">
+  
+  
+  <link rel="stylesheet" href="./assets/dg-v170-legacy-micro-core.css">
+<link rel="stylesheet" href="./assets/dg-v171-legacy-ui-core.css?v=171">  
+
+
+  
+  
+  
+  
+<link rel="stylesheet" href="./assets/dg-v173-advanced-core.css">
+  <link rel="stylesheet" href="./assets/dg-v168-data-mobile.css">
+  
+  <link rel="stylesheet" href="./assets/dg-v169-global-shell.css">
+  <link rel="stylesheet" href="./assets/dg-v126-command-dock.css?v=126">
+  <link rel="stylesheet" href="./assets/dg-v190-control.css?v=190">
+  <link rel="stylesheet" href="./assets/dg-v191-control-center.css?v=191">
+  <link rel="stylesheet" href="./assets/dg-v192-command-center.css?v=192">
+  <link rel="stylesheet" href="./dg-v193-focus.css">
+</head>
+<body class="dg-v65-page dg-v75-app">
+  <div class="archive-shell">
+    <section class="archive-hero">
+      <div><h1>🗂️ Archivio documenti</h1><p>Tutte le conferme di prenotazione e le ricevute di acconto/saldo generate dal Gestionale, sempre disponibili in PDF.</p></div>
+      <div class="archive-live"><span class="archive-live-dot"></span><span id="archive-sync-status">Sincronizzazione Supabase attiva</span></div><button class="archive-btn primary" id="archive-refresh" type="button">↻ Aggiorna archivio</button>
+    </section>
+    <div id="archive-error" class="archive-error"></div>
+    <section class="archive-stats">
+      <div class="archive-stat"><span>Documenti totali</span><strong id="stat-total">—</strong></div>
+      <div class="archive-stat"><span>Conferme viaggio</span><strong id="stat-booking">—</strong></div>
+      <div class="archive-stat"><span>Ricevute acconto</span><strong id="stat-acconto">—</strong></div>
+      <div class="archive-stat"><span>Ricevute saldo</span><strong id="stat-saldo">—</strong></div>
+    </section>
+    <section class="archive-panel">
+      <div class="archive-toolbar">
+        <label class="archive-search">🔎 <input id="archive-search" type="search" placeholder="Cerca cliente, viaggio o numero documento…" autocomplete="off"></label>
+        <span id="archive-missing-count" class="archive-missing-count" aria-live="polite"></span><button class="archive-btn archive-bulk-action" id="archive-recover-all" type="button">⚙ Recupera mancanti</button><span id="archive-recovery-progress" class="archive-recovery-progress" aria-live="polite"></span><div class="archive-filters">
+          <button class="archive-filter is-active" data-filter="all">Tutti</button>
+          <button class="archive-filter" data-filter="booking">Prenotazioni</button>
+          <button class="archive-filter" data-filter="acconto">Acconti</button>
+          <button class="archive-filter" data-filter="saldo">Saldi</button>
+        </div>
+      </div>
+      <div class="archive-table-wrap">
+        <table class="archive-table">
+          <thead><tr><th>Documento</th><th>Numero</th><th>Cliente</th><th>Viaggio</th><th>Data</th><th>Importo</th><th>Email</th><th>Azioni</th></tr></thead>
+          <tbody id="archive-body"><tr><td colspan="9"><div class="archive-loader">Caricamento archivio…</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script src="./assets/dg-v48-stability.js"></script>
+<script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
+<script src="./assets/dg-v56-admin-access.js"></script>
+<script type="module" src="./assets/archivio-v31.js"></script>
+  <script src="./assets/dg-v46-ux.js?v=73"></script>
+
+  <script src="./assets/dg-v58-theme.js"></script>
+  <script src="./assets/dg-v75-shell.js?v=96"></script>
+  <script src="./assets/dg-v76-agency.js?v=83"></script>
+  <script src="./assets/dg-v80-performance.js?v=86"></script>
+<script src="./assets/dg-v84-black-text.js?v=86"></script>
+<script src="./assets/dg-v85-stability.js?v=86"></script>
+<script src="./assets/dg-v82-fortress.js?v=86"></script><script src="./assets/dg-v90-universal-polish.js?v=90"></script>
+  <script src="./assets/dg-v91-universal-contract.js?v=91"></script>
+  <script src="./assets/dg-v93-universal-command.js?v=93"></script>
+  <script src="./assets/dg-v99-executive.js?v=99"></script>
+<script type="module" src="./assets/dg-v102-advanced.js"></script>
+  <script type="module" src="./assets/dg-v103-advanced.js?v=103"></script>
+<script type="module" src="./assets/dg-v168-data-mobile.js"></script>
+  
+  <script src="./assets/dg-v167-global-core.js?v=125" defer></script>
+  <script src="./assets/dg-v126-command-dock.js?v=126" defer></script>
+
+
+<script src="./assets/dg-v156-mobile-core.js?v=156" defer></script>
+  
+<script src="./assets/dg-v180-runtime-guard.js"></script>
+  <script src="./assets/dg-v190-control.js?v=190" defer></script>
+  <script src="./assets/dg-v192-command-center.js?v=192" defer></script>
+  <script src="./dg-v193-focus.js"></script>
+</body>
+</html>

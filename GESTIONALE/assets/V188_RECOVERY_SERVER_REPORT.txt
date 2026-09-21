@@ -1,0 +1,6 @@
+V188 - SERVER RECOVERY
+- Updated recover-archive-missing source included in package.
+- Bulk recovery includes NULL and empty storage_path values.
+- Requires authenticated gestionale admin via is_gestionale_admin().
+- Uploads PDFs to ricevute-prenotazioni and updates authoritative storage_path fields.
+- No emails, no booking creation, no amount changes.

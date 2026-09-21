@@ -1,0 +1,28 @@
+DELGROSSO GESTIONALE — V185 RECOVERY CENTER
+
+Base: V184 PAYMENT RECOVERY HARDENED
+
+V185 adds a mandatory post-recovery verification step in Archivio:
+- booking confirmation recovery runs the existing document-generation/archive flow;
+- payment receipt recovery runs the existing receipt/archive flow;
+- after the service reports success, Archivio reloads the authoritative archive dataset;
+- the row must then have a non-empty storage path before the UI can show “Archiviato ✓”;
+- if the path is still missing, the operation is reported as not completed rather than showing a false success.
+
+Safety:
+- no new booking is created;
+- no booking/payment amounts are changed;
+- no automatic email is sent by recovery;
+- no mass historical repair is performed automatically;
+- no destructive database operation is included.
+
+Live DB snapshot checked before packaging:
+- prenotazioni: 34 total, 17 archived, 17 missing confirmation_storage_path
+- pagamenti: 4 total, 2 archived, 2 missing receipt_storage_path
+- noleggi_bus_pagamenti: 0 total
+
+Static validation:
+- archivio-v31.js: node --check PASS
+- package ZIP integrity: checked after creation
+
+Important: this package does not claim that the 19 historical files have already been uploaded. They are recovered through the Archivio “Archivia ora” action, with verification after each operation.

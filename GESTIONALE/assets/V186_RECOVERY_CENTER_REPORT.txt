@@ -1,0 +1,3 @@
+V186 Recovery Center
+
+Added a controlled bulk recovery action for all documents missing storage_path. Recovery is sequential, no email is sent, no automatic local download occurs, and each document is reloaded from Supabase after processing. Failures are counted and do not create new bookings.

@@ -1,0 +1,25 @@
+SITO SYNC V181 — PATCH RICHIESTO
+
+Il pacchetto del gestionale non contiene il repository del sito.
+Quando viene fornito il package corrente del sito, applicare:
+
+1) js/gestionale.js
+   - mantenere createGestionaleBooking() con requestId stabile
+   - aggiungere archiveGestionaleBookingConfirmation({bookingId,number,pdfBase64,trip,email,sendEmail})
+   - chiamare gestionale-bridge action=archive-booking
+
+2) js/ricevuta.js
+   - esporre DGReceipt.generate(data) oltre a DGReceipt.download(data)
+
+3) prenota.html
+   - dopo creazione prenotazione, generare il PDF di conferma
+   - convertire il Blob in base64
+   - chiamare archiveGestionaleBookingConfirmation()
+   - solo dopo esito positivo mostrare "conferma archiviata"
+   - mantenere la ricevuta disponibile anche se l'email è vuota/non richiesta
+
+4) IMPORTANTE
+   - non modificare il gestionale Supabase
+   - non duplicare la prenotazione se l'archiviazione fallisce
+   - mantenere requestId stabile per i retry della prenotazione
+   - non considerare una conferma archiviata se confirmation_storage_path non viene scritto

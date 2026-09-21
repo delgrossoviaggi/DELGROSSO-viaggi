@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pagamenti - Del Grosso Gestionale V109 Production Executive</title>
+
+
+
+  <script src="./assets/dg-v48-stability.js"></script>
+<script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
+<script src="./assets/dg-v56-admin-access.js"></script>
+<script type="module" src="./assets/pagamenti-CkMIF-LJ.js?v=195"></script>
+  <link rel="modulepreload" href="./assets/settingsService-SYNC153.js">
+  <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
+  <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
+  <link rel="modulepreload" href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="modulepreload" href="./assets/browser-Bi1SjHOd.js">
+  <link rel="modulepreload" href="./assets/xlsxExport-Ci5qKKp3.js">
+  <link rel="stylesheet" href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" href="./">
+  <link rel="stylesheet" href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-receipts-v24.css">
+  <link rel="stylesheet" href="./assets/dg-documents-v25.css">
+  <link rel="stylesheet" href="./assets/dg-v172-legacy-global.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
+  <link rel="stylesheet" href="./assets/dg-universal-devices-v1.css">
+
+  
+  
+  
+  <link rel="stylesheet" href="./assets/dg-universal-v61.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v62.css">
+
+<link rel="stylesheet" href="./assets/dg-adaptive-v65.css">
+  <link rel="stylesheet" href="./assets/dg-universal-v73.css">
+  
+  
+  <link rel="stylesheet" href="./assets/dg-v170-legacy-micro-core.css">
+<link rel="stylesheet" href="./assets/dg-v171-legacy-ui-core.css?v=171">  
+
+
+  
+  
+  
+  
+<link rel="stylesheet" href="./assets/dg-v173-advanced-core.css">
+  <link rel="stylesheet" href="./assets/dg-v168-data-mobile.css">
+  <link rel="stylesheet" href="./assets/dg-v175-payment-core.css?v=109">
+  
+  <link rel="stylesheet" href="./assets/dg-v169-global-shell.css">
+  <link rel="stylesheet" href="./assets/dg-v126-command-dock.css?v=126">
+<link rel="stylesheet" href="./assets/dg-v133-booking-cockpit.css?v=133">
+  <link rel="stylesheet" href="./assets/dg-v190-control.css?v=190">
+  <link rel="stylesheet" href="./assets/dg-v191-control-center.css?v=191">
+  <link rel="stylesheet" href="./assets/dg-v192-command-center.css?v=192">
+  <link rel="stylesheet" href="./dg-v193-focus.css">
+  <link rel="stylesheet" href="./assets/dg-v194-payments-control.css?v=194">
+  <link rel="stylesheet" href="./assets/dg-v195-payments-cash.css?v=195">
+<link rel="stylesheet" href="./assets/dg-v197-cassa-final.css?v=197">
+</head>
+<body class="dg-v65-page dg-v75-app">
+ 
+<h1>Gestione Pagamenti Enterprise</h1>
+<p class="module-intro">Ogni prenotazione mantiene il proprio ledger di movimenti: acconti, saldi e rimborsi registrati solo dal gestionale.</p>
+ 
+<div class="toolbar">
+<label class="sr-only" for="searchPayment">Cerca pagamento</label>
+<input id="searchPayment" placeholder="Cerca prenotazione, cliente o viaggio..." aria-label="Cerca pagamento">
+<select id="filterMetodo" aria-label="Filtro metodo pagamento">
+<option value="">Tutti i metodi</option>
+<option>Contanti</option>
+<option>POS</option>
+<option>Bonifico</option>
+<option>Carta</option>
+<option>PayPal</option>
+<option>Altro</option>
+</select>
+<select id="filterStato" aria-label="Filtro stato pagamento">
+<option value="">Tutti gli stati</option>
+<option>Da Pagare</option>
+<option>Acconto Ricevuto</option>
+<option>Pagato</option>
+<option>Rimborsato</option>
+</select>
+<button id="btnPending" type="button">Solo residui</button>
+<button id="btnRefresh" type="button">Aggiorna</button>
+<button id="btnNewPayment" type="button" class="payment-primary-action">＋ Registra pagamento</button>
+<button id="btnOpenBookings" type="button">Apri Prenotazioni</button>
+</div>
+
+<div class="stats">
+<div class="box"><h3>Incasso Oggi</h3><span id="todayIncome">€ 0,00</span></div>
+<div class="box"><h3>Da Incassare</h3><span id="pendingIncome">€ 0,00</span></div>
+<div class="box"><h3>Acconti</h3><span id="depositIncome">€ 0,00</span></div>
+<div class="box"><h3>Saldi</h3><span id="balanceIncome">€ 0,00</span></div>
+<div class="box"><h3>Rimborsi</h3><span id="refundIncome">€ 0,00</span></div>
+</div>
+
+<table id="paymentsTable">
+<thead>
+<tr>
+<th>Prenotazione</th>
+<th>Cliente</th>
+<th>Viaggio</th>
+<th>Totale</th>
+<th>Incassato</th>
+<th>Residuo</th>
+<th>Stato</th>
+<th>Metodo</th>
+<th>Ultimo movimento</th>
+<th>Aggiornato</th>
+<th>Azioni</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="panel">
+<h2>Azioni Rapide</h2>
+<button id="btnQuickExcel">Esporta Excel</button>
+<button id="btnExportIncassi">Esporta CSV</button>
+</div>
+
+<div id="paymentPickerModal" class="modal" tabindex="-1" aria-hidden="true">
+<div class="content payment-picker__content">
+  <div class="payment-picker__header">
+    <div>
+      <span class="payment-picker__eyebrow">NUOVO MOVIMENTO</span>
+      <h2>Seleziona il prenotato</h2>
+      <p>Pesca la prenotazione: il gestionale collegherà automaticamente cliente, viaggio, totale e residuo.</p>
+    </div>
+    <button id="closePaymentPicker" type="button" class="btn-secondary">Chiudi</button>
+  </div>
+  <div class="payment-picker__toolbar">
+    <input id="paymentBookingSearch" type="search" placeholder="Cerca nome, telefono, codice o viaggio..." autocomplete="off" aria-label="Cerca prenotato">
+    <div class="payment-picker__type">
+      <button type="button" class="picker-type is-active" data-picker-type="Acconto">Acconto</button>
+      <button type="button" class="picker-type" data-picker-type="Saldo">Saldo</button>
+      <button type="button" class="picker-type" data-picker-type="Rimborso">Rimborso</button>
+    </div>
+  </div>
+  <div id="paymentBookingPickerList" class="payment-picker__list"></div>
+</div>
+</div>
+
+<div id="modal" class="modal" tabindex="-1">
+<div class="content payment-modal__content">
+<h2 id="paymentModalTitle">Pagamenti prenotazione</h2>
+<p id="paymentBookingMeta" class="module-intro">Dettaglio cliente e viaggio</p>
+<div class="payment-linked-context" aria-label="Collegamenti movimento">
+  <div class="linked-field"><span>👤 Cliente</span><strong id="paymentLinkedClient">—</strong></div>
+  <div class="linked-field"><span>🚌 Viaggio</span><strong id="paymentLinkedTrip">—</strong></div>
+  <div class="linked-field"><span>🎟️ Prenotazione</span><strong id="paymentLinkedBooking">—</strong></div>
+</div>
+<div class="payment-selected-actions">
+  <span id="paymentSelectionNote" class="payment-selection-note">Prenotazione collegata al movimento</span>
+  <button id="changePaymentBooking" type="button" class="btn-secondary">↔ Cambia prenotato</button>
+</div>
+
+<div class="payment-modal__summary">
+  <div class="payment-summary-card"><span>Totale viaggio</span><strong id="modalPayTotale">€ 0,00</strong></div>
+  <div class="payment-summary-card"><span>Incassato</span><strong id="modalPayPagato">€ 0,00</strong></div>
+  <div class="payment-summary-card"><span>Residuo</span><strong id="modalPayResiduo">€ 0,00</strong></div>
+  <div class="payment-summary-card"><span>Stato pagamento</span><strong id="modalPayStatus">Da Pagare</strong></div>
+</div>
+
+<div class="payment-modal__layout">
+  <section class="payment-history-card">
+    <h3>Storico movimenti</h3>
+    <table class="pay-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Ricevuta</th>
+          <th>Tipo</th>
+          <th>Importo</th>
+          <th>Metodo</th>
+          <th>Note</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody id="paymentHistoryTbody"></tbody>
+    </table>
+  </section>
+
+  <section class="payment-form-card">
+    <h3>Registra movimento</h3>
+    <div class="panel">
+      <button id="btnQuickAcconto" type="button" class="btn-secondary">Acconto</button>
+      <button id="btnQuickSaldo" type="button" class="btn-secondary">Saldo</button>
+      <button id="btnQuickRimborso" type="button" class="btn-secondary">Rimborso</button>
+    </div>
+
+    <input id="bookingIdInput" type="hidden">
+    <input id="movementIdInput" type="hidden">
+    <input id="paymentClienteId" type="hidden">
+    <input id="paymentViaggioId" type="hidden">
+
+    <div class="pay-form-grid">
+      <div>
+        <label for="importoInput">Importo</label>
+        <input id="importoInput" type="number" step="0.01" min="0.01" inputmode="decimal" autocomplete="off" placeholder="0,00">
+      </div>
+      <div>
+        <label for="tipoSelect">Tipo</label>
+        <select id="tipoSelect">
+          <option value="Acconto">Acconto</option>
+          <option value="Saldo">Saldo</option>
+          <option value="Rimborso">Rimborso</option>
+          <option value="Altro">Altro movimento</option>
+        </select>
+      </div>
+      <div>
+        <label for="metodoSelect">Metodo pagamento</label>
+        <select id="metodoSelect">
+          <option>Contanti</option>
+          <option>POS</option>
+          <option>Bonifico</option>
+          <option>Carta</option>
+          <option>PayPal</option>
+          <option>Altro</option>
+        </select>
+      </div>
+      <div>
+        <label for="dataInput">Data pagamento</label>
+        <input id="dataInput" type="date">
+      </div>
+    </div>
+
+    <label for="noteInput">Note</label>
+    <textarea id="noteInput" placeholder="Note movimento" enterkeyhint="done"></textarea>
+
+    <div class="payment-form-actions">
+      <button id="savePayment" type="button">Salva movimento</button>
+      <button id="cancelPaymentEdit" type="button" class="btn-secondary hidden">Annulla modifica</button>
+      <button id="closeModal" type="button">Chiudi</button>
+    </div>
+  </section>
+</div>
+</div>
+
+
+
+
+
+
+
+
+<script src="./assets/dg-receipts-v24.js"></script>
+<script type="module" src="./assets/paymentReceiptService-v24.js"></script>
+<script type="module" src="./assets/dg-receipt-download-v28.js"></script>
+<script type="module" src="./assets/bookingDocumentsService-v25.js"></script>
+  <script src="./assets/dg-v46-ux.js?v=73"></script>
+
+  <script src="./assets/dg-v58-theme.js"></script>
+  <script src="./assets/dg-v75-shell.js?v=96"></script>
+  <script src="./assets/dg-v76-agency.js?v=83"></script>
+  <script src="./assets/dg-v80-performance.js?v=86"></script>
+<script src="./assets/dg-v84-black-text.js?v=86"></script>
+<script src="./assets/dg-v85-stability.js?v=86"></script>
+<script src="./assets/dg-v82-fortress.js?v=86"></script><script src="./assets/dg-v90-universal-polish.js?v=90"></script>
+  <script src="./assets/dg-v91-universal-contract.js?v=91"></script>
+  <script src="./assets/dg-v93-universal-command.js?v=93"></script>
+  <script src="./assets/dg-v99-executive.js?v=99"></script>
+<script type="module" src="./assets/dg-v102-advanced.js"></script>
+  <script type="module" src="./assets/dg-v103-advanced.js?v=103"></script>
+<script type="module" src="./assets/dg-v168-data-mobile.js"></script>
+  
+  <script src="./assets/dg-v167-global-core.js?v=125" defer></script>
+  <script src="./assets/dg-v126-command-dock.js?v=126" defer></script>
+<script src="./assets/dg-v133-booking-cockpit.js?v=133" defer></script>
+
+
+<script src="./assets/dg-v156-mobile-core.js?v=156" defer></script>
+  
+<script src="./assets/dg-v180-runtime-guard.js"></script>
+  <script src="./assets/dg-v190-control.js?v=190" defer></script>
+  <script src="./assets/dg-v192-command-center.js?v=192" defer></script>
+  <script src="./dg-v193-focus.js"></script>
+</body>
+</html><script src="./assets/dg-v139-142-final-integrity.js?v=142"></script>

@@ -1,0 +1,5 @@
+V189 - SERVER RECOVERY HARDENING
+- recover-archive-missing deployed as ACTIVE version 2.
+- Missing-document discovery now includes both NULL and empty storage_path values.
+- JWT + is_gestionale_admin protection retained.
+- No email, booking creation, or amount changes.

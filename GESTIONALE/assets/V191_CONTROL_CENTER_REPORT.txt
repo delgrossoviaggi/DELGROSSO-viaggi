@@ -1,0 +1,11 @@
+DELGROSSO GESTIONALE V191 — CONTROL CENTER
+
+Pacchetto completo riorganizzato.
+
+1. Nuovo layer UI globale V191 applicato a tutte le pagine operative.
+2. Navigazione laterale riorganizzata in OPERATIVO / CLIENTI & FLOTTA / AMMINISTRAZIONE / CONTROLLO / SISTEMA.
+3. Mobile iPhone: sidebar + topbar + bottom navigation semplificate, tabelle trasformate in schede leggibili.
+4. Desktop: gerarchia visiva uniforme, toolbar/card/tabelle coerenti, spaziatura ridotta e meno rumore.
+5. Dashboard e moduli principali mantengono i propri servizi e selettori JS.
+6. Nessuna modifica a Supabase, schema, prenotazioni, pagamenti o logiche di business.
+7. Tutti i file HTML operativi includono il nuovo CSS globale.
