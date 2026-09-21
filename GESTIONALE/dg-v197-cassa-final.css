@@ -1,0 +1,17 @@
+/* DELGROSSO V197 — Cassa Pro */
+.payment-linked-context{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.linked-field{display:flex;flex-direction:column;gap:5px;padding:13px 15px;border:1px solid rgba(148,163,184,.28);border-radius:14px;background:rgba(248,250,252,.72);min-width:0}
+.linked-field span{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b}
+.linked-field strong{font-size:14px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.payment-selected-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 16px;padding:10px 12px;border-radius:14px;background:rgba(14,116,144,.07);border:1px solid rgba(14,165,233,.18)}
+.payment-selected-actions .payment-selection-note{font-size:12px;font-weight:700;color:#475569}
+.payment-selected-actions button{min-height:38px}
+.payment-picker__item{position:relative}
+.payment-picker__item.is-focused{outline:2px solid rgba(14,165,233,.35);outline-offset:2px}
+.payment-picker__trip span{color:#64748b}
+.payment-cash-context{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.payment-cash-chip{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:11px;font-weight:800}
+.payment-cash-chip--residual{background:#fff7ed;color:#9a3412}
+.payment-cash-chip--zero{background:#ecfdf5;color:#047857}
+@media(max-width:900px){.payment-linked-context{grid-template-columns:1fr}.payment-selected-actions{align-items:stretch;flex-direction:column}.payment-selected-actions button{width:100%}}
+@media(max-width:640px){.payment-picker__item{padding:14px}.payment-picker__actions{grid-template-columns:1fr!important}.payment-picker__actions button{width:100%;min-height:44px}.linked-field{padding:12px}}

@@ -1,0 +1,17 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — V197 CASSA PRO
+
+Base: V195 CASSA COMPLETA.
+
+Interventi:
+- mantenuto il flusso Pagamenti -> cerca prenotato -> viaggio -> tipo movimento -> salvataggio;
+- aggiunto nel modal del ledger un riepilogo esplicito di cliente, viaggio e prenotazione;
+- aggiunto il pulsante "Cambia prenotato" per cambiare la prenotazione senza chiudere la cassa;
+- mostrati codice prenotazione, telefono e numero posti nel contesto selezionato;
+- aggiunta gestione ESC per chiudere i modal;
+- rifiniture responsive dedicate alla Cassa Pro;
+- nessuna modifica a schema Supabase, RLS, funzioni o dati.
+
+Validazione:
+- node --check pagamenti-CkMIF-LJ.js: OK
+- riferimento CSS V197 presente in pagamenti.html: OK
+- pacchetto derivato dalla V195 completa.

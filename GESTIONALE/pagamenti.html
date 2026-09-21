@@ -10,7 +10,7 @@
   <script src="./assets/dg-v48-stability.js"></script>
 <script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
 <script src="./assets/dg-v56-admin-access.js"></script>
-<script type="module" src="./assets/pagamenti-CkMIF-LJ.js?v=114"></script>
+<script type="module" src="./assets/pagamenti-CkMIF-LJ.js?v=195"></script>
   <link rel="modulepreload" href="./assets/settingsService-SYNC153.js">
   <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
   <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
@@ -73,6 +73,9 @@
   <link rel="stylesheet" href="./assets/dg-v191-control-center.css?v=191">
   <link rel="stylesheet" href="./assets/dg-v192-command-center.css?v=192">
   <link rel="stylesheet" href="./dg-v193-focus.css">
+  <link rel="stylesheet" href="./assets/dg-v194-payments-control.css?v=194">
+  <link rel="stylesheet" href="./assets/dg-v195-payments-cash.css?v=195">
+<link rel="stylesheet" href="./assets/dg-v197-cassa-final.css?v=197">
 </head>
 <body class="dg-v65-page dg-v75-app">
  
@@ -100,6 +103,7 @@
 </select>
 <button id="btnPending" type="button">Solo residui</button>
 <button id="btnRefresh" type="button">Aggiorna</button>
+<button id="btnNewPayment" type="button" class="payment-primary-action">＋ Registra pagamento</button>
 <button id="btnOpenBookings" type="button">Apri Prenotazioni</button>
 </div>
 
@@ -136,6 +140,28 @@
 <button id="btnExportIncassi">Esporta CSV</button>
 </div>
 
+<div id="paymentPickerModal" class="modal" tabindex="-1" aria-hidden="true">
+<div class="content payment-picker__content">
+  <div class="payment-picker__header">
+    <div>
+      <span class="payment-picker__eyebrow">NUOVO MOVIMENTO</span>
+      <h2>Seleziona il prenotato</h2>
+      <p>Pesca la prenotazione: il gestionale collegherà automaticamente cliente, viaggio, totale e residuo.</p>
+    </div>
+    <button id="closePaymentPicker" type="button" class="btn-secondary">Chiudi</button>
+  </div>
+  <div class="payment-picker__toolbar">
+    <input id="paymentBookingSearch" type="search" placeholder="Cerca nome, telefono, codice o viaggio..." autocomplete="off" aria-label="Cerca prenotato">
+    <div class="payment-picker__type">
+      <button type="button" class="picker-type is-active" data-picker-type="Acconto">Acconto</button>
+      <button type="button" class="picker-type" data-picker-type="Saldo">Saldo</button>
+      <button type="button" class="picker-type" data-picker-type="Rimborso">Rimborso</button>
+    </div>
+  </div>
+  <div id="paymentBookingPickerList" class="payment-picker__list"></div>
+</div>
+</div>
+
 <div id="modal" class="modal" tabindex="-1">
 <div class="content payment-modal__content">
 <h2 id="paymentModalTitle">Pagamenti prenotazione</h2>
@@ -143,6 +169,11 @@
 <div class="payment-linked-context" aria-label="Collegamenti movimento">
   <div class="linked-field"><span>👤 Cliente</span><strong id="paymentLinkedClient">—</strong></div>
   <div class="linked-field"><span>🚌 Viaggio</span><strong id="paymentLinkedTrip">—</strong></div>
+  <div class="linked-field"><span>🎟️ Prenotazione</span><strong id="paymentLinkedBooking">—</strong></div>
+</div>
+<div class="payment-selected-actions">
+  <span id="paymentSelectionNote" class="payment-selection-note">Prenotazione collegata al movimento</span>
+  <button id="changePaymentBooking" type="button" class="btn-secondary">↔ Cambia prenotato</button>
 </div>
 
 <div class="payment-modal__summary">
