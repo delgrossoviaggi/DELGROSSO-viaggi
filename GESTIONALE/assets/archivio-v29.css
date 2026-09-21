@@ -4,3 +4,4 @@
 .archive-related{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.archive-related a{font-size:11px;font-weight:800;text-decoration:none;padding:5px 8px;border-radius:8px;background:rgba(15,76,129,.08);color:#0f4c81}.archive-related a:hover{text-decoration:underline}
 @media(max-width:700px){.archive-hero{align-items:flex-start}.archive-live{order:3;margin-left:0;width:100%;justify-content:center}}
 .archive-missing-count{display:inline-flex;align-items:center;padding:8px 11px;border-radius:999px;background:rgba(245,158,11,.12);color:#b45309;font-weight:800;font-size:.8rem}.archive-missing-action{border-color:#f59e0b;color:#b45309;background:rgba(245,158,11,.08)}
+.archive-bulk-action{border-color:#7c3aed;color:#6d28d9;background:rgba(124,58,237,.08);font-weight:800}.archive-recovery-progress{font-size:.8rem;font-weight:700;color:#475569;min-width:180px}

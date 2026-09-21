@@ -6,6 +6,7 @@ const SUPABASE_URL='https://chkuayhbmitdmzmmvona.supabase.co';
 const SUPABASE_KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
 const BOOKING_FN=`${SUPABASE_URL}/functions/v1/send-booking-confirmation`;
 const headers={apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`};
+const RECOVERY_FN='https://chkuayhbmitdmzmmvona.supabase.co/functions/v1/recover-archive-missing';
 let rows=[]; let activeFilter='all'; let refreshTimer=null; let lastSyncAt=null;
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -149,6 +150,36 @@ async function recoverAndVerify(row, button, runner){
   setTimeout(()=>{button.textContent=old;button.disabled=false},1400);
   return fresh;
 }
+async function recoverAllMissing(){
+  const missing=rows.filter(r=>!r.path);
+  if(!missing.length){ alert('Non ci sono documenti mancanti da recuperare.'); return; }
+  if(!confirm(`Verranno recuperati ${missing.length} documenti mancanti direttamente da Supabase. Nessuna email e nessun download automatico. Procedere?`)) return;
+  const btn=$('#archive-recover-all'); const progress=$('#archive-recovery-progress');
+  btn.disabled=true; const original=btn.textContent; btn.textContent='Recupero server…';
+  try{
+    const mod=window.DG_SUPABASE_SYNC;
+    const sb=mod?.getClient?await mod.getClient():null;
+    const session=sb?await sb.auth.getSession():null;
+    const token=session?.data?.session?.access_token;
+    if(!token) throw new Error('Sessione gestionale non autenticata o scaduta. Effettua nuovamente il login.');
+    if(progress) progress.textContent=`Invio richiesta per ${missing.length} documenti…`;
+    const r=await fetch(RECOVERY_FN,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({action:'missing'})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.success) throw new Error(d.error||`Recovery server non riuscito (${r.status})`);
+    const s=d.summary||{};
+    btn.textContent=s.errors?`⚠ Recuperati ${s.archived}, errori ${s.errors}`:`✓ Recuperati ${s.archived}`;
+    if(progress) progress.textContent=`Risultato: ${s.archived||0} recuperati · ${s.errors||0} errori · ${s.already||0} già archiviati`;
+    await load();
+  }catch(e){
+    console.error('Recovery server failed',e);
+    btn.textContent='⚠ Recupero non riuscito';
+    if(progress) progress.textContent=e?.message||String(e);
+    alert(e?.message||String(e));
+  }finally{
+    setTimeout(()=>{btn.textContent=original;btn.disabled=false;},3500);
+  }
+}
+
 async function act(action,id,button){
   const row=rows.find(x=>String(x.id)===String(id)); if(!row)return;
   button.disabled=true; const old=button.textContent; button.textContent='Attendi…';
@@ -206,6 +237,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('.archive-filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.archive-filter').forEach(b=>b.classList.remove('is-active'));btn.classList.add('is-active');activeFilter=btn.dataset.filter||'all';render()}));
   $('#archive-body')?.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)act(b.dataset.action,b.dataset.id,b)});
   $('#archive-refresh')?.addEventListener('click',load);
+  $('#archive-recover-all')?.addEventListener('click',recoverAllMissing);
   load();
   refreshTimer=window.setInterval(()=>{ if(document.visibilityState==='visible') load(); },10000);
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') load(); });
