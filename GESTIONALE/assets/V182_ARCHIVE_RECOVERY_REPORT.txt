@@ -1,8 +1,0 @@
-V182 — ARCHIVE RECOVERY
-
-Added an operator-safe recovery action to Archivio documenti for booking confirmations without confirmation_storage_path.
-The action retrieves the authoritative booking/trip context, regenerates the confirmation PDF, archives it through send-booking-confirmation with sendEmail=false, then refreshes the archive.
-No booking is created or duplicated. No database schema/data migration is performed.
-Also added a live count of documents still missing storage_path and bumped Service Worker cache to V182.
-
-Static validation: JS syntax checked; no local asset deletion.

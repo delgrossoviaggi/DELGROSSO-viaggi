@@ -1,9 +1,0 @@
-DELGROSSO GESTIONALE — SYNC 153
-
-Canonical Supabase: https://chkuayhbmitdmzmmvona.supabase.co
-
-Fix: Prenotazioni page now loads clienti, viaggi, flotta and prenotazioni directly from the canonical Supabase REST API first, then falls back to the Gestionale services/sync layer. This isolates the incoming-booking display from service-wrapper failures.
-
-Live DB verification at build time: 31 active prenotazioni; latest booking 2026-09-18 18:35:45 UTC.
-
-No production database rows were modified by this build.

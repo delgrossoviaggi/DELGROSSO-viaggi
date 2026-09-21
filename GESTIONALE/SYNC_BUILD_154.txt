@@ -1,4 +1,0 @@
-DELGROSSO GESTIONALE — SYNC BUILD 154
-
-Added booking change-date workflow and fixed payment movement getter collision.
-Canonical Supabase remains the live operational source.

@@ -1,5 +1,0 @@
-/* V146 — Manual document approval center */
-.dg-confirm-booking,.dg-payment-receipt{min-height:38px;white-space:nowrap}
-.dg-confirm-booking{font-weight:800}
-.dg-payment-receipt{border-style:dashed}
-@media(max-width:700px){.dg-confirm-booking,.dg-payment-receipt{width:100%;white-space:normal}.booking-actions{display:grid!important;grid-template-columns:1fr;gap:8px}}
