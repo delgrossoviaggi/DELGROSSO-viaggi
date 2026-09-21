@@ -1,0 +1,120 @@
+/* DELGROSSO V170 — legacy global micro-core. Original order preserved. */
+
+/* ===== dg-v80-performance.css ===== */
+/* DEL GROSSO V80 — fast, resilient UI defaults */
+html{scroll-behavior:auto!important;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{overflow-x:hidden;}
+button,[role="button"],a,input,select,textarea{touch-action:manipulation;}
+button[data-dg-busy],button[disabled]{cursor:default;}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}}
+
+/* ===== dg-v82-fortress.css ===== */
+/* V82 resilience UI */
+.dg-v82-fortress{position:fixed;z-index:2147483000;right:16px;bottom:18px;display:none;align-items:center;gap:10px;max-width:min(520px,calc(100vw - 32px));padding:11px 13px;border:1px solid rgba(15,76,129,.18);border-radius:16px;background:rgba(255,255,255,.96);box-shadow:0 16px 44px rgba(15,35,55,.18);backdrop-filter:blur(14px);font:500 13px/1.25 system-ui,sans-serif;color:#172433}
+.dg-v82-fortress.is-visible{display:flex}.dg-v82-fortress-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#f59e0b}.dg-v82-fortress.offline .dg-v82-fortress-dot{background:#dc2626}.dg-v82-fortress-copy{display:grid;gap:2px;min-width:0}.dg-v82-fortress-copy strong{font-size:12px}.dg-v82-fortress-copy span{color:#5c6b78}.dg-v82-fortress button{border:0;border-radius:10px;padding:7px 10px;background:#0f4c81;color:#fff;font-weight:700;white-space:nowrap;cursor:pointer}.dg-v82-fortress .dg-v82-close{background:transparent;color:#6b7280;font-size:18px;padding:2px 5px}
+@media(max-width:640px){.dg-v82-fortress{left:10px;right:10px;bottom:10px;max-width:none}.dg-v82-fortress button{min-height:40px}.dg-v82-fortress .dg-v82-close{min-width:36px}}
+
+/* ===== dg-v84-black-text.css ===== */
+/* DEL GROSSO GESTIONALE V84 — BLACK TEXT / BOTH THEMES
+ * Lightweight CSS-first readability layer. No DOM scanning, no MutationObserver loops.
+ * Business/content surfaces use black text in LIGHT and DARK themes.
+ * Navigation/brand/status controls keep their intentional contrast.
+ */
+:root{
+  --dg-v84-text:#000;
+  --dg-v84-surface:#fff;
+  --dg-v84-surface-soft:#f7f9fc;
+  --dg-v84-border:#dbe4ec;
+}
+html[data-theme="dark"],html.dark,body[data-theme="dark"],body.dark{
+  --dg-v84-text:#000;
+  --dg-v84-surface:#f7f9fc;
+  --dg-v84-surface-soft:#eef3f7;
+  --dg-v84-border:#d4dee7;
+}
+/* Main business workspace: always black text in both themes. */
+body.dg-v75-app main,
+body.dg-v75-app .dg-v75-main,
+body.dg-v75-app .dg-v75-content,
+body.dg-v75-app .page-content,
+body.dg-v75-app .content-area,
+body.dg-v75-app .content,
+body.dg-v75-app .container,
+body.dg-v75-app .card,
+body.dg-v75-app .app-card,
+body.dg-v75-app .form-card,
+body.dg-v75-app .settings-card,
+body.dg-v75-app .quote-card,
+body.dg-v75-app .op-card,
+body.dg-v75-app .widget-card,
+body.dg-v75-app .spotlight-card,
+body.dg-v75-app .search-section,
+body.dg-v75-app .toolbar,
+body.dg-v75-app .filters,
+body.dg-v75-app .table-wrap,
+body.dg-v75-app .table-container,
+body.dg-v75-app .section-card,
+body.dg-v75-app .panel,
+body.dg-v75-app .modal,
+body.dg-v75-app .modal-content,
+body.dg-v75-app .dialog,
+body.dg-v75-app .popup{
+  color:var(--dg-v84-text)!important;
+}
+/* Headings, labels and data: black regardless of light/dark theme. */
+body.dg-v75-app main :where(h1,h2,h3,h4,h5,h6,p,label,legend,caption,li,dt,dd,td,th,div:not(.dg-v75-sidebar):not(.dg-v75-topbar):not(.dg-v75-bottom)),
+body.dg-v75-app .dg-v75-main :where(h1,h2,h3,h4,h5,h6,p,label,legend,caption,li,dt,dd,td,th){
+  color:var(--dg-v84-text)!important;
+}
+/* Form controls: black values and labels in both themes. */
+body.dg-v75-app main :where(input,select,textarea),
+body.dg-v75-app .dg-v75-main :where(input,select,textarea),
+body.dg-v75-app .modal :where(input,select,textarea),
+body.dg-v75-app .dialog :where(input,select,textarea){
+  color:#000!important;
+  -webkit-text-fill-color:#000!important;
+  background:#fff!important;
+  caret-color:#000!important;
+}
+body.dg-v75-app main :where(input,select,textarea)::placeholder,
+body.dg-v75-app .dg-v75-main :where(input,select,textarea)::placeholder,
+body.dg-v75-app .modal :where(input,select,textarea)::placeholder,
+body.dg-v75-app .dialog :where(input,select,textarea)::placeholder{
+  color:#5b6773!important;
+  opacity:1!important;
+}
+/* Native select options stay readable. */
+body.dg-v75-app :where(select,option){color:#000!important;background:#fff!important;}
+/* Keep intentional white text on dark brand/navigation/action surfaces. */
+body.dg-v75-app :where(.dg-v75-sidebar,.dg-v75-sidebar *, .dg-v75-topbar,.dg-v75-topbar *, .dg-v75-bottom,.dg-v75-bottom *){color:inherit;}
+body.dg-v75-app :where(.dg-v75-new,.dg-v75-nav a.active,.dg-v75-bottom a.active){color:#fff!important;}
+body.dg-v75-app :where(button,.btn,.button){
+  /* Default button text is black unless the component explicitly owns a dark action surface. */
+  color:#000;
+}
+body.dg-v75-app :where(button,.btn,.button).primary,
+body.dg-v75-app :where(button,.btn,.button)[data-variant="primary"],
+body.dg-v75-app :where(button,.btn,.button).danger,
+body.dg-v75-app :where(button,.btn,.button).success,
+body.dg-v75-app :where(button,.btn,.button).warning,
+body.dg-v75-app .dg-v75-new{color:#fff!important;}
+/* Dark theme: keep business cards/surfaces light so black text remains genuinely readable. */
+html[data-theme="dark"] body.dg-v75-app :where(.card,.app-card,.form-card,.settings-card,.quote-card,.op-card,.widget-card,.spotlight-card,.search-section,.toolbar,.filters,.table-wrap,.table-container,.section-card,.panel,.modal,.modal-content,.dialog,.popup),
+html.dark body.dg-v75-app :where(.card,.app-card,.form-card,.settings-card,.quote-card,.op-card,.widget-card,.spotlight-card,.search-section,.toolbar,.filters,.table-wrap,.table-container,.section-card,.panel,.modal,.modal-content,.dialog,.popup),
+body[data-theme="dark"].dg-v75-app :where(.card,.app-card,.form-card,.settings-card,.quote-card,.op-card,.widget-card,.spotlight-card,.search-section,.toolbar,.filters,.table-wrap,.table-container,.section-card,.panel,.modal,.modal-content,.dialog,.popup),
+body.dark.dg-v75-app :where(.card,.app-card,.form-card,.settings-card,.quote-card,.op-card,.widget-card,.spotlight-card,.search-section,.toolbar,.filters,.table-wrap,.table-container,.section-card,.panel,.modal,.modal-content,.dialog,.popup){
+  background:var(--dg-v84-surface)!important;
+  border-color:var(--dg-v84-border)!important;
+}
+/* Legacy hard-coded muted text inside the workspace: force it back to black. */
+body.dg-v75-app main :where(.muted,.text-muted,.subtitle,.description,.helper,.hint,.meta,.kpi-meta,.kpi-label,.eyebrow){color:#000!important;opacity:.78;}
+/* Accessibility: no animation is needed for a color correction. */
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important;}}
+
+/* ===== dg-v85-stability.css ===== */
+/* DEL GROSSO GESTIONALE V85 — stability defaults */
+html{scroll-behavior:auto!important;}
+body{overflow-anchor:none;}
+button,a,input,select,textarea{touch-action:manipulation;}
+/* Avoid accidental transition storms during boot. */
+html.dg-v85-boot *{transition:none!important;animation:none!important;}

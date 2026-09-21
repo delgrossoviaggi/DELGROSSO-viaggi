@@ -1,0 +1,58 @@
+/* DELGROSSO GESTIONALE V192 — Unified Control Center UI
+   Presentation/navigation layer only. Existing data/services remain authoritative. */
+:root{--dg192-ink:#10253a;--dg192-navy:#08233b;--dg192-blue:#0b6aa8;--dg192-bg:#f3f6fa;--dg192-card:#fff;--dg192-line:#dfe7ef;--dg192-muted:#6b7b8c;--dg192-ok:#17824c;--dg192-warn:#b97800;--dg192-danger:#c43e45;--dg192-shadow:0 8px 28px rgba(10,35,58,.07);--dg192-r:16px}
+html{background:var(--dg192-bg)!important}body.dg-v75-app{background:var(--dg192-bg)!important;color:var(--dg192-ink)!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+body.dg-v75-app:before{content:"";display:block;height:1px;background:#0b6aa8;opacity:.85}
+body.dg-v75-app>h1{max-width:1500px;margin:0 auto 16px!important;padding:18px 18px 0!important;font-size:clamp(1.35rem,2vw,2rem)!important;letter-spacing:-.035em!important;color:var(--dg192-navy)!important}
+/* One visual language */
+body.dg-v75-app .toolbar,body.dg-v75-app .card,body.dg-v75-app .op-card,body.dg-v75-app .checkin-card,body.dg-v75-app .stats,body.dg-v75-app .dg106-toolbar,body.dg-v75-app .dg106-table-wrap,body.dg-v75-app .booking-table-wrap,body.dg-v75-app .table-wrap{border:1px solid var(--dg192-line)!important;border-radius:var(--dg192-r)!important;background:var(--dg192-card)!important;box-shadow:var(--dg192-shadow)!important}
+body.dg-v75-app .toolbar{padding:12px!important;gap:9px!important;margin-bottom:14px!important}
+body.dg-v75-app input,body.dg-v75-app select,body.dg-v75-app textarea{min-height:42px!important;border:1px solid #d6e0e9!important;border-radius:10px!important;background:#fff!important;color:var(--dg192-ink)!important;box-shadow:none!important}
+body.dg-v75-app input:focus,body.dg-v75-app select:focus,body.dg-v75-app textarea:focus{outline:3px solid rgba(11,106,168,.11)!important;border-color:#68a8cb!important}
+body.dg-v75-app button,.dg-v75-app .btn{min-height:42px!important;border-radius:10px!important;font-weight:750!important}
+body.dg-v75-app table{border-collapse:separate!important;border-spacing:0!important}
+body.dg-v75-app table thead th{background:#f5f8fb!important;color:#64778a!important;font-size:.69rem!important;text-transform:uppercase!important;letter-spacing:.045em!important;padding:11px 10px!important;border-bottom:1px solid var(--dg192-line)!important}
+body.dg-v75-app table tbody td{padding:11px 10px!important;border-bottom:1px solid #edf1f5!important;font-size:.86rem!important}
+body.dg-v75-app table tbody tr:hover td{background:#fafcfe!important}
+/* Module headers */
+.prenotazioni-hero,.dg106-hero,.checkin-hero,.op-header-card{border-radius:20px!important;box-shadow:0 12px 32px rgba(8,35,59,.13)!important;background:linear-gradient(120deg,#08233b,#0d4f78)!important}
+.prenotazioni-hero{padding:20px!important}.dg106-hero{padding:20px!important}
+/* Dashboard: the control center is primary */
+body.dg-v75-app.dg190-dashboard .kpi-grid{display:none!important}
+body.dg-v75-app.dg190-dashboard .charts-section{display:none!important}
+body.dg-v75-app.dg190-dashboard .overview-grid,body.dg-v75-app.dg190-dashboard .widgets-grid{margin-top:16px!important}
+.dg190-control{margin:0 0 16px!important}
+.dg190-topgrid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin-bottom:12px!important}
+.dg190-focus-card{background:#fff!important;border:1px solid var(--dg192-line)!important;border-radius:16px!important;padding:16px!important;box-shadow:var(--dg192-shadow)!important;transition:transform .16s ease,box-shadow .16s ease!important}
+.dg190-focus-card:hover{transform:translateY(-1px)!important;box-shadow:0 12px 32px rgba(10,35,58,.1)!important}
+.dg190-focus-card .label{display:block;font-size:.69rem!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:var(--dg192-muted)!important;font-weight:800!important}
+.dg190-focus-card .value{display:block;margin-top:7px!important;font-size:clamp(1.55rem,2.4vw,2.1rem)!important;line-height:1.05!important;color:var(--dg192-navy)!important}
+.dg190-focus-card .meta{margin:7px 0 0!important;font-size:.76rem!important;color:var(--dg192-muted)!important}
+.dg190-main-grid{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr)!important;gap:12px!important}
+.dg190-panel{background:#fff!important;border:1px solid var(--dg192-line)!important;border-radius:16px!important;padding:16px!important;box-shadow:var(--dg192-shadow)!important}
+.dg190-panel-head{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important;margin-bottom:12px!important}.dg190-panel-head h2{margin:4px 0 0!important;font-size:1.05rem!important;color:var(--dg192-navy)!important}.dg190-panel-head .eyebrow{font-size:.65rem!important;letter-spacing:.08em!important;color:var(--dg192-blue)!important;font-weight:850!important}
+.dg190-shortcuts{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}.dg190-shortcut{display:flex!important;align-items:center!important;justify-content:center!important;min-height:52px!important;padding:10px!important;border:1px solid var(--dg192-line)!important;border-radius:11px!important;background:#f8fafc!important;color:var(--dg192-ink)!important;text-decoration:none!important;font-size:.78rem!important;font-weight:750!important;text-align:center!important}.dg190-shortcut:hover{border-color:#a8c6da!important;background:#eef6fb!important}
+.dg190-alerts{display:grid!important;gap:9px!important}.dg190-alert{display:flex!important;gap:10px!important;align-items:flex-start!important;padding:11px!important;border:1px solid var(--dg192-line)!important;border-radius:11px!important;background:#fafcfe!important}.dg190-alert strong,.dg190-alert span{display:block}.dg190-alert strong{font-size:.82rem!important}.dg190-alert span{margin-top:3px!important;color:var(--dg192-muted)!important;font-size:.74rem!important;line-height:1.35!important}.dg190-dot{width:8px!important;height:8px!important;border-radius:50%!important;background:#e0a52b!important;margin-top:5px!important;flex:0 0 auto}
+/* Mobile navigation */
+.dg190-mobilebar{display:none!important}
+/* Compact dense modules without losing functionality */
+.dg106-kpis{gap:10px!important}.dg106-kpi{border-radius:15px!important}
+/* Mobile-first */
+@media(max-width:900px){
+ body.dg-v75-app{padding-bottom:76px!important}body.dg-v75-app>h1{padding:14px 12px 0!important}
+ .dg190-topgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.dg190-main-grid{grid-template-columns:1fr!important}.dg190-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .dg190-mobilebar{display:grid!important;position:fixed!important;left:8px!important;right:8px!important;bottom:8px!important;z-index:1200!important;grid-template-columns:repeat(6,1fr)!important;padding:7px 5px!important;border:1px solid rgba(223,231,239,.95)!important;border-radius:17px!important;background:rgba(255,255,255,.97)!important;box-shadow:0 10px 34px rgba(10,35,58,.15)!important;backdrop-filter:blur(14px)!important}
+ .dg190-mobilebar a{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;gap:2px!important;color:#65778a!important;text-decoration:none!important;font-size:.61rem!important;font-weight:750!important}.dg190-mobilebar a .ico{font-size:1rem!important;line-height:1!important}.dg190-mobilebar a.is-active{color:var(--dg192-blue)!important}
+ .dg190-mobilebar a:last-child{color:var(--dg192-navy)!important}
+ /* Convert the most data-heavy tables into readable cards */
+ .dg192-mobile-cards thead{display:none!important}.dg192-mobile-cards,.dg192-mobile-cards tbody,.dg192-mobile-cards tr,.dg192-mobile-cards td{display:block!important;width:100%!important}.dg192-mobile-cards tbody tr{margin:0 0 10px!important;padding:9px!important;border:1px solid var(--dg192-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:0 5px 18px rgba(10,35,58,.055)!important}.dg192-mobile-cards tbody td{display:grid!important;grid-template-columns:minmax(88px,34%) minmax(0,1fr)!important;gap:8px!important;padding:7px 4px!important;border:0!important;overflow-wrap:anywhere!important}.dg192-mobile-cards tbody td:before{content:attr(data-label)!important;color:#718397!important;font-size:.68rem!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.03em!important}.dg192-mobile-cards tbody td:last-child{border-top:1px solid #edf1f5!important;margin-top:4px!important;padding-top:10px!important}
+ .booking-table-wrap,.dg106-table-wrap{overflow:visible!important}.dg106-table-wrap table{width:100%!important}
+ .dg106-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}.dg106-kpi .value{font-size:1.25rem!important}
+ .op-layout,.checkin-layout{grid-template-columns:1fr!important}.op-passenger-table{min-width:680px!important}
+}
+@media(max-width:520px){
+ .dg190-topgrid{grid-template-columns:1fr 1fr!important;gap:8px!important}.dg190-focus-card{padding:12px!important}.dg190-focus-card .value{font-size:1.35rem!important}.dg190-focus-card .meta{font-size:.68rem!important}.dg190-shortcut{min-height:48px!important;font-size:.72rem!important;padding:8px!important}
+ .dg190-panel{padding:12px!important}.dg190-panel-head h2{font-size:.96rem!important}
+ .dg106-kpis{grid-template-columns:1fr 1fr!important}.dg106-kpi{padding:11px!important}.dg106-kpi .sub{font-size:.66rem!important}
+ body.dg-v75-app input,body.dg-v75-app select,body.dg-v75-app textarea{min-height:46px!important}
+}

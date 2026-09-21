@@ -1,0 +1,73 @@
+/* ===== dg-v78-booking-command.css ===== */
+/* Del Grosso V78 — Prenotazioni Control Room */
+.dg78-command{margin:0 0 18px;display:grid;gap:12px}
+.dg78-command-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:2px 2px}
+.dg78-command-title{display:flex;align-items:center;gap:11px;min-width:0}
+.dg78-command-mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#08253d,#0d5479);color:#fff;box-shadow:0 10px 25px rgba(7,42,66,.18);font-size:19px}
+.dg78-command-title strong{display:block;font-size:18px;letter-spacing:-.02em}.dg78-command-title small{display:block;color:#718096;font-size:11px;margin-top:2px}
+.dg78-live-pill{display:flex;align-items:center;gap:7px;border:1px solid rgba(20,91,128,.14);background:rgba(255,255,255,.82);border-radius:999px;padding:8px 11px;font-size:10px;font-weight:800;color:#526273;white-space:nowrap}
+.dg78-live-pill i{width:8px;height:8px;border-radius:50%;background:#13b981;box-shadow:0 0 0 4px rgba(19,185,129,.12)}
+.dg78-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.dg78-kpi{border:1px solid rgba(14,63,91,.1);background:rgba(255,255,255,.93);border-radius:15px;padding:12px 13px;box-shadow:0 8px 22px rgba(15,23,42,.045);min-width:0}
+.dg78-kpi small{display:block;color:#7a8a99;text-transform:uppercase;letter-spacing:.07em;font-size:8px;font-weight:900}.dg78-kpi strong{display:block;margin-top:4px;font-size:20px;letter-spacing:-.04em;color:#102a43}.dg78-kpi span{display:block;margin-top:3px;font-size:9px;color:#7a8a99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg78-kpi.accent{background:linear-gradient(145deg,#08253d,#0e4e70);color:#fff}.dg78-kpi.accent small,.dg78-kpi.accent span{color:#b9d1df}.dg78-kpi.accent strong{color:#fff}
+.dg78-tools{display:grid;grid-template-columns:minmax(190px,1.7fr) repeat(4,minmax(130px,1fr)) auto;gap:8px;align-items:center}
+.dg78-tools input,.dg78-tools select{width:100%;height:42px;border:1px solid rgba(15,76,129,.13);border-radius:11px;background:rgba(255,255,255,.96);padding:0 12px;color:#183044;font:600 12px system-ui;outline:none;box-sizing:border-box}
+.dg78-tools input:focus,.dg78-tools select:focus{border-color:rgba(15,113,160,.45);box-shadow:0 0 0 3px rgba(20,135,183,.08)}
+.dg78-tools button{height:42px;border:1px solid rgba(15,76,129,.13);border-radius:11px;background:#fff;color:#17344b;font:800 11px system-ui;padding:0 12px;cursor:pointer;touch-action:manipulation}
+.dg78-tools button.primary{background:#0d4d70;color:#fff;border-color:#0d4d70}.dg78-tools button:hover{transform:translateY(-1px)}
+.dg78-chips{display:flex;gap:7px;overflow:auto;padding:1px 1px 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.dg78-chips::-webkit-scrollbar{display:none}
+.dg78-chip{flex:0 0 auto;border:1px solid rgba(15,76,129,.12);background:rgba(255,255,255,.8);color:#526273;border-radius:999px;padding:8px 11px;font:800 10px system-ui;cursor:pointer;touch-action:manipulation}.dg78-chip.active{background:#0d4d70;color:#fff;border-color:#0d4d70}
+.dg78-mobile-list{display:none}
+.dg78-mobile-card{border:1px solid rgba(15,76,129,.12);border-radius:17px;background:rgba(255,255,255,.96);box-shadow:0 10px 28px rgba(15,23,42,.06);padding:14px;display:grid;gap:11px}
+.dg78-mobile-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.dg78-mobile-person{min-width:0}.dg78-mobile-person strong{display:block;font-size:16px;color:#102a43;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dg78-mobile-person small{display:block;color:#718096;font-size:9px;margin-top:3px;font-weight:800}
+.dg78-mobile-status{font-size:9px;font-weight:900;padding:6px 8px;border-radius:999px;background:#edf4f8;color:#15506f;white-space:nowrap}
+.dg78-mobile-trip{border-radius:13px;padding:10px 11px;background:linear-gradient(145deg,rgba(10,65,96,.06),rgba(10,65,96,.02));display:grid;gap:4px}.dg78-mobile-trip strong{font-size:11px;color:#17344b}.dg78-mobile-trip span{font-size:9px;color:#718096}
+.dg78-mobile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.dg78-mobile-grid div{padding:8px;border-radius:10px;background:#f5f8fa;min-width:0}.dg78-mobile-grid small{display:block;color:#7a8a99;font-size:7px;text-transform:uppercase;font-weight:900}.dg78-mobile-grid b{display:block;margin-top:3px;font-size:11px;color:#17344b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dg78-mobile-actions{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:7px}.dg78-mobile-actions button{min-height:43px;border-radius:11px;border:1px solid rgba(15,76,129,.13);background:#fff;color:#17344b;font:800 10px system-ui;touch-action:manipulation}.dg78-mobile-actions button.primary{background:#0d4d70;color:#fff;border-color:#0d4d70}.dg78-mobile-actions button.danger{color:#9b2525}.dg78-empty{padding:28px 12px;text-align:center;color:#718096;font-size:12px;border:1px dashed rgba(15,76,129,.16);border-radius:15px;background:rgba(255,255,255,.55)}
+.dg78-view-cards #bookingTable{display:none!important}.dg78-view-cards .dg78-mobile-list{display:grid!important;gap:10px}.dg78-view-table .dg78-mobile-list{display:none!important}
+@media(max-width:900px){.dg78-kpis{grid-template-columns:repeat(3,1fr)}.dg78-tools{grid-template-columns:1fr 1fr}.dg78-tools input{grid-column:1/-1}.dg78-tools .primary{grid-column:span 1}}
+@media(max-width:700px){.dg78-command{margin:2px 0 14px}.dg78-command-head{align-items:flex-start}.dg78-command-title strong{font-size:16px}.dg78-live-pill{padding:7px 9px}.dg78-kpis{grid-template-columns:repeat(2,1fr);gap:7px}.dg78-kpi{padding:10px 11px}.dg78-kpi strong{font-size:18px}.dg78-tools{grid-template-columns:1fr 1fr}.dg78-tools input{grid-column:1/-1;height:46px}.dg78-tools select,.dg78-tools button{height:44px}.dg78-tools button:last-child{grid-column:1/-1}.dg78-view-table #bookingTable{display:none!important}.dg78-view-table .dg78-mobile-list,.dg78-mobile-list{display:grid!important}.booking-table-wrap{display:none!important}}
+@media(max-width:390px){.dg78-kpis{grid-template-columns:1fr 1fr}.dg78-mobile-grid{grid-template-columns:1fr 1fr}.dg78-mobile-actions{grid-template-columns:1fr 1fr}.dg78-mobile-actions button:first-child{grid-column:1/-1}}
+
+
+/* ===== dg-v126-command-dock.css ===== */
+/* DELGROSSO V126 — universal operational command dock */
+.dg-command-dock{position:sticky;top:0;z-index:900;display:flex;align-items:center;gap:8px;padding:8px 10px;margin:0 0 14px;background:rgba(255,255,255,.94);border:1px solid #e4e9f0;border-radius:14px;box-shadow:0 8px 24px rgba(20,35,60,.07);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.dg-command-dock__label{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#687386;white-space:nowrap;padding:0 4px}
+.dg-command-dock__items{display:flex;gap:7px;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.dg-command-dock__items::-webkit-scrollbar{display:none}
+.dg-command-dock a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 12px;border:1px solid #e4e9f0;border-radius:11px;background:#fff;color:#172033;text-decoration:none;font-size:.82rem;font-weight:750;white-space:nowrap;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.dg-command-dock a:hover{transform:translateY(-1px);border-color:#b9c6d8;background:#f7faff}
+.dg-command-dock a[aria-current="page"]{background:#0b5cff;color:#fff;border-color:#0b5cff}
+.dg-command-dock a.dg-primary{border-color:#e66f00;background:#fff7ef;color:#a94f00}
+.dg-command-dock a.dg-primary[aria-current="page"]{background:#e66f00;color:#fff;border-color:#e66f00}
+html.dark .dg-command-dock{background:rgba(21,29,43,.94);border-color:#2a3444}
+html.dark .dg-command-dock a{background:#151d2b;color:#f4f7fb;border-color:#2a3444}
+html.dark .dg-command-dock a:hover{background:#1b2637}
+html.dark .dg-command-dock__label{color:#aab4c4}
+@media(max-width:700px){.dg-command-dock{position:sticky;top:6px;margin:0 -2px 12px;padding:7px;border-radius:13px;gap:6px}.dg-command-dock__label{display:none}.dg-command-dock__items{width:100%;gap:6px}.dg-command-dock a{min-height:42px;padding:8px 11px;font-size:.8rem}}
+@media(prefers-reduced-motion:reduce){.dg-command-dock a{transition:none}}
+
+
+/* ===== dg-v128-booking-actions.css ===== */
+/* DELGROSSO V128 — azioni prenotazione semplici e touch-first */
+.booking-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.booking-actions .dg-confirm-booking{font-weight:800;border-color:#138a4b}
+.booking-actions .dg-confirm-booking:not([disabled]){cursor:pointer}
+.booking-actions .dg-confirm-booking[disabled]{opacity:.78;cursor:default}
+@media(max-width:900px){.booking-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.booking-actions button{min-height:44px;width:100%}}
+@media(max-width:560px){.booking-actions{grid-template-columns:1fr}.booking-actions .delBtn{order:20}}
+
+
+/* ===== dg-v133-booking-cockpit.css ===== */
+.dg-v133-context{margin:0 0 16px;padding:14px 16px;border:1px solid rgba(18,64,92,.14);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(239,247,252,.96));box-shadow:0 8px 26px rgba(18,64,92,.08);color:#102a43}.dg-v133-title{font-weight:900;font-size:15px;margin-bottom:10px}.dg-v133-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.dg-v133-grid>div{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.72);border:1px solid rgba(18,64,92,.08);min-width:0}.dg-v133-grid span{display:block;font-size:11px;font-weight:800;opacity:.7;margin-bottom:3px}.dg-v133-grid strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dg-v133-grid .residuo{color:#a23b32}@media(max-width:900px){.dg-v133-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.dg-v133-context{padding:12px}.dg-v133-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dg-v133-grid>div{padding:8px}.dg-v133-title{font-size:14px}}
+
+
+/* ===== dg-v146-manual-approval.css ===== */
+/* V146 — Manual document approval center */
+.dg-confirm-booking,.dg-payment-receipt{min-height:38px;white-space:nowrap}
+.dg-confirm-booking{font-weight:800}
+.dg-payment-receipt{border-style:dashed}
+@media(max-width:700px){.dg-confirm-booking,.dg-payment-receipt{width:100%;white-space:normal}.booking-actions{display:grid!important;grid-template-columns:1fr;gap:8px}}
+

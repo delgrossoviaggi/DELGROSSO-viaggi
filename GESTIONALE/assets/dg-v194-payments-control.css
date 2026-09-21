@@ -1,0 +1,44 @@
+/* V194 — Pagamenti Control Center */
+#btnNewPayment.payment-primary-action{background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff;border:0;box-shadow:0 10px 24px rgba(37,99,235,.22);font-weight:800}
+#btnNewPayment.payment-primary-action:hover{filter:brightness(1.04);transform:translateY(-1px)}
+.payment-picker__content{width:min(1120px,100%);max-height:min(88vh,900px);overflow:hidden;padding:0!important}
+.payment-picker__header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px 26px 18px;border-bottom:1px solid var(--dg-border,#dbe4ee);background:#fff}
+.payment-picker__eyebrow{display:block;font-size:11px;letter-spacing:.16em;font-weight:900;color:#0284c7;margin-bottom:6px}
+.payment-picker__header h2{margin:0;color:#0f172a;font-size:1.55rem}
+.payment-picker__header p{margin:7px 0 0;color:#64748b;font-size:.92rem}
+.payment-picker__toolbar{padding:16px 26px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#f8fafc;border-bottom:1px solid #e2e8f0}
+#paymentBookingSearch{flex:1 1 360px;min-height:48px;border:1px solid #cbd5e1;border-radius:14px;padding:0 15px;font-size:14px;background:#fff;color:#0f172a}
+#paymentBookingSearch:focus{outline:none;border-color:#38bdf8;box-shadow:0 0 0 4px rgba(14,165,233,.11)}
+.payment-picker__type{display:flex;gap:7px;flex-wrap:wrap}
+.picker-type{min-height:42px;padding:0 13px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:#334155;font-weight:800;cursor:pointer}
+.picker-type.is-active{background:#0f4c81;color:#fff;border-color:#0f4c81}
+.payment-picker__list{padding:16px 26px 24px;overflow:auto;max-height:calc(88vh - 170px);display:grid;gap:10px;background:#f8fafc}
+.payment-picker__item{display:grid;grid-template-columns:minmax(220px,1.35fr) minmax(150px,.65fr) auto;gap:18px;align-items:center;background:#fff;border:1px solid #dbe4ee;border-radius:18px;padding:15px 16px;box-shadow:0 5px 18px rgba(15,23,42,.05)}
+.payment-picker__client{font-size:15px;font-weight:900;color:#0f172a}
+.payment-picker__meta{margin-top:4px;color:#64748b;font-size:12px}
+.payment-picker__trip{margin-top:7px;color:#0f4c81;font-size:13px;font-weight:800}
+.payment-picker__trip span{color:#64748b;font-weight:700}
+.payment-picker__numbers{display:flex;flex-direction:column;gap:4px}
+.payment-picker__numbers strong{font-size:16px;color:#0f172a}
+.payment-picker__numbers span{font-size:12px;color:#64748b}
+.payment-picker__actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.picker-select-btn{min-height:42px;padding:0 12px;border:0;border-radius:11px;background:#0284c7;color:#fff;font-weight:900;cursor:pointer}
+.picker-select-btn--secondary{background:#0f4c81}
+.picker-select-btn--open{background:#e2e8f0;color:#0f172a}
+.payment-picker__empty{padding:40px 20px;text-align:center;color:#64748b;background:#fff;border:1px dashed #cbd5e1;border-radius:16px}
+/* Improve the page contrast where older payment CSS leaves dark text on the navy shell. */
+body.dg-v65-page.dg-v75-app h1,body.dg-v65-page.dg-v75-app h2,body.dg-v65-page.dg-v75-app h3,body.dg-v65-page.dg-v75-app p{color:var(--dg-text,#0f172a)}
+.module-intro{color:#475569!important}
+.stats .box,.panel,.payment-history-card,.payment-form-card{color:#0f172a}
+.stats .box h3{color:#64748b!important}
+#paymentsTable th{color:#334155}
+#paymentsTable td{color:#0f172a}
+#paymentsTable td small{color:#64748b!important}
+.toolbar input,.toolbar select{background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important}
+@media(max-width:760px){
+  .payment-picker__header{padding:18px;gap:12px}
+  .payment-picker__toolbar,.payment-picker__list{padding-left:18px;padding-right:18px}
+  .payment-picker__item{grid-template-columns:1fr;gap:10px}
+  .payment-picker__actions{justify-content:stretch}
+  .payment-picker__actions button{flex:1}
+}
