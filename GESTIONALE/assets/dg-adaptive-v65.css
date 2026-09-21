@@ -1,0 +1,127 @@
+/* DELGROSSO GESTIONALE V65 — UNIVERSAL RESPONSIVE HARDENING
+   Final layout layer. No business logic, auth, Supabase or data mutations. */
+:root{
+  --dg65-safe-t:max(10px,env(safe-area-inset-top));
+  --dg65-safe-r:max(10px,env(safe-area-inset-right));
+  --dg65-safe-b:max(14px,env(safe-area-inset-bottom));
+  --dg65-safe-l:max(10px,env(safe-area-inset-left));
+  --dg65-gap:clamp(10px,1.5vw,18px);
+}
+html{width:100%;max-width:100%;min-width:0;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:90px}
+body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box}
+img,svg,video,canvas,iframe{max-width:100%;height:auto}
+button,input,select,textarea{font:inherit;max-width:100%;box-sizing:border-box}
+input,select,textarea{font-size:16px;min-width:0}
+button,a,[role="button"]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{cursor:pointer}
+
+/* Prevent common flex/grid overflow bugs. */
+.app-shell,.main-content,.content,.page,.page-content,.dg-page-view,.settings-shell,.archive-shell,.prenota-form-wrapper,.nb-page,main,.quote-page{min-width:0!important;max-width:100%!important}
+.app-shell>* ,.main-content>* ,.content>* ,.page>* ,.page-content>* ,.dg-page-view>* ,.settings-shell>* ,.archive-shell>* ,.prenota-form-wrapper>* ,.nb-page>* ,main>* ,.quote-page>*{min-width:0;max-width:100%}
+.form-grid,.form-row,.input-row,.grid,.cards,.stats,.pay-form-grid,.quote-stats,.setting-grid,.helper-grid,.op-form-grid,.quick-payments-grid{min-width:0!important}
+.form-grid>* ,.form-row>* ,.input-row>* ,.grid>* ,.cards>* ,.stats>* ,.pay-form-grid>* ,.quote-stats>* ,.setting-grid>* ,.op-form-grid>* ,.quick-payments-grid>*{min-width:0!important}
+
+/* Wide data stays usable: only the data surface scrolls, never the whole page. */
+.table-wrap,.table-responsive,.table-container,.data-table-wrap,.booking-table-wrap,.archive-table-wrap,.op-table-wrap,.nb-table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:thin}
+.table-wrap>table,.table-responsive>table,.table-container>table,.data-table-wrap>table,.booking-table-wrap>table,.archive-table-wrap>table,.op-table-wrap>table,.nb-table-wrap>table{max-width:none}
+
+/* Forms never push the viewport wider. */
+input,select,textarea{width:100%;max-width:100%}
+textarea{resize:vertical}
+label{min-width:0}
+
+/* Modals: usable from 320px phones through large monitors. */
+.modal,.popup,.dialog,.nb-modal,.corporate-modal{padding:var(--dg65-safe-t) var(--dg65-safe-r) var(--dg65-safe-b) var(--dg65-safe-l)}
+.modal-content,.dialog-content,.popup-content,.payment-modal__content,.nb-dialog,.modal-dialog,.corporate-modal .modal-content{width:min(1100px,100%)!important;max-width:100%!important;max-height:calc(100dvh - var(--dg65-safe-t) - var(--dg65-safe-b) - 12px)!important;min-width:0!important;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal-head,.nb-dialog-head,.modal-actions,.nb-dialog-actions,.payment-form-actions,.pay-form-actions{min-width:0;max-width:100%}
+.modal-actions,.nb-dialog-actions{flex-wrap:wrap}
+
+/* Touch targets. */
+@media (pointer:coarse){
+  button,.btn,.button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"],a.nav-link{min-height:44px}
+  input,select,textarea{min-height:46px}
+}
+
+/* Tablet / small laptop. */
+@media (min-width:701px) and (max-width:1100px){
+  .form-grid,.pay-form-grid,.op-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .payment-modal__layout{grid-template-columns:1fr!important}
+  .payment-modal__summary,.pay-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .stats,.cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .quotes-toolbar,.quote-layout{grid-template-columns:1fr!important}
+  .prenotazioni-toolbar{grid-template-columns:1fr 1fr!important}
+}
+
+/* Phones: stack editing flows and keep every action visible. */
+@media (max-width:700px){
+  body{padding-left:var(--dg65-safe-l)!important;padding-right:var(--dg65-safe-r)!important;padding-bottom:var(--dg65-safe-b)!important}
+  body.dg-v41-ready{padding-top:74px!important;padding-left:var(--dg65-safe-l)!important;padding-right:var(--dg65-safe-r)!important}
+  .form-grid,.form-row,.input-row,.pay-form-grid,.setting-grid,.helper-grid,.payment-modal__layout,.op-form-grid,.quote-layout,.quotes-toolbar,.toolbar-actions{grid-template-columns:1fr!important;width:100%!important}
+  .grid,.container{grid-template-columns:1fr!important;width:100%!important}
+  .stats,.cards,.pay-summary,.payment-modal__summary{grid-template-columns:1fr 1fr!important;width:100%!important;gap:8px!important}
+
+  /* Global toolbars become predictable one-column controls. */
+  .toolbar,.filters,.actions,.toolbar-actions,.pay-form-actions,.payment-form-actions,.prenota-actions,.op-actions,.nb-toolbar{display:grid!important;grid-template-columns:1fr!important;width:100%!important;gap:8px!important}
+  .toolbar>*,.filters>*,.actions>*,.toolbar-actions>*,.pay-form-actions>*,.payment-form-actions>*,.prenota-actions>*,.op-actions>*,.nb-toolbar>*{width:100%!important;min-width:0!important}
+  .toolbar input,.toolbar select,.toolbar button,.filters input,.filters select,.filters button{width:100%!important;min-width:0!important}
+
+  /* Global shell/header: never cover content. */
+  .dg-v41-menu{left:var(--dg65-safe-l)!important;top:var(--dg65-safe-t)!important;width:50px!important;height:50px!important;min-width:50px!important}
+  .dg-v41-header{left:68px!important;right:var(--dg65-safe-r)!important;top:var(--dg65-safe-t)!important;min-height:50px!important;max-width:calc(100vw - 68px - var(--dg65-safe-r))!important;padding:8px 11px!important;gap:8px!important}
+  .dg-v41-heading{min-width:0!important;flex:1 1 auto!important;overflow:hidden!important}
+  .dg-v41-heading strong{font-size:13px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dg-v41-status{min-width:0!important;max-width:44vw!important;flex:0 1 44vw!important;overflow:hidden!important}
+  .dg-v41-status *{min-width:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dg-v41-drawer{width:min(340px,calc(100vw - 20px))!important;max-width:calc(100vw - 20px)!important;max-height:calc(100dvh - var(--dg65-safe-t) - var(--dg65-safe-b))!important}
+
+  /* Cards and sections: compact but never clipped. */
+  .card,.panel,.box,.content,.prenota-form-card,.payment-form-card,.payment-history-card,.archive-panel,.quote-card,.op-card,.nb-table-card{max-width:100%!important;min-width:0!important}
+  .hero-card,.prenotazioni-hero,.nb-hero{max-width:100%!important;min-width:0!important}
+  .hero-content,.section-heading,.card-header,.card-head,.op-card-head,.modal-head,.nb-dialog-head{min-width:0!important;max-width:100%!important}
+  .hero-content{min-height:0!important}
+
+  /* Tables remain fully accessible without page-wide horizontal scrolling. */
+  .table-wrap,.table-responsive,.table-container,.data-table-wrap,.booking-table-wrap,.archive-table-wrap,.op-table-wrap,.nb-table-wrap{overflow-x:auto!important;max-width:100%!important}
+  table{max-width:none!important}
+  .table-actions,.booking-actions,.pay-row-actions,.nb-row-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important;min-width:0!important}
+  .table-actions>*,.booking-actions>*,.pay-row-actions>*,.nb-row-actions>*{width:100%!important;min-width:0!important}
+
+  /* Reservation/payment editing: generous fields + reachable save actions. */
+  .prenota-form-section,.pay-form,.payment-form-card,.payment-history-card{padding:14px!important;max-width:100%!important}
+  input,select,textarea{font-size:16px!important;min-height:46px!important}
+  button,.btn,.button,[role="button"],a.nav-link{min-height:44px!important}
+  .pay-sum-item,.payment-summary-card{min-width:0!important;padding:10px!important}
+  .pay-sum-value,.payment-summary-card strong{overflow-wrap:anywhere}
+  .payment-form-actions,.nb-dialog-actions,.modal-actions{padding-bottom:max(10px,var(--dg65-safe-b))!important}
+
+  /* Full-height mobile dialogs: header + form + actions are all scrollable/reachable. */
+  .modal,.popup,.dialog,.nb-modal{align-items:flex-start!important;justify-content:center!important;padding-top:var(--dg65-safe-t)!important;padding-bottom:var(--dg65-safe-b)!important}
+  .modal-content,.dialog-content,.popup-content,.payment-modal__content,.nb-dialog,.modal-dialog,.corporate-modal .modal-content{width:100%!important;max-width:100%!important;max-height:calc(100dvh - var(--dg65-safe-t) - var(--dg65-safe-b) - 8px)!important;border-radius:18px!important}
+  .modal-dialog{padding:16px!important}
+  .modal-head,.nb-dialog-head{position:sticky;top:0;z-index:4;background:inherit}
+
+  /* Avoid accidental fixed-width children from legacy modules. */
+  [style*="width: 500px"],[style*="width:500px"],[style*="width: 600px"],[style*="width:600px"],[style*="width: 700px"],[style*="width:700px"],[style*="width: 800px"],[style*="width:800px"],[style*="width: 900px"],[style*="width:900px"]{max-width:100%!important}
+}
+
+@media (max-width:430px){
+  .stats,.cards{grid-template-columns:1fr 1fr!important}
+  .card,.panel,.box{border-radius:16px!important}
+  .prenotazioni-hero h1{font-size:26px!important}
+  .nb-hero h1{font-size:28px!important}
+  .dg-v41-heading strong{font-size:12px!important}
+  .dg-v41-status{max-width:40vw!important;flex-basis:40vw!important}
+  .table-actions,.booking-actions,.pay-row-actions,.nb-row-actions{grid-template-columns:1fr!important}
+}
+@media (max-width:360px){
+  .stats,.cards,.pay-summary,.payment-modal__summary{grid-template-columns:1fr!important}
+  .dg-v41-header{left:62px!important;right:6px!important;max-width:calc(100vw - 68px)!important}
+  .dg-v41-menu{width:48px!important;height:48px!important;min-width:48px!important}
+}
+@media (orientation:landscape) and (max-height:600px){
+  body.dg-v41-ready{padding-top:64px!important}
+  .modal-content,.dialog-content,.popup-content,.nb-dialog,.modal-dialog{max-height:calc(100dvh - 12px)!important}
+  .dg-v41-drawer{max-height:calc(100dvh - 12px)!important;overflow:auto!important}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
