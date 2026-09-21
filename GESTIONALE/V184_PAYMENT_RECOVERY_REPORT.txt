@@ -1,0 +1,6 @@
+V184 – PAYMENT RECOVERY HARDENING
+
+- Recupero ricevute pagamento: Archivia ora non scarica più automaticamente il PDF sul dispositivo.
+- issuePaymentReceipt supporta autoDownload:false.
+- Nessuna modifica DB.
+- Il recupero continua a richiedere una prenotazione collegata e archivia il PDF tramite Edge Function send-payment-receipt.

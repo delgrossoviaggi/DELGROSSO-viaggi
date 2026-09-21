@@ -1,0 +1,20 @@
+DELGROSSO GESTIONALE — V190 CONTROL CENTER
+
+OBIETTIVO
+Ridurre il carico visivo e rendere il gestionale leggibile e controllabile sia da PC sia da iPhone 17 Pro.
+
+MODIFICHE
+- Nuovo sistema UI globale V190 applicato alle pagine operative.
+- Navigazione riorganizzata in gruppi: Operativo, Clienti & Servizi, Amministrazione, Sistema.
+- Menu mobile rapido con 5 sezioni principali + accesso contestuale.
+- Dashboard trasformata in Control Center: 4 indicatori prioritari, azioni rapide e area "Situazione da verificare".
+- Grafici e vecchia griglia KPI della dashboard vengono nascosti dalla vista principale per ridurre la dispersione, senza eliminare i moduli o i dati.
+- Responsive specifico per schermi piccoli: card compatte, pulsanti touch-friendly, niente layout orizzontale obbligatorio.
+- Nessuna modifica a database, prenotazioni, pagamenti, autenticazione o logica Supabase.
+- V189 server recovery resta incluso e non viene alterato.
+
+PRINCIPIO
+La dashboard deve rispondere prima a: cosa succede oggi, quanti passeggeri ho, quanto ho incassato, cosa devo incassare e cosa devo verificare.
+
+NOTA
+La validazione effettuata è statica: sintassi JS del nuovo modulo e presenza dei riferimenti CSS/JS nelle pagine. Non viene dichiarato un test E2E su iPhone reale.

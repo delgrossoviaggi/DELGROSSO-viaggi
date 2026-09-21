@@ -1,0 +1,10 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — V197 CASSA FINAL
+
+Base: V196 completa.
+- Pacchetto completo, non patch.
+- Pagamenti/Cassa mantenuti dalla V196.
+- Versioni/cache references aggiornate a V197 dove presenti.
+- Asset Cassa rinominato in dg-v197-cassa-final.css.
+- Rifinitura responsive e touch-safe delle azioni della tabella Pagamenti.
+- Nessuna modifica a Supabase, schema, RLS o business rules.
+- Nessun file eliminato.

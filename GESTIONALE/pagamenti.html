@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pagamenti - Del Grosso Gestionale V109 Production Executive</title>
+
+
+
+  <script src="./assets/dg-v48-stability.js"></script>
+<script type="module" src="./assets/dg-supabase-sync-v4.js"></script>
+<script src="./assets/dg-v56-admin-access.js"></script>
+  <link rel="modulepreload" href="./assets/settingsService-SYNC153.js">
+  <link rel="modulepreload" href="./assets/tripService-BzTorehO.js">
+  <link rel="modulepreload" href="./assets/bookingService-CitenMQF.js">
+  <link rel="modulepreload" href="./assets/notificationService-D35-IFKU.js">
+  <link rel="modulepreload" href="./assets/appRoutes-BbuDm13X.js">
+  <link rel="modulepreload" href="./assets/backButton-BaCuvMXq.js">
+  <link rel="modulepreload" href="./assets/messageSystem-jVMshBDs.js">
+  <link rel="modulepreload" href="./assets/seatAssignmentService-0MTjkiXK.js">
+  <link rel="modulepreload" href="./assets/localAuthService-BoJ5x74a.js">
+  <link rel="modulepreload" href="./assets/notificationCenterService-CaZQlods.js">
+  <link rel="modulepreload" href="./assets/browser-Bi1SjHOd.js">
+  <link rel="modulepreload" href="./assets/xlsxExport-Ci5qKKp3.js">
+  <link rel="stylesheet" href="./assets/messageSystem-DWNz-gIS.css">
+  <link rel="stylesheet" href="./">
+  <link rel="stylesheet" href="./assets/accessibility-BRl-3lTk.css">
+  <link rel="stylesheet" href="./assets/dg-modern-ui.css">
+  <link rel="stylesheet" href="./assets/dg-premium-ui.css">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b2742">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DG Gestionale">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="./assets/dg-universal-v13.css">
+  <link rel="stylesheet" href="./assets/dg-github-v19.css">
+  <link rel="stylesheet" href="./assets/dg-menu-v21.css">
+  <link rel="stylesheet" href="./assets/dg-mobile-v24.css">
+  <link rel="stylesheet" href="./assets/dg-receipts-v24.css">
+  <link rel="stylesheet" href="./assets/dg-documents-v25.css">
+  <link rel="stylesheet" href="./assets/dg-v172-legacy-global.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v32.css">
+  <link rel="stylesheet" href="./assets/dg-universal-devices-v1.css">
+
+  
+  
+  
+  <link rel="stylesheet" href="./assets/dg-universal-v61.css">
+  <link rel="stylesheet" href="./assets/dg-responsive-v62.css">
+
+<link rel="stylesheet" href="./assets/dg-adaptive-v65.css">
+  <link rel="stylesheet" href="./assets/dg-universal-v73.css">
+  
+  
+  <link rel="stylesheet" href="./assets/dg-v170-legacy-micro-core.css">
+<link rel="stylesheet" href="./assets/dg-v171-legacy-ui-core.css?v=171">  
+
+
+  
+  
+  
+  
+<link rel="stylesheet" href="./assets/dg-v173-advanced-core.css">
+  <link rel="stylesheet" href="./assets/dg-v168-data-mobile.css">
+  <link rel="stylesheet" href="./assets/dg-v175-payment-core.css?v=109">
+  
+  <link rel="stylesheet" href="./assets/dg-v169-global-shell.css">
+  <link rel="stylesheet" href="./assets/dg-v126-command-dock.css?v=126">
+<link rel="stylesheet" href="./assets/dg-v133-booking-cockpit.css?v=133">
+  <link rel="stylesheet" href="./assets/dg-v190-control.css?v=190">
+  <link rel="stylesheet" href="./assets/dg-v191-control-center.css?v=191">
+  <link rel="stylesheet" href="./assets/dg-v192-command-center.css?v=192">
+  <link rel="stylesheet" href="./dg-v193-focus.css">
+  <link rel="stylesheet" href="./assets/dg-v194-payments-control.css?v=194">
+  <link rel="stylesheet" href="./assets/dg-v195-payments-cash.css?v=195">
+<link rel="stylesheet" href="./assets/dg-v197-cassa-final.css?v=197">
+<link rel="stylesheet" href="./assets/dg-v198-payments-pro.css?v=198">
+</head>
+<body class="dg-v65-page dg-v75-app">
+<main class="dg-payments-pro">
+  <div class="dg-pay-breadcrumb"><span>Home</span><span>›</span><span>Pagamenti</span><span>›</span><strong>Registra pagamento</strong></div>
+  <section class="dg-pay-hero">
+    <div><h1>💳 Registra pagamento</h1><p>Seleziona un prenotato, scegli il viaggio e registra <strong>acconto, saldo o rimborso</strong> direttamente dalla Cassa.</p></div>
+    <div class="dg-pay-hero-actions"><button id="payBack" class="dg-pay-btn">← Torna indietro</button><button id="payOpenBookings" class="dg-pay-btn primary">☷ Vedi prenotazioni</button></div>
+  </section>
+  <section class="dg-pay-kpis">
+    <div class="dg-pay-kpi"><small>Incasso oggi</small><strong id="kpiToday">€ 0,00</strong></div>
+    <div class="dg-pay-kpi red"><small>Da incassare</small><strong id="kpiPending">€ 0,00</strong></div>
+    <div class="dg-pay-kpi green"><small>Acconti</small><strong id="kpiDeposits">€ 0,00</strong></div>
+    <div class="dg-pay-kpi green"><small>Saldi</small><strong id="kpiBalances">€ 0,00</strong></div>
+    <div class="dg-pay-kpi"><small>Rimborsi</small><strong id="kpiRefunds">€ 0,00</strong></div>
+  </section>
+  <section class="dg-pay-wizard">
+    <div class="dg-pay-steps">
+      <div class="dg-pay-step is-active" data-step="1"><span class="num">1</span><div><strong>Seleziona prenotato</strong><span>Cerca per nome, telefono o codice</span></div></div>
+      <div class="dg-pay-step" data-step="2"><span class="num">2</span><div><strong>Seleziona viaggio</strong><span>Scegli il viaggio della prenotazione</span></div></div>
+      <div class="dg-pay-step" data-step="3"><span class="num">3</span><div><strong>Registra pagamento</strong><span>Acconto, saldo o rimborso</span></div></div>
+    </div>
+    <div class="dg-pay-grid">
+      <section class="dg-pay-card"><div class="dg-pay-card-head"><div><h2>1 · Seleziona prenotato</h2><small>Il cliente viene collegato automaticamente</small></div></div><div class="dg-pay-card-body"><input id="payClientSearch" class="dg-pay-search" type="search" placeholder="Cerca nome, telefono, codice prenotazione..." autocomplete="off"><div id="payClientList" class="dg-pay-list"></div></div></section>
+      <section class="dg-pay-card"><div class="dg-pay-card-head"><div><h2>2 · Seleziona viaggio</h2><small>Viaggi del cliente selezionato</small></div></div><div class="dg-pay-card-body"><div id="payTripList" class="dg-pay-list"></div></div></section>
+      <section class="dg-pay-card"><div class="dg-pay-card-head"><div><h2>3 · Dettagli e pagamento</h2><small id="selectedBookingMeta">Seleziona un viaggio</small></div></div><div class="dg-pay-card-body">
+        <div class="dg-pay-summary"><div class="dg-pay-summary-grid"><div class="dg-pay-summary-item"><span>Cliente</span><strong id="selectedClientName">Nessun prenotato</strong></div><div class="dg-pay-summary-item"><span>Viaggio</span><strong id="selectedTripName">Seleziona un viaggio</strong></div><div class="dg-pay-summary-item"><span>Totale viaggio</span><strong id="payTotal">€ 0,00</strong></div><div class="dg-pay-summary-item"><span>Incassato</span><strong id="payPaid">€ 0,00</strong></div><div class="dg-pay-summary-item residual"><span>Residuo</span><strong id="payResidual">€ 0,00</strong></div><div class="dg-pay-summary-item"><span>Stato pagamento</span><strong id="payStatus">Da Pagare</strong></div></div></div>
+        <div class="dg-pay-type"><button type="button" data-pay-type="Acconto" class="is-active">🟠 Acconto</button><button type="button" data-pay-type="Saldo">🔵 Saldo</button><button type="button" data-pay-type="Rimborso">🔴 Rimborso</button></div>
+        <div class="dg-pay-form"><div><label for="payAmount">Importo €</label><input id="payAmount" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0,00"></div><div><label for="payMethod">Metodo di pagamento</label><select id="payMethod"><option>Contanti</option><option>POS</option><option>Bonifico</option><option>Carta</option><option>PayPal</option><option>Altro</option></select></div><div><label for="payDate">Data pagamento</label><input id="payDate" type="date"></div><div><label>Operazione</label><input value="Gestionale DELGROSSO" disabled></div><div class="full"><label for="payNote">Note (opzionale)</label><textarea id="payNote" placeholder="Note sul pagamento..."></textarea></div></div>
+        <button id="paySave" class="dg-pay-save" type="button">✓ Registra pagamento</button>
+      </div></section>
+    </div>
+    <section class="dg-pay-card dg-pay-history"><div class="dg-pay-card-head"><div><h3>🧾 Storico pagamenti del viaggio selezionato</h3><small>Movimenti collegati alla prenotazione scelta</small></div></div><div class="dg-pay-card-body" id="payHistory"><div class="dg-pay-empty">Seleziona un viaggio per visualizzare lo storico.</div></div></section>
+    <div id="payStatusBar" class="dg-pay-status"><span>● Caricamento modulo…</span><span>Supabase</span></div>
+  </section>
+  <div class="dg-pay-footer-note">DELGROSSO Viaggi & Limousine Bus · Cassa operativa · V198</div>
+</main>
+
+<input id="hiddenBookingId" type="hidden"><input id="hiddenClientId" type="hidden"><input id="hiddenTripId" type="hidden"><select id="payType" hidden><option>Acconto</option><option>Saldo</option><option>Rimborso</option></select>
+
+<script src="./assets/dg-receipts-v24.js"></script>
+<script type="module" src="./assets/paymentReceiptService-v24.js"></script>
+<script type="module" src="./assets/dg-v198-payments-pro.js"></script>
+<script src="./assets/dg-v46-ux.js?v=73"></script>
+<script src="./assets/dg-v58-theme.js"></script><script src="./assets/dg-v75-shell.js?v=96"></script><script src="./assets/dg-v76-agency.js?v=83"></script><script src="./assets/dg-v80-performance.js?v=86"></script><script src="./assets/dg-v84-black-text.js?v=86"></script><script src="./assets/dg-v85-stability.js?v=86"></script><script src="./assets/dg-v82-fortress.js?v=86"></script><script src="./assets/dg-v90-universal-polish.js?v=90"></script><script src="./assets/dg-v91-universal-contract.js?v=91"></script><script src="./assets/dg-v93-universal-command.js?v=93"></script><script src="./assets/dg-v99-executive.js?v=99"></script><script type="module" src="./assets/dg-v102-advanced.js"></script><script type="module" src="./assets/dg-v103-advanced.js?v=103"></script><script type="module" src="./assets/dg-v168-data-mobile.js"></script><script src="./assets/dg-v167-global-core.js?v=125" defer></script><script src="./assets/dg-v126-command-dock.js?v=126" defer></script><script src="./assets/dg-v133-booking-cockpit.js?v=133" defer></script><script src="./assets/dg-v156-mobile-core.js?v=156" defer></script><script src="./assets/dg-v180-runtime-guard.js"></script><script src="./assets/dg-v190-control.js?v=190" defer></script><script src="./assets/dg-v192-command-center.js?v=192" defer></script><script src="./dg-v193-focus.js"></script><script src="./assets/dg-v139-142-final-integrity.js?v=142"></script>
+</body></html>
