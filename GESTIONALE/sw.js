@@ -1,5 +1,5 @@
-/* DEL GROSSO GESTIONALE — V199 PAGAMENTI CONTROL CENTER */
-const CACHE=`dg-gestionale-v199`;
+/* DEL GROSSO GESTIONALE — V200 PAGAMENTI CONTROL CENTER */
+const CACHE=`dg-gestionale-v200`;
 const BASE=new URL(`./`,self.registration.scope);
 const PRECACHE=[
  `agenda.html`,
@@ -83,7 +83,7 @@ const PRECACHE=[
  `assets/dg-v191-control-center.css`,
  `assets/dg-v192-command-center.css`,
  `assets/dg-v192-command-center.js`,
- `assets/dg-v199-payments-control.css`,
+ `assets/dg-v200-payments-control.css`,
  `assets/dg-v46-ux.js`,
  `assets/dg-v48-stability.js`,
  `assets/dg-v50-noleggi-dashboard.js`,

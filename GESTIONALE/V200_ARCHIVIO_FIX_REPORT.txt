@@ -1,0 +1,11 @@
+V200 – ARCHIVIO FIX
+
+Correzione principale:
+- risolto l'errore JavaScript "missing ) after argument list" in assets/archivio-v31.js.
+- l'errore era causato da un apostrofo non escapato nella stringa dell'errore di verifica archivio.
+
+Risultato:
+- Archivio può completare il parsing del modulo.
+- Il caricamento dell'archivio non viene più bloccato dal SyntaxError.
+- Restano attive ricerca, filtri, Archivia ora, recupero server, apertura/scaricamento PDF e reinvio email.
+- Nessuna modifica al database/Supabase.
