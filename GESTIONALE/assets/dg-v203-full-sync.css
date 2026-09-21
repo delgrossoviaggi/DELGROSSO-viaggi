@@ -1,0 +1,6 @@
+/* DELGROSSO V203 — Full Sync control */
+#dg-v155-sync-status{gap:8px!important;flex-wrap:wrap}
+.dg-v203-full-sync{border:1px solid rgba(15,76,129,.22);background:#fff;color:#16212d;border-radius:10px;padding:7px 10px;font:700 12px/1.1 system-ui,-apple-system,Segoe UI,sans-serif;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(15,76,129,.08)}
+.dg-v203-full-sync:hover{transform:translateY(-1px)}
+#dg-v155-sync-status[data-status="checking"] .dg-v203-full-sync{opacity:.65;pointer-events:none}
+@media(max-width:700px){.dg-v203-full-sync{padding:8px 9px;font-size:11px}#dg-v155-sync-status{max-width:calc(100vw - 24px)}}
