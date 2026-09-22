@@ -1,5 +1,5 @@
 /* DEL GROSSO GESTIONALE — V200 PAGAMENTI CONTROL CENTER */
-const CACHE=`dg-gestionale-v203`;
+const CACHE=`dg-gestionale-v204`;
 const BASE=new URL(`./`,self.registration.scope);
 const PRECACHE=[
  `agenda.html`,
@@ -9,8 +9,8 @@ const PRECACHE=[
  `assets/apple-touch-icon.png`,
  `assets/archivio-v29.css`,
  `assets/archivio-v202.js`,
- `assets/dg-v203-full-sync.js`,
- `assets/dg-v203-full-sync.css`,
+ `assets/dg-v204-full-sync.js`,
+ `assets/dg-v204-full-sync.css`,
  `assets/auto-Di6OnzQw.js`,
  `assets/backButton-BaCuvMXq.js`,
  `assets/bookingDocumentsService-v25.js`,
