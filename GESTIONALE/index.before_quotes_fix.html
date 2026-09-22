@@ -116,7 +116,6 @@ input,select,textarea{font-size:16px;} /* prevents iOS Safari auto-zoom */
 @media(max-width:1000px){
   body{background:#f3f7fb;min-width:0;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
   .app.on{display:block;width:100%;min-height:100dvh}
-  .sidebar{display:none!important}
   .main{width:100%;margin:0;padding:0 0 calc(74px + env(safe-area-inset-bottom));}
   .topbar{position:sticky;top:0;z-index:40;height:auto;min-height:58px;margin:0;border-radius:0 0 15px 15px;padding:7px 8px;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:7px;box-shadow:0 5px 18px rgba(7,28,50,.10)}
   .mobile-menu-btn{display:block}
@@ -185,10 +184,6 @@ input,select,textarea{font-size:16px;} /* prevents iOS Safari auto-zoom */
   .mobile-quick-pay{width:100%;margin-top:10px;min-height:50px;border:0;border-radius:12px;background:linear-gradient(135deg,#0878e5,#0860c7);color:#fff;font-weight:900;font-size:14px}
   .sync-pill{display:none}
 }
-
-/* Quote workflow */
-#quotesTable td:last-child{white-space:normal;min-width:230px}#quotesTable td:last-child .btn{margin:2px 0}
-@media(max-width:1000px){.main{margin-left:0!important;width:100%!important}.sidebar{display:none!important}.mobile-menu-btn{display:block!important}.mobile-menu{display:none!important}.mobile-menu.on{display:block!important}}
 </style>
 
 <style id="dg-optional-css">
@@ -254,7 +249,6 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
     <button data-page="dashboard" class="active"><span class="ico">⌂</span><span>Dashboard</span></button>
     <button data-page="viaggi"><span class="ico">🚌</span><span>Viaggi</span></button>
     <button data-page="prenotazioni"><span class="ico">▣</span><span>Prenotazioni</span></button>
-    <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
     <button data-page="clienti"><span class="ico">👤</span><span>Clienti</span></button>
     <button data-page="pagamenti"><span class="ico">▣</span><span>Pagamenti</span></button>
     <button data-page="operativo"><span class="ico">⚙</span><span>Operativo</span></button>
@@ -311,18 +305,6 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
   <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
   <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
-</section>
-
-<section class="page" id="page-preventivi">
-  <div class="section-title"><h2>Preventivi & richieste</h2><div class="section-actions"><button class="btn btn-primary" onclick="openQuoteModal()">+ Nuovo preventivo</button></div></div>
-  <div class="cards" id="quoteSummary"></div>
-  <div class="toolbar">
-    <input id="quoteSearch" placeholder="Nome, telefono, email, destinazione, codice...">
-    <select id="quoteFilter"><option value="">Tutti gli stati</option><option>Nuovo</option><option>In lavorazione</option><option>Inviato</option><option>Accettato</option><option>Rifiutato</option><option>Annullato</option></select>
-    <select id="quoteOrigin"><option value="">Tutte le provenienze</option><option value="sito">Richieste dal sito</option><option value="gestionale">Creati dal gestionale</option></select>
-    <button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna richieste</button>
-  </div>
-  <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Codice</th><th>Richiedente</th><th>Contatti</th><th>Servizio</th><th>Viaggio</th><th>Pax</th><th>Importo</th><th>Stato</th><th></th></tr></thead><tbody id="quotesTable"></tbody></table></div>
 </section>
 
 <section class="page" id="page-clienti">
@@ -480,7 +462,6 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
       <button onclick="mobileGo('dashboard')">⌂<span>Dashboard</span></button>
       <button onclick="mobileGo('viaggi')">🚌<span>Viaggi</span></button>
       <button onclick="mobileGo('prenotazioni')">▣<span>Prenotazioni</span></button>
-      <button onclick="mobileGo('preventivi')">📄<span>Preventivi</span></button>
       <button onclick="mobileGo('clienti')">👤<span>Clienti</span></button>
       <button onclick="mobileGo('pagamenti')">💳<span>Pagamenti</span></button>
       <button onclick="mobileGo('operativo')">⚙️<span>Operativo</span></button>
@@ -693,7 +674,6 @@ function renderPage(p){
   if(p==='dashboard')renderDashboard();
   if(p==='viaggi')renderTrips();
   if(p==='prenotazioni')renderBookings();
-  if(p==='preventivi')renderQuotes();
   if(p==='clienti')renderClients();
   if(p==='pagamenti')renderPayments();
   if(p==='operativo')renderOperativo();
@@ -735,36 +715,8 @@ function renderTrips(){
 function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
  const rows=state.prenotazioni.filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
- $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+ $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
 }
-function quoteOrigin(q){
-  const o=String(q.origine||q.provenienza||q.source||q.fonte||'').toLowerCase();
-  return /sito|web|website|online|form/.test(o)?'sito':'gestionale';
-}
-function quoteDate(q){return String(q.created_at||q.data_richiesta||q.createdAt||q.data_viaggio||'').slice(0,10)}
-function quoteStatusClass(st){return st==='Accettato'?'ok':(st==='Rifiutato'||st==='Annullato'?'danger':(st==='Inviato'||st==='In lavorazione'?'info':'wait'))}
-function renderQuotes(){
- const q=($('quoteSearch')?.value||'').trim().toLowerCase();
- const st=$('quoteFilter')?.value||'';
- const origin=$('quoteOrigin')?.value||'';
- const rows=state.preventivi.filter(x=>{
-   const text=JSON.stringify(x).toLowerCase();
-   return (!q||text.includes(q)) && (!st||String(x.stato||'Nuovo')===st) && (!origin||quoteOrigin(x)===origin);
- }).sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
- const siteCount=state.preventivi.filter(x=>quoteOrigin(x)==='sito').length;
- const newCount=state.preventivi.filter(x=>String(x.stato||'Nuovo')==='Nuovo').length;
- const openCount=state.preventivi.filter(x=>['Nuovo','In lavorazione','Inviato'].includes(String(x.stato||'Nuovo'))).length;
- $('quoteSummary').innerHTML=[['📥','Richieste dal sito',siteCount],['🆕','Nuove',newCount],['📋','In gestione',openCount]].map(x=>`<div class="module-card"><h3>${x[0]} ${x[1]}</h3><b style="font-size:25px">${x[2]}</b></div>`).join('');
- $('quotesTable').innerHTML=rows.map(x=>{
-   const name=[x.nome,x.cognome].filter(Boolean).join(' ')||x.cliente||'—';
-   const date=quoteDate(x);
-   const trip=[x.luogo_partenza,x.destinazione].filter(Boolean).join(' → ')||'—';
-   const originLabel=quoteOrigin(x)==='sito'?'🌐 Sito':'🖥️ Gestionale';
-   const status=String(x.stato||'Nuovo');
-   return `<tr><td>${date?dateIT(date):'—'}</td><td><b>${esc(x.numero_preventivo||x.codice||x.id?.slice(0,8)||'—')}</b><br><small>${originLabel}</small></td><td><b>${esc(name)}</b></td><td>${esc(x.telefono||'—')}<br><small>${esc(x.email||'')}</small></td><td>${esc(x.servizio||'—')}</td><td>${esc(trip)}<br><small>${x.data_viaggio?dateIT(x.data_viaggio):'data da definire'}</small></td><td>${Number(x.numero_passeggeri||x.passeggeri||1)}</td><td>${money(x.importo_preventivo??x.importo??0)}</td><td><span class="pill ${quoteStatusClass(status)}">${esc(status)}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openQuoteModal('${x.id}')">Apri</button> ${x.convertito_prenotazione_id?`<span class="pill ok">✓ Convertito</span>`:(status!=='Rifiutato'&&status!=='Annullato'?`<button class="btn btn-green btn-sm" onclick="openQuoteConvertModal('${x.id}')">🎫 Converti</button>`:'')} <button class="btn btn-ghost btn-sm" onclick="updateQuoteStatus('${x.id}','In lavorazione')">▶ Prendi in carico</button> <button class="btn btn-danger btn-sm" onclick="deleteQuote('${x.id}')">🗑️</button></td></tr>`;
- }).join('')||'<tr><td colspan="10" class="empty">Nessuna richiesta/preventivo trovato.</td></tr>';
-}
-
 function renderClients(){
  const q=($('clientSearch')?.value||'').toLowerCase();const rows=state.clienti.filter(c=>!q||`${c.nome} ${c.cognome} ${c.telefono} ${c.email}`.toLowerCase().includes(q));
  $('clientsTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.codice_cliente||c.id?.slice(0,8))}</td><td><b>${esc(c.nome)} ${esc(c.cognome)}</b></td><td>${esc(c.telefono||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.citta||'—')}</td><td><span class="pill ok">${esc(c.stato_cliente||'Attivo')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openClientModal('${c.id}')">Modifica</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nessun cliente.</td></tr>';
@@ -1066,49 +1018,8 @@ async function saveFleet(id){const body={titolo:$('f2_title').value||`${$('f2_ma
 function openCheckinModal(){openModal('Check-in manuale',`<div class="form-grid"><div class="field full"><label>Prenotazione</label><select id="ci_booking">${bookingOptions()}</select></div><div class="field"><label>Esito</label><select id="ci_esito"><option>PRESENTE</option><option>ASSENTE</option></select></div><div class="field"><label>Fermata / Gate</label><input id="ci_gate"></div><div class="field"><label>Posto</label><input id="ci_seat"></div><div class="field full"><label>Note</label><textarea id="ci_note"></textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-green" onclick="saveCheckin()">Registra</button>`)}
 async function saveCheckin(){const b=state.prenotazioni.find(x=>x.id===$('ci_booking').value);if(!b)return;const body={prenotazione_id:b.id,prenotazione_codice:b.codice,viaggio_id:b.viaggio_id,cliente:b.cliente,telefono:b.telefono,email:b.email,posto:$('ci_seat').value||null,esito:$('ci_esito').value,operatore:currentOperator.name,gate:$('ci_gate').value||null,note:$('ci_note').value||null,qr_payload:b.confirmation_token||b.codice};try{await api('accessi_checkin','',{method:'POST',body});await api('prenotazioni',`id=eq.${b.id}`,{method:'PATCH',body:{checkin_effettuato:body.esito==='PRESENTE',checkin_stato:body.esito,checkin_fermata:body.gate,checked_in_at:new Date().toISOString(),checkin_operatore:currentOperator.name,checkin_note:body.note}});closeModal();toast('Check-in registrato');await loadAll()}catch(e){toast(e.message,false)}}
 function openTripDetail(id){const v=state.viaggi.find(x=>x.id===id);const bs=state.prenotazioni.filter(b=>b.viaggio_id===id);openModal('Control Room — '+(v?.titolo||''),`<div class="detail-grid"><div><h3>${esc(v?.destinazione||'')}</h3><p>${dateIT(v?.data_partenza)} · ${esc(v?.luogo_partenza||'')} · ${v?.ora_partenza||''}</p><div class="seat-grid">${Array.from({length:Number(v?.posti_totali||0)},(_,i)=>{const n=i+1;const busy=bs.some(b=>String(b.posti_selezionati||'').split(',').map(x=>x.trim()).includes(String(n)));return `<div class="seat ${busy?'busy':''}">${n}${busy?' •':''}</div>`}).join('')}</div></div><div><h3>Prenotati (${bs.length})</h3>${bs.map(b=>`<div class="list-row"><div class="row-main"><strong>${esc(b.cliente)}</strong><small>${b.posti||0} posti · ${money(b.saldo)} residuo</small></div><span class="pill ${b.checkin_effettuato?'ok':'wait'}">${b.checkin_effettuato?'PRESENTE':'NON PRESENTE'}</span></div>`).join('')}</div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>`)}
-function openQuoteModal(id=''){
- const q=state.preventivi.find(x=>x.id===id)||{};
- const title=id?'Modifica richiesta / preventivo':'Nuovo preventivo';
- openModal(title,`<div class="form-grid"><div class="field"><label>Nome *</label><input id="q_nome" value="${esc(q.nome||'')}"></div><div class="field"><label>Cognome</label><input id="q_cog" value="${esc(q.cognome||'')}"></div><div class="field"><label>Telefono *</label><input id="q_tel" value="${esc(q.telefono||'')}"></div><div class="field"><label>Email (facoltativa)</label><input id="q_email" type="email" value="${esc(q.email||'')}"></div><div class="field full"><label>Azienda</label><input id="q_company" value="${esc(q.azienda||'')}"></div><div class="field"><label>Servizio</label><input id="q_serv" value="${esc(q.servizio||q.servizio_richiesto||'')}"></div><div class="field"><label>Data viaggio</label><input id="q_date" type="date" value="${esc(q.data_viaggio||q.data_partenza||'')}"></div><div class="field"><label>Partenza</label><input id="q_part" value="${esc(q.luogo_partenza||q.partenza||'')}"></div><div class="field"><label>Destinazione *</label><input id="q_dest" value="${esc(q.destinazione||'')}"></div><div class="field"><label>Passeggeri</label><input id="q_pax" type="number" min="1" value="${Number(q.numero_passeggeri||q.passeggeri||1)}"></div><div class="field"><label>Importo €</label><input id="q_imp" type="number" step=".01" value="${Number(q.importo_preventivo??q.importo??0)}"></div><div class="field"><label>Validità preventivo</label><input id="q_valid" type="date" value="${esc(q.validita_preventivo||'')}"></div><div class="field"><label>Stato</label><select id="q_status">${['Nuovo','In lavorazione','Inviato','Accettato','Rifiutato','Annullato'].map(x=>`<option ${String(q.stato||'Nuovo')===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Provenienza</label><select id="q_origin"><option value="gestionale" ${quoteOrigin(q)==='gestionale'?'selected':''}>Gestionale</option><option value="sito" ${quoteOrigin(q)==='sito'?'selected':''}>Sito / richiesta online</option></select></div><div class="field full"><label>Richiesta del cliente</label><textarea id="q_det" rows="4">${esc(q.dettagli_offerta||q.note_cliente||q.messaggio||q.dettagli||'')}</textarea></div><div class="field full"><label>Note interne</label><textarea id="q_internal" rows="3">${esc(q.note_interne||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button>${id?`<button class="btn btn-danger" onclick="deleteQuote('${id}')">🗑️ Elimina</button>`:''}<button class="btn btn-primary" onclick="saveQuote('${id}')">${id?'Salva modifiche':'Salva preventivo'}</button>`);
-}
-async function saveQuote(id=''){
- const existing=id?state.preventivi.find(x=>x.id===id):null;
- const code=existing?.numero_preventivo||existing?.codice||'PV-'+String(Date.now()).slice(-6);
- const body={numero_preventivo:code,codice:code,nome:$('q_nome').value.trim(),cognome:$('q_cog').value.trim()||null,telefono:$('q_tel').value.trim()||null,email:$('q_email').value.trim()||null,azienda:$('q_company').value.trim()||null,origine:$('q_origin').value,stato:$('q_status').value,servizio:$('q_serv').value||null,servizio_richiesto:$('q_serv').value||null,data_viaggio:$('q_date').value||null,data_partenza:$('q_date').value||null,luogo_partenza:$('q_part').value||null,partenza:$('q_part').value||null,destinazione:$('q_dest').value.trim(),numero_passeggeri:Number($('q_pax').value)||1,passeggeri:Number($('q_pax').value)||1,importo:Number($('q_imp').value)||0,importo_preventivo:Number($('q_imp').value)||0,validita_preventivo:$('q_valid').value||null,note_cliente:$('q_det').value||null,dettagli_offerta:$('q_det').value||null,note_interne:$('q_internal').value||null,operatore:currentOperator.name,data_modifica:new Date().toISOString(),updated_at:new Date().toISOString()};
- if(!body.nome||!body.telefono||!body.destinazione)return toast('Compila nome, telefono e destinazione.',false);
- try{if(id)await api('preventivi',`id=eq.${id}`,{method:'PATCH',body});else await api('preventivi','',{method:'POST',body});closeModal();toast(id?'Preventivo/richiesta aggiornato':'Preventivo salvato');await loadAll()}catch(e){toast(e.message,false)}
-}
-async function updateQuoteStatus(id,status){try{await api('preventivi',`id=eq.${id}`,{method:'PATCH',body:{stato:status,data_modifica:new Date().toISOString(),updated_at:new Date().toISOString()}});toast(status==='In lavorazione'?'Richiesta presa in carico':'Stato aggiornato');await loadAll()}catch(e){toast('Impossibile aggiornare la richiesta: '+e.message,false)}}
-async function deleteQuote(id){if(!confirm('Eliminare definitivamente questo preventivo/richiesta?'))return;try{await api('preventivi',`id=eq.${id}`,{method:'DELETE'});closeModal();toast('Preventivo/richiesta eliminato');await loadAll()}catch(e){toast('Impossibile eliminare il preventivo: '+e.message,false)}}
-
-let quoteConvertSeats=[];
-function quoteConvertSeatPicker(){
- const tid=$('qc_trip')?.value, box=$('qc_picker'); if(!tid||!box)return;
- const v=state.viaggi.find(x=>x.id===tid)||{};
- const busy=state.prenotazionePosti.filter(x=>x.viaggio_id===tid).map(x=>String(x.posto));
- const total=Number(v.posti_totali||0);
- box.innerHTML=Array.from({length:total},(_,i)=>{const n=String(i+1),isBusy=busy.includes(n),sel=quoteConvertSeats.includes(n);return `<button type="button" class="seat ${isBusy?'busy':''} ${sel?'selected':''}" ${isBusy?'disabled':''} onclick="toggleQuoteConvertSeat('${n}')">${n}</button>`}).join('');
- $('qc_selected').value=quoteConvertSeats.join(', ');
- $('qc_count').value=quoteConvertSeats.length;
- $('qc_total').value=((Number(v.prezzo)||0)*quoteConvertSeats.length).toFixed(2);
-}
-function toggleQuoteConvertSeat(n){const i=quoteConvertSeats.indexOf(String(n));if(i>=0)quoteConvertSeats.splice(i,1);else quoteConvertSeats.push(String(n));quoteConvertSeats.sort((a,b)=>Number(a)-Number(b));quoteConvertSeatPicker()}
-function openQuoteConvertModal(id){
- const q=state.preventivi.find(x=>x.id===id);if(!q)return;
- const preferred=q.viaggio_id||state.viaggi.find(v=>q.data_viaggio&&v.data_partenza===q.data_viaggio)?.id||state.viaggi[0]?.id||'';
- quoteConvertSeats=[];
- openModal('Converti preventivo in prenotazione',`<div class="statusline info" style="margin-bottom:12px"><b>${esc(q.numero_preventivo||q.codice||'Preventivo')}</b> · ${esc([q.nome,q.cognome].filter(Boolean).join(' '))} · ${esc(q.destinazione||'')}</div><div class="form-grid"><div class="field full"><label>Viaggio *</label><select id="qc_trip" onchange="quoteConvertSeats=[];quoteConvertSeatPicker()">${state.viaggi.map(v=>`<option value="${v.id}" ${preferred===v.id?'selected':''}>${esc(v.titolo||v.destinazione)} · ${dateIT(v.data_partenza)} · ${money(v.prezzo)} · ${v.posti_liberi??v.posti_totali??0} liberi</option>`).join('')}</select></div><div class="field"><label>N° posti selezionati</label><input id="qc_count" type="number" readonly value="0"></div><div class="field"><label>Totale prenotazione €</label><input id="qc_total" type="number" step=".01" readonly value="0"></div><div class="field full"><label>Pianta posti — seleziona i posti da assegnare</label><div id="qc_picker" class="seat-picker"></div><input id="qc_selected" readonly></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-green" onclick="convertQuoteToBooking('${id}')">✓ Crea prenotazione</button>`);
- quoteConvertSeatPicker();
-}
-async function convertQuoteToBooking(id){
- if(!quoteConvertSeats.length)return toast('Seleziona almeno un posto.',false);
- const tid=$('qc_trip')?.value;if(!tid)return toast('Seleziona il viaggio.',false);
- try{
-   const result=await rpc('dg_convert_preventivo_to_booking',{p_preventivo_id:id,p_viaggio_id:tid,p_posti:quoteConvertSeats});
-   if(!result?.success)throw new Error(result?.error||'Conversione non riuscita');
-   closeModal();toast(`Prenotazione ${result.codice||''} creata dal preventivo`);await loadAll();
- }catch(e){toast('Impossibile convertire il preventivo: '+e.message,false);log('CONVERSIONE PREVENTIVO: '+e.message)}
-}
+function openQuoteModal(){openModal('Nuovo preventivo',`<div class="form-grid"><div class="field"><label>Nome</label><input id="q_nome"></div><div class="field"><label>Cognome</label><input id="q_cog"></div><div class="field"><label>Telefono</label><input id="q_tel"></div><div class="field"><label>Email</label><input id="q_email"></div><div class="field"><label>Servizio</label><input id="q_serv"></div><div class="field"><label>Data viaggio</label><input id="q_date" type="date"></div><div class="field"><label>Partenza</label><input id="q_part"></div><div class="field"><label>Destinazione</label><input id="q_dest"></div><div class="field"><label>Passeggeri</label><input id="q_pax" type="number" value="1"></div><div class="field"><label>Importo €</label><input id="q_imp" type="number" step=".01"></div><div class="field full"><label>Dettagli</label><textarea id="q_det"></textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveQuote()">Salva preventivo</button>`)}
+async function saveQuote(){const code='PV-'+String(Date.now()).slice(-6);const body={numero_preventivo:code,codice:code,nome:$('q_nome').value,cognome:$('q_cog').value||null,telefono:$('q_tel').value,email:$('q_email').value||null,origine:'gestionale',stato:'Nuovo',servizio:$('q_serv').value||null,data_viaggio:$('q_date').value||null,luogo_partenza:$('q_part').value||null,destinazione:$('q_dest').value,numero_passeggeri:Number($('q_pax').value)||1,passeggeri:Number($('q_pax').value)||1,importo:Number($('q_imp').value)||0,importo_preventivo:Number($('q_imp').value)||0,dettagli_offerta:$('q_det').value||null,operatore:currentOperator.name};try{await api('preventivi','',{method:'POST',body});closeModal();toast('Preventivo salvato');await loadAll()}catch(e){toast(e.message,false)}}
 function printWindow(title,body){const w=window.open('','_blank','width=760,height=900');if(!w)return toast('Il browser ha bloccato la finestra di stampa',false);w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;padding:35px;color:#10233d}h1{margin:0 0 5px}.logo{max-width:260px;max-height:100px;object-fit:contain}.box{border:1px solid #dbe5ef;border-radius:14px;padding:18px;margin-top:18px}.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #edf2f7}.row:last-child{border:0}@media print{button{display:none}}.seat-picker{display:grid;grid-template-columns:repeat(4,minmax(38px,1fr));gap:8px;padding:12px;background:#f5f9fd;border:1px solid #dce7f2;border-radius:12px;max-height:300px;overflow:auto}.seat-picker .seat{border:1px solid #bcd0e3;background:#fff;border-radius:8px;padding:8px 4px;cursor:pointer;font-weight:700}.seat-picker .seat.selected{background:#1677e8;color:#fff;border-color:#1677e8}.seat-picker .seat.busy{background:#e7edf3;color:#8b98a7;cursor:not-allowed;text-decoration:line-through}.seat-picker .seat:nth-child(4n+3){margin-left:8px}.btn-ghost{background:#f1f6fb;color:#1266c5;border:1px solid #d7e3ef}.btn-ghost:hover{background:#e8f1fa}
 
 
@@ -1126,14 +1037,13 @@ function openRentalModal(id=''){const r=state.noleggi.find(x=>x.id===id)||{};ope
 async function saveRental(id){const old=id?state.noleggi.find(x=>x.id===id):null;const price=Number($('r_price').value)||0;const body={id_noleggio:old?.id_noleggio||'NL-'+String(Date.now()).slice(-6),referente:$('r_ref').value||null,azienda:$('r_company').value||null,telefono:$('r_tel').value||null,email:$('r_email').value||null,tratta_partenza:$('r_from').value,tratta_destinazione:$('r_to').value,data_partenza:$('r_date').value,ora_partenza:$('r_time').value||null,data_ritorno:$('r_back').value||null,passeggeri:Number($('r_pax').value)||1,servizio_tipo:'Andata e ritorno',prezzo_concordato:price,acconto:old?.acconto||0,saldo:Math.max(price-(old?.acconto||0),0),stato_pagamento:old?.stato_pagamento||'Da pagare',stato_noleggio:$('r_status').value,note:$('r_note').value||null};try{if(id)await api('noleggi_bus',`id=eq.${id}`,{method:'PATCH',body});else await api('noleggi_bus','',{method:'POST',body});closeModal();toast('Noleggio salvato');await loadAll()}catch(e){toast(e.message,false)}}
 async function markNotificationsRead(){try{await api('notifiche','letto=eq.false',{method:'PATCH',body:{letto:true,updated_at:new Date().toISOString()}});toast('Notifiche segnate come lette');await loadAll()}catch(e){toast(e.message,false)}}
 $('sideNav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)go(b.dataset.page)});
-['tripSearch','tripStatus','bookSearch','bookFilter','quoteSearch','quoteFilter','quoteOrigin','clientSearch','rentalSearch','rentalStatus','agendaSearch','agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('input',()=>renderPage(state.page)));
+['tripSearch','tripStatus','bookSearch','bookFilter','clientSearch','rentalSearch','rentalStatus','agendaSearch','agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('input',()=>renderPage(state.page)));
 ['agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('change',()=>renderAgenda()));
-['quoteFilter','quoteOrigin'].forEach(id=>$(id)?.addEventListener('change',()=>renderQuotes()));
 $('globalSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();if(!q)return;const found=state.prenotazioni.find(x=>JSON.stringify(x).toLowerCase().includes(q))||state.clienti.find(x=>JSON.stringify(x).toLowerCase().includes(q))||state.viaggi.find(x=>JSON.stringify(x).toLowerCase().includes(q));if(found){if(found.viaggio_id)go('prenotazioni');else if(found.destinazione)go('viaggi');else go('clienti')}});
 $('notifBtn').onclick=()=>go('comunicazioni');
 document.addEventListener('change',e=>{if(e.target?.id==='controlTripSelect')renderControlRoom()});
 
-$('loginBtn').onclick=async()=>{const btn=$('loginBtn');btn.disabled=true;$('loginMsg').textContent='Autenticazione in corso…';try{await signIn($('loginUser').value,$('loginPass').value);$('currentOperatorName').textContent=currentOperator.name;$('currentOperatorRole').textContent='Ruolo: '+currentOperator.role;if($('mobileOperatorName'))$('mobileOperatorName').textContent=currentOperator.name;$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');await loadAll();await health();startAutoSync();$('loginMsg').textContent=''}catch(e){$('loginMsg').textContent=e.message||'Credenziali non valide'}finally{btn.disabled=false}};
+$('loginBtn').onclick=async()=>{const btn=$('loginBtn');btn.disabled=true;$('loginMsg').textContent='Autenticazione in corso…';try{await signIn($('loginUser').value,$('loginPass').value);$('currentOperatorName').textContent=currentOperator.name;$('currentOperatorRole').textContent='Ruolo: '+currentOperator.role;$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');await loadAll();await health();startAutoSync();$('loginMsg').textContent=''}catch(e){$('loginMsg').textContent=e.message||'Credenziali non valide'}finally{btn.disabled=false}};
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
 (function(){const e=$('lastSync');const v=localStorage.getItem('dg_last_sync');if(e&&v)e.textContent='Ultima sincronizzazione: '+v})();
 (async()=>{try{const raw=sessionStorage.getItem('dg_auth');if(raw){authSession=JSON.parse(raw);$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');if(!(await health())){if(await refreshAuth()){await loadAll()}else await signOut()}else await loadAll();startAutoSync()}}catch(e){await signOut()}})();

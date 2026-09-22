@@ -50,3 +50,46 @@ NOTA
 ----
 Questa è una PWA/Web App, non una .ipa firmata da Apple.
 Non richiede App Store Connect per l'uso come Web App sulla schermata Home.
+
+
+FUNZIONI PRENOTAZIONI
+---------------------
+Dal gestionale è possibile:
+- creare una nuova prenotazione direttamente;
+- scegliere il viaggio;
+- inserire cliente, telefono ed email;
+- selezionare i posti dalla pianta;
+- impostare totale e stato;
+- modificare una prenotazione esistente;
+- annullare una prenotazione liberando i posti;
+- eliminare definitivamente una prenotazione (se consentito dalle policy Supabase);
+- stampare la conferma di prenotazione.
+
+Il salvataggio sincronizza la pianta posti tramite la funzione Supabase
+dg_sync_booking_seats.
+
+
+FUNZIONI OPERATIVE AGGIUNTE / VERIFICATE
+------------------------------------------
+- Prenotazione manuale direttamente dal gestionale.
+- Selezione posti dalla pianta del viaggio.
+- Modifica prenotazioni.
+- Annullamento prenotazioni con liberazione posti.
+- Eliminazione definitiva prenotazioni (con RPC quando disponibile e fallback REST).
+- Stampa conferma prenotazione.
+- Modulo Preventivi con creazione e modifica.
+- Inbox richieste preventivo: le righe provenienti dal sito vengono evidenziate come richieste online.
+- Filtri per stato e provenienza.
+- Presa in carico richiesta e cancellazione.
+- Il gestionale legge la tabella Supabase `preventivi`: il modulo del sito deve scrivere nella stessa tabella per far arrivare automaticamente le richieste.
+- Layout corretto a larghezze tablet/desktop strette: niente sovrapposizione tra sidebar e contenuto.
+
+NUOVE FUNZIONI V5
+------------------
+- Prenotazione manuale dal gestionale con piantina posti.
+- Modifica, annullamento e cancellazione prenotazioni.
+- Preventivi e richieste dal sito in un'unica sezione.
+- Notifica Supabase per nuove richieste preventivo.
+- Presa in carico delle richieste.
+- Conversione di un preventivo in prenotazione con assegnazione posti.
+- Layout tablet/iPhone corretto per evitare sovrapposizione sidebar/menu.
