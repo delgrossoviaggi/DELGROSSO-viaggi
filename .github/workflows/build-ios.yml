@@ -26,6 +26,17 @@ jobs:
             -project "IOS_APP/DELGROSSO-Gestionale.xcodeproj" \
             -list
 
+      - name: Pulisci build
+        run: |
+          xcodebuild \
+            -project "IOS_APP/DELGROSSO-Gestionale.xcodeproj" \
+            -target "DELGROSSO Gestionale" \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            clean
+
       - name: Compila app iOS
         run: |
           xcodebuild \
@@ -36,3 +47,20 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
+
+      - name: Comprimi app
+        run: |
+          mkdir -p ios-artifact
+          cp -R "IOS_APP/build/Release-iphoneos/DELGROSSO Gestionale.app" ios-artifact/
+
+      - name: Crea ZIP dell'app
+        run: |
+          cd ios-artifact
+          zip -r "../DELGROSSO-Gestionale-iOS.zip" "DELGROSSO Gestionale.app"
+
+      - name: Carica app come Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DELGROSSO-Gestionale-iOS
+          path: DELGROSSO-Gestionale-iOS.zip
+          retention-days: 7
