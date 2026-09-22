@@ -1,5 +1,5 @@
-/* DEL GROSSO GESTIONALE — V206 LIVE SUPABASE SYNC */
-const CACHE=`dg-gestionale-v206`;
+/* DEL GROSSO GESTIONALE — V207 LIVE SUPABASE SYNC */
+const CACHE=`dg-gestionale-v207`;
 const BASE=new URL(`./`,self.registration.scope);
 const PRECACHE=[
  `agenda.html`,
@@ -9,10 +9,10 @@ const PRECACHE=[
  `assets/apple-touch-icon.png`,
  `assets/archivio-v29.css`,
  `assets/archivio-v202.js`,
- `assets/dg-v206-full-sync.js`,
- `assets/dg-v206-full-sync.css`,
- `assets/dg-v206-live-sync.js`,
- `assets/dg-v206-live-sync.css`,
+ `assets/dg-v207-full-sync.js`,
+ `assets/dg-v207-full-sync.css`,
+ `assets/dg-v207-live-sync.js`,
+ `assets/dg-v207-live-sync.css`,
  `assets/auto-Di6OnzQw.js`,
  `assets/backButton-BaCuvMXq.js`,
  `assets/bookingDocumentsService-v25.js`,
