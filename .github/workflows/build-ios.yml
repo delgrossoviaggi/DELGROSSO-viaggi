@@ -1,0 +1,30 @@
+name: Build DELGROSSO iOS
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "IOS_APP/**"
+      - ".github/workflows/build-ios.yml"
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Scarica repository
+        uses: actions/checkout@v4
+
+      - name: Mostra Xcode
+        run: xcodebuild -version
+
+      - name: Compila app iOS
+        run: |
+          xcodebuild \
+            -project "IOS_APP/DELGROSSO-Gestionale.xcodeproj" \
+            -scheme "DELGROSSO-Gestionale" \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
