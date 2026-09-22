@@ -1,3 +1,0 @@
-V199 — Pagamenti fix
-
-Risolto il crash Cannot read properties of null (reading addEventListener): il codice tentava di collegare payRefresh, ma il pulsante non esisteva nella pagina. I binding ora sono null-safe e la Cassa include il pulsante Aggiorna. Il crash bloccava load(), lasciando la barra su Caricamento modulo. Nessuna modifica a Supabase/database.

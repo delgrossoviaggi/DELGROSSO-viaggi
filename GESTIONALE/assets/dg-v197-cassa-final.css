@@ -1,8 +1,0 @@
-
-/* V197 — Cassa final polish: no data/business-rule changes. */
-.payment-picker__item{transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
-.payment-picker__item:hover{transform:translateY(-1px)}
-.payment-picker__item [data-booking-pick]{touch-action:manipulation}
-.dg-payment-row .table-actions{display:flex;flex-wrap:wrap;gap:6px}
-.dg-payment-row .table-actions button{white-space:nowrap}
-@media(max-width:640px){.dg-payment-row .table-actions{display:grid;grid-template-columns:1fr 1fr}.dg-payment-row .table-actions button{width:100%;min-height:42px}}
