@@ -1,6 +1,6 @@
-const CACHE='delgrosso-gestionale-v2';
-self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html'])))});
-self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+const CACHE='delgrosso-gestionale-v3-logo';
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./assets/delgrosso-app-icon-180.png','./assets/delgrosso-app-icon-512.png','./assets/delgrosso-app-icon-1024.png','./assets/delgrosso-logo-iphone-ui.png']))) });
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
   if(u.origin!==location.origin || u.pathname.includes('/rest/v1/') || u.pathname.includes('/auth/v1/')) return;
