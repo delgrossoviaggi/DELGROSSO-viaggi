@@ -5,13 +5,23 @@
   "start_url": "./index.html#dashboard",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "any",
+  "background_color": "#061a2d",
+  "theme_color": "#061a2d",
   "icons": [
     {
       "src": "assets/delgrosso-app-icon-180.png",
       "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/delgrosso-app-icon-152.png",
+      "sizes": "152x152",
       "type": "image/png",
       "purpose": "any"
     },

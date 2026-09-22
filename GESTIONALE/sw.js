@@ -1,8 +1,75 @@
-const CACHE='delgrosso-gestionale-v3-logo';
-self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./assets/delgrosso-app-icon-180.png','./assets/delgrosso-app-icon-512.png','./assets/delgrosso-app-icon-1024.png','./assets/delgrosso-logo-iphone-ui.png']))) });
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{
-  const u=new URL(e.request.url);
-  if(u.origin!==location.origin || u.pathname.includes('/rest/v1/') || u.pathname.includes('/auth/v1/')) return;
-  e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)));
+const CACHE = 'delgrosso-gestionale-pwa-v4';
+
+const APP_SHELL = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './assets/delgrosso-app-icon-180.png',
+  './assets/delgrosso-app-icon-152.png',
+  './assets/delgrosso-app-icon-512.png',
+  './assets/delgrosso-app-icon-1024.png',
+  './assets/delgrosso-logo-iphone-ui.png'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Never interfere with Supabase/Auth/REST traffic.
+  if (url.origin !== self.location.origin ||
+      url.pathname.includes('/rest/v1/') ||
+      url.pathname.includes('/auth/v1/') ||
+      url.pathname.includes('/storage/v1/') ||
+      url.pathname.includes('/realtime/')) {
+    return;
+  }
+
+  // HTML/navigation: network first, cached shell as offline fallback.
+  if (request.mode === 'navigate' ||
+      request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Static assets: cache first, then network.
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request).then((response) => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      });
+    })
+  );
 });
