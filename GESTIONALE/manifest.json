@@ -1,6 +1,6 @@
 {
   "name": "Del Grosso Viaggi · Gestionale Supabase",
-  "short_name": "DG Gestionale V207",
+  "short_name": "DG Gestionale V208",
   "start_url": "./login.html",
   "display": "standalone",
   "orientation": "any",
@@ -20,5 +20,5 @@
       "purpose": "any"
     }
   ],
-  "description": "Gestionale operativo Del Grosso Viaggi & Limousine Bus"
+  "description": "Gestionale operativo Del Grosso Viaggi & Limousine Bus · Supabase LIVE"
 }
