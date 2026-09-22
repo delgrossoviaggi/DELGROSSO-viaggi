@@ -12,17 +12,25 @@ jobs:
     runs-on: macos-latest
 
     steps:
+
       - name: Scarica repository
         uses: actions/checkout@v4
 
       - name: Mostra Xcode
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+
+      - name: Verifica progetto Xcode
+        run: |
+          xcodebuild \
+            -project "IOS_APP/DELGROSSO-Gestionale.xcodeproj" \
+            -list
 
       - name: Compila app iOS
         run: |
           xcodebuild \
             -project "IOS_APP/DELGROSSO-Gestionale.xcodeproj" \
-            -scheme "DELGROSSO-Gestionale" \
+            -target "DELGROSSO Gestionale" \
             -sdk iphoneos \
             -configuration Release \
             CODE_SIGNING_ALLOWED=NO \
