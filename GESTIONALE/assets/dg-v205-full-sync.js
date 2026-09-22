@@ -1,9 +1,9 @@
-/* DELGROSSO GESTIONALE V205 — FULL SYNC LOCAL-AUTH SAFE */
+/* DELGROSSO GESTIONALE V206 — FULL SYNC LOCAL-AUTH SAFE */
 (function(){
   'use strict';
-  if(window.__DG_V205_FULL_SYNC__) return;
-  window.__DG_V205_FULL_SYNC__=true;
-  const LAST='dg_v205_last_full_sync';
+  if(window.__DG_V206_FULL_SYNC__) return;
+  window.__DG_V206_FULL_SYNC__=true;
+  const LAST='dg_v206_last_full_sync';
   const MIN_INTERVAL=0;
   const text=v=>String(v??'').trim();
   const statusEl=()=>document.querySelector('#dg-v155-sync-status');
@@ -15,9 +15,9 @@
   }
   function addButton(){
     const el=statusEl();
-    if(!el || el.querySelector('.dg-v205-full-sync')) return;
+    if(!el || el.querySelector('.dg-v206-full-sync')) return;
     const b=document.createElement('button');
-    b.type='button'; b.className='dg-v205-full-sync';
+    b.type='button'; b.className='dg-v206-full-sync';
     b.textContent='↻ Sincronizza tutto';
     b.title='Ricarica dal Supabase tutti i dati operativi del Gestionale';
     b.addEventListener('click',()=>run({manual:true}));
@@ -37,7 +37,7 @@
     }catch{return false}
   }
   async function run({manual=false}={}){
-    if(window.__DG_V205_SYNC_BUSY__) return window.__DG_V205_SYNC_BUSY__;
+    if(window.__DG_V206_SYNC_BUSY__) return window.__DG_V206_SYNC_BUSY__;
     const job=(async()=>{
       if(!navigator.onLine) throw new Error('Connessione assente.');
       addButton();
@@ -59,10 +59,10 @@
       const message=text(err?.message||err)||'Sincronizzazione non riuscita.';
       setLabel('SYNC: '+message,'error');
       window.dispatchEvent(new CustomEvent('dg:full-sync-error',{detail:{message}}));
-      if(manual) console.error('[DG V205 FULL SYNC]',err);
+      if(manual) console.error('[DG V206 FULL SYNC]',err);
       throw err;
-    }).finally(()=>{window.__DG_V205_SYNC_BUSY__=null;});
-    window.__DG_V205_SYNC_BUSY__=job;
+    }).finally(()=>{window.__DG_V206_SYNC_BUSY__=null;});
+    window.__DG_V206_SYNC_BUSY__=job;
     return job;
   }
   async function maybeAuto(){
