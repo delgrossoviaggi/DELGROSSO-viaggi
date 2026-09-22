@@ -1,0 +1,16 @@
+{
+  "name": "DELGROSSO Gestionale",
+  "short_name": "DELGROSSO",
+  "start_url": "./index.html#dashboard",
+  "display": "standalone",
+  "background_color": "#071c2f",
+  "theme_color": "#0b2741",
+  "icons": [
+    {
+      "src": "assets/delgrosso-logo-ui.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
