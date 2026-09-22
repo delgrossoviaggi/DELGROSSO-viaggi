@@ -9,7 +9,7 @@
   666666666666666666666666 = {isa = PBXFileReference; lastKnownFileType = folder; path = WebApp; sourceTree = "<group>";};
   777777777777777777777777 = {isa = PBXGroup; children = (111111111111111111111111,222222222222222222222222,333333333333333333333333,555555555555555555555555,666666666666666666666666); name = "DELGROSSO-Gestionale"; path = "DELGROSSO-Gestionale"; sourceTree = "<group>";};
   888888888888888888888888 = {isa = PBXGroup; children = (777777777777777777777777,999999999999999999999999); sourceTree = "<group>";};
-  9999999999999999999999999 = {isa = PBXGroup; children = (FFFFFFFFFFFFFFFFFFFFFFFF); name = Products; sourceTree = "<group>";};
+  999999999999999999999999 = {isa = PBXGroup; children = (FFFFFFFFFFFFFFFFFFFFFFFF); name = Products; sourceTree = "<group>";};
   AAAAAAAAAAAAAAAAAAAAAAAA = {isa = PBXNativeTarget; buildConfigurationList = BBBBBBBBBBBBBBBBBBBBBBBB; buildPhases = (CCCCCCCCCCCCCCCCCCCCCCCC,DDDDDDDDDDDDDDDDDDDDDDDD,EEEEEEEEEEEEEEEEEEEEEEEE); buildRules = (); dependencies = (); name = "DELGROSSO Gestionale"; productName = "DELGROSSO Gestionale"; productReference = FFFFFFFFFFFFFFFFFFFFFFFF; productType = "com.apple.product-type.application";};
   121212121212121212121212 = {isa = PBXBuildFile; fileRef = 111111111111111111111111;};
   131313131313131313131313 = {isa = PBXBuildFile; fileRef = 222222222222222222222222;};
