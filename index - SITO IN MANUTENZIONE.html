@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>DELGROSSO Viaggi & Limousine Bus | Sito in manutenzione</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #07111f;
+      --bg2: #0d1d31;
+      --text: #ffffff;
+      --muted: #b8c4d3;
+      --accent: #d9b56d;
+      --card: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.14);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(217,181,109,.18), transparent 30%),
+        radial-gradient(circle at 85% 85%, rgba(34,92,145,.28), transparent 35%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .wrap {
+      width: min(900px, 100%);
+      text-align: center;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70px;
+      padding: 12px 28px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(12px);
+      margin-bottom: 42px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      font-size: clamp(18px, 3vw, 28px);
+    }
+
+    .brand span {
+      color: var(--accent);
+      margin-left: 8px;
+    }
+
+    .icon {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(217,181,109,.12);
+      border: 1px solid rgba(217,181,109,.35);
+      font-size: 42px;
+    }
+
+    h1 {
+      font-size: clamp(36px, 7vw, 66px);
+      line-height: 1.05;
+      margin-bottom: 20px;
+      letter-spacing: -1.5px;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: clamp(17px, 2.5vw, 21px);
+      line-height: 1.65;
+    }
+
+    .card {
+      margin: 38px auto 0;
+      padding: 26px;
+      max-width: 680px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      backdrop-filter: blur(15px);
+    }
+
+    .card-title {
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .contacts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .contact {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.15);
+      border-radius: 16px;
+      padding: 18px 14px;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease;
+    }
+
+    .contact:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,.1);
+      border-color: rgba(217,181,109,.5);
+    }
+
+    .contact strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 7px;
+    }
+
+    .contact small {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer {
+      margin-top: 34px;
+      color: #8290a3;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+
+      .brand {
+        margin-bottom: 30px;
+        padding: 11px 18px;
+      }
+
+      .contacts {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <div class="brand">
+      DELGROSSO <span>VIAGGI &amp; LIMOUSINE BUS</span>
+    </div>
+
+    <div class="icon" aria-hidden="true">🚌</div>
+
+    <h1>Sito in <span>manutenzione</span></h1>
+
+    <p class="subtitle">
+      Stiamo lavorando al nuovo sito di DELGROSSO Viaggi &amp; Limousine Bus
+      per offrirti un'esperienza ancora migliore.
+      <br>
+      Torneremo online molto presto.
+    </p>
+
+    <section class="card">
+      <div class="card-title">Nel frattempo, contattaci</div>
+
+      <div class="contacts">
+        <a class="contact" href="mailto:info@delgrossoviaggi.it">
+          <strong>✉️ Email</strong>
+          <small>info@delgrossoviaggi.it</small>
+        </a>
+
+        <a class="contact"
+           href="https://wa.me/393662127916"
+           target="_blank"
+           rel="noopener noreferrer">
+          <strong>💬 WhatsApp</strong>
+          <small>366 212 7916</small>
+        </a>
+      </div>
+    </section>
+
+    <div class="footer">
+      © DELGROSSO Viaggi &amp; Limousine Bus
+    </div>
+
+  </main>
+</body>
+</html>
