@@ -787,7 +787,7 @@ async function loadAll(){
       api('attivita_gestionale','select=*&order=created_at.desc'),
       api('scadenze_gestionale','select=*&order=data_scadenza.asc'),
       api('audit_log_gestionale','select=*&order=created_at.desc&limit=100'),
-      api('archivio_documenti','select=*&order=created_at.desc'),
+      api('archivio_documenti','select=*&order=updated_at.desc'),
       api('economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'),
       api('carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'),
       api('manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc')
@@ -799,14 +799,15 @@ async function loadAll(){
       prenotazionePosti:pp||[],attivita:att||[],scadenze:sc||[],audit:audit||[],archivioDocumenti:docs||[],economia:eco||[],carburante:fuel||[],manutenzioni:maint||[],online:true
     });
     setStatus('live');markSynced();renderPage(state.page);updateBadge();initFleetCarousels();
+    if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;try{await rpc('dg_reconcile_payments_economia',{});}catch(e){log('Riconciliazione Economia: '+e.message)}}
     try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti}}));}catch{}
     log(`Sincronizzazione completa: ${state.viaggi.length} viaggi · ${state.prenotazioni.length} prenotazioni · ${state.clienti.length} clienti · ${state.pagamenti.length} pagamenti · ${state.flotta.length} mezzi · ${state.noleggi.length} noleggi`);
   }catch(e){
     state.online=false;
-    setStatus(/HTTP 401|HTTP 403/.test(String(e.message))?'auth':(/viaggi: HTTP/.test(String(e.message))?'degraded':'off'),e.message);
+    setStatus(/HTTP 401|HTTP 403/.test(String(e.message))?'auth':(/HTTP 400|HTTP 404|HTTP 409/.test(String(e.message))?'degraded':(/viaggi: HTTP/.test(String(e.message))?'degraded':'off')),e.message);
     log('Sincronizzazione fallita: '+e.message);
     // Mantiene disponibili gli ultimi dati validamente sincronizzati, marcandoli come cache.
-    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);initFleetCarousels();toast('Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
+    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);initFleetCarousels();toast(/HTTP 400|HTTP 404|HTTP 409/.test(String(e.message))?'Problema di schema/API Supabase: caricati gli ultimi dati sincronizzati.':'Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
     toast('Sincronizzazione Supabase fallita: '+e.message,false);
   }
 }
