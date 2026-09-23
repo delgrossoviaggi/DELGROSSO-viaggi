@@ -384,6 +384,36 @@ html,body{background:var(--dl-bg)!important;color:var(--dl-text)}
   .hero-services span{font-size:8px!important}
 }
 
+
+/* ===== DELGROSSO HERO SPLIT — LOGO + SLOGAN AFFIANCATI ALLA FOTO ===== */
+.dl26-static-hero{display:grid!important;grid-template-columns:42% 58%!important;height:268px!important;position:relative!important;overflow:hidden!important;background:#071522!important}
+.dl26-static-hero-copy{position:relative!important;left:auto!important;top:auto!important;transform:none!important;z-index:2!important;max-width:none!important;display:flex!important;flex-direction:column!important;justify-content:center!important;padding:24px 28px!important;background:linear-gradient(145deg,#0c2740,#071522)!important}
+.dl26-hero-logo{display:block!important;width:245px!important;height:82px!important;object-fit:contain!important;object-position:left center!important;background:transparent!important;border-radius:0!important;padding:0!important;margin:0 0 10px!important;box-shadow:none!important}
+.dl26-hero-copy .eyebrow,.dl26-static-hero-copy .eyebrow{font-size:11px!important;letter-spacing:2px!important;color:#8fcfff!important;font-weight:900!important}
+.dl26-static-hero-copy h1{font-size:29px!important;line-height:1.02!important;margin:7px 0 7px!important;color:#fff!important;letter-spacing:-.4px!important}
+.dl26-static-hero-copy h1 em{font-size:22px!important;color:#dcecff!important;font-style:italic!important;font-weight:500!important}
+.dl26-static-hero-copy p{font-size:14px!important;color:#c7d9e9!important;margin:0 0 12px!important}
+.dl26-static-hero-photo{position:relative!important;min-width:0!important;height:100%!important;overflow:hidden!important;background:#0a1b2c!important}
+.dl26-static-hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,21,34,.12),rgba(7,21,34,0) 30%,rgba(7,21,34,.06));pointer-events:none}
+.dl26-static-hero-img{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;object-position:center!important;filter:saturate(1) contrast(1.02)!important}
+@media(max-width:1000px){
+  .dl26-static-hero{display:flex!important;flex-direction:column!important;height:auto!important;min-height:0!important}
+  .dl26-static-hero-copy{order:1!important;padding:16px 16px 13px!important;display:block!important;background:linear-gradient(145deg,#0c2740,#071522)!important}
+  .dl26-static-hero-photo{order:2!important;height:180px!important;min-height:180px!important}
+  .dl26-hero-logo{width:190px!important;height:60px!important;margin-bottom:5px!important}
+  .dl26-static-hero-copy .eyebrow{font-size:9px!important}
+  .dl26-static-hero-copy h1{font-size:23px!important;margin:4px 0 5px!important}
+  .dl26-static-hero-copy h1 em{font-size:17px!important}
+  .dl26-static-hero-copy p{font-size:11px!important;margin-bottom:7px!important}
+  .hero-services{gap:5px!important}
+  .hero-services span{font-size:8px!important;padding:5px 7px!important}
+}
+@media(max-width:420px){
+  .dl26-static-hero-photo{height:160px!important;min-height:160px!important}
+  .dl26-hero-logo{width:175px!important;height:55px!important}
+  .dl26-static-hero-copy h1{font-size:21px!important}
+}
+
 </style>
 
 <style id="dg-optional-css">
@@ -545,14 +575,15 @@ body{background:radial-gradient(circle at 65% -10%,rgba(16,103,180,.18),transpar
 <div class="content">
 <section class="page active" id="page-dashboard">
   <div class="dl26-hero dl26-static-hero">
-    <img class="dl26-static-hero-img" src="assets/bus-bianco-dashboard.jpg" alt="DELGROSSO Viaggi - Bus GT">
-    <div class="dl26-static-hero-overlay"></div>
     <div class="dl26-static-hero-copy">
       <img class="dl26-hero-logo" src="assets/delgrosso-logo-iphone-ui.png" alt="DELGROSSO Viaggi">
-      <span class="eyebrow">VIAGGI IN TUTTA ITALIA</span>
-      <h1>Più di un viaggio,<br><em>è un'emozione.</em></h1>
-      <p>Comfort, sicurezza e professionalità. La strada che ti porta più lontano.</p>
+      <span class="eyebrow">DELGROSSO VIAGGI</span>
+      <h1>Portiamo i tuoi sogni<br><em>più lontano.</em></h1>
+      <p>Più di un viaggio, è un'emozione.</p>
       <div class="hero-services"><span>🚌 Viaggi in bus GT</span><span>👥 Limousine bus per feste private</span><span>🚐 Noleggio con conducente</span></div>
+    </div>
+    <div class="dl26-static-hero-photo">
+      <img class="dl26-static-hero-img" src="assets/bus-bianco-dashboard.jpg" alt="DELGROSSO Viaggi - Bus GT">
     </div>
   </div>
 
