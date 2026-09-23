@@ -197,193 +197,6 @@ input,select,textarea{font-size:16px;} /* prevents iOS Safari auto-zoom */
 @media(max-width:1000px){.main{margin-left:0!important;width:100%!important}.sidebar{display:none!important}.mobile-menu-btn{display:block!important}.mobile-menu{display:none!important}.mobile-menu.on{display:block!important}}
 
 .dossier-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:4px 0 14px}.dossier-head h2{margin:8px 0 4px}.dossier-head p{margin:0;color:#64748b}.dossier-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dossier-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0 14px}.dossier-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}.dossier-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.dossier-mini-grid>div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px}.dossier-mini-grid small,.dossier-mini-grid b{display:block}.dossier-mini-grid b{margin-top:4px}.alert-line{padding:10px 12px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;margin-bottom:8px}.economy-positive{color:#047857}.economy-negative{color:#b91c1c}@media(max-width:800px){.dossier-head{display:block}.dossier-actions{justify-content:flex-start;margin-top:10px}.dossier-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dossier-grid{grid-template-columns:1fr}.dossier-mini-grid{grid-template-columns:1fr}.dossier-head h2{font-size:20px}}
-
-/* ===== DELGROSSO REFERENCE INTERFACE — FINAL ===== */
-:root{
-  --dl-bg:#06121e;
-  --dl-surface:#0b1d2e;
-  --dl-surface2:#10283e;
-  --dl-border:rgba(126,169,208,.20);
-  --dl-text:#edf6ff;
-  --dl-muted:#8fa8bf;
-  --dl-blue:#0b82ee;
-  --dl-blue2:#0758b7;
-}
-html,body{background:var(--dl-bg)!important;color:var(--dl-text)}
-.app{background:var(--dl-bg)}
-.sidebar{
-  width:243px!important;
-  background:linear-gradient(180deg,#061522 0%,#071a2b 58%,#061522 100%)!important;
-  border-right:1px solid rgba(127,172,215,.12);
-}
-.brand{
-  margin:9px 12px 12px!important;
-  height:91px!important;
-  padding:5px 8px!important;
-  background:transparent!important;
-}
-.brand img{max-width:218px!important;max-height:82px!important;mix-blend-mode:screen}
-.nav{padding:0 10px!important}
-.nav button{padding:11px 13px!important;color:#d8e6f3!important;font-size:15px;border-radius:7px!important}
-.nav button.active,.nav button:hover{
-  background:linear-gradient(90deg,#0b6ed8,#064ca6)!important;
-  box-shadow:inset 3px 0 #17a9ff!important;
-}
-.side-bottom{padding:9px 12px 6px!important}
-.fleet-carousel{
-  height:168px!important;
-  border-radius:10px!important;
-  border:1px solid var(--dl-border)!important;
-  background:#091b2b!important;
-}
-.fleet-carousel-img{height:108px!important;object-fit:contain!important;padding:4px 8px!important}
-.fleet-caption{top:108px!important;height:60px!important;padding:8px 10px!important}
-.version{font-size:11px!important;line-height:1.45;color:#b8cbe0!important;padding:8px 3px 3px!important}
-
-.main{
-  margin-left:243px!important;
-  width:calc(100% - 243px)!important;
-  background:var(--dl-bg)!important;
-}
-.topbar{
-  height:72px!important;
-  margin:0!important;
-  border-radius:0!important;
-  background:rgba(5,16,27,.96)!important;
-  border-bottom:1px solid rgba(126,169,208,.13)!important;
-  box-shadow:none!important;
-  padding:0 17px!important;
-}
-.search{
-  max-width:455px!important;
-  height:40px!important;
-  background:#12283d!important;
-  border:1px solid rgba(125,174,219,.14)!important;
-  border-radius:10px!important;
-}
-.search input{height:38px!important;background:transparent!important;border:0!important;color:#eaf5ff!important}
-.top-clock{display:flex;align-items:center;gap:10px;margin-left:auto;padding:0 14px;border-left:1px solid rgba(126,169,208,.14);border-right:1px solid rgba(126,169,208,.14);color:#dcecff}
-.top-clock>span{font-size:22px;color:#b9d6f3}
-.top-clock small{display:block;font-size:10px;color:#c0cfdf;white-space:nowrap}
-.top-clock b{display:block;font-size:17px;line-height:1.1;margin-top:2px}
-.top-actions{margin-left:0!important;gap:9px!important}
-.bell{background:transparent!important;border:0!important;color:#d8e8f7!important}
-.user{color:#fff!important}
-.avatar{background:linear-gradient(135deg,#0da8ff,#075dc2)!important}
-.content{padding:10px 15px 24px!important}
-
-.dl26-hero{
-  height:238px!important;
-  border-radius:13px!important;
-  border:1px solid rgba(126,169,208,.22)!important;
-  box-shadow:0 16px 35px rgba(0,0,0,.28)!important;
-}
-.dl26-static-hero-img{
-  width:100%!important;height:100%!important;object-fit:cover!important;
-  object-position:center 56%!important;
-  filter:saturate(.98) contrast(1.02)!important;
-}
-.dl26-hero-overlay{
-  background:linear-gradient(90deg,rgba(3,13,23,.93) 0%,rgba(3,13,23,.78) 32%,rgba(3,13,23,.25) 67%,rgba(3,13,23,.08) 100%)!important;
-}
-.dl26-static-hero-copy{
-  left:34px!important;top:27px!important;transform:none!important;max-width:560px!important;
-}
-.dl26-hero-logo{
-  display:block!important;width:285px!important;height:90px!important;object-fit:contain!important;
-  object-position:left center!important;background:#fff!important;border-radius:8px!important;
-  padding:5px 10px!important;margin-bottom:7px!important;
-  box-shadow:0 7px 20px rgba(0,0,0,.18)!important;
-}
-.dl26-hero-copy .eyebrow{font-size:12px!important;letter-spacing:2.2px!important;color:#a9d8ff!important}
-.dl26-hero-copy h1{font-size:34px!important;line-height:1.02!important;margin:6px 0 6px!important}
-.dl26-hero-copy h1 em{font-size:22px!important}
-.dl26-hero-copy p{font-size:13px!important;color:#d2e4f4!important}
-.hero-services{display:flex;gap:18px;margin-top:11px;flex-wrap:wrap}
-.hero-services span{font-size:11px;color:#f3f8fd;background:rgba(4,20,35,.36);border:1px solid rgba(255,255,255,.11);border-radius:8px;padding:7px 9px;backdrop-filter:blur(5px)}
-
-.dl26-metrics{gap:10px!important;margin:10px 0!important}
-.dl26-metrics .metric{
-  min-height:96px!important;
-  padding:13px!important;
-  background:linear-gradient(145deg,#102a43,#0a1b2c)!important;
-  border:1px solid rgba(150,190,225,.13)!important;
-  border-radius:11px!important;
-}
-.dl26-metrics .metric b{font-size:24px!important;color:#fff!important}
-.dl26-metrics .metric small{font-size:11px!important;color:#9db4ca!important}
-.dl26-metrics .metric .mi{width:39px;height:39px;background:rgba(21,152,255,.14)!important;color:#49b5ff!important}
-
-.dl26-grid-main{gap:10px!important}
-.dl26-grid-bottom,.dl26-grid-three{gap:10px!important}
-.dl26-panel{
-  background:linear-gradient(145deg,rgba(12,30,48,.97),rgba(7,20,33,.99))!important;
-  border:1px solid rgba(126,169,208,.18)!important;
-  border-radius:11px!important;
-  box-shadow:0 10px 25px rgba(0,0,0,.22)!important;
-}
-.dl26-panel .card-head{padding:12px 13px!important}
-.dl26-panel .card-head h3{font-size:14px!important;color:#f3f8fd!important}
-.dl26-panel .card-body{color:#d7e5f2!important}
-.dl26-panel .row-main strong{color:#f1f7fd!important}
-.dl26-panel .row-main small{color:#819ab1!important}
-.dl26-departures .list-row,.dl26-alerts .list-row,.dl26-fleet .list-row,.dl26-bookings .list-row{
-  border-bottom:1px solid rgba(145,182,218,.08)!important
-}
-.dl26-panel .btn-ghost{color:#27a5ff!important}
-
-@media(max-width:1200px){
-  .top-clock{display:none}
-}
-@media(max-width:1000px){
-  body{background:#06121e!important}
-  .main{width:100%!important;margin:0!important;padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}
-  .topbar{
-    background:#061522!important;
-    min-height:60px!important;
-    border-bottom:1px solid rgba(126,169,208,.15)!important;
-    padding:7px 9px!important;
-  }
-  .mobile-menu-btn{background:#102a43!important;color:#fff!important;border:1px solid rgba(126,169,208,.14)!important}
-  .top-brand .mini{background:#fff!important}
-  .top-brand strong,.top-brand small{color:#fff!important}
-  .search{background:#0b2034!important;border-color:#1c3d58!important}
-  .search input{color:#eaf5ff!important}
-  .search input::placeholder{color:#88a1b9!important}
-  .content{padding:9px 8px 14px!important}
-  .dl26-hero{
-    height:auto!important;min-height:340px!important;
-    display:block!important;border-radius:12px!important;
-  }
-  .dl26-static-hero-img{height:180px!important;object-fit:cover!important;object-position:center!important}
-  .dl26-hero-overlay{inset:0!important;background:linear-gradient(180deg,rgba(3,13,23,.15) 0%,rgba(3,13,23,.72) 48%,rgba(3,13,23,.98) 100%)!important}
-  .dl26-static-hero-copy{
-    left:15px!important;right:15px!important;top:auto!important;bottom:14px!important;max-width:none!important;
-  }
-  .dl26-hero-logo{width:205px!important;height:60px!important;margin-bottom:5px!important}
-  .dl26-hero-copy .eyebrow{font-size:9px!important}
-  .dl26-hero-copy h1{font-size:25px!important;margin:4px 0!important}
-  .dl26-hero-copy h1 em{font-size:18px!important}
-  .dl26-hero-copy p{font-size:11px!important}
-  .hero-services{gap:5px;margin-top:7px!important}
-  .hero-services span{font-size:9px!important;padding:6px 7px!important}
-  .dl26-metrics{grid-template-columns:1fr 1fr!important;gap:7px!important}
-  .dl26-metrics .metric{min-height:82px!important;padding:10px 9px!important}
-  .dl26-metrics .metric b{font-size:18px!important}
-  .dl26-grid-main,.dl26-grid-bottom,.dl26-grid-three{grid-template-columns:1fr!important}
-  .dl26-panel{border-radius:11px!important}
-  .mobile-nav{background:rgba(4,15,25,.98)!important;border-top:1px solid rgba(126,169,208,.18)!important}
-}
-@media(max-width:420px){
-  .top-brand .mini{display:none}
-  .top-brand strong{font-size:12px!important}
-  .top-brand small{font-size:8px!important}
-  .dl26-hero{min-height:325px!important}
-  .dl26-static-hero-img{height:160px!important}
-  .dl26-hero-logo{width:185px!important;height:55px!important}
-  .hero-services span{font-size:8px!important}
-}
-
 </style>
 
 <style id="dg-optional-css">
@@ -537,20 +350,18 @@ body{background:radial-gradient(circle at 65% -10%,rgba(16,103,180,.18),transpar
 <header class="topbar">
   <button class="mobile-menu-btn" type="button" aria-label="Apri menu" onclick="toggleMobileMenu()">☰</button>
   <div class="top-brand"><div class="mini"><img src="assets/delgrosso-logo-iphone-ui.png"></div><div><strong>Sistema Gestionale</strong><small>DELGROSSO Viaggi & Limousine BUS<br>La strada che ti porta più lontano</small></div></div>
-  <div class="search"><span>⌕</span><input id="globalSearch" placeholder="Cerca viaggi, clienti, prenotazioni..."></div>
-  <div class="top-clock" aria-label="Data e ora"><span>▣</span><div><small id="topDate">Mercoledì 23 Settembre 2026</small><b id="topTime">11:00</b></div></div>
-  <div class="top-actions"><span class="sync-pill" id="syncPill">● Supabase</span><button class="bell" id="notifBtn">🔔<span class="badge" id="notifBadge">0</span></button><div class="user"><div class="avatar">NC</div><div><b>Nicola</b><small style="display:block;color:#72839a">Amministratore</small></div></div></div>
+  <div class="search"><span>⌕</span><input id="globalSearch" placeholder="Cerca clienti, viaggi, prenotazioni..."></div>
+  <div class="top-actions"><span class="sync-pill" id="syncPill">● Supabase</span><button class="bell" id="notifBtn">🔔<span class="badge" id="notifBadge">0</span></button><div class="user"><div class="avatar">DG</div><div><b>Admin</b><small style="display:block;color:#72839a">Amministratore</small></div></div></div>
 </header>
 
 <div class="content">
 <section class="page active" id="page-dashboard">
   <div class="dl26-hero dl26-static-hero">
-    <img class="dl26-static-hero-img" src="assets/bus-bianco-dashboard.jpg" alt="DELGROSSO Viaggi - Bus GT">
+    <img class="dl26-static-hero-img" src="assets/dashboard-hero-static.jpg" alt="DELGROSSO Viaggi - Bus GT">
     <div class="dl26-static-hero-overlay"></div>
     <div class="dl26-static-hero-copy">
-      <img class="dl26-hero-logo" src="assets/delgrosso-logo-iphone-ui.png" alt="DELGROSSO Viaggi">
       <span class="eyebrow">VIAGGI IN TUTTA ITALIA</span>
-      <h1>Più di un viaggio,<br><em>è un'emozione.</em></h1>
+      <h1>DELGROSSO<br><em>Viaggi & Limousine Bus</em></h1>
       <p>Comfort, sicurezza e professionalità. La strada che ti porta più lontano.</p>
       <div class="hero-services"><span>🚌 Viaggi in bus GT</span><span>👥 Limousine bus per feste private</span><span>🚐 Noleggio con conducente</span></div>
     </div>
@@ -976,7 +787,7 @@ async function loadAll(){
       api('attivita_gestionale','select=*&order=created_at.desc'),
       api('scadenze_gestionale','select=*&order=data_scadenza.asc'),
       api('audit_log_gestionale','select=*&order=created_at.desc&limit=100'),
-      api('archivio_documenti','select=*&order=updated_at.desc'),
+      api('archivio_documenti','select=*&order=created_at.desc'),
       api('economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'),
       api('carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'),
       api('manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc')
@@ -988,15 +799,14 @@ async function loadAll(){
       prenotazionePosti:pp||[],attivita:att||[],scadenze:sc||[],audit:audit||[],archivioDocumenti:docs||[],economia:eco||[],carburante:fuel||[],manutenzioni:maint||[],online:true
     });
     setStatus('live');markSynced();renderPage(state.page);updateBadge();initFleetCarousels();
-    if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;try{await rpc('dg_reconcile_payments_economia',{});}catch(e){log('Riconciliazione Economia: '+e.message)}}
     try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti}}));}catch{}
     log(`Sincronizzazione completa: ${state.viaggi.length} viaggi · ${state.prenotazioni.length} prenotazioni · ${state.clienti.length} clienti · ${state.pagamenti.length} pagamenti · ${state.flotta.length} mezzi · ${state.noleggi.length} noleggi`);
   }catch(e){
     state.online=false;
-    setStatus(/HTTP 401|HTTP 403/.test(String(e.message))?'auth':(/HTTP 400|HTTP 404|HTTP 409/.test(String(e.message))?'degraded':(/viaggi: HTTP/.test(String(e.message))?'degraded':'off')),e.message);
+    setStatus(/HTTP 401|HTTP 403/.test(String(e.message))?'auth':(/viaggi: HTTP/.test(String(e.message))?'degraded':'off'),e.message);
     log('Sincronizzazione fallita: '+e.message);
     // Mantiene disponibili gli ultimi dati validamente sincronizzati, marcandoli come cache.
-    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);initFleetCarousels();toast(/HTTP 400|HTTP 404|HTTP 409/.test(String(e.message))?'Problema di schema/API Supabase: caricati gli ultimi dati sincronizzati.':'Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
+    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);initFleetCarousels();toast('Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
     toast('Sincronizzazione Supabase fallita: '+e.message,false);
   }
 }
@@ -1640,8 +1450,7 @@ html,body{background:var(--dg-bg)!important;color:var(--dg-text)!important}
 }
 @media(max-width:380px){.dl26-hero{height:205px!important}.dl26-static-hero-copy h1{font-size:22px!important}.metric b{font-size:17px!important}.metric{padding:8px!important}.content{padding-left:5px!important;padding-right:5px!important}}
 
-</style></head><body>${body}<script>window.onload=()=>window.print()<\/script>
-</body></html>`);w.document.close()}
+</style></head><body>${body}<script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close()}
 async function printReceipt(paymentId){const p=state.pagamenti.find(x=>x.id===paymentId);if(!p)return;const b=state.prenotazioni.find(x=>x.id===p.prenotazione_id);printWindow('Ricevuta '+(p.receipt_number||p.ricevuta||''),`<img class="logo" src="assets/delgrosso-logo-cropped.jpg"><h1>Ricevuta pagamento</h1><p><b>${esc(p.receipt_number||p.ricevuta||'—')}</b></p><div class="box"><div class="row"><span>Cliente</span><b>${esc(p.cliente||b?.cliente||'—')}</b></div><div class="row"><span>Viaggio</span><b>${esc(p.viaggio||tripName(p.viaggio_id))}</b></div><div class="row"><span>Tipo</span><b>${esc(p.tipo)}</b></div><div class="row"><span>Importo</span><b>${money(p.importo)}</b></div><div class="row"><span>Metodo</span><b>${esc(p.metodo_pagamento||p.metodo||'—')}</b></div><div class="row"><span>Data</span><b>${dateIT(p.data_pagamento)}</b></div><div class="row"><span>Residuo</span><b>${money(b?.saldo||p.saldo||0)}</b></div></div><p style="margin-top:30px">DELGROSSO Viaggi & Limousine BUS</p>`)}
 async function printConfirmation(id){let b=state.prenotazioni.find(x=>x.id===id);if(!b)return;try{if(!b.confirmation_number){await rpc('dg_generate_confirmation',{p_booking_id:id});await loadAll();b=state.prenotazioni.find(x=>x.id===id)||b}}catch(e){return toast(e.message,false)}const seats=state.prenotazionePosti.filter(x=>x.prenotazione_id===id).map(x=>x.posto).join(', ')||b.posti_selezionati||'—';const v=state.viaggi.find(v=>v.id===b.viaggio_id);printWindow('Conferma '+(b.confirmation_number||b.codice||''),`<img class="logo" src="assets/delgrosso-logo-cropped.jpg"><h1>Conferma prenotazione</h1><p>Codice: <b>${esc(b.confirmation_number||b.codice||'—')}</b></p><div class="box"><div class="row"><span>Cliente</span><b>${esc(b.cliente)}</b></div><div class="row"><span>Telefono</span><b>${esc(b.telefono||'—')}</b></div><div class="row"><span>Viaggio</span><b>${esc(tripName(b.viaggio_id))}</b></div><div class="row"><span>Data</span><b>${dateIT(v?.data_partenza)}</b></div><div class="row"><span>Posti</span><b>${b.posti||0}</b></div><div class="row"><span>Posti scelti</span><b>${esc(seats)}</b></div><div class="row"><span>Totale</span><b>${money(b.totale)}</b></div><div class="row"><span>Pagato</span><b>${money(b.pagato)}</b></div><div class="row"><span>Residuo</span><b>${money(b.saldo)}</b></div></div><p>Conservare questa conferma per il viaggio.</p>`)}
 function openTaskModal(){openModal('Nuova attività',`<div class="form-grid"><div class="field full"><label>Titolo</label><input id="t_title"></div><div class="field full"><label>Descrizione</label><textarea id="t_desc"></textarea></div><div class="field"><label>Priorità</label><select id="t_pri"><option>normale</option><option>alta</option><option>bassa</option></select></div><div class="field"><label>Scadenza</label><input id="t_date" type="date"></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveTask()">Salva</button>`)}
