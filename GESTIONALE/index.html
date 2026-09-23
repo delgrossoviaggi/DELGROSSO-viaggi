@@ -14,8 +14,14 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
 .field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:#34445b}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#6bb4ff;box-shadow:0 0 0 3px rgba(8,120,229,.1)}
 .btn{border:0;border-radius:11px;padding:11px 16px;font-weight:800}.btn-primary{background:linear-gradient(135deg,var(--blue),#0860c7);color:#fff}.btn-secondary{background:#fff;border:1px solid #b8d0e8;color:#17304a}.btn-green{background:var(--green);color:#fff}.btn-danger{background:#fee2e2;color:#b91c1c}.btn-ghost{background:transparent;color:#1769c5}.btn-sm{padding:8px 11px;font-size:12px}.btn:disabled{opacity:.5;cursor:not-allowed}
 .app{display:none;min-height:100vh}.app.on{display:flex}.sidebar{width:246px;background:linear-gradient(180deg,#061a2d,#08223a);color:#fff;position:fixed;left:0;top:0;bottom:0;z-index:20;display:flex;flex-direction:column}.brand{margin:8px 8px 12px;background:#fff;border-radius:12px;padding:8px;height:92px;display:grid;place-items:center}.brand img{max-width:100%;max-height:78px}.nav{padding:0 8px;overflow:auto}.nav button{width:100%;border:0;background:transparent;color:#fff;text-align:left;padding:14px 15px;border-radius:10px;margin:2px 0;font-weight:700;display:flex;gap:13px;align-items:center}.nav button:hover,.nav button.active{background:linear-gradient(90deg,#0b7ce9,#0968cf)}.ico{width:20px;text-align:center;opacity:.95}.side-bottom{margin-top:auto;padding:10px}.fleet-mini{border-radius:12px;overflow:hidden;margin-bottom:10px}.fleet-mini img{display:block;width:100%;height:112px;object-fit:cover}.fleet-mini div{background:#0d2a46;padding:10px;font-size:12px}.version{font-size:11px;color:#91a6bd;padding:10px}
+.fleet-carousel{position:relative;height:168px;background:#0d2a46}.fleet-carousel-img{width:100%;height:112px!important;object-fit:cover;display:block;transition:opacity .25s ease}.fleet-caption{position:absolute;left:0;right:0;top:112px;height:56px;background:linear-gradient(180deg,#0d2a46,#0a2035);padding:8px 34px 8px 10px;color:#fff;display:flex;flex-direction:column;justify-content:center}.fleet-caption b{font-size:12px;line-height:1.1}.fleet-caption span{font-size:10px;color:#9eb2c8;margin-top:2px}.fleet-arrow,.hero-arrow{position:absolute;border:0;display:grid;place-items:center;cursor:pointer;font-weight:900;line-height:1;color:#fff;background:rgba(4,20,35,.58);backdrop-filter:blur(4px);z-index:3}.fleet-arrow{top:39px;width:28px;height:34px;border-radius:8px;font-size:25px}.fleet-prev{left:7px}.fleet-next{right:7px}.fleet-dots,.hero-dots{position:absolute;display:flex;gap:5px;z-index:4}.fleet-dots{right:9px;bottom:9px}.fleet-dots button,.hero-dots button{width:6px;height:6px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.55);cursor:pointer}.fleet-dots button.active,.hero-dots button.active{background:#fff;transform:scale(1.25)}
+.hero-carousel{position:relative}.hero-carousel-img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;transition:opacity .25s ease}.hero-carousel-label{position:absolute;right:14px;bottom:13px;z-index:3;background:rgba(4,20,35,.68);color:#fff;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;backdrop-filter:blur(4px)}.hero-arrow{top:50%;transform:translateY(-50%);width:38px;height:52px;border-radius:11px;font-size:34px}.hero-prev{left:12px}.hero-next{right:12px}.hero-dots{left:50%;bottom:12px;transform:translateX(-50%);padding:7px 9px;border-radius:999px;background:rgba(4,20,35,.38);backdrop-filter:blur(4px)}
+@media(max-width:600px){.hero-arrow{width:34px;height:44px;font-size:29px}.hero-carousel-label{right:10px;bottom:10px;font-size:10px}.fleet-carousel{height:160px}.fleet-carousel-img{height:105px!important}.fleet-caption{top:105px;height:55px}}
 .main{margin-left:246px;width:calc(100% - 246px);min-width:0}.topbar{height:76px;background:#fff;margin:8px 8px 0;border-radius:12px;display:flex;align-items:center;gap:18px;padding:12px 18px;box-shadow:var(--shadow);position:sticky;top:8px;z-index:10}.top-brand{display:flex;align-items:center;gap:10px;min-width:330px}.top-brand .mini{width:44px;height:44px;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center}.top-brand .mini img{max-width:80%;max-height:80%}.top-brand strong{display:block}.top-brand small{color:var(--muted)}.search{flex:1;max-width:560px;position:relative}.search input{width:100%;padding:12px 14px 12px 38px;border:1px solid var(--line);border-radius:10px}.search span{position:absolute;left:14px;top:10px;color:#698096}.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}.bell{position:relative;background:#f6f9fc;border:1px solid var(--line);border-radius:10px;padding:11px}.badge{position:absolute;right:-4px;top:-5px;background:#ef4444;color:#fff;border-radius:20px;font-size:9px;padding:3px 5px}.user{display:flex;align-items:center;gap:9px;padding:5px 7px}.avatar{width:38px;height:38px;border-radius:50%;background:#0b7ce9;color:#fff;display:grid;place-items:center;font-weight:900}.content{padding:12px 8px 24px}.page{display:none}.page.active{display:block}.hero{height:242px;border-radius:15px;overflow:hidden;position:relative;background:#0c2742;margin-bottom:12px;box-shadow:var(--shadow)}.hero img{width:100%;height:100%;object-fit:cover}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.8) 26%,rgba(255,255,255,.1) 58%,rgba(0,0,0,.08));}.hero-copy{position:absolute;z-index:2;left:42px;top:32px;max-width:370px}.hero-copy img{width:290px;height:auto;object-fit:contain}.hero-copy h2{font-size:31px;margin:8px 0 3px}.hero-copy p{font-size:18px;margin:0;color:#223d58}.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:12px}.metric{background:#fff;border:1px solid #dce8f4;border-radius:12px;padding:13px;min-width:0}.metric .top{display:flex;gap:11px;align-items:center}.metric .mi{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:#eaf5ff}.metric b{font-size:22px}.metric small{display:block;color:var(--muted);margin-top:3px}.metric .trend{color:#0baf6e;font-size:11px;margin-top:7px}.grid3{display:grid;grid-template-columns:1.05fr 1.05fr 1fr;gap:12px}.card{background:#fff;border:1px solid #dce8f4;border-radius:12px;box-shadow:0 4px 18px rgba(9,37,65,.04);overflow:hidden}.card-head{padding:14px 16px;border-bottom:1px solid #e6eef6;display:flex;align-items:center;justify-content:space-between}.card-head h3{font-size:15px;margin:0}.card-body{padding:12px}.list-row{display:flex;align-items:center;gap:10px;padding:10px 7px;border-bottom:1px solid #edf2f7}.list-row:last-child{border-bottom:0}.datebox{width:45px;text-align:center;border-radius:9px;background:#eef7ff;color:#1472c8;padding:6px 4px;font-weight:900;font-size:12px}.row-main{min-width:0;flex:1}.row-main strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.row-main small{color:var(--muted)}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:900}.ok{background:#dcfce7;color:#16814b}.wait{background:#fff4d6;color:#b87900}.danger{background:#fee2e2;color:#b91c1c}.info{background:#e5f3ff;color:#0c6bc6}.neutral{background:#eef2f7;color:#5d6e82}.dash-bottom{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px;margin-top:12px}.mini-stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.mini-stat div{padding:12px;border-radius:9px;background:#f6fafc;text-align:center}.mini-stat b{font-size:17px}.section-title{display:flex;align-items:center;justify-content:space-between;margin:5px 0 12px}.section-title h2{margin:0;font-size:21px}.section-actions{display:flex;gap:8px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #dce8f4;padding:12px;border-radius:12px;margin-bottom:12px}.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.table-card{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:12px;border-bottom:1px solid #edf2f7;text-align:left;white-space:nowrap}.table th{font-size:11px;text-transform:uppercase;color:#6a7c91;background:#f7fafc}.empty{text-align:center;padding:35px;color:var(--muted)}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid .full{grid-column:1/-1}.modal{position:fixed;inset:0;background:rgba(3,17,30,.56);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}.modal.on{display:flex}.modal-box{width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.3)}.modal-head{padding:18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.modal-body{padding:18px}.modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}.close{border:0;background:#f1f5f9;border-radius:8px;padding:8px}.toast{position:fixed;right:20px;bottom:20px;background:#102b44;color:#fff;padding:13px 16px;border-radius:11px;z-index:200;box-shadow:0 15px 35px rgba(0,0,0,.25);display:none;max-width:420px}.toast.on{display:block}.statusline{font-size:11px;padding:8px 12px;border-radius:8px;background:#f5f8fb;color:#60748a}.statusline.live{background:#dcfce7;color:#15803d}.statusline.off{background:#fff1f2;color:#be123c}.statusline.warn{background:#fff7df;color:#9a6700}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.module-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px}.module-card h3{margin:0 0 7px}.module-card p{color:var(--muted);font-size:12px;margin:0 0 12px}.detail-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px}.seat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.seat{border:1px solid #c9d8e7;border-radius:7px;padding:8px;text-align:center;font-size:11px;background:#f7fafc}.seat.busy{background:#fee2e2;color:#b91c1c;border-color:#fecaca}.seat.selected{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}.log{max-height:260px;overflow:auto}.log-item{padding:9px;border-bottom:1px solid #edf2f7;font-size:12px}.mobile-nav{display:none}
 @media(max-width:1200px){.metrics{grid-template-columns:repeat(3,1fr)}.grid3,.dash-bottom{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}}
+
+.finance-dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.finance-dash-grid>div{background:#f6fafc;border:1px solid #e5edf4;border-radius:10px;padding:11px}.finance-dash-grid small{display:block;color:#64748b;font-size:10px}.finance-dash-grid strong{display:block;margin-top:5px;font-size:16px}.dash-finance-actions{display:flex;gap:7px;margin-top:10px}
+.economy-positive{color:#047857;font-weight:800}.economy-negative{color:#b91c1c;font-weight:800}.table-wrap{overflow:auto}.table-wrap .table{min-width:900px}.quick-actions{display:flex;gap:8px;flex-wrap:wrap}.form-help{font-size:12px;color:#64748b;margin-top:4px}
 @media(max-width:850px){.sidebar{width:72px}.sidebar .brand{height:62px}.sidebar .brand img{display:none}.nav button{justify-content:center}.nav button span:last-child,.side-bottom{display:none}.main{margin-left:72px;width:calc(100% - 72px)}.top-brand{min-width:auto}.top-brand div:not(.mini){display:none}.topbar{gap:8px}.hero-copy{left:20px}.hero-copy img{width:220px}.form-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}}
 @media(max-width:600px){
   /* iPhone app shell: use the exact supplied DELGROSSO logo */
@@ -26,7 +32,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:
   .top-brand strong{font-size:13px}
   .top-brand small{display:none!important}
 }
-@media(max-width:600px){.topbar{height:auto;flex-wrap:wrap;position:relative;top:0}.search{order:3;max-width:none;flex-basis:100%}.metrics{grid-template-columns:repeat(2,1fr)}.hero{height:210px}.hero-copy h2{font-size:24px}.hero-copy p{font-size:14px}.content{padding:8px}.main{margin-left:0;width:100%;padding-bottom:65px}.sidebar{display:none}.mobile-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:58px;background:#061a2d;z-index:30;justify-content:space-around}.mobile-nav button{background:transparent;color:#fff;border:0;font-size:10px}.mobile-nav b{display:block;font-size:18px}}
+@media(max-width:600px){.finance-dash-grid{grid-template-columns:repeat(2,1fr)}.topbar{height:auto;flex-wrap:wrap;position:relative;top:0}.search{order:3;max-width:none;flex-basis:100%}.metrics{grid-template-columns:repeat(2,1fr)}.hero{height:210px}.hero-copy h2{font-size:24px}.hero-copy p{font-size:14px}.content{padding:8px}.main{margin-left:0;width:100%;padding-bottom:65px}.sidebar{display:none}.mobile-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:58px;background:#061a2d;z-index:30;justify-content:space-around}.mobile-nav button{background:transparent;color:#fff;border:0;font-size:10px}.mobile-nav b{display:block;font-size:18px}}
 .seat-picker{display:grid;grid-template-columns:repeat(4,minmax(38px,1fr));gap:8px;padding:12px;background:#f5f9fd;border:1px solid #dce7f2;border-radius:12px;max-height:300px;overflow:auto}.seat-picker .seat{border:1px solid #bcd0e3;background:#fff;border-radius:8px;padding:8px 4px;cursor:pointer;font-weight:700}.seat-picker .seat.selected{background:#1677e8;color:#fff;border-color:#1677e8}.seat-picker .seat.busy{background:#e7edf3;color:#8b98a7;cursor:not-allowed;text-decoration:line-through}.seat-picker .seat:nth-child(4n+3){margin-left:8px}.btn-ghost{background:#f1f6fb;color:#1266c5;border:1px solid #d7e3ef}.btn-ghost:hover{background:#e8f1fa}
 
 
@@ -189,6 +195,8 @@ input,select,textarea{font-size:16px;} /* prevents iOS Safari auto-zoom */
 /* Quote workflow */
 #quotesTable td:last-child{white-space:normal;min-width:230px}#quotesTable td:last-child .btn{margin:2px 0}
 @media(max-width:1000px){.main{margin-left:0!important;width:100%!important}.sidebar{display:none!important}.mobile-menu-btn{display:block!important}.mobile-menu{display:none!important}.mobile-menu.on{display:block!important}}
+
+.dossier-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:4px 0 14px}.dossier-head h2{margin:8px 0 4px}.dossier-head p{margin:0;color:#64748b}.dossier-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dossier-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0 14px}.dossier-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}.dossier-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.dossier-mini-grid>div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px}.dossier-mini-grid small,.dossier-mini-grid b{display:block}.dossier-mini-grid b{margin-top:4px}.alert-line{padding:10px 12px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;margin-bottom:8px}.economy-positive{color:#047857}.economy-negative{color:#b91c1c}@media(max-width:800px){.dossier-head{display:block}.dossier-actions{justify-content:flex-start;margin-top:10px}.dossier-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dossier-grid{grid-template-columns:1fr}.dossier-mini-grid{grid-template-columns:1fr}.dossier-head h2{font-size:20px}}
 </style>
 
 <style id="dg-optional-css">
@@ -233,6 +241,10 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
 <link rel="icon" type="image/png" sizes="512x512" href="assets/delgrosso-app-icon-512.png">
 <link rel="manifest" href="manifest.webmanifest">
 
+
+<style>
+.live-status{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;margin-left:6px}.live-status:before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}.live-pre{color:#2563eb;background:#eff6ff}.live-ready{color:#d97706;background:#fffbeb}.live-run{color:#059669;background:#ecfdf5}.live-done{color:#64748b;background:#f1f5f9}.live-danger{color:#dc2626;background:#fef2f2}.dossier-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}.dossier-step{border:1px solid #e2e8f0;border-radius:12px;padding:10px;background:#fff}.dossier-step.active{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.08)}.dossier-step b{display:block;font-size:13px}.dossier-step small{display:block;color:#64748b;margin-top:3px}.dossier-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}@media(max-width:800px){.dossier-timeline{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
 <section id="login">
@@ -272,7 +284,13 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
 <button data-page="impostazioni"><span class="ico">⚙</span><span>Impostazioni</span></button>
   </nav>
   <div class="side-bottom">
-    <div class="fleet-mini"><img src="assets/bus-bianco-reale.jpg"><div><b>DELGROSSO</b><br>La strada che ti porta più lontano</div></div>
+    <div class="fleet-mini fleet-carousel" id="sideFleetCarousel">
+      <img class="fleet-carousel-img" src="assets/bus-bianco-reale.jpg" alt="DELGROSSO Bus GT">
+      <button class="fleet-arrow fleet-prev" type="button" aria-label="Foto precedente">‹</button>
+      <button class="fleet-arrow fleet-next" type="button" aria-label="Foto successiva">›</button>
+      <div class="fleet-caption"><b>DELGROSSO</b><span>GT · Limousine BUS</span></div>
+      <div class="fleet-dots" aria-label="Foto flotta"></div>
+    </div>
     <div class="version">V1.0 DEFINITIVO<br>© 2026 Tutti i diritti riservati</div>
   </div>
 </aside>
@@ -287,7 +305,16 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
 
 <div class="content">
 <section class="page active" id="page-dashboard">
-  <div class="hero"><div class="hero-copy"><img class="hero-logo" src="assets/delgrosso-logo-iphone-ui.png" alt="DELGROSSO Viaggi & Limousine BUS"><h2>Viaggiare è vivere due volte</h2><p>Sicurezza · Comfort · Esperienza · Ovunque con voi</p></div><div class="hero-photo"><img src="assets/bus-bianco-dashboard.jpg" alt="Bus DELGROSSO bianco"></div></div>
+  <div class="hero">
+    <div class="hero-copy"><img class="hero-logo" src="assets/delgrosso-logo-iphone-ui.png" alt="DELGROSSO Viaggi & Limousine BUS"><h2>Viaggiare è vivere due volte</h2><p>Sicurezza · Comfort · Esperienza · Ovunque con voi</p></div>
+    <div class="hero-photo hero-carousel" id="dashboardFleetCarousel">
+      <img class="hero-carousel-img" src="assets/bus-bianco-dashboard.jpg" alt="Bus DELGROSSO">
+      <div class="hero-carousel-label">DELGROSSO · GT</div>
+      <button class="hero-arrow hero-prev" type="button" aria-label="Foto precedente">‹</button>
+      <button class="hero-arrow hero-next" type="button" aria-label="Foto successiva">›</button>
+      <div class="hero-dots" aria-label="Foto flotta"></div>
+    </div>
+  </div>
   <div class="metrics" id="dashMetrics"></div>
   <div class="grid3">
     <div class="card"><div class="card-head"><h3>📅 Prossime partenze</h3><button class="btn btn-ghost btn-sm" onclick="go('viaggi')">Vedi tutti</button></div><div class="card-body" id="nextTrips"></div></div>
@@ -298,6 +325,10 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
     <div class="card"><div class="card-head"><h3>🚍 Stato flotta</h3><button class="btn btn-ghost btn-sm" onclick="go('flotta')">Vedi flotta</button></div><div class="card-body" id="fleetStatus"></div></div>
     <div class="card"><div class="card-head"><h3>🔔 Avvisi e notifiche</h3><button class="btn btn-ghost btn-sm" onclick="go('comunicazioni')">Vedi tutte</button></div><div class="card-body" id="alerts"></div></div>
     <div class="card"><div class="card-head"><h3>📊 Statistiche rapide</h3><button class="btn btn-ghost btn-sm" onclick="go('statistiche')">Vedi statistiche</button></div><div class="card-body"><div class="mini-stat" id="quickStats"></div></div></div>
+  </div>
+  <div class="detail-grid" style="margin-top:12px">
+    <div class="card"><div class="card-head"><h3>💶 Situazione economica</h3><button class="btn btn-ghost btn-sm" onclick="go('economia')">Apri Economia</button></div><div class="card-body" id="dashboardEconomy"></div></div>
+    <div class="card"><div class="card-head"><h3>🔧 Scadenze flotta</h3><button class="btn btn-ghost btn-sm" onclick="go('flotta')">Gestisci flotta</button></div><div class="card-body" id="dashboardFleetAlerts"></div></div>
   </div>
 </section>
 
@@ -350,8 +381,9 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
 </section>
 
 <section class="page" id="page-flotta">
-  <div class="section-title"><h2>Flotta</h2><button class="btn btn-primary" onclick="openFleetModal()">+ Nuovo mezzo</button></div>
+  <div class="section-title"><h2>Flotta</h2><div class="quick-actions"><button class="btn btn-primary" onclick="openFleetModal()">+ Nuovo mezzo</button><button class="btn btn-secondary" onclick="openFuelModal()">⛽ Rifornimento</button><button class="btn btn-secondary" onclick="openMaintenanceModal()">🔧 Manutenzione</button></div></div>
   <div class="cards" id="fleetCards"></div>
+  <div class="detail-grid" style="margin-top:12px"><div class="card"><div class="card-head"><h3>⛽ Ultimi rifornimenti</h3></div><div class="card-body" id="fuelRecent"></div></div><div class="card"><div class="card-head"><h3>🔧 Manutenzioni e scadenze</h3></div><div class="card-body" id="maintenanceRecent"></div></div></div>
 </section>
 
 <section class="page" id="page-comunicazioni">
@@ -400,7 +432,7 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
 </section>
 
 <section class="page" id="page-controlroom">
-  <div class="section-title"><h2>Control Room Operativa</h2><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div>
+  <div class="section-title"><h2>Control Room Operativa</h2><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
   <div class="optional-toolbar">
     <select id="controlTripSelect"></select>
     <button class="btn btn-primary" onclick="openTripDetail(document.getElementById('controlTripSelect').value)">Apri dossier viaggio</button>
@@ -410,15 +442,22 @@ kbd{background:#102b44;color:#fff;border-radius:5px;padding:2px 6px;font-size:10
     <div class="card"><div class="card-head"><h3>💺 Occupazione posti</h3></div><div class="card-body" id="controlSeats"></div></div>
     <div class="card"><div class="card-head"><h3>✅ Check-in / Presenze</h3></div><div class="card-body" id="controlCheckin"></div></div>
   </div>
+  <div class="detail-grid" style="margin-top:12px">
+    <div class="card"><div class="card-head"><h3>💶 Situazione economica viaggio</h3><button class="btn btn-ghost btn-sm" onclick="go('economia')">Apri Economia</button></div><div class="card-body" id="controlFinance"></div></div>
+    <div class="card"><div class="card-head"><h3>🚍 Stato operativo mezzo</h3><button class="btn btn-ghost btn-sm" onclick="go('flotta')">Apri Flotta</button></div><div class="card-body" id="controlFleet"></div></div>
+  </div>
+  <div class="card" style="margin-top:12px"><div class="card-head"><h3>🚨 Anomalie e attività da controllare</h3><span class="pill wait" id="controlAlertCount">0</span></div><div class="card-body" id="controlAlerts"></div></div>
 </section>
 
 <section class="page" id="page-economia">
-  <div class="section-title"><h2>Economia & Incassi</h2><button class="btn btn-secondary" onclick="renderEconomia()">↻ Aggiorna</button></div>
+  <div class="section-title"><h2>Economia & Controllo finanziario</h2><div class="quick-actions"><button class="btn btn-green" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-danger" onclick="openEconomyModal('Uscita')">− Uscita</button><button class="btn btn-secondary" onclick="exportEconomyCSV()">⬇ Export CSV</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+  <div class="toolbar"><input id="ecoSearch" placeholder="🔎 Cerca movimento, categoria, viaggio, mezzo..."><select id="ecoType"><option value="">Entrate + Uscite</option><option>Entrata</option><option>Uscita</option></select><select id="ecoPeriod"><option value="all">Tutto il periodo</option><option value="today">Oggi</option><option value="month">Questo mese</option><option value="year">Quest'anno</option></select><button class="btn btn-secondary" onclick="renderEconomia()">Applica</button></div>
   <div class="optional-grid" id="economyKpis"></div>
   <div class="detail-grid" style="margin-top:12px">
-    <div class="card"><div class="card-head"><h3>💳 Incassi per metodo</h3></div><div class="card-body" id="economyMethods"></div></div>
-    <div class="card"><div class="card-head"><h3>📊 Movimenti recenti</h3></div><div class="card-body" id="economyRecent"></div></div>
+    <div class="card"><div class="card-head"><h3>📊 Analisi per categoria</h3></div><div class="card-body" id="economyMethods"></div></div>
+    <div class="card"><div class="card-head"><h3>🚌 Risultato per viaggio</h3></div><div class="card-body" id="economyTrips"></div></div>
   </div>
+  <div class="card" style="margin-top:12px"><div class="card-head"><h3>💶 Movimenti economici</h3></div><div class="table-wrap"><table class="table"><thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrizione</th><th>Collegamento</th><th>Metodo</th><th>Importo</th><th></th></tr></thead><tbody id="economyTable"></tbody></table></div></div>
 </section>
 
 <section class="page" id="page-backup">
@@ -522,7 +561,7 @@ const state={
   viaggi:[],prenotazioni:[],clienti:[],pagamenti:[],flotta:[],notifiche:[],
   checkin:[],preventivi:[],impostazioni:[],
   noleggi:[],noleggiMezzi:[],noleggiPagamenti:[],
-  prenotazionePosti:[],attivita:[],scadenze:[],audit:[]
+  prenotazionePosti:[],attivita:[],scadenze:[],audit:[],economia:[],carburante:[],manutenzioni:[],archivioDocumenti:[]
 };
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -651,7 +690,7 @@ window.go=go;
 async function loadAll(){
   try{
     const [
-      v,p,c,pa,f,n,ch,q,settings,nb,nbm,nbp,pp,att,sc,audit,docs
+      v,p,c,pa,f,n,ch,q,settings,nb,nbm,nbp,pp,att,sc,audit,docs,eco,fuel,maint
     ]=await Promise.all([
       api('viaggi','select=*&order=data_partenza.asc'),
       api('prenotazioni','select=*&order=created_at.desc'),
@@ -668,23 +707,27 @@ async function loadAll(){
       api('prenotazione_posti','select=*&order=created_at.desc'),
       api('attivita_gestionale','select=*&order=created_at.desc'),
       api('scadenze_gestionale','select=*&order=data_scadenza.asc'),
-      api('audit_log_gestionale','select=*&order=created_at.desc&limit=100')
+      api('audit_log_gestionale','select=*&order=created_at.desc&limit=100'),
+      api('archivio_documenti','select=*&order=created_at.desc'),
+      api('economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'),
+      api('carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'),
+      api('manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc')
     ]);
     Object.assign(state,{
       viaggi:v||[],prenotazioni:p||[],clienti:c||[],pagamenti:pa||[],flotta:f||[],
       notifiche:n||[],checkin:ch||[],preventivi:q||[],impostazioni:settings||[],
       noleggi:nb||[],noleggiMezzi:nbm||[],noleggiPagamenti:nbp||[],
-      prenotazionePosti:pp||[],attivita:att||[],scadenze:sc||[],audit:audit||[],online:true,archivioDocumenti:[]
+      prenotazionePosti:pp||[],attivita:att||[],scadenze:sc||[],audit:audit||[],archivioDocumenti:docs||[],economia:eco||[],carburante:fuel||[],manutenzioni:maint||[],online:true
     });
-    setStatus('live');markSynced();renderPage(state.page);updateBadge();
-    try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit}}));}catch{}
+    setStatus('live');markSynced();renderPage(state.page);updateBadge();initFleetCarousels();
+    try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti}}));}catch{}
     log(`Sincronizzazione completa: ${state.viaggi.length} viaggi · ${state.prenotazioni.length} prenotazioni · ${state.clienti.length} clienti · ${state.pagamenti.length} pagamenti · ${state.flotta.length} mezzi · ${state.noleggi.length} noleggi`);
   }catch(e){
     state.online=false;
     setStatus(/HTTP 401|HTTP 403/.test(String(e.message))?'auth':(/viaggi: HTTP/.test(String(e.message))?'degraded':'off'),e.message);
     log('Sincronizzazione fallita: '+e.message);
     // Mantiene disponibili gli ultimi dati validamente sincronizzati, marcandoli come cache.
-    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);toast('Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
+    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);initFleetCarousels();toast('Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
     toast('Sincronizzazione Supabase fallita: '+e.message,false);
   }
 }
@@ -720,7 +763,22 @@ function renderDashboard(){
  $('alerts').innerHTML=state.notifiche.slice(0,5).map(n=>`<div class="list-row"><div class="row-main"><strong>${esc(n.titolo)}</strong><small>${esc(n.messaggio)}</small></div><small>${dateIT((n.created_at||'').slice(0,10))}</small></div>`).join('')||'<div class="empty">Nessun avviso.</div>';
  const income=state.pagamenti.filter(p=>p.tipo!=='Rimborso').reduce((s,p)=>s+Number(p.importo||0),0), seats=state.prenotazioni.reduce((s,b)=>s+Number(b.posti||0),0), cap=state.viaggi.reduce((s,v)=>s+Number(v.posti_totali||0),0);
  $('quickStats').innerHTML=`<div><b>${money(income)}</b><small>Incasso</small></div><div><b>${seats}</b><small>Posti</small></div><div><b>${cap?Math.round(seats/cap*100):0}%</b><small>Occupazione</small></div><div><b>${state.viaggi.filter(v=>v.stato==='SOLD OUT').length}</b><small>Sold out</small></div>`;
+ renderDashboardFinance();
 }
+function renderDashboardFinance(){
+ const eco=state.economia||[], ym=new Date().toISOString().slice(0,7);
+ const month=eco.filter(x=>String(x.data_movimento||'').slice(0,7)===ym);
+ const ein=month.filter(x=>x.tipo==='Entrata').reduce((n,x)=>n+Number(x.importo||0),0);
+ const eout=month.filter(x=>x.tipo==='Uscita').reduce((n,x)=>n+Number(x.importo||0),0);
+ const saldo=ein-eout;
+ const today=new Date().toISOString().slice(0,10);
+ const due=(state.manutenzioni||[]).filter(x=>x.prossima_data && x.prossima_data<=today && x.stato!=='Annullata');
+ const upcoming=(state.manutenzioni||[]).filter(x=>x.prossima_data && x.prossima_data>today).sort((a,b)=>String(a.prossima_data).localeCompare(String(b.prossima_data))).slice(0,4);
+ $('dashboardEconomy').innerHTML=`<div class="finance-dash-grid"><div><small>Entrate mese</small><strong class="economy-positive">+ ${money(ein)}</strong></div><div><small>Uscite mese</small><strong class="economy-negative">− ${money(eout)}</strong></div><div><small>Saldo mese</small><strong class="${saldo>=0?'economy-positive':'economy-negative'}">${money(saldo)}</strong></div><div><small>Movimenti</small><strong>${month.length}</strong></div></div><div class="dash-finance-actions"><button class="btn btn-green btn-sm" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-danger btn-sm" onclick="openEconomyModal('Uscita')">− Uscita</button></div>`;
+ const rows=[...due.map(x=>({x,over:true})),...upcoming.map(x=>({x,over:false}))];
+ $('dashboardFleetAlerts').innerHTML=(due.length?`<div class="pill danger" style="margin-bottom:8px">⚠️ ${due.length} scadenza/e da controllare</div>`:'')+(rows.length?rows.map(({x,over})=>{const f=state.flotta.find(y=>y.id===x.flotta_id);return `<div class="list-row"><div class="row-main"><strong>🔧 ${esc(x.tipo||'Manutenzione')}</strong><small>${esc(f?.targa||'Mezzo')} · ${dateIT(x.prossima_data)}</small></div><span class="pill ${over?'danger':'wait'}">${over?'SCADUTA':'PROGRAMMATA'}</span></div>`}).join(''):'<div class="empty">Nessuna scadenza manutenzione registrata.</div>');
+}
+
 function tripName(id){const v=state.viaggi.find(x=>x.id===id);return v?.titolo||v?.destinazione||'—'}
 function bookingOptions(){return '<option value="">Seleziona...</option>'+state.prenotazioni.map(b=>`<option value="${b.id}">${esc(b.cliente)} · ${esc(b.codice||b.id?.slice(0,8))} · ${esc(tripName(b.viaggio_id))}</option>`).join('')}
 function paymentClientOptions(selected=''){const names=[...new Set(state.prenotazioni.map(b=>String(b.cliente||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));return '<option value="">Seleziona cliente...</option>'+names.map(n=>`<option value="${esc(n)}" ${n===selected?'selected':''}>${esc(n)}</option>`).join('')}
@@ -830,54 +888,125 @@ function renderControlRoom(){
   sel.innerHTML=trips.map(v=>`<option value="${v.id}">${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${Number(v.posti_occupati||0)}/${Number(v.posti_totali||0)}</option>`).join('');
   if(current && trips.some(v=>v.id===current)) sel.value=current; else if(trips[0]) sel.value=trips[0].id;
   const v=trips.find(x=>x.id===sel.value);
-  if(!v){$('controlKpis').innerHTML='<div class="empty">Nessun viaggio disponibile.</div>';$('controlSeats').innerHTML='';$('controlCheckin').innerHTML='';return;}
+  if(!v){$('controlKpis').innerHTML='<div class="empty">Nessun viaggio disponibile.</div>';$('controlSeats').innerHTML='';$('controlCheckin').innerHTML='';$('controlFinance').innerHTML='';$('controlFleet').innerHTML='';$('controlAlerts').innerHTML='<div class="empty">Nessun dato operativo.</div>';return;}
   const bs=state.prenotazioni.filter(b=>b.viaggio_id===v.id && !/annull|cancel/i.test(b.stato||''));
   const seats=state.prenotazionePosti.filter(x=>x.viaggio_id===v.id);
   const selected=new Set(seats.map(x=>String(x.posto)));
-  const occupied=Number(v.posti_occupati||selected.size||bs.reduce((n,b)=>n+Number(b.posti||0),0));
+  const bookedPeople=bs.reduce((n,b)=>n+Number(b.posti||0),0);
+  const occupied=Math.max(Number(v.posti_occupati||0),selected.size,bookedPeople);
   const capacity=Number(v.posti_totali||0);
   const free=Math.max(capacity-occupied,0);
   const check=state.checkin.filter(c=>c.viaggio_id===v.id);
-  const present=check.filter(c=>String(c.esito||c.checkin_stato||'').toUpperCase()==='PRESENTE').length;
+  const present=check.filter(c=>String(c.esito||c.checkin_stato||'').toUpperCase()==='PRESENTE').length + bs.filter(b=>b.checkin_effettuato && !check.some(c=>c.prenotazione_id===b.id)).length;
   const value=bs.reduce((n,b)=>n+Number(b.totale||0),0);
   const paid=bs.reduce((n,b)=>n+Number(b.pagato||0),0);
   const balance=bs.reduce((n,b)=>n+Math.max(Number(b.saldo||0),0),0);
+  const occupancy=capacity?Math.round(occupied/capacity*100):0;
+  const tripDate=String(v.data_partenza||'').slice(0,10);
+  const tripTime=String(v.ora_partenza||'').slice(0,5);
+  const now=new Date();
+  let tripMoment=tripDate?new Date(`${tripDate}T${tripTime||'00:00'}:00`):null;
+  let liveClass='live-pre', liveText='Programmato';
+  if(/annull/i.test(v.stato||'')){liveClass='live-danger';liveText='Annullato'}
+  else if(tripMoment && now>tripMoment){liveClass='live-done';liveText='Partenza effettuata'}
+  else if(tripDate===isoToday){liveClass='live-ready';liveText='Partenza oggi'}
+  else if(tripMoment && (tripMoment-now)<48*3600000){liveClass='live-ready';liveText='In preparazione'}
+  const liveBadge=`<span class="live-status ${liveClass}">${liveText}</span>`;
+  const timeline=[
+    {icon:'📋',title:'Prenotazioni',text:`${bs.length} attive · ${occupied}/${capacity||'?'} posti`,active:bs.length>0},
+    {icon:'💳',title:'Incassi',text:`${money(paid)} incassati · ${money(residual)} residuo`,active:paid>0},
+    {icon:'✅',title:'Presenze',text:`${present}/${occupied} passeggeri presenti`,active:present>0},
+    {icon:'🚍',title:'Operatività',text:fleet?`${fleet.titolo||fleet.modello||'Mezzo assegnato'} · ${liveText}`:'Mezzo non assegnato',active:!!fleet}
+  ];
   $('controlKpis').innerHTML=[
-    ['👥','Prenotati',bs.reduce((n,b)=>n+Number(b.posti||0),0)],
-    ['💺','Posti occupati',occupied],
-    ['🟢','Posti liberi',free],
-    ['💶','Valore viaggio',money(value)],
-    ['💳','Incassato',money(paid)],
-    ['⏳','Da incassare',money(balance)],
-    ['✅','Presenti',present],
-    ['📋','Prenotazioni',bs.length]
+    ['👥','Passeggeri',bookedPeople],['💺','Posti occupati',occupied],['🟢','Posti liberi',free],['📊','Occupazione',occupancy+'%'],
+    ['💶','Valore viaggio',money(value)],['💳','Incassato',money(paid)],['⏳','Da incassare',money(balance)],['✅','Presenti',present+'/'+bookedPeople]
   ].map(x=>`<div class="module-card"><h3>${x[0]} ${x[1]}</h3><b style="font-size:23px">${x[2]}</b></div>`).join('');
+
   const grid=Array.from({length:capacity},(_,i)=>String(i+1)).map(n=>{
     const p=seats.find(x=>String(x.posto)===n);
     const b=p?bs.find(x=>x.id===p.prenotazione_id):bs.find(x=>String(x.posti_selezionati||'').split(',').map(z=>z.trim()).includes(n));
     const cls=b?'busy':'';
     return `<div class="seat ${cls}" title="${b?esc(b.cliente):'Libero'}">${n}</div>`;
   }).join('');
-  $('controlSeats').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="pill ok">● ${occupied} occupati</span><span class="pill neutral">○ ${free} liberi</span></div><div class="seat-grid">${grid||'<div class="empty">Nessuna piantina disponibile.</div>'}</div>`;
-  $('controlCheckin').innerHTML=bs.map(b=>{const c=check.find(x=>x.prenotazione_id===b.id);const presentB=b.checkin_effettuato||String(c?.esito||c?.checkin_stato||'').toUpperCase()==='PRESENTE';return `<div class="list-row"><div class="avatar" style="width:35px;height:35px;font-size:12px">${esc((b.cliente||'?').slice(0,2).toUpperCase())}</div><div class="row-main"><strong>${esc(b.cliente||'—')}</strong><small>${b.posti||0} posti · ${esc(b.posti_selezionati||'—')} · ${money(b.saldo)} residuo</small></div><span class="pill ${presentB?'ok':'wait'}">${presentB?'PRESENTE':'NON PRESENTE'}</span></div>`}).join('')||'<div class="empty">Nessun prenotato per questo viaggio.</div>';
+  $('controlSeats').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="pill ok">● ${occupied} occupati</span><span class="pill neutral">○ ${free} liberi</span><span class="pill info">📊 ${occupancy}%</span></div><div class="seat-grid">${grid||'<div class="empty">Nessuna piantina disponibile.</div>'}</div>`;
+
+  $('controlCheckin').innerHTML=bs.map(b=>{
+    const c=check.find(x=>x.prenotazione_id===b.id);
+    const presentB=b.checkin_effettuato||String(c?.esito||c?.checkin_stato||'').toUpperCase()==='PRESENTE';
+    return `<div class="list-row"><div class="avatar" style="width:35px;height:35px;font-size:12px">${esc((b.cliente||'?').slice(0,2).toUpperCase())}</div><div class="row-main"><strong>${esc(b.cliente||'—')}</strong><small>${b.posti||0} posti · ${esc(b.posti_selezionati||'—')} · ${money(b.saldo)} residuo</small></div><span class="pill ${presentB?'ok':'wait'}">${presentB?'PRESENTE':'NON PRESENTE'}</span></div>`;
+  }).join('')||'<div class="empty">Nessun prenotato per questo viaggio.</div>';
+
+  const eco=state.economia||[];
+  const tripEco=eco.filter(m=>m.viaggio_id===v.id);
+  const ecoIn=tripEco.filter(m=>m.tipo==='Entrata').reduce((n,m)=>n+Number(m.importo||0),0);
+  const ecoOut=tripEco.filter(m=>m.tipo==='Uscita').reduce((n,m)=>n+Number(m.importo||0),0);
+  const ecoBalance=ecoIn-ecoOut;
+  $('controlFinance').innerHTML=`<div class="finance-dash-grid"><div><small>Entrate</small><strong class="economy-positive">+ ${money(ecoIn)}</strong></div><div><small>Uscite</small><strong class="economy-negative">− ${money(ecoOut)}</strong></div><div><small>Saldo</small><strong class="${ecoBalance>=0?'economy-positive':'economy-negative'}">${money(ecoBalance)}</strong></div><div><small>Movimenti</small><strong>${tripEco.length}</strong></div></div><div style="margin-top:10px"><small>Margine rispetto al valore prenotazioni</small><br><b>${money(value-ecoOut)}</b></div>`;
+
+  const fleetId=v.flotta_id||v.mezzo_id||v.id_mezzo||'';
+  const fleet=state.flotta.find(f=>f.id===fleetId)||state.flotta.find(f=>String(f.targa||'')===String(v.targa||''));
+  const maint=(state.manutenzioni||[]).filter(m=>m.flotta_id===fleet?.id && m.stato!=='Annullata').sort((a,b)=>String(a.prossima_data||'9999').localeCompare(String(b.prossima_data||'9999')));
+  $('controlFleet').innerHTML=fleet?`<div class="list-row"><div class="row-main"><strong>${esc(fleet.titolo||((fleet.marca||'')+' '+(fleet.modello||'')))}</strong><small>${esc(fleet.targa||'Targa non indicata')} · ${fleet.posti||0} posti · ${esc(fleet.categoria||'GT')}</small></div><span class="pill ${fleet.stato==='Manutenzione'?'danger':'ok'}">${esc(fleet.stato||'Operativo')}</span></div>${maint.length?`<div style="margin-top:10px"><b>Prossima manutenzione:</b> ${esc(maint[0].tipo||'Intervento')} · ${dateIT(maint[0].prossima_data||'')}</div>`:'<small>Nessuna manutenzione programmata collegata.</small>'}`:'<div class="empty">Nessun mezzo assegnato direttamente al viaggio.</div>';
+
+  const today=isoToday;
+  const alerts=[];
+  if(free===0) alerts.push({t:'Posti esauriti',d:'Il viaggio è a capacità completa.',c:'ok'});
+  else if(free<=5) alerts.push({t:'Pochi posti disponibili',d:`Restano ${free} posti liberi.`,c:'wait'});
+  const unpaid=bs.filter(b=>Number(b.saldo||0)>0);
+  if(unpaid.length) alerts.push({t:'Pagamenti da incassare',d:`${unpaid.length} prenotazioni hanno un residuo complessivo di ${money(balance)}.`,c:'wait'});
+  const absent=bs.filter(b=>!b.checkin_effettuato && !check.some(c=>c.prenotazione_id===b.id && String(c.esito||c.checkin_stato||'').toUpperCase()==='PRESENTE')).length;
+  if(absent) alerts.push({t:'Check-in da completare',d:`${absent} prenotati non risultano presenti.`,c:'wait'});
+  const dueMaint=(state.manutenzioni||[]).filter(m=>m.prossima_data && m.prossima_data<=today && m.stato!=='Annullata');
+  if(dueMaint.length) alerts.push({t:'Manutenzioni scadute',d:`${dueMaint.length} interventi richiedono controllo.`,c:'danger'});
+  $('controlAlertCount').textContent=alerts.length;
+  $('controlAlertCount').className='pill '+(alerts.some(a=>a.c==='danger')?'danger':alerts.length?'wait':'ok');
+  $('controlAlerts').innerHTML=alerts.length?alerts.map(a=>`<div class="list-row"><div class="row-main"><strong>${esc(a.t)}</strong><small>${esc(a.d)}</small></div><span class="pill ${a.c}">${a.c==='danger'?'ATTENZIONE':a.c==='ok'?'OK':'DA CONTROLLARE'}</span></div>`).join(''):'<div class="empty">✅ Nessuna anomalia operativa rilevata.</div>';
 }
 
-function renderEconomia(){
-  const payments=state.pagamenti||[];
-  const bookings=state.prenotazioni.filter(b=>!/annull|cancel/i.test(b.stato||''));
-  const gross=payments.filter(p=>p.tipo!=='Rimborso').reduce((n,p)=>n+Math.abs(Number(p.importo||0)),0);
-  const refunds=payments.filter(p=>p.tipo==='Rimborso').reduce((n,p)=>n+Math.abs(Number(p.importo||0)),0);
-  const net=gross-refunds;
-  const expected=bookings.reduce((n,b)=>n+Number(b.totale||0),0);
-  const paid=bookings.reduce((n,b)=>n+Number(b.pagato||0),0);
-  const due=bookings.reduce((n,b)=>n+Math.max(Number(b.saldo||0),0),0);
-  const methods={};
-  payments.forEach(p=>{const m=p.metodo_pagamento||p.metodo||'Non specificato';const sign=p.tipo==='Rimborso'?-1:1;methods[m]=(methods[m]||0)+sign*Math.abs(Number(p.importo||0));});
-  $('economyKpis').innerHTML=[['💶','Incassi lordi',money(gross)],['↩️','Rimborsi',money(refunds)],['📈','Incasso netto',money(net)],['🧾','Valore prenotazioni',money(expected)],['💳','Già pagato',money(paid)],['⏳','Da incassare',money(due)],['👥','Prenotazioni',bookings.length],['🚌','Viaggi',state.viaggi.length]].map(x=>`<div class="module-card"><h3>${x[0]} ${x[1]}</h3><b style="font-size:22px">${x[2]}</b></div>`).join('');
-  const methodRows=Object.entries(methods).sort((a,b)=>b[1]-a[1]).map(([m,v])=>`<div class="list-row"><div class="row-main"><strong>${esc(m)}</strong><small>${payments.filter(p=>(p.metodo_pagamento||p.metodo||'Non specificato')===m).length} movimenti</small></div><b>${money(v)}</b></div>`).join('');
-  $('economyMethods').innerHTML=methodRows||'<div class="empty">Nessun movimento registrato.</div>';
-  $('economyRecent').innerHTML=payments.slice(0,20).map(p=>`<div class="list-row"><div class="row-main"><strong>${esc(p.cliente||'Cliente non indicato')}</strong><small>${dateIT(p.data_pagamento)} · ${esc(p.viaggio||tripName(p.viaggio_id))} · ${esc(p.metodo_pagamento||p.metodo||'—')}</small></div><span class="pill ${p.tipo==='Rimborso'?'danger':'ok'}">${p.tipo==='Rimborso'?'−':'+'}${money(Math.abs(Number(p.importo||0)))}</span></div>`).join('')||'<div class="empty">Nessun movimento registrato.</div>';
+function ecoDateMatch(d,period){
+ const x=new Date((d||'')+'T12:00:00'), now=new Date();
+ if(period==='today') return x.toDateString()===now.toDateString();
+ if(period==='month') return x.getMonth()===now.getMonth()&&x.getFullYear()===now.getFullYear();
+ if(period==='year') return x.getFullYear()===now.getFullYear();
+ return true;
 }
+function ecoLabel(m){
+ const v=m.viaggio_id?state.viaggi.find(x=>x.id===m.viaggio_id):null;
+ const n=m.noleggio_id?state.noleggi.find(x=>x.id===m.noleggio_id):null;
+ const f=m.flotta_id?state.flotta.find(x=>x.id===m.flotta_id):null;
+ return v?`🚌 ${esc(v.titolo)}`:n?`🚐 ${esc(n.id_noleggio||n.tratta_destinazione||'Noleggio')}`:f?`🚍 ${esc((f.targa||'')+' '+(f.titolo||f.modello||''))}`:'Generale';
+}
+function filteredEconomy(){
+ const q=($('ecoSearch')?.value||'').toLowerCase().trim(), type=$('ecoType')?.value||'', period=$('ecoPeriod')?.value||'all';
+ return (state.economia||[]).filter(m=>{if(type&&m.tipo!==type)return false;if(!ecoDateMatch(m.data_movimento,period))return false;return !q||JSON.stringify(m).toLowerCase().includes(q)||ecoLabel(m).toLowerCase().includes(q)});
+}
+function renderEconomia(){
+ const rows=filteredEconomy(), all=state.economia||[];
+ const entrate=rows.filter(x=>x.tipo==='Entrata').reduce((n,x)=>n+Number(x.importo||0),0);
+ const uscite=rows.filter(x=>x.tipo==='Uscita').reduce((n,x)=>n+Number(x.importo||0),0);
+ const saldo=entrate-uscite;
+ const automatiche=rows.filter(x=>String(x.origine||'').startsWith('automatico')).length;
+ $('economyKpis').innerHTML=[['🟢','Entrate',money(entrate)],['🔴','Uscite',money(uscite)],['💰','Saldo',money(saldo)],['🔄','Movimenti',rows.length],['⚡','Automatici',automatiche],['📅','Periodo','Filtri attivi']].map(x=>`<div class="module-card"><h3>${x[0]} ${x[1]}</h3><b style="font-size:22px" class="${x[1]==='Saldo'?(saldo>=0?'economy-positive':'economy-negative'):''}">${x[2]}</b></div>`).join('');
+ const cats={};rows.forEach(x=>{const k=(x.tipo==='Uscita'?'− ':'+ ')+(x.categoria||'Altro');cats[k]=(cats[k]||0)+Number(x.importo||0)});
+ $('economyMethods').innerHTML=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([k,v])=>`<div class="list-row"><div class="row-main"><strong>${esc(k)}</strong><small>${rows.filter(x=>((x.tipo==='Uscita'?'− ':'+ ')+(x.categoria||'Altro'))===k).length} movimenti</small></div><b>${money(v)}</b></div>`).join('')||'<div class="empty">Nessun movimento.</div>';
+ const byTrip={};rows.filter(x=>x.viaggio_id).forEach(x=>{const v=state.viaggi.find(y=>y.id===x.viaggio_id);const k=x.viaggio_id;byTrip[k] ||= {name:v?.titolo||'Viaggio',in:0,out:0};if(x.tipo==='Entrata')byTrip[k].in+=Number(x.importo||0);else byTrip[k].out+=Number(x.importo||0)});
+ $('economyTrips').innerHTML=Object.values(byTrip).sort((a,b)=>(b.in-b.out)-(a.in-a.out)).slice(0,12).map(x=>`<div class="list-row"><div class="row-main"><strong>🚌 ${esc(x.name)}</strong><small>Entrate ${money(x.in)} · Uscite ${money(x.out)}</small></div><b class="${x.in-x.out>=0?'economy-positive':'economy-negative'}">${money(x.in-x.out)}</b></div>`).join('')||'<div class="empty">Nessun movimento collegato a un viaggio.</div>';
+ $('economyTable').innerHTML=rows.slice(0,200).map(m=>`<tr><td>${dateIT(m.data_movimento)}</td><td><span class="pill ${m.tipo==='Entrata'?'ok':'danger'}">${m.tipo}</span></td><td>${esc(m.categoria)}</td><td>${esc(m.descrizione||'—')}<br><small>${esc(m.origine||'manuale')}</small></td><td>${ecoLabel(m)}</td><td>${esc(m.metodo||'—')}</td><td class="${m.tipo==='Entrata'?'economy-positive':'economy-negative'}">${m.tipo==='Entrata'?'+':'−'} ${money(m.importo)}</td><td><button class="btn btn-secondary btn-sm" onclick="openEconomyModal('', '${m.id}')">✏️</button></td></tr>`).join('')||'<tr><td colspan="8" class="empty">Nessun movimento economico.</td></tr>';
+ renderFleetEconomy();
+}
+function openEconomyModal(defaultType='Entrata',id=''){
+ const m=state.economia.find(x=>x.id===id)||{}; const type=m.tipo||defaultType;
+ openModal(id?'Modifica movimento':'Nuovo movimento economico',`<div class="form-grid"><div class="field"><label>Tipo</label><select id="e_type"><option ${type==='Entrata'?'selected':''}>Entrata</option><option ${type==='Uscita'?'selected':''}>Uscita</option></select></div><div class="field"><label>Categoria</label><select id="e_cat"><option>Incasso prenotazione</option><option>Incasso noleggio</option><option>Rimborso</option><option>Carburante</option><option>Pedaggi</option><option>Manutenzione</option><option>Assicurazione</option><option>Revisione</option><option>Lavaggio</option><option>Pubblicità</option><option>Spese amministrative</option><option>Personale</option><option>Altro</option></select></div><div class="field"><label>Importo €</label><input id="e_amount" type="number" step=".01" min="0.01" value="${m.importo??''}"></div><div class="field"><label>Data</label><input id="e_date" type="date" value="${m.data_movimento||new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Metodo</label><select id="e_method"><option>Bonifico</option><option>Contanti</option><option>POS</option><option>PayPal</option><option>Carta</option><option>Altro</option></select></div><div class="field"><label>Viaggio</label><select id="e_trip"><option value="">— Nessun viaggio —</option>${state.viaggi.map(v=>`<option value="${v.id}" ${m.viaggio_id===v.id?'selected':''}>${esc(v.titolo)} · ${dateIT(v.data_partenza)}</option>`).join('')}</select></div><div class="field"><label>Noleggio</label><select id="e_rental"><option value="">— Nessun noleggio —</option>${state.noleggi.map(v=>`<option value="${v.id}" ${m.noleggio_id===v.id?'selected':''}>${esc(v.id_noleggio||v.tratta_destinazione||'Noleggio')} · ${dateIT(v.data_partenza)}</option>`).join('')}</select></div><div class="field"><label>Mezzo</label><select id="e_fleet"><option value="">— Nessun mezzo —</option>${state.flotta.map(v=>`<option value="${v.id}" ${m.flotta_id===v.id?'selected':''}>${esc(v.targa||'')} · ${esc(v.titolo||v.modello||'Mezzo')}</option>`).join('')}</select></div><div class="field"><label>Riferimento</label><input id="e_ref" value="${esc(m.riferimento||'')}"></div><div class="field full"><label>Descrizione</label><input id="e_desc" value="${esc(m.descrizione||'')}"></div><div class="field full"><label>Note</label><textarea id="e_note">${esc(m.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveEconomy('${id}')">Salva su Supabase</button>`);
+ if(m.categoria)$('e_cat').value=m.categoria;if(m.metodo)$('e_method').value=m.metodo;
+}
+async function saveEconomy(id){const amount=Math.round((Number($('e_amount').value)||0)*100)/100;if(amount<=0)return toast('Inserisci un importo valido',false);const body={tipo:$('e_type').value,categoria:$('e_cat').value,importo:amount,data_movimento:$('e_date').value,metodo:$('e_method').value,viaggio_id:$('e_trip').value||null,noleggio_id:$('e_rental').value||null,flotta_id:$('e_fleet').value||null,descrizione:$('e_desc').value||null,riferimento:$('e_ref').value||null,note:$('e_note').value||null,origine:'manuale'};try{if(id)await api('economia_movimenti',`id=eq.${id}`,{method:'PATCH',body});else await api('economia_movimenti','',{method:'POST',body});closeModal();toast('Movimento economico salvato su Supabase');await loadAll()}catch(e){toast(e.message,false)}}
+function exportEconomyCSV(){const rows=filteredEconomy();const head=['Data','Tipo','Categoria','Descrizione','Collegamento','Metodo','Importo','Origine'];const csv=[head,...rows.map(m=>[m.data_movimento,m.tipo,m.categoria,m.descrizione||'',ecoLabel(m).replace(/<[^>]*>/g,''),m.metodo||'',m.importo,m.origine||''])].map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(';')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='DELGROSSO_Economia.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function renderFleetEconomy(){const fr=state.carburante||[], ma=state.manutenzioni||[];if($('fuelRecent'))$('fuelRecent').innerHTML=fr.slice(0,10).map(x=>{const f=state.flotta.find(y=>y.id===x.flotta_id);return `<div class="list-row"><div class="row-main"><strong>⛽ ${esc(f?.targa||'Mezzo')}</strong><small>${dateIT(x.data_rifornimento)} · ${x.litri||0} L · ${esc(x.distributore||'')}</small></div><b class="economy-negative">− ${money(x.importo)}</b></div>`}).join('')||'<div class="empty">Nessun rifornimento.</div>';if($('maintenanceRecent'))$('maintenanceRecent').innerHTML=ma.slice(0,10).map(x=>{const f=state.flotta.find(y=>y.id===x.flotta_id);return `<div class="list-row"><div class="row-main"><strong>🔧 ${esc(x.tipo)}</strong><small>${esc(f?.targa||'Mezzo')} · ${dateIT(x.data_intervento)} · ${esc(x.officina||'')}</small></div><b>${money(x.costo)}</b></div>`}).join('')||'<div class="empty">Nessuna manutenzione.</div>'}
+async function openFuelModal(id=''){const x=state.carburante.find(y=>y.id===id)||{};openModal(id?'Modifica rifornimento':'Nuovo rifornimento',`<div class="form-grid"><div class="field"><label>Mezzo</label><select id="fu_fleet">${state.flotta.map(f=>`<option value="${f.id}" ${x.flotta_id===f.id?'selected':''}>${esc(f.targa||'')} · ${esc(f.titolo||f.modello||'Mezzo')}</option>`).join('')}</select></div><div class="field"><label>Data</label><input id="fu_date" type="date" value="${x.data_rifornimento||new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Importo €</label><input id="fu_amount" type="number" step=".01" value="${x.importo??''}"></div><div class="field"><label>Litri</label><input id="fu_liters" type="number" step=".01" value="${x.litri??''}"></div><div class="field"><label>Prezzo/litro</label><input id="fu_price" type="number" step=".001" value="${x.prezzo_litro??''}"></div><div class="field"><label>Km</label><input id="fu_km" type="number" value="${x.km??''}"></div><div class="field"><label>Distributore</label><input id="fu_station" value="${esc(x.distributore||'')}"></div><div class="field"><label>Viaggio collegato</label><select id="fu_trip"><option value="">— Nessuno —</option>${state.viaggi.map(v=>`<option value="${v.id}" ${x.viaggio_id===v.id?'selected':''}>${esc(v.titolo)} · ${dateIT(v.data_partenza)}</option>`).join('')}</select></div><div class="field full"><label>Note</label><textarea id="fu_note">${esc(x.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveFuel('${id}')">Salva rifornimento</button>`)}
+async function saveFuel(id){const amount=Math.round((Number($('fu_amount').value)||0)*100)/100;if(amount<=0)return toast('Inserisci il costo del rifornimento',false);const body={flotta_id:$('fu_fleet').value,data_rifornimento:$('fu_date').value,importo:amount,litri:Number($('fu_liters').value)||null,prezzo_litro:Number($('fu_price').value)||null,km:Number($('fu_km').value)||null,distributore:$('fu_station').value||null,viaggio_id:$('fu_trip').value||null,note:$('fu_note').value||null,metodo:'Carta'};try{if(id)await api('carburante_flotta',`id=eq.${id}`,{method:'PATCH',body});else await api('carburante_flotta','',{method:'POST',body});closeModal();toast('Rifornimento salvato · uscita registrata automaticamente in Economia');await loadAll()}catch(e){toast(e.message,false)}}
+function openMaintenanceModal(id=''){const x=state.manutenzioni.find(y=>y.id===id)||{};openModal(id?'Modifica manutenzione':'Nuova manutenzione',`<div class="form-grid"><div class="field"><label>Mezzo</label><select id="ma_fleet">${state.flotta.map(f=>`<option value="${f.id}" ${x.flotta_id===f.id?'selected':''}>${esc(f.targa||'')} · ${esc(f.titolo||f.modello||'Mezzo')}</option>`).join('')}</select></div><div class="field"><label>Tipo intervento</label><input id="ma_type" value="${esc(x.tipo||'Tagliando')}"></div><div class="field"><label>Data intervento</label><input id="ma_date" type="date" value="${x.data_intervento||new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Costo €</label><input id="ma_cost" type="number" step=".01" value="${x.costo??0}"></div><div class="field"><label>Km</label><input id="ma_km" type="number" value="${x.km??''}"></div><div class="field"><label>Officina</label><input id="ma_shop" value="${esc(x.officina||'')}"></div><div class="field"><label>Prossima data</label><input id="ma_next" type="date" value="${x.prossima_data||''}"></div><div class="field"><label>Prossimi km</label><input id="ma_nextkm" type="number" value="${x.prossimi_km??''}"></div><div class="field full"><label>Descrizione</label><input id="ma_desc" value="${esc(x.descrizione||'')}"></div><div class="field full"><label>Note</label><textarea id="ma_note">${esc(x.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveMaintenance('${id}')">Salva manutenzione</button>`)}
+async function saveMaintenance(id){const cost=Math.round((Number($('ma_cost').value)||0)*100)/100;const body={flotta_id:$('ma_fleet').value,tipo:$('ma_type').value.trim()||'Altro',data_intervento:$('ma_date').value,costo:cost,km:Number($('ma_km').value)||null,officina:$('ma_shop').value||null,prossima_data:$('ma_next').value||null,prossimi_km:Number($('ma_nextkm').value)||null,descrizione:$('ma_desc').value||null,note:$('ma_note').value||null,stato:'Completata'};try{if(id)await api('manutenzioni_flotta',`id=eq.${id}`,{method:'PATCH',body});else await api('manutenzioni_flotta','',{method:'POST',body});closeModal();toast('Manutenzione salvata · uscita registrata automaticamente in Economia');await loadAll()}catch(e){toast(e.message,false)}}
 
 function renderRentals(){
  const q=($('rentalSearch')?.value||'').toLowerCase(), st=$('rentalStatus')?.value||'';
@@ -889,7 +1018,7 @@ function renderFleet(){
 }
 function renderNotifications(){$('notificationsList').innerHTML=state.notifiche.map(n=>`<div class="list-row"><div class="row-main"><strong>${esc(n.titolo)}</strong><small>${esc(n.messaggio)}</small></div><span class="pill ${n.letto?'neutral':'wait'}">${n.letto?'Letta':'Nuova'}</span></div>`).join('')||'<div class="empty">Nessuna notifica.</div>'}
 function renderDocs(){$('quotesList').innerHTML=state.preventivi.slice(0,10).map(q=>`<div class="list-row"><div class="row-main"><strong>${esc(q.numero_preventivo||q.codice||'Preventivo')}</strong><small>${esc(q.nome)} ${esc(q.cognome||'')} · ${esc(q.destinazione)}</small></div><b>${money(q.importo_preventivo||q.importo)}</b></div>`).join('')||'<div class="empty">Nessun preventivo.</div>'}
-function renderStats(){const inc=state.pagamenti.reduce((s,p)=>s+Number(p.tipo==='Rimborso'?-Math.abs(p.importo||0):Math.abs(p.importo||0)),0), seats=state.prenotazioni.reduce((s,b)=>s+Number(b.posti||0),0), cap=state.viaggi.reduce((s,v)=>s+Number(v.posti_totali||0),0);$('statsCards').innerHTML=[['💶','Incasso netto',money(inc)],['👥','Posti prenotati',seats],['📈','Occupazione',cap?Math.round(seats/cap*100)+'%':'0%'],['🚌','Viaggi',state.viaggi.length],['🚍','Mezzi',state.flotta.length],['📋','Prenotazioni',state.prenotazioni.length]].map(x=>`<div class="module-card"><h3>${x[0]} ${x[1]}</h3><b style="font-size:24px">${x[2]}</b></div>`).join('');$('statsTrips').innerHTML=state.viaggi.map(v=>`<div class="list-row"><div class="row-main"><strong>${esc(v.titolo)}</strong><small>${dateIT(v.data_partenza)}</small></div><span>${v.posti_occupati||0}/${v.posti_totali||0} posti</span></div>`).join('')||'<div class="empty">Nessun viaggio.</div>'}
+function renderStats(){const inc=state.pagamenti.reduce((s,p)=>s+Number(p.tipo==='Rimborso'?-Math.abs(p.importo||0):Math.abs(p.importo||0)),0), seats=state.prenotazioni.reduce((s,b)=>s+Number(b.posti||0),0), cap=state.viaggi.reduce((s,v)=>s+Number(v.posti_totali||0),0), ecoIn=(state.economia||[]).filter(x=>x.tipo==='Entrata').reduce((s,x)=>s+Number(x.importo||0),0), ecoOut=(state.economia||[]).filter(x=>x.tipo==='Uscita').reduce((s,x)=>s+Number(x.importo||0),0);$('statsCards').innerHTML=[['💶','Entrate',money(ecoIn)],['🔴','Uscite',money(ecoOut)],['💰','Saldo',money(ecoIn-ecoOut)],['👥','Posti prenotati',seats],['📈','Occupazione',cap?Math.round(seats/cap*100)+'%':'0%'],['🚌','Viaggi',state.viaggi.length],['🚍','Mezzi',state.flotta.length],['📋','Prenotazioni',state.prenotazioni.length]].map(x=>`<div class="module-card"><h3>${x[0]} ${x[1]}</h3><b style="font-size:24px">${x[2]}</b></div>`).join('');$('statsTrips').innerHTML=state.viaggi.map(v=>`<div class="list-row"><div class="row-main"><strong>${esc(v.titolo)}</strong><small>${dateIT(v.data_partenza)}</small></div><span>${v.posti_occupati||0}/${v.posti_totali||0} posti</span></div>`).join('')||'<div class="empty">Nessun viaggio.</div>'}
 
 function openModal(title,body,foot){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modalFoot').innerHTML=foot;$('modal').classList.add('on')}
 function closeModal(){$('modal').classList.remove('on')} window.closeModal=closeModal;
@@ -1065,11 +1194,66 @@ function openFleetModal(id=''){const f=state.flotta.find(x=>x.id===id)||{};openM
 async function saveFleet(id){const body={titolo:$('f2_title').value||`${$('f2_marca').value} ${$('f2_model').value}`,marca:$('f2_marca').value,modello:$('f2_model').value,targa:$('f2_targa').value||null,posti:Number($('f2_posti').value)||0,stato:$('f2_stato').value,immagine:$('f2_img').value||null,categoria:$('f2_cat').value||null,descrizione:$('f2_desc').value||null,attivo:true};try{if(id)await api('flotta',`id=eq.${id}`,{method:'PATCH',body});else await api('flotta','',{method:'POST',body});closeModal();toast('Mezzo salvato su Supabase');await loadAll()}catch(e){toast(e.message,false)}}
 function openCheckinModal(){openModal('Check-in manuale',`<div class="form-grid"><div class="field full"><label>Prenotazione</label><select id="ci_booking">${bookingOptions()}</select></div><div class="field"><label>Esito</label><select id="ci_esito"><option>PRESENTE</option><option>ASSENTE</option></select></div><div class="field"><label>Fermata / Gate</label><input id="ci_gate"></div><div class="field"><label>Posto</label><input id="ci_seat"></div><div class="field full"><label>Note</label><textarea id="ci_note"></textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-green" onclick="saveCheckin()">Registra</button>`)}
 async function saveCheckin(){const b=state.prenotazioni.find(x=>x.id===$('ci_booking').value);if(!b)return;const body={prenotazione_id:b.id,prenotazione_codice:b.codice,viaggio_id:b.viaggio_id,cliente:b.cliente,telefono:b.telefono,email:b.email,posto:$('ci_seat').value||null,esito:$('ci_esito').value,operatore:currentOperator.name,gate:$('ci_gate').value||null,note:$('ci_note').value||null,qr_payload:b.confirmation_token||b.codice};try{await api('accessi_checkin','',{method:'POST',body});await api('prenotazioni',`id=eq.${b.id}`,{method:'PATCH',body:{checkin_effettuato:body.esito==='PRESENTE',checkin_stato:body.esito,checkin_fermata:body.gate,checked_in_at:new Date().toISOString(),checkin_operatore:currentOperator.name,checkin_note:body.note}});closeModal();toast('Check-in registrato');await loadAll()}catch(e){toast(e.message,false)}}
-function openTripDetail(id){const v=state.viaggi.find(x=>x.id===id);const bs=state.prenotazioni.filter(b=>b.viaggio_id===id);openModal('Control Room — '+(v?.titolo||''),`<div class="detail-grid"><div><h3>${esc(v?.destinazione||'')}</h3><p>${dateIT(v?.data_partenza)} · ${esc(v?.luogo_partenza||'')} · ${v?.ora_partenza||''}</p><div class="seat-grid">${Array.from({length:Number(v?.posti_totali||0)},(_,i)=>{const n=i+1;const busy=bs.some(b=>String(b.posti_selezionati||'').split(',').map(x=>x.trim()).includes(String(n)));return `<div class="seat ${busy?'busy':''}">${n}${busy?' •':''}</div>`}).join('')}</div></div><div><h3>Prenotati (${bs.length})</h3>${bs.map(b=>`<div class="list-row"><div class="row-main"><strong>${esc(b.cliente)}</strong><small>${b.posti||0} posti · ${money(b.saldo)} residuo</small></div><span class="pill ${b.checkin_effettuato?'ok':'wait'}">${b.checkin_effettuato?'PRESENTE':'NON PRESENTE'}</span></div>`).join('')}</div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>`)}
-function openQuoteModal(id=''){
- const q=state.preventivi.find(x=>x.id===id)||{};
- const title=id?'Modifica richiesta / preventivo':'Nuovo preventivo';
- openModal(title,`<div class="form-grid"><div class="field"><label>Nome *</label><input id="q_nome" value="${esc(q.nome||'')}"></div><div class="field"><label>Cognome</label><input id="q_cog" value="${esc(q.cognome||'')}"></div><div class="field"><label>Telefono *</label><input id="q_tel" value="${esc(q.telefono||'')}"></div><div class="field"><label>Email (facoltativa)</label><input id="q_email" type="email" value="${esc(q.email||'')}"></div><div class="field full"><label>Azienda</label><input id="q_company" value="${esc(q.azienda||'')}"></div><div class="field"><label>Servizio</label><input id="q_serv" value="${esc(q.servizio||q.servizio_richiesto||'')}"></div><div class="field"><label>Data viaggio</label><input id="q_date" type="date" value="${esc(q.data_viaggio||q.data_partenza||'')}"></div><div class="field"><label>Partenza</label><input id="q_part" value="${esc(q.luogo_partenza||q.partenza||'')}"></div><div class="field"><label>Destinazione *</label><input id="q_dest" value="${esc(q.destinazione||'')}"></div><div class="field"><label>Passeggeri</label><input id="q_pax" type="number" min="1" value="${Number(q.numero_passeggeri||q.passeggeri||1)}"></div><div class="field"><label>Importo €</label><input id="q_imp" type="number" step=".01" value="${Number(q.importo_preventivo??q.importo??0)}"></div><div class="field"><label>Validità preventivo</label><input id="q_valid" type="date" value="${esc(q.validita_preventivo||'')}"></div><div class="field"><label>Stato</label><select id="q_status">${['Nuovo','In lavorazione','Inviato','Accettato','Rifiutato','Annullato'].map(x=>`<option ${String(q.stato||'Nuovo')===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Provenienza</label><select id="q_origin"><option value="gestionale" ${quoteOrigin(q)==='gestionale'?'selected':''}>Gestionale</option><option value="sito" ${quoteOrigin(q)==='sito'?'selected':''}>Sito / richiesta online</option></select></div><div class="field full"><label>Richiesta del cliente</label><textarea id="q_det" rows="4">${esc(q.dettagli_offerta||q.note_cliente||q.messaggio||q.dettagli||'')}</textarea></div><div class="field full"><label>Note interne</label><textarea id="q_internal" rows="3">${esc(q.note_interne||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button>${id?`<button class="btn btn-danger" onclick="deleteQuote('${id}')">🗑️ Elimina</button>`:''}<button class="btn btn-primary" onclick="saveQuote('${id}')">${id?'Salva modifiche':'Salva preventivo'}</button>`);
+function openTripDetail(id){
+  const v=state.viaggi.find(x=>x.id===id);
+  if(!v){toast('Viaggio non trovato',false);return;}
+  const bs=state.prenotazioni.filter(b=>b.viaggio_id===id && !/annull|cancel/i.test(b.stato||''));
+  const seats=state.prenotazionePosti.filter(x=>x.viaggio_id===id);
+  const tripEco=state.economia.filter(m=>m.viaggio_id===id);
+  const payments=state.pagamenti.filter(p=>p.viaggio_id===id);
+  const check=state.checkin.filter(c=>c.viaggio_id===id);
+  const quotes=state.preventivi.filter(q=>q.viaggio_id===id);
+  const docs=state.archivioDocumenti.filter(d=>d.viaggio_id===id || d.riferimento_id===id || d.entita_id===id);
+  const tasks=state.attivita.filter(a=>a.viaggio_id===id || a.riferimento_id===id);
+  const deadlines=state.scadenze.filter(a=>a.viaggio_id===id || a.riferimento_id===id);
+  const capacity=Number(v.posti_totali||0);
+  const occupied=Math.max(Number(v.posti_occupati||0),seats.length,bs.reduce((n,b)=>n+Number(b.posti||0),0));
+  const free=Math.max(capacity-occupied,0);
+  const value=bs.reduce((n,b)=>n+Number(b.totale||0),0);
+  const paid=bs.reduce((n,b)=>n+Number(b.pagato||0),0);
+  const residual=bs.reduce((n,b)=>n+Math.max(Number(b.saldo||0),0),0);
+  const inTotal=tripEco.filter(m=>m.tipo==='Entrata').reduce((n,m)=>n+Number(m.importo||0),0);
+  const outTotal=tripEco.filter(m=>m.tipo==='Uscita').reduce((n,m)=>n+Number(m.importo||0),0);
+  const margin=inTotal-outTotal;
+  const presentIds=new Set(check.filter(c=>String(c.esito||c.checkin_stato||'').toUpperCase()==='PRESENTE').map(c=>c.prenotazione_id));
+  const present=bs.filter(b=>b.checkin_effettuato||presentIds.has(b.id)).reduce((n,b)=>n+Number(b.posti||0),0);
+  const fleetId=v.flotta_id||v.mezzo_id||v.id_mezzo||'';
+  const fleet=state.flotta.find(f=>f.id===fleetId)||state.flotta.find(f=>String(f.targa||'')===String(v.targa||''));
+  const maint=(state.manutenzioni||[]).filter(m=>m.flotta_id===fleet?.id && m.stato!=='Annullata').sort((a,b)=>String(a.prossima_data||'9999').localeCompare(String(b.prossima_data||'9999')));
+  const fuel=(state.carburante||[]).filter(f=>f.flotta_id===fleet?.id && (!f.viaggio_id || f.viaggio_id===id));
+  const fuelTotal=fuel.reduce((n,f)=>n+Number(f.importo||0),0);
+  const occupancy=capacity?Math.round(occupied/capacity*100):0;
+  const kpis=[['👥','Passeggeri',occupied],['💺','Posti liberi',free],['📊','Occupazione',occupancy+'%'],['💶','Valore prenotazioni',money(value)],['💳','Incassato',money(paid)],['⏳','Da incassare',money(residual)],['✅','Presenti',present+'/'+occupied],['💰','Margine economico',money(margin)]];
+  const seatGrid=capacity?Array.from({length:capacity},(_,i)=>{
+    const n=String(i+1), p=seats.find(x=>String(x.posto)===n);
+    const b=p?bs.find(x=>x.id===p.prenotazione_id):bs.find(x=>String(x.posti_selezionati||'').split(',').map(z=>z.trim()).includes(n));
+    return `<div class="seat ${b?'busy':''}" title="${b?esc(b.cliente):'Libero'}">${n}</div>`;
+  }).join(''):'<div class="empty">Nessuna piantina configurata.</div>';
+  const bookingRows=bs.length?bs.map(b=>{
+    const c=b.checkin_effettuato||presentIds.has(b.id);
+    return `<div class="list-row"><div class="avatar" style="width:38px;height:38px;font-size:12px">${esc((b.cliente||'?').slice(0,2).toUpperCase())}</div><div class="row-main"><strong>${esc(b.cliente||'—')}</strong><small>${esc(b.telefono||'')} · ${b.posti||0} posti · posti ${esc(b.posti_selezionati||'—')}</small></div><div style="text-align:right"><b>${money(b.totale)}</b><small style="display:block">${c?'PRESENTE':'NON PRESENTE'} · residuo ${money(b.saldo)}</small></div></div>`;
+  }).join(''):'<div class="empty">Nessuna prenotazione attiva.</div>';
+  const paymentRows=payments.slice(0,12).map(p=>`<div class="list-row"><div class="row-main"><strong>${esc(p.tipo||'Pagamento')}</strong><small>${dateIT(p.data_pagamento)} · ${esc(p.metodo||'')} · ${esc(p.note||'')}</small></div><b class="economy-positive">${money(p.importo)}</b></div>`).join('')||'<div class="empty">Nessun pagamento collegato.</div>';
+  const ecoRows=tripEco.slice(0,12).map(m=>`<div class="list-row"><div class="row-main"><strong>${esc(m.categoria||m.tipo)}</strong><small>${dateIT(m.data_movimento)} · ${esc(m.descrizione||'')} · ${esc(m.metodo||'')}</small></div><b class="${m.tipo==='Entrata'?'economy-positive':'economy-negative'}">${m.tipo==='Entrata'?'+':'−'} ${money(m.importo)}</b></div>`).join('')||'<div class="empty">Nessun movimento economico collegato.</div>';
+  const fleetHtml=fleet?`<div class="list-row"><div class="row-main"><strong>${esc(fleet.titolo||((fleet.marca||'')+' '+(fleet.modello||'')))}</strong><small>${esc(fleet.targa||'Targa non indicata')} · ${fleet.posti||0} posti · ${esc(fleet.categoria||'GT')}</small></div><span class="pill ${fleet.stato==='Manutenzione'?'danger':'ok'}">${esc(fleet.stato||'Operativo')}</span></div><div class="dossier-mini-grid"><div><small>Carburante collegato</small><b>${money(fuelTotal)}</b></div><div><small>Prossima manutenzione</small><b>${maint[0]?.prossima_data?dateIT(maint[0].prossima_data):'—'}</b></div><div><small>Km ultimo rifornimento</small><b>${fuel.length?Math.max(...fuel.map(x=>Number(x.km||0))):'—'}</b></div></div>`:'<div class="empty">Nessun mezzo assegnato al viaggio.</div>';
+  const ops=tasks.concat(deadlines).sort((a,b)=>String(a.scadenza||a.data_scadenza||'9999').localeCompare(String(b.scadenza||b.data_scadenza||'9999'))).slice(0,10).map(x=>`<div class="list-row"><div class="row-main"><strong>${esc(x.titolo||x.tipo||'Attività')}</strong><small>${esc(x.descrizione||x.note||'')} · ${dateIT(x.scadenza||x.data_scadenza)}</small></div><span class="pill ${String(x.stato||'').toLowerCase().includes('complet')?'ok':'wait'}">${esc(x.stato||'aperta')}</span></div>`).join('')||'<div class="empty">Nessuna attività o scadenza collegata.</div>';
+  const docRows=docs.slice(0,10).map(d=>`<div class="list-row"><div class="row-main"><strong>📄 ${esc(d.titolo||d.nome||d.tipo||'Documento')}</strong><small>${esc(d.categoria||d.tipo||'')} · ${dateIT(d.created_at?.slice(0,10))}</small></div><span class="pill neutral">Archivio</span></div>`).join('')||'<div class="empty">Nessun documento collegato.</div>';
+  const alert=[];
+  if(free<=5)alert.push(`⚠️ ${free===0?'Viaggio completo':`${free} posti liberi`}`);
+  if(residual>0)alert.push(`💳 ${money(residual)} da incassare`);
+  if(occupied && present<occupied)alert.push(`✅ Check-in incompleto: ${occupied-present} passeggeri da verificare`);
+  if(maint[0]?.prossima_data && maint[0].prossima_data<=isoToday)alert.push('🔧 Manutenzione da controllare');
+  const html=`
+  <div class="dossier-head"><div><span class="pill info">DOSSIER 360°</span>${liveBadge}<h2>${esc(v.titolo||v.destinazione||'Viaggio')}</h2><p>${dateIT(v.data_partenza)} · ${esc(v.luogo_partenza||'')} → ${esc(v.destinazione||'')} · ${esc(v.ora_partenza||'')}</p></div><div class="dossier-actions"><button class="btn btn-primary btn-sm" onclick="openBookingModal();closeModal()">+ Prenotazione</button><button class="btn btn-green btn-sm" onclick="openCheckinModal();closeModal()">✓ Check-in</button><button class="btn btn-secondary btn-sm" onclick="openEconomyModal('Entrata');closeModal()">+ Entrata</button></div></div>
+  <div class="dossier-timeline">${timeline.map(x=>`<div class="dossier-step ${x.active?'active':''}"><b>${x.icon} ${x.title}</b><small>${x.text}</small></div>`).join('')}</div>
+  <div class="dossier-quick"><button class="btn btn-ghost btn-sm" onclick="go('prenotazioni')">👥 Prenotazioni</button><button class="btn btn-ghost btn-sm" onclick="go('pagamenti')">💳 Pagamenti</button><button class="btn btn-ghost btn-sm" onclick="go('economia')">💶 Economia</button><button class="btn btn-ghost btn-sm" onclick="go('flotta')">🚍 Flotta</button><button class="btn btn-ghost btn-sm" onclick="go('documenti')">📄 Documenti</button></div>
+  <div class="dossier-kpis">${kpis.map(x=>`<div class="module-card"><small>${x[0]} ${x[1]}</small><b>${x[2]}</b></div>`).join('')}</div>
+  <div class="dossier-grid"><div class="card"><div class="card-head"><h3>💺 Posti e occupazione</h3><span class="pill ${free===0?'danger':'ok'}">${occupancy}%</span></div><div class="card-body"><div class="seat-grid">${seatGrid}</div></div></div><div class="card"><div class="card-head"><h3>🚍 Mezzo assegnato</h3></div><div class="card-body">${fleetHtml}</div></div></div>
+  <div class="dossier-grid"><div class="card"><div class="card-head"><h3>👥 Prenotazioni e passeggeri (${bs.length})</h3></div><div class="card-body">${bookingRows}</div></div><div class="card"><div class="card-head"><h3>💳 Pagamenti (${payments.length})</h3></div><div class="card-body">${paymentRows}</div></div></div>
+  <div class="dossier-grid"><div class="card"><div class="card-head"><h3>💶 Economia del viaggio</h3><span class="pill ${margin>=0?'ok':'danger'}">Saldo ${money(margin)}</span></div><div class="card-body"><div class="finance-dash-grid"><div><small>Entrate</small><strong class="economy-positive">+ ${money(inTotal)}</strong></div><div><small>Uscite</small><strong class="economy-negative">− ${money(outTotal)}</strong></div><div><small>Movimenti</small><strong>${tripEco.length}</strong></div></div><div style="margin-top:10px">${ecoRows}</div></div></div><div class="card"><div class="card-head"><h3>🚨 Avvisi operativi</h3><span class="pill ${alert.length?'wait':'ok'}">${alert.length}</span></div><div class="card-body">${alert.length?alert.map(a=>`<div class="alert-line">${a}</div>`).join(''):'<div class="empty">Nessuna anomalia rilevata.</div>'}</div></div></div>
+  <div class="dossier-grid"><div class="card"><div class="card-head"><h3>📋 Attività e scadenze</h3></div><div class="card-body">${ops}</div></div><div class="card"><div class="card-head"><h3>📄 Documenti</h3></div><div class="card-body">${docRows}</div></div></div>
+  <div class="card"><div class="card-head"><h3>🧾 Preventivi collegati</h3><span class="pill neutral">${quotes.length}</span></div><div class="card-body">${quotes.length?quotes.map(q=>`<div class="list-row"><div class="row-main"><strong>${esc(q.cliente||q.ragione_sociale||'Richiesta')}</strong><small>${esc(q.stato||'')} · ${esc(q.destinazione||'')} · ${q.passeggeri||q.pax||0} pax</small></div><b>${money(q.importo||q.totale||0)}</b></div>`).join(''):'<div class="empty">Nessun preventivo collegato.</div>'}</div></div>`;
+  openModal('Dossier 360° — '+(v.titolo||v.destinazione||'Viaggio'),html,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi dossier</button><button class="btn btn-primary" onclick="window.print()">🖨️ Stampa dossier</button>`);
 }
 async function saveQuote(id=''){
  const existing=id?state.preventivi.find(x=>x.id===id):null;
@@ -1108,6 +1292,65 @@ async function convertQuoteToBooking(id){
    if(!result?.success)throw new Error(result?.error||'Conversione non riuscita');
    closeModal();toast(`Prenotazione ${result.codice||''} creata dal preventivo`);await loadAll();
  }catch(e){toast('Impossibile convertire il preventivo: '+e.message,false);log('CONVERSIONE PREVENTIVO: '+e.message)}
+}
+/* === CAROUSEL FLOTTA DELGROSSO === */
+const fleetCarouselDefaults = [
+  {src:'assets/bus-bianco-dashboard.jpg', label:'DELGROSSO · GT', type:'GT'},
+  {src:'assets/bus-extra.jpg', label:'DELGROSSO · GT', type:'GT'},
+  {src:'assets/bus-bianco-reale.jpg', label:'DELGROSSO · GT', type:'GT'}
+];
+const fleetCarousels = {};
+function fleetCarouselSources(){
+  const out=[...fleetCarouselDefaults];
+  const seen=new Set(out.map(x=>x.src));
+  (state.flotta||[]).forEach(f=>{
+    const src=String(f.immagine||'').trim();
+    if(!src || seen.has(src)) return;
+    const txt=((f.categoria||'')+' '+(f.titolo||'')+' '+(f.descrizione||'')).toLowerCase();
+    const isLim=txt.includes('limousine') || txt.includes('party');
+    out.push({src,label:`DELGROSSO · ${isLim?'Limousine BUS':'GT'}`,type:isLim?'Limousine BUS':'GT'});
+    seen.add(src);
+  });
+  return out;
+}
+function buildFleetCarousel(id, kind){
+  const root=document.getElementById(id); if(!root) return;
+  const img=root.querySelector(kind==='hero'?'.hero-carousel-img':'.fleet-carousel-img');
+  const dots=root.querySelector(kind==='hero'?'.hero-dots':'.fleet-dots');
+  const label=kind==='hero'?root.querySelector('.hero-carousel-label'):root.querySelector('.fleet-caption span');
+  const prev=root.querySelector(kind==='hero'?'.hero-prev':'.fleet-prev');
+  const next=root.querySelector(kind==='hero'?'.hero-next':'.fleet-next');
+  const slides=fleetCarouselSources();
+  if(!img || slides.length===0) return;
+  if(fleetCarousels[id]?.timer) clearInterval(fleetCarousels[id].timer);
+  let idx=fleetCarousels[id]?.idx||0;
+  idx=Math.max(0,Math.min(idx,slides.length-1));
+  const stateObj=fleetCarousels[id]||{idx:0,timer:null};
+  stateObj.idx=idx; stateObj.timer=null; fleetCarousels[id]=stateObj;
+  function render(i){
+    stateObj.idx=(i+slides.length)%slides.length;
+    const s=slides[stateObj.idx];
+    img.style.opacity='0.35';
+    const pre=new Image();
+    pre.onload=()=>{img.src=s.src;img.alt=s.label;img.style.opacity='1'};
+    pre.onerror=()=>{img.style.opacity='1'};
+    pre.src=s.src;
+    if(label) label.textContent=s.label;
+    if(dots){
+      dots.innerHTML=slides.map((_,n)=>`<button type="button" class="${n===stateObj.idx?'active':''}" aria-label="Foto ${n+1}"></button>`).join('');
+      [...dots.children].forEach((b,n)=>b.onclick=()=>{render(n);restart()});
+    }
+  }
+  function restart(){clearInterval(stateObj.timer);if(slides.length>1)stateObj.timer=setInterval(()=>render(stateObj.idx+1),5200)}
+  if(prev) prev.onclick=()=>{render(stateObj.idx-1);restart()};
+  if(next) next.onclick=()=>{render(stateObj.idx+1);restart()};
+  root.onmouseenter=()=>clearInterval(stateObj.timer);
+  root.onmouseleave=restart;
+  render(idx);restart();
+}
+function initFleetCarousels(){
+  buildFleetCarousel('sideFleetCarousel','side');
+  buildFleetCarousel('dashboardFleetCarousel','hero');
 }
 function printWindow(title,body){const w=window.open('','_blank','width=760,height=900');if(!w)return toast('Il browser ha bloccato la finestra di stampa',false);w.document.write(`<!doctype html><html><head><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;padding:35px;color:#10233d}h1{margin:0 0 5px}.logo{max-width:260px;max-height:100px;object-fit:contain}.box{border:1px solid #dbe5ef;border-radius:14px;padding:18px;margin-top:18px}.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #edf2f7}.row:last-child{border:0}@media print{button{display:none}}.seat-picker{display:grid;grid-template-columns:repeat(4,minmax(38px,1fr));gap:8px;padding:12px;background:#f5f9fd;border:1px solid #dce7f2;border-radius:12px;max-height:300px;overflow:auto}.seat-picker .seat{border:1px solid #bcd0e3;background:#fff;border-radius:8px;padding:8px 4px;cursor:pointer;font-weight:700}.seat-picker .seat.selected{background:#1677e8;color:#fff;border-color:#1677e8}.seat-picker .seat.busy{background:#e7edf3;color:#8b98a7;cursor:not-allowed;text-decoration:line-through}.seat-picker .seat:nth-child(4n+3){margin-left:8px}.btn-ghost{background:#f1f6fb;color:#1266c5;border:1px solid #d7e3ef}.btn-ghost:hover{background:#e8f1fa}
 
