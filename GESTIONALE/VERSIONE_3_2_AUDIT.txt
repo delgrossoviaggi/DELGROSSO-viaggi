@@ -1,0 +1,7 @@
+DELGROSSO Gestionale 3.2 — Audit stabilità
+
+- caricamento moduli con Promise.allSettled: un modulo Supabase guasto non blocca gli altri
+- backup JSON, ripristino cache locale ed export CSV ripristinati
+- nuovo/modifica preventivo ripristinato
+- cache PWA v8
+- stessa base Supabase, nessun database locale aggiuntivo

@@ -735,7 +735,7 @@ html,body{background:var(--ref-bg)!important;color:var(--ref-text)!important}
     <button data-page="economia"><span class="ico">€</span><span>Economia</span></button>
     <button data-page="backup"><span class="ico">💾</span><span>Backup & Export</span></button>
 
-<button data-page="impostazioni"><span class="ico">⚙</span><span>Impostazioni</span></button>
+<button data-page="pro"><span class="ico">✦</span><span>Centro Pro</span></button><button data-page="impostazioni"><span class="ico">⚙</span><span>Impostazioni</span></button>
   </nav>
   <div class="side-bottom">
     <div class="fleet-mini fleet-carousel" id="sideFleetCarousel">
@@ -758,17 +758,8 @@ html,body{background:var(--ref-bg)!important;color:var(--ref-text)!important}
 <div class="content">
 <div class="pagebar"><div class="crumbs"><span>⌂</span><span>Home</span><b>›</b><strong id="pageCrumb">Dashboard</strong></div><div class="pagebar-date" id="pagebarDate">Lunedì 23 Settembre 2026 · 15:42</div></div>
 <section class="page active" id="page-dashboard">
-  <div class="reference-hero">
-    <div class="reference-hero-copy">
-      <img class="reference-logo" src="assets/delgrosso-logo-white-transparent.png" alt="DELGROSSO Viaggi">
-      <h1>Portiamo i tuoi sogni<br><em>più lontano.</em></h1>
-      <p>Più di un viaggio, è un'emozione.</p>
-      <div class="hero-services"><span>🚌 <b>Viaggi</b><small>in bus GT</small></span><span>👥 <b>Limousine bus</b><small>per feste private</small></span><span>🚐 <b>Noleggio con conducente</b><small>Mercedes V250D</small></span></div>
-    </div>
-    <div class="reference-hero-photo"><img src="assets/bus-bianco-dashboard.jpg" alt="Bus GT DELGROSSO"></div>
-    <div class="reference-hero-slogan">Viaggiare<br><em>è vivere<br>due volte.</em><i>—</i></div>
-  </div>
-  <div class="metrics reference-metrics" id="dashMetrics"></div>
+  <div class="reference-hero dg4-hero"><div class="reference-hero-copy dg4-hero-copy"><img class="reference-logo dg4-logo" src="assets/delgrosso-logo-white-transparent.png" alt="DELGROSSO Viaggi"><h1>Portiamo i tuoi sogni <em>più lontano.</em></h1><p>Più di un viaggio, è un'emozione.</p><div class="hero-services"><span>🚌 <b>Viaggi</b><small>in bus GT</small></span><span>👥 <b>Limousine bus</b><small>per feste private</small></span><span>🚐 <b>Noleggio con conducente</b><small>Mercedes V250D</small></span></div></div><div class="reference-hero-photo dg4-hero-photo"><img src="assets/bus-bianco-dashboard.jpg" alt="Bus GT DELGROSSO"></div><div class="reference-hero-slogan dg4-hero-slogan">Viaggiare<br><em>è vivere<br>due volte.</em><i>—</i></div></div>
+  <div class="metrics reference-metrics"  <div class="metrics reference-metrics" id="dashMetrics"></div>
   <div class="reference-grid-main">
     <div class="card reference-panel departures-panel"><div class="card-head"><h3>🚌 Partenze di oggi</h3><button class="btn btn-ghost btn-sm" onclick="go('viaggi')">Vedi tutti i viaggi →</button></div><div class="card-body" id="nextTrips"></div></div>
     <div class="card reference-panel alerts-panel"><div class="card-head"><h3>⚠ Avvisi e scadenze</h3><button class="btn btn-ghost btn-sm" onclick="go('comunicazioni')">Vedi tutti →</button></div><div class="card-body" id="alerts"></div></div>
@@ -944,6 +935,7 @@ html,body{background:var(--ref-bg)!important;color:var(--ref-text)!important}
   </div>
 </section>
 
+<section class="page" id="page-pro"><div class="section-title"><div><h2>Centro Pro — DELGROSSO Gestionale 4.1</h2><p class="section-subtitle">Operatività, redditività, CRM, flotta, sicurezza e salute del sistema in un unico centro.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openQuickActions()">＋ Azione rapida</button><button class="btn btn-secondary" onclick="healthPro()">♥ Controlla sistema</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div><div class="pro-health-grid" id="proHealth"></div><div class="pro-grid"><div class="card pro-card"><div class="card-head"><h3>🎛️ Control Room 360°</h3></div><div class="card-body" id="proControl"></div></div><div class="card pro-card"><div class="card-head"><h3>💰 Redditività viaggi</h3></div><div class="card-body" id="proProfit"></div></div><div class="card pro-card"><div class="card-head"><h3>👤 CRM 360°</h3></div><div class="card-body" id="proCRM"></div></div><div class="card pro-card"><div class="card-head"><h3>🚍 Flotta & manutenzione</h3></div><div class="card-body" id="proFleet"></div></div><div class="card pro-card"><div class="card-head"><h3>🚨 Anomalie <button class="btn btn-primary btn-sm" onclick="openAnomalyModal()">＋</button></h3></div><div class="card-body" id="proAnomalies"></div></div><div class="card pro-card"><div class="card-head"><h3>☑ Checklist mezzi <button class="btn btn-primary btn-sm" onclick="openChecklistModal()">＋</button></h3></div><div class="card-body" id="proChecklist"></div></div><div class="card pro-card"><div class="card-head"><h3>🔔 Notifiche intelligenti</h3></div><div class="card-body" id="proAlerts"></div></div><div class="card pro-card"><div class="card-head"><h3>📊 KPI & statistiche</h3></div><div class="card-body" id="proKpi"></div></div><div class="card pro-card"><div class="card-head"><h3>📁 Documenti 360°</h3></div><div class="card-body" id="proDocs"></div></div><div class="card pro-card"><div class="card-head"><h3>🛡️ Audit & sicurezza</h3></div><div class="card-body" id="proAudit"></div></div></div></section>
 <section class="page" id="page-impostazioni">
   <div class="section-title"><h2>Impostazioni</h2></div>
   <div class="cards">
@@ -1009,8 +1001,18 @@ const state={
   viaggi:[],prenotazioni:[],clienti:[],pagamenti:[],flotta:[],notifiche:[],
   checkin:[],preventivi:[],impostazioni:[],
   noleggi:[],noleggiMezzi:[],noleggiPagamenti:[],
-  prenotazionePosti:[],attivita:[],scadenze:[],audit:[],economia:[],carburante:[],manutenzioni:[],archivioDocumenti:[]
+  prenotazionePosti:[],attivita:[],scadenze:[],audit:[],economia:[],carburante:[],manutenzioni:[],archivioDocumenti:[],anomalie:[],checklist:[],syncErrors:[]
 };
+// === PERFORMANCE ENGINE 4.1 ===
+const DG_FETCH_TIMEOUT=12000;
+const DG_GET_CACHE_TTL=2500;
+const dgGetCache=new Map();
+const dgInflight=new Map();
+let loadAllBusy=false;
+let loadAllQueued=false;
+let globalSearchTimer=null;
+function dgAbortAfter(ms){const c=new AbortController();const t=setTimeout(()=>c.abort('timeout'),ms);return {signal:c.signal,clear:()=>clearTimeout(t)};}
+function dgInvalidateGetCache(table){for(const k of dgGetCache.keys())if(k.startsWith(table+'|'))dgGetCache.delete(k)}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const money=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n)||0);
@@ -1045,17 +1047,45 @@ async function refreshAuth(){
   return true;
 }
 async function api(table,query='',opts={}){
-  const make=()=>fetch(`${SUPA_URL}/rest/v1/${table}${query?'?'+query:''}`,{
-    method:opts.method||'GET',headers:{...accessHeaders(),...(opts.headers||{})},
-    body:opts.body?JSON.stringify(opts.body):undefined,cache:'no-store'
-  });
-  let out=await parseResponse(await make());
-  if(out.status===401 && authSession?.refresh_token){
-    if(await refreshAuth()) out=await parseResponse(await make());
+  const method=opts.method||'GET';
+  const key=table+'|'+query;
+  if(method==='GET'){
+    const hit=dgGetCache.get(key);
+    if(hit && (Date.now()-hit.ts)<DG_GET_CACHE_TTL) return hit.data;
+    if(dgInflight.has(key)) return dgInflight.get(key);
   }
-  if(!out.ok) throw new Error(`${table}: HTTP ${out.status} ${out.data?.message||out.data?.hint||out.data||''}`);
-  return out.data;
+  const run=async()=>{
+    const make=async()=>{
+      const ctl=dgAbortAfter(opts.timeout||DG_FETCH_TIMEOUT);
+      try{
+        return await fetch(`${SUPA_URL}/rest/v1/${table}${query?'?'+query:''}`,{
+          method,headers:{...accessHeaders(),...(opts.headers||{})},
+          body:opts.body?JSON.stringify(opts.body):undefined,cache:'no-store',signal:ctl.signal
+        });
+      }finally{ctl.clear()}
+    };
+    let out;
+    try{out=await parseResponse(await make())}
+    catch(e){
+      // Un singolo retry per errori transitori di rete/timeout.
+      if(method==='GET'){
+        await new Promise(r=>setTimeout(r,180));
+        out=await parseResponse(await make());
+      }else throw e;
+    }
+    if(out.status===401 && authSession?.refresh_token){
+      if(await refreshAuth()) out=await parseResponse(await make());
+    }
+    if(!out.ok) throw new Error(`${table}: HTTP ${out.status} ${out.data?.message||out.data?.hint||out.data||''}`);
+    if(method==='GET') dgGetCache.set(key,{ts:Date.now(),data:out.data});
+    else dgInvalidateGetCache(table);
+    return out.data;
+  };
+  const promise=run();
+  if(method==='GET') dgInflight.set(key,promise);
+  try{return await promise}finally{if(method==='GET')dgInflight.delete(key)}
 }
+
 async function rpc(name,body){
   const make=()=>fetch(`${SUPA_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:accessHeaders(),body:JSON.stringify(body||{})});
   let out=await parseResponse(await make());
@@ -1130,58 +1160,54 @@ let autoSyncTimer=null;
 let syncBusy=false;
 function markSynced(){const now=new Date();const txt=now.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'medium'});const e=$('lastSync');if(e)e.textContent='Ultima sincronizzazione: '+txt;localStorage.setItem('dg_last_sync',txt)}
 async function syncIntegrity(){if(syncBusy)return;syncBusy=true;try{const r=await rpc('sync_gestionale_integrity',{});log('Integrità Supabase: '+JSON.stringify(r));toast(`Integrità sincronizzata · ${r?.prenotazioni_sincronizzate??0} prenotazioni · ${r?.viaggi_sincronizzati??0} viaggi`);await loadAll()}catch(e){toast('Sincronizzazione integrità fallita: '+e.message,false);log('INTEGRITÀ: '+e.message)}finally{syncBusy=false}}
-function startAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=setInterval(async()=>{if(document.visibilityState==='visible' && authSession && !syncBusy) await loadAll()},20000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy)loadAll()},{passive:true})}
+function startAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=setInterval(async()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy) await loadAll()},45000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy)loadAll()},{passive:true})}}
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
 function go(page){window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
-const PAGE_META={dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room','Dossier operativo 360°'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale']};
+const PAGE_META={dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room','Dossier operativo 360°'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema']};
 function updatePageChrome(page){const m=PAGE_META[page]||PAGE_META.dashboard;const t=$('topPageTitle'),s=$('topPageSubtitle'),c=$('pageCrumb');if(t)t.textContent=m[0];if(s)s.textContent=m[1];if(c)c.textContent=m[0];}
 
 window.go=go; updatePageChrome(state.page||'dashboard');
 async function loadAll(){
+  if(loadAllBusy){loadAllQueued=true;return {ok:false,queued:true}}
+  loadAllBusy=true;
   try{
-    const [
-      v,p,c,pa,f,n,ch,q,settings,nb,nbm,nbp,pp,att,sc,audit,docs,eco,fuel,maint
-    ]=await Promise.all([
-      api('viaggi','select=*&order=data_partenza.asc'),
-      api('prenotazioni','select=*&order=created_at.desc'),
-      api('clienti','select=*&order=created_at.desc'),
-      api('pagamenti','select=*&order=data_pagamento.desc,created_at.desc'),
-      api('flotta','select=*&order=marca.asc'),
-      api('notifiche','select=*&order=created_at.desc'),
-      api('accessi_checkin','select=*&order=created_at.desc'),
-      api('preventivi','select=*&order=created_at.desc'),
-      api('impostazioni','select=*&order=created_at.desc'),
-      api('noleggi_bus','select=*&order=data_partenza.asc'),
-      api('noleggi_bus_mezzi','select=*&order=created_at.desc'),
-      api('noleggi_bus_pagamenti','select=*&order=data_pagamento.desc,created_at.desc'),
-      api('prenotazione_posti','select=*&order=created_at.desc'),
-      api('attivita_gestionale','select=*&order=created_at.desc'),
-      api('scadenze_gestionale','select=*&order=data_scadenza.asc'),
-      api('audit_log_gestionale','select=*&order=created_at.desc&limit=100'),
-      api('archivio_documenti','select=*&order=updated_at.desc'),
-      api('economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'),
-      api('carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'),
-      api('manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc')
-    ]);
-    Object.assign(state,{
-      viaggi:v||[],prenotazioni:p||[],clienti:c||[],pagamenti:pa||[],flotta:f||[],
-      notifiche:n||[],checkin:ch||[],preventivi:q||[],impostazioni:settings||[],
-      noleggi:nb||[],noleggiMezzi:nbm||[],noleggiPagamenti:nbp||[],
-      prenotazionePosti:pp||[],attivita:att||[],scadenze:sc||[],audit:audit||[],archivioDocumenti:docs||[],economia:eco||[],carburante:fuel||[],manutenzioni:maint||[],online:true
-    });
-    setStatus('live');markSynced();renderPage(state.page);updateBadge();initFleetCarousels();
-    if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;try{await rpc('dg_reconcile_payments_economia',{});}catch(e){log('Riconciliazione Economia: '+e.message)}}
-    try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti}}));}catch{}
-    log(`Sincronizzazione completa: ${state.viaggi.length} viaggi · ${state.prenotazioni.length} prenotazioni · ${state.clienti.length} clienti · ${state.pagamenti.length} pagamenti · ${state.flotta.length} mezzi · ${state.noleggi.length} noleggi`);
-  }catch(e){
-    state.online=false;
-    setStatus(/HTTP 401|HTTP 403/.test(String(e.message))?'auth':(/HTTP 400|HTTP 404|HTTP 409/.test(String(e.message))?'degraded':(/viaggi: HTTP/.test(String(e.message))?'degraded':'off')),e.message);
-    log('Sincronizzazione fallita: '+e.message);
-    // Mantiene disponibili gli ultimi dati validamente sincronizzati, marcandoli come cache.
-    try{const raw=localStorage.getItem('dg_state_cache');if(raw){const c=JSON.parse(raw);if(c?.data)Object.assign(state,c.data);renderPage(state.page);initFleetCarousels();toast(/HTTP 400|HTTP 404|HTTP 409/.test(String(e.message))?'Problema di schema/API Supabase: caricati gli ultimi dati sincronizzati.':'Supabase non disponibile: visualizzati gli ultimi dati sincronizzati.',false);return}}catch{}
-    toast('Sincronizzazione Supabase fallita: '+e.message,false);
+  const specs=[
+    ['viaggi','select=*&order=data_partenza.asc'],['prenotazioni','select=*&order=created_at.desc'],['clienti','select=*&order=created_at.desc'],
+    ['pagamenti','select=*&order=data_pagamento.desc,created_at.desc'],['flotta','select=*&order=marca.asc'],['notifiche','select=*&order=created_at.desc'],
+    ['accessi_checkin','select=*&order=created_at.desc'],['preventivi','select=*&order=created_at.desc'],['impostazioni','select=*&order=created_at.desc'],
+    ['noleggi_bus','select=*&order=data_partenza.asc'],['noleggi_bus_mezzi','select=*&order=created_at.desc'],['noleggi_bus_pagamenti','select=*&order=data_pagamento.desc,created_at.desc'],
+    ['prenotazione_posti','select=*&order=created_at.desc'],['attivita_gestionale','select=*&order=created_at.desc'],['scadenze_gestionale','select=*&order=data_scadenza.asc'],
+    ['audit_log_gestionale','select=*&order=created_at.desc&limit=150'],['archivio_documenti','select=*&order=updated_at.desc'],
+    ['economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'],['carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'],
+    ['manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc'],['anomalie_gestionale','select=*&order=created_at.desc'],['checklist_mezzi','select=*&order=data_check.desc,created_at.desc']
+  ];
+  const results=await Promise.allSettled(specs.map(x=>api(x[0],x[1])));
+  const data={}, failed=[];
+  results.forEach((r,i)=>{const name=specs[i][0]; if(r.status==='fulfilled') data[name]=r.value||[]; else {data[name]=state[name]||[]; failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}});
+  Object.assign(state,{viaggi:data.viaggi||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:data.impostazioni||[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],syncErrors:failed,online:failed.length<specs.length});
+  if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<specs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
+  if(failed.length===specs.length){try{const raw=localStorage.getItem('dg_state_cache');const c=raw?JSON.parse(raw):null;if(c?.data){Object.assign(state,c.data);state.online=false;log("Caricata cache locale dell'ultima sincronizzazione valida");}}catch(e){log('Cache locale non disponibile: '+e.message)}}
+  markSynced();
+  try{if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;await rpc('dg_reconcile_payments_economia',{});}}catch(e){log('Riconciliazione Economia: '+e.message)}
+  try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti,anomalie:state.anomalie,checklist:state.checklist}}));}catch{}
+  renderPage(state.page);updateBadge();initFleetCarousels();if(typeof renderPro==='function')renderPro();
+  if(failed.length)toast('Sincronizzazione parziale: '+failed.length+' modulo/i non disponibili. Gli altri restano operativi.',false);
+  return {ok:failed.length===0,failed};
+  }finally{
+    loadAllBusy=false;
+    if(loadAllQueued){loadAllQueued=false;setTimeout(()=>loadAll(),80)}
   }
+}
+function restoreCacheFast(){
+  try{
+    const raw=localStorage.getItem('dg_state_cache');const c=raw?JSON.parse(raw):null;
+    if(!c?.data)return false;
+    Object.assign(state,c.data);state.online=false;state.cacheTs=c.ts||0;
+    renderPage(state.page||'dashboard');updateBadge();initFleetCarousels();
+    setStatus('degraded','Dati locali in attesa della sincronizzazione');
+    return true;
+  }catch(e){return false}
 }
 function updateBadge(){$('notifBadge').textContent=state.notifiche.filter(n=>!n.letto).length}
 function renderPage(p){
@@ -1202,6 +1228,7 @@ function renderPage(p){
     if(p==='controlroom')renderControlRoom();
     if(p==='economia')renderEconomia();
     if(p==='backup')renderBackup();
+    if(p==='pro'&&typeof renderPro==='function')renderPro();
   }catch(e){
     console.error('DELGROSSO modulo '+p,e);
     log('Errore rendering '+p+': '+(e?.message||e));
@@ -1867,14 +1894,14 @@ $('sideNav').addEventListener('click',e=>{const b=e.target.closest('button[data-
 ['tripSearch','tripStatus','bookSearch','bookFilter','quoteSearch','quoteFilter','quoteOrigin','clientSearch','rentalSearch','rentalStatus','agendaSearch','agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('input',()=>renderPage(state.page)));
 ['agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('change',()=>renderAgenda()));
 ['quoteFilter','quoteOrigin'].forEach(id=>$(id)?.addEventListener('change',()=>renderQuotes()));
-$('globalSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();if(!q)return;const found=state.prenotazioni.find(x=>JSON.stringify(x).toLowerCase().includes(q))||state.clienti.find(x=>JSON.stringify(x).toLowerCase().includes(q))||state.viaggi.find(x=>JSON.stringify(x).toLowerCase().includes(q));if(found){if(found.viaggio_id)go('prenotazioni');else if(found.destinazione)go('viaggi');else go('clienti')}});
+$('globalSearch').addEventListener('input',e=>{clearTimeout(globalSearchTimer);const q=e.target.value.trim().toLowerCase();if(!q)return;globalSearchTimer=setTimeout(()=>{const hit=a=>a.find(x=>Object.values(x||{}).some(v=>String(v??'').toLowerCase().includes(q)));const found=hit(state.prenotazioni)||hit(state.clienti)||hit(state.viaggi)||hit(state.noleggi)||hit(state.preventivi);if(found){if(found.viaggio_id)go('prenotazioni');else if(found.destinazione||found.data_partenza)go('viaggi');else if(found.stato_noleggio)go('noleggi');else if(found.data_viaggio)go('preventivi');else go('clienti')}},140)});
 $('notifBtn').onclick=()=>go('comunicazioni');
 document.addEventListener('change',e=>{if(e.target?.id==='controlTripSelect')renderControlRoom()});
 
-$('loginBtn').onclick=async()=>{const btn=$('loginBtn');btn.disabled=true;$('loginMsg').textContent='Autenticazione in corso…';try{await signIn($('loginUser').value,$('loginPass').value);$('currentOperatorName').textContent=currentOperator.name;$('currentOperatorRole').textContent='Ruolo: '+currentOperator.role;if($('mobileOperatorName'))$('mobileOperatorName').textContent=currentOperator.name;$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');await loadAll();await health();startAutoSync();$('loginMsg').textContent=''}catch(e){$('loginMsg').textContent=e.message||'Credenziali non valide'}finally{btn.disabled=false}};
+$('loginBtn').onclick=async()=>{const btn=$('loginBtn');btn.disabled=true;$('loginMsg').textContent='Autenticazione in corso…';try{await signIn($('loginUser').value,$('loginPass').value);$('currentOperatorName').textContent=currentOperator.name;$('currentOperatorRole').textContent='Ruolo: '+currentOperator.role;if($('mobileOperatorName'))$('mobileOperatorName').textContent=currentOperator.name;$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');restoreCacheFast();await loadAll();await health();startAutoSync();$('loginMsg').textContent=''}catch(e){$('loginMsg').textContent=e.message||'Credenziali non valide'}finally{btn.disabled=false}};
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
 (function(){const e=$('lastSync');const v=localStorage.getItem('dg_last_sync');if(e&&v)e.textContent='Ultima sincronizzazione: '+v})();
-(async()=>{try{const raw=sessionStorage.getItem('dg_auth');if(raw){authSession=JSON.parse(raw);$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');if(!(await health())){if(await refreshAuth()){await loadAll()}else await signOut()}else await loadAll();startAutoSync()}}catch(e){await signOut()}})();
+(async()=>{try{const raw=sessionStorage.getItem('dg_auth');if(raw){authSession=JSON.parse(raw);$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');if(!(await health())){if(await refreshAuth()){await loadAll()}else await signOut()}else {restoreCacheFast();await loadAll()}startAutoSync()}}catch(e){await signOut()}})();
 </script>
 <script>
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
@@ -1891,6 +1918,38 @@ function toggleMobileMenu(force){
 }
 function mobileGo(page){toggleMobileMenu(false);go(page);window.setTimeout(()=>window.scrollTo({top:0,left:0,behavior:'smooth'}),40);}
 
+</script>
+
+<style id="dg4-professional">
+.dg4-hero{position:relative!important;display:grid!important;grid-template-columns:minmax(300px,.9fr) minmax(430px,1.55fr) minmax(150px,.42fr)!important;min-height:292px!important;height:292px!important;overflow:hidden!important;border-radius:14px!important;background:#061b30!important}.dg4-hero-photo{position:relative!important;overflow:hidden!important;min-width:0!important}.dg4-hero-photo img{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important;object-position:center center!important}.dg4-hero-copy{position:relative!important;inset:auto!important;transform:none!important;z-index:3!important;padding:28px 10px 24px 34px!important;max-width:none!important;display:flex!important;flex-direction:column!important;justify-content:center!important;background:linear-gradient(90deg,rgba(4,22,39,.98),rgba(4,22,39,.72))!important}.dg4-logo{width:min(270px,82%)!important;height:auto!important;max-height:72px!important;object-fit:contain!important;object-position:left center!important;margin:0 0 12px!important}.dg4-hero-copy h1{font-size:25px!important;line-height:1.08!important;margin:0 0 7px!important}.dg4-hero-copy h1 em{font-size:24px!important}.dg4-hero-copy p{font-size:14px!important;margin:0 0 14px!important}.dg4-hero-slogan{position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding:18px!important;z-index:3!important;font-size:23px!important;line-height:1.08!important;background:linear-gradient(90deg,rgba(4,22,39,.12),rgba(4,22,39,.78))!important}.dg4-hero-slogan em{font-size:24px!important}.dg4-hero-slogan i{display:block!important;color:#14c96b!important;margin-top:12px}.pro-health-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:0 0 12px}.pro-health-item{background:#fff;border:1px solid #dbe5ee;border-radius:12px;padding:12px;box-shadow:0 3px 12px rgba(8,35,60,.06)}.pro-health-item b{display:block;font-size:13px}.pro-health-item small{color:#71839a}.pro-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:#16b86a}.pro-dot.warn{background:#f59e0b}.pro-dot.bad{background:#e11d48}.pro-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pro-card{min-width:0}.pro-list{display:grid;gap:8px}.pro-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #e6edf3}.pro-row:last-child{border-bottom:0}.pro-row small{display:block;color:#71839a;margin-top:2px}.pro-row strong{white-space:nowrap}.pro-positive{color:#08a85b}.pro-negative{color:#df1738}.pro-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pro-kpi{background:#f6f9fc;border:1px solid #e2eaf1;border-radius:10px;padding:10px}.pro-kpi small{display:block;color:#71839a}.pro-kpi b{font-size:19px}.pro-empty{padding:12px;border:1px dashed #cbd8e5;border-radius:10px;color:#71839a}.quick-modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.quick-modal-grid button{min-height:64px}@media(max-width:1000px){.dg4-hero{grid-template-columns:1fr!important;height:auto!important;min-height:0!important}.dg4-hero-photo{height:205px!important;grid-row:1!important}.dg4-hero-copy{grid-row:2!important;padding:18px!important;background:#061b30!important}.dg4-logo{width:210px!important;max-height:58px!important;margin:0 auto 8px!important}.dg4-hero-copy h1{text-align:center!important;font-size:21px!important}.dg4-hero-copy h1 em{font-size:20px!important}.dg4-hero-copy p{text-align:center!important;font-size:12px!important}.dg4-hero-copy .hero-services{display:none!important}.dg4-hero-slogan{grid-row:3!important;min-height:74px!important;font-size:17px!important;padding:12px!important;background:#061b30!important}.dg4-hero-slogan em{font-size:18px!important}.pro-health-grid{grid-template-columns:repeat(2,1fr)!important}.pro-grid{grid-template-columns:1fr!important}.pro-kpi-grid{grid-template-columns:repeat(2,1fr)!important}.quick-modal-grid{grid-template-columns:1fr!important}}
+</style>
+<script>
+(function(){
+window.downloadBackup=async function(){
+  const data={version:'4.1',created_at:new Date().toISOString(),project:'chkuayhbmitdmzmmvona',data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,preventivi:state.preventivi,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti,anomalie:state.anomalie,checklist:state.checklist}};
+  const text=JSON.stringify(data,null,2),blob=new Blob([text],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='DELGROSSO_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);try{await api('backup_log_gestionale','',{method:'POST',body:{tipo:'JSON',dimensione_bytes:blob.size,record_counts:Object.fromEntries(Object.entries(data.data).map(([k,v])=>[k,Array.isArray(v)?v.length:0]))}})}catch{}toast('Backup JSON creato');
+};
+window.restoreBackupPicker=function(){$('backupFile')?.click()};
+window.restoreBackup=async function(file){if(!file)return;try{const txt=await file.text(),data=JSON.parse(txt);if(!data?.data||typeof data.data!=='object')throw new Error('Backup non valido');localStorage.setItem('dg_restore_preview',JSON.stringify(data));toast('Backup caricato in anteprima locale: nessun dato Supabase è stato sovrascritto.');log('Backup importato in anteprima: '+file.name)}catch(e){toast('Backup non valido: '+e.message,false)}};
+window.exportCSV=function(kind){const map={viaggi:state.viaggi,prenotazioni:state.prenotazioni,pagamenti:state.pagamenti,clienti:state.clienti};const rows=map[kind]||[];if(!rows.length)return toast('Nessun dato da esportare',false);const keys=[...new Set(rows.flatMap(x=>Object.keys(x)))];const csv=[keys.join(';'),...rows.map(r=>keys.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`).join(';'))].join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='DELGROSSO_'+kind+'_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Export CSV creato')};
+window.renderBackup=function(){const a=$('auditList');if(a)a.innerHTML=(state.audit||[]).slice(0,30).map(x=>`<div class="pro-row"><span><b>${esc(x.azione||x.evento||'Operazione')}</b><small>${esc(x.created_at||'')} · ${esc(x.utente_nome||x.user_email||'Operatore')}</small></span></div>`).join('')||'<div class="pro-empty">Nessun audit disponibile.</div>';};
+window.openQuoteModal=function(id=''){const q=id?(state.preventivi||[]).find(x=>x.id===id)||{}:{};openModal(id?'Modifica preventivo':'Nuova richiesta / preventivo',`<div class="form-grid"><div class="field"><label>Nome *</label><input id="q_nome" value="${esc(q.nome||'')}"></div><div class="field"><label>Cognome</label><input id="q_cog" value="${esc(q.cognome||'')}"></div><div class="field"><label>Telefono *</label><input id="q_tel" value="${esc(q.telefono||'')}"></div><div class="field"><label>Email</label><input id="q_email" value="${esc(q.email||'')}"></div><div class="field"><label>Azienda</label><input id="q_company" value="${esc(q.azienda||'')}"></div><div class="field"><label>Origine</label><select id="q_origin"><option value="gestionale">Gestionale</option><option value="sito">Sito</option></select></div><div class="field"><label>Stato</label><select id="q_status">${['Nuovo','In lavorazione','Inviato','Accettato','Rifiutato','Annullato'].map(x=>`<option ${String(q.stato||'Nuovo')===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Servizio</label><input id="q_serv" value="${esc(q.servizio||q.servizio_richiesto||'Viaggio GT')}"></div><div class="field"><label>Data viaggio</label><input id="q_date" type="date" value="${esc(q.data_viaggio||q.data_partenza||'')}"></div><div class="field"><label>Partenza</label><input id="q_part" value="${esc(q.luogo_partenza||q.partenza||'')}"></div><div class="field"><label>Destinazione *</label><input id="q_dest" value="${esc(q.destinazione||'')}"></div><div class="field"><label>Passeggeri</label><input id="q_pax" type="number" min="1" value="${q.numero_passeggeri??q.passeggeri??1}"></div><div class="field"><label>Importo €</label><input id="q_imp" type="number" step=".01" min="0" value="${q.importo_preventivo??q.importo??0}"></div><div class="field"><label>Validità</label><input id="q_valid" type="date" value="${esc(q.validita_preventivo||'')}"></div><div class="field full"><label>Dettagli richiesta/offerta</label><textarea id="q_det">${esc(q.note_cliente||q.dettagli_offerta||'')}</textarea></div><div class="field full"><label>Note interne</label><textarea id="q_internal">${esc(q.note_interne||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveQuote('${id}')">Salva preventivo</button>`);if($('q_origin'))$('q_origin').value=q.origine||'gestionale'};
+window.renderPro=function(){if(!$('page-pro')||!$('page-pro').classList.contains('active'))return;const today=new Date().toISOString().slice(0,10);const eco=state.economia||[],ein=eco.filter(x=>x.tipo==='Entrata').reduce((n,x)=>n+Number(x.importo||0),0),eout=eco.filter(x=>x.tipo==='Uscita').reduce((n,x)=>n+Number(x.importo||0),0);const openAn=(state.anomalie||[]).filter(x=>!['Risolta','Annullata'].includes(x.stato));const badMaint=(state.manutenzioni||[]).filter(x=>x.prossima_data&&x.prossima_data<=today&&x.stato!=='Annullata');const occupied=state.prenotazioni.reduce((n,x)=>n+Number(x.posti||0),0),capacity=state.viaggi.reduce((n,x)=>n+Number(x.posti_totali||0),0),fill=capacity?Math.round(occupied/capacity*100):0,duePay=state.prenotazioni.filter(x=>Number(x.saldo||0)>0).length;
+$('proControl').innerHTML=`<div class="pro-kpi-grid"><div class="pro-kpi"><small>Viaggi</small><b>${state.viaggi.length}</b></div><div class="pro-kpi"><small>Occupazione</small><b>${fill}%</b></div><div class="pro-kpi"><small>Saldi aperti</small><b>${duePay}</b></div><div class="pro-kpi"><small>Anomalie aperte</small><b class="${openAn.length?'pro-negative':''}">${openAn.length}</b></div></div><div class="pro-row"><span>Manutenzioni da verificare</span><strong>${badMaint.length}</strong></div><button class="btn btn-primary btn-sm" onclick="go('controlroom')">Apri Control Room 360°</button>`;
+const by={};state.viaggi.forEach(v=>by[v.id]={name:v.titolo||v.destinazione||'Viaggio',inc:0,out:0});eco.forEach(x=>{if(x.viaggio_id&&by[x.viaggio_id]){if(x.tipo==='Entrata')by[x.viaggio_id].inc+=Number(x.importo||0);else by[x.viaggio_id].out+=Number(x.importo||0)}});const top=Object.values(by).map(x=>({...x,m:x.inc-x.out})).sort((a,b)=>b.m-a.m).slice(0,5);$('proProfit').innerHTML=top.length?`<div class="pro-list">${top.map(x=>`<div class="pro-row"><span><b>${esc(x.name)}</b><small>Entrate ${money(x.inc)} · Uscite ${money(x.out)}</small></span><strong class="${x.m>=0?'pro-positive':'pro-negative'}">${money(x.m)}</strong></div>`).join('')}</div>`:'<div class="pro-empty">Nessun movimento collegato ai viaggi.</div>';
+const customers=state.clienti.map(c=>{const bs=state.prenotazioni.filter(b=>b.cliente_id===c.id||b.cliente===c.nome||b.cliente===c.nominativo);return{name:c.nome||c.nominativo||c.ragione_sociale||'Cliente',n:bs.length,spent:bs.reduce((n,b)=>n+Number(b.totale||0),0)}}).sort((a,b)=>b.spent-a.spent).slice(0,5);$('proCRM').innerHTML=customers.length?`<div class="pro-list">${customers.map(c=>`<div class="pro-row"><span><b>${esc(c.name)}</b><small>${c.n} prenotazioni</small></span><strong>${money(c.spent)}</strong></div>`).join('')}</div>`:'<div class="pro-empty">Nessun cliente disponibile.</div>';
+$('proFleet').innerHTML=state.flotta.slice(0,6).map(f=>`<div class="pro-row"><span><b>${esc(f.titolo||f.targa||f.marca||'Mezzo')}</b><small>${esc(f.stato||'Disponibile')} · ${(state.manutenzioni||[]).filter(m=>m.flotta_id===f.id).length} manut. · ${(state.carburante||[]).filter(m=>m.flotta_id===f.id).length} rif.</small></span><strong>${esc(f.targa||'')}</strong></div>`).join('')||'<div class="pro-empty">Flotta vuota.</div>';
+$('proAnomalies').innerHTML=openAn.slice(0,5).map(a=>`<div class="pro-row"><span><b>${esc(a.titolo)}</b><small>${esc(a.priorita)} · ${esc(a.stato)}</small></span><button class="btn btn-secondary btn-sm" onclick="resolveAnomaly('${a.id}')">Risolvi</button></div>`).join('')||'<div class="pro-empty">Nessuna anomalia aperta.</div>';
+$('proChecklist').innerHTML=(state.checklist||[]).slice(0,5).map(c=>`<div class="pro-row"><span><b>${esc(state.flotta.find(f=>f.id===c.flotta_id)?.titolo||'Mezzo')}</b><small>${dateIT(c.data_check)} · ${esc(c.esito)}</small></span><strong>${c.esito==='OK'?'🟢':c.esito==='Non OK'?'🔴':'🟡'}</strong></div>`).join('')||'<div class="pro-empty">Nessuna checklist registrata.</div>';
+const alerts=[...state.notifiche.filter(n=>!n.letto).map(n=>n.titolo||'Notifica'),...badMaint.map(()=> 'Manutenzione in scadenza'),...(duePay?['Saldi clienti da incassare']:[])];$('proAlerts').innerHTML=alerts.slice(0,6).map(x=>`<div class="pro-row"><span>🔔 ${esc(x)}</span></div>`).join('')||'<div class="pro-empty">Nessun alert.</div>';
+$('proKpi').innerHTML=`<div class="pro-kpi-grid"><div class="pro-kpi"><small>Entrate</small><b class="pro-positive">${money(ein)}</b></div><div class="pro-kpi"><small>Uscite</small><b class="pro-negative">${money(eout)}</b></div><div class="pro-kpi"><small>Saldo</small><b>${money(ein-eout)}</b></div><div class="pro-kpi"><small>Clienti</small><b>${state.clienti.length}</b></div></div>`;$('proDocs').innerHTML=`<div class="pro-kpi-grid"><div class="pro-kpi"><small>Documenti</small><b>${state.archivioDocumenti.length}</b></div><div class="pro-kpi"><small>Preventivi</small><b>${state.preventivi.length}</b></div><div class="pro-kpi"><small>Noleggi</small><b>${state.noleggi.length}</b></div><div class="pro-kpi"><small>Attività</small><b>${state.attivita.length}</b></div></div>`;$('proAudit').innerHTML=state.audit.slice(0,5).map(a=>`<div class="pro-row"><span><b>${esc(a.azione||a.evento||'Operazione')}</b><small>${esc(a.created_at||'')}</small></span></div>`).join('')||'<div class="pro-empty">Nessun audit disponibile.</div>';healthPro();};
+window.healthPro=async function(){const checks=[['Auth',''],['Viaggi','viaggi'],['Economia','economia_movimenti'],['Flotta','flotta'],['Anomalie','anomalie_gestionale'],['Checklist','checklist_mezzi']];const box=$('proHealth');if(!box)return;box.innerHTML=checks.map(x=>`<div class="pro-health-item"><b><span class="pro-dot warn"></span>${esc(x[0])}</b><small>Controllo…</small></div>`).join('');for(let i=0;i<checks.length;i++){let ok=false;try{if(i===0){const r=await fetch(SUPA_URL+'/auth/v1/health',{headers:{apikey:SUPA_KEY},cache:'no-store'});ok=r.ok}else{await api(checks[i][1],'select=id&limit=1');ok=true}}catch{}const e=box.children[i];if(e){e.querySelector('.pro-dot').className='pro-dot '+(ok?'':'bad');e.querySelector('small').textContent=ok?'Operativo':'Non disponibile'}}};
+window.openQuickActions=function(){openModal('Azioni rapide',`<div class="quick-modal-grid"><button class="btn btn-primary" onclick="closeModal();openTripModal()">🚌 Nuovo viaggio</button><button class="btn btn-primary" onclick="closeModal();openBookingModal()">🎫 Nuova prenotazione</button><button class="btn btn-primary" onclick="closeModal();openPaymentModal()">💳 Nuovo pagamento</button><button class="btn btn-secondary" onclick="closeModal();openClientModal()">👤 Nuovo cliente</button><button class="btn btn-secondary" onclick="closeModal();openQuoteModal()">🧾 Nuovo preventivo</button><button class="btn btn-secondary" onclick="closeModal();openEconomyModal('Uscita')">💶 Nuova spesa</button><button class="btn btn-secondary" onclick="closeModal();openFuelModal()">⛽ Rifornimento</button><button class="btn btn-secondary" onclick="closeModal();openMaintenanceModal()">🔧 Manutenzione</button><button class="btn btn-secondary" onclick="closeModal();openAnomalyModal()">🚨 Anomalia</button></div>`,'<button class="btn btn-ghost" onclick="closeModal()">Chiudi</button>')};
+window.openAnomalyModal=function(id=''){const a=(state.anomalie||[]).find(x=>x.id===id)||{};openModal(id?'Modifica anomalia':'Nuova anomalia',`<div class="form-grid"><div class="field full"><label>Titolo</label><input id="an_title" value="${esc(a.titolo||'')}"></div><div class="field"><label>Priorità</label><select id="an_pri">${['Bassa','Media','Alta','Critica'].map(x=>`<option ${a.priorita===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Stato</label><select id="an_status">${['Aperta','In lavorazione','Risolta','Annullata'].map(x=>`<option ${a.stato===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Mezzo</label><select id="an_fleet"><option value="">—</option>${state.flotta.map(f=>`<option value="${f.id}">${esc(f.titolo||f.targa||f.marca||'Mezzo')}</option>`).join('')}</select></div><div class="field"><label>Viaggio</label><select id="an_trip"><option value="">—</option>${state.viaggi.map(v=>`<option value="${v.id}">${esc(v.titolo||v.destinazione||'Viaggio')}</option>`).join('')}</select></div><div class="field full"><label>Descrizione</label><textarea id="an_desc">${esc(a.descrizione||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveAnomaly('${id}')">Salva</button>`) };
+window.saveAnomaly=async function(id){const body={titolo:$('an_title').value.trim(),priorita:$('an_pri').value,stato:$('an_status').value,flotta_id:$('an_fleet').value||null,viaggio_id:$('an_trip').value||null,descrizione:$('an_desc').value||null};if(!body.titolo)return toast('Inserisci il titolo',false);try{if(id)await api('anomalie_gestionale',`id=eq.${id}`,{method:'PATCH',body});else await api('anomalie_gestionale','',{method:'POST',body});closeModal();toast('Anomalia salvata');await loadAll()}catch(e){toast(e.message,false)}};window.resolveAnomaly=async function(id){try{await api('anomalie_gestionale',`id=eq.${id}`,{method:'PATCH',body:{stato:'Risolta',data_risoluzione:new Date().toISOString().slice(0,10)}});toast('Anomalia risolta');await loadAll()}catch(e){toast(e.message,false)}};
+window.openChecklistModal=function(){openModal('Checklist mezzo',`<div class="form-grid"><div class="field"><label>Mezzo</label><select id="cl_fleet">${state.flotta.map(f=>`<option value="${f.id}">${esc(f.titolo||f.targa||f.marca||'Mezzo')}</option>`).join('')}</select></div><div class="field"><label>Viaggio</label><select id="cl_trip"><option value="">—</option>${state.viaggi.map(v=>`<option value="${v.id}">${esc(v.titolo||v.destinazione||'Viaggio')}</option>`).join('')}</select></div>${[['luci','Luci'],['pneumatici','Pneumatici'],['climatizzazione','Climatizzazione'],['porte','Porte'],['bagagliaio','Bagagliaio'],['estintore','Estintore'],['documentazione','Documentazione'],['pulizia','Pulizia'],['carburante','Carburante']].map(x=>`<label class="check-item"><input type="checkbox" id="cl_${x[0]}"> ${x[1]}</label>`).join('')}<div class="field full"><label>Note</label><textarea id="cl_note"></textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveChecklist()">Salva checklist</button>`) };window.saveChecklist=async function(){const keys=['luci','pneumatici','climatizzazione','porte','bagagliaio','estintore','documentazione','pulizia','carburante'];const vals=Object.fromEntries(keys.map(k=>[k,$('cl_'+k).checked]));const esito=keys.every(k=>vals[k])?'OK':keys.some(k=>vals[k])?'Incompleta':'Non OK';try{await api('checklist_mezzi','',{method:'POST',body:{flotta_id:$('cl_fleet').value,viaggio_id:$('cl_trip').value||null,esito,...vals,note:$('cl_note').value||null}});closeModal();toast('Checklist registrata');await loadAll()}catch(e){toast(e.message,false)}};
+window.addEventListener('load',()=>{setTimeout(()=>{if(state.page==='pro')renderPro()},100)});
+})();
 </script>
 </body>
 </html>

@@ -1,0 +1,13 @@
+DELGROSSO GESTIONALE 4.1 — MAX PERFORMANCE
+
+Aggiornamenti principali:
+- Motore richieste Supabase con timeout controllato e retry singolo sui GET transitori.
+- Deduplicazione delle richieste GET simultanee e micro-cache per evitare chiamate ripetute.
+- Blocco delle sincronizzazioni concorrenti: niente doppio loadAll quando timer e visibilita coincidono.
+- Cache locale mostrata subito all'avvio, mentre parte la sincronizzazione Supabase in background.
+- Auto-sync portato a 45 secondi per ridurre traffico e carico senza perdere l'aggiornamento operativo.
+- Ricerca globale con debounce e scansione dei campi, evitando JSON.stringify ad ogni tasto.
+- Service Worker aggiornato a cache v8 per forzare il rinnovo dell’app su iPhone/PWA.
+- Hardening Supabase: indice sulla FK audit user_id, rimozione di un indice duplicato sui pagamenti noleggi, ANALYZE sulle tabelle operative principali.
+
+Nota: gli advisory Supabase mostrano ancora diversi indici non usati; non sono stati rimossi automaticamente perché possono diventare utili con la crescita dei dati e dei filtri.
