@@ -1,4 +1,4 @@
-const CACHE = 'delgrosso-gestionale-pwa-v8-maxperf';
+const CACHE = 'delgrosso-gestionale-pwa-v9-responsive43';
 
 const APP_SHELL = [
   './',

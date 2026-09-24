@@ -1,0 +1,3 @@
+DELGROSSO Gestionale 4.3 RESPONSIVE UNIVERSALE
+Layout adattivo automatico per iPhone, Android, tablet e desktop.
+Breakpoint fluidi, sidebar desktop rimossa su touch/schermi medi, topbar/mobile nav adattive, tabelle scrollabili, modali bottom-sheet, form e dashboard responsive.
