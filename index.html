@@ -1,31 +1,22 @@
 <!doctype html>
 <html lang="it">
-<head>
+<head><script src="js/site-config.js"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07111f">
-  <title>DELGROSSO Viaggi | Viaggi organizzati e noleggio Bus GT</title>
-  <meta name="description" content="Scopri i viaggi organizzati DELGROSSO, prenota il tuo posto e richiedi un preventivo per Bus GT e Limousine Bus.">
+  <title>DELGROSSO Viaggi &amp; Limousine Bus | Viaggi dalla Puglia</title>
+  
   <link rel="stylesheet" href="assets/pro.css">
   <link rel="stylesheet" href="assets/remodulazione-v14.css"><link rel="stylesheet" href="assets/dynamic-home.css"><link rel="stylesheet" href="assets/ad-hoc.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+  <script src="js/public-data.js"></script>
+<link rel="stylesheet" href="assets/site-features.css"><meta name="description" content="Viaggi organizzati dalla Puglia, noleggio autobus Gran Turismo e Limousine Bus per feste private. Scopri partenze, foto della flotta e servizi DELGROSSO."><link rel="canonical" href="https://www.delgrossoviaggi.it/index.html"><link rel="alternate" hreflang="it" href="https://www.delgrossoviaggi.it/index.html"><link rel="alternate" hreflang="en" href="https://www.delgrossoviaggi.it/index.html?lang=en"><link rel="alternate" hreflang="x-default" href="https://www.delgrossoviaggi.it/index.html"><meta property="og:title" content="DELGROSSO Viaggi &amp; Limousine Bus | Viaggi dalla Puglia"><meta property="og:description" content="Viaggi organizzati dalla Puglia, noleggio autobus Gran Turismo e Limousine Bus per feste private. Scopri partenze, foto della flotta e servizi DELGROSSO."><meta property="og:type" content="website"><meta property="og:url" content="https://www.delgrossoviaggi.it/index.html"><link rel="icon" href="favicon.png"></head>
 <body class="remodulated-site home-premium home-dynamic">
 <div class="page-loader" aria-hidden="true"><span></span></div>
 <header class="site-header premium-header">
   <div class="wrap nav">
     <a class="brand" href="index.html" aria-label="DELGROSSO Viaggi - Home"><img src="assets/logo.JPEG" alt="DELGROSSO Viaggi"></a>
     <button class="mobile-toggle" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
-    <nav class="navlinks" aria-label="Navigazione principale">
-      <a href="index.html">Home</a>
-      <a href="viaggi.html">Viaggi</a>
-      <a href="flotta.html">Flotta</a>
-      <a href="noleggio.html">Noleggio</a>
-      <a href="limousine.html">Limousine Bus</a>
-      <a href="chi-siamo.html">Chi siamo</a>
-      <a href="contatti.html">Contatti</a>
-      <a class="navcta" href="prenota.html">Prenota</a>
-    </nav>
+    <nav class="navlinks" aria-label="Navigazione principale"><a href="index.html">Home</a><a href="viaggi.html">Viaggi e partenze</a><a href="limousine.html">Limousine Bus</a><a href="flotta.html">Flotta</a><a href="news.html">Blog e news</a><a href="contatti.html">Contatti</a><a href="chi-siamo.html">Chi siamo</a><a href="admin.html">Area riservata</a></nav>
   </div>
 </header>
 <main id="main-content">
@@ -46,7 +37,7 @@
         <span>IL TUO VIAGGIO, IN POCHI PASSAGGI</span>
         <strong>Trova la partenza. Scegli il posto.</strong>
         <p>Disponibilità e posti aggiornati dal calendario viaggi.</p>
-        <div><a href="prenota.html">Prenota</a><a href="https://wa.me/393205730466" data-setting="whatsapp">WhatsApp</a></div>
+        <div><a href="prenota.html">Prenota</a><a href="contatti.html">Contatti in aggiornamento</a></div>
       </aside>
     </div>
     <div id="heroControls" class="hero-controls" hidden aria-label="Controlli fotografie"><button type="button" data-slide="-1" aria-label="Foto precedente">←</button><span id="heroCount" aria-live="off"></span><button type="button" data-slide="1" aria-label="Foto successiva">→</button><button id="heroPause" type="button" aria-label="Avvia scorrimento automatico">Riproduci</button></div><a class="hero-scroll" href="#prossima-partenza" aria-label="Scopri il sito">Scopri ↓</a>
@@ -56,7 +47,7 @@
   <div class="wrap"><a id="nextDepartureStrip" class="next-departure-strip" href="viaggi.html" aria-live="polite"><span class="departure-mark">IN CALENDARIO</span><strong>Scopri le prossime partenze</strong><span class="departure-action">Vedi viaggi ↗</span></a></div>
   <section id="partenze" class="section premium-departures" tabindex="-1">
     <div class="wrap">
-      <div class="premium-heading"><div><span class="premium-kicker dark-kicker">CALENDARIO COLLEGATO AL GESTIONALE</span><h2>La tua prossima<br><em>esperienza.</em></h2></div><a class="premium-text-link" href="viaggi.html">Vedi tutte le partenze →</a></div>
+      <div class="premium-heading"><div><span class="premium-kicker dark-kicker">IL CALENDARIO DELLE PARTENZE</span><h2>La tua prossima<br><em>esperienza.</em></h2></div><a class="premium-text-link" href="viaggi.html">Vedi tutte le partenze →</a></div>
       <p id="journeyResults" class="result-status" role="status">Caricamento delle partenze…</p><div id="tripGrid" class="trip-grid premium-trip-grid"></div>
     </div>
   </section>
@@ -107,15 +98,15 @@
   </section>
 
   <section class="premium-final-cta"><div class="wrap"><div><span class="premium-kicker">Pronto a partire?</span><h2>Trova il viaggio giusto per te.</h2></div><div class="actions"><a class="btn btn-primary" href="viaggi.html">Esplora le partenze</a><a class="btn btn-ghost" href="contatti.html">Contattaci</a></div></div></section>
-</main>
+<section class="newsletter-section"><div class="wrap"><div><span class="premium-kicker dark-kicker">IL PROSSIMO VIAGGIO NELLA TUA CASELLA</span><h2>Novità, partenze<br>e voglia di partire.</h2><p>Iscriviti per ricevere gli aggiornamenti DELGROSSO. Potrai annullare l’iscrizione da ogni e-mail.</p></div><form class="service-form" data-service-form="newsletter"><fieldset disabled><label for="newsletterEmail">Il tuo indirizzo e-mail</label><input id="newsletterEmail" name="email" type="email" autocomplete="email" maxlength="254" required><div class="honeypot" aria-hidden="true"><label>Sito web<input name="website" tabindex="-1" autocomplete="off"></label></div><label class="consent"><input type="checkbox" name="marketingConsent" value="yes" required><span>Acconsento a ricevere la newsletter. Ho letto l’<a href="privacy.html">informativa privacy</a>.</span></label><button class="btn btn-blue" type="submit">Iscrivimi alla newsletter</button></fieldset><p role="status">Servizio in attivazione. Non vengono raccolti dati da questo modulo.</p></form></div></section></main>
 <footer class="premium-footer">
   <div class="wrap footer-grid">
     <div class="footer-brand"><img src="assets/logo.JPEG" alt="DELGROSSO Viaggi"><div class="footer-copy">Viaggi organizzati, noleggio Bus Gran Turismo e Limousine Bus per eventi privati.</div></div>
     <div><div class="footer-title">Scopri</div><div class="footer-links"><a href="viaggi.html">Viaggi e partenze</a><a href="flotta.html">La nostra flotta</a><a href="limousine.html">Limousine Bus</a><a href="preventivo.html">Richiedi preventivo</a></div></div>
-    <div><div class="footer-title">Contatti</div><div class="footer-links"><a href="tel:+393205730466" data-setting="phone">320 573 0466</a><a href="https://wa.me/393205730466" data-setting="whatsapp">WhatsApp</a><a href="mailto:info@delgrossoviaggi.it" data-setting="email">info@delgrossoviaggi.it</a><a class="reserved-link" href="admin.html">Area riservata</a></div></div>
+    <div><div class="footer-title">Contatti</div><div class="footer-links"><span data-contact-pending>Recapiti in aggiornamento</span><a data-contact="phone" hidden></a><a data-contact="whatsapp" hidden></a><a data-contact="email" hidden></a><a class="reserved-link" href="admin.html">Area riservata</a></div></div>
   </div>
   <div class="wrap copyright"><span>© <span data-current-year>2026</span> DELGROSSO Viaggi &amp; Limousine Bus</span><span>Comfort, sicurezza e passione.</span></div>
 </footer>
-<div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">Viaggi</a><a href="https://wa.me/393205730466">WhatsApp</a></div>
+<div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">Viaggi</a><a href="contatti.html">Contatti in aggiornamento</a></div>
 <script src="js/gestionale.js"></script><script src="js/public-ui.js"></script><script src="js/site.js"></script><script src="js/trip-discovery.js"></script><script src="js/dynamic-home.js"></script>
-</body></html>
+<script src="js/site-features.js"></script><script src="js/languages.js"></script></body></html>

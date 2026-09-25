@@ -1,13 +1,13 @@
 const SUPABASE_URL='https://bhsanrbadsqcpbtxupmr.supabase.co';
 const SUPABASE_KEY='sb_publishable_jcc3RIJmNnXZdhcmFuIKFg_EpxO_rBp';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const sb=window.DGPublicData.createClient(SUPABASE_URL,SUPABASE_KEY);
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const media=arr=>Array.isArray(arr)?arr:[];
-const fmtDate=d=>d?new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00')):'';
+const fmtDate=d=>d?new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en-GB':'it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00')):'';
 function headerActive(){const p=location.pathname.split('/').pop()||'index.html';document.querySelectorAll('.navlinks a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===p));const h=document.querySelector('.site-header');const sync=()=>h?.classList.toggle('scrolled',scrollY>25);sync();window.addEventListener('scroll',sync,{passive:true});}
 function mobileNav(){const b=document.querySelector('.mobile-toggle'),n=document.querySelector('.navlinks');if(!b||!n)return;b.setAttribute('aria-expanded','false');b.onclick=()=>{const open=n.classList.toggle('mobile-open');b.setAttribute('aria-expanded',String(open));b.textContent=open?'✕':'☰';};n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{n.classList.remove('mobile-open');b.setAttribute('aria-expanded','false');b.textContent='☰';}));document.addEventListener('click',e=>{if(!n.contains(e.target)&&!b.contains(e.target)){n.classList.remove('mobile-open');b.setAttribute('aria-expanded','false');b.textContent='☰';}});}
 async function loadSettings(){let {data}=await sb.from('site_settings').select('*').eq('id',1).maybeSingle();if(!data){let r=await sb.from('info_azienda').select('*').eq('id',1).maybeSingle();data=r.data?{company_name:r.data.nome,phone:r.data.telefono,whatsapp:r.data.whatsapp,email:r.data.email,address:r.data.indirizzo,instagram:r.data.instagram,facebook:r.data.facebook}:null;}return data||{};}
-function applySettings(s){document.querySelectorAll('[data-setting]').forEach(el=>{const k=el.dataset.setting;if(s[k]){if(el.tagName==='A'&&(k==='phone'||k==='whatsapp'||k==='email'))el.href=k==='email'?`mailto:${s[k]}`:k==='whatsapp'?`https://wa.me/${String(s[k]).replace(/\D/g,'')}`:`tel:${String(s[k]).replace(/\s/g,'')}`;el.textContent=el.textContent.trim()&&k==='whatsapp'?'WhatsApp':s[k];}})}
+function applySettings(s){if(!window.DG_CONFIG?.contactsReady)return;s={...s,...Object.fromEntries(Object.entries(window.DG_CONFIG.contacts||{}).filter(([,v])=>v))};document.querySelectorAll('[data-setting]').forEach(el=>{const k=el.dataset.setting;if(s[k]){if(el.tagName==='A'&&(k==='phone'||k==='whatsapp'||k==='email'))el.href=k==='email'?`mailto:${s[k]}`:k==='whatsapp'?`https://wa.me/${String(s[k]).replace(/\D/g,'')}`:`tel:${String(s[k]).replace(/\s/g,'')}`;el.textContent=el.textContent.trim()&&k==='whatsapp'?'WhatsApp':s[k];}})}
 function publicFleetItems(items){return (items||[]).filter(x=>! /mercedes|v\s*250|\bvan\b/i.test([x.title,x.marca,x.modello].filter(Boolean).join(" ")));}
 function fleetCard(x,home=false){const imgs=media(x.gallery_urls);const cover=x.cover_url||imgs[0]||'';if(home)return `<a class="fleet-photo-card" href="flotta.html?bus=${encodeURIComponent(x.id)}" aria-label="Scopri ${esc(x.title)}"><img loading="lazy" src="${esc(cover)}" alt="${esc(x.title)}"><span class="fleet-open" aria-hidden="true">↗</span></a>`;return `<a class="fleet-card fleet-card-link" href="flotta.html?bus=${encodeURIComponent(x.id)}"><img loading="lazy" src="${esc(cover)}" alt="${esc(x.title)}"><div class="fleet-info"><h3>${esc(x.title)}</h3><p>${esc(x.description||'')} ${x.seats?`· ${x.seats} posti`:''}</p><span class="fleet-more">Vedi mezzo e galleria →</span></div></a>`;}
 async function home(){
@@ -29,7 +29,7 @@ function tripImage(x){return x.locandina||x.immagine||x.cover_url||x.foto_url||'
 function tripTitle(x){return x.titolo||x.destinazione||'Partenza Del Grosso';}
 function tripField(x,...keys){for(const k of keys){if(x?.[k]!==undefined&&x?.[k]!==null&&String(x[k]).trim()!=='')return x[k]}return ''}
 function tripCountdown(date,time=''){if(!date)return '';const t=String(time||'').slice(0,5);const d=new Date(`${date}T${t||'23:59'}:00`);if(Number.isNaN(d.getTime()))return '';const diff=d-new Date();if(diff<=0)return 'Partenza in corso';const days=Math.floor(diff/86400000),hours=Math.floor((diff%86400000)/3600000);return days>1?`Tra ${days} giorni`:days===1?'Domani':`Tra ${hours} ore`;}
-function tripLongDate(d){if(!d)return '';return new Intl.DateTimeFormat('it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date(`${d}T12:00:00`));}
+function tripLongDate(d){if(!d)return '';return new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en-GB':'it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date(`${d}T12:00:00`));}
 function tripIcon(type){const icons={pin:'⌖',clock:'◷',bus:'▣',seat:'♢',price:'€',spark:'✦'};return icons[type]||'•';}
 function tripCard(x){
  const a=typeof gestTripAvailability==='function'?gestTripAvailability(x):{soldOut:Number(x.posti_liberi??0)<=0,total:Number(x.posti_totali??0),free:Number(x.posti_liberi??0)};
@@ -331,7 +331,7 @@ window.v8Polish=function(){try{v9OldPolish?.()}catch(e){console.warn(e)}try{v9Re
   function mobileActions(){
     if(qs('.v11-contact-fab') || !document.body) return;
     const wrap=document.createElement('div'); wrap.className='v11-contact-fab';
-    wrap.innerHTML='<a href="https://wa.me/393205730466" target="_blank" rel="noopener" aria-label="Contatta Del Grosso Viaggi su WhatsApp">WhatsApp</a><a href="prenota.html" aria-label="Apri le prenotazioni">Prenota</a>';
+    wrap.innerHTML='<a href="contatti.html" target="_blank" rel="noopener" aria-label="Contatta Del Grosso Viaggi su WhatsApp">WhatsApp</a><a href="prenota.html" aria-label="Apri le prenotazioni">Prenota</a>';
     document.body.appendChild(wrap);
   }
   function formGuard(){

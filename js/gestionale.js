@@ -3,7 +3,7 @@
 const SITE_SUPABASE_URL = 'https://bhsanrbadsqcpbtxupmr.supabase.co';
 const GESTIONALE_BRIDGE = `${SITE_SUPABASE_URL}/functions/v1/gestionale-bridge`;
 
-const gestFmtDate = d => d ? new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00')) : '';
+const gestFmtDate = d => d ? new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en-GB':'it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(new Date(d+'T12:00:00')) : '';
 const gestFmtTime = t => t ? String(t).slice(0,5) : '';
 const gestEsc = s => String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
@@ -59,6 +59,11 @@ async function getBusLayout(viaggioId){
   return await gestBridge('bus-layout',{viaggioId});
 }
 
-async function createGestionaleBooking({viaggioId,nome,cognome,telefono,email,note,posti}){
-  return await gestBridge('booking',{viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String)});
+async function createGestionaleBooking({viaggioId,nome,cognome,telefono,email,note,posti,requestId}){
+  const stableRequestId=requestId||((globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():`web-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  return await gestBridge('booking',{viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId});
+}
+
+async function checkGestionaleBridge(){
+  try{const r=await fetch(`${GESTIONALE_BRIDGE}?health=1`,{cache:'no-store'});return r.ok?await r.json():{ok:false,status:r.status}}catch(error){return {ok:false,error:String(error?.message||error)}}
 }
