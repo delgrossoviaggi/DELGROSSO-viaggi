@@ -1,0 +1,67 @@
+/* DELGROSSO Viaggi — identità del sito pubblico */
+:root{--dg-ink:#081b2d;--dg-blue:#075d91;--dg-gold:#e8b659;--dg-cloud:#f5f8fb}
+body.remodulated-site{background:var(--dg-cloud)}
+.premium-header{background:rgba(5,21,37,.96);box-shadow:0 8px 30px rgba(3,17,29,.13)}
+.premium-header .navlinks a{font-size:12px;letter-spacing:.055em}
+.premium-header .navcta{padding:13px 22px;border-radius:9px;background:var(--dg-gold);color:#092032!important}
+.premium-kicker{font-size:12px;letter-spacing:.14em}
+.home-dynamic .premium-hero{height:clamp(620px,75vh,800px);min-height:620px;background:linear-gradient(130deg,#071a2e,#104061)}
+.home-dynamic .premium-hero:before{background:linear-gradient(90deg,rgba(3,16,30,.94) 1%,rgba(3,16,30,.7) 46%,rgba(3,16,30,.25) 100%),linear-gradient(0deg,rgba(3,16,30,.55),transparent 55%)}
+.home-dynamic .hero-media .hero-fallback{position:absolute;inset:0;background:linear-gradient(135deg,#0a223a 10%,#13547a 60%,#08223b);}
+.home-dynamic .premium-hero-content{grid-template-columns:minmax(0,1fr) 290px;gap:32px;padding-top:70px;padding-bottom:90px}
+.home-dynamic .hero-copy{max-width:840px}
+.home-dynamic .hero-copy h1{font-size:clamp(52px,6.5vw,90px);line-height:1.03;letter-spacing:-.055em;text-wrap:balance}
+.home-dynamic .hero-copy h1 em{color:#f3c36f}
+.home-dynamic .hero-copy p{font-size:18px;line-height:1.6;max-width:600px}
+.home-dynamic .hero-copy .btn{min-height:54px;padding:0 24px;font-size:13px;border-radius:10px}
+.hero-contact-card{margin-bottom:44px;border-radius:16px;padding:25px}
+.hero-contact-card>span{font-size:11px;line-height:1.5;color:#ffd38c}
+.hero-contact-card>strong{font-size:23px;line-height:1.22}
+.hero-contact-card>p{color:#d6e5ee;font-size:14px;line-height:1.55;margin:0 0 18px}
+.hero-contact-card a{font-size:12px;min-height:44px;display:grid;place-items:center}
+.home-dynamic .hero-controls{bottom:70px}
+.journey-finder{margin-top:-52px;border:1px solid #e1e9ee;border-top:4px solid var(--dg-gold);border-radius:15px;padding:26px 30px 22px;box-shadow:0 16px 50px rgba(4,25,45,.16)}
+.finder-heading{margin-bottom:18px;gap:15px}
+.finder-heading h2{font-size:28px;color:var(--dg-ink)}
+.finder-heading p{font-size:15px}
+.journey-finder label{font-size:14px;color:#213d50}
+.journey-finder input:not([type=checkbox]){font-size:16px;border-radius:9px;background:#fff;border-color:#bfd0dc}
+.journey-finder .btn{font-size:13px;border-radius:9px}
+.finder-bottom label,.finder-bottom button{font-size:14px}
+.next-departure-strip{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;padding:20px 24px;margin:18px 0 10px;background:#0c2d49;color:#fff;border-radius:12px;transition:transform .2s,background-color .2s}
+.next-departure-strip:hover{transform:translateY(-2px);background:#10416a}
+.departure-mark{font-size:12px;font-weight:800;letter-spacing:.07em;color:#ffd084}
+.next-departure-strip strong{font-size:17px;line-height:1.35}
+.departure-action{font-size:14px;font-weight:700;white-space:nowrap}
+.home-dynamic .premium-departures{padding:70px 0 80px;background:var(--dg-cloud)}
+.premium-heading{margin-bottom:26px}
+.premium-heading h2{line-height:1.02}
+.premium-text-link{font-size:14px;letter-spacing:0;text-transform:none}
+.result-status{font-size:15px}
+.home-dynamic .trip-card:not(.is-soldout) .trip-body:after{display:none}
+.home-dynamic .trip-card{border-radius:15px;box-shadow:0 6px 26px rgba(8,27,45,.08)}
+.home-dynamic .trip-card:hover{transform:translateY(-4px);box-shadow:0 16px 38px rgba(8,27,45,.13)}
+.home-dynamic .trip-img{background:#eef2f4;height:315px}
+.home-dynamic .trip-img img{object-fit:contain}
+.home-dynamic .trip-title{font-size:25px;line-height:1.17}
+.home-dynamic .trip-body{padding:24px}
+.home-dynamic .trip-meta,.home-dynamic .availability,.home-dynamic .trip-question{font-size:14px;line-height:1.5}
+.home-dynamic .trip-price{font-size:23px}
+.home-dynamic .trip-status{font-size:12px}
+.home-dynamic .premium-services{padding:0;background:#fff}
+.premium-services-grid>a{min-height:116px}
+.premium-services-grid>a>span{font-size:13px}
+.premium-services-grid b{font-size:18px}
+.premium-services-grid small{font-size:14px;line-height:1.45}
+.home-dynamic .premium-section{padding:78px 0}
+.home-dynamic .premium-next .next-experience-card{border-radius:15px}
+.experience-options span,.experience-options b,.experience-options p{font-size:14px}
+.premium-trust-points span,.premium-trust-points p{font-size:14px}
+.premium-limousine-facts span{font-size:13px}
+.premium-footer .footer-copy,.premium-footer .footer-links a{font-size:14px;line-height:1.6}
+.page-hero.viaggi-v9-hero .viaggi-v9-hero-panel small{letter-spacing:.08em}
+.remodulated-site .trip-card:not(.is-soldout) .trip-body:after{display:none}
+:focus-visible{outline:3px solid #f4b83f!important;outline-offset:3px}
+@media(max-width:1050px){.home-dynamic .premium-hero-content{grid-template-columns:1fr}.hero-contact-card{display:none}.premium-header .navlinks.mobile-open a{font-size:15px}}
+@media(max-width:700px){.home-dynamic .premium-hero{height:auto;min-height:565px}.home-dynamic .premium-hero-content{padding-top:120px;padding-bottom:105px;align-items:start}.home-dynamic .hero-copy h1{font-size:clamp(42px,11vw,61px)}.home-dynamic .hero-copy p{font-size:16px}.home-dynamic .hero-copy .actions{display:grid;gap:10px}.home-dynamic .hero-copy .btn{width:100%}.home-dynamic .hero-controls{left:22px;bottom:35px}.journey-finder{margin-top:-20px;padding:20px 18px;border-radius:13px}.finder-heading h2{font-size:25px}.journey-finder form{gap:11px}.next-departure-strip{grid-template-columns:1fr auto;gap:5px 12px;margin:15px 0 0;padding:16px}.departure-mark{grid-column:1/-1}.next-departure-strip strong{font-size:15px}.departure-action{font-size:12px}.home-dynamic .premium-departures,.home-dynamic .premium-section{padding:58px 0}.home-dynamic .premium-heading h2{font-size:42px}.home-dynamic .trip-img{height:300px}.home-dynamic .trip-body{padding:20px}.premium-services-grid>a{min-height:88px}.premium-services-grid b{font-size:16px}.premium-services-grid small{font-size:13px}.premium-footer{padding-bottom:75px}}
+@media(prefers-reduced-motion:reduce){.next-departure-strip,.home-dynamic .trip-card{transition:none}}

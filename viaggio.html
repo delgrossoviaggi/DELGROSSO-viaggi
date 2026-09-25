@@ -4,20 +4,37 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Viaggio | Del Grosso Viaggi</title>
 <meta name="description" content="Scopri tutti i dettagli della partenza Del Grosso Viaggi e prenota il tuo posto.">
-<link rel="stylesheet" href="assets/pro.css">
+<link rel="stylesheet" href="assets/pro.css"><link rel="stylesheet" href="assets/remodulazione-v14.css"><link rel="stylesheet" href="assets/ad-hoc.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="trip-detail-page">
 <div class="page-loader" aria-hidden="true"><span></span></div>
-<header class="site-header"><div class="wrap nav">
-<a class="brand" href="index.html" aria-label="Del Grosso Viaggi Home"><img src="assets/logo.JPEG" alt="Del Grosso Viaggi"></a>
-<button class="mobile-toggle" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
-<nav class="navlinks" aria-label="Navigazione principale"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">La Flotta</a><a href="partyontheroad.html">Party</a><a href="chi-siamo.html">Chi siamo</a><a href="limousine.html">Limousine</a><a href="contatti.html">Contatti</a><a class="navcta" href="prenota.html">Prenota</a></nav>
-<div class="site-tools" aria-label="Accessi rapidi"><a class="tool-link" href="https://www.delgrossoviaggi.it/GESTIONALE/index.html" title="Apri il Gestionale"><span class="tool-icon tool-g" aria-hidden="true">G</span><span class="tool-label">Gestionale</span></a><a class="tool-link" href="admin.html" title="Area riservata amministrazione"><span class="tool-icon tool-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span><span class="tool-label">Admin</span></a></div>
-</div></header>
+<header class="site-header premium-header">
+  <div class="wrap nav">
+    <a class="brand" href="index.html" aria-label="DELGROSSO Viaggi - Home"><img src="assets/logo.JPEG" alt="DELGROSSO Viaggi"></a>
+    <button class="mobile-toggle" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+    <nav class="navlinks" aria-label="Navigazione principale">
+      <a href="index.html">Home</a>
+      <a href="viaggi.html">Viaggi</a>
+      <a href="flotta.html">Flotta</a>
+      <a href="noleggio.html">Noleggio</a>
+      <a href="limousine.html">Limousine Bus</a>
+      <a href="chi-siamo.html">Chi siamo</a>
+      <a href="contatti.html">Contatti</a>
+      <a class="navcta" href="prenota.html">Prenota</a>
+    </nav>
+  </div>
+</header>
 <main id="tripDetail"></main>
 <section class="related-section"><div class="wrap"><div class="section-head"><div><div class="kicker">Continua a scoprire</div><h2>Altre partenze<br>da vivere.</h2></div><p>Se questa partenza non fa per te, dai un'occhiata alle prossime esperienze disponibili.</p></div><div id="relatedTrips" class="trip-grid"></div></div></section>
-<footer><div class="wrap footer-grid"><div class="footer-brand"><img src="assets/logo.JPEG" alt="Del Grosso Viaggi"><div class="footer-copy">Viaggi organizzati · Noleggio Bus · Party on the Road.<br>Qualità, comfort e passione per ogni chilometro.</div></div><div><div class="footer-title">Esplora</div><div class="footer-links"><a href="viaggi.html">Partenze</a><a href="flotta.html">La Flotta</a><a href="partyontheroad.html">Party on the Road</a><a href="preventivo.html">Richiedi preventivo</a></div></div><div><div class="footer-title">Contatti</div><div class="footer-links"><a data-setting="phone"></a><a data-setting="whatsapp">WhatsApp</a><a data-setting="email"></a></div></div></div><div class="wrap copyright"><span>© <span data-current-year>2026</span> Del Grosso Viaggi</span><span>Travel with experience.</span></div></footer>
+<footer class="premium-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand"><img src="assets/logo.JPEG" alt="DELGROSSO Viaggi"><div class="footer-copy">Viaggi organizzati, noleggio Bus Gran Turismo e Limousine Bus per eventi privati.</div></div>
+    <div><div class="footer-title">Scopri</div><div class="footer-links"><a href="viaggi.html">Viaggi e partenze</a><a href="flotta.html">La nostra flotta</a><a href="limousine.html">Limousine Bus</a><a href="preventivo.html">Richiedi preventivo</a></div></div>
+    <div><div class="footer-title">Contatti</div><div class="footer-links"><a href="tel:+393205730466" data-setting="phone">320 573 0466</a><a href="https://wa.me/393205730466" data-setting="whatsapp">WhatsApp</a><a href="mailto:info@delgrossoviaggi.it" data-setting="email">info@delgrossoviaggi.it</a><a class="reserved-link" href="admin.html">Area riservata</a></div></div>
+  </div>
+  <div class="wrap copyright"><span>© <span data-current-year>2026</span> DELGROSSO Viaggi &amp; Limousine Bus</span><span>Comfort, sicurezza e passione.</span></div>
+</footer>
 <div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">🚍 Partenze</a><a href="prenota.html">✦ Prenota</a></div>
-<script src="js/gestionale.js"></script><script src="js/site.js"></script><script>tripDetail();setTimeout(v8Polish,450);</script>
+<script src="js/gestionale.js"></script><script src="js/public-ui.js"></script><script src="js/site.js"></script><script>tripDetail();setTimeout(v8Polish,450);</script>
 </body></html>

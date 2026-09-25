@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prenota | Del Grosso Viaggi</title>
-<link rel="stylesheet" href="assets/pro.css">
+<link rel="stylesheet" href="assets/pro.css"><link rel="stylesheet" href="assets/remodulazione-v14.css"><link rel="stylesheet" href="assets/ad-hoc.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--ink:#07111f;--blue:#0f4c81;--blue2:#1976c9;--sky:#eaf5ff;--line:#d9e3ec;--muted:#6b7b8d;--green:#1f8f3a;--green-dark:#17682b;--red:#d64545;--red-dark:#a63232;--gold:#d4af37;--gold-dark:#b68f15}
@@ -24,15 +24,37 @@
 .optional-label{font-size:.78em;font-weight:700;text-transform:none;letter-spacing:0;color:#718096}.form-trust{font-size:12px;color:#65758a;margin:14px 0 0;line-height:1.5}
 </style>
 </head>
-<body><div class="page-loader" aria-hidden="true"><span></span></div>
-<header class="site-header"><div class="wrap nav"><a class="brand" href="index.html" aria-label="Del Grosso Viaggi Home"><img src="assets/logo.JPEG" alt="Del Grosso Viaggi"></a><button class="mobile-toggle" type="button" aria-label="Apri menu" aria-expanded="false">☰</button><nav class="navlinks" aria-label="Navigazione principale"><a href="index.html">Home</a><a href="viaggi.html">Partenze</a><a href="flotta.html">La Flotta</a><a href="partyontheroad.html">Party</a><a href="chi-siamo.html">Chi siamo</a><a href="limousine.html">Limousine</a><a href="contatti.html">Contatti</a><a class="navcta" href="prenota.html">Prenota</a></nav><div class="site-tools" aria-label="Accessi rapidi"><a class="tool-link" href="https://www.delgrossoviaggi.it/GESTIONALE/index.html" title="Apri il Gestionale"><span class="tool-icon tool-g" aria-hidden="true">G</span><span class="tool-label">Gestionale</span></a><a class="tool-link" href="admin.html" title="Area riservata amministrazione"><span class="tool-icon tool-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span><span class="tool-label">Admin</span></a></div></div></header>
+<body class="remodulated-site"><div class="page-loader" aria-hidden="true"><span></span></div>
+<header class="site-header premium-header">
+  <div class="wrap nav">
+    <a class="brand" href="index.html" aria-label="DELGROSSO Viaggi - Home"><img src="assets/logo.JPEG" alt="DELGROSSO Viaggi"></a>
+    <button class="mobile-toggle" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+    <nav class="navlinks" aria-label="Navigazione principale">
+      <a href="index.html">Home</a>
+      <a href="viaggi.html">Viaggi</a>
+      <a href="flotta.html">Flotta</a>
+      <a href="noleggio.html">Noleggio</a>
+      <a href="limousine.html">Limousine Bus</a>
+      <a href="chi-siamo.html">Chi siamo</a>
+      <a href="contatti.html">Contatti</a>
+      <a class="navcta" href="prenota.html">Prenota</a>
+    </nav>
+  </div>
+</header>
 <main>
 <section class="page-hero"><div class="wrap"><div class="eyebrow">Prenotazione ufficiale</div><h1>Scegli il viaggio.<br>Scegli il posto.</h1><p>Le partenze e la disponibilità dei posti arrivano direttamente dal Gestionale Del Grosso.</p></div></section>
-<div class="booking-steps-v8"><span class="active"><b>01</b> Partenza</span><i>→</i><span><b>02</b> Posto</span><i>→</i><span><b>03</b> Dati</span><i>→</i><span><b>04</b> Conferma</span></div><section class="section"><div class="wrap"><div class="booking-layout"><form id="booking" class="booking"><div class="field"><label>Partenza</label><select id="viaggio" required><option value="">Caricamento viaggi…</option></select></div><div id="details" class="notice">Seleziona una partenza per visualizzare il dettaglio e i posti disponibili.</div><div class="field"><label>Seleziona i posti</label><div id="busCard" class="bus-card" style="display:none"><div class="bus-head"><div><div id="busTitle" class="bus-title">Piantina autobus</div><div id="busMeta" class="bus-meta"></div></div><div id="busBadge" class="bus-badge">—</div></div><div id="seats" class="bus-map-host"></div><div class="seat-note">Seleziona i posti direttamente sulla piantina. I posti grigi sono già occupati.</div></div><div class="legend"><span><i class="dot"></i>Disponibile</span><span><i class="dot sel"></i>Selezionato</span><span><i class="dot occ"></i>Occupato</span></div><div class="selection-box"><div class="selection-head"><span>I tuoi posti</span><span><span id="sumSeatsInline">0</span> selezionati</span></div><div id="selectedList" class="selected-list"><span style="font-size:10px;color:#8796a5">Nessun posto selezionato</span></div></div></div><div class="field"><label>Nome *</label><input id="nome" required autocomplete="given-name"></div><div class="field"><label>Cognome *</label><input id="cognome" required autocomplete="family-name"></div><div class="field"><label>Telefono *</label><input id="telefono" required inputmode="tel" autocomplete="tel"></div><div class="field"><label>Email <span class="optional-label">(facoltativa)</span></label><input id="email" type="email" autocomplete="email" placeholder="Puoi lasciarla vuota" aria-describedby="email-help"><small id="email-help" class="field-help">Facoltativa: puoi prenotare anche senza email.</small></div><div class="field"><label>Note</label><textarea id="note" rows="3" placeholder="Eventuali esigenze o informazioni aggiuntive"></textarea></div><button id="submit" class="btn btn-blue" style="width:100%" type="submit">Invia prenotazione</button><div id="msg" class="notice" style="display:none"></div><p class="form-trust">📞 Telefono obbligatorio · ✉️ Email facoltativa · I dati servono esclusivamente per gestire la richiesta.</p><div class="booking-reassurance"><div><b>🔒 Dati protetti</b><span>Usati per gestire la prenotazione.</span></div><div><b>💺 Posto scelto</b><span>Lo selezioni direttamente sulla piantina.</span></div><div><b>📞 Assistenza</b><span>Se serve, ti ricontattiamo al telefono.</span></div></div></form>
+<div class="booking-steps-v8"><span class="active"><b>01</b> Partenza</span><i>→</i><span><b>02</b> Posto</span><i>→</i><span><b>03</b> Dati</span><i>→</i><span><b>04</b> Conferma</span></div><section class="section"><div class="wrap"><div class="booking-layout"><form id="booking" class="booking"><div class="field"><label for="viaggio">Partenza</label><select id="viaggio" required><option value="">Caricamento viaggi…</option></select></div><div id="details" class="notice">Seleziona una partenza per visualizzare il dettaglio e i posti disponibili.</div><div class="field"><strong>Seleziona i posti</strong><div id="busCard" class="bus-card" style="display:none"><div class="bus-head"><div><div id="busTitle" class="bus-title">Piantina autobus</div><div id="busMeta" class="bus-meta"></div></div><div id="busBadge" class="bus-badge">—</div></div><div id="seats" class="bus-map-host"></div><div class="seat-note">Seleziona i posti direttamente sulla piantina. I posti rossi sono già occupati.</div></div><div class="legend"><span><i class="dot"></i>Disponibile</span><span><i class="dot sel"></i>Selezionato</span><span><i class="dot occ"></i>Occupato</span></div><div class="selection-box"><div class="selection-head"><span>I tuoi posti</span><span><span id="sumSeatsInline">0</span> selezionati</span></div><div id="selectedList" class="selected-list"><span style="font-size:10px;color:#8796a5">Nessun posto selezionato</span></div></div></div><div class="field"><label for="nome">Nome *</label><input id="nome" required autocomplete="given-name"></div><div class="field"><label for="cognome">Cognome *</label><input id="cognome" required autocomplete="family-name"></div><div class="field"><label for="telefono">Telefono *</label><input id="telefono" required inputmode="tel" autocomplete="tel"></div><div class="field"><label for="email">Email <span class="optional-label">(facoltativa)</span></label><input id="email" type="email" autocomplete="email" placeholder="Puoi lasciarla vuota" aria-describedby="email-help"><small id="email-help" class="field-help">Facoltativa: puoi prenotare anche senza email.</small></div><div class="field"><label for="note">Note</label><textarea id="note" rows="3" placeholder="Eventuali esigenze o informazioni aggiuntive"></textarea></div><button id="submit" class="btn btn-blue" style="width:100%" type="submit">Invia prenotazione</button><div id="msg" class="notice" style="display:none"></div><p class="form-trust">📞 Telefono obbligatorio · ✉️ Email facoltativa · I dati servono esclusivamente per gestire la richiesta.</p><div class="booking-reassurance"><div><b>🔒 Dati protetti</b><span>Usati per gestire la prenotazione.</span></div><div><b>💺 Posto scelto</b><span>Lo selezioni direttamente sulla piantina.</span></div><div><b>📞 Assistenza</b><span>Se serve, ti ricontattiamo al telefono.</span></div></div></form>
 <aside class="summary"><div class="eyebrow">Riepilogo</div><h2 id="sumTitle">Seleziona una partenza</h2><div class="summary-row"><span>Data</span><strong id="sumDate">—</strong></div><div class="summary-row"><span>Partenza</span><strong id="sumTime">—</strong></div><div class="summary-row"><span>Posti</span><strong id="sumSeats">0</strong></div><div class="summary-total">€ <span id="sumTotal">0</span></div><div style="margin-top:8px;font-size:11px;color:#aab7c7">Totale calcolato in base al prezzo ufficiale del viaggio.</div></aside></div></div></section>
 </main>
-<footer><div class="wrap copyright"><span>© <span data-current-year>2026</span> Del Grosso Viaggi</span><span>Travel with experience.</span></div></footer>
-<div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">🚍 Partenze</a><a href="prenota.html">✦ Prenota</a></div><script src="js/site.js"></script><script src="js/gestionale.js"></script><script src="js/ricevuta.js"></script>
+<footer class="premium-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand"><img src="assets/logo.JPEG" alt="DELGROSSO Viaggi"><div class="footer-copy">Viaggi organizzati, noleggio Bus Gran Turismo e Limousine Bus per eventi privati.</div></div>
+    <div><div class="footer-title">Scopri</div><div class="footer-links"><a href="viaggi.html">Viaggi e partenze</a><a href="flotta.html">La nostra flotta</a><a href="limousine.html">Limousine Bus</a><a href="preventivo.html">Richiedi preventivo</a></div></div>
+    <div><div class="footer-title">Contatti</div><div class="footer-links"><a href="tel:+393205730466" data-setting="phone">320 573 0466</a><a href="https://wa.me/393205730466" data-setting="whatsapp">WhatsApp</a><a href="mailto:info@delgrossoviaggi.it" data-setting="email">info@delgrossoviaggi.it</a><a class="reserved-link" href="admin.html">Area riservata</a></div></div>
+  </div>
+  <div class="wrap copyright"><span>© <span data-current-year>2026</span> DELGROSSO Viaggi &amp; Limousine Bus</span><span>Comfort, sicurezza e passione.</span></div>
+</footer>
+<div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">🚍 Partenze</a><a href="prenota.html">✦ Prenota</a></div><script src="js/gestionale.js"></script><script src="js/public-ui.js"></script><script src="js/site.js"></script><script src="js/ricevuta.js"></script>
 <script>
 (async()=>{
 const sel=document.querySelector('#viaggio'),seats=document.querySelector('#seats'),details=document.querySelector('#details'),msg=document.querySelector('#msg'),form=document.querySelector('#booking'),submit=document.querySelector('#submit');
@@ -93,17 +115,18 @@ function renderSeats(bus){
  seats.innerHTML='';selected=[];scale=1;updateSummary();if(!current)return;
  const model=normalizeLayout(bus), rows=Array.isArray(model.layout)?model.layout:[], occ=new Set(booked.map(String));
  const seatCells=rows.flatMap(r=>Array.isArray(r.cells)?r.cells:[]).filter(c=>c&&c.type==='seat');
+ const occupiedOnMap=seatCells.filter(c=>occ.has(String(c.id??c.number??c.value??''))).length;
  const total=Number(model.config?.totalSeats||bus?.totalSeats||seatCells.length||current?.posti_totali||0);
  busCard.style.display='block';
- const realName=[bus?.marca,bus?.modello].filter(Boolean).join(' ').trim();
+ const busInfo=bus?.bus||bus||{},realName=[busInfo?.marca,busInfo?.modello].filter(Boolean).join(' ').trim();
  busTitle.textContent=realName?`Piantina autobus · ${realName}`:`Piantina autobus · ${model.config.name}`;
- busMeta.textContent=`${bus?.targa||'Autobus assegnato'} · ${model.config.name||model.model}`;
+ busMeta.textContent=`${busInfo?.targa||'Autobus assegnato'} · ${model.config.name||model.model}`;
  busBadge.textContent=`${total} posti`;
  const tools=document.createElement('div');tools.className='map-tools';
  tools.innerHTML=`<small>La disposizione è quella del Gestionale: clicca sul numero del posto per selezionarlo.</small><div class="zoom"><button type="button" id="zoomOut" aria-label="Riduci">−</button><button type="button" id="zoomReset">100%</button><button type="button" id="zoomIn" aria-label="Ingrandisci">+</button></div>`;
  const container=document.createElement('div');container.className='bus-map-container';
  const header=document.createElement('div');header.className='bus-map-header';
- header.innerHTML=`<div class="seat-map-front"><span class="seat-map-front__icon">${SVG.steering}</span><span class="seat-map-front__title">${esc(model.config.frontLabel||`FRONTE BUS ${model.model}`)}</span><span class="seat-map-front__driver">${SVG.steering} ${esc(model.config.driverLabel||'AUTISTA')}</span></div><p class="seat-map-stats"><strong>${seatCells.length-occ.size}</strong> disponibili &nbsp;·&nbsp; <strong>${occ.size}</strong> occupati &nbsp;·&nbsp; <strong>${seatCells.length}</strong> posti totali</p>`;
+ header.innerHTML=`<div class="seat-map-front"><span class="seat-map-front__icon">${SVG.steering}</span><span class="seat-map-front__title">${esc(model.config.frontLabel||`FRONTE BUS ${model.model}`)}</span><span class="seat-map-front__driver">${SVG.steering} ${esc(model.config.driverLabel||'AUTISTA')}</span></div><p class="seat-map-stats"><strong>${seatCells.length-occupiedOnMap}</strong> disponibili &nbsp;·&nbsp; <strong>${occupiedOnMap}</strong> occupati &nbsp;·&nbsp; <strong>${seatCells.length}</strong> posti totali</p>`;
  container.appendChild(header);
  const mapGrid=document.createElement('div');mapGrid.className='seat-map-grid';
  const legend=document.createElement('div');legend.className='seat-map-legend';
@@ -135,8 +158,9 @@ async function load(){
  try{
    const [bs,bus]=await Promise.all([getBookedSeats(current.id),getBusLayout(current.id)]);if(token!==loadToken)return;
    booked=Array.isArray(bs)?bs.map(String):[];const normalized=normalizeLayout(bus);const layoutSeats=normalized.layout.flatMap(r=>Array.isArray(r.cells)?r.cells:[]).filter(c=>c?.type==='seat');
-   const total=Number(normalized.config?.totalSeats||layoutSeats.length||current.posti_totali||0),free=Math.max(0,layoutSeats.length-booked.length);
-   const busName=[bus?.marca,bus?.modello].filter(Boolean).join(' ')||normalized.config?.name||'Autobus assegnato';
+   const seatIds=new Set(layoutSeats.map(c=>String(c.id??c.number??c.value??''))),bookedOnLayout=booked.filter(id=>seatIds.has(String(id)));
+   const total=Number(normalized.config?.totalSeats||layoutSeats.length||current.posti_totali||0),free=Math.max(0,layoutSeats.length-bookedOnLayout.length);
+   const busInfo=bus?.bus||bus||{},busName=[busInfo?.marca,busInfo?.modello].filter(Boolean).join(' ')||normalized.config?.name||'Autobus assegnato';
    details.innerHTML=`<strong>${esc(current.destinazione||current.titolo||'')}</strong> · ${esc(gestFmtDate(current.data_partenza))} · ore ${esc(gestFmtTime(current.ora_partenza))}<br>${esc(current.luogo_partenza||'')}<div class="trip-stats"><span class="pill">💶 <strong>€ ${Number(current.prezzo||0).toFixed(0)}</strong> / persona</span><span class="pill">💺 <strong>${free}</strong> posti liberi</span><span class="pill">🚌 <strong>${esc(busName)}</strong></span></div>`;
    renderSeats(bus);
  }catch(e){console.error(e);details.className='notice error';details.textContent='Non è stato possibile caricare la piantina e la disponibilità. Ricarica la pagina e riprova.';busCard.style.display='none'}
@@ -148,26 +172,26 @@ try{
  const q=new URLSearchParams(location.search).get('viaggio');if(q&&trips.some(v=>String(v.id)===String(q)))sel.value=q;await load();
 }catch(e){console.error(e);sel.innerHTML='<option value="">Errore collegamento partenze</option>';details.className='notice error';details.textContent='Non riesco a caricare le partenze in questo momento.'}
 sel.onchange=load;
-form.onsubmit=async e=>{e.preventDefault();msg.style.display='block';msg.className='notice';if(!current){msg.textContent='Seleziona una partenza.';return}if(typeof gestTripIsSoldOut==='function'&&gestTripIsSoldOut(current)){msg.className='notice error';msg.textContent='SOLD OUT: questo viaggio è al completo.';return}if(!selected.length){msg.textContent='Seleziona almeno un posto sulla piantina.';return}submit.disabled=true;submit.textContent='Invio in corso…';msg.textContent='Verifica disponibilità e registrazione…';try{const result=await createGestionaleBooking({viaggioId:current.id,nome:document.querySelector('#nome').value.trim(),cognome:document.querySelector('#cognome').value.trim(),telefono:document.querySelector('#telefono').value.trim(),email:(document.querySelector('#email').value.trim()||null),note:document.querySelector('#note').value.trim(),posti:selected});if(!result?.success)throw new Error(result?.error||'Prenotazione non accettata');msg.className='notice success';
-const bookedSeats=(result.posti||selected).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+form.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;msg.style.display='block';msg.className='notice';if(!current){msg.textContent='Seleziona una partenza.';return}if(typeof gestTripIsSoldOut==='function'&&gestTripIsSoldOut(current)){msg.className='notice error';msg.textContent='SOLD OUT: questo viaggio è al completo.';return}if(!selected.length){msg.textContent='Seleziona almeno un posto sulla piantina.';return}const bookingTrip=current,bookingSeats=selected.slice();submit.disabled=true;sel.disabled=true;seats.style.pointerEvents='none';submit.textContent='Invio in corso…';msg.textContent='Verifica disponibilità e registrazione…';let bookingConfirmed=false,bookingRequested=false;try{const latestBooked=new Set((await getBookedSeats(bookingTrip.id)).map(String));if(bookingSeats.some(n=>latestBooked.has(String(n)))){await load();throw new Error('Uno dei posti selezionati è stato occupato. Seleziona un altro posto sulla piantina.')}bookingRequested=true;const result=await createGestionaleBooking({viaggioId:bookingTrip.id,nome:document.querySelector('#nome').value.trim(),cognome:document.querySelector('#cognome').value.trim(),telefono:document.querySelector('#telefono').value.trim(),email:(document.querySelector('#email').value.trim()||null),note:document.querySelector('#note').value.trim(),posti:bookingSeats});if(!result?.success){bookingRequested=false;throw new Error(result?.error||'Prenotazione non accettata')}bookingConfirmed=true;msg.className='notice success';
+const bookedSeats=(result.posti||bookingSeats).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
 const receiptData={
-  viaggio:current.titolo||current.destinazione||'Viaggio',
-  data:gestFmtDate(current.data_partenza),
-  ora:gestFmtTime(current.ora_partenza),
+  viaggio:bookingTrip.titolo||bookingTrip.destinazione||'Viaggio',
+  data:gestFmtDate(bookingTrip.data_partenza),
+  ora:gestFmtTime(bookingTrip.ora_partenza),
   nome:document.querySelector('#nome').value.trim(),
   cognome:document.querySelector('#cognome').value.trim(),
   telefono:document.querySelector('#telefono').value.trim(),
   numeroPosti:bookedSeats.length,
   posti:bookedSeats,
-  prezzo:Number(current.prezzo||0),
-  totale:Number(current.prezzo||0)*bookedSeats.length
+  prezzo:Number(bookingTrip.prezzo||0),
+  totale:Number(bookingTrip.prezzo||0)*bookedSeats.length
 };
 msg.innerHTML=`<strong>Prenotazione registrata correttamente.</strong><br>Posti: ${esc(bookedSeats.join(', '))}<br><span id="receiptStatus">Generazione ricevuta PDF in corso…</span><br><button type="button" id="downloadReceipt" class="btn btn-blue" style="margin-top:10px">📄 Scarica ricevuta</button>`;
 const downloadBtn=document.querySelector('#downloadReceipt'),receiptStatus=document.querySelector('#receiptStatus');
 const doReceipt=async()=>{downloadBtn.disabled=true;downloadBtn.textContent='Generazione…';try{await DGReceipt.download(receiptData);receiptStatus.textContent='Ricevuta PDF scaricata correttamente.';downloadBtn.textContent='📄 Scarica di nuovo';downloadBtn.disabled=false}catch(receiptErr){console.error(receiptErr);receiptStatus.textContent='Prenotazione salvata. Puoi provare a scaricare nuovamente la ricevuta.';downloadBtn.textContent='📄 Scarica ricevuta';downloadBtn.disabled=false}};
 downloadBtn.onclick=doReceipt;
 await doReceipt();
-selected=[];form.querySelectorAll('input,textarea').forEach(x=>x.value='');await load()}catch(err){console.error(err);msg.className='notice error';msg.textContent=err.message||'Non è stato possibile completare la prenotazione.'}finally{submit.disabled=false;submit.textContent='Invia prenotazione'}}
+selected=[];form.querySelectorAll('input,textarea').forEach(x=>x.value='');try{await load()}catch(refreshError){console.warn('Ricaricamento posti non riuscito',refreshError)}}catch(err){console.error(err);if(bookingConfirmed){msg.className='notice success';msg.textContent='Prenotazione registrata. La ricevuta non è disponibile al momento: contattaci per riceverla.'}else{msg.className='notice error';msg.textContent=bookingRequested||err?.name==='AbortError'||/troppo tempo/i.test(err?.message||'')?'Non riusciamo a confermare l’esito. Contattaci prima di riprovare, per evitare una doppia prenotazione.':err.message||'Non è stato possibile completare la prenotazione.'}}finally{sel.disabled=false;seats.style.pointerEvents='';submit.disabled=bookingConfirmed||Boolean(current&&gestTripIsSoldOut(current));submit.textContent=bookingConfirmed?'Prenotazione registrata':submit.disabled?'SOLD OUT':'Invia prenotazione'}}
 })();
 </script>
 </body></html>
