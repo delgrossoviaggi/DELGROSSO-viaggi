@@ -1,0 +1,31 @@
+
+/* DELGROSSO V22 — Navy + Arancio caldo + Bianco */
+:root{
+  --dg-navy:#071B2E;
+  --dg-navy-2:#0D2A45;
+  --dg-navy-3:#123A5C;
+  --dg-orange:#F28C28;
+  --dg-orange-2:#FFAA45;
+  --dg-white:#FFFFFF;
+  --dg-ivory:#F7F4EF;
+  --dg-ink:#0A1724;
+  --dg-muted:#5E6B78;
+  --dg-border:rgba(7,27,46,.14);
+}
+html,body{background:var(--dg-ivory);color:var(--dg-ink)}
+header,.site-header,.topbar,.nav-shell{background:var(--dg-navy)!important;color:var(--dg-white)!important}
+header a,.site-header a,.topbar a,.nav-shell a{color:var(--dg-white)}
+footer,.site-footer{background:var(--dg-navy)!important;color:var(--dg-white)!important}
+footer a,.site-footer a{color:var(--dg-white)}
+button,.btn,.button,[class*="cta"],a.btn,a.button{
+  border-color:transparent;
+}
+.btn-primary,.button-primary,[class*="primary-cta"],.limo-cta{
+  background:var(--dg-orange)!important;color:var(--dg-navy)!important;
+}
+.btn-primary:hover,.button-primary:hover,[class*="primary-cta"]:hover,.limo-cta:hover{
+  background:var(--dg-orange-2)!important;
+}
+.badge,.pill,.tag,.eyebrow,.kicker{accent-color:var(--dg-orange)}
+a{accent-color:var(--dg-orange)}
+::selection{background:var(--dg-orange);color:var(--dg-navy)}
