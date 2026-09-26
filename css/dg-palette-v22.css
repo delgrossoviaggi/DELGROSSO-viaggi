@@ -74,3 +74,29 @@ a{accent-color:var(--dg-orange)}
 @media(max-width:700px){
   .dg-footer-credits{font-size:10px;margin-top:22px;padding-top:15px}
 }
+
+
+/* DELGROSSO V25 — nuova palette */
+:root{
+ --dg-bg:#F4F7FA; --dg-surface:#FFFFFF; --dg-navy:#061C2F; --dg-navy2:#0B304D;
+ --dg-orange:#F47B20; --dg-orange2:#FF9A45; --dg-text:#102333; --dg-muted:#526575;
+ --dg-line:rgba(6,28,47,.13);
+}
+html,body{background:var(--dg-bg)!important;color:var(--dg-text)}
+header,.site-header,.topbar,.nav-shell,footer,.site-footer{background:var(--dg-navy)!important;color:#fff!important}
+.btn-primary,.button-primary,.limo-cta,[class*="primary-cta"]{background:var(--dg-orange)!important;color:#061C2F!important}
+.btn-primary:hover,.button-primary:hover,.limo-cta:hover,[class*="primary-cta"]:hover{background:var(--dg-orange2)!important}
+::selection{background:var(--dg-orange);color:#061C2F}
+.dg-footer-credits{color:rgba(255,255,255,.82)!important}
+
+/* V25: protezione leggibilità testo su immagini */
+.dg-photo-copy{position:relative!important;z-index:1!important;isolation:isolate}
+.dg-photo-copy:before{
+ content:"";position:absolute;z-index:-1;inset:-14px -18px;border-radius:16px;
+ background:linear-gradient(90deg,rgba(3,17,29,.88),rgba(3,17,29,.62) 68%,rgba(3,17,29,.08));
+ pointer-events:none
+}
+.dg-photo-copy,.dg-photo-copy *{color:#fff!important}
+.dg-photo-copy h1,.dg-photo-copy h2,.dg-photo-copy h3,.dg-photo-copy p,.dg-photo-copy span,.dg-photo-copy strong{
+ text-shadow:0 2px 9px rgba(0,0,0,.78)!important
+}
