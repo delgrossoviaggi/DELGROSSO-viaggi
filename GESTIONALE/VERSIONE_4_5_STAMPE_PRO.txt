@@ -1,0 +1,6 @@
+DELGROSSO Gestionale 4.5 STAMPE PRO
+- Piantina Control Room professionale con corridoio centrale
+- Stessa struttura grafica a schermo e in stampa
+- Piantina A4 orizzontale
+- Ricevute e conferme A4 con stile coerente tra anteprima e stampa
+- Stampa colori forzata con print-color-adjust
