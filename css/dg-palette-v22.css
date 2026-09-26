@@ -29,3 +29,48 @@ button,.btn,.button,[class*="cta"],a.btn,a.button{
 .badge,.pill,.tag,.eyebrow,.kicker{accent-color:var(--dg-orange)}
 a{accent-color:var(--dg-orange)}
 ::selection{background:var(--dg-orange);color:var(--dg-navy)}
+
+
+/* V23: leggibilità universale su fotografie e fondi dinamici */
+.dg-readable-copy{
+  position:relative!important;
+  z-index:2!important;
+  isolation:isolate;
+}
+.dg-readable-copy::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-18px -22px;
+  border-radius:18px;
+  background:linear-gradient(90deg,rgba(3,16,28,.88),rgba(3,16,28,.66) 62%,rgba(3,16,28,.12));
+  backdrop-filter:blur(1.5px);
+  -webkit-backdrop-filter:blur(1.5px);
+  pointer-events:none;
+}
+.dg-readable-copy h1,.dg-readable-copy h2,.dg-readable-copy h3,.dg-readable-copy h4,
+.dg-readable-copy p,.dg-readable-copy span,.dg-readable-copy strong,.dg-readable-copy small,.dg-readable-copy a{
+  color:#fff!important;
+  text-shadow:0 2px 10px rgba(0,0,0,.62)!important;
+}
+@media(max-width:700px){
+ .dg-readable-copy::before{inset:-14px -15px;background:rgba(3,16,28,.74)}
+}
+
+/* V24 — crediti footer in basso a sinistra */
+.dg-footer-credits{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:28px;
+  padding:18px 0 6px;
+  text-align:left!important;
+  color:rgba(255,255,255,.72)!important;
+  font-size:11px;
+  line-height:1.65;
+  letter-spacing:.055em;
+  font-weight:700;
+}
+.dg-footer-credits div{color:inherit!important;text-align:left!important}
+@media(max-width:700px){
+  .dg-footer-credits{font-size:10px;margin-top:22px;padding-top:15px}
+}
