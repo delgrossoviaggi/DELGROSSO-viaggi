@@ -1,0 +1,16 @@
+name = "delgrosso-emergenza"
+main = "worker.js"
+compatibility_date = "2026-09-29"
+workers_dev = true
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+ORIGIN_URL = "https://SOSTITUISCI-CON-TUO-DEPLOY.vercel.app"
+ALERT_TO = "info@delgrossoviaggi.it"
+ALERT_FROM = "Monitor DELGROSSO <monitor@TUO-DOMINIO-VERIFICATO.it>"
+
+[[kv_namespaces]]
+binding = "MONITOR_KV"
+id = "INSERISCI_ID_KV"
