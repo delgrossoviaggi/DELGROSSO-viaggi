@@ -1,0 +1,2 @@
+-- Applicato direttamente a Supabase gestionale il 30/09/2026: create_public_booking_v3 + vista dg_calendario_flotta.
+-- Questo file documenta che il database remoto e il sito devono usare la RPC create_public_booking_v3.
