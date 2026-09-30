@@ -39,7 +39,7 @@
   <div>©CREATED CRISTINO NICOLA PIO</div>
 </div>
 </footer>
-<div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">🚍 Partenze</a><a href="prenota.html">✦ Prenota</a></div><script src="js/gestionale.js?v=28"></script><script src="js/public-ui.js"></script><script src="js/site.js?v=28"></script>
+<div class="mobile-quickbar" aria-label="Azioni rapide"><a href="viaggi.html">🚍 Partenze</a><a href="prenota.html">✦ Prenota</a></div><script src="js/gestionale.js?v=30"></script><script src="js/public-ui.js"></script><script src="js/site.js?v=28"></script>
 <script>
 (async()=>{const g=document.querySelector('#tripFull'),c=document.querySelector('#tripCount'),search=document.querySelector('#tripSearch'),dateFilter=document.querySelector('#tripDateFilter'),sort=document.querySelector('#tripSort'),result=document.querySelector('#discoveryResult');let currentFilter='all',query=new URLSearchParams(location.search).get('dest')?.trim().toLowerCase()||'';if(search&&query)search.value=query;
 const render=trips=>{const now=new Date();let filtered=(trips||[]).filter(t=>{const a=gestTripAvailability(t),title=(tripTitle(t)+' '+(t.destinazione||'')).toLowerCase();if(query&&!title.includes(query))return false;if(currentFilter==='sold'&&!a.soldOut)return false;if(currentFilter==='available'&&a.soldOut)return false;if(currentFilter==='soon'&&(a.soldOut||!a.known||a.free>10))return false;if(dateFilter?.value!=='all'){const days=Number(dateFilter.value),d=new Date(String(t.data_partenza||'')+'T12:00:00');if(!Number.isNaN(d.getTime())&&((d-now)/(86400000)>days))return false;}return true});
