@@ -1,0 +1,6 @@
+DELGROSSO Gestionale V5.6 - Assistente Gestionale 360°
+
+- Le domande informative aggiornano prima i dati dal gestionale/Supabase e poi rispondono.
+- Query supportate: prenotati/posti, posti liberi, incassi, residui, acconti, fermate, ricerca cliente/prenotazione, flotta, check-in e riepilogo viaggio.
+- I comandi che modificano dati continuano a generare una bozza e richiedono conferma esplicita.
+- In caso di viaggio ambiguo l'assistente chiede di specificare la partenza invece di inventare.
