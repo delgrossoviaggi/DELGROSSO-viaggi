@@ -61,7 +61,7 @@ async function getBusLayout(viaggioId){
 
 async function createGestionaleBooking({viaggioId,nome,cognome,telefono,email,note,posti,requestId,fermataPartenza}){
   const stableRequestId=requestId||((globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():`web-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  return await gestBridge('booking',{viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId,fermataPartenza:String(fermataPartenza||'').trim()});
+  return await gestBridge('booking',{viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId,fermataPartenza:String(fermataPartenza||'')});
 }
 
 async function checkGestionaleBridge(){
