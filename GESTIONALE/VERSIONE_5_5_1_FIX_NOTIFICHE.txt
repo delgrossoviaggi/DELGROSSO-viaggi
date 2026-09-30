@@ -1,0 +1,3 @@
+DELGROSSO Gestionale V5.5.1
+Fix applicato anche al database Supabase gestionale: il trigger dg_assistente_booking_event ora registra le nuove prenotazioni nella tabella notifiche con tipo INFO, valore ammesso dal constraint notifiche_tipo_check.
+Errore risolto: new row for relation "notifiche" violates check constraint "notifiche_tipo_check".
