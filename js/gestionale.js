@@ -65,8 +65,20 @@ async function getTripStops(viaggioId){
 }
 
 async function createGestionaleBooking({viaggioId,nome,cognome,telefono,email,note,posti,requestId,fermataPartenza}){
+  // Lo stesso requestId viene riutilizzato nei retry: il backend e' idempotente e non crea doppioni.
   const stableRequestId=requestId||((globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():`web-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  return await gestBridge('booking',{viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId,fermataPartenza:String(fermataPartenza||'')});
+  const payload={viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId,fermataPartenza:String(fermataPartenza||'')};
+  let lastError=null;
+  for(let attempt=1;attempt<=2;attempt++){
+    try{return await gestBridge('booking',payload)}catch(error){
+      lastError=error;
+      const msg=String(error?.message||'');
+      const uncertain=error?.name==='TypeError'||/fetch|network|rete|tempo|collegamento/i.test(msg);
+      if(!uncertain||attempt===2)throw error;
+      await new Promise(r=>setTimeout(r,650));
+    }
+  }
+  throw lastError||new Error('Prenotazione non completata.');
 }
 
 async function checkGestionaleBridge(){

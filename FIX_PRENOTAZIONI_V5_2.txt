@@ -1,0 +1,1 @@
+V5.2: retry idempotente della prenotazione con stesso requestId, messaggi errore reali, cache-bust gestionale.js v31. Il backend create_public_booking_v3 resta la fonte unica di registrazione.
