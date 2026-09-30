@@ -1,0 +1,4 @@
+DELGROSSO Gestionale V5.7
+- Correzione backend conferma prenotazione: search_path include schema extensions per pgcrypto/gen_random_bytes.
+- Assistente ottimizzato per iPhone 17 / iOS: campi 16px, layout singola colonna, pulsanti touch, safe-area, tastiera e schede bozza responsive.
+- Mantiene Assistente 360 e conferma obbligatoria prima delle scritture.

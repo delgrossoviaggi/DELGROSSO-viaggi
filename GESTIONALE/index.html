@@ -796,6 +796,35 @@ input,select,textarea,button{max-width:100%;font:inherit}
 }
 </style>
 
+
+<style id="dg-v57-iphone-assistant">
+/* V5.7 - Assistente ottimizzato iPhone 17 / iOS */
+#page-assistente textarea,#page-assistente input,#page-assistente select{font-size:16px!important}
+#page-assistente textarea{resize:vertical;min-height:112px}
+@media(max-width:760px){
+ #page-assistente{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+ #page-assistente .section-title{align-items:flex-start;gap:10px}
+ #page-assistente .section-title>div{min-width:0}
+ #page-assistente .section-title .btn{flex:0 0 auto}
+ #page-assistente .card{border-radius:16px}
+ #page-assistente .card-body{padding:14px!important}
+ #page-assistente .card-head{padding:13px 14px!important;gap:8px;flex-wrap:wrap}
+ #page-assistente .quick-actions{display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
+ #page-assistente .quick-actions .btn{width:100%!important;min-height:48px!important;font-size:15px!important;touch-action:manipulation}
+ #page-assistente textarea{width:100%!important;min-height:132px!important;line-height:1.45!important;padding:13px!important}
+ #page-assistente .cards,#page-assistente .detail-grid{grid-template-columns:1fr!important}
+ #assistantDraft .form-grid{grid-template-columns:1fr!important}
+ #assistantDraft .field{grid-column:1/-1!important}
+ #assistantDraft input,#assistantDraft select,#assistantDraft textarea{width:100%!important;min-height:46px!important}
+ #assistantDraft .module-card{padding:14px!important}
+}
+@media(max-width:430px){
+ #page-assistente .section-title{display:grid!important;grid-template-columns:1fr!important}
+ #page-assistente .section-title>.btn{width:100%!important}
+ #page-assistente h2{font-size:21px!important}
+ #page-assistente .section-subtitle{font-size:12px!important;line-height:1.4!important}
+}
+</style>
 </head>
 <body>
 <section id="login">
