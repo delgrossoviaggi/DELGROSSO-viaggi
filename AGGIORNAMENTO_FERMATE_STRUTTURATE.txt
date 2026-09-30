@@ -1,0 +1,6 @@
+Aggiornamento 30/09/2026
+- Fermate viaggio gestite singolarmente nel gestionale (una per riga).
+- Salvataggio su Supabase nella tabella viaggi_fermate.
+- Pagina prenotazione legge le fermate strutturate del viaggio.
+- Fallback compatibile con i vecchi viaggi.
+- Fermata scelta salvata con la prenotazione.
