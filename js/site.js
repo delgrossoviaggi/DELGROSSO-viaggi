@@ -32,30 +32,31 @@ function tripCountdown(date,time=''){if(!date)return '';const t=String(time||'')
 function tripLongDate(d){if(!d)return '';return new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en-GB':'it-IT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date(`${d}T12:00:00`));}
 function tripIcon(type){const icons={pin:'⌖',clock:'◷',bus:'▣',seat:'♢',price:'€',spark:'✦'};return icons[type]||'•';}
 function tripCard(x){
+ const cancelled=typeof gestTripIsCancelled==='function'&&gestTripIsCancelled(x);
  const a=typeof gestTripAvailability==='function'?gestTripAvailability(x):{soldOut:Number(x.posti_liberi??0)<=0,total:Number(x.posti_totali??0),free:Number(x.posti_liberi??0)};
- const sold=a.soldOut,known=a.known!==false,free=a.free,total=a.total,occupied=total&&known?Math.max(0,Math.min(total,total-free)):0,pct=total&&known?Math.round((occupied/total)*100):0;
+ const sold=!cancelled&&a.soldOut,known=a.known!==false,free=a.free,total=a.total,occupied=total&&known?Math.max(0,Math.min(total,total-free)):0,pct=total&&known?Math.round((occupied/total)*100):0;
  const img=tripImage(x),title=tripTitle(x),date=String(x.data_partenza||''),day=date.slice(8,10),mon=date.slice(5,7);
  const time=String(x.ora_partenza||'').slice(0,5),place=tripField(x,'luogo_partenza','punto_ritrovo','ritrovo','partenza');
  const price=(x.prezzo!==undefined&&x.prezzo!==null&&x.prezzo!=='')?`€ ${Number(x.prezzo).toFixed(0)}`:'Su richiesta';
- const status=sold?'SOLD OUT':!known?'DA VERIFICARE':free<=10?'ULTIMI POSTI':(x.stato||'DISPONIBILE');
+ const status=cancelled?'ANNULLATO':sold?'SOLD OUT':!known?'DA VERIFICARE':free<=10?'ULTIMI POSTI':(x.stato||'DISPONIBILE');
  const countdown=tripCountdown(x.data_partenza,time);
- return `<article class="trip-card ${sold?'is-soldout':''}" data-trip-id="${esc(x.id)}">
+ return `<article class="trip-card ${cancelled?'is-cancelled':sold?'is-soldout':''}" data-trip-id="${esc(x.id)}">
   <a class="trip-card-click" href="viaggio.html?id=${encodeURIComponent(x.id)}" aria-label="Scopri ${esc(title)}">
    <div class="trip-img">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(title)}">`:'<div class="trip-img-placeholder">DELGROSSO<br>VIAGGI</div>'}
     <div class="trip-floating-date"><span>${esc(day||'—')}</span><small>${esc(mon||'')}</small></div>
-    <div class="trip-card-topline"><span class="trip-live-pill"><i></i> LIVE</span><span class="trip-status ${sold?'sold':known&&free<=10?'soon':''}">${esc(status)}</span></div>
+    <div class="trip-card-topline"><span class="trip-live-pill"><i></i> LIVE</span><span class="trip-status ${cancelled?'cancelled':sold?'sold':known&&free<=10?'soon':''}">${esc(status)}</span></div>
     <div class="trip-card-destination"><span>DESTINAZIONE</span><b>${esc(x.destinazione||title)}</b></div>
-    ${sold?`<div class="soldout-overlay"><span>SOLD OUT</span><small>POSTI ESAURITI</small></div>`:''}
+    ${cancelled?`<div class="cancelled-overlay"><span>ANNULLATO</span><small>VIAGGIO ANNULLATO</small></div>`:sold?`<div class="soldout-overlay"><span>SOLD OUT</span><small>POSTI ESAURITI</small></div>`:''}
    </div>
   </a>
-  ${sold?'<div class="soldout-strip">SOLD OUT · VIAGGIO AL COMPLETO</div>':''}
+  ${cancelled?'<div class="cancelled-strip">ANNULLATO · VIAGGIO NON EFFETTUATO</div>':sold?'<div class="soldout-strip">SOLD OUT · VIAGGIO AL COMPLETO</div>':''}
   <div class="trip-body">
    <div class="trip-card-kicker"><span>${esc(fmtDate(x.data_partenza))}</span>${countdown?`<span class="trip-countdown">${esc(countdown)}</span>`:''}</div>
    <div class="trip-title">${esc(title)}</div>
    <div class="trip-meta"><span class="trip-meta-main">⌖ ${esc(place||'Punto di partenza da comunicare')}</span><strong class="trip-price">${esc(price)}</strong></div>
-   <div class="trip-meta"><span class="trip-meta-main">◷ ${esc(time||'—')}</span><strong class="availability ${!sold&&known&&free<=10?'low':''} ${sold?'none':''}">${sold?'POSTI ESAURITI':known?`${free} posti liberi${total?` / ${total}`:''}`:'Disponibilità da verificare'}</strong></div>
-   ${total&&known?`<div class="availability-meter" aria-label="${pct}% posti occupati"><span style="width:${pct}%"></span></div><div class="trip-meter-label"><span>${pct}% occupato</span><span>${sold?'Completo':free<=10?'Affrettati':'Disponibilità live'}</span></div>`:''}
-   <div class="trip-card-footer"><a class="btn btn-card-detail" href="viaggio.html?id=${encodeURIComponent(x.id)}">Scopri il viaggio <span>↗</span></a><a class="trip-book-mini ${sold?'disabled':''}" ${sold?'aria-disabled="true"':''} href="${sold?'viaggio.html?id='+encodeURIComponent(x.id):!known?'contatti.html':'prenota.html?viaggio='+encodeURIComponent(x.id)}">${sold?'Completo':known?'Prenota':'Informazioni'}</a></div>
+   <div class="trip-meta"><span class="trip-meta-main">◷ ${esc(time||'—')}</span><strong class="availability ${!sold&&known&&free<=10?'low':''} ${sold?'none':''}">${cancelled?'VIAGGIO ANNULLATO':sold?'POSTI ESAURITI':known?`${free} posti liberi${total?` / ${total}`:''}`:'Disponibilità da verificare'}</strong></div>
+   ${total&&known?`<div class="availability-meter" aria-label="${pct}% posti occupati"><span style="width:${pct}%"></span></div><div class="trip-meter-label"><span>${pct}% occupato</span><span>${cancelled?'Annullato':sold?'Completo':free<=10?'Affrettati':'Disponibilità live'}</span></div>`:''}
+   <div class="trip-card-footer"><a class="btn btn-card-detail" href="viaggio.html?id=${encodeURIComponent(x.id)}">Scopri il viaggio <span>↗</span></a><a class="trip-book-mini ${(sold||cancelled)?'disabled':''}" ${(sold||cancelled)?'aria-disabled="true"':''} href="${cancelled?'viaggio.html?id='+encodeURIComponent(x.id):sold?'viaggio.html?id='+encodeURIComponent(x.id):!known?'contatti.html':'prenota.html?viaggio='+encodeURIComponent(x.id)}">${cancelled?'Annullato':sold?'Completo':known?'Prenota':'Informazioni'}</a></div>
   </div>
  </article>`;
 }

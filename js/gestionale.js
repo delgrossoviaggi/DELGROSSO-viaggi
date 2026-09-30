@@ -48,7 +48,12 @@ function gestTripAvailability(trip={}){
   const free=Number.isFinite(freeRaw)?Math.max(0,freeRaw):Number.isFinite(total)&&Number.isFinite(occupied)?Math.max(0,total-occupied):0;
   return {soldOut:bridgeSold||explicitSold||soldByNumbers,known:Number.isFinite(freeRaw)||(Number.isFinite(total)&&Number.isFinite(occupied))||bridgeSold||explicitSold,total:Number.isFinite(total)?Math.max(0,total):0,occupied:Number.isFinite(occupied)?Math.max(0,occupied):0,free};
 }
-function gestTripIsSoldOut(trip){return gestTripAvailability(trip).soldOut;}
+function gestTripIsCancelled(trip={}){
+  const state=String(trip.stato??trip.status??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
+  return trip.annullato===true || trip.cancelled===true || trip.canceled===true ||
+    /(^|\b)(annullat[oa]|cancellat[oa]|cancelled|canceled|viaggio annullato)(\b|$)/i.test(state);
+}
+function gestTripIsSoldOut(trip){return !gestTripIsCancelled(trip) && gestTripAvailability(trip).soldOut;}
 
 async function getBookedSeats(viaggioId){
   const data = await gestBridge('booked-seats',{viaggioId});
@@ -59,26 +64,9 @@ async function getBusLayout(viaggioId){
   return await gestBridge('bus-layout',{viaggioId});
 }
 
-async function getTripStops(viaggioId){
-  const data=await gestBridge('trip-stops',{viaggioId});
-  return Array.isArray(data)?data:[];
-}
-
-async function createGestionaleBooking({viaggioId,nome,cognome,telefono,email,note,posti,requestId,fermataPartenza}){
-  // Lo stesso requestId viene riutilizzato nei retry: il backend e' idempotente e non crea doppioni.
+async function createGestionaleBooking({viaggioId,nome,cognome,telefono,email,note,posti,requestId}){
   const stableRequestId=requestId||((globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():`web-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  const payload={viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId,fermataPartenza:String(fermataPartenza||'')};
-  let lastError=null;
-  for(let attempt=1;attempt<=2;attempt++){
-    try{return await gestBridge('booking',payload)}catch(error){
-      lastError=error;
-      const msg=String(error?.message||'');
-      const uncertain=error?.name==='TypeError'||/fetch|network|rete|tempo|collegamento/i.test(msg);
-      if(!uncertain||attempt===2)throw error;
-      await new Promise(r=>setTimeout(r,650));
-    }
-  }
-  throw lastError||new Error('Prenotazione non completata.');
+  return await gestBridge('booking',{viaggioId,nome,cognome,telefono,email:(email||null),note,posti:posti.map(String),requestId:stableRequestId});
 }
 
 async function checkGestionaleBridge(){
