@@ -1,0 +1,7 @@
+DELGROSSO GESTIONALE - PACCHETTO UNICO (BASE 4.9)
+
+Questo pacchetto cumulativo comprende i file presenti nella versione 4.9, inclusi gli aggiornamenti 4.7 e 4.8, lo script SQL/AGGIORNAMENTO_4_7.sql e i recapiti per gli acconti:
+Nicola: 366 212 7916
+Email: info@delgrossoviaggi.it
+
+Prima di pubblicare, effettuare un backup del gestionale e del database. Verificare le migrazioni SQL in ambiente di prova e testare i flussi reali di prenotazione, noleggio, pagamento e disponibilita mezzi. La presenza dei file nel pacchetto non costituisce una verifica del funzionamento con il database di produzione.

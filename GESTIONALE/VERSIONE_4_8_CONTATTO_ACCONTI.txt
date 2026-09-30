@@ -1,0 +1,1 @@
+Versione 4.8: inserita info@delgrossoviaggi.it nel messaggio finale di prenotazione, notifica e conferma stampabile. Numero telefonico non aggiunto in assenza di conferma.

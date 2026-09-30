@@ -1,4 +1,4 @@
-const CACHE = 'delgrosso-gestionale-pwa-v9-responsive43';
+const CACHE = 'delgrosso-gestionale-pwa-v48-contact-email';
 
 const APP_SHELL = [
   './',

@@ -1,0 +1,11 @@
+DELGROSSO GESTIONALE 4.7 - AGGIORNAMENTO PROGRESSIVO
+
+1) Fare un backup del database e della versione online.
+2) Verificare le colonne e le policy esistenti prima di eseguire SQL/AGGIORNAMENTO_4_7.sql nel SQL Editor di Supabase gestionale.
+3) Configurare policy RLS per dg_blocchi_flotta coerenti con gli utenti autorizzati. Senza policy, la tabella non e' accessibile ai client.
+4) Solo dopo esito positivo pubblicare TUTTA la cartella sul sito.
+5) Aggiornare anche il sito PUBBLICO separatamente: questo ZIP contiene il gestionale, non il codice della pagina pubblica di prenotazione.
+
+INCLUSO: calendario per mezzo derivato da viaggi, noleggi con acconto e blocchi manuali; controllo conflitti per data; partenza obbligatoria nella prenotazione da gestionale; durata acconto personalizzabile; avviso contattare Nicola; campi di riepilogo stampabile.
+
+DA COMPLETARE/VERIFICARE: integrazione della prenotazione del sito pubblico; fermate ammesse specifiche per viaggio; orari completi dei servizi; sincronizzazione acconti dalla tabella pagamenti noleggio; test end-to-end con Supabase reale e verifica delle policy RLS. La 4.7 non va considerata operativa in produzione finche' tali test non sono completati.
