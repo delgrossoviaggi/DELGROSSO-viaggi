@@ -1,4 +1,4 @@
-const CACHE = 'delgrosso-gestionale-pwa-v48-contact-email';
+const CACHE = 'delgrosso-gestionale-pwa-v49-assistente-iphone';
 
 const APP_SHELL = [
   './',
@@ -35,7 +35,6 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Never interfere with Supabase/Auth/REST traffic.
   if (url.origin !== self.location.origin ||
       url.pathname.includes('/rest/v1/') ||
       url.pathname.includes('/auth/v1/') ||
@@ -44,11 +43,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML/navigation: network first, cached shell as offline fallback.
-  if (request.mode === 'navigate' ||
-      request.destination === 'document') {
+  if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((response) => {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
@@ -59,7 +56,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache first, then network.
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
