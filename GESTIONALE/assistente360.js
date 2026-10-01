@@ -207,3 +207,97 @@ function bootTrip(){injectTripCreator();setTimeout(injectTripCreator,1000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootTrip);else bootTrip();
 window.addEventListener('hashchange',()=>{if(location.hash==='#assistente')setTimeout(injectTripCreator,80)});
 })();
+
+
+/* V6.2 — Assistente Flotta: manutenzioni/scadenze multi-mezzo con anteprima e conferma */
+(function(){
+'use strict';
+let dgFleetDraft=null;
+const gx=id=>document.getElementById(id);
+const ge=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const gn=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function fleetLabel(v){return [v.titolo,v.marca,v.modello,v.targa].filter(Boolean).join(' · ')}
+function fleetMatches(raw){
+ const q=gn(raw), all=(state.flotta||[]).filter(v=>v.attivo!==false);
+ let chosen=[];
+ if(/tutti|tutte|tutti i mezzi|tutti i bus/.test(q)) chosen=[...all];
+ else chosen=all.filter(v=>{
+   const hay=gn([v.titolo,v.marca,v.modello,v.targa,v.categoria,v.descrizione].join(' '));
+   return q.split(/\s+/).filter(x=>x.length>2).some(x=>hay.includes(x));
+ });
+ if(/tranne|esclud/i.test(q)){
+   const ex=q.split(/tranne|esclud(?:i|endo)?/i)[1]||'';
+   const toks=gn(ex).split(/\s+/).filter(x=>x.length>2);
+   chosen=chosen.filter(v=>!toks.some(x=>gn(fleetLabel(v)).includes(x)));
+ }
+ return [...new Map(chosen.map(v=>[v.id,v])).values()];
+}
+function parseDate(raw){
+ let m=raw.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](20\d{2})\b/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+ const months={gennaio:1,febbraio:2,marzo:3,aprile:4,maggio:5,giugno:6,luglio:7,agosto:8,settembre:9,ottobre:10,novembre:11,dicembre:12};
+ const q=gn(raw);for(const [name,n] of Object.entries(months)){const z=q.match(new RegExp(name+'\\s+(20\\d{2})'));if(z)return `${z[1]}-${String(n).padStart(2,'0')}-31`}
+ return '';
+}
+function parseFleet(raw){
+ const q=gn(raw), vehicles=fleetMatches(raw), date=parseDate(raw), km=Number((raw.match(/\b(\d{3,7})\s*km\b/i)||[])[1]||0);
+ const cost=Number(String((raw.match(/(?:€|euro)\s*(\d+(?:[.,]\d{1,2})?)|(\d+(?:[.,]\d{1,2})?)\s*(?:€|euro)/i)||[])[1]||'0').replace(',','.'));
+ let kind='MANUTENZIONE',type='Altro';
+ if(/estintor/.test(q)){kind='SCADENZA';type='Estintori'}
+ else if(/assicuraz/.test(q)){kind='SCADENZA';type='Assicurazione'}
+ else if(/revision/.test(q)){kind='SCADENZA';type='Revisione'}
+ else if(/bollo/.test(q)){kind='SCADENZA';type='Bollo'}
+ else if(/tagliand/.test(q)){kind='MANUTENZIONE';type='Tagliando'}
+ else if(/pneumatic|gomme/.test(q)){kind='MANUTENZIONE';type='Pneumatici'}
+ return {raw,vehicles,date,km,cost,kind,type};
+}
+function injectFleet(){
+ const page=gx('page-assistente');if(!page||gx('assistantFleet360'))return;
+ const p=document.createElement('div');p.id='assistantFleet360';p.className='card';p.style.marginBottom='12px';
+ p.innerHTML=`<div class="card-head"><h3>🚌 Gestione Flotta intelligente</h3><span class="pill info">PC + iPHONE</span></div><div class="card-body">
+ <p style="margin-top:0;color:#607086">Scrivi una manutenzione o una scadenza in linguaggio naturale. Prima di modificare i dati vedrai sempre i mezzi interessati.</p>
+ <textarea id="assistantFleetText" rows="4" placeholder="Es: A tutti i mezzi tranne il Mercedes, gli estintori scadono a luglio 2027.&#10;Es: Il bus GT PB bianco ha fatto il tagliando oggi, 245000 km."></textarea>
+ <div class="quick-actions"><button class="btn btn-primary" onclick="dgPrepareFleetDraft()">🤖 Analizza flotta</button></div><div id="assistantFleetDraft" style="margin-top:12px"></div></div>`;
+ const a=gx('assistantTripCreator')||gx('assistant360Quick')||page.querySelector('.card');a.insertAdjacentElement('afterend',p);
+}
+window.dgPrepareFleetDraft=function(){
+ const raw=gx('assistantFleetText')?.value.trim();if(!raw)return toast('Scrivi cosa devo registrare sulla flotta',false);
+ dgFleetDraft=parseFleet(raw);renderFleet();
+};
+function renderFleet(){
+ const d=dgFleetDraft,b=gx('assistantFleetDraft');if(!d||!b)return;
+ if(!d.vehicles.length){b.innerHTML='<div class="statusline warn">⚠️ Non riesco a identificare con sicurezza il mezzo. Specifica nome, modello, colore o targa.</div>';return}
+ const today=new Date().toISOString().slice(0,10);
+ b.innerHTML=`<div class="module-card"><h3>👁️ Anteprima operazione flotta</h3>
+ <div class="statusline"><b>Mezzi interessati (${d.vehicles.length}):</b><br>${d.vehicles.map(v=>'• '+ge(fleetLabel(v))).join('<br>')}</div>
+ <div class="form-grid" style="margin-top:10px"><div class="field"><label>Operazione</label><select id="af_kind"><option ${d.kind==='MANUTENZIONE'?'selected':''}>MANUTENZIONE</option><option ${d.kind==='SCADENZA'?'selected':''}>SCADENZA</option></select></div>
+ <div class="field"><label>Tipo</label><input id="af_type" value="${ge(d.type)}"></div>
+ <div class="field"><label>${d.kind==='SCADENZA'?'Data scadenza':'Data intervento'}</label><input id="af_date" type="date" value="${ge(d.date||(d.kind==='MANUTENZIONE'?today:''))}"></div>
+ <div class="field"><label>Km</label><input id="af_km" type="number" min="0" value="${d.km||''}"></div>
+ <div class="field"><label>Costo €</label><input id="af_cost" type="number" min="0" step=".01" value="${d.cost||''}"></div>
+ <div class="field full"><label>Note</label><textarea id="af_note">${ge(d.raw)}</textarea></div></div>
+ <div class="statusline" style="margin-top:10px">🔐 Verranno aggiornati storico manutenzioni/scadenziario e audit. Nessuna scrittura prima della conferma.</div>
+ <div class="quick-actions" style="margin-top:10px"><button class="btn btn-green" onclick="dgConfirmFleetDraft()">✓ CONFERMA AGGIORNAMENTO</button><button class="btn btn-secondary" onclick="document.getElementById('assistantFleetDraft').innerHTML=''">Annulla</button></div></div>`;
+}
+async function auditFleet(v,action,data){try{await api('audit_log_gestionale','',{method:'POST',body:{azione:action,entita:'flotta',entita_id:v.id,descrizione:`Assistente DELGROSSO: ${action} - ${fleetLabel(v)}`,dati:data}})}catch(_){}}
+window.dgConfirmFleetDraft=async function(){
+ const d=dgFleetDraft;if(!d)return;
+ const kind=gx('af_kind').value,type=gx('af_type').value.trim(),date=gx('af_date').value,km=Number(gx('af_km').value||0),cost=Number(gx('af_cost').value||0),note=gx('af_note').value||null;
+ if(!type||!date)return toast('Inserisci tipo e data',false);
+ if(!confirm(`Confermi ${kind.toLowerCase()} "${type}" su ${d.vehicles.length} mezzo/i?\nData: ${date}\n\n${d.vehicles.map(fleetLabel).join('\n')}`))return;
+ try{
+  for(const v of d.vehicles){
+   if(kind==='SCADENZA'){
+    await api('scadenze_gestionale','',{method:'POST',body:{titolo:`${type} — ${fleetLabel(v)}`,descrizione:note,tipo:'FLOTTA',stato:'Aperta',priorita:'Media',data_scadenza:date,riferimento_tipo:'flotta',riferimento_id:v.id,note}});
+    await auditFleet(v,'SCADENZA_FLOTTA',{tipo:type,data_scadenza:date,note});
+   }else{
+    await api('manutenzioni_flotta','',{method:'POST',body:{flotta_id:v.id,tipo:type,descrizione:note,data_intervento:date,km:km||null,costo:cost||0,stato:'Completata',note}});
+    await auditFleet(v,'MANUTENZIONE_FLOTTA',{tipo:type,data_intervento:date,km:km||null,costo:cost||0,note});
+   }
+  }
+  toast(`Aggiornati ${d.vehicles.length} mezzi`);gx('assistantFleetDraft').innerHTML='';gx('assistantFleetText').value='';dgFleetDraft=null;await loadAll();
+ }catch(err){toast('Aggiornamento non completato: '+err.message,false)}
+};
+function boot(){injectFleet();setTimeout(injectFleet,1200)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+window.addEventListener('hashchange',()=>setTimeout(injectFleet,80));
+})();
