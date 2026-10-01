@@ -1,0 +1,7 @@
+DELGROSSO ASSISTENTE VIRTUALE 360° V9
+
+Regola: TU CHIEDI -> ANALISI DATI -> ANTEPRIMA -> TUA CONFERMA -> ESECUZIONE -> RICARICA SUPABASE -> AUDIT.
+
+Comprende prenotazioni, pagamenti/acconti/saldi, spostamento e annullamento prenotazioni, check-in, viaggi/locandine, pubblicazione viaggi, assegnazione mezzi, flotta/manutenzioni/scadenze, blocchi mezzi, attività, note cliente, ricerca 360, archivio, noleggi, economia, dossier viaggio, anomalie, priorità e disponibilità mezzi.
+
+PC e iPhone usano gli stessi dati Supabase. Rimane attivo il percorso iPhone già verificato. In caso di ambiguità l'assistente non indovina: richiede la selezione.
