@@ -1,0 +1,21 @@
+DELGROSSO — IPHONE SAFE LOADER V9
+==================================
+Questa soluzione NON modifica index.html e NON modifica Supabase.
+
+CARICARE nella cartella GESTIONALE:
+- iphone.html
+- iphone-loader.js
+
+Poi su iPhone aprire:
+https://delgrossoviaggi.it/GESTIONALE/iphone.html
+
+COME FUNZIONA
+iphone.html prende l'index.html già funzionante sul PC come testo.
+Prima che Safari lo interpreti, separa i blocchi JavaScript dall'HTML.
+Poi costruisce l'interfaccia e avvia gli script separatamente.
+In questo modo il codice JavaScript non può comparire come testo nella pagina.
+
+Il PC continua a usare index.html normalmente.
+
+Se questa modalità funziona correttamente, in un secondo passaggio si può
+rendere iphone.html l'ingresso automatico per iPhone senza cambiare il PC.
