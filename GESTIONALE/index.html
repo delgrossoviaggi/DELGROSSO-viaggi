@@ -627,6 +627,14 @@ html,body{background:var(--ref-bg)!important;color:var(--ref-text)!important}
  .fleet-carousel{height:165px!important}.fleet-carousel-img{height:108px!important}.fleet-caption{top:108px!important;height:57px!important}
 }
 @media(max-width:420px){.content{padding-left:5px!important;padding-right:5px!important}.metrics{gap:6px!important}.metric{padding:8px!important}.metric b{font-size:17px!important}.dl26-hero{height:205px!important}.dl26-hero-logo{width:160px!important}.dl26-static-hero-copy h1{font-size:22px!important}.topbar{margin-left:5px!important;margin-right:5px!important}}
+
+/* V5.7.1 - Assistente sempre raggiungibile su iPhone */
+@media(max-width:1000px){
+ .mobile-nav button{min-width:0!important;padding:7px 2px!important}
+ .mobile-nav button span{font-size:18px!important}
+ .mobile-nav button b{font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ .mobile-menu-grid button[onclick*="assistente"]{background:linear-gradient(90deg,#0a62c8,#084ea0)!important;color:#fff!important;font-weight:900!important}
+}
 </style>
 <script>
 (function(){
@@ -765,7 +773,7 @@ input,select,textarea,button{max-width:100%;font:inherit}
   .modal{padding:0!important;align-items:flex-end!important}.modal-box{width:100%!important;max-width:none!important;max-height:94dvh!important;border-radius:18px 18px 0 0!important;padding-bottom:env(safe-area-inset-bottom)}
   .modal-body{padding:14px!important}.modal-foot{position:sticky;bottom:0;background:#fff;z-index:2;flex-wrap:wrap;padding-bottom:calc(12px + env(safe-area-inset-bottom))!important}.modal-foot .btn{flex:1 1 130px}
   input,select,textarea{font-size:16px!important}
-  .mobile-nav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:70!important;width:100%!important}
+  .mobile-nav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:70!important;width:100%!important}
   .mobile-menu-panel{width:min(92vw,390px)!important;max-width:100%!important}
   .toast{left:10px!important;right:10px!important;bottom:calc(72px + env(safe-area-inset-bottom))!important;max-width:none!important}
   /* Dashboard hero remains the same identity, but fluid */
@@ -1088,7 +1096,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 </div>
 </main>
 <nav class="mobile-nav">
-<button onclick="go('dashboard')"><span>⌂</span><b>Home</b></button><button onclick="go('viaggi')"><span>🚌</span><b>Viaggi</b></button><button onclick="go('prenotazioni')"><span>▣</span><b>Pren.</b></button><button onclick="go('pagamenti')"><span>€</span><b>Pag.</b></button><button onclick="toggleMobileMenu()"><span>☰</span><b>Menu</b></button>
+<button onclick="go('dashboard')"><span>⌂</span><b>Home</b></button><button onclick="go('viaggi')"><span>🚌</span><b>Viaggi</b></button><button onclick="go('prenotazioni')"><span>▣</span><b>Pren.</b></button><button onclick="go('pagamenti')"><span>€</span><b>Pag.</b></button><button onclick="go('assistente')"><span>🤖</span><b>Assist.</b></button><button onclick="toggleMobileMenu()"><span>☰</span><b>Menu</b></button>
 </nav>
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
   <div class="mobile-menu-backdrop" onclick="toggleMobileMenu(false)"></div>
@@ -1109,6 +1117,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
       <button onclick="mobileGo('noleggi')">🚐<span>Noleggi</span></button>
       <button onclick="mobileGo('agenda')">📅<span>Agenda</span></button>
       <button onclick="mobileGo('comunicazioni')">🔔<span>Comunicazioni</span></button>
+      <button onclick="mobileGo('assistente')">🤖<span>Assistente DELGROSSO</span></button>
       <button onclick="mobileGo('documenti')">📄<span>Documenti</span></button>
       <button onclick="mobileGo('statistiche')">📊<span>Statistiche</span></button>
       <button onclick="mobileGo('backup')">💾<span>Backup & Export</span></button>
