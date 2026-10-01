@@ -354,8 +354,8 @@ function dateFromText(q){const m=String(q).match(/\b(\d{1,2})[\/.-](\d{1,2})(?:[
 function busyOn(v,date){
  const reasons=[];
  (state.viaggi||[]).filter(t=>t.autobus_id===v.id&&String(t.data_partenza||'').slice(0,10)===date&&!/annull/i.test(t.stato||'')).forEach(t=>reasons.push('Viaggio: '+tripName(t)));
- (state.dg_blocchi_flotta||[]).filter(b=>b.flotta_id===v.id&&date>=String(b.data_inizio||'').slice(0,10)&&date<=String(b.data_fine||'').slice(0,10)).forEach(b=>reasons.push('Blocco: '+(b.motivo||'mezzo non disponibile')));
- (state.noleggi_bus_mezzi||[]).filter(m=>m.flotta_id===v.id).forEach(m=>{const n=(state.noleggi_bus||[]).find(x=>x.id===m.noleggio_id);if(n&&date>=String(n.data_partenza||'').slice(0,10)&&date<=String(n.data_ritorno||n.data_partenza||'').slice(0,10))reasons.push('Noleggio: '+(n.id_noleggio||n.referente||'occupato'))});
+ (state.dgBlocchi||state.dg_blocchi_flotta||[]).filter(b=>b.flotta_id===v.id&&date>=String(b.data_inizio||'').slice(0,10)&&date<=String(b.data_fine||'').slice(0,10)).forEach(b=>reasons.push('Blocco: '+(b.motivo||'mezzo non disponibile')));
+ (state.noleggiMezzi||state.noleggi_bus_mezzi||[]).filter(m=>m.flotta_id===v.id).forEach(m=>{const n=(state.noleggi||state.noleggi_bus||[]).find(x=>x.id===m.noleggio_id);if(n&&date>=String(n.data_partenza||'').slice(0,10)&&date<=String(n.data_ritorno||n.data_partenza||'').slice(0,10))reasons.push('Noleggio: '+(n.id_noleggio||n.referente||'occupato'))});
  return reasons;
 }
 window.dgV7FleetAvailabilityPrompt=()=>{const q=prompt('Per quale data vuoi controllare i mezzi? Es. 20/12/2026');const d=dateFromText(q||'');if(!d)return toast('Data non riconosciuta',false);dgV7FleetAvailability(d)};
@@ -371,4 +371,30 @@ window.assistantUnderstand=async function(){
 function boot7(){capPanel();setTimeout(capPanel,1000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot7);else boot7();
 window.addEventListener('hashchange',()=>setTimeout(capPanel,80));
+})();
+
+
+/* DELGROSSO Assistente 360 V8.1 — governance operativa */
+(function(){
+'use strict';
+const N=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const H=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function out(html){const e=document.getElementById('assistantV7Output')||document.getElementById('assistantOutput');if(e)e.innerHTML=html}
+function explainSafety(raw){
+ const q=N(raw);
+ const destructive=/elimina|cancella|annulla|rimbor|sposta|modifica|assegna|registra|crea|aggiungi|imposta|scaden|tagliand|pagat|acconto|saldo/.test(q);
+ if(!destructive)return false;
+ out(`<div class="module-card"><h3>🛡️ Operazione controllata</h3><p>Ho riconosciuto una richiesta che può modificare il gestionale.</p><div class="statusline warn"><b>Richiesta:</b> ${H(raw)}</div><p>Prima di scrivere nel database devo identificare con certezza record, importi/date/posti e mostrarti l’anteprima. Se manca un dato non lo invento.</p><p><b>Nessuna modifica è stata eseguita da questo fallback.</b> Completa i dati richiesti oppure usa il flusso specifico dell’Assistente.</p></div>`);
+ return true;
+}
+const prev=window.assistantUnderstand;
+window.assistantUnderstand=async function(){
+ const raw=document.getElementById('assistantCommand')?.value?.trim()||'';
+ if(!raw)return prev?prev():undefined;
+ const known=/cosa (?:puoi|sai) fare|aiuto assistente|comandi assistente|(?:mezzi|autobus|bus).*(?:liber|disponibil)|(?:liber|disponibil).*(?:mezzi|autobus|bus)|^(?:cerca|trova)\s+|locandina|estintor|tagliand|assicuraz|revisione|bollo|pneumatic|prenot|acconto|saldo|pagamento|posti|check.?in|preparami|anomali|situazione|incass|residuo/i.test(N(raw));
+ if(known&&prev)return prev();
+ if(explainSafety(raw))return;
+ return prev?prev():undefined;
+};
+window.dgAssistantPolicy={version:'8.1',writesRequirePreview:true,writesRequireConfirmation:true,ambiguityNeverGuessed:true,verifyAfterWrite:true};
 })();
