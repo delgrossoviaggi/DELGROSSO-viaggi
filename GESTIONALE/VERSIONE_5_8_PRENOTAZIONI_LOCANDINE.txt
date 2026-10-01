@@ -1,0 +1,9 @@
+DELGROSSO V5.8
+- Prenotazione pubblica verificata su RPC create_public_booking_v3 con transazione rollback: success=true.
+- Fix trigger flotta già applicato al Supabase gestionale: gli aggiornamenti conteggio posti non devono bloccare le prenotazioni.
+- Fix generazione conferma: search_path public, extensions.
+- Nuovo caricamento locandina in Nuovo/Modifica viaggio.
+- Upload nel bucket pubblico Supabase locandine e salvataggio URL nel campo viaggi.locandina.
+- Anteprima locandina, sostituzione e rimozione.
+- Compatibile PC/iPhone (input file Foto, UI responsive esistente).
+- Il sito pubblico usa già viaggi.locandina come immagine prioritaria.
