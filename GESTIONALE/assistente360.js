@@ -301,3 +301,74 @@ function boot(){injectFleet();setTimeout(injectFleet,1200)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 window.addEventListener('hashchange',()=>setTimeout(injectFleet,80));
 })();
+
+
+/* V7 — DELGROSSO 360: catalogo capacità + ricerca universale + disponibilità flotta + operazioni controllate */
+(function(){
+'use strict';
+const V7={};
+const $7=id=>document.getElementById(id);
+const h7=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const n7=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function tripName(v){return v?.titolo||v?.destinazione||v?.id_viaggio||'Viaggio'}
+function clientName(c){return [c?.nome,c?.cognome].filter(Boolean).join(' ')||c?.cliente||c?.nominativo||''}
+function vehicleName(v){return [v?.titolo,v?.marca,v?.modello,v?.targa].filter(Boolean).join(' · ')}
+function capPanel(){
+ const page=$7('page-assistente');if(!page||$7('assistantV7Capabilities'))return;
+ const p=document.createElement('div');p.id='assistantV7Capabilities';p.className='card';p.style.marginBottom='12px';
+ p.innerHTML=`<div class="card-head"><h3>✨ Cosa posso fare nel Gestionale</h3><span class="pill success">V7 · 360°</span></div>
+ <div class="card-body"><div class="cards">
+ ${[
+ ['🚌 Viaggi','Crea viaggio da locandina + informazioni, controlla posti/fermate/riempimento, prepara dossier partenza.'],
+ ['👥 Prenotazioni','Cerca prenotazioni e clienti, interpreta richieste incollate da WhatsApp, prepara modifiche con conferma.'],
+ ['💶 Pagamenti','Acconti/saldi con controllo del cliente e del viaggio; riepiloghi incassato e residuo.'],
+ ['💺 Posti & check-in','Disponibilità, posti assegnati, mancanti al check-in e controllo operativo della partenza.'],
+ ['🔧 Flotta','Tagliandi, manutenzioni, estintori/revisioni/assicurazioni, scadenze multiple e disponibilità mezzi per data.'],
+ ['📅 Centro operativo','Scadenze, attività, anomalie, priorità e “Cosa devo fare adesso?”.'],
+ ['📁 Archivio','Ricerca documenti/ricevute collegate a cliente, viaggio, prenotazione o pagamento.'],
+ ['📊 Economia','Riepilogo viaggio, incassi/residui e movimenti economici già presenti nel gestionale.'],
+ ['🚍 Noleggi bus','Consulta noleggi, date, mezzi e conflitti di disponibilità.'],
+ ['🔎 Ricerca 360','Cerca per nome, telefono, codice prenotazione, destinazione, data, targa o mezzo.']
+ ].map(x=>`<div class="card" style="padding:12px"><b>${x[0]}</b><div style="margin-top:5px;color:#607086">${x[1]}</div></div>`).join('')}
+ </div><div class="quick-actions" style="margin-top:12px">
+ <button class="btn btn-secondary" onclick="dgV7Help()">📖 Esempi comandi</button>
+ <button class="btn btn-secondary" onclick="dgV7UniversalSearchPrompt()">🔎 Ricerca 360</button>
+ <button class="btn btn-secondary" onclick="dgV7FleetAvailabilityPrompt()">🚌 Mezzi liberi</button>
+ </div><div id="assistantV7Output" style="margin-top:12px"></div></div>`;
+ const first=page.querySelector('.card'); first?first.insertAdjacentElement('afterend',p):page.appendChild(p);
+}
+window.dgV7Help=()=>{$7('assistantV7Output').innerHTML=`<div class="module-card"><b>Puoi scrivermi, per esempio:</b><br><br>
+“Preparami Assisi” · “Quanti posti rimangono per Napoli?” · “Chi deve ancora pagare l’acconto?” · “Cerca Mario Rossi” · “Quali mezzi sono liberi il 20 dicembre?” · “Il PB bianco ha fatto il tagliando” · “A tutti i mezzi tranne il Mercedes gli estintori scadono a luglio 2027” · “Controlla le anomalie” · “Fammi il punto della situazione”.<br><br>
+<b>Regola:</b> letture e controlli sono immediati; creazioni/modifiche richiedono anteprima e conferma.</div>`};
+function allSearch(q){
+ const x=n7(q), rows=[];
+ (state.clienti||[]).forEach(c=>{const hay=n7([clientName(c),c.telefono,c.email,c.codice_cliente,c.citta].join(' '));if(hay.includes(x))rows.push(['Cliente',clientName(c),c.telefono||c.email||'',c.id])});
+ (state.prenotazioni||[]).forEach(p=>{const hay=n7([p.cliente,p.nominativo,p.nome,p.cognome,p.telefono,p.email,p.codice_prenotazione,p.id_prenotazione,p.fermata_partenza].join(' '));if(hay.includes(x)){const v=(state.viaggi||[]).find(v=>v.id===p.viaggio_id);rows.push(['Prenotazione',p.cliente||p.nominativo||[p.nome,p.cognome].filter(Boolean).join(' '),tripName(v),p.id])}});
+ (state.viaggi||[]).forEach(v=>{if(n7([tripName(v),v.destinazione,v.data_partenza,v.id_viaggio].join(' ')).includes(x))rows.push(['Viaggio',tripName(v),String(v.data_partenza||'').slice(0,10),v.id])});
+ (state.flotta||[]).forEach(v=>{if(n7(vehicleName(v)).includes(x))rows.push(['Mezzo',vehicleName(v),v.stato||'',v.id])});
+ return rows;
+}
+window.dgV7UniversalSearchPrompt=()=>{const q=prompt('Cosa vuoi cercare? Nome, telefono, codice, viaggio, destinazione, targa...');if(q)dgV7UniversalSearch(q)};
+window.dgV7UniversalSearch=function(q){const rows=allSearch(q);$7('assistantV7Output').innerHTML=rows.length?`<div class="module-card"><h3>🔎 Risultati per “${h7(q)}”</h3>${rows.slice(0,40).map(r=>`<div class="statusline"><b>${h7(r[0])}</b> · ${h7(r[1])}<br><small>${h7(r[2])}</small></div>`).join('')}</div>`:`<div class="statusline warn">Nessun risultato per “${h7(q)}”.</div>`};
+function dateFromText(q){const m=String(q).match(/\b(\d{1,2})[\/.-](\d{1,2})(?:[\/.-](20\d{2}))?\b/);if(m)return `${m[3]||new Date().getFullYear()}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;const months={gennaio:1,febbraio:2,marzo:3,aprile:4,maggio:5,giugno:6,luglio:7,agosto:8,settembre:9,ottobre:10,novembre:11,dicembre:12};const s=n7(q);for(const [k,v] of Object.entries(months)){const z=s.match(new RegExp('(\\d{1,2})\\s+'+k+'(?:\\s+(20\\d{2}))?'));if(z)return `${z[2]||new Date().getFullYear()}-${String(v).padStart(2,'0')}-${z[1].padStart(2,'0')}`}return ''}
+function busyOn(v,date){
+ const reasons=[];
+ (state.viaggi||[]).filter(t=>t.autobus_id===v.id&&String(t.data_partenza||'').slice(0,10)===date&&!/annull/i.test(t.stato||'')).forEach(t=>reasons.push('Viaggio: '+tripName(t)));
+ (state.dg_blocchi_flotta||[]).filter(b=>b.flotta_id===v.id&&date>=String(b.data_inizio||'').slice(0,10)&&date<=String(b.data_fine||'').slice(0,10)).forEach(b=>reasons.push('Blocco: '+(b.motivo||'mezzo non disponibile')));
+ (state.noleggi_bus_mezzi||[]).filter(m=>m.flotta_id===v.id).forEach(m=>{const n=(state.noleggi_bus||[]).find(x=>x.id===m.noleggio_id);if(n&&date>=String(n.data_partenza||'').slice(0,10)&&date<=String(n.data_ritorno||n.data_partenza||'').slice(0,10))reasons.push('Noleggio: '+(n.id_noleggio||n.referente||'occupato'))});
+ return reasons;
+}
+window.dgV7FleetAvailabilityPrompt=()=>{const q=prompt('Per quale data vuoi controllare i mezzi? Es. 20/12/2026');const d=dateFromText(q||'');if(!d)return toast('Data non riconosciuta',false);dgV7FleetAvailability(d)};
+window.dgV7FleetAvailability=function(date){const vs=(state.flotta||[]).filter(v=>v.attivo!==false);$7('assistantV7Output').innerHTML=`<div class="module-card"><h3>🚌 Disponibilità mezzi · ${h7(date)}</h3>${vs.map(v=>{const r=busyOn(v,date);return `<div class="statusline ${r.length?'warn':'success'}"><b>${h7(vehicleName(v))}</b> — ${r.length?'OCCUPATO':'LIBERO'}${r.length?'<br><small>'+h7(r.join(' · '))+'</small>':''}</div>`}).join('')}</div>`};
+const oldUnderstand=window.assistantUnderstand;
+window.assistantUnderstand=async function(){
+ const raw=$7('assistantCommand')?.value?.trim()||'', q=n7(raw);
+ if(/cosa (?:puoi|sai) fare|aiuto assistente|comandi assistente/.test(q)){dgV7Help();return}
+ if(/(?:mezzi|autobus|bus).*(?:liber|disponibil)|(?:liber|disponibil).*(?:mezzi|autobus|bus)/.test(q)){await loadAll();const d=dateFromText(raw);if(!d){$7('assistantV7Output').innerHTML='<div class="statusline warn">Indicami anche la data, per esempio: “Quali mezzi sono liberi il 20/12/2026?”</div>';return}dgV7FleetAvailability(d);return}
+ if(/^(?:cerca|trova)\s+/.test(q)){await loadAll();dgV7UniversalSearch(raw.replace(/^(cerca|trova)\s+/i,''));return}
+ return oldUnderstand?oldUnderstand():undefined;
+};
+function boot7(){capPanel();setTimeout(capPanel,1000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot7);else boot7();
+window.addEventListener('hashchange',()=>setTimeout(capPanel,80));
+})();
