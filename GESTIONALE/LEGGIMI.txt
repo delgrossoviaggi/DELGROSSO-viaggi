@@ -1,21 +1,24 @@
-DELGROSSO — IPHONE SAFE LOADER V9
-==================================
-Questa soluzione NON modifica index.html e NON modifica Supabase.
+DELGROSSO — AVVIO AUTOMATICO IPHONE V10
+========================================
 
-CARICARE nella cartella GESTIONALE:
-- iphone.html
-- iphone-loader.js
+Ora che iphone.html funziona, questo pacchetto rende automatico il passaggio.
 
-Poi su iPhone aprire:
-https://delgrossoviaggi.it/GESTIONALE/iphone.html
+1. Lascia nella cartella GESTIONALE i file V9 già funzionanti:
+   - iphone.html
+   - iphone-loader.js
 
-COME FUNZIONA
-iphone.html prende l'index.html già funzionante sul PC come testo.
-Prima che Safari lo interpreti, separa i blocchi JavaScript dall'HTML.
-Poi costruisce l'interfaccia e avvia gli script separatamente.
-In questo modo il codice JavaScript non può comparire come testo nella pagina.
+2. Carica anche:
+   - iphone-auto.js
 
-Il PC continua a usare index.html normalmente.
+3. Apri GESTIONALE/index.html e, SUBITO DOPO il tag <head>, aggiungi:
+   <script src="./iphone-auto.js?v=10"></script>
 
-Se questa modalità funziona correttamente, in un secondo passaggio si può
-rendere iphone.html l'ingresso automatico per iPhone senza cambiare il PC.
+RISULTATO
+- iPhone: aprendo il normale /GESTIONALE/ viene mandato automaticamente a iphone.html.
+- PC: continua ad aprire index.html come adesso.
+- Android/iPad: restano sulla versione normale.
+- Supabase non viene modificato.
+
+EMERGENZA / TEST DESKTOP SU IPHONE
+Se serve evitare temporaneamente il reindirizzamento:
+index.html?desktop=1
