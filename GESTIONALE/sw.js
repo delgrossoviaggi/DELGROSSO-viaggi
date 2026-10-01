@@ -1,6 +1,71 @@
-const CACHE = 'delgrosso-gestionale-pwa-v53-assistente-v7';
-const APP_SHELL = ['./','./index.html','./assistente360.js','./manifest.webmanifest','./assets/delgrosso-app-icon-180.png','./assets/delgrosso-app-icon-152.png','./assets/delgrosso-app-icon-512.png','./assets/delgrosso-app-icon-1024.png','./assets/delgrosso-logo-iphone-ui.png'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-async function htmlWithAssistant(request){const response=await fetch(request,{cache:'no-store'});if(!response.ok)return response;let html=await response.text();if(!html.includes('assistente360.js'))html=html.replace('</body>','<script src="./assistente360.js?v=7.0"></script></body>');return new Response(html,{status:response.status,statusText:response.statusText,headers:new Headers(response.headers)})}
-self.addEventListener('fetch',event=>{const r=event.request;if(r.method!=='GET')return;const u=new URL(r.url);if(u.origin!==self.location.origin||u.pathname.includes('/rest/v1/')||u.pathname.includes('/auth/v1/')||u.pathname.includes('/storage/v1/')||u.pathname.includes('/realtime/'))return;if(r.mode==='navigate'||r.destination==='document'){event.respondWith(htmlWithAssistant(r).catch(()=>caches.match('./index.html')));return}event.respondWith(caches.match(r).then(c=>c||fetch(r).then(resp=>{if(resp&&resp.ok)caches.open(CACHE).then(cache=>cache.put(r,resp.clone()));return resp})))});
+const CACHE='delgrosso-gestionale-pwa-v54-safe-v7-1';
+const OPTIONAL=['./assistente360.js','./manifest.webmanifest'];
+
+self.addEventListener('install',event=>{
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    for(const url of OPTIONAL){
+      try{
+        const r=await fetch(url,{cache:'no-store'});
+        if(r.ok) await cache.put(url,r.clone());
+      }catch(e){}
+    }
+    await self.skipWaiting();
+  })());
+});
+
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
+
+async function navigation(request){
+  try{
+    const r=await fetch(request,{cache:'no-store'});
+    if(!r.ok) return r;
+    let html=await r.text();
+    if(!html.includes('assistente360.js')){
+      html=html.replace('</body>','<script src="./assistente360.js?v=7.1"></script></body>');
+    }
+    const headers=new Headers(r.headers);
+    headers.set('Cache-Control','no-store, no-cache, must-revalidate');
+    return new Response(html,{status:r.status,statusText:r.statusText,headers});
+  }catch(e){
+    const cached=await caches.match(request);
+    if(cached) return cached;
+    return new Response(
+      '<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>DELGROSSO</title><body style="font-family:system-ui;padding:24px"><h2>DELGROSSO Gestionale</h2><p>Connessione non disponibile. Riprova quando sei online.</p></body>',
+      {headers:{'Content-Type':'text/html; charset=utf-8'}}
+    );
+  }
+}
+
+self.addEventListener('fetch',event=>{
+  const r=event.request;
+  if(r.method!=='GET') return;
+  const u=new URL(r.url);
+  if(u.origin!==self.location.origin) return;
+
+  if(r.mode==='navigate'||r.destination==='document'){
+    event.respondWith(navigation(r));
+    return;
+  }
+
+  if(u.pathname.endsWith('/assistente360.js')){
+    event.respondWith((async()=>{
+      try{
+        const fresh=await fetch(r,{cache:'no-store'});
+        if(fresh.ok){
+          const c=await caches.open(CACHE);
+          await c.put(r,fresh.clone());
+        }
+        return fresh;
+      }catch(e){
+        return (await caches.match(r)) || new Response('',{status:503});
+      }
+    })());
+  }
+});
