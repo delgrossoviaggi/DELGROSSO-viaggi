@@ -118,7 +118,7 @@ window.deleteWrongPayment=async function(kind,id){
     await loadAll();
     if(typeof dgRenderOperatorCash==='function')dgRenderOperatorCash();
   }catch(e){
-    toast('Pagamento non eliminato: '+e.message,false);
+    const msg=e?.message||String(e);toast('Eliminazione non riuscita: '+msg,false);console.error('delete payment',e);
   }
 };
 
