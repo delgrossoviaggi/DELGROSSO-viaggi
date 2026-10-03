@@ -73,7 +73,7 @@ async function rpc(name,body){
 }
 async function signIn(username,password){
   const u=username.trim().toLowerCase();
-  const operators={nicola:{email:'nicola@delgrossoviaggi.it',name:'Nicola'},raffaele:{email:'nicola@delgrossoviaggi.it',name:'Raffaele'}};
+  const operators={nicola:{email:'nicola@delgrossoviaggi.it',name:'Nicola'},raffaele:{email:'info@delgrossoviaggi.it',name:'Raffaele'}};
   const op=operators[u]||null;
   const email=op?op.email:u;
   if(op) currentOperator={username:u,name:op.name,role:'Amministratore'};

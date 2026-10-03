@@ -1150,7 +1150,7 @@ const state={
   page:'dashboard',online:false,
   viaggi:[],prenotazioni:[],clienti:[],pagamenti:[],flotta:[],notifiche:[],assistenteEventi:[],assistenteAcconti:[],
   checkin:[],preventivi:[],impostazioni:[],viaggiFermate:[],
-  noleggi:[],noleggiMezzi:[],noleggiPagamenti:[],
+  noleggi:[],noleggiMezzi:[],noleggiPagamenti:[],cassaOperatori:[],
   prenotazionePosti:[],attivita:[],scadenze:[],audit:[],economia:[],carburante:[],manutenzioni:[],archivioDocumenti:[],anomalie:[],checklist:[],syncErrors:[]
 };
 // === PERFORMANCE ENGINE 4.1 ===
@@ -1245,7 +1245,7 @@ async function rpc(name,body){
 }
 async function signIn(username,password){
   const u=username.trim().toLowerCase();
-  const operators={nicola:{email:'nicola@delgrossoviaggi.it',name:'Nicola'},raffaele:{email:'nicola@delgrossoviaggi.it',name:'Raffaele'}};
+  const operators={nicola:{email:'nicola@delgrossoviaggi.it',name:'Nicola'},raffaele:{email:'info@delgrossoviaggi.it',name:'Raffaele'}};
   const op=operators[u]||null;
   const email=op?op.email:u;
   if(op) currentOperator={username:u,name:op.name,role:'Amministratore'};
@@ -1326,7 +1326,7 @@ async function loadAll(){
     ['viaggi','select=*&order=data_partenza.asc'],['viaggi_fermate','select=*&order=viaggio_id.asc,ordine.asc'],['prenotazioni','select=*&order=created_at.desc'],['clienti','select=*&order=created_at.desc'],
     ['pagamenti','select=*&order=data_pagamento.desc,created_at.desc'],['flotta','select=*&order=marca.asc'],['notifiche','select=*&order=created_at.desc'],['assistente_eventi','select=*&order=created_at.desc&limit=100'],['dg_assistente_acconti','select=*&order=scadenza_acconto.asc'],
     ['accessi_checkin','select=*&order=created_at.desc'],['preventivi','select=*&order=created_at.desc'],['impostazioni','select=*&order=created_at.desc'],
-    ['noleggi_bus','select=*&order=data_partenza.asc'],['noleggi_bus_mezzi','select=*&order=created_at.desc'],['noleggi_bus_pagamenti','select=*&order=data_pagamento.desc,created_at.desc'],
+    ['noleggi_bus','select=*&order=data_partenza.asc'],['noleggi_bus_mezzi','select=*&order=created_at.desc'],['noleggi_bus_pagamenti','select=*&order=data_pagamento.desc,created_at.desc'],['dg_cassa_operatori','select=*&order=nome.asc'],
     ['prenotazione_posti','select=*&order=created_at.desc'],['attivita_gestionale','select=*&order=created_at.desc'],['scadenze_gestionale','select=*&order=data_scadenza.asc'],
     ['audit_log_gestionale','select=*&order=created_at.desc&limit=150'],['archivio_documenti','select=*&order=updated_at.desc'],
     ['economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'],['carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'],
@@ -1335,12 +1335,12 @@ async function loadAll(){
   const results=await Promise.allSettled(specs.map(x=>api(x[0],x[1])));
   const data={}, failed=[];
   results.forEach((r,i)=>{const name=specs[i][0]; if(r.status==='fulfilled') data[name]=r.value||[]; else {data[name]=state[name]||[]; failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}});
-  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:data.impostazioni||[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],syncErrors:failed,online:failed.length<specs.length});
+  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:data.impostazioni||[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],syncErrors:failed,online:failed.length<specs.length});
   if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<specs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
   if(failed.length===specs.length){try{const raw=localStorage.getItem('dg_state_cache');const c=raw?JSON.parse(raw):null;if(c?.data){Object.assign(state,c.data);state.online=false;log("Caricata cache locale dell'ultima sincronizzazione valida");}}catch(e){log('Cache locale non disponibile: '+e.message)}}
   markSynced();
   try{if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;await rpc('dg_reconcile_payments_economia',{});}}catch(e){log('Riconciliazione Economia: '+e.message)}
-  try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,viaggiFermate:state.viaggiFermate,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti,anomalie:state.anomalie,checklist:state.checklist}}));}catch{}
+  try{localStorage.setItem('dg_state_cache',JSON.stringify({ts:Date.now(),data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,checkin:state.checkin,preventivi:state.preventivi,impostazioni:state.impostazioni,viaggiFermate:state.viaggiFermate,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,cassaOperatori:state.cassaOperatori,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti,anomalie:state.anomalie,checklist:state.checklist}}));}catch{}
   renderPage(state.page);updateBadge();initFleetCarousels();if(typeof renderPro==='function')renderPro();
   if(failed.length)toast('Sincronizzazione parziale: '+failed.length+' modulo/i non disponibili. Gli altri restano operativi.',false);
   return {ok:failed.length===0,failed};
@@ -2210,7 +2210,7 @@ function mobileGo(page){toggleMobileMenu(false);go(page);window.setTimeout(()=>w
 <script>
 (function(){
 window.downloadBackup=async function(){
-  const data={version:'4.1',created_at:new Date().toISOString(),project:'chkuayhbmitdmzmmvona',data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,preventivi:state.preventivi,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti,anomalie:state.anomalie,checklist:state.checklist}};
+  const data={version:'4.1',created_at:new Date().toISOString(),project:'chkuayhbmitdmzmmvona',data:{viaggi:state.viaggi,prenotazioni:state.prenotazioni,clienti:state.clienti,pagamenti:state.pagamenti,flotta:state.flotta,notifiche:state.notifiche,preventivi:state.preventivi,noleggi:state.noleggi,noleggiMezzi:state.noleggiMezzi,noleggiPagamenti:state.noleggiPagamenti,cassaOperatori:state.cassaOperatori,prenotazionePosti:state.prenotazionePosti,attivita:state.attivita,scadenze:state.scadenze,audit:state.audit,economia:state.economia,carburante:state.carburante,manutenzioni:state.manutenzioni,archivioDocumenti:state.archivioDocumenti,anomalie:state.anomalie,checklist:state.checklist}};
   const text=JSON.stringify(data,null,2),blob=new Blob([text],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='DELGROSSO_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);try{await api('backup_log_gestionale','',{method:'POST',body:{tipo:'JSON',dimensione_bytes:blob.size,record_counts:Object.fromEntries(Object.entries(data.data).map(([k,v])=>[k,Array.isArray(v)?v.length:0]))}})}catch{}toast('Backup JSON creato');
 };
 window.restoreBackupPicker=function(){$('backupFile')?.click()};
@@ -2262,8 +2262,11 @@ window.addEventListener('load',()=>{setTimeout(()=>{if(state.page==='pro')render
 })();
 </script>
 
-<script src="./pagamenti-noleggi-v2.js?v=4"></script>
-<script src="./assistente-ai360.js?v=4"></script>
-<script src="./flotta-estintori-v3.js?v=3"></script>
+<script src="./pagamenti-noleggi-v2.js?v=6"></script>
+<script src="./assistente-ai360.js?v=6"></script>
+<script src="./flotta-estintori-v3.js?v=6"></script>
+
+<script src="./operator-cassa-v6.js?v=6"></script>
+<script src="./core-rescue-v6.js?v=6"></script>
 </body>
 </html>

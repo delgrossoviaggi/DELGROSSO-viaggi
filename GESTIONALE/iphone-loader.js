@@ -17,7 +17,7 @@
     }
 
     msg('Caricamento interfaccia…');
-    const res=await fetch('./index.html?iphone_safe=9&t='+Date.now(),{cache:'no-store',credentials:'same-origin'});
+    const res=await fetch('./index.html?iphone_safe=6&t='+Date.now(),{cache:'no-store',credentials:'same-origin'});
     if(!res.ok) throw new Error('Impossibile caricare index.html ('+res.status+')');
     let html=await res.text();
 
