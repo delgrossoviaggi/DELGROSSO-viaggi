@@ -1,0 +1,14 @@
+DELGROSSO Gestionale — Flotta Estintori V3
+
+Aggiunto nella sezione Flotta:
+- pulsante dedicato "Scadenza estintori"
+- gestione dei 3 Bus GT + Limousine Bus
+- Mercedes V250D escluso dalla gestione estintori richiesta
+- selezione multipla dei mezzi
+- data scadenza, priorità e note
+- aggiornamento della scadenza esistente senza duplicarla
+- badge scadenza direttamente sulle schede mezzo
+- pannello riepilogo scadenze estintori
+- stato visivo: regolare / entro 90 giorni / entro 30 giorni / scaduta
+- audit dell'aggiornamento
+- Assistente AI aggiornato per applicare la scadenza estintori ai mezzi corretti
