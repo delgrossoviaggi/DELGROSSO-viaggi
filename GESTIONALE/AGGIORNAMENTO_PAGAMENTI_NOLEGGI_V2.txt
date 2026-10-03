@@ -1,0 +1,23 @@
+DELGROSSO GESTIONALE — ASSISTENTE AI 360 V2
+
+NOVITÀ PAGAMENTI
+- Pagamenti unificati: Viaggi/Prenotazioni + Noleggi Bus/NCC/Limousine.
+- Dalla pagina Pagamenti puoi scegliere il tipo di origine.
+- Per i noleggi puoi registrare: Acconto, Saldo, Rimborso.
+- Il noleggio aggiorna automaticamente Pagato/Residuo/Stato pagamento.
+- I movimenti del noleggio restano nello storico noleggi_bus_pagamenti.
+- I pagamenti noleggio entrano anche nel riepilogo incassi Pagamenti.
+- Pulsante Pagamento direttamente nella riga del noleggio.
+- Ricevuta stampabile del pagamento noleggio.
+
+ASSISTENTE AI
+- Supporta register_rental_payment.
+- Frasi esempio:
+  "Isabella D'Amico mi ha dato 500 euro di acconto per il noleggio, bonifico"
+  "Registra il saldo del noleggio di Isabella D'Amico, 1900 euro"
+  "Quanto manca da pagare per il noleggio di Isabella?"
+- Prima della scrittura resta obbligatoria la conferma.
+
+SUPABASE
+- Aggiunta RPC autenticata: dg_register_rental_payment(...)
+- Edge Function AI aggiornata: delgrosso-ai360-v2

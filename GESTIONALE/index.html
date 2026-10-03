@@ -938,9 +938,9 @@ input,select,textarea,button{max-width:100%;font:inherit}
 </section>
 
 <section class="page" id="page-pagamenti">
-  <div class="section-title"><h2>Pagamenti</h2><button class="btn btn-primary" onclick="openPaymentModal()">+ Registra pagamento</button></div>
+  <div class="section-title"><h2>Pagamenti</h2><button class="btn btn-primary" onclick="openPaymentModal()">+ Registra acconto / saldo</button></div>
   <div class="cards" id="paymentSummary"></div>
-  <div class="card table-card" style="margin-top:12px"><table class="table"><thead><tr><th>Data</th><th>Ricevuta</th><th>Cliente</th><th>Viaggio</th><th>Tipo</th><th>Importo</th><th>Metodo</th><th>Stato</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
+  <div class="card table-card" style="margin-top:12px"><table class="table"><thead><tr><th>Data</th><th>Origine / Ricevuta</th><th>Cliente</th><th>Viaggio / Noleggio</th><th>Tipo</th><th>Importo</th><th>Metodo</th><th>Stato</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
 </section>
 
 <section class="page" id="page-operativo">
@@ -1689,7 +1689,7 @@ async function saveMaintenance(id){const cost=Math.round((Number($('ma_cost').va
 function renderRentals(){
  const q=($('rentalSearch')?.value||'').toLowerCase(), st=$('rentalStatus')?.value||'';
  const rows=state.noleggi.filter(r=>(!q||JSON.stringify(r).toLowerCase().includes(q))&&(!st||r.stato_noleggio===st));
- $('rentalsTable').innerHTML=rows.map(r=>`<tr><td><b>${esc(r.id_noleggio||r.id?.slice(0,8))}</b></td><td>${esc(r.referente||r.azienda||'—')}<br><small>${esc(r.telefono||'')}</small></td><td>${esc(r.tratta_partenza)} → ${esc(r.tratta_destinazione)}</td><td>${dateIT(r.data_partenza)}<br><small>${r.ora_partenza||''}</small></td><td>${r.passeggeri||0}</td><td>${money(r.prezzo_concordato)}</td><td>${esc(r.stato_pagamento||'Da pagare')}<br><small>Acc. ${money(r.acconto)} · Saldo ${money(r.saldo)}</small></td><td><span class="pill ${r.stato_noleggio==='Completato'?'ok':r.stato_noleggio==='Annullato'?'danger':'info'}">${esc(r.stato_noleggio||'Richiesto')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openRentalModal('${r.id}')">Apri</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessun noleggio.</td></tr>';}
+ $('rentalsTable').innerHTML=rows.map(r=>`<tr><td><b>${esc(r.id_noleggio||r.id?.slice(0,8))}</b></td><td>${esc(r.referente||r.azienda||'—')}<br><small>${esc(r.telefono||'')}</small></td><td>${esc(r.tratta_partenza)} → ${esc(r.tratta_destinazione)}</td><td>${dateIT(r.data_partenza)}<br><small>${r.ora_partenza||''}</small></td><td>${r.passeggeri||0}</td><td>${money(r.prezzo_concordato)}</td><td>${esc(r.stato_pagamento||'Da pagare')}<br><small>Acc. ${money(r.acconto)} · Saldo ${money(r.saldo)}</small></td><td><span class="pill ${r.stato_noleggio==='Completato'?'ok':r.stato_noleggio==='Annullato'?'danger':'info'}">${esc(r.stato_noleggio||'Richiesto')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openRentalModal('${r.id}')">Apri</button> <button class="btn btn-green btn-sm" onclick="openPaymentModal('rental:${r.id}')">💶 Pagamento</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessun noleggio.</td></tr>';}
 
 
 /* 4.7: calendario flotta. Il controllo definitivo contro assegnazioni concorrenti
@@ -2208,6 +2208,7 @@ window.addEventListener('load',()=>{setTimeout(()=>{if(state.page==='pro')render
 })();
 </script>
 
-<script src="./assistente-ai360.js?v=1"></script>
+<script src="./pagamenti-noleggi-v2.js?v=2"></script>
+<script src="./assistente-ai360.js?v=2"></script>
 </body>
 </html>
