@@ -888,7 +888,7 @@ input,select,textarea,button{max-width:100%;font:inherit}
   <div class="top-brand"><div class="mini"><img src="assets/delgrosso-logo-white-transparent.png" alt="DELGROSSO"></div><div><strong id="topPageTitle">Dashboard</strong><small id="topPageSubtitle">Panoramica generale del gestionale</small></div></div>
   <div class="search"><span>⌕</span><input id="globalSearch" placeholder="Cerca viaggi, clienti, prenotazioni..."></div>
   <div class="top-clock" aria-label="Data e ora"><span>▣</span><div><small id="topDate">—</small><b id="topTime">--:--</b></div></div>
-  <div class="top-actions"><span class="sync-pill" id="syncPill">● Supabase</span><button class="bell" id="notifBtn">🔔<span class="badge" id="notifBadge">0</span></button><div class="user"><div class="avatar">NC</div><div><b>Nicola</b><small style="display:block;color:#72839a">Amministratore</small></div></div></div>
+  <div class="top-actions"><span class="sync-pill" id="syncPill">● Supabase</span><button class="bell" id="notifBtn">🔔<span class="badge" id="notifBadge">0</span></button><div class="user"><div class="avatar" id="currentOperatorAvatar">DG</div><div><b id="currentOperatorTopName">Operatore</b><small id="currentOperatorTopRole" style="display:block;color:#72839a">Amministratore</small></div></div></div>
 </header>
 
 <div class="content">
@@ -1089,7 +1089,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
   <div class="section-title"><h2>Impostazioni</h2></div>
   <div class="cards">
     <div class="module-card"><h3>🔗 Connessione Supabase</h3><p>Progetto collegato: chkuayhbmitdmzmmvona</p><div class="statusline" id="connectionStatus">Controllo...</div><button class="btn btn-secondary btn-sm" onclick="health()">Test connessione</button> <button class="btn btn-primary btn-sm" onclick="loadAll()">↻ Sincronizza tutto</button> <button class="btn btn-green btn-sm" onclick="syncIntegrity()">✓ Sincronizza integrità</button><div id="lastSync" class="statusline" style="margin-top:8px">Ultima sincronizzazione: —</div></div>
-    <div class="module-card"><h3>👤 Operatore</h3><p>Accesso autenticato Supabase</p><b id="currentOperatorName">Nicola</b><br><small id="currentOperatorRole">Ruolo: Amministratore</small><br><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="signOut()">Esci dal gestionale</button></div>
+    <div class="module-card"><h3>👤 Operatore</h3><p>Accesso autenticato Supabase</p><b id="currentOperatorName">Operatore</b><br><small id="currentOperatorRole">Ruolo: Amministratore</small><br><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="signOut()">Esci dal gestionale</button></div>
     <div class="module-card"><h3>🚍 Brand</h3><p>Logo e immagini reali DELGROSSO utilizzati nell'interfaccia.</p><span class="pill info">DELGROSSO</span></div>
   </div>
   <div class="card" style="margin-top:12px"><div class="card-head"><h3>Diagnostica</h3></div><div class="card-body"><div class="log" id="diagLog"></div></div></div>
@@ -1103,7 +1103,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
   <div class="mobile-menu-backdrop" onclick="toggleMobileMenu(false)"></div>
   <aside class="mobile-menu-panel">
     <div class="mobile-menu-head"><div><strong>DELGROSSO</strong><small>Sistema Gestionale</small></div><button class="close" onclick="toggleMobileMenu(false)">✕</button></div>
-    <div class="mobile-menu-status"><span class="avatar">DG</span><div><b id="mobileOperatorName">Amministratore</b><small>Accesso operativo</small></div></div>
+    <div class="mobile-menu-status"><span class="avatar">DG</span><div><b id="mobileOperatorName">Operatore</b><small>Accesso operativo</small></div></div>
     <div class="mobile-menu-grid">
       <button onclick="mobileGo('dashboard')">⌂<span>Dashboard</span></button>
       <button onclick="mobileGo('viaggi')">🚌<span>Viaggi</span></button>
@@ -2268,6 +2268,6 @@ window.addEventListener('load',()=>{setTimeout(()=>{if(state.page==='pro')render
 
 <script src="./operator-cassa-v6.js?v=6"></script>
 
-<script src="./core-runtime-v7.js?v=7"></script>
+<script src="./core-runtime-v7.js?v=11"></script>
 </body>
 </html>

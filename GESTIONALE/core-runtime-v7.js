@@ -6,18 +6,28 @@
 const $id=id=>document.getElementById(id);
 let loginBusy=false, bootDone=false;
 
-function operatorFromEmail(email){
-  const e=String(email||'').toLowerCase();
-  return e==='info@delgrossoviaggi.it'
-    ? {username:'raffaele',name:'Raffaele',role:'Amministratore'}
-    : {username:'nicola',name:'Nicola',role:'Amministratore'};
+function operatorFromUser(user){
+  const id=String(user?.id||'');
+  const email=String(user?.email||'').toLowerCase();
+  if(id==='45028c0e-b1fc-4dc5-a16a-46e012acd62a' || email==='info@delgrossoviaggi.it'){
+    return {username:'raffaele',name:'Raffaele',role:'Amministratore',initials:'RF'};
+  }
+  if(id==='66d68c45-c8bf-4a83-b9e2-fcd38e9119a5' || email==='nicola@delgrossoviaggi.it'){
+    return {username:'nicola',name:'Nicola',role:'Amministratore',initials:'NC'};
+  }
+  return {username:'operatore',name:user?.email||'Operatore',role:'Amministratore',initials:'DG'};
 }
 function updateOperatorUI(){
   try{
     const n=currentOperator?.name||'Operatore';
+    const role=currentOperator?.role||'Amministratore';
+    const initials=currentOperator?.initials||(n==='Raffaele'?'RF':n==='Nicola'?'NC':'DG');
     const a=$id('currentOperatorName'); if(a)a.textContent=n;
-    const r=$id('currentOperatorRole'); if(r)r.textContent='Ruolo: '+(currentOperator?.role||'Amministratore');
+    const r=$id('currentOperatorRole'); if(r)r.textContent='Ruolo: '+role;
     const m=$id('mobileOperatorName'); if(m)m.textContent=n;
+    const top=$id('currentOperatorTopName'); if(top)top.textContent=n;
+    const topRole=$id('currentOperatorTopRole'); if(topRole)topRole.textContent=role;
+    const av=$id('currentOperatorAvatar'); if(av)av.textContent=initials;
   }catch(e){console.warn('operator ui',e)}
 }
 function showLogin(msg=''){
@@ -55,7 +65,7 @@ async function login(){
       signIn(user,pass),
       new Promise((_,rej)=>setTimeout(()=>rej(new Error('Tempo di connessione scaduto. Riprova.')),20000))
     ]);
-    currentOperator=operatorFromEmail(authSession?.user?.email);
+    currentOperator=operatorFromUser(authSession?.user);
     sessionStorage.setItem('dg_operator',JSON.stringify(currentOperator));
     showApp();
     if(msg)msg.textContent='';
@@ -119,7 +129,7 @@ async function bootSession(){
     if(!raw){showLogin();return}
     authSession=JSON.parse(raw);
     if(!authSession?.access_token){showLogin();return}
-    currentOperator=operatorFromEmail(authSession?.user?.email);
+    currentOperator=operatorFromUser(authSession?.user);
     sessionStorage.setItem('dg_operator',JSON.stringify(currentOperator));
     showApp();
     setTimeout(()=>syncAfterOpen(),30);
@@ -130,7 +140,7 @@ async function bootSession(){
       try{
         const ok=await refreshAuth();
         if(!ok)throw new Error('Sessione scaduta');
-        currentOperator=operatorFromEmail(authSession?.user?.email);
+        currentOperator=operatorFromUser(authSession?.user);
         updateOperatorUI();
       }catch(e){
         authSession=null;

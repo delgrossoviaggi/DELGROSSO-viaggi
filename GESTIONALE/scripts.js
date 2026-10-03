@@ -11,7 +11,7 @@ if(APP_LOCAL_FILE){
 
 const SUPA_KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
 let authSession=null;
-let currentOperator={username:'nicola',name:'Nicola',role:'Amministratore'};
+let currentOperator={username:'operatore',name:'Operatore',role:'Amministratore',initials:'DG'};
 const state={
   page:'dashboard',online:false,
   viaggi:[],prenotazioni:[],clienti:[],pagamenti:[],flotta:[],notifiche:[],
