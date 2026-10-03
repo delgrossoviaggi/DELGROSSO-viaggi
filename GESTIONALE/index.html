@@ -1686,21 +1686,43 @@ async function saveFuel(id){const amount=Math.round((Number($('fu_amount').value
 function openMaintenanceModal(id=''){const x=state.manutenzioni.find(y=>y.id===id)||{};openModal(id?'Modifica manutenzione':'Nuova manutenzione',`<div class="form-grid"><div class="field"><label>Mezzo</label><select id="ma_fleet">${state.flotta.map(f=>`<option value="${f.id}" ${x.flotta_id===f.id?'selected':''}>${esc(f.targa||'')} · ${esc(f.titolo||f.modello||'Mezzo')}</option>`).join('')}</select></div><div class="field"><label>Tipo intervento</label><input id="ma_type" value="${esc(x.tipo||'Tagliando')}"></div><div class="field"><label>Data intervento</label><input id="ma_date" type="date" value="${x.data_intervento||new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Costo €</label><input id="ma_cost" type="number" step=".01" value="${x.costo??0}"></div><div class="field"><label>Km</label><input id="ma_km" type="number" value="${x.km??''}"></div><div class="field"><label>Officina</label><input id="ma_shop" value="${esc(x.officina||'')}"></div><div class="field"><label>Prossima data</label><input id="ma_next" type="date" value="${x.prossima_data||''}"></div><div class="field"><label>Prossimi km</label><input id="ma_nextkm" type="number" value="${x.prossimi_km??''}"></div><div class="field full"><label>Descrizione</label><input id="ma_desc" value="${esc(x.descrizione||'')}"></div><div class="field full"><label>Note</label><textarea id="ma_note">${esc(x.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveMaintenance('${id}')">Salva manutenzione</button>`)}
 async function saveMaintenance(id){const cost=Math.round((Number($('ma_cost').value)||0)*100)/100;const body={flotta_id:$('ma_fleet').value,tipo:$('ma_type').value.trim()||'Altro',data_intervento:$('ma_date').value,costo:cost,km:Number($('ma_km').value)||null,officina:$('ma_shop').value||null,prossima_data:$('ma_next').value||null,prossimi_km:Number($('ma_nextkm').value)||null,descrizione:$('ma_desc').value||null,note:$('ma_note').value||null,stato:'Completata'};try{if(id)await api('manutenzioni_flotta',`id=eq.${id}`,{method:'PATCH',body});else await api('manutenzioni_flotta','',{method:'POST',body});closeModal();toast('Manutenzione salvata · uscita registrata automaticamente in Economia');await loadAll()}catch(e){toast(e.message,false)}}
 
+
+function rentalVehicleIds(rentalId){
+  return (state.noleggiMezzi||[]).filter(x=>x.noleggio_id===rentalId).map(x=>x.flotta_id);
+}
+function rentalVehicles(rentalId){
+  const ids=new Set(rentalVehicleIds(rentalId));
+  return (state.flotta||[]).filter(f=>ids.has(f.id));
+}
+function rentalVehicleLabel(rentalId){
+  const rows=rentalVehicles(rentalId);
+  if(!rows.length)return 'Nessun mezzo';
+  return rows.map(f=>`${f.titolo||f.modello||f.targa} (${f.posti||0})`).join(' + ');
+}
+function rentalFleetCheckboxes(rentalId=''){
+  const selected=new Set(rentalVehicleIds(rentalId));
+  return (state.flotta||[]).filter(f=>f.attivo!==false).map(f=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:9px 10px;border:1px solid #dbe5ef;border-radius:10px;margin:5px 0;cursor:pointer">
+    <input class="r_fleet_multi" type="checkbox" value="${f.id}" ${selected.has(f.id)?'checked':''} onchange="updateRentalFleetCapacity()">
+    <span><b>${esc(f.titolo||f.marca+' '+f.modello)}</b><br><small>${esc(f.targa||'')} · ${f.posti||0} posti · ${esc(f.stato||'Disponibile')}</small></span>
+  </label>`).join('');
+}
+function selectedRentalVehicleIds(){
+  return [...document.querySelectorAll('.r_fleet_multi:checked')].map(x=>x.value);
+}
+function updateRentalFleetCapacity(){
+  const ids=selectedRentalVehicleIds(), pax=Number($('r_pax')?.value||0);
+  const rows=(state.flotta||[]).filter(f=>ids.includes(f.id));
+  const cap=rows.reduce((n,f)=>n+Number(f.posti||0),0);
+  const el=$('r_fleet_capacity');
+  if(!el)return;
+  const diff=cap-pax;
+  el.innerHTML=`<b>${ids.length} mezzo/i selezionato/i · ${cap} posti disponibili</b><br><span style="color:${diff>=0?'#087a45':'#b42318'}">${pax||0} passeggeri richiesti · ${diff>=0?diff+' posti liberi':'mancano '+Math.abs(diff)+' posti'}</span>`;
+}
+
 function renderRentals(){
  const q=($('rentalSearch')?.value||'').toLowerCase(), st=$('rentalStatus')?.value||'';
  const rows=state.noleggi.filter(r=>(!q||JSON.stringify(r).toLowerCase().includes(q))&&(!st||r.stato_noleggio===st));
- $('rentalsTable').innerHTML=rows.map(r=>`<tr><td><b>${esc(r.id_noleggio||r.id?.slice(0,8))}</b></td><td>${esc(r.referente||r.azienda||'—')}<br><small>${esc(r.telefono||'')}</small></td><td>${esc(r.tratta_partenza)} → ${esc(r.tratta_destinazione)}</td><td>${dateIT(r.data_partenza)}<br><small>${r.ora_partenza||''}</small></td><td>${r.passeggeri||0}</td><td>${money(r.prezzo_concordato)}</td><td>${esc(r.stato_pagamento||'Da pagare')}<br><small>Acc. ${money(r.acconto)} · Saldo ${money(r.saldo)}</small></td><td><span class="pill ${r.stato_noleggio==='Completato'?'ok':r.stato_noleggio==='Annullato'?'danger':'info'}">${esc(r.stato_noleggio||'Richiesto')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openRentalModal('${r.id}')">Apri</button> <button class="btn btn-green btn-sm" onclick="openPaymentModal('rental:${r.id}')">💶 Pagamento</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessun noleggio.</td></tr>';}
-
-
-/* 4.7: calendario flotta. Il controllo definitivo contro assegnazioni concorrenti
-   deve essere attivato in Supabase con la migrazione inclusa nel pacchetto. */
-function dgDay(x){return String(x||'').slice(0,10)}
-function dgFleetEvents(fid){
- const events=[];
- (state.viaggi||[]).filter(v=>String(v.autobus_id||v.flotta_id||'')===String(fid)&&!/annull/i.test(v.stato||'')).forEach(v=>events.push({start:dgDay(v.data_partenza),end:dgDay(v.data_rientro||v.data_ritorno||v.data_partenza),label:'Viaggio: '+(v.titolo||v.destinazione||''),kind:'busy',id:v.id}));
- (state.noleggi||[]).filter(r=>String(r.flotta_id||'')===String(fid)&&!/annull|completat/i.test(r.stato_noleggio||'')&&Number(r.acconto||0)>0).forEach(r=>events.push({start:dgDay(r.data_partenza),end:dgDay(r.data_ritorno||r.data_partenza),label:'Noleggio confermato: '+(r.referente||r.azienda||''),kind:'busy',id:r.id}));
- (state.dgBlocchi||[]).filter(b=>String(b.flotta_id)===String(fid)).forEach(b=>events.push({start:dgDay(b.data_inizio),end:dgDay(b.data_fine),label:'Blocco: '+(b.motivo||'Indisponibile'),kind:'blocked',id:b.id}));
- return events.filter(e=>e.start);
+ $('rentalsTable').innerHTML=rows.map(r=>{const mezzi=rentalVehicles(r.id),cap=mezzi.reduce((n,f)=>n+Number(f.posti||0),0);return `<tr><td><b>${esc(r.id_noleggio||r.id?.slice(0,8))}</b></td><td>${esc(r.referente||r.azienda||'—')}<br><small>${esc(r.telefono||'')}</small></td><td>${esc(r.tratta_partenza)} → ${esc(r.tratta_destinazione)}<br><small>🚌 ${esc(rentalVehicleLabel(r.id))}${mezzi.length?` · ${cap} posti`:''}</small></td><td>${dateIT(r.data_partenza)}<br><small>${r.ora_partenza||''}</small></td><td>${r.passeggeri||0}</td><td>${money(r.prezzo_concordato)}</td><td>${esc(r.stato_pagamento||'Da pagare')}<br><small>Acc. ${money(r.acconto)} · Saldo ${money(r.saldo)}</small></td><td><span class="pill ${r.stato_noleggio==='Completato'?'ok':r.stato_noleggio==='Annullato'?'danger':'info'}">${esc(r.stato_noleggio||'Richiesto')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openRentalModal('${r.id}')">Apri</button></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Nessun noleggio.</td></tr>';
 }
 function dgDateBusy(fid,date,excludeTrip=''){return dgFleetEvents(fid).filter(e=>e.start<=date&&e.end>=date&&e.id!==excludeTrip)}
 function dgOpenFleetCalendar(fid,month){
@@ -2126,25 +2148,48 @@ async function printConfirmation(id){let b=state.prenotazioni.find(x=>x.id===id)
 function openTaskModal(){openModal('Nuova attività',`<div class="form-grid"><div class="field full"><label>Titolo</label><input id="t_title"></div><div class="field full"><label>Descrizione</label><textarea id="t_desc"></textarea></div><div class="field"><label>Priorità</label><select id="t_pri"><option>normale</option><option>alta</option><option>bassa</option></select></div><div class="field"><label>Scadenza</label><input id="t_date" type="date"></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveTask()">Salva</button>`)}
 async function saveTask(){const body={titolo:$('t_title').value.trim(),descrizione:$('t_desc').value||null,priorita:$('t_pri').value,scadenza:$('t_date').value||null,assegnata_a:currentOperator.name};if(!body.titolo)return toast('Inserisci un titolo',false);try{await api('attivita_gestionale','',{method:'POST',body});closeModal();toast('Attività salvata');await loadAll()}catch(e){toast(e.message,false)}}
 async function completeTask(id){try{await api('attivita_gestionale',`id=eq.${id}`,{method:'PATCH',body:{stato:'completata',completata_at:new Date().toISOString(),updated_at:new Date().toISOString()}});toast('Attività completata');await loadAll()}catch(e){toast(e.message,false)}}
-function openRentalModal(id=''){const r=state.noleggi.find(x=>x.id===id)||{};openModal(id?'Modifica noleggio':'Nuovo noleggio',`<div class="form-grid"><div class="field"><label>Referente</label><input id="r_ref" value="${esc(r.referente||'')}"></div><div class="field"><label>Azienda</label><input id="r_company" value="${esc(r.azienda||'')}"></div><div class="field"><label>Telefono</label><input id="r_tel" value="${esc(r.telefono||'')}"></div><div class="field"><label>Email</label><input id="r_email" value="${esc(r.email||'')}"></div><div class="field"><label>Partenza</label><input id="r_from" value="${esc(r.tratta_partenza||'')}"></div><div class="field"><label>Destinazione</label><input id="r_to" value="${esc(r.tratta_destinazione||'')}"></div><div class="field"><label>Data partenza</label><input id="r_date" type="date" value="${esc(r.data_partenza||'')}"></div><div class="field"><label>Ora</label><input id="r_time" type="time" value="${esc(r.ora_partenza||'')}"></div><div class="field"><label>Data ritorno</label><input id="r_back" type="date" value="${esc(r.data_ritorno||'')}"></div><div class="field"><label>Passeggeri</label><input id="r_pax" type="number" value="${r.passeggeri??1}"></div><div class="field"><label>Prezzo concordato €</label><input id="r_price" type="number" step=".01" value="${r.prezzo_concordato??0}"></div><div class="field"><label>Mezzo richiesto</label><select id="r_fleet"><option value="">Seleziona mezzo</option>${state.flotta.map(f=>`<option value="${f.id}" ${r.flotta_id===f.id?'selected':''}>${esc(f.titolo||f.marca+' '+f.modello)}</option>`).join('')}</select></div><div class="field"><label>Stato noleggio</label><select id="r_status">${['Richiesto','Confermato','In servizio','Completato','Annullato'].map(x=>`<option ${r.stato_noleggio===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field full"><label>Note</label><textarea id="r_note">${esc(r.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveRental('${id}')">Salva noleggio</button>`)}
-async function saveRental(id){const old=id?state.noleggi.find(x=>x.id===id):null;const price=Number($('r_price').value)||0;const fid=$('r_fleet')?.value||null;const status=$('r_status').value;if(status==='Confermato'&&Number(old?.acconto||0)<=0)return toast('Per confermare il noleggio registra prima un acconto.',false);if(fid&&status==='Confermato'){const start=$('r_date').value,end=$('r_back').value||start;if(dgFleetEvents(fid).some(e=>e.start<=end&&e.end>=start))return toast('Mezzo già occupato nelle date richieste.',false)}const body={flotta_id:fid,id_noleggio:old?.id_noleggio||'NL-'+String(Date.now()).slice(-6),referente:$('r_ref').value||null,azienda:$('r_company').value||null,telefono:$('r_tel').value||null,email:$('r_email').value||null,tratta_partenza:$('r_from').value,tratta_destinazione:$('r_to').value,data_partenza:$('r_date').value,ora_partenza:$('r_time').value||null,data_ritorno:$('r_back').value||null,passeggeri:Number($('r_pax').value)||1,servizio_tipo:'Andata e ritorno',prezzo_concordato:price,acconto:old?.acconto||0,saldo:Math.max(price-(old?.acconto||0),0),stato_pagamento:old?.stato_pagamento||'Da pagare',stato_noleggio:status,note:$('r_note').value||null};try{if(id)await api('noleggi_bus',`id=eq.${id}`,{method:'PATCH',body});else await api('noleggi_bus','',{method:'POST',body});closeModal();toast('Noleggio salvato');await loadAll()}catch(e){toast(e.message,false)}}
-async function markNotificationsRead(){try{await api('notifiche','letto=eq.false',{method:'PATCH',body:{letto:true,updated_at:new Date().toISOString()}});toast('Notifiche segnate come lette');await loadAll()}catch(e){toast(e.message,false)}}
-$('sideNav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)go(b.dataset.page)});
-['tripSearch','tripStatus','bookSearch','bookFilter','quoteSearch','quoteFilter','quoteOrigin','clientSearch','rentalSearch','rentalStatus','agendaSearch','agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('input',()=>renderPage(state.page)));
-['agendaFilter','agendaPeriod'].forEach(id=>$(id)?.addEventListener('change',()=>renderAgenda()));
-['quoteFilter','quoteOrigin'].forEach(id=>$(id)?.addEventListener('change',()=>renderQuotes()));
-$('globalSearch').addEventListener('input',e=>{clearTimeout(globalSearchTimer);const q=e.target.value.trim().toLowerCase();if(!q)return;globalSearchTimer=setTimeout(()=>{const hit=a=>a.find(x=>Object.values(x||{}).some(v=>String(v??'').toLowerCase().includes(q)));const found=hit(state.prenotazioni)||hit(state.clienti)||hit(state.viaggi)||hit(state.noleggi)||hit(state.preventivi);if(found){if(found.viaggio_id)go('prenotazioni');else if(found.destinazione||found.data_partenza)go('viaggi');else if(found.stato_noleggio)go('noleggi');else if(found.data_viaggio)go('preventivi');else go('clienti')}},140)});
-$('notifBtn').onclick=()=>go('comunicazioni');
-document.addEventListener('change',e=>{if(e.target?.id==='controlTripSelect')renderControlRoom()});
-
-$('loginBtn').onclick=async()=>{const btn=$('loginBtn');btn.disabled=true;$('loginMsg').textContent='Autenticazione in corso…';try{await signIn($('loginUser').value,$('loginPass').value);$('currentOperatorName').textContent=currentOperator.name;$('currentOperatorRole').textContent='Ruolo: '+currentOperator.role;if($('mobileOperatorName'))$('mobileOperatorName').textContent=currentOperator.name;$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');restoreCacheFast();await loadAll();await health();startAutoSync();$('loginMsg').textContent=''}catch(e){$('loginMsg').textContent=e.message||'Credenziali non valide'}finally{btn.disabled=false}};
-$('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
-(function(){const e=$('lastSync');const v=localStorage.getItem('dg_last_sync');if(e&&v)e.textContent='Ultima sincronizzazione: '+v})();
-(async()=>{try{const raw=sessionStorage.getItem('dg_auth');if(raw){authSession=JSON.parse(raw);$('login').style.display='none';$('app').classList.add('on');go(location.hash.slice(1)||'dashboard');if(!(await health())){if(await refreshAuth()){await loadAll()}else await signOut()}else {restoreCacheFast();await loadAll()}startAutoSync()}}catch(e){await signOut()}})();
-</script>
-<script>
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+function openRentalModal(id=''){
+ const r=state.noleggi.find(x=>x.id===id)||{};
+ openModal(id?'Modifica noleggio':'Nuovo noleggio',`<div class="form-grid">
+ <div class="field"><label>Referente</label><input id="r_ref" value="${esc(r.referente||'')}"></div>
+ <div class="field"><label>Azienda</label><input id="r_company" value="${esc(r.azienda||'')}"></div>
+ <div class="field"><label>Telefono</label><input id="r_tel" value="${esc(r.telefono||'')}"></div>
+ <div class="field"><label>Email</label><input id="r_email" value="${esc(r.email||'')}"></div>
+ <div class="field"><label>Partenza</label><input id="r_from" value="${esc(r.tratta_partenza||'')}"></div>
+ <div class="field"><label>Destinazione</label><input id="r_to" value="${esc(r.tratta_destinazione||'')}"></div>
+ <div class="field"><label>Data partenza</label><input id="r_date" type="date" value="${esc(r.data_partenza||'')}"></div>
+ <div class="field"><label>Ora</label><input id="r_time" type="time" value="${esc(r.ora_partenza||'')}"></div>
+ <div class="field"><label>Data ritorno</label><input id="r_back" type="date" value="${esc(r.data_ritorno||'')}"></div>
+ <div class="field"><label>Passeggeri</label><input id="r_pax" type="number" min="1" value="${r.passeggeri??1}" oninput="updateRentalFleetCapacity()"></div>
+ <div class="field"><label>Prezzo concordato €</label><input id="r_price" type="number" step=".01" value="${r.prezzo_concordato??0}"></div>
+ <div class="field"><label>Stato noleggio</label><select id="r_status">${['Richiesto','Confermato','In servizio','Completato','Annullato'].map(x=>`<option ${r.stato_noleggio===x?'selected':''}>${x}</option>`).join('')}</select></div>
+ <div class="field full"><label>🚌 Mezzi da assegnare (selezione multipla)</label><div>${rentalFleetCheckboxes(id)}</div><div id="r_fleet_capacity" style="margin-top:8px;padding:10px;border-radius:10px;background:#f6f9fc;border:1px solid #dfe8f1"></div><small>Puoi selezionare più autobus fino a raggiungere o superare i posti richiesti. Il sistema controlla automaticamente capienza e disponibilità nelle date del noleggio.</small></div>
+ <div class="field full"><label>Note</label><textarea id="r_note">${esc(r.note||'')}</textarea></div>
+ </div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveRental('${id}')">Salva noleggio</button>`);
+ setTimeout(updateRentalFleetCapacity,0);
+}
+async function saveRental(id){
+ const old=id?state.noleggi.find(x=>x.id===id):null;
+ const price=Number($('r_price').value)||0,status=$('r_status').value,pax=Number($('r_pax').value)||1;
+ const vehicleIds=selectedRentalVehicleIds();
+ const cap=(state.flotta||[]).filter(f=>vehicleIds.includes(f.id)).reduce((n,f)=>n+Number(f.posti||0),0);
+ if(status==='Confermato'&&Number(old?.acconto||0)<=0)return toast('Per confermare il noleggio registra prima un acconto.',false);
+ if(status==='Confermato'&&!vehicleIds.length)return toast('Per confermare il noleggio seleziona almeno un mezzo.',false);
+ if(vehicleIds.length&&cap<pax)return toast(`Capienza insufficiente: ${cap} posti disponibili per ${pax} passeggeri.`,false);
+ const body={flotta_id:null,id_noleggio:old?.id_noleggio||'NL-'+String(Date.now()).slice(-6),referente:$('r_ref').value||null,azienda:$('r_company').value||null,telefono:$('r_tel').value||null,email:$('r_email').value||null,tratta_partenza:$('r_from').value,tratta_destinazione:$('r_to').value,data_partenza:$('r_date').value,ora_partenza:$('r_time').value||null,data_ritorno:$('r_back').value||null,passeggeri:pax,servizio_tipo:'Andata e ritorno',prezzo_concordato:price,acconto:old?.acconto||0,saldo:Math.max(price-(old?.acconto||0),0),stato_pagamento:old?.stato_pagamento||'Da pagare',stato_noleggio:status,note:$('r_note').value||null};
+ try{
+   let rentalId=id;
+   if(id) await api('noleggi_bus',`id=eq.${id}`,{method:'PATCH',body});
+   else{
+     const created=await api('noleggi_bus','',{method:'POST',body,headers:{Prefer:'return=representation'}});
+     rentalId=created?.[0]?.id;
+     if(!rentalId)throw new Error('Noleggio creato ma ID non restituito');
+   }
+   const assign=await rpc('dg_set_rental_vehicles',{p_noleggio_id:rentalId,p_vehicle_ids:vehicleIds});
+   closeModal();
+   toast(`Noleggio salvato · ${assign?.mezzi||vehicleIds.length} mezzo/i · ${assign?.posti_totali||cap} posti`);
+   await loadAll();
+ }catch(e){toast('Noleggio non salvato: '+e.message,false)}
 }
 
 function toggleMobileMenu(force){
