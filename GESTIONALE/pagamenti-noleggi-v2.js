@@ -24,11 +24,11 @@ window.renderPayments=function(){
     const p=x.p;
     if(x.kind==='trip'){
       const b=(state.prenotazioni||[]).find(z=>z.id===p.prenotazione_id),trip=tripName(p.viaggio_id||b?.viaggio_id);
-      return `<tr><td>${dateIT(p.data_pagamento)}</td><td><span class="pill info">VIAGGIO</span><br><small>${esc(p.receipt_number||p.ricevuta||'—')}</small></td><td>${esc(p.cliente||b?.cliente||'—')}</td><td>${esc(p.viaggio||trip)}</td><td><span class="pill ${p.tipo==='Rimborso'?'danger':'info'}">${esc(p.tipo||'Pagamento')}</span></td><td>${money(p.importo)}</td><td>${esc(p.metodo_pagamento||p.metodo||'—')}</td><td>${esc(p.stato||'Registrato')}<br><small>👤 ${esc(p.incassato_da||'Nicola')}</small> <button class="btn btn-secondary btn-sm" onclick="openEditPaymentModal('${p.id}')">✏️</button> <button class="btn btn-ghost btn-sm" onclick="printReceipt('${p.id}')">🧾</button></td></tr>`;
+      return `<tr><td>${dateIT(p.data_pagamento)}</td><td><span class="pill info">VIAGGIO</span><br><small>${esc(p.receipt_number||p.ricevuta||'—')}</small></td><td>${esc(p.cliente||b?.cliente||'—')}</td><td>${esc(p.viaggio||trip)}</td><td><span class="pill ${p.tipo==='Rimborso'?'danger':'info'}">${esc(p.tipo||'Pagamento')}</span></td><td>${money(p.importo)}</td><td>${esc(p.metodo_pagamento||p.metodo||'—')}</td><td>${esc(p.stato||'Registrato')}<br><small>👤 ${esc(p.incassato_da||'Nicola')}</small> <button class="btn btn-secondary btn-sm" onclick="openEditPaymentModal('${p.id}')">✏️</button> <button class="btn btn-ghost btn-sm" onclick="printReceipt('${p.id}')">🧾</button> <button class="btn btn-danger btn-sm" onclick="deleteWrongPayment('trip','${p.id}')">🗑️</button></td></tr>`;
     }
     const r=(state.noleggi||[]).find(z=>z.id===p.noleggio_id);
     const servizio=r?`${r.tratta_partenza||'—'} → ${r.tratta_destinazione||'—'}`:'Noleggio';
-    return `<tr><td>${dateIT(p.data_pagamento)}</td><td><span class="pill ok">NOLEGGIO</span><br><small>${esc(p.receipt_number||'—')}</small></td><td>${esc(r?.referente||r?.azienda||'—')}</td><td>${esc(servizio)}<br><small>${esc(r?.id_noleggio||'')}</small></td><td><span class="pill ${p.tipo==='Rimborso'?'danger':'ok'}">${esc(p.tipo||'Pagamento')}</span></td><td>${money(p.importo)}</td><td>${esc(p.metodo||'—')}</td><td>Registrato<br><small>👤 ${esc(p.incassato_da||'Nicola')}</small> <button class="btn btn-ghost btn-sm" onclick="printRentalPaymentReceipt('${p.id}')">🧾</button></td></tr>`;
+    return `<tr><td>${dateIT(p.data_pagamento)}</td><td><span class="pill ok">NOLEGGIO</span><br><small>${esc(p.receipt_number||'—')}</small></td><td>${esc(r?.referente||r?.azienda||'—')}</td><td>${esc(servizio)}<br><small>${esc(r?.id_noleggio||'')}</small></td><td><span class="pill ${p.tipo==='Rimborso'?'danger':'ok'}">${esc(p.tipo||'Pagamento')}</span></td><td>${money(p.importo)}</td><td>${esc(p.metodo||'—')}</td><td>Registrato<br><small>👤 ${esc(p.incassato_da||'Nicola')}</small> <button class="btn btn-ghost btn-sm" onclick="printRentalPaymentReceipt('${p.id}')">🧾</button> <button class="btn btn-danger btn-sm" onclick="deleteWrongPayment('rental','${p.id}')">🗑️</button></td></tr>`;
   }).join('')||'<tr><td colspan="8" class="empty">Nessun pagamento.</td></tr>';
 };
 function modeChange(){
@@ -75,6 +75,53 @@ window.savePayment=async function(){
   const b=(state.prenotazioni||[]).find(x=>x.id===$g('p_booking')?.value),selectedClient=String($g('p_client')?.value||'').trim(),selectedTrip=$g('p_trip')?.value||'';if(!selectedClient)return toast('Seleziona il cliente',false);if(!selectedTrip)return toast('Seleziona il viaggio',false);if(!b)return toast('Non esiste una prenotazione per il cliente e il viaggio selezionati',false);if(String(b.cliente||'').trim()!==selectedClient||b.viaggio_id!==selectedTrip)return toast('Cliente, viaggio e prenotazione non corrispondono',false);
   try{const result=await rpc('dg_register_payment',{p_booking_id:b.id,p_tipo:type,p_importo:amount,p_metodo:method,p_data:date,p_note:note});await rpc('sync_prenotazione_pagamenti',{p_prenotazione_id:b.id});closeModal();toast('Pagamento registrato sul viaggio · '+tripName(b.viaggio_id));await loadAll();if(result?.payment_id)setTimeout(()=>printReceipt(result.payment_id),250)}catch(e){toast(e.message,false)}
 };
+
+window.deleteWrongPayment=async function(kind,id){
+  const isRental=kind==='rental';
+  const p=isRental?(state.noleggiPagamenti||[]).find(x=>x.id===id):(state.pagamenti||[]).find(x=>x.id===id);
+  if(!p)return toast('Pagamento non trovato',false);
+
+  let who='—',ref='—';
+  if(isRental){
+    const r=(state.noleggi||[]).find(x=>x.id===p.noleggio_id);
+    who=r?.referente||r?.azienda||'Cliente noleggio';
+    ref=r?.id_noleggio||`${r?.tratta_partenza||'—'} → ${r?.tratta_destinazione||'—'}`;
+  }else{
+    const b=(state.prenotazioni||[]).find(x=>x.id===p.prenotazione_id);
+    who=p.cliente||b?.cliente||'Cliente';
+    ref=p.viaggio||tripName(p.viaggio_id||b?.viaggio_id);
+  }
+
+  const number=p.receipt_number||p.ricevuta||p.id.slice(0,8);
+  const ok=confirm(
+    `⚠️ ELIMINAZIONE PAGAMENTO ERRATO\n\n`+
+    `Cliente: ${who}\n`+
+    `Riferimento: ${ref}\n`+
+    `Tipo: ${p.tipo||'Pagamento'}\n`+
+    `Importo: ${money(Math.abs(Number(p.importo||0)))}\n`+
+    `Ricevuta: ${number}\n\n`+
+    `Questa operazione rimuoverà il pagamento dal gestionale e ricalcolerà saldo, economia e cassa operatore.\n\nConfermi?`
+  );
+  if(!ok)return;
+
+  const reason=prompt('Motivo eliminazione (obbligatorio):','Pagamento inserito per errore');
+  if(reason===null)return;
+  if(!String(reason).trim())return toast('Inserisci il motivo dell’eliminazione',false);
+
+  try{
+    if(isRental){
+      await rpc('dg_delete_rental_payment',{p_payment_id:id,p_reason:String(reason).trim()});
+    }else{
+      await rpc('dg_delete_payment',{p_payment_id:id,p_reason:String(reason).trim()});
+    }
+    toast('Pagamento errato eliminato e totali ricalcolati');
+    await loadAll();
+    if(typeof dgRenderOperatorCash==='function')dgRenderOperatorCash();
+  }catch(e){
+    toast('Pagamento non eliminato: '+e.message,false);
+  }
+};
+
 window.printRentalPaymentReceipt=function(id){
   const p=(state.noleggiPagamenti||[]).find(x=>x.id===id);if(!p)return toast('Pagamento noleggio non trovato',false);
   const r=(state.noleggi||[]).find(x=>x.id===p.noleggio_id);if(!r)return toast('Noleggio non trovato',false);
