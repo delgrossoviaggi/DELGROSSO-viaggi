@@ -5,10 +5,26 @@ const FN='delgrosso-ai360-v2';
 let history=[];
 let pending=null;
 let attachment=null;
+const HISTORY_VERSION='12';
+function historyKey(){
+  const uid=authSession?.user?.id||currentOperator?.username||'guest';
+  return `dg_ai360_history_v${HISTORY_VERSION}_${uid}`;
+}
 const q=id=>document.getElementById(id);
 const h=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function save(){try{sessionStorage.setItem('dg_ai360_history',JSON.stringify(history.slice(-30)))}catch{}}
-function load(){try{history=JSON.parse(sessionStorage.getItem('dg_ai360_history')||'[]')}catch{history=[]}}
+function save(){try{sessionStorage.setItem(historyKey(),JSON.stringify(history.slice(-30)))}catch{}}
+function load(){
+  try{
+    // V12 intentionally starts a clean chat and keeps Nicola/Raffaele separate.
+    history=JSON.parse(sessionStorage.getItem(historyKey())||'[]');
+    history=history.filter(x=>!/(Failed to fetch|manca la chiave API|AI_NOT_CONFIGURED)/i.test(String(x?.text||'')));
+  }catch{history=[]}
+}
+function clearHistory(){
+  history=[];pending=null;attachment=null;
+  try{sessionStorage.removeItem(historyKey())}catch{}
+  drawPlan(null);updateAttachment();drawChat();
+}
 function add(role,text,meta={}){history.push({role,text,ts:Date.now(),...meta});save();drawChat()}
 function drawChat(){const box=q('ai360Messages');if(!box)return;box.innerHTML=history.map(x=>`<div class="ai360-msg ${x.role==='user'?'me':'bot'}"><div class="ai360-bubble">${x.role==='assistant'?'<b>🤖 Assistente DELGROSSO</b><br>':''}${h(x.text).replace(/\n/g,'<br>')}</div><small>${new Date(x.ts||Date.now()).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join('')||`<div class="ai360-welcome"><b>🤖 Assistente DELGROSSO AI 360</b><p>Scrivimi normalmente. Sono operativo anche senza servizi esterni per le funzioni principali del gestionale; preparo sempre l’anteprima prima di modificare i dati.</p><div class="ai360-examples"><button onclick="ai360Example('Mario Rossi, 4 persone per Assisi da San Nicandro, telefono 3331234567, 40 euro di acconto')">🎫 Prenotazione</button><button onclick="ai360Example('Chi deve ancora pagare l’acconto per Assisi?')">💶 Acconti</button><button onclick="ai360Example('Per il noleggio da 110 passeggeri seleziona due bus sufficienti e mostrami l’anteprima')">🚌 Noleggio multi-bus</button><button onclick="ai360Example('Isabella D’Amico mi ha dato 500 euro di acconto per il noleggio, bonifico')">💶 Acconto noleggio</button><button onclick="ai360Example('Elimina il pagamento errato con ricevuta DG-...')">🗑️ Elimina pagamento errato</button><button onclick="ai360Example('Rimborsa 30 euro a Mario Rossi per Assisi e preparami la ricevuta di rimborso')">↩️ Rimborso + ricevuta</button><button onclick="ai360Example('Il PB bianco ha fatto il tagliando oggi')">🔧 Flotta</button><button onclick="ai360Example('Cosa devo fare oggi?')">📋 Priorità</button></div></div>`;box.scrollTop=box.scrollHeight}
 function actionLine(a){return `<div class="ai360-action"><b>${h(a.label||a.type||'Operazione')}</b><small>${h(a.type||'')}</small></div>`}
@@ -25,10 +41,103 @@ async function invoke(body){
  const t=await r.text();let data;try{data=JSON.parse(t)}catch{data={message:t}}
  if(!r.ok){const e=new Error(data?.message||data?.error||`HTTP ${r.status}`);e.code=data?.error;e.status=r.status;throw e}return data;
 }
-async function status(){const el=q('ai360Status');if(!el)return;el.textContent='● controllo AI…';el.className='ai360-status wait';try{const r=await invoke({mode:'status'});if(r.ai_configured){el.textContent=`● AI ONLINE · ${r.model}`;el.className='ai360-status live'}else{el.textContent='● AI GESTIONALE DISPONIBILE';el.className='ai360-status wait'}}catch(e){el.textContent='● AI NON RAGGIUNGIBILE';el.className='ai360-status off'}}
+async function status(){const el=q('ai360Status');if(!el)return;el.textContent='● controllo AI…';el.className='ai360-status wait';try{const r=await invoke({mode:'health'});if(r.operational||r.ai_configured){el.textContent=`● AI ONLINE · ${r.model||'Gestionale AI operativo'}`;el.className='ai360-status live'}else{el.textContent='● AI GESTIONALE DISPONIBILE';el.className='ai360-status wait'}}catch(e){el.textContent='● MODALITÀ LOCALE ATTIVA';el.className='ai360-status wait'}}
+
+function emNorm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function emDate(msg){
+  const raw=String(msg||'');
+  let m=raw.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
+  if(m)return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  const months={gennaio:1,febbraio:2,marzo:3,aprile:4,maggio:5,giugno:6,luglio:7,agosto:8,settembre:9,ottobre:10,novembre:11,dicembre:12};
+  const n=emNorm(raw);
+  for(const [name,month] of Object.entries(months)){
+    const r=new RegExp(`\\b${name}\\s+(20\\d{2})\\b`).exec(n);
+    if(r){const last=new Date(Number(r[1]),month,0).getDate();return `${r[1]}-${String(month).padStart(2,'0')}-${String(last).padStart(2,'0')}`}
+  }
+  return null;
+}
+function emMoney(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0))}
+function emTrips(msg){
+  const n=emNorm(msg),date=emDate(msg),trips=state.viaggi||[];
+  const stop=new Set(['quanto','incassato','incassati','incasso','viaggio','gita','posti','rimangono','rimasti','liberi','disponibili','prenotati','persone','acconto','saldo','pagato','per']);
+  const words=n.split(' ').filter(w=>w.length>=4&&!stop.has(w)&&!/^20\d{2}$/.test(w));
+  const scored=trips.map(v=>{
+    const text=emNorm(`${v.titolo||''} ${v.destinazione||''}`);
+    let score=words.reduce((z,w)=>z+(text.includes(w)?1:0),0);
+    if(date&&String(v.data_partenza)===date)score+=5;
+    else if(date)score-=3;
+    return {v,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+  return scored.length?scored.map(x=>x.v):(date?trips.filter(v=>String(v.data_partenza)===date):[]);
+}
+function emFleet(msg){
+  const n=emNorm(msg),fleet=(state.flotta||[]).filter(f=>f.attivo!==false);
+  return fleet.filter(f=>{
+    const t=emNorm(`${f.titolo||''} ${f.marca||''} ${f.modello||''} ${f.targa||''}`);
+    if(n.includes('pb bianco'))return t.includes('pb')&&t.includes('bianco');
+    if(n.includes('century')||n.includes('grigio'))return t.includes('century')||t.includes('grigio');
+    if(n.includes('limousine'))return t.includes('limousine');
+    if(/\bpb\b/.test(n))return t.includes('pb')&&!t.includes('bianco');
+    return false;
+  });
+}
+function localEmergencyPlan(msg){
+  const n=emNorm(msg),date=emDate(msg);
+  if((n.includes('quanto')||n.includes('incass'))&&(n.includes('nicola')||n.includes('raffaele'))){
+    const who=n.includes('raffaele')?'raffaele':'nicola';
+    const r=(state.cassaOperatori||[]).find(x=>emNorm(x.username||x.nome)===who);
+    if(!r)return {assistant_message:'Non trovo il riepilogo cassa dell’operatore.',actions:[]};
+    return {assistant_message:`${r.nome}: cassa netta ${emMoney(r.cassa_netto)}. Viaggi ${emMoney(r.viaggi_incassati)}, noleggi ${emMoney(r.noleggi_incassati)}, rimborsi ${emMoney(Number(r.viaggi_rimborsi||0)+Number(r.noleggi_rimborsi||0))}.`,actions:[]};
+  }
+  if(n.includes('incassat')){
+    const trips=emTrips(msg);
+    if(trips.length!==1)return {assistant_message:'Indicami meglio destinazione e data del viaggio.',actions:[]};
+    const v=trips[0],rows=(state.pagamenti||[]).filter(x=>x.viaggio_id===v.id);
+    const pos=rows.filter(x=>emNorm(x.tipo)!=='rimborso').reduce((z,x)=>z+Math.abs(Number(x.importo||0)),0);
+    const ref=rows.filter(x=>emNorm(x.tipo)==='rimborso').reduce((z,x)=>z+Math.abs(Number(x.importo||0)),0);
+    return {assistant_message:`Per ${v.titolo||v.destinazione} del ${v.data_partenza}: incassati ${emMoney(pos)}, rimborsi ${emMoney(ref)}, netto ${emMoney(pos-ref)}.`,actions:[]};
+  }
+  if(n.includes('posti')&&(n.includes('rimang')||n.includes('liber')||n.includes('disponib'))){
+    const trips=emTrips(msg);
+    if(trips.length!==1)return {assistant_message:'Indicami meglio viaggio e data per controllare i posti.',actions:[]};
+    const v=trips[0],used=(state.prenotazioni||[]).filter(b=>b.viaggio_id===v.id&&!emNorm(b.stato).startsWith('annull')).reduce((z,b)=>z+Number(b.posti||0),0);
+    return {assistant_message:`${v.titolo||v.destinazione}: ${used} prenotati su ${Number(v.posti_totali||0)}, quindi ${Math.max(Number(v.posti_totali||0)-used,0)} posti liberi.`,actions:[]};
+  }
+  if((n.includes('estintor')||n.includes('scadenza estint'))&&date){
+    const vehicles=emFleet(msg);
+    if(!vehicles.length)return {assistant_message:'Non riesco a identificare il mezzo. Scrivi PB bianco, PB, Century grigio o Limousine Bus.',actions:[]};
+    const names=vehicles.map(v=>v.titolo||v.modello||v.targa);
+    return {
+      assistant_message:`Ho capito: scadenza estintori ${date} per ${names.join(', ')}.`,
+      preview:names.map(x=>`${x} → scadenza estintori ${date}`),
+      actions:[{type:'deadline',label:'Imposta scadenza estintori',params:{vehicle_ids:vehicles.map(v=>v.id),type:'Estintori',title:'Scadenza estintori',date,priority:'alta',notes:'Inserita tramite Assistente DELGROSSO AI 360'}}]
+    };
+  }
+  if(n.includes('chi')&&(n.includes('acconto')||n.includes('pagare'))){
+    const trips=emTrips(msg);
+    if(trips.length!==1)return {assistant_message:'Indicami meglio viaggio e data per controllare gli acconti.',actions:[]};
+    const v=trips[0],rows=(state.prenotazioni||[]).filter(b=>b.viaggio_id===v.id&&!emNorm(b.stato).startsWith('annull')&&Number(b.pagato||0)<=0);
+    return {assistant_message:rows.length?`Senza pagamento per ${v.titolo||v.destinazione}: ${rows.map(b=>b.cliente||b.cliente_nome).join(', ')}.`:`Per ${v.titolo||v.destinazione} non risultano prenotazioni completamente senza pagamento.`,actions:[]};
+  }
+  return null;
+}
+
 async function send(){const input=q('ai360Input'),msg=input?.value.trim();if(!msg)return;input.value='';add('user',msg);q('ai360Plan').innerHTML='';pending=null;const sendBtn=q('ai360Send');sendBtn.disabled=true;sendBtn.textContent='Analizzo…';add('assistant','Sto controllando i dati reali del gestionale e preparo il piano…',{temporary:true});const tmpIndex=history.length-1;
  try{const r=await invoke({mode:'plan',message:msg,history:history.filter(x=>!x.temporary).slice(-8).map(x=>({role:x.role,content:x.text})),attachment});history.splice(tmpIndex,1);attachment=null;updateAttachment();const p=r.plan||{};add('assistant',p.needs_clarification?(p.clarification_question||p.assistant_message||'Mi serve un dato in più.'):(p.assistant_message||'Ho preparato il piano.'));if(p.actions?.length){pending={id:r.plan_id,plan:p};drawPlan(p,r.plan_id)}else drawPlan(null)}
- catch(e){history.splice(tmpIndex,1);add('assistant','Non sono riuscito a contattare il motore dell’assistente. Riprova tra pochi secondi: nessun dato è stato modificato. Dettaglio: '+e.message)}
+ catch(e){
+   history.splice(tmpIndex,1);
+   const local=localEmergencyPlan(msg);
+   if(local){
+     add('assistant',local.assistant_message||'Ho elaborato la richiesta in modalità di emergenza.');
+     if(local.actions?.length){
+       const id='LOCAL-'+Date.now();
+       pending={id,plan:{...local,requires_confirmation:true},local:true};
+       drawPlan(pending.plan,id);
+     }else drawPlan(null);
+   }else{
+     add('assistant','Connessione al motore non disponibile in questo momento. Il gestionale resta operativo e nessun dato è stato modificato. Riprova tra pochi secondi.');
+   }
+ }
  finally{sendBtn.disabled=false;sendBtn.textContent='Invia ➜'}
 }
 const PATCH_ALLOW={prenotazioni:['cliente','cliente_nome','telefono','email','posti','totale','acconto','saldo','pagato','stato','note','fermata_partenza','giorni_acconto','scadenza_acconto','metodo_pagamento'],viaggi:['titolo','destinazione','luogo_partenza','data_partenza','ora_partenza','prezzo','descrizione','locandina','immagine','autobus','autobus_id','posti_totali','stato','pubblicato','costo_totale'],clienti:['nome','cognome','telefono','email','codice_fiscale','indirizzo','citta','cap','provincia','note','stato_cliente','provenienza'],flotta:['titolo','marca','modello','targa','categoria','anno','posti','stato','descrizione','attivo','seat_layout'],noleggi_bus:['referente','azienda','telefono','email','tratta_partenza','tratta_destinazione','fermate','data_partenza','ora_partenza','data_ritorno','ora_ritorno','passeggeri','servizio_tipo','prezzo_concordato','acconto','saldo','stato_pagamento','stato_noleggio','note','flotta_id'],attivita_gestionale:['titolo','descrizione','stato','priorita','scadenza','riferimento_tipo','riferimento_id','assegnata_a'],scadenze_gestionale:['titolo','descrizione','tipo','stato','priorita','data_scadenza','riferimento_tipo','riferimento_id','cliente_id','viaggio_id','prenotazione_id','importo','note']};
@@ -93,9 +202,10 @@ async function confirm(id){
  const box=q('ai360Plan');if(box)box.style.opacity='.6';
  let results=[];
  try{
-   const c=await invoke({mode:'claim',plan_id:id});
+   const isLocal=!!pending?.local;
+   const c=isLocal?{plan:pending.plan}:await invoke({mode:'claim',plan_id:id});
    for(const act of (c.plan?.actions||[]))results.push(await executeLocal(act));
-   await invoke({mode:'complete',plan_id:id,ok:true,result:results});
+   if(!isLocal)await invoke({mode:'complete',plan_id:id,ok:true,result:results});
    pending=null;drawPlan(null);
    await loadAll();
    const receipts=results.map(x=>x?.receipt).filter(x=>x?.id);
@@ -109,12 +219,12 @@ async function confirm(id){
    toast('Assistente AI: '+e.message,false)
  }finally{if(box)box.style.opacity='1'}
 }
-async function cancel(id){try{await invoke({mode:'cancel',plan_id:id})}catch{}pending=null;drawPlan(null);add('assistant','Operazione annullata. Non ho modificato i dati.')}
+async function cancel(id){try{if(!pending?.local)await invoke({mode:'cancel',plan_id:id})}catch{}pending=null;drawPlan(null);add('assistant','Operazione annullata. Non ho modificato i dati.')}
 function filePicked(file){if(!file){attachment=null;updateAttachment();return}if(file.size>5*1024*1024){toast('Allegato troppo grande: massimo 5 MB',false);return}if(!file.type.startsWith('image/')){toast('Per ora allega una locandina come immagine JPG/PNG/HEIC.',false);return}const r=new FileReader();r.onload=()=>{attachment={name:file.name,type:file.type,data_url:r.result};updateAttachment()};r.readAsDataURL(file)}
 function updateAttachment(){const e=q('ai360AttachName');if(e)e.textContent=attachment?`📎 ${attachment.name}`:'Nessun allegato'}
 function mic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return toast('Dettatura non disponibile su questo browser',false);const r=new SR();r.lang='it-IT';r.interimResults=false;r.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript||'';q('ai360Input').value=(q('ai360Input').value+' '+t).trim()};r.onerror=()=>toast('Dettatura non riuscita',false);r.start()}
-function render(){const p=q('page-assistente');if(!p)return;p.innerHTML=`<div class="section-title"><div><h2>🤖 Assistente DELGROSSO AI 360°</h2><p class="section-subtitle">Scrivi come parli. L’AI legge il gestionale, prepara il lavoro e modifica i dati solo dopo la tua conferma.</p></div><span id="ai360Status" class="ai360-status wait">● controllo AI…</span></div><div class="ai360-shell"><div id="ai360Messages" class="ai360-messages"></div><div id="ai360Plan"></div><div class="ai360-compose"><textarea id="ai360Input" rows="3" placeholder="Es: Mario Rossi 4 persone Assisi da San Nicandro, 40 € acconto…"></textarea><div class="ai360-tools"><label class="btn btn-secondary ai360-file">📎 Locandina<input id="ai360File" type="file" accept="image/*" hidden></label><button class="btn btn-secondary" id="ai360Mic">🎙️ Dettatura</button><span id="ai360AttachName">Nessun allegato</span><button class="btn btn-primary" id="ai360Send">Invia ➜</button></div></div></div><div class="ai360-safety"><b>🔒 Regola fissa:</b> letture e controlli possono partire subito; prenotazioni, pagamenti, rimborsi con relativa ricevuta, spostamenti, cancellazioni, viaggi, flotta, noleggi ed economia richiedono sempre la tua conferma.</div>`;drawChat();q('ai360Send').onclick=send;q('ai360Input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});q('ai360File').onchange=e=>filePicked(e.target.files?.[0]);q('ai360Mic').onclick=mic;status()}
-window.renderAssistant=render;window.ai360Send=send;window.ai360Confirm=confirm;window.ai360Cancel=cancel;window.ai360Example=t=>{q('ai360Input').value=t;q('ai360Input').focus()};
+function render(){const p=q('page-assistente');if(!p)return;p.innerHTML=`<div class="section-title"><div><h2>🤖 Assistente DELGROSSO AI 360°</h2><p class="section-subtitle">Scrivi come parli. L’AI legge il gestionale, prepara il lavoro e modifica i dati solo dopo la tua conferma.</p></div><span id="ai360Status" class="ai360-status wait">● controllo AI…</span></div><div class="ai360-shell"><div id="ai360Messages" class="ai360-messages"></div><div id="ai360Plan"></div><div class="ai360-compose"><textarea id="ai360Input" rows="3" placeholder="Es: Mario Rossi 4 persone Assisi da San Nicandro, 40 € acconto…"></textarea><div class="ai360-tools"><label class="btn btn-secondary ai360-file">📎 Locandina<input id="ai360File" type="file" accept="image/*" hidden></label><button class="btn btn-secondary" id="ai360Mic">🎙️ Dettatura</button><button class="btn btn-secondary" id="ai360Clear">🧹 Pulisci chat</button><span id="ai360AttachName">Nessun allegato</span><button class="btn btn-primary" id="ai360Send">Invia ➜</button></div></div></div><div class="ai360-safety"><b>🔒 Regola fissa:</b> letture e controlli possono partire subito; prenotazioni, pagamenti, rimborsi con relativa ricevuta, spostamenti, cancellazioni, viaggi, flotta, noleggi ed economia richiedono sempre la tua conferma.</div>`;drawChat();q('ai360Send').onclick=send;q('ai360Input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});q('ai360File').onchange=e=>filePicked(e.target.files?.[0]);q('ai360Mic').onclick=mic;q('ai360Clear').onclick=clearHistory;status()}
+window.renderAssistant=render;window.ai360Send=send;window.ai360Clear=clearHistory;window.ai360Confirm=confirm;window.ai360Cancel=cancel;window.ai360Example=t=>{q('ai360Input').value=t;q('ai360Input').focus()};
 load();
 const css=document.createElement('style');css.id='dg-ai360-style';css.textContent=`.ai360-status{padding:8px 11px;border-radius:999px;font-size:12px;font-weight:900}.ai360-status.live{background:#e9fff3;color:#087a45}.ai360-status.wait{background:#fff7df;color:#8a5b00}.ai360-status.off{background:#fff0f3;color:#a51335}.ai360-shell{background:#fff;border:1px solid #dbe5ef;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(16,43,68,.08)}.ai360-messages{height:min(55vh,520px);overflow:auto;padding:18px;background:linear-gradient(180deg,#f7fbff,#fff)}.ai360-msg{display:flex;flex-direction:column;margin:8px 0;max-width:86%}.ai360-msg.me{margin-left:auto;align-items:flex-end}.ai360-msg.bot{align-items:flex-start}.ai360-bubble{padding:12px 14px;border-radius:16px;line-height:1.45;background:#fff;border:1px solid #dbe5ef}.ai360-msg.me .ai360-bubble{background:#0b67c8;color:#fff;border-color:#0b67c8}.ai360-msg small{font-size:10px;color:#789;margin:3px 7px}.ai360-welcome{max-width:720px;margin:45px auto;text-align:center;color:#29445d}.ai360-welcome b{font-size:21px}.ai360-examples{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}.ai360-examples button{border:1px solid #cfdeec;background:#fff;border-radius:999px;padding:8px 11px;cursor:pointer}.ai360-compose{border-top:1px solid #dbe5ef;padding:12px}.ai360-compose textarea{width:100%;font-size:16px;min-height:84px;resize:vertical}.ai360-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.ai360-tools #ai360AttachName{font-size:11px;color:#6b7f92;flex:1}.ai360-plan-card{margin:12px;border:2px solid #79aee8;border-radius:14px;padding:13px;background:#f5faff}.ai360-plan-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px}.ai360-plan-head span{font-size:11px;background:#dcecff;border-radius:999px;padding:4px 8px}.ai360-preview{padding:4px 0}.ai360-action{padding:9px 10px;background:#fff;border:1px solid #dbe5ef;border-radius:10px;margin-top:7px}.ai360-action small{display:block;color:#72869a;margin-top:2px}.ai360-confirm{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.ai360-safety{margin-top:10px;padding:11px 13px;border-radius:12px;background:#f6f9fc;border:1px solid #dfe8f1;font-size:12px;color:#52697f}@media(max-width:700px){.ai360-messages{height:48vh;padding:10px}.ai360-msg{max-width:94%}.ai360-tools{display:grid;grid-template-columns:1fr 1fr}.ai360-tools #ai360AttachName{grid-column:1/-1}.ai360-tools #ai360Send{grid-column:1/-1;min-height:48px}.ai360-confirm .btn{width:100%}.ai360-plan-head{flex-direction:column}.section-title .ai360-status{justify-self:start}}`;document.head.appendChild(css);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{if(q('page-assistente')?.classList.contains('active'))render()},{once:true});else if(q('page-assistente')?.classList.contains('active'))render();
