@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta name="dg-build" content="DELGROSSO-MASTER-DIRECT-UNIVERSAL-MOBILE-FIX">
+<meta name="dg-build" content="DELGROSSO-MASTER-DIRECT-UNIVERSAL-MOBILE-MOVE-SEATS">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
 <meta charset="utf-8">
@@ -945,7 +945,7 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-controlroom">
-  <div class="section-title"><div><h2>🎛️ Control Room Operativa</h2><p class="section-subtitle">Operatività del giorno: partenze, fermate, passeggeri, acconti, posti, check-in, mezzi e anomalie.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+  <div class="section-title"><div><h2>🎛️ Control Room Operativa</h2><p class="section-subtitle">Operatività del giorno: partenze, fermate, passeggeri, acconti, posti, check-in, mezzi e anomalie.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
   <div class="optional-toolbar">
     <select id="controlTripSelect"></select>
     <button class="btn btn-primary" onclick="openTripDetail(document.getElementById('controlTripSelect').value)">Apri dossier viaggio</button>
@@ -971,8 +971,8 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-prenotazioni">
-  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
-  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
+  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
 </section>
 
@@ -1478,15 +1478,16 @@ function renderDashboard(){
  const today=romeISODate(), ym=romeYearMonth();
  const activeTrips=state.viaggi.filter(v=>v.data_partenza && v.data_partenza>=today && !/annull|cancel/i.test(String(v.stato||''))).sort((a,b)=>(a.data_partenza||'').localeCompare(b.data_partenza||''));
  const future=activeTrips.slice(0,6), activeIds=new Set(activeTrips.map(v=>v.id));
- const activeBookings=state.prenotazioni.filter(b=>activeIds.has(b.viaggio_id)&&!/annull|cancel/i.test(String(b.stato||'')));
- const seats=activeBookings.reduce((n,b)=>n+Number(b.posti||0),0), cap=activeTrips.reduce((n,v)=>n+Number(v.posti_totali||0),0), free=Math.max(cap-seats,0);
+ const allActiveBookings=state.prenotazioni.filter(b=>activeIds.has(b.viaggio_id)&&!/annull|cancel/i.test(String(b.stato||'')));
+ const activeBookings=allActiveBookings.filter(b=>!b.riserva_aziendale);
+ const seats=activeBookings.reduce((n,b)=>n+Number(b.posti||0),0), reservedCompany=allActiveBookings.filter(b=>b.riserva_aziendale).reduce((n,b)=>n+Number(b.posti||0),0), occupiedCapacity=seats+reservedCompany, cap=activeTrips.reduce((n,v)=>n+Number(v.posti_totali||0),0), free=Math.max(cap-occupiedCapacity,0);
  const income=state.economia.filter(e=>String(e.tipo||'').toLowerCase()==='entrata').reduce((n,e)=>n+Math.abs(Number(e.importo||0)),0);
  const expenses=state.economia.filter(e=>String(e.tipo||'').toLowerCase()==='uscita').reduce((n,e)=>n+Math.abs(Number(e.importo||0)),0), balance=income-expenses;
  const openRentals=state.noleggi.filter(r=>!/complet|annull/i.test(String(r.stato_noleggio||''))).length;
  const incomeByTrip={}; state.pagamenti.forEach(p=>{if(!p.viaggio_id)return;const sign=String(p.tipo||'').toLowerCase()==='rimborso'?-1:1;incomeByTrip[p.viaggio_id]=(incomeByTrip[p.viaggio_id]||0)+sign*Math.abs(Number(p.importo||0))});
  $('dashMetrics').innerHTML=[
   ['🚌',activeTrips.length,'Prossime partenze','viaggi attivi','blue'],
-  ['👥',seats,'Passeggeri prenotati',`${free} posti liberi complessivi`,'green'],
+  ['👥',seats,'Passeggeri clienti',`${reservedCompany?reservedCompany+' riservati DELGROSSO · ':''}${free} posti liberi`,'green'],
   ['€',money(income),'Incassi registrati','pagamenti effettivi','orange'],
   ['▣',money(expenses),'Uscite registrate','spese e rimborsi','red'],
   ['◉',money(balance),'Saldo registrato','incassi meno uscite','purple'],
@@ -1528,8 +1529,100 @@ function renderTrips(){
 function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
  const rows=state.prenotazioni.filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
- $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+ $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
 }
+
+// === DELGROSSO: spostamento prenotati tra date mantenendo gli stessi posti ===
+window.dgMoveSelected=new Set();
+window.dgMoveSingleId='';
+function dgMoveBookingSeats(b){
+  const rows=(state.prenotazionePosti||[]).filter(x=>x.prenotazione_id===b.id).map(x=>String(x.posto).trim()).filter(Boolean);
+  if(rows.length)return [...new Set(rows)].sort((a,b)=>Number(a)-Number(b));
+  return String(b.posti_selezionati||'').split(',').map(x=>x.trim()).filter(Boolean).sort((a,b)=>Number(a)-Number(b));
+}
+function dgMoveActiveBookings(tripId){return (state.prenotazioni||[]).filter(b=>b.viaggio_id===tripId&&!/annull|cancel/i.test(String(b.stato||'')))}
+function dgMoveTargetOccupied(targetId){
+  const out=new Set();
+  const active=new Set(dgMoveActiveBookings(targetId).map(b=>b.id));
+  (state.prenotazionePosti||[]).forEach(x=>{if(x.viaggio_id===targetId&&active.has(x.prenotazione_id))out.add(String(x.posto).trim())});
+  dgMoveActiveBookings(targetId).forEach(b=>{
+    const hasRows=(state.prenotazionePosti||[]).some(x=>x.prenotazione_id===b.id);
+    if(!hasRows)String(b.posti_selezionati||'').split(',').map(x=>x.trim()).filter(Boolean).forEach(x=>out.add(x));
+  });
+  return out;
+}
+function dgMoveTripOptions(sourceId,targetId=''){
+  return (state.viaggi||[]).filter(v=>v.id!==sourceId&&!/annull|cancel/i.test(String(v.stato||''))).slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))).map(v=>`<option value="${v.id}" ${v.id===targetId?'selected':''}>${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${v.posti_occupati||0}/${v.posti_totali||0}</option>`).join('');
+}
+function openMoveBookingsModal(singleId=''){
+  const single=(state.prenotazioni||[]).find(x=>x.id===singleId)||null;
+  const sourceId=single?.viaggio_id||(state.viaggi||[]).find(v=>dgMoveActiveBookings(v.id).length)?.id||'';
+  window.dgMoveSingleId=singleId||'';
+  window.dgMoveSelected=new Set(singleId?[singleId]:[]);
+  const sourceOptions=(state.viaggi||[]).filter(v=>dgMoveActiveBookings(v.id).length).slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))).map(v=>`<option value="${v.id}" ${v.id===sourceId?'selected':''}>${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${dgMoveActiveBookings(v.id).reduce((n,b)=>n+Number(b.posti||0),0)} pax</option>`).join('');
+  openModal(singleId?'Sposta prenotazione mantenendo i posti':'Sposta prenotati mantenendo gli stessi posti',`
+    <div class="statusline live" style="margin-bottom:12px"><b>🔄 Cambio data sicuro</b><br>Cliente, pagamenti, acconti, saldo, fermata e note restano invariati. I numeri di posto vengono mantenuti identici.</div>
+    <div class="form-grid">
+      <div class="field"><label>Data / viaggio attuale</label><select id="mv_source" ${singleId?'disabled':''} onchange="dgMoveSourceChanged()">${sourceOptions}</select></div>
+      <div class="field"><label>Nuova data / viaggio *</label><select id="mv_target" onchange="renderMoveBookingChoices()"><option value="">— Seleziona destinazione —</option>${dgMoveTripOptions(sourceId)}</select></div>
+      <div class="field full"><label>Nuova fermata comune (facoltativa)</label><input id="mv_stop" placeholder="Lascia vuoto per mantenere la fermata di ogni cliente"><div class="form-help">Se non scrivi nulla, ogni prenotato mantiene la propria fermata attuale.</div></div>
+    </div>
+    <div class="quick-actions" style="margin:8px 0 10px"><button type="button" class="btn btn-secondary btn-sm" onclick="dgMoveSelectAllCompatible()" ${singleId?'style="display:none"':''}>✓ Seleziona tutti compatibili</button><button type="button" class="btn btn-ghost btn-sm" onclick="dgMoveSelected.clear();renderMoveBookingChoices()" ${singleId?'style="display:none"':''}>Deseleziona</button></div>
+    <div id="mv_summary" class="statusline">Seleziona la nuova data per controllare i posti.</div>
+    <div id="mv_list" style="margin-top:10px"></div>
+  `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-primary" id="mv_confirm" onclick="executeMoveBookings()">🔄 Sposta mantenendo posti</button>`);
+  renderMoveBookingChoices();
+}
+function dgMoveSourceChanged(){
+  const source=$('mv_source')?.value||'';
+  window.dgMoveSelected=new Set();
+  if($('mv_target'))$('mv_target').innerHTML='<option value="">— Seleziona destinazione —</option>'+dgMoveTripOptions(source);
+  renderMoveBookingChoices();
+}
+function dgMoveConflict(b,targetId){
+  const seats=dgMoveBookingSeats(b), target=(state.viaggi||[]).find(v=>v.id===targetId), occupied=targetId?dgMoveTargetOccupied(targetId):new Set();
+  if(seats.length!==Number(b.posti||0))return {bad:true,msg:`posti assegnati incompleti (${seats.length}/${Number(b.posti||0)})`,seats};
+  if(!targetId)return {bad:false,msg:'seleziona la nuova data',seats};
+  const out=seats.filter(x=>!/^\d+$/.test(x)||Number(x)>Number(target?.posti_totali||0));
+  if(out.length)return {bad:true,msg:'posti non presenti sul mezzo: '+out.join(', '),seats};
+  const busy=seats.filter(x=>occupied.has(x));
+  if(busy.length)return {bad:true,msg:'posti già occupati: '+busy.join(', '),seats};
+  return {bad:false,msg:'stessi posti disponibili: '+seats.join(', '),seats};
+}
+function renderMoveBookingChoices(){
+  const source=$('mv_source')?.value||'', target=$('mv_target')?.value||'', list=$('mv_list'), summary=$('mv_summary');if(!list)return;
+  const rows=dgMoveActiveBookings(source).filter(b=>!window.dgMoveSingleId||b.id===window.dgMoveSingleId);
+  const targetTrip=(state.viaggi||[]).find(v=>v.id===target);
+  let compatible=0;
+  rows.forEach(b=>{const c=dgMoveConflict(b,target);if(!c.bad)compatible++;else window.dgMoveSelected.delete(b.id)});
+  list.innerHTML=rows.map(b=>{const c=dgMoveConflict(b,target),checked=window.dgMoveSelected.has(b.id);return `<label class="list-row" style="cursor:${c.bad?'not-allowed':'pointer'};align-items:flex-start"><input type="checkbox" style="width:20px;height:20px;margin-top:6px" ${checked?'checked':''} ${c.bad?'disabled':''} onchange="dgMoveToggle('${b.id}',this.checked)"><div class="row-main"><strong>${esc(b.cliente||b.cliente_nome||'Cliente')}</strong><small>${esc(b.telefono||'')} · ${Number(b.posti||0)} pax · posti <b>${esc(c.seats.join(', ')||'—')}</b> · residuo ${money(b.saldo||0)}</small><small style="color:${c.bad?'#b91c1c':'#047857'}">${esc(c.msg)}</small></div></label>`}).join('')||'<div class="empty">Nessuna prenotazione attiva su questa data.</div>';
+  const selected=[...window.dgMoveSelected], pax=selected.reduce((n,id)=>n+Number((state.prenotazioni||[]).find(b=>b.id===id)?.posti||0),0);
+  if(summary)summary.innerHTML=target?`Destinazione: <b>${esc(targetTrip?.titolo||targetTrip?.destinazione||'Viaggio')}</b> · ${dateIT(targetTrip?.data_partenza)}<br>Selezionati: <b>${selected.length} prenotazioni / ${pax} passeggeri</b> · compatibili: ${compatible}/${rows.length}`:'Seleziona la nuova data: il gestionale controllerà gli stessi numeri di posto prima dello spostamento.';
+  const btn=$('mv_confirm');if(btn)btn.disabled=!target||selected.length===0;
+}
+function dgMoveToggle(id,on){if(on)window.dgMoveSelected.add(id);else window.dgMoveSelected.delete(id);renderMoveBookingChoices()}
+function dgMoveSelectAllCompatible(){
+  const source=$('mv_source')?.value||'',target=$('mv_target')?.value||'';window.dgMoveSelected=new Set(dgMoveActiveBookings(source).filter(b=>!dgMoveConflict(b,target).bad).map(b=>b.id));renderMoveBookingChoices();
+}
+async function executeMoveBookings(){
+  const ids=[...window.dgMoveSelected],source=$('mv_source')?.value||'',target=$('mv_target')?.value||'',stop=$('mv_stop')?.value.trim()||null;
+  if(!source||!target||!ids.length)return toast('Seleziona data di partenza, nuova data e almeno un prenotato',false);
+  const sv=(state.viaggi||[]).find(v=>v.id===source),tv=(state.viaggi||[]).find(v=>v.id===target),pax=ids.reduce((n,id)=>n+Number((state.prenotazioni||[]).find(b=>b.id===id)?.posti||0),0);
+  const conflicts=ids.map(id=>{const b=(state.prenotazioni||[]).find(x=>x.id===id);return b?dgMoveConflict(b,target):{bad:true,msg:'prenotazione non trovata'}}).filter(x=>x.bad);
+  if(conflicts.length)return toast('Uno o più prenotati non possono mantenere gli stessi posti sulla nuova data',false);
+  if(!confirm(`Confermi lo spostamento?\n\nDa: ${sv?.titolo||''} · ${dateIT(sv?.data_partenza)}\nA: ${tv?.titolo||''} · ${dateIT(tv?.data_partenza)}\n\n${ids.length} prenotazioni · ${pax} passeggeri\nGli stessi posti verranno mantenuti.`))return;
+  const btn=$('mv_confirm');if(btn){btn.disabled=true;btn.textContent='Spostamento in corso…'}
+  try{
+    const res=await rpc('dg_move_bookings_keep_seats',{p_booking_ids:ids,p_target_trip_id:target,p_target_stop:stop});
+    // La vecchia conferma viene invalidata dal server. Rigenera la nuova in best effort.
+    for(const id of ids){try{await rpc('dg_generate_confirmation',{p_booking_id:id})}catch(e){log('Conferma da rigenerare dopo spostamento: '+e.message)}}
+    closeModal();await loadAll();toast(`${res?.moved||ids.length} prenotazione/i spostate mantenendo gli stessi posti`);
+  }catch(e){
+    const m=String(e?.message||e).replace(/.*POSTI_OCCUPATI_DESTINAZIONE:\s*/,'Posti occupati sulla nuova data: ').replace(/.*POSTI_NON_COMPATIBILI_CON_IL_MEZZO_DESTINAZIONE:\s*/,'Posti non compatibili col mezzo: ');
+    toast('Spostamento non eseguito: '+m,false);log('SPOSTA DATA: '+String(e?.message||e));
+  }finally{if(btn){btn.disabled=false;btn.textContent='🔄 Sposta mantenendo posti'}}
+}
+
 function quoteOrigin(q){
   const o=String(q.origine||q.provenienza||q.source||q.fonte||'').toLowerCase();
   return /sito|web|website|online|form/.test(o)?'sito':'gestionale';
@@ -1909,7 +2002,7 @@ let modalSelectedSeats=[];
 function seatListForTrip(tripId,excludeBookingId=''){return state.prenotazionePosti.filter(x=>x.viaggio_id===tripId&&x.prenotazione_id!==excludeBookingId).map(x=>String(x.posto));}
 function renderSeatPicker(){const tripId=$('b_trip')?.value;if(!tripId||!$('seatPicker'))return;const bId=window.currentBookingId||'';const v=state.viaggi.find(x=>x.id===tripId)||{};const busy=seatListForTrip(tripId,bId);const total=Number(v.posti_totali||0);$('seatPicker').innerHTML=Array.from({length:total},(_,i)=>{const n=String(i+1),isBusy=busy.includes(n),sel=modalSelectedSeats.includes(n);return `<button type="button" class="seat ${isBusy?'busy':''} ${sel?'selected':''}" ${isBusy?'disabled':''} onclick="toggleSeat('${n}')">${n}</button>`}).join('');$('b_selected').value=modalSelectedSeats.join(', ');$('b_seats').value=modalSelectedSeats.length||1;}
 function toggleSeat(n){const i=modalSelectedSeats.indexOf(String(n));if(i>=0)modalSelectedSeats.splice(i,1);else modalSelectedSeats.push(String(n));modalSelectedSeats.sort((a,b)=>Number(a)-Number(b));const v=state.viaggi.find(x=>x.id===$('b_trip')?.value);if(v&&$('b_total'))$('b_total').value=(Number(v.prezzo)||0)*modalSelectedSeats.length;renderSeatPicker();}
-function openBookingModal(id=''){window.currentBookingId=id;const b=state.prenotazioni.find(x=>x.id===id)||{};const firstTrip=b.viaggio_id||state.viaggi[0]?.id||'';const bookingStatus=b.stato||'In attesa acconto',bookingStatuses=['In attesa acconto','Confermata','Acconto Ricevuto','Pagata','Annullata'];if(b.stato&&!bookingStatuses.includes(b.stato))bookingStatuses.unshift(b.stato);modalSelectedSeats=state.prenotazionePosti.filter(x=>x.prenotazione_id===id).map(x=>String(x.posto));if(!modalSelectedSeats.length&&b.posti_selezionati)modalSelectedSeats=String(b.posti_selezionati).split(',').map(x=>x.trim()).filter(Boolean);openModal(id?'Modifica prenotazione':'Nuova prenotazione',`<div class="form-grid"><div class="field full"><label>Viaggio</label><select id="b_trip" onchange="modalSelectedSeats=[];renderSeatPicker()">${state.viaggi.map(v=>`<option value="${v.id}" ${firstTrip===v.id?'selected':''}>${esc(v.titolo)} · ${dateIT(v.data_partenza)} · ${money(v.prezzo)} · ${v.posti_liberi??v.posti_totali??0} liberi</option>`).join('')}</select></div><div class="field"><label>Cliente</label><input id="b_client" value="${esc(b.cliente||'')}"></div><div class="field"><label>Telefono</label><input id="b_tel" value="${esc(b.telefono||'')}"></div><div class="field"><label>Email (facoltativa)</label><input id="b_email" value="${esc(b.email||'')}"></div><div class="field"><label>Fermata di partenza *</label><input id="b_departure" required placeholder="Seleziona la fermata prevista" value="${esc(b.fermata_partenza||'')}" list="dg_departure_options"><datalist id="dg_departure_options">${['San Severo','Apricena','San Nicandro Garganico','Lesina','Poggio Imperiale','Termoli','Foggia'].map(x=>`<option value="${x}">`).join('')}</datalist></div><div class="field"><label>Giorni per acconto</label><input id="b_days" type="number" min="1" max="90" value="${b.giorni_acconto??2}"></div><div class="field"><label>N° posti</label><input id="b_seats" type="number" min="1" value="${b.posti||1}" readonly></div><div class="field"><label>Totale €</label><input id="b_total" type="number" step=".01" value="${b.totale??0}"></div><div class="field full"><label>Pianta posti — clicca per selezionare</label><div id="seatPicker" class="seat-picker"></div><input id="b_selected" value="${esc(b.posti_selezionati||'')}" readonly></div><div class="field"><label>Stato</label><select id="b_status">${bookingStatuses.map(x=>`<option ${bookingStatus===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field full"><label>Note</label><textarea id="b_note">${esc(b.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>${id?`<button class="btn btn-danger" onclick="cancelBooking('${id}')">❌ Annulla e libera posti</button><button class="btn btn-ghost" onclick="deleteBooking('${id}')">🗑️ Elimina</button><button class="btn btn-primary" onclick="printConfirmation('${id}')">🎫 Conferma</button>`:''}<button class="btn btn-primary" onclick="saveBooking('${id}')">Salva prenotazione</button>`);const v=state.viaggi.find(x=>x.id===firstTrip);if(v&&(!b.totale||b.totale===0))$('b_total').value=(Number(v.prezzo)||0)*(modalSelectedSeats.length||Number(b.posti)||1);renderSeatPicker();}
+function openBookingModal(id=''){window.currentBookingId=id;const b=state.prenotazioni.find(x=>x.id===id)||{};const firstTrip=b.viaggio_id||state.viaggi[0]?.id||'';const bookingStatus=b.stato||'In attesa acconto',bookingStatuses=['In attesa acconto','Confermata','Acconto Ricevuto','Pagata','Annullata'];if(b.stato&&!bookingStatuses.includes(b.stato))bookingStatuses.unshift(b.stato);modalSelectedSeats=state.prenotazionePosti.filter(x=>x.prenotazione_id===id).map(x=>String(x.posto));if(!modalSelectedSeats.length&&b.posti_selezionati)modalSelectedSeats=String(b.posti_selezionati).split(',').map(x=>x.trim()).filter(Boolean);openModal(id?'Modifica prenotazione':'Nuova prenotazione',`<div class="form-grid"><div class="field full"><label>Viaggio</label><select id="b_trip" ${id?'disabled':'onchange="modalSelectedSeats=[];renderSeatPicker()"'}>${state.viaggi.map(v=>`<option value="${v.id}" ${firstTrip===v.id?'selected':''}>${esc(v.titolo)} · ${dateIT(v.data_partenza)} · ${money(v.prezzo)} · ${v.posti_liberi??v.posti_totali??0} liberi</option>`).join('')}</select>${id?'<div class="form-help">🔒 Per cambiare data usa <b>Sposta data</b>: il gestionale manterrà gli stessi posti e controllerà che siano liberi.</div>':''}</div><div class="field"><label>Cliente</label><input id="b_client" value="${esc(b.cliente||'')}"></div><div class="field"><label>Telefono</label><input id="b_tel" value="${esc(b.telefono||'')}"></div><div class="field"><label>Email (facoltativa)</label><input id="b_email" value="${esc(b.email||'')}"></div><div class="field"><label>Fermata di partenza *</label><input id="b_departure" required placeholder="Seleziona la fermata prevista" value="${esc(b.fermata_partenza||'')}" list="dg_departure_options"><datalist id="dg_departure_options">${['San Severo','Apricena','San Nicandro Garganico','Lesina','Poggio Imperiale','Termoli','Foggia'].map(x=>`<option value="${x}">`).join('')}</datalist></div><div class="field"><label>Giorni per acconto</label><input id="b_days" type="number" min="1" max="90" value="${b.giorni_acconto??2}"></div><div class="field"><label>N° posti</label><input id="b_seats" type="number" min="1" value="${b.posti||1}" readonly></div><div class="field"><label>Totale €</label><input id="b_total" type="number" step=".01" value="${b.totale??0}"></div><div class="field full"><label>Pianta posti — clicca per selezionare</label><div id="seatPicker" class="seat-picker"></div><input id="b_selected" value="${esc(b.posti_selezionati||'')}" readonly></div><div class="field"><label>Stato</label><select id="b_status">${bookingStatuses.map(x=>`<option ${bookingStatus===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field full"><label>Note</label><textarea id="b_note">${esc(b.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>${id?`<button class="btn btn-secondary" onclick="closeModal();openMoveBookingsModal('${id}')">🔄 Sposta data</button><button class="btn btn-danger" onclick="cancelBooking('${id}')">❌ Annulla e libera posti</button><button class="btn btn-ghost" onclick="deleteBooking('${id}')">🗑️ Elimina</button><button class="btn btn-primary" onclick="printConfirmation('${id}')">🎫 Conferma</button>`:''}<button class="btn btn-primary" onclick="saveBooking('${id}')">Salva prenotazione</button>`);const v=state.viaggi.find(x=>x.id===firstTrip);if(v&&(!b.totale||b.totale===0)&&!b.riserva_aziendale)$('b_total').value=(Number(v.prezzo)||0)*(modalSelectedSeats.length||Number(b.posti)||1);renderSeatPicker();}
 async function saveBooking(id){
  const v=state.viaggi.find(x=>x.id===$('b_trip').value); if(!v)return toast('Seleziona un viaggio',false);
  const client=$('b_client').value.trim(); if(!client)return toast('Inserisci il nome del cliente',false);
@@ -2656,11 +2749,9 @@ async function executeLocal(a){const p=a.params||{},t=a.type;
  }
  if(t==='move_booking'){
    const b=state.prenotazioni.find(x=>x.id===p.booking_id),v=state.viaggi.find(x=>x.id===p.target_trip_id);if(!b||!v)throw new Error('Prenotazione o viaggio non trovato');
-   const used=state.prenotazioni.filter(x=>x.viaggio_id===v.id&&x.id!==b.id&&!/annull|cancel/i.test(String(x.stato||''))).reduce((n,x)=>n+Number(x.posti||0),0);
-   if(Number(v.posti_totali||0)>0&&used+Number(b.posti||0)>Number(v.posti_totali))throw new Error('Posti insufficienti nel viaggio di destinazione');
-   const body={viaggio_id:v.id,cliente:b.cliente||b.cliente_nome||'Cliente',cliente_nome:b.cliente_nome||b.cliente||'Cliente',telefono:b.telefono||null,email:b.email||null,posti:Number(b.posti||1),totale:Number(b.totale||0),stato:b.stato||'In attesa acconto',note:b.note||null,fermata_partenza:p.departure_stop||b.fermata_partenza||'Da definire',giorni_acconto:Number(b.giorni_acconto||2),data_prenotazione:b.data_prenotazione||romeDate(),viaggio_codice:v.id_viaggio||null};
-   await rpc('dg_save_booking_v13',{p_id:b.id,p_data:body,p_seats:[]});
-   await aiAudit('AI_MOVE_BOOKING','prenotazioni',b.id,{target_trip_id:v.id});return {type:t,id:b.id}
+   const result=await rpc('dg_move_bookings_keep_seats',{p_booking_ids:[b.id],p_target_trip_id:v.id,p_target_stop:p.departure_stop||null});
+   try{await rpc('dg_generate_confirmation',{p_booking_id:b.id})}catch(e){log('Conferma da rigenerare dopo spostamento AI: '+e.message)}
+   await aiAudit('AI_MOVE_BOOKING_KEEP_SEATS','prenotazioni',b.id,{target_trip_id:v.id,seats_preserved:true});return {type:t,id:b.id,result}
  }
  if(t==='cancel_booking'){
    const b=state.prenotazioni.find(x=>x.id===p.booking_id);if(!b)throw new Error('Prenotazione non trovata');
@@ -4109,5 +4200,112 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
   console.info('DELGROSSO MASTER · Universal Compatibility attiva · iOS / iPadOS / Android / Tablet / PC');
 })();
 </script>
-</body>
+\n<style id="dg-company-reserve-style">
+.btn-purple{background:#6d28d9!important;color:#fff!important;border:1px solid #5b21b6!important}.btn-purple:hover{background:#5b21b6!important}.pill.company{background:#ede9fe!important;color:#6d28d9!important;border:1px solid #c4b5fd!important}.seat.company-reserved{background:#ede9fe!important;color:#6d28d9!important;border-color:#a78bfa!important;text-decoration:none!important;cursor:not-allowed!important}.dg-company-reserve-box{border:1px solid #c4b5fd;background:linear-gradient(135deg,#faf5ff,#f5f3ff);border-radius:14px;padding:14px}.dg-company-reserve-summary{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.dg-company-reserve-summary>div{background:#fff;border:1px solid #ddd6fe;border-radius:10px;padding:9px 12px;min-width:130px}.dg-company-reserve-summary small{display:block;color:#6b7280;font-size:10px}.dg-company-reserve-summary b{display:block;margin-top:3px;color:#4c1d95}.dg-company-row{background:#faf5ff!important}.dg-company-row td{border-bottom-color:#ddd6fe!important}@media(max-width:600px){.dg-company-reserve-summary>div{flex:1 1 calc(50% - 6px);min-width:0}.btn-purple{width:auto}}
+</style>
+<script id="dg-company-reserve-module">
+(function(){
+  function activeBooking(b){return b&&!/annull|cancel/i.test(String(b.stato||''));}
+  function companyBooking(b){return !!(b?.riserva_aziendale||(/DELGROSSO VIAGGI/i.test(String(b?.cliente||''))&&Number(b?.totale||0)===0&&/riserv/i.test(String(b?.stato||''))));}
+  function bookingSeats(b){
+    const rows=(state.prenotazionePosti||[]).filter(x=>x.prenotazione_id===b.id).map(x=>String(x.posto).trim()).filter(Boolean);
+    if(rows.length)return [...new Set(rows)].sort((a,b)=>Number(a)-Number(b));
+    return String(b.posti_selezionati||'').split(',').map(x=>x.trim()).filter(Boolean).sort((a,b)=>Number(a)-Number(b));
+  }
+  function occupiedSeatSet(tripId,excludeId=''){
+    const set=new Set(),activeIds=new Set((state.prenotazioni||[]).filter(b=>b.viaggio_id===tripId&&b.id!==excludeId&&activeBooking(b)).map(b=>b.id));
+    (state.prenotazionePosti||[]).forEach(x=>{if(x.viaggio_id===tripId&&activeIds.has(x.prenotazione_id))set.add(String(x.posto).trim())});
+    (state.prenotazioni||[]).filter(b=>b.viaggio_id===tripId&&b.id!==excludeId&&activeBooking(b)).forEach(b=>{
+      if(!(state.prenotazionePosti||[]).some(x=>x.prenotazione_id===b.id))bookingSeats(b).forEach(s=>set.add(s));
+    });
+    return set;
+  }
+  function companySeatSet(tripId,excludeId=''){
+    const set=new Set();
+    (state.prenotazioni||[]).filter(b=>b.viaggio_id===tripId&&b.id!==excludeId&&activeBooking(b)&&companyBooking(b)).forEach(b=>bookingSeats(b).forEach(s=>set.add(s)));
+    return set;
+  }
+  window.dgCompanyReserveSeats=new Set();
+  window.dgCompanyTripOptions=function(selected=''){
+    const today=typeof romeISODate==='function'?romeISODate():new Date().toISOString().slice(0,10);
+    return (state.viaggi||[]).filter(v=>String(v.data_partenza||'')>=today&&!/annull|cancel/i.test(String(v.stato||''))).slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))).map(v=>`<option value="${v.id}" ${v.id===selected?'selected':''}>${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${Number(v.posti_occupati||0)}/${Number(v.posti_totali||0)}</option>`).join('');
+  };
+  window.openCompanyReserveModal=function(preselectTrip=''){
+    const trips=(state.viaggi||[]).filter(v=>!/annull|cancel/i.test(String(v.stato||'')));
+    const tripId=(trips.some(v=>v.id===preselectTrip)?preselectTrip:'')||trips.slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')))[0]?.id||'';
+    window.dgCompanyReserveSeats=new Set();
+    openModal('🎟️ Riserva posti — DELGROSSO VIAGGI',`
+      <div class="dg-company-reserve-box"><b>Riserva aziendale gratuita</b><div class="form-help">I posti selezionati diventano non vendibili e vengono intestati a <b>DELGROSSO VIAGGI</b>. Totale, pagato e saldo restano sempre a €0.</div></div>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field full"><label>Viaggio / data *</label><select id="dg_company_trip" onchange="dgCompanyReserveSeats.clear();renderCompanyReserveSeats()">${dgCompanyTripOptions(tripId)}</select></div>
+        <div class="field full"><label>Pianta posti — seleziona i posti da riservare</label><div id="dg_company_seat_picker" class="seat-picker"></div></div>
+        <div class="field full"><label>Note interne (facoltative)</label><textarea id="dg_company_note" placeholder="Es. posti staff, accompagnatore, esigenze operative..."></textarea></div>
+      </div>
+      <div class="dg-company-reserve-summary"><div><small>Posti selezionati</small><b id="dg_company_count">0</b></div><div><small>Importo totale</small><b>€ 0,00</b></div><div><small>Intestatario</small><b>DELGROSSO VIAGGI</b></div></div>
+    `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-ghost" onclick="dgCompanyReserveSeats.clear();renderCompanyReserveSeats()">Azzera</button><button class="btn btn-purple" id="dg_company_confirm" onclick="saveCompanyReservation()" disabled>🎟️ Riserva gratuitamente</button>`);
+    renderCompanyReserveSeats();
+  };
+  window.renderCompanyReserveSeats=function(){
+    const tripId=$('dg_company_trip')?.value||'',box=$('dg_company_seat_picker');if(!tripId||!box)return;
+    const v=(state.viaggi||[]).find(x=>x.id===tripId)||{},busy=occupiedSeatSet(tripId),company=companySeatSet(tripId),total=Number(v.posti_totali||0);
+    box.innerHTML=Array.from({length:total},(_,i)=>{const n=String(i+1),isBusy=busy.has(n),isCompany=company.has(n),sel=dgCompanyReserveSeats.has(n);return `<button type="button" class="seat ${isBusy?'busy':''} ${isCompany?'company-reserved':''} ${sel?'selected':''}" ${isBusy?'disabled':''} onclick="toggleCompanyReserveSeat('${n}')" title="${isCompany?'Riservato DELGROSSO':isBusy?'Occupato':'Libero'}">${n}</button>`}).join('');
+    const c=$('dg_company_count');if(c)c.textContent=dgCompanyReserveSeats.size;
+    const btn=$('dg_company_confirm');if(btn)btn.disabled=dgCompanyReserveSeats.size===0;
+  };
+  window.toggleCompanyReserveSeat=function(n){if(dgCompanyReserveSeats.has(String(n)))dgCompanyReserveSeats.delete(String(n));else dgCompanyReserveSeats.add(String(n));renderCompanyReserveSeats();};
+  window.saveCompanyReservation=async function(){
+    const tripId=$('dg_company_trip')?.value||'',seats=[...dgCompanyReserveSeats].sort((a,b)=>Number(a)-Number(b)),note=$('dg_company_note')?.value.trim()||null;
+    if(!tripId||!seats.length)return toast('Seleziona almeno un posto da riservare',false);
+    const trip=(state.viaggi||[]).find(v=>v.id===tripId);
+    if(!confirm(`Confermi la riserva gratuita?\n\n${trip?.titolo||trip?.destinazione||'Viaggio'} · ${dateIT(trip?.data_partenza)}\nPosti: ${seats.join(', ')}\n\nIntestatario: DELGROSSO VIAGGI\nImporto: € 0,00`))return;
+    const btn=$('dg_company_confirm');if(btn){btn.disabled=true;btn.textContent='Riserva in corso…'}
+    try{
+      const r=await rpc('dg_reserve_company_seats',{p_trip_id:tripId,p_seats:seats,p_note:note});
+      closeModal();await loadAll();toast(`${r?.count||seats.length} posto/i riservati gratuitamente a DELGROSSO VIAGGI`);
+    }catch(e){toast('Riserva non eseguita: '+String(e?.message||e).replace(/.*POSTI_GIA_OCCUPATI:\s*/,'Posti già occupati: ').replace(/.*POSTI_NON_VALIDI:\s*/,'Posti non validi: '),false);}
+    finally{if(btn){btn.disabled=false;btn.textContent='🎟️ Riserva gratuitamente'}}
+  };
+  window.openCompanyReservationDetail=function(id){
+    const b=(state.prenotazioni||[]).find(x=>x.id===id);if(!b)return toast('Riserva non trovata',false);
+    const v=(state.viaggi||[]).find(x=>x.id===b.viaggio_id),seats=bookingSeats(b);
+    openModal('🎟️ Riserva DELGROSSO VIAGGI',`
+      <div class="dg-company-reserve-box"><b>Riserva aziendale gratuita</b><div class="form-help">Questi posti sono bloccati e non possono essere venduti ad altri clienti.</div></div>
+      <div class="detail-grid" style="margin-top:12px">
+        <div><small>Viaggio</small><b>${esc(v?.titolo||v?.destinazione||'Viaggio')}</b></div>
+        <div><small>Data</small><b>${dateIT(v?.data_partenza)}</b></div>
+        <div><small>Posti</small><b>${esc(seats.join(', ')||'—')}</b></div>
+        <div><small>Numero posti</small><b>${Number(b.posti||seats.length||0)}</b></div>
+        <div><small>Totale</small><b>€ 0,00</b></div>
+        <div><small>Saldo</small><b>€ 0,00</b></div>
+      </div>
+      ${b.note?`<div class="statusline" style="margin-top:12px"><b>Note</b><br>${esc(b.note)}</div>`:''}
+    `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-secondary" onclick="closeModal();openMoveBookingsModal('${id}')">🔄 Sposta data</button><button class="btn btn-danger" onclick="cancelBooking('${id}')">Libera posti</button>`);
+  };
+  // Prenotazioni: vista speciale per le riserve aziendali.
+  window.renderBookings=function(){
+    const q=($('bookSearch')?.value||'').toLowerCase(),st=$('bookFilter')?.value||'';
+    const rows=(state.prenotazioni||[]).filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
+    $('bookingsTable').innerHTML=rows.map(b=>{
+      const company=companyBooking(b),rowClass=company?' class="dg-company-row"':'';
+      const moneyCols=company?'<td><span class="pill company">GRATUITA</span></td><td>€ 0,00</td><td>€ 0,00</td>':`<td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td>`;
+      const status=company?'<span class="pill company">🎟️ Riservata DELGROSSO</span>':`<span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span>`;
+      const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button>`;
+      return `<tr${rowClass}><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente||b.cliente_nome||'Cliente')}${company?'<br><small>Riserva aziendale gratuita</small>':`<br><small>${esc(b.telefono||'')}</small>`}</td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td>${moneyCols}<td>${status}</td><td>${actions}</td></tr>`;
+    }).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+  };
+  // Pianta posti standard: le riserve DELGROSSO sono evidenziate in viola.
+  window.renderSeatPicker=function(){
+    const tripId=$('b_trip')?.value;if(!tripId||!$('seatPicker'))return;
+    const bId=window.currentBookingId||'',v=(state.viaggi||[]).find(x=>x.id===tripId)||{},busy=seatListForTrip(tripId,bId),company=companySeatSet(tripId,bId),total=Number(v.posti_totali||0);
+    $('seatPicker').innerHTML=Array.from({length:total},(_,i)=>{const n=String(i+1),isBusy=busy.includes(n),isCompany=company.has(n),sel=modalSelectedSeats.includes(n);return `<button type="button" class="seat ${isBusy?'busy':''} ${isCompany?'company-reserved':''} ${sel?'selected':''}" ${isBusy?'disabled':''} onclick="toggleSeat('${n}')" title="${isCompany?'Riservato DELGROSSO':isBusy?'Occupato':'Libero'}">${n}</button>`}).join('');
+    $('b_selected').value=modalSelectedSeats.join(', ');$('b_seats').value=modalSelectedSeats.length||1;
+  };
+  const originalOpenBooking=window.openBookingModal;
+  window.openBookingModal=function(id=''){
+    const b=id?(state.prenotazioni||[]).find(x=>x.id===id):null;
+    if(companyBooking(b))return openCompanyReservationDetail(id);
+    return originalOpenBooking(id);
+  };
+})();
+</script>\n</body>
 </html>
