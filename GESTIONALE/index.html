@@ -1370,7 +1370,7 @@ function updatePageChrome(page){const m=PAGE_META[page]||PAGE_META.dashboard;con
 
 window.go=go; updatePageChrome(state.page||'dashboard');
 function dgSafeCacheData73(){
-  const trips=(state.viaggi||[]).filter(v=>String(v.pubblicato||'').toUpperCase()==='SI').map(v=>({id:v.id,id_viaggio:v.id_viaggio,titolo:v.titolo,destinazione:v.destinazione,luogo_partenza:v.luogo_partenza,data_partenza:v.data_partenza,ora_partenza:v.ora_partenza,prezzo:v.prezzo,autobus:v.autobus,autobus_id:v.autobus_id,posti_totali:v.posti_totali,posti_liberi:v.posti_liberi,posti_occupati:v.posti_occupati,stato:v.stato,pubblicato:v.pubblicato,minimo_partecipanti:v.minimo_partecipanti}));
+  const trips=(state.viaggi||[]).filter(v=>String(v.pubblicato||'').toUpperCase()==='SI').map(v=>({id:v.id,id_viaggio:v.id_viaggio,titolo:v.titolo,destinazione:v.destinazione,luogo_partenza:v.luogo_partenza,data_partenza:v.data_partenza,ora_partenza:v.ora_partenza,prezzo:v.prezzo,autobus:v.autobus,autobus_id:v.autobus_id,posti_totali:v.posti_totali,posti_liberi:v.posti_liberi,posti_occupati:v.posti_occupati,stato:v.stato,pubblicato:v.pubblicato,minimo_partecipanti:v.minimo_partecipanti,sold_out_manual:v.sold_out_manual,stato_pre_sold_out:v.stato_pre_sold_out,sold_out_at:v.sold_out_at,online_hidden_at:v.online_hidden_at}));
   const fleet=(state.flotta||[]).filter(f=>f.attivo!==false).map(f=>({id:f.id,titolo:f.titolo,marca:f.marca,modello:f.modello,categoria:f.categoria,posti:f.posti,stato:f.stato,attivo:f.attivo}));
   return {viaggi:trips,flotta:fleet,viaggiFermate:[]};
 }
@@ -1521,10 +1521,42 @@ function paymentClientOptions(selected=''){const names=[...new Set(state.prenota
 function paymentTripOptions(selected=''){return '<option value="">Seleziona viaggio...</option>'+state.viaggi.slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))).map(v=>`<option value="${v.id}" ${v.id===selected?'selected':''}>${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${money(v.prezzo)}</option>`).join('')}
 function paymentBookingOptions(client='',tripId='',selected=''){const rows=state.prenotazioni.filter(b=>(!client||String(b.cliente||'').trim()===client)&&(!tripId||b.viaggio_id===tripId));return '<option value="">'+(rows.length?'Seleziona prenotazione...':'Nessuna prenotazione per cliente/viaggio')+'</option>'+rows.map(b=>`<option value="${b.id}" ${b.id===selected?'selected':''}>${esc(b.codice||b.id?.slice(0,8))} · ${b.posti||0} posti · Totale ${money(b.totale)}</option>`).join('')}
 function syncPaymentBookings(){const client=$('p_client')?.value||'',trip=$('p_trip')?.value||'',current=$('p_booking')?.value||'';if($('p_booking')){$('p_booking').innerHTML=paymentBookingOptions(client,trip,current);const rows=state.prenotazioni.filter(b=>(!client||String(b.cliente||'').trim()===client)&&(!trip||b.viaggio_id===trip));if(rows.length===1)$('p_booking').value=rows[0].id;}updatePaySummary()}
+function dgTripRemaining(v){
+ const db=Number(v?.posti_liberi);
+ if(Number.isFinite(db))return Math.max(db,0);
+ return Math.max(Number(v?.posti_totali||0)-Number(v?.posti_occupati||0),0);
+}
+async function setTripOnlineState(id,action){
+ const v=state.viaggi.find(x=>x.id===id); if(!v)return;
+ const remaining=dgTripRemaining(v), a=String(action||'').toUpperCase();
+ let question='';
+ if(a==='SOLD_OUT')question=`${v.titolo||v.destinazione}: risultano ancora ${remaining} posti fisicamente liberi. Vuoi segnare il viaggio SOLD OUT online? Le nuove prenotazioni verranno bloccate.`;
+ if(a==='OFFLINE')question=`Vuoi togliere ${v.titolo||v.destinazione} dal sito? Il viaggio e tutte le prenotazioni resteranno nel gestionale.`;
+ if(a==='ONLINE')question=`Vuoi rimettere online ${v.titolo||v.destinazione}?`;
+ if(a==='REOPEN')question=`Vuoi riaprire le vendite online per ${v.titolo||v.destinazione}?`;
+ if(!confirm(question||'Confermi l’operazione?'))return;
+ try{
+   await rpc('dg_set_trip_online_state',{p_trip_id:id,p_action:a});
+   toast(a==='SOLD_OUT'?'Viaggio impostato SOLD OUT':a==='OFFLINE'?'Data tolta dal sito':a==='ONLINE'?'Data rimessa online':'Vendite riaperte');
+   await loadAll();
+ }catch(e){toast('Operazione non riuscita: '+(e?.message||e),false);log('STATO ONLINE VIAGGIO: '+(e?.message||e))}
+}
 function renderTrips(){
  const q=($('tripSearch')?.value||'').toLowerCase(), st=$('tripStatus')?.value||'';
  const rows=state.viaggi.filter(v=>(!q||JSON.stringify(v).toLowerCase().includes(q))&&(!st||v.stato===st));
- $('tripsTable').innerHTML=rows.map(v=>`<tr><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b><br><small>${esc(v.id_viaggio||v.destinazione)}</small></td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}</td><td>${money(v.prezzo)}</td><td><span class="pill ${v.stato==='SOLD OUT'?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(v.stato||'Programmato')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
+ $('tripsTable').innerHTML=rows.map(v=>{
+   const remaining=dgTripRemaining(v), sold=Boolean(v.sold_out_manual)||String(v.stato||'').toUpperCase()==='SOLD OUT', online=String(v.pubblicato||'').toUpperCase()==='SI';
+   const lastFive=!sold&&remaining<=5;
+   const rowStyle=lastFive?'background:rgba(245,158,11,.08)':'';
+   const availability=remaining===0?'<br><small style="font-weight:800;color:#dc2626">Nessun posto libero</small>':lastFive?`<br><small style="font-weight:800;color:#d97706">⚠ Ultimi ${remaining} posti</small>`:`<br><small>${remaining} liberi</small>`;
+   const status=`<span class="pill ${sold?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(sold?'SOLD OUT':(v.stato||'Programmato'))}</span> <span class="pill ${online?'ok':'wait'}">${online?'Online':'Offline'}</span>`;
+   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> `;
+   if(lastFive&&online)actions+=`<button class="btn btn-danger btn-sm" onclick="setTripOnlineState('${v.id}','SOLD_OUT')">🔴 SOLD OUT</button> `;
+   if(sold)actions+=`<button class="btn btn-secondary btn-sm" onclick="setTripOnlineState('${v.id}','REOPEN')">🟢 Riapri vendite</button> `;
+   if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
+   else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
+   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b><br><small>${esc(v.id_viaggio||v.destinazione)}</small></td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:310px">${actions}</td></tr>`;
+ }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
 }
 function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
