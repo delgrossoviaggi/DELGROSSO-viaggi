@@ -990,8 +990,8 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-clienti">
-  <div class="section-title"><h2>Clienti</h2><button class="btn btn-primary" onclick="openClientModal()">+ Nuovo cliente</button></div>
-  <div class="toolbar"><input id="clientSearch" placeholder="Nome, cognome, telefono, email..."><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="section-title"><h2>Clienti</h2><div class="section-actions"><button class="btn btn-secondary" id="syncClientsBtn" onclick="syncClientsNow()">↻ Sincronizza clienti</button><button class="btn btn-primary" onclick="openClientModal()">+ Nuovo cliente</button></div></div>
+  <div class="toolbar"><input id="clientSearch" placeholder="Nome, cognome, telefono, email..."><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button><span id="clientSyncStatus" class="form-help">Anagrafica sincronizzata automaticamente con le prenotazioni.</span></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Telefono</th><th>Email</th><th>Città</th><th>Stato</th><th></th></tr></thead><tbody id="clientsTable"></tbody></table></div>
 </section>
 
@@ -1653,7 +1653,30 @@ function renderQuotes(){
 
 function renderClients(){
  const q=($('clientSearch')?.value||'').toLowerCase();const rows=state.clienti.filter(c=>!q||`${c.nome} ${c.cognome} ${c.telefono} ${c.email}`.toLowerCase().includes(q));
- $('clientsTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.codice_cliente||c.id?.slice(0,8))}</td><td><b>${esc(c.nome)} ${esc(c.cognome)}</b></td><td>${esc(c.telefono||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.citta||'—')}</td><td><span class="pill ok">${esc(c.stato_cliente||'Attivo')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openClientModal('${c.id}')">Modifica</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nessun cliente.</td></tr>';
+ $('clientsTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.codice_cliente||c.id?.slice(0,8))}</td><td><b>${esc(c.nome)} ${esc(c.cognome)}</b>${c.provenienza?`<br><small>${esc(c.provenienza)}</small>`:''}</td><td>${esc(c.telefono||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.citta||'—')}</td><td><span class="pill ok">${esc(c.stato_cliente||'Attivo')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openClientModal('${c.id}')">Modifica</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nessun cliente.</td></tr>';
+ const info=$('clientSyncStatus');if(info&&!window.__dgClientSyncLast)info.textContent=`${state.clienti.length} clienti sincronizzati da Supabase · sincronizzazione automatica attiva`;
+}
+async function syncClientsNow(){
+ if(window.__dgClientSyncBusy)return;
+ window.__dgClientSyncBusy=true;
+ const btn=$('syncClientsBtn'),status=$('clientSyncStatus');
+ if(btn){btn.disabled=true;btn.textContent='⏳ Sincronizzo...'}
+ if(status)status.textContent='Confronto prenotazioni e anagrafica clienti...';
+ try{
+   const raw=await rpc('dg_sync_clients_from_bookings',{});
+   const r=Array.isArray(raw)?(raw[0]||{}):(raw||{});
+   window.__dgClientSyncLast=r;
+   await loadAll();
+   const after=Number(r.after??state.clienti.length),ins=Number(r.inserted||0),upd=Number(r.updated||0);
+   if(status)status.textContent=`${after} clienti totali · ${ins} nuovi inseriti · ${upd} già presenti/aggiornati`;
+   toast(`Clienti sincronizzati: ${after} totali · ${ins} nuovi`);
+ }catch(e){
+   if(status)status.textContent='Sincronizzazione non riuscita: '+e.message;
+   toast('Sincronizzazione clienti: '+e.message,false);
+ }finally{
+   window.__dgClientSyncBusy=false;
+   if(btn){btn.disabled=false;btn.textContent='↻ Sincronizza clienti'}
+ }
 }
 function renderPayments(){
  const inc=state.pagamenti.filter(p=>String(p.tipo||'').toLowerCase()!=='rimborso').reduce((s,p)=>s+Math.abs(Number(p.importo||0)),0), refunds=state.pagamenti.filter(p=>String(p.tipo||'').toLowerCase()==='rimborso').reduce((s,p)=>s+Math.abs(Number(p.importo||0)),0), today=state.pagamenti.filter(p=>p.data_pagamento===romeISODate()).reduce((s,p)=>s+(String(p.tipo||'').toLowerCase()==='rimborso'?-Math.abs(Number(p.importo||0)):Math.abs(Number(p.importo||0))),0);
