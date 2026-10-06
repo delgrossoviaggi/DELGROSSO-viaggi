@@ -1,5 +1,13 @@
-gestionale-bridge: version 6
-Project: bhsanrbadsqcpbtxupmr
-verify_jwt: false
-Health endpoint: GET ?health=1
-Booking endpoint: POST action=booking -> /rest/v1/rpc/create_public_booking_v2
+DELGROSSO — STATO BRIDGE SITO -> GESTIONALE
+Verifica effettuata: 06/10/2026
+
+Progetto sito: bhsanrbadsqcpbtxupmr (delgrosso-sito)
+Edge Function live: gestionale-bridge
+Stato live verificato: ACTIVE
+Versione live verificata da Supabase: 8
+verify_jwt live: false (endpoint pubblico gestito dalla funzione)
+
+IMPORTANTE:
+- Il file locale "gestionale-bridge-v6-index.ts" e' una fotografia precedente e NON deve essere ridistribuito sopra la funzione live senza prima confrontarlo con la versione 8 attualmente in produzione.
+- Il restyling FLAGSHIP 2026 NON modifica ne' distribuisce la Edge Function.
+- js/gestionale.js resta il client pubblico ufficiale del bridge.

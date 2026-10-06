@@ -1,0 +1,44 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — VERIFICA FLAGSHIP 2026 V30
+Data verifica: 06/10/2026
+
+ESITO: OK PER DEPLOY DEL FRONTEND
+
+COLLEGAMENTO GESTIONALE / SUPABASE
+- js/gestionale.js NON modificato.
+  SHA-256: 4def7c68d44066834d41566f67cf114ff50f0b6f5110758099ba6f7aad2e09b3
+- gestionale-bridge-v6-index.ts NON modificato.
+  SHA-256: 6e3b720cc9ded636fc322d15c458a6fb5027494a9ae06bdc63eb5cf62f00266d
+- La Edge Function live "gestionale-bridge" sul progetto del sito è stata verificata come ACTIVE, versione 8.
+- IMPORTANTE: il file locale v6 è una snapshot storica e NON deve essere usato per sovrascrivere la funzione live v8.
+- Nessuna migrazione o modifica al database Supabase è stata applicata durante il restyling.
+
+TEST ESEGUITI
+- Riferimenti locali HTML/CSS/JS/immagini: OK
+- ID HTML duplicati nelle pagine pubbliche: 0
+- Sintassi di tutti i file js/*.js: OK
+- Sintassi degli script inline HTML: OK
+- vercel.json: JSON valido
+- manifest.webmanifest: JSON valido
+- sitemap.xml: XML valido
+- CSS Flagship 2026: parsing senza errori
+- Logica inline originale di prenota.html: invariata
+- Logica inline originale di viaggi.html: invariata
+- Logica inline originale di viaggio.html: invariata
+
+INTERVENTI PRINCIPALI
+- Nuovo design system Flagship 2026 responsive e mobile-first.
+- Home ricostruita con hero premium, CTA prenotazione, dati dinamici e contenuti live.
+- UX pubblica consolidata in un singolo layer, rimuovendo i molteplici overlay grafici legacy dalle pagine pubbliche.
+- Migliorati menu, CTA, ricerca, ritorno in alto, breadcrumb, footer e mobile quickbar.
+- Migliorata presentazione di viaggi, flotta, limousine, news, noleggio, preventivo e pagine istituzionali.
+- Manifest, sitemap, meta social/SEO e header di sicurezza/caching Vercel aggiornati.
+- Area riservata/admin lasciate conservative per minimizzare il rischio operativo.
+
+PUNTI ANCORA DA COMPLETARE SOLO QUANDO DISPONIBILI I DATI UFFICIALI
+- Google Business URL in js/site-config.js è vuoto.
+- Endpoint form contatti/newsletter risultano non configurati; non sono stati inventati endpoint.
+- privacyReady è false: non è stato attivato artificialmente senza verifica legale/configurazione reale.
+- Eventuale indirizzo aziendale/local SEO va valorizzato solo con dati ufficiali confermati.
+
+NOTA SUL TEST VISIVO
+La validazione statica/sintattica è completa. Il browser Chromium del container non ha completato il rendering headless per un problema dell'ambiente (DBus/zygote), quindi non viene dichiarato un test screenshot automatico che non è stato realmente completato.

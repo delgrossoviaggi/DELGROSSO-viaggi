@@ -1,0 +1,10 @@
+DELGROSSO GESTIONALE V6 — ACCESSO RESILIENTE + CASSA OPERATORI
+
+- Ripristinato il collegamento del pulsante Accedi.
+- Nicola usa nicola@delgrossoviaggi.it.
+- Raffaele usa info@delgrossoviaggi.it.
+- Watchdog accesso PC/iPhone, session restore e cache locale.
+- Errori moduli opzionali isolati dal login/core.
+- Pagamenti viaggio/noleggio ed Economia sincronizzati con operatore autenticato.
+- Totali separati Nicola/Raffaele per viaggi, noleggi, rimborsi e cassa netta.
+- Assistente AI aggiornato per leggere la cassa operatori.

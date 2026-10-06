@@ -116,287 +116,100 @@ async function contacts(){applySettings(await loadSettings());}
 headerActive();mobileNav();
 function premiumMotion(){let bar=document.querySelector('.scroll-progress');if(!bar){bar=document.createElement('div');bar.className='scroll-progress';bar.innerHTML='<span></span>';document.body.appendChild(bar)}const progress=bar.querySelector('span');const sync=()=>{const h=document.documentElement.scrollHeight-window.innerHeight;progress.style.width=`${h>0?(scrollY/h)*100:0}%`};sync();window.addEventListener('scroll',sync,{passive:true});const media=document.querySelector('.hero-media');if(media && !matchMedia('(prefers-reduced-motion: reduce)').matches){media.classList.add('hero-parallax');window.addEventListener('mousemove',e=>{const x=(e.clientX/innerWidth-.5)*6,y=(e.clientY/innerHeight-.5)*4;media.style.transform=`scale(1.035) translate(${x}px,${y}px)`},{passive:true});}}
 function siteUX(){const loader=document.querySelector('.page-loader');window.addEventListener('load',()=>setTimeout(()=>loader?.classList.add('hide'),180),{once:true});document.querySelectorAll('img').forEach((img,i)=>{if(i>0&&!img.loading)img.loading='lazy';img.decoding='async';});if('IntersectionObserver' in window){const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-view');observer.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -35px'});document.querySelectorAll('.section-head,.trip-card,.fleet-card,.fleet-photo-card,.news-card,.news-row,.party-feature,.contact-card,.gallery-item,.quote,.trip-toolbar').forEach(el=>{el.classList.add('reveal');observer.observe(el)});}}
-siteUX();premiumMotion();v5GlobalUX();
-
-
-/* =========================
-   TECH PREMIUM V5 — GLOBAL EXPERIENCE LAYER
-   ========================= */
-function v5TripDateShort(d){if(!d)return '—';return String(d).slice(8,10)+'/'+String(d).slice(5,7)}
-function v5InjectCommandSearch(){
- if(document.querySelector('#globalSearchOverlay'))return;
- const tools=document.querySelector('.site-tools');
- if(tools){const b=document.createElement('button');b.className='global-search-trigger';b.type='button';b.innerHTML='<span>Cerca un viaggio</span><kbd>⌕</kbd>';b.setAttribute('aria-label','Cerca un viaggio');tools.prepend(b);b.onclick=v5OpenSearch;}
- const o=document.createElement('div');o.id='globalSearchOverlay';o.className='global-search-overlay';o.setAttribute('aria-hidden','true');o.innerHTML='<div class="global-search-panel" role="dialog" aria-modal="true" aria-label="Cerca un viaggio"><div class="global-search-head"><span style="font-size:19px">⌕</span><input id="globalSearchInput" type="search" autocomplete="off" placeholder="Cerca destinazione, viaggio…"><button class="global-search-close" type="button" aria-label="Chiudi">✕</button></div><div class="global-search-hint">Cerca tra le partenze ufficiali · disponibilità sincronizzata live</div><div id="globalSearchResults" class="global-search-results"><div class="search-empty">Sto preparando le partenze…</div></div><div class="search-status"><span><strong>● LIVE</strong> · calendario ufficiale</span><span>ESC per chiudere</span></div></div>';
- document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)v5CloseSearch();});o.querySelector('.global-search-close').onclick=v5CloseSearch;
- const input=o.querySelector('#globalSearchInput');input.addEventListener('input',()=>v5RenderSearch(input.value));
- document.addEventListener('keydown',e=>{if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'))&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();v5OpenSearch();}if(e.key==='Escape'&&o.classList.contains('open'))v5CloseSearch();});
-}
-async function v5OpenSearch(){const o=document.querySelector('#globalSearchOverlay');if(!o)return;o.classList.add('open');o.setAttribute('aria-hidden','false');const i=o.querySelector('#globalSearchInput');setTimeout(()=>i?.focus(),30);if(!window.__dgTrips?.length){try{window.__dgTrips=await getGestionaleTrips()}catch{}}v5RenderSearch(i?.value||'')}
-function v5CloseSearch(){const o=document.querySelector('#globalSearchOverlay');o?.classList.remove('open');o?.setAttribute('aria-hidden','true')}
-function v5RenderSearch(q=''){const box=document.querySelector('#globalSearchResults');if(!box)return;const needle=q.trim().toLowerCase();const list=(window.__dgTrips||[]).filter(t=>{const text=(tripTitle(t)+' '+(t.destinazione||'')).toLowerCase();return !needle||text.includes(needle)}).slice(0,12);if(!list.length){box.innerHTML='<div class="search-empty">Nessuna partenza trovata.<br><a href="viaggi.html" style="color:#0878c9;font-weight:900">Apri tutte le partenze →</a></div>';return;}box.innerHTML=list.map(t=>{const a=gestTripAvailability(t),img=tripImage(t),title=tripTitle(t),time=String(t.ora_partenza||'').slice(0,5);return `<a class="search-result" href="viaggio.html?id=${encodeURIComponent(t.id)}"><div>${img?`<img src="${esc(img)}" alt="${esc(title)}">`:'<div style="width:82px;height:64px;border-radius:12px;background:#071a2b"></div>'}</div><div class="search-result-copy"><small>${esc(t.destinazione||'Partenza')} · ${esc(v5TripDateShort(t.data_partenza))}</small><b>${esc(title)}</b><span>${esc(time||'—')} · ${a.soldOut?'SOLD OUT':`${a.free} posti disponibili`}</span></div><span class="search-result-arrow">→</span></a>`}).join('')}
-function v5HomeCommand(){const root=document.querySelector('#homeLiveCommand');if(!root)return;const trips=window.__dgTrips||[];const available=trips.filter(t=>!gestTripAvailability(t).soldOut);const next=available[0]||trips[0];const free=trips.reduce((n,t)=>n+gestTripAvailability(t).free,0);const sold=trips.filter(t=>gestTripAvailability(t).soldOut).length;const destinations=new Set(trips.map(t=>(t.destinazione||'').trim()).filter(Boolean)).size;root.innerHTML=`<div class="live-command-shell"><div class="live-command-main"><div class="command-label"><i></i> DELGROSSO LIVE · CALENDARIO UFFICIALE</div><h2>Il tuo prossimo viaggio,<br>in un colpo d'occhio.</h2><p>Partenze, disponibilità e destinazioni vengono lette dal calendario operativo e aggiornate automaticamente.</p><div class="command-stats"><div class="command-stat"><small>Partenze</small><b>${trips.length}</b></div><div class="command-stat"><small>Posti liberi</small><b>${free}</b></div><div class="command-stat"><small>Destinazioni</small><b>${destinations}</b></div></div><div class="actions" style="margin-top:24px"><a class="btn btn-primary" href="viaggi.html">Esplora il calendario →</a>${sold?`<span style="align-self:center;font-size:8px;color:rgba(255,255,255,.48);font-weight:900">${sold} ${sold===1?'partenza completa':'partenze complete'}</span>`:''}</div></div><div class="live-command-next">${next?`<a class="command-next-card" href="viaggio.html?id=${encodeURIComponent(next.id)}">${tripImage(next)?`<img src="${esc(tripImage(next))}" alt="${esc(tripTitle(next))}">`:''}<div class="command-next-date"><b>${esc(String(next.data_partenza||'').slice(8,10)||'—')}</b><small>${esc(String(next.data_partenza||'').slice(5,7)||'')}</small></div><div class="command-next-copy"><small>PROSSIMA PARTENZA · ${esc(tripCountdown(next.data_partenza,String(next.ora_partenza||'').slice(0,5)))}</small><b>${esc(tripTitle(next))}</b><span>${esc(next.destinazione||'Scopri la destinazione')} · ${gestTripAvailability(next).soldOut?'SOLD OUT':gestTripAvailability(next).free+' posti disponibili'} →</span></div></a>`:'<div class="search-empty">Nessuna partenza pubblicata.</div>'}</div></div>`}
-function v5GlobalUX(){
- v5InjectCommandSearch();
- if(!document.querySelector('.page-transition')){const p=document.createElement('div');p.className='page-transition';document.body.appendChild(p);}
- const top=document.createElement('button');top.className='back-to-top';top.type='button';top.setAttribute('aria-label','Torna su');top.textContent='↑';document.body.appendChild(top);const sync=()=>top.classList.toggle('show',scrollY>650);sync();window.addEventListener('scroll',sync,{passive:true});top.onclick=()=>scrollTo({top:0,behavior:'smooth'});
- document.querySelectorAll('a[href]').forEach(a=>a.addEventListener('click',e=>{const href=a.getAttribute('href')||'';if(!href||href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('tel:')||href.startsWith('http')||a.target==='_blank'||e.metaKey||e.ctrlKey)return;const p=document.querySelector('.page-transition');if(p){p.style.animation='none';void p.offsetWidth;p.style.animation='v5page .7s cubic-bezier(.76,0,.24,1) forwards';}}));
-}
-function v5EnhanceHome(){v5HomeCommand();}
-
-/* =========================
-   TECH PREMIUM V7 — TRAVEL EXPERIENCE LAYER
-   ========================= */
-function v7Saved(){try{return JSON.parse(localStorage.getItem('dg_saved_trips')||'[]')}catch{return[]}}
-function v7Save(id){const a=v7Saved(),i=a.indexOf(String(id));i>=0?a.splice(i,1):a.unshift(String(id));try{localStorage.setItem('dg_saved_trips',JSON.stringify(a.slice(0,30)))}catch{}return a}
-function v7IsSaved(id){return v7Saved().includes(String(id))}
-function v7Toast(text){let t=document.querySelector('.v7-toast');if(!t){t=document.createElement('div');t.className='v7-toast';document.body.appendChild(t)}t.textContent=text;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2200)}
-function v7CalendarUrl(t){const d=String(t.data_partenza||'');if(!d)return '#';const time=String(t.ora_partenza||'09:00').slice(0,5);const start=d.replaceAll('-','')+'T'+time.replace(':','')+'00';const end=d.replaceAll('-','')+'T235900';const title=encodeURIComponent(tripTitle(t));const details=encodeURIComponent('Del Grosso Viaggi · '+(t.destinazione||''));return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`}
-function v7EnhanceCards(){document.querySelectorAll('.trip-card[data-trip-id]').forEach(card=>{const id=card.dataset.tripId;if(card.querySelector('.v7-save'))return;const tools=document.createElement('div');tools.className='v7-card-tools';const b=document.createElement('button');b.type='button';b.className='v7-save';b.setAttribute('aria-label',v7IsSaved(id)?'Rimuovi dai preferiti':'Salva viaggio');b.innerHTML=v7IsSaved(id)?'★':'☆';b.title=v7IsSaved(id)?'Salvato':'Salva';b.onclick=e=>{e.preventDefault();e.stopPropagation();const list=v7Save(id);b.innerHTML=list.includes(String(id))?'★':'☆';b.classList.toggle('saved',list.includes(String(id)));b.setAttribute('aria-label',list.includes(String(id))?'Rimuovi dai preferiti':'Salva viaggio');v7Toast(list.includes(String(id))?'Viaggio salvato':'Viaggio rimosso dai salvati');};tools.appendChild(b);card.querySelector('.trip-img')?.appendChild(tools)})}
-function v7EnhanceHome(){
- const rail=document.querySelector('#destinationRail');if(rail&&!rail.querySelector('.v7-destination-note')){const n=document.createElement('div');n.className='v7-destination-note';n.innerHTML='<span>✦</span><b>Lasciati ispirare</b><small>Le prossime esperienze partono da qui.</small>';rail.prepend(n)}
- v7EnhanceCards();
-}
-function v7EnhanceDepartures(){
- const grid=document.querySelector('#tripFull');if(!grid)return;
- const toolbar=document.querySelector('.trip-toolbar');
- if(toolbar&&!toolbar.querySelector('.v7-saved-toggle')){const b=document.createElement('button');b.type='button';b.className='v7-saved-toggle';b.innerHTML='☆ Salvati <span>0</span>';b.onclick=()=>{b.classList.toggle('active');const only=b.classList.contains('active');const list=window.__dgTrips||[];const saved=v7Saved();const render=window.__dgTripRender; if(typeof render==='function'){if(!only)render(list);else render(list.filter(t=>saved.includes(String(t.id))))}b.querySelector('span').textContent=v7Saved().length};toolbar.appendChild(b)}
- const updateSaved=()=>{const b=document.querySelector('.v7-saved-toggle');if(b)b.querySelector('span').textContent=v7Saved().length};updateSaved();v7EnhanceCards();
- const observer=new MutationObserver(()=>{v7EnhanceCards();updateSaved()});observer.observe(grid,{childList:true});
-}
-function v7EnhanceTripDetail(){
- const root=document.querySelector('#tripDetail');if(!root)return;
- if(!root.__v7Observer){root.__v7Observer=new MutationObserver(()=>{if(root.querySelector('.trip-detail-shell')){v7EnhanceTripDetail();root.__v7Observer.disconnect();root.__v7Observer=null}});root.__v7Observer.observe(root,{childList:true,subtree:true})}
- const id=new URLSearchParams(location.search).get('id');if(!id)return;
- const actions=root.querySelector('.detail-top-actions')||root.querySelector('.trip-detail-hero-actions');
- if(actions&&!actions.querySelector('.v7-detail-actions')){const wrap=document.createElement('div');wrap.className='v7-detail-actions';const save=document.createElement('button');save.type='button';save.className='detail-icon-btn';save.innerHTML=v7IsSaved(id)?'★ Salvato':'☆ Salva';save.onclick=()=>{const list=v7Save(id);save.innerHTML=list.includes(String(id))?'★ Salvato':'☆ Salva';v7Toast(list.includes(String(id))?'Viaggio salvato':'Viaggio rimosso dai salvati')};const share=document.createElement('button');share.type='button';share.className='detail-icon-btn';share.textContent='↗ Condividi';share.onclick=async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);v7Toast('Link copiato')}}catch{}};wrap.append(save,share);actions.appendChild(wrap)}
- const final=root.querySelector('.detail-final-cta');if(final&&!final.querySelector('.v7-calendar')){const t=window.__dgCurrentTrip;if(t){const a=document.createElement('a');a.className='v7-calendar';a.target='_blank';a.rel='noopener';a.href=v7CalendarUrl(t);a.textContent='＋ Aggiungi al calendario';final.appendChild(a)}}
-}
-function v7GlobalPolish(){
- document.querySelectorAll('a[href="viaggi.html"]').forEach(a=>{if(a.textContent.trim().toLowerCase()==='partenze')a.setAttribute('aria-label','Scopri le prossime partenze')});
- document.querySelectorAll('img').forEach(img=>{if(!img.alt)img.alt='Del Grosso Viaggi'});
- const liveWords=[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&/sincronizzazion|gestionale.*disponibilit|disponibilit.*gestionale/i.test(el.textContent||''));liveWords.forEach(el=>{el.textContent=el.textContent.replace(/sincronizzat[ae]? in tempo reale con il gestionale del grosso/ig,'Disponibilità aggiornata').replace(/sincronizzazione…/ig,'Disponibilità aggiornata').replace(/sincronizzazione/ig,'Disponibilità aggiornata').replace(/aggiornati dal gestionale/ig,'aggiornati automaticamente').replace(/dal gestionale/ig,'automaticamente').replace(/calendario operativo/ig,'calendario ufficiale')});
-}
-v7GlobalPolish();
-setTimeout(()=>{v7EnhanceCards();v7EnhanceDepartures();v7EnhanceTripDetail()},350);
-
-
-
-
-/* =========================
-   TECH PREMIUM V8 — SMART TRAVEL COMMAND
-   ========================= */
-function v8SearchTrips(q=''){
- const list=window.__dgTrips||[];
- const term=String(q).trim().toLowerCase();
- return list.filter(t=>{
-   if(!term)return true;
-   const hay=[tripTitle(t),t.destinazione,t.luogo_partenza,t.data_partenza].filter(Boolean).join(' ').toLowerCase();
-   return hay.includes(term);
- }).slice(0,8);
-}
-function v8FormatSearchResult(t){
- const a=gestTripAvailability(t), img=tripImage(t), title=tripTitle(t), date=gestFmtDate(t.data_partenza), time=gestFmtTime(t.ora_partenza);
- return `<a class="v8-search-item" href="viaggio.html?id=${encodeURIComponent(t.id)}"><span class="v8-search-thumb">${img?`<img src="${esc(img)}" alt="">`:'✦'}</span><span class="v8-search-copy"><small>${esc(date)} · ${esc(time||'—')}</small><b>${esc(title)}</b><span>${esc(t.destinazione||'')} · ${a.soldOut?'SOLD OUT':`${a.free} posti disponibili`}</span></span><strong>→</strong></a>`;
-}
-function v8OpenSearch(prefill=''){
- let modal=document.querySelector('.v8-search-modal');
- if(!modal){
-  modal=document.createElement('div');modal.className='v8-search-modal';modal.innerHTML=`<div class="v8-search-backdrop"></div><section class="v8-search-panel" role="dialog" aria-modal="true" aria-labelledby="v8SearchTitle"><div class="v8-search-head"><div><small>DELGROSSO TRAVEL</small><h2 id="v8SearchTitle">Dove vuoi andare?</h2></div><button type="button" class="v8-search-close" aria-label="Chiudi">×</button></div><label class="v8-search-input-wrap"><span>⌕</span><input id="v8SearchInput" type="search" autocomplete="off" placeholder="Cerca destinazione, viaggio o partenza…"><kbd>ESC</kbd></label><div class="v8-search-meta"><span id="v8SearchStatus">Le prossime esperienze, in un unico posto.</span><span>↵ Apri · ↑↓ Naviga</span></div><div id="v8SearchResults" class="v8-search-results"></div><div class="v8-search-foot"><span>Non sai dove andare?</span><a href="viaggi.html">Esplora tutte le partenze →</a></div></section></div>`;
-  document.body.appendChild(modal);
-  const input=modal.querySelector('#v8SearchInput'), results=modal.querySelector('#v8SearchResults'), status=modal.querySelector('#v8SearchStatus');
-  const render=()=>{const data=v8SearchTrips(input.value);results.innerHTML=data.length?data.map(v8FormatSearchResult).join(''):`<div class="v8-search-empty"><b>Nessun viaggio trovato.</b><span>Prova con un'altra destinazione.</span></div>`;status.textContent=data.length?`${data.length} ${data.length===1?'esperienza trovata':'esperienze trovate'}`:'Nessun risultato'};
-  modal.querySelector('.v8-search-close').onclick=()=>v8CloseSearch();modal.querySelector('.v8-search-backdrop').onclick=()=>v8CloseSearch();input.addEventListener('input',render);input.addEventListener('keydown',e=>{if(e.key==='Escape'){v8CloseSearch();return}if(e.key==='Enter'){const first=results.querySelector('a');if(first)location.href=first.href}});
-  modal._render=render;modal._input=input;
- }
- modal.classList.add('open');document.body.classList.add('v8-search-open');modal._input.value=prefill;modal._render();setTimeout(()=>modal._input.focus(),30);
-}
-function v8CloseSearch(){const modal=document.querySelector('.v8-search-modal');if(modal){modal.classList.remove('open');document.body.classList.remove('v8-search-open')}}
-function v8InjectSearchTrigger(){
- if(document.querySelector('.v8-search-trigger'))return;
- const b=document.createElement('button');b.type='button';b.className='v8-search-trigger';b.innerHTML='<span>⌕</span><span class="v8-search-trigger-label">Cerca un viaggio</span><kbd>/</kbd>';b.setAttribute('aria-label','Cerca un viaggio');b.onclick=()=>v8OpenSearch();document.body.appendChild(b);
- document.addEventListener('keydown',e=>{if(e.key==='Escape')v8CloseSearch();if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'))&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();v8OpenSearch()}});
-}
-function v8AddHomeDestinations(){
- const rail=document.querySelector('#destinationRail');if(!rail)return;
- const trips=window.__dgTrips||[];const groups=[];const seen=new Set();
- trips.forEach(t=>{const d=String(t.destinazione||'').trim();if(!d||seen.has(d.toLowerCase()))return;seen.add(d.toLowerCase());const a=gestTripAvailability(t);groups.push({d,t,a})});
- const current=rail.querySelectorAll('.destination-card');
- if(groups.length && !current.length){rail.innerHTML=groups.slice(0,6).map(({d,t,a})=>`<a class="destination-card v8-destination-card" href="viaggi.html?dest=${encodeURIComponent(d)}"><span class="destination-card-media">${tripImage(t)?`<img loading="lazy" src="${esc(tripImage(t))}" alt="${esc(d)}">`:''}</span><span class="destination-card-overlay"></span><span class="destination-card-copy"><small>${a.soldOut?'COMPLETO':a.free<=10?'ULTIMI POSTI':'PROSSIMA ESPERIENZA'}</small><b>${esc(d)}</b><span>${esc(gestFmtDate(t.data_partenza))} · ${a.soldOut?'SOLD OUT':`${a.free} posti`}</span></span></a>`).join('')}
-}
-function v8HomeHeroPulse(){
- const hero=document.querySelector('.hero');if(!hero||hero.querySelector('.v8-hero-orbit'))return;
- const o=document.createElement('div');o.className='v8-hero-orbit';o.innerHTML='<span></span><span></span><span></span>';hero.appendChild(o);
-}
-function v8Polish(){
- v8InjectSearchTrigger();
- if(document.querySelector('.hero'))v8HomeHeroPulse();
- if(document.querySelector('#destinationRail'))v8AddHomeDestinations();
- document.querySelectorAll('.trip-card').forEach(card=>{card.addEventListener('mouseenter',()=>card.classList.add('v8-hover'),{passive:true});card.addEventListener('mouseleave',()=>card.classList.remove('v8-hover'),{passive:true})});
-}
-setTimeout(v8Polish,650);
 
 /* =========================================================
-   TECH PREMIUM V9 — HOMEPAGE INTELLIGENCE / POLISH
+   FLAGSHIP 2026 — single public UX layer
+   Keeps all Supabase / booking / trip core functions above unchanged.
    ========================================================= */
-function v9HomeUpgrade(){
-  if(!document.querySelector('.home-v9')) return;
-  const trips=window.__dgTrips||[];
-  const pulse=document.querySelector('#homePulse');
-  if(pulse){
-    const available=trips.filter(t=>!gestTripAvailability(t).soldOut);
-    const free=trips.reduce((n,t)=>n+gestTripAvailability(t).free,0);
-    const destinations=new Set(trips.map(t=>String(t.destinazione||'').trim().toLowerCase()).filter(Boolean)).size;
-    pulse.innerHTML=`<div><small>Partenze</small><b>${trips.length}</b></div><div><small>Posti liberi</small><b>${free}</b></div><div><small>Destinazioni</small><b>${destinations}</b></div>`;
-  }
-  document.querySelectorAll('.v9-search-open').forEach(b=>{if(b.dataset.v9Bound)return;b.dataset.v9Bound='1';b.addEventListener('click',()=>v8OpenSearch())});
-  const grid=document.querySelector('#tripGrid');
-  if(grid && !grid.children.length){
-    grid.innerHTML='<div class="empty" style="grid-column:1/-1">Le prossime partenze stanno arrivando…</div>';
-  }
-  // Keep the homepage destination rail focused: remove empty cards if data is unavailable.
-  const rail=document.querySelector('#destinationRail');
-  if(rail && !rail.querySelector('.destination-card') && trips.length===0){rail.innerHTML='<div class="empty" style="grid-column:1/-1">Nuove destinazioni in arrivo.</div>'}
-}
+(function DGFlagship(){
+  const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>[...r.querySelectorAll(s)];
+  const cfg=window.DG_CONFIG||{};
+  const state={searchReady:false};
 
-/* V9 destination rail replaces the first-generation homepage cards with a cleaner editorial rail. */
-function v9RefreshDestinationRail(){
- const rail=document.querySelector('#destinationRail');if(!rail)return;
- const trips=window.__dgTrips||[];const map=new Map();
- trips.forEach(t=>{const d=String(t.destinazione||'').trim();if(!d)return;const key=d.toLowerCase();const old=map.get(key);if(!old || String(t.data_partenza||'')<String(old.data_partenza||''))map.set(key,t)});
- const groups=[...map.values()].slice(0,4);
- if(!groups.length){rail.innerHTML='<div class="empty" style="grid-column:1/-1">Nuove destinazioni in arrivo.</div>';return;}
- rail.innerHTML=groups.map(t=>{const d=String(t.destinazione||'').trim(),a=gestTripAvailability(t),img=tripImage(t),label=a.soldOut?'COMPLETO':a.free<=10?'ULTIMI POSTI':'PROSSIMA ESPERIENZA';return `<a class="destination-card v8-destination-card" href="viaggi.html?dest=${encodeURIComponent(d)}"><span class="destination-card-media">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(d)}">`:''}</span><span class="destination-card-overlay"></span><span class="destination-card-copy"><small>${label}</small><b>${esc(d)}</b><span>${esc(gestFmtDate(t.data_partenza))} · ${a.soldOut?'SOLD OUT':`${a.free} posti disponibili`}</span></span></a>`}).join('');
-}
-const v9OldPolish=window.v8Polish;
-window.v8Polish=function(){try{v9OldPolish?.()}catch(e){console.warn(e)}try{v9RefreshDestinationRail()}catch(e){console.warn(e)}};
-
-/* =========================================================
-   TECH PREMIUM V10 — AGENCY EXPERIENCE LAYER
-   ========================================================= */
-(function(){
-  const qs=(s,r=document)=>r.querySelector(s);
-  const qsa=(s,r=document)=>[...r.querySelectorAll(s)];
   function addSkip(){
-    if(qs('.v10-skip')) return;
-    const a=document.createElement('a'); a.className='v10-skip'; a.href='#main-content'; a.textContent='Vai al contenuto';
-    document.body.prepend(a);
-    const main=qs('main'); if(main && !main.id) main.id='main-content';
+    if(qs('.v10-skip'))return;
+    const main=qs('main'); if(main&&!main.id)main.id='main-content';
+    const a=document.createElement('a');a.className='v10-skip';a.href='#main-content';a.textContent='Vai al contenuto';document.body.prepend(a);
   }
-  function activeNav(){
+  function breadcrumbs(){
+    const main=qs('main');if(!main||qs('.v11-breadcrumb')||document.body.classList.contains('home-dynamic'))return;
     const path=(location.pathname.split('/').pop()||'index.html').toLowerCase();
-    qsa('.navlinks a').forEach(a=>{
-      const href=(a.getAttribute('href')||'').split('?')[0].split('#')[0].toLowerCase();
-      if(href===path) a.classList.add('active');
-    });
+    const labels={'viaggi.html':'Viaggi e partenze','prenota.html':'Prenota','viaggio.html':'Dettaglio viaggio','flotta.html':'Flotta','limousine.html':'Limousine Bus','noleggio.html':'Noleggio Bus','partyontheroad.html':'Party on the Road','chi-siamo.html':'Chi siamo','contatti.html':'Contatti','preventivo.html':'Preventivo','news.html':'Blog e news','privacy.html':'Privacy','cookie.html':'Cookie'};
+    if(!labels[path])return;
+    const b=document.createElement('div');b.className='v11-breadcrumb wrap';b.innerHTML=`<a href="index.html">Home</a><span>›</span><span>${labels[path]}</span>`;main.prepend(b);
   }
   function backTop(){
-    if(qs('.v10-backtop')) return;
-    const b=document.createElement('button'); b.type='button'; b.className='v10-backtop'; b.setAttribute('aria-label','Torna in alto'); b.textContent='↑';
-    b.onclick=()=>window.scrollTo({top:0,behavior:'smooth'}); document.body.appendChild(b);
-    const sync=()=>b.classList.toggle('show',window.scrollY>600); window.addEventListener('scroll',sync,{passive:true}); sync();
+    if(qs('.flagship-backtop'))return;
+    const b=document.createElement('button');b.className='flagship-backtop';b.type='button';b.setAttribute('aria-label','Torna in alto');b.textContent='↑';document.body.appendChild(b);
+    const sync=()=>b.classList.toggle('show',scrollY>650);sync();addEventListener('scroll',sync,{passive:true});b.onclick=()=>scrollTo({top:0,behavior:'smooth'});
   }
-  function improveButtons(){
-    qsa('a.btn,button.btn').forEach(el=>{ if(!el.getAttribute('aria-label') && !el.textContent.trim()) el.setAttribute('aria-label','Azione'); });
+  function socialFooter(){
+    const footer=qs('footer');if(!footer||qs('.flagship-socials',footer))return;
+    const social=(cfg.contactsExtra?.social||[]).filter(x=>x?.url&&/^https?:\/\//i.test(x.url));if(!social.length)return;
+    const host=qs('.footer-brand',footer)||qs('.footer-grid>div',footer);if(!host)return;
+    const wrap=document.createElement('div');wrap.className='flagship-socials';
+    social.forEach(x=>{const a=document.createElement('a');a.href=x.url;a.target='_blank';a.rel='noopener';a.textContent=x.network==='Instagram'?'Instagram':'Facebook';a.setAttribute('aria-label',x.label||x.network);wrap.appendChild(a)});host.appendChild(wrap);
   }
-  function agencyStats(){
-    const grid=qs('#homePulse'); if(!grid) return;
-    const trips=window.__dgTrips||[];
-    if(!trips.length) return;
-    const next=trips.find(t=>!gestTripAvailability(t).soldOut) || trips[0];
-    const nextCell=document.createElement('div'); nextCell.className='v10-next-pulse';
-    nextCell.innerHTML=`<small>Prossima esperienza</small><b>${esc(tripTitle(next))}</b><span>${esc(gestFmtDate(next.data_partenza))}</span>`;
-    if(!grid.querySelector('.v10-next-pulse')) grid.appendChild(nextCell);
+  function mobileQuickbar(){
+    let bar=qs('.mobile-quickbar');if(!bar){bar=document.createElement('div');bar.className='mobile-quickbar';bar.setAttribute('aria-label','Azioni rapide');document.body.appendChild(bar)}
+    const wa=String(cfg.contacts?.whatsapp||'').replace(/\D/g,'');
+    bar.innerHTML=`<a href="viaggi.html">Partenze</a><a href="prenota.html">Prenota</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:`<a href="contatti.html">Contatti</a>`}`;
   }
+  function injectSearchButton(){
+    const nav=qs('.nav');if(!nav||qs('.flagship-search-button',nav))return;
+    const b=document.createElement('button');b.type='button';b.className='flagship-search-button';b.setAttribute('aria-label','Cerca un viaggio');b.innerHTML='⌕';
+    const toggle=qs('.mobile-toggle',nav);nav.insertBefore(b,toggle||null);b.onclick=()=>openSearch();
+  }
+  function makeSearch(){
+    if(state.searchReady)return;state.searchReady=true;
+    const o=document.createElement('div');o.className='flagship-search-overlay';o.setAttribute('aria-hidden','true');
+    o.innerHTML=`<section class="flagship-search-panel" role="dialog" aria-modal="true" aria-label="Cerca un viaggio"><div class="flagship-search-head"><input id="flagshipSearchInput" type="search" autocomplete="off" placeholder="Cerca Napoli, Assisi, mercatini…"><button type="button" aria-label="Chiudi">×</button></div><div class="flagship-search-meta">Partenze ufficiali collegate al Gestionale · disponibilità aggiornata</div><div class="flagship-search-results"><div class="flagship-search-empty">Scrivi una destinazione oppure consulta le prossime partenze.</div></div></section>`;
+    document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)closeSearch()});
+    qs('button',o).onclick=closeSearch;qs('input',o).addEventListener('input',e=>renderSearch(e.target.value));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'))&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){e.preventDefault();openSearch();}});
+  }
+  async function openSearch(prefill=''){
+    makeSearch();const o=qs('.flagship-search-overlay'),input=qs('#flagshipSearchInput',o);o.classList.add('open');o.setAttribute('aria-hidden','false');document.body.classList.add('flagship-search-open');input.value=prefill;
+    if(!Array.isArray(window.__dgTrips)||!window.__dgTrips.length){try{window.__dgTrips=await getGestionaleTrips()}catch{window.__dgTrips=[]}}
+    renderSearch(prefill);setTimeout(()=>input.focus(),30);
+  }
+  function closeSearch(){const o=qs('.flagship-search-overlay');if(!o)return;o.classList.remove('open');o.setAttribute('aria-hidden','true');document.body.classList.remove('flagship-search-open')}
+  function renderSearch(q=''){
+    const box=qs('.flagship-search-results');if(!box)return;const needle=q.trim().toLowerCase();
+    const list=(window.__dgTrips||[]).filter(t=>!needle||(tripTitle(t)+' '+(t.destinazione||'')+' '+(t.luogo_partenza||'')).toLowerCase().includes(needle)).slice(0,12);
+    if(!list.length){box.innerHTML='<div class="flagship-search-empty">Nessun viaggio trovato. <a href="viaggi.html">Apri tutte le partenze →</a></div>';return}
+    box.innerHTML=list.map(t=>{const a=gestTripAvailability(t),img=tripImage(t),time=String(t.ora_partenza||'').slice(0,5);return `<a class="flagship-search-item" href="viaggio.html?id=${encodeURIComponent(t.id)}"><span class="flagship-search-thumb">${img?`<img src="${esc(img)}" alt="">`:''}</span><span class="flagship-search-copy"><small>${esc(fmtDate(t.data_partenza))}${time?' · '+esc(time):''}</small><b>${esc(tripTitle(t))}</b><span>${a.soldOut?'SOLD OUT':`${a.free} posti disponibili`}</span></span><strong>→</strong></a>`}).join('');
+  }
+  function homeCommand(){
+    const root=qs('#homeLiveCommand');if(!root)return;const trips=Array.isArray(window.__dgTrips)?window.__dgTrips:[];
+    if(!trips.length){root.innerHTML='<div class="empty">Il calendario delle partenze è in aggiornamento.</div>';return}
+    const available=trips.filter(t=>!gestTripAvailability(t).soldOut),next=available[0]||trips[0],free=trips.reduce((n,t)=>n+gestTripAvailability(t).free,0),destinations=new Set(trips.map(t=>String(t.destinazione||'').trim().toLowerCase()).filter(Boolean)).size,a=gestTripAvailability(next),img=tripImage(next);
+    root.innerHTML=`<div class="live-command-shell"><div class="live-command-main"><div class="command-label"><i></i> DELGROSSO LIVE · CALENDARIO UFFICIALE</div><h2>Partenze e disponibilità,<br>in un colpo d’occhio.</h2><p>Il sito legge il calendario operativo del Gestionale: quando aggiorni un viaggio, il pubblico vede date e disponibilità senza ricopiare i dati.</p><div class="command-stats"><div class="command-stat"><small>Partenze</small><b>${trips.length}</b></div><div class="command-stat"><small>Posti liberi</small><b>${free}</b></div><div class="command-stat"><small>Destinazioni</small><b>${destinations}</b></div></div><div class="actions" style="margin-top:22px"><a class="btn btn-primary" href="viaggi.html">Apri il calendario →</a></div></div><div class="live-command-next">${next?`<a class="command-next-card" href="viaggio.html?id=${encodeURIComponent(next.id)}">${img?`<img src="${esc(img)}" alt="${esc(tripTitle(next))}">`:''}<div class="command-next-date"><b>${esc(String(next.data_partenza||'').slice(8,10)||'—')}</b><small>${esc(String(next.data_partenza||'').slice(5,7)||'')}</small></div><div class="command-next-copy"><small>PROSSIMA PARTENZA · ${esc(tripCountdown(next.data_partenza,String(next.ora_partenza||'').slice(0,5)))}</small><b>${esc(tripTitle(next))}</b><span>${a.soldOut?'SOLD OUT':`${a.free} posti disponibili`} →</span></div></a>`:'<div class="empty">Nessuna partenza pubblicata.</div>'}</div></div>`;
+  }
+  function heroLive(){
+    const trips=Array.isArray(window.__dgTrips)?window.__dgTrips:[],next=trips.find(t=>!gestTripAvailability(t).soldOut)||trips[0];if(!next)return;
+    const a=gestTripAvailability(next),dest=qs('#smartDest'),date=qs('#smartDate'),avail=qs('#smartAvailability');
+    if(dest)dest.textContent=tripTitle(next);if(date)date.textContent=fmtDate(next.data_partenza);if(avail)avail.textContent=a.soldOut?'Viaggio al completo':`${a.free} posti disponibili`;
+  }
+  function cardPolish(){
+    qsa('.trip-card').forEach(card=>{if(card.dataset.flagship)return;card.dataset.flagship='1';const img=qs('.trip-img img',card);if(img){img.decoding='async';img.loading='lazy'}});
+  }
+  function structuredData(){
+    if(qs('#dgStructuredData'))return;const sameAs=(cfg.contactsExtra?.social||[]).map(x=>x.url).filter(Boolean);const phone=cfg.contacts?.phone||cfg.contacts?.whatsapp||'';
+    const data={'@context':'https://schema.org','@type':'Organization','name':'DELGROSSO Viaggi & Limousine Bus','url':'https://www.delgrossoviaggi.it/','logo':'https://www.delgrossoviaggi.it/assets/logo.JPEG','email':cfg.contacts?.email||undefined,'telephone':phone||undefined,'sameAs':sameAs.length?sameAs:undefined};
+    Object.keys(data).forEach(k=>data[k]===undefined&&delete data[k]);const s=document.createElement('script');s.type='application/ld+json';s.id='dgStructuredData';s.textContent=JSON.stringify(data);document.head.appendChild(s);
+  }
+  function refresh(){homeCommand();heroLive();cardPolish()}
   function init(){
-    addSkip(); activeNav(); backTop(); improveButtons();
-    setTimeout(agencyStats,900);
+    document.body.classList.add('flagship-2026');addSkip();breadcrumbs();backTop();socialFooter();mobileQuickbar();injectSearchButton();makeSearch();structuredData();cardPolish();
+    const heroSearch=qs('#flagshipHeroSearch');if(heroSearch)heroSearch.onclick=()=>openSearch();
+    setTimeout(refresh,300);setTimeout(refresh,1200);
+    const target=qs('#tripGrid')||qs('#tripFull');if(target&&'MutationObserver'in window)new MutationObserver(()=>{cardPolish();if(document.body.classList.contains('home-dynamic'))refresh()}).observe(target,{childList:true,subtree:true});
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+  window.DGFlagship={refresh,openSearch};
+  /* compatibility for inline calls that existed in older versions */
+  window.v8Polish=()=>{cardPolish();refresh()};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
-/* =========================================================
-   TECH PREMIUM V11 — PUBLIC AGENCY EXPERIENCE
-   ========================================================= */
-(function(){
-  const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>[...r.querySelectorAll(s)];
-  function breadcrumbs(){
-    const main=qs('main'); if(!main || qs('.v11-breadcrumb')) return;
-    const path=(location.pathname.split('/').pop()||'index.html').toLowerCase();
-    if(path==='index.html') return;
-    const labels={"viaggi.html":"Partenze","prenota.html":"Prenota","viaggio.html":"Dettaglio viaggio","flotta.html":"La Flotta","partyontheroad.html":"Party on the Road","limousine.html":"Limousine Bus","chi-siamo.html":"Chi siamo","contatti.html":"Contatti","preventivo.html":"Preventivo","news.html":"News"};
-    const b=document.createElement('div'); b.className='v11-breadcrumb wrap'; b.innerHTML=`<a href="index.html">Home</a><span>›</span><span>${labels[path]||'Del Grosso Viaggi'}</span>`;
-    main.prepend(b);
-  }
-  function mobileActions(){
-    if(qs('.v11-contact-fab') || !document.body) return;
-    const wrap=document.createElement('div'); wrap.className='v11-contact-fab';
-    wrap.innerHTML='<a href="contatti.html" target="_blank" rel="noopener" aria-label="Contatta Del Grosso Viaggi su WhatsApp">WhatsApp</a><a href="prenota.html" aria-label="Apri le prenotazioni">Prenota</a>';
-    document.body.appendChild(wrap);
-  }
-  function formGuard(){
-    qsa('form').forEach(form=>{
-      form.addEventListener('invalid',e=>{ const el=e.target; if(el && el.matches('input,select,textarea')) el.classList.add('v11-invalid'); },true);
-      form.addEventListener('input',e=>{if(e.target?.classList?.contains('v11-invalid')) e.target.classList.remove('v11-invalid')});
-    });
-  }
-  function year(){qsa('[data-current-year]').forEach(x=>x.textContent=new Date().getFullYear());}
-  function init(){breadcrumbs();mobileActions();formGuard();year();}
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
-})();
-
-
-/* V13 — automatic text contrast on image cards.
-   Samples the actual image when CORS allows canvas access; otherwise falls
-   back to a dark veil + white text, which is the safest readable treatment. */
-(function dgAutoContrast(){
-  const selectors=[
-    '.next-experience-card',
-    '.destination-card',
-    '.fleet-card'
-  ];
-  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-  const luminance=(r,g,b)=>{
-    const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};
-    return .2126*f(r)+.7152*f(g)+.0722*f(b);
-  };
-  function apply(card,img){
-    if(!card||!img)return;
-    card.classList.add('dg-auto-contrast');
-    let tone='light';
-    try{
-      if(!img.complete||!img.naturalWidth){card.classList.add('dg-contrast-light');return;}
-      const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
-      if(!ctx)throw new Error('canvas');
-      const w=64,h=64;c.width=w;c.height=h;
-      ctx.drawImage(img,0,0,w,h);
-      const data=ctx.getImageData(0,0,w,h).data;
-      let sum=0,count=0;
-      for(let i=0;i<data.length;i+=16){
-        sum+=luminance(data[i],data[i+1],data[i+2]);count++;
-      }
-      const avg=count?sum/count:.25;
-      /* Bright photography gets dark copy + a subtle white local veil.
-         Mid/dark photography keeps white copy with a dark local veil. */
-      tone=avg>.62?'dark':'light';
-      card.classList.remove('dg-contrast-light','dg-contrast-dark');
-      card.classList.add('dg-contrast-'+tone);
-      card.style.setProperty('--dg-image-luma',clamp(avg,0,1).toFixed(3));
-    }catch(e){
-      card.classList.remove('dg-contrast-dark');
-      card.classList.add('dg-contrast-light');
-    }
-  }
-  function scan(root=document){
-    selectors.forEach(sel=>root.querySelectorAll(sel).forEach(card=>{
-      const img=card.querySelector('img');
-      const copy=card.querySelector('.next-experience-copy,.destination-card-copy,.fleet-info');
-      if(!img||!copy)return;
-      copy.classList.add('dg-contrast-copy');
-      const run=()=>apply(card,img);
-      if(img.complete)run(); else img.addEventListener('load',run,{once:true});
-    }));
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scan(),{once:true});else scan();
-  new MutationObserver(m=>m.forEach(x=>x.addedNodes.forEach(n=>{if(n.nodeType===1)scan(n)}))).observe(document.body,{childList:true,subtree:true});
-})();
+siteUX();premiumMotion();

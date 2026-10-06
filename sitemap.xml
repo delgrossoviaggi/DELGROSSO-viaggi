@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://www.delgrossoviaggi.it/index.html</loc></url>
-<url><loc>https://www.delgrossoviaggi.it/viaggi.html</loc></url>
-<url><loc>https://www.delgrossoviaggi.it/flotta.html</loc></url>
-<url><loc>https://www.delgrossoviaggi.it/limousine.html</loc></url>
-<url><loc>https://www.delgrossoviaggi.it/news.html</loc></url>
-<url><loc>https://www.delgrossoviaggi.it/contatti.html</loc></url>
-<url><loc>https://www.delgrossoviaggi.it/chi-siamo.html</loc></url>
+  <url><loc>https://www.delgrossoviaggi.it/index.html</loc><lastmod>2026-10-06</lastmod><priority>1.0</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/viaggi.html</loc><lastmod>2026-10-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/prenota.html</loc><lastmod>2026-10-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/flotta.html</loc><lastmod>2026-10-06</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/limousine.html</loc><lastmod>2026-10-06</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/noleggio.html</loc><lastmod>2026-10-06</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/preventivo.html</loc><lastmod>2026-10-06</lastmod><priority>0.8</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/news.html</loc><lastmod>2026-10-06</lastmod><priority>0.7</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/chi-siamo.html</loc><lastmod>2026-10-06</lastmod><priority>0.7</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/contatti.html</loc><lastmod>2026-10-06</lastmod><priority>0.7</priority></url>
+  <url><loc>https://www.delgrossoviaggi.it/partyontheroad.html</loc><lastmod>2026-10-06</lastmod><priority>0.6</priority></url>
 </urlset>

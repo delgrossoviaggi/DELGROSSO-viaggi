@@ -1,1 +1,15 @@
-DELGROSSO Gestionale — Assistente AI 360° v1 — 2026-10-03
+DELGROSSO GESTIONALE — AI 360 V4 RIMBORSI
+
+Novità:
+- Ricevuta di rimborso dedicata per prenotazioni viaggio.
+- Ricevuta di rimborso dedicata per noleggi Bus / NCC / Limousine.
+- Numerazione rimborso già gestita da Supabase:
+  DG-RIM-... per viaggi
+  DG-RIM-NB-... per noleggi.
+- Dopo un rimborso manuale si apre la ricevuta corretta.
+- L'Assistente AI può interpretare richieste di rimborso, proporle in anteprima,
+  attendere CONFERMA TUTTO e poi registrare il rimborso e preparare la ricevuta.
+- Audit AI distinto per rimborsi.
+- Cache PWA aggiornata.
+
+Regola invariata: nessun rimborso viene eseguito dall'Assistente senza conferma.

@@ -1,0 +1,16 @@
+DELGROSSO GESTIONALE — AI360 V5 MULTI-BUS
+
+NOLEGGI
+- Selezione multipla dei mezzi per lo stesso noleggio.
+- Somma automatica dei posti.
+- Indicazione immediata di posti richiesti, disponibili, mancanti/liberi.
+- Controllo server-side di capienza.
+- Controllo conflitti con viaggi, altri noleggi e blocchi flotta.
+- Salvataggio dei mezzi in noleggi_bus_mezzi.
+- flotta_id resta valorizzato con il primo mezzo per compatibilità con funzioni esistenti.
+- La lista noleggi mostra tutti i mezzi assegnati e la capienza totale.
+
+ASSISTENTE AI
+- Può proporre vehicle_ids multipli per un noleggio.
+- Dopo conferma assegna i mezzi tramite la stessa RPC server-side.
+- Se la capienza complessiva non basta, l'operazione viene bloccata.

@@ -23,6 +23,7 @@ window.DG_CONFIG={
   {href:'news.html',it:'Blog e news',en:'Blog & news'},
   {href:'contatti.html',it:'Contatti',en:'Contact'},
   {href:'chi-siamo.html',it:'Chi siamo',en:'About us'},
+  {href:'prenota.html',it:'Prenota',en:'Book'},
   {href:'area-riservata.html',it:'Area riservata',en:'Staff login'}
  ]
 };
