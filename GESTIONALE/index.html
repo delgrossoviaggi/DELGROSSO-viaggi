@@ -2036,7 +2036,7 @@ function openTripModal(id=''){const v=state.viaggi.find(x=>x.id===id)||{};const 
 <div class="field"><label>Posti totali</label><input id="f_seats" type="number" value="${v.posti_totali??63}"></div><div class="field"><label>Autobus</label><select id="f_bus"><option value="">Seleziona</option>${state.flotta.map(f=>`<option value="${f.id}" ${v.autobus_id===f.id?'selected':''}>${esc(f.titolo||f.marca+' '+f.modello)} · ${f.posti||0}</option>`).join('')}</select></div>
 <div class="field"><label>Stato</label><select id="f_status">${['Programmato','Confermato','SOLD OUT','Annullato'].map(s=>`<option ${v.stato===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>Pubblicato</label><select id="f_pub"><option ${v.pubblicato==='SI'?'selected':''}>SI</option><option ${v.pubblicato!=='SI'?'selected':''}>NO</option></select></div>
 <div class="field full"><label>Descrizione</label><textarea id="f_desc" rows="3">${esc(v.descrizione||'')}</textarea></div>
-<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary" onclick="saveTrip('${id}')">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}})}
+<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary" onclick="saveTrip('${id}')">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}})}
 async function uploadTripPoster(file,tripId){if(!file)return null;if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error('La locandina deve essere JPG, PNG o WEBP.');if(file.size>12*1024*1024)throw new Error('La locandina supera 12 MB. Riduci la dimensione e riprova.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`viaggi/${tripId}/${Date.now()}.${ext}`;const r=await fetch(`${SUPA_URL}/storage/v1/object/locandine/${path}`,{method:'POST',headers:{...accessHeaders(),'Content-Type':file.type,'x-upsert':'true'},body:file});if(!r.ok){let m='';try{m=(await r.json())?.message||''}catch{}throw new Error(m||'Caricamento locandina non riuscito.')}return `${SUPA_URL}/storage/v1/object/public/locandine/${path}`}
 async function saveTrip(id){
  if(window.__dgTripSaving)return;
@@ -2046,27 +2046,35 @@ async function saveTrip(id){
  const total=Number($('f_seats')?.value)||0;
  const stops=String($('f_part')?.value||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
  const title=String($('f_titolo')?.value||'').trim(), dest=String($('f_dest')?.value||'').trim(), date=$('f_date')?.value||'';
- if(!title||!dest||!date)return toast('Titolo, destinazione e data sono obbligatori.',false);
- if(total<1)return toast('Inserisci una capienza valida.',false);
- if(!stops.length)return toast('Inserisci almeno una fermata di partenza.',false);
- if(bus&&dgDateBusy(bus.id,date,id).length)return toast('Mezzo occupato nella data selezionata. Consulta il calendario flotta.',false);
+ const tripFail=(msg)=>{if($('tripSaveStatus')){$('tripSaveStatus').textContent='Errore: '+msg;$('tripSaveStatus').className='statusline full off'}toast(msg,false);log('VIAGGIO VALIDAZIONE: '+msg);return false};
+ if(!title||!dest||!date)return tripFail('Titolo, destinazione e data sono obbligatori.');
+ if(total<1)return tripFail('Inserisci una capienza valida.');
+ if(!stops.length)return tripFail('Inserisci almeno una fermata di partenza.');
+ const busyEvents=bus?dgDateBusy(bus.id,date,id):[];
+ const busConflict=Boolean(bus&&busyEvents.length);
+ const busConflictMsg=busConflict?`Il mezzo ${bus.titolo||bus.marca||'selezionato'} risulta già impegnato il ${date}: ${busyEvents.map(e=>e.label).join(' · ')}. Il viaggio verrà salvato senza autobus assegnato, così non perdi la nuova partenza.`:'';
+ if(busConflict){
+   log('VIAGGIO: '+busConflictMsg);
+   if($('tripSaveStatus')){$('tripSaveStatus').textContent='⚠️ '+busConflictMsg;$('tripSaveStatus').className='statusline full warn'}
+   toast('⚠️ Mezzo già occupato: salvo il viaggio senza assegnare il bus.',false);
+ }
  const tripId=id||newUUID();
  const body={
    titolo:title,destinazione:dest,luogo_partenza:stops.join(' | '),data_partenza:date,
    ora_partenza:$('f_time')?.value||null,prezzo:Math.round((Number($('f_price')?.value)||0)*100)/100,
-   descrizione:$('f_desc')?.value||null,autobus_id:bus?.id||null,
-   autobus:bus?`${bus.marca||''} ${bus.modello||''}`.trim():null,posti_totali:total,
+   descrizione:$('f_desc')?.value||null,autobus_id:busConflict?null:(bus?.id||null),
+   autobus:busConflict?null:(bus?`${bus.marca||''} ${bus.modello||''}`.trim():null),posti_totali:total,
    stato:$('f_status')?.value||'Programmato',pubblicato:$('f_pub')?.value||'NO',
    minimo_partecipanti:Number(old?.minimo_partecipanti||40)||40
  };
  const posterFile=$('f_locandina')?.files?.[0]||null, removePoster=Boolean($('f_remove_locandina')?.checked);
  if(removePoster)body.locandina=null;
  window.__dgTripSaving=true;
- if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}
+ if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}; if($('tripSaveStatus')){$('tripSaveStatus').textContent='Salvataggio viaggio su Supabase…';$('tripSaveStatus').className='statusline full warn'}
  try{
    // 1) Prima salviamo sempre il viaggio su Postgres. Un problema di upload locandina
    // non deve mai impedire la creazione del viaggio.
-   const saved=await rpc('dg_save_trip_v14',{p_id:tripId,p_data:body,p_stops:stops});
+   const saved=await rpc('dg_save_trip_v14',{p_id:tripId,p_data:body,p_stops:stops}); if($('tripSaveStatus')){$('tripSaveStatus').textContent='Viaggio salvato. Verifica sincronizzazione…';$('tripSaveStatus').className='statusline full live'}
    const savedTrip=Array.isArray(saved)?saved[0]:saved;
    if(savedTrip?.id){
      const i=state.viaggi.findIndex(x=>x.id===savedTrip.id);
@@ -2093,10 +2101,16 @@ async function saveTrip(id){
    await loadAll(true);
    const visible=state.viaggi.some(v=>v.id===tripId);
    if(!visible){state.viaggi.push(verify[0]);state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));renderTrips()}
-   toast((id?'Viaggio aggiornato e sincronizzato':'Viaggio creato e sincronizzato su Supabase')+(posterWarning?' · senza locandina':''),!posterWarning);
+   const warnings=[];
+   if(busConflict)warnings.push('mezzo non assegnato perché già occupato');
+   if(posterWarning)warnings.push('locandina non caricata');
+   const offlineNote=body.pubblicato==='NO'?' · salvato nel gestionale, NON visibile online':'';
+   toast((id?'Viaggio aggiornato e sincronizzato':'Viaggio creato e sincronizzato su Supabase')+offlineNote+(warnings.length?' · '+warnings.join(' · '):''),warnings.length===0);
+   if(busConflict)log('VIAGGIO SALVATO SENZA BUS: '+busConflictMsg);
    if(posterWarning)log(posterWarning.trim());
  }catch(e){
    const msg=e?.message||String(e);
+   if($('tripSaveStatus')){$('tripSaveStatus').textContent='Errore: '+msg;$('tripSaveStatus').className='statusline full off'}
    toast('Viaggio non salvato: '+msg,false);log('VIAGGIO: '+msg);
  }finally{
    window.__dgTripSaving=false;
