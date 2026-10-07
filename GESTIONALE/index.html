@@ -945,7 +945,7 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-controlroom">
-  <div class="section-title"><div><h2>🎛️ Control Room Operativa</h2><p class="section-subtitle">Operatività del giorno: partenze, fermate, passeggeri, acconti, posti, check-in, mezzi e anomalie.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+  <div class="section-title"><div><h2>🎛️ Control Room Operativa</h2><p class="section-subtitle">Operatività del giorno: partenze, fermate, passeggeri, acconti, posti, check-in, mezzi e anomalie.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
   <div class="optional-toolbar">
     <select id="controlTripSelect"></select>
     <button class="btn btn-primary" onclick="openTripDetail(document.getElementById('controlTripSelect').value)">Apri dossier viaggio</button>
@@ -965,14 +965,14 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-viaggi">
-  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button></div></div>
-  <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
+  <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Viaggio</th><th>Partenza</th><th>Posti</th><th>Prezzo</th><th>Stato</th><th></th></tr></thead><tbody id="tripsTable"></tbody></table></div>
 </section>
 
 <section class="page" id="page-prenotazioni">
   <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
-  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
 </section>
 
@@ -984,14 +984,14 @@ const dgLocalStorage=window.dgLocalStorage;
     <input id="quoteSearch" placeholder="Nome, telefono, email, destinazione, codice...">
     <select id="quoteFilter"><option value="">Tutti gli stati</option><option>Nuovo</option><option>In Lavorazione</option><option>Inviato</option><option>Accettato</option><option>Rifiutato</option><option>Annullato</option></select>
     <select id="quoteOrigin"><option value="">Tutte le provenienze</option><option value="sito">Richieste dal sito</option><option value="gestionale">Creati dal gestionale</option></select>
-    <button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna richieste</button>
+    <button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna richieste</button>
   </div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Codice</th><th>Richiedente</th><th>Contatti</th><th>Servizio</th><th>Viaggio</th><th>Pax</th><th>Importo</th><th>Stato</th><th></th></tr></thead><tbody id="quotesTable"></tbody></table></div>
 </section>
 
 <section class="page" id="page-clienti">
   <div class="section-title"><h2>Clienti</h2><div class="section-actions"><button class="btn btn-secondary" id="syncClientsBtn" onclick="syncClientsNow()">↻ Sincronizza clienti</button><button class="btn btn-primary" onclick="openClientModal()">+ Nuovo cliente</button></div></div>
-  <div class="toolbar"><input id="clientSearch" placeholder="Nome, cognome, telefono, email..."><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button><span id="clientSyncStatus" class="form-help">Anagrafica sincronizzata automaticamente con le prenotazioni.</span></div>
+  <div class="toolbar"><input id="clientSearch" placeholder="Nome, cognome, telefono, email..."><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button><span id="clientSyncStatus" class="form-help">Anagrafica sincronizzata automaticamente con le prenotazioni.</span></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Telefono</th><th>Email</th><th>Città</th><th>Stato</th><th></th></tr></thead><tbody id="clientsTable"></tbody></table></div>
 </section>
 
@@ -1009,7 +1009,7 @@ const dgLocalStorage=window.dgLocalStorage;
 
 <section class="page" id="page-noleggi">
   <div class="section-title"><h2>Noleggi & Limousine BUS</h2><button class="btn btn-primary" onclick="openRentalModal()">+ Nuovo noleggio</button></div>
-  <div class="toolbar"><input id="rentalSearch" placeholder="Cliente, azienda, tratta, codice..."><select id="rentalStatus"><option value="">Tutti gli stati</option><option>Richiesto</option><option>Confermato</option><option>In servizio</option><option>Completato</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="toolbar"><input id="rentalSearch" placeholder="Cliente, azienda, tratta, codice..."><select id="rentalStatus"><option value="">Tutti gli stati</option><option>Richiesto</option><option>Confermato</option><option>In servizio</option><option>Completato</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Tratta</th><th>Data</th><th>Pax</th><th>Prezzo</th><th>Pagamento</th><th>Stato</th><th></th></tr></thead><tbody id="rentalsTable"></tbody></table></div>
 </section>
 
@@ -1026,7 +1026,7 @@ const dgLocalStorage=window.dgLocalStorage;
 
 
 <section class="page" id="page-assistente">
-  <div class="section-title"><div><h2>🤖 Assistente DELGROSSO</h2><p class="section-subtitle">Interroga il gestionale in tempo reale, controlla prenotazioni, incassi, clienti e attività; le modifiche richiedono sempre conferma.</p></div><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="section-title"><div><h2>🤖 Assistente DELGROSSO</h2><p class="section-subtitle">Interroga il gestionale in tempo reale, controlla prenotazioni, incassi, clienti e attività; le modifiche richiedono sempre conferma.</p></div><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card" style="margin-bottom:12px"><div class="card-head"><h3>💬 Assistente operativo</h3><span class="pill neutral">CONFERMA OBBLIGATORIA</span></div><div class="card-body"><p style="margin-top:0;color:#607086">Incolla qui un messaggio WhatsApp oppure scrivi un comando naturale. L’assistente prepara l’operazione, ma non modifica nulla finché non premi <b>Conferma</b>.</p><div class="field"><label>Messaggio / comando</label><textarea id="assistantCommand" rows="4" placeholder="Es: Mario Rossi, 4 posti per Napoli 15 novembre, partenza San Severo, telefono 3331234567, totale 80 €.
 Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textarea></div><div class="quick-actions" style="margin-top:10px"><button class="btn btn-primary" onclick="assistantUnderstand()">🤖 Analizza</button><button class="btn btn-secondary" onclick="assistantExample('booking')">Esempio prenotazione</button><button class="btn btn-secondary" onclick="assistantExample('payment')">Esempio acconto</button></div><div id="assistantDraft" style="margin-top:12px"></div></div></div>
   <div class="cards" id="assistantKpis"></div>
@@ -1047,7 +1047,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 </section>
 
 <section class="page" id="page-statistiche">
-  <div class="section-title"><h2>Statistiche</h2><button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button></div>
+  <div class="section-title"><h2>Statistiche</h2><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="cards" id="statsCards"></div>
   <div class="card" style="margin-top:12px"><div class="card-head"><h3>Riepilogo viaggi</h3></div><div class="card-body" id="statsTrips"></div></div>
 </section>
@@ -1056,7 +1056,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 <section class="page" id="page-agenda">
   <div class="section-title"><h2>Agenda Operativa</h2><div class="quick-actions">
     <button class="btn btn-primary" onclick="openTaskModal()">+ Attività</button>
-    <button class="btn btn-secondary" onclick="loadAll()">↻ Aggiorna</button>
+    <button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button>
   </div></div>
   <div class="agenda-kpis" id="agendaKpis"></div>
   <div class="optional-toolbar agenda-toolbar">
@@ -1079,7 +1079,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 
 
 <section class="page" id="page-economia">
-  <div class="section-title"><h2>Economia & Controllo finanziario</h2><div class="quick-actions"><button class="btn btn-green" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-danger" onclick="openEconomyModal('Uscita')">− Uscita</button><button class="btn btn-secondary" onclick="exportEconomyCSV()">⬇ Export CSV</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+  <div class="section-title"><h2>Economia & Controllo finanziario</h2><div class="quick-actions"><button class="btn btn-green" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-danger" onclick="openEconomyModal('Uscita')">− Uscita</button><button class="btn btn-secondary" onclick="exportEconomyCSV()">⬇ Export CSV</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
   <div class="toolbar"><input id="ecoSearch" placeholder="🔎 Cerca movimento, categoria, viaggio, mezzo..."><select id="ecoType"><option value="">Entrate + Uscite</option><option>Entrata</option><option>Uscita</option></select><select id="ecoPeriod"><option value="all">Tutto il periodo</option><option value="today">Oggi</option><option value="month">Questo mese</option><option value="year">Quest'anno</option></select><button class="btn btn-secondary" onclick="renderEconomia()">Applica</button></div>
   <div class="optional-grid" id="economyKpis"></div>
   <div class="detail-grid" style="margin-top:12px">
@@ -1125,11 +1125,11 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
   </div>
 </section>
 
-<section class="page" id="page-pro"><div class="section-title"><div><h2>Centro Pro — DELGROSSO Gestionale 7.5</h2><p class="section-subtitle">Operatività, redditività, CRM, flotta, sicurezza e salute del sistema in un unico centro.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openQuickActions()">＋ Azione rapida</button><button class="btn btn-secondary" onclick="healthPro()">♥ Controlla sistema</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div><div class="pro-health-grid" id="proHealth"></div><div class="pro-grid"><div class="card pro-card"><div class="card-head"><h3>🎛️ Control Room 360°</h3></div><div class="card-body" id="proControl"></div></div><div class="card pro-card"><div class="card-head"><h3>💰 Redditività viaggi</h3></div><div class="card-body" id="proProfit"></div></div><div class="card pro-card"><div class="card-head"><h3>👤 CRM 360°</h3></div><div class="card-body" id="proCRM"></div></div><div class="card pro-card"><div class="card-head"><h3>🚍 Flotta & manutenzione</h3></div><div class="card-body" id="proFleet"></div></div><div class="card pro-card"><div class="card-head"><h3>🚨 Anomalie <button class="btn btn-primary btn-sm" onclick="openAnomalyModal()">＋</button></h3></div><div class="card-body" id="proAnomalies"></div></div><div class="card pro-card"><div class="card-head"><h3>☑ Checklist mezzi <button class="btn btn-primary btn-sm" onclick="openChecklistModal()">＋</button></h3></div><div class="card-body" id="proChecklist"></div></div><div class="card pro-card"><div class="card-head"><h3>🔔 Notifiche intelligenti</h3></div><div class="card-body" id="proAlerts"></div></div><div class="card pro-card"><div class="card-head"><h3>📊 KPI & statistiche</h3></div><div class="card-body" id="proKpi"></div></div><div class="card pro-card"><div class="card-head"><h3>📁 Documenti 360°</h3></div><div class="card-body" id="proDocs"></div></div><div class="card pro-card"><div class="card-head"><h3>🛡️ Audit & sicurezza</h3></div><div class="card-body" id="proAudit"></div></div></div></section>
+<section class="page" id="page-pro"><div class="section-title"><div><h2>Centro Pro — DELGROSSO Gestionale 7.5</h2><p class="section-subtitle">Operatività, redditività, CRM, flotta, sicurezza e salute del sistema in un unico centro.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openQuickActions()">＋ Azione rapida</button><button class="btn btn-secondary" onclick="healthPro()">♥ Controlla sistema</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div><div class="pro-health-grid" id="proHealth"></div><div class="pro-grid"><div class="card pro-card"><div class="card-head"><h3>🎛️ Control Room 360°</h3></div><div class="card-body" id="proControl"></div></div><div class="card pro-card"><div class="card-head"><h3>💰 Redditività viaggi</h3></div><div class="card-body" id="proProfit"></div></div><div class="card pro-card"><div class="card-head"><h3>👤 CRM 360°</h3></div><div class="card-body" id="proCRM"></div></div><div class="card pro-card"><div class="card-head"><h3>🚍 Flotta & manutenzione</h3></div><div class="card-body" id="proFleet"></div></div><div class="card pro-card"><div class="card-head"><h3>🚨 Anomalie <button class="btn btn-primary btn-sm" onclick="openAnomalyModal()">＋</button></h3></div><div class="card-body" id="proAnomalies"></div></div><div class="card pro-card"><div class="card-head"><h3>☑ Checklist mezzi <button class="btn btn-primary btn-sm" onclick="openChecklistModal()">＋</button></h3></div><div class="card-body" id="proChecklist"></div></div><div class="card pro-card"><div class="card-head"><h3>🔔 Notifiche intelligenti</h3></div><div class="card-body" id="proAlerts"></div></div><div class="card pro-card"><div class="card-head"><h3>📊 KPI & statistiche</h3></div><div class="card-body" id="proKpi"></div></div><div class="card pro-card"><div class="card-head"><h3>📁 Documenti 360°</h3></div><div class="card-body" id="proDocs"></div></div><div class="card pro-card"><div class="card-head"><h3>🛡️ Audit & sicurezza</h3></div><div class="card-body" id="proAudit"></div></div></div></section>
 <section class="page" id="page-impostazioni">
   <div class="section-title"><h2>Impostazioni</h2></div>
   <div class="cards">
-    <div class="module-card"><h3>🔗 Connessione Supabase</h3><p>Progetto collegato: chkuayhbmitdmzmmvona</p><div class="statusline" id="connectionStatus">Controllo...</div><button class="btn btn-secondary btn-sm" onclick="health()">Test connessione</button> <button class="btn btn-primary btn-sm" onclick="loadAll()">↻ Sincronizza tutto</button> <button class="btn btn-green btn-sm" onclick="syncIntegrity()">✓ Sincronizza integrità</button><div id="lastSync" class="statusline" style="margin-top:8px">Ultima sincronizzazione: —</div></div>
+    <div class="module-card"><h3>🔗 Connessione Supabase</h3><p>Progetto collegato: chkuayhbmitdmzmmvona</p><div class="statusline" id="connectionStatus">Controllo...</div><button class="btn btn-secondary btn-sm" onclick="health()">Test connessione</button> <button class="btn btn-primary btn-sm" onclick="loadAll(true)">↻ Sincronizza tutto</button> <button class="btn btn-green btn-sm" onclick="syncIntegrity()">✓ Sincronizza integrità</button><div id="lastSync" class="statusline" style="margin-top:8px">Ultima sincronizzazione: —</div></div>
     <div class="module-card"><h3>👤 Operatore</h3><p>Accesso autenticato Supabase</p><b id="currentOperatorName">Operatore</b><br><small id="currentOperatorRole">Ruolo: Amministratore</small><br><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="signOut()">Esci dal gestionale</button></div>
     <div class="module-card"><h3>🚍 Brand</h3><p>Logo e immagini reali DELGROSSO utilizzati nell'interfaccia.</p><span class="pill info">DELGROSSO</span></div>
     <div class="module-card" id="dg73PrivacyCard"><h3>🔐 Privacy 7.4</h3><p>Dati clienti e finanziari solo in memoria. Blocco schermo automatico e cache sensibile disattivata.</p><div id="dg73PrivacyStatus" class="statusline live">● Privacy estrema attiva</div><div style="margin-top:10px"><button class="btn btn-secondary btn-sm" onclick="lockPrivacy73(true)">🔒 Blocca schermo</button> <button class="btn btn-secondary btn-sm" onclick="purgeDeviceTraces73(true)">Pulisci tracce locali</button></div></div>
@@ -1247,7 +1247,8 @@ async function refreshAuth(){
 async function api(table,query='',opts={}){
   const method=opts.method||'GET';
   const key=table+'|'+query;
-  if(method==='GET'){
+  const noCache=Boolean(opts.noCache);
+  if(method==='GET'&&!noCache){
     const hit=dgGetCache.get(key);
     if(hit && (Date.now()-hit.ts)<DG_GET_CACHE_TTL) return hit.data;
     if(dgInflight.has(key)) return dgInflight.get(key);
@@ -1275,20 +1276,23 @@ async function api(table,query='',opts={}){
       if(await refreshAuth()) out=await parseResponse(await make());
     }
     if(!out.ok) throw new Error(`${table}: HTTP ${out.status} ${out.data?.message||out.data?.hint||out.data||''}`);
-    if(method==='GET') dgGetCache.set(key,{ts:Date.now(),data:out.data});
-    else dgInvalidateGetCache(table);
+    if(method==='GET'&&!noCache) dgGetCache.set(key,{ts:Date.now(),data:out.data});
+    else if(method!=='GET') dgGetCache.clear(); // trigger/RPC possono aggiornare tabelle collegate
     return out.data;
   };
   const promise=run();
-  if(method==='GET') dgInflight.set(key,promise);
-  try{return await promise}finally{if(method==='GET')dgInflight.delete(key)}
+  if(method==='GET'&&!noCache) dgInflight.set(key,promise);
+  try{return await promise}finally{if(method==='GET'&&!noCache)dgInflight.delete(key)}
 }
 
 async function rpc(name,body){
-  const make=()=>fetch(`${SUPA_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:accessHeaders(),body:JSON.stringify(body||{})});
+  const make=()=>fetch(`${SUPA_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:accessHeaders(),body:JSON.stringify(body||{}),cache:'no-store'});
   let out=await parseResponse(await make());
   if(out.status===401&&authSession?.refresh_token){if(await refreshAuth())out=await parseResponse(await make())}
   if(!out.ok)throw new Error(`RPC ${name}: HTTP ${out.status} ${out.data?.message||out.data?.hint||out.data||''}`);
+  // Le RPC del gestionale possono modificare piu tabelle: dopo una scrittura
+  // invalidiamo la cache REST per evitare di mostrare dati precedenti.
+  dgGetCache.clear();
   return out.data;
 }
 async function signIn(username,password){
@@ -1360,8 +1364,8 @@ function setStatus(kind,msg=''){
 let autoSyncTimer=null;
 let syncBusy=false;
 function markSynced(){const now=new Date();const txt=now.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'medium'});const e=$('lastSync');if(e)e.textContent='Ultima sincronizzazione: '+txt;try{dgLocalStorage.setItem('dg_last_sync',txt);dgLocalStorage.setItem('dg_last_sync_ts',String(Date.now()))}catch{}}
-async function syncIntegrity(){if(syncBusy)return;syncBusy=true;try{const r=await rpc('sync_gestionale_integrity',{});log('Integrità Supabase: '+JSON.stringify(r));toast(`Integrità sincronizzata · ${r?.prenotazioni_sincronizzate??0} prenotazioni · ${r?.viaggi_sincronizzati??0} viaggi`);await loadAll()}catch(e){toast('Sincronizzazione integrità fallita: '+e.message,false);log('INTEGRITÀ: '+e.message)}finally{syncBusy=false}}
-function startAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=setInterval(async()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy) await loadAll()},45000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy)loadAll()},{passive:true})}}
+async function syncIntegrity(){if(syncBusy)return;syncBusy=true;try{const r=await rpc('sync_gestionale_integrity',{});log('Integrità Supabase: '+JSON.stringify(r));toast(`Integrità sincronizzata · ${r?.prenotazioni_sincronizzate??0} prenotazioni · ${r?.viaggi_sincronizzati??0} viaggi`);await loadAll(true)}catch(e){toast('Sincronizzazione integrità fallita: '+e.message,false);log('INTEGRITÀ: '+e.message)}finally{syncBusy=false}}
+function startAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=setInterval(async()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy) await loadAll(true)},30000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy)loadAll(true)},{passive:true})}}
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
 function go(page){window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
@@ -1397,7 +1401,8 @@ function dgPurgeLegacySensitive73(){
   }catch{}
 }
 dgPurgeLegacySensitive73();
-async function loadAll(){
+async function loadAll(forceFresh=false){
+  if(forceFresh)dgGetCache.clear();
   if(loadAllBusy){loadAllQueued=true;return {ok:false,queued:true}}
   loadAllBusy=true;
   try{
@@ -1427,7 +1432,7 @@ async function loadAll(){
   return {ok:failed.length===0,failed};
   }finally{
     loadAllBusy=false;
-    if(loadAllQueued){loadAllQueued=false;setTimeout(()=>loadAll(),80)}
+    if(loadAllQueued){loadAllQueued=false;setTimeout(()=>loadAll(true),80)}
   }
 }
 function restoreCacheFast(){
@@ -2031,26 +2036,86 @@ function openTripModal(id=''){const v=state.viaggi.find(x=>x.id===id)||{};const 
 <div class="field"><label>Posti totali</label><input id="f_seats" type="number" value="${v.posti_totali??63}"></div><div class="field"><label>Autobus</label><select id="f_bus"><option value="">Seleziona</option>${state.flotta.map(f=>`<option value="${f.id}" ${v.autobus_id===f.id?'selected':''}>${esc(f.titolo||f.marca+' '+f.modello)} · ${f.posti||0}</option>`).join('')}</select></div>
 <div class="field"><label>Stato</label><select id="f_status">${['Programmato','Confermato','SOLD OUT','Annullato'].map(s=>`<option ${v.stato===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>Pubblicato</label><select id="f_pub"><option ${v.pubblicato==='SI'?'selected':''}>SI</option><option ${v.pubblicato!=='SI'?'selected':''}>NO</option></select></div>
 <div class="field full"><label>Descrizione</label><textarea id="f_desc" rows="3">${esc(v.descrizione||'')}</textarea></div>
-<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div></div>`, `<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveTrip('${id}')">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}})}
+<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary" onclick="saveTrip('${id}')">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}})}
 async function uploadTripPoster(file,tripId){if(!file)return null;if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error('La locandina deve essere JPG, PNG o WEBP.');if(file.size>12*1024*1024)throw new Error('La locandina supera 12 MB. Riduci la dimensione e riprova.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`viaggi/${tripId}/${Date.now()}.${ext}`;const r=await fetch(`${SUPA_URL}/storage/v1/object/locandine/${path}`,{method:'POST',headers:{...accessHeaders(),'Content-Type':file.type,'x-upsert':'true'},body:file});if(!r.ok){let m='';try{m=(await r.json())?.message||''}catch{}throw new Error(m||'Caricamento locandina non riuscito.')}return `${SUPA_URL}/storage/v1/object/public/locandine/${path}`}
 async function saveTrip(id){
+ if(window.__dgTripSaving)return;
+ const btn=$('tripSaveBtn');
  const old=id?state.viaggi.find(x=>x.id===id):null;
- const bus=state.flotta.find(x=>x.id===$('f_bus').value);
- const total=Number($('f_seats').value)||0;
- const stops=$('f_part').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);
- if(!$('f_titolo').value.trim()||!$('f_dest').value.trim()||!$('f_date').value)return toast('Titolo, destinazione e data sono obbligatori.',false);
+ const bus=state.flotta.find(x=>x.id===$('f_bus')?.value);
+ const total=Number($('f_seats')?.value)||0;
+ const stops=String($('f_part')?.value||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ const title=String($('f_titolo')?.value||'').trim(), dest=String($('f_dest')?.value||'').trim(), date=$('f_date')?.value||'';
+ if(!title||!dest||!date)return toast('Titolo, destinazione e data sono obbligatori.',false);
  if(total<1)return toast('Inserisci una capienza valida.',false);
  if(!stops.length)return toast('Inserisci almeno una fermata di partenza.',false);
- if(bus&&dgDateBusy(bus.id,$('f_date').value,id).length)return toast('Mezzo occupato nella data selezionata. Consulta il calendario flotta.',false);
+ if(bus&&dgDateBusy(bus.id,date,id).length)return toast('Mezzo occupato nella data selezionata. Consulta il calendario flotta.',false);
  const tripId=id||newUUID();
- const body={titolo:$('f_titolo').value.trim(),destinazione:$('f_dest').value.trim(),luogo_partenza:stops.join(' | '),data_partenza:$('f_date').value,ora_partenza:$('f_time').value||null,prezzo:Math.round((Number($('f_price').value)||0)*100)/100,descrizione:$('f_desc').value||null,autobus_id:bus?.id||null,autobus:bus?`${bus.marca||''} ${bus.modello||''}`.trim():null,posti_totali:total,stato:$('f_status').value,pubblicato:$('f_pub').value};
+ const body={
+   titolo:title,destinazione:dest,luogo_partenza:stops.join(' | '),data_partenza:date,
+   ora_partenza:$('f_time')?.value||null,prezzo:Math.round((Number($('f_price')?.value)||0)*100)/100,
+   descrizione:$('f_desc')?.value||null,autobus_id:bus?.id||null,
+   autobus:bus?`${bus.marca||''} ${bus.modello||''}`.trim():null,posti_totali:total,
+   stato:$('f_status')?.value||'Programmato',pubblicato:$('f_pub')?.value||'NO',
+   minimo_partecipanti:Number(old?.minimo_partecipanti||40)||40
+ };
+ const posterFile=$('f_locandina')?.files?.[0]||null, removePoster=Boolean($('f_remove_locandina')?.checked);
+ if(removePoster)body.locandina=null;
+ window.__dgTripSaving=true;
+ if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}
  try{
-   const posterFile=$('f_locandina')?.files?.[0]||null, removePoster=Boolean($('f_remove_locandina')?.checked);
-   if(posterFile)body.locandina=await uploadTripPoster(posterFile,tripId); else if(removePoster)body.locandina=null;
-   await rpc('dg_save_trip_v13',{p_id:tripId,p_data:body,p_stops:stops});
-   closeModal(); toast(id?'Viaggio aggiornato in modo atomico':'Viaggio creato e sincronizzato'); await loadAll();
- }catch(e){toast('Viaggio non salvato: '+e.message,false);log('VIAGGIO: '+e.message)}
+   // 1) Prima salviamo sempre il viaggio su Postgres. Un problema di upload locandina
+   // non deve mai impedire la creazione del viaggio.
+   const saved=await rpc('dg_save_trip_v14',{p_id:tripId,p_data:body,p_stops:stops});
+   const savedTrip=Array.isArray(saved)?saved[0]:saved;
+   if(savedTrip?.id){
+     const i=state.viaggi.findIndex(x=>x.id===savedTrip.id);
+     if(i>=0)state.viaggi[i]=savedTrip; else state.viaggi.push(savedTrip);
+     state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));
+     renderTrips();
+   }
+
+   // 2) La locandina viene caricata dopo. Se fallisce, il viaggio resta comunque salvato.
+   let posterWarning='';
+   if(posterFile){
+     try{
+       const posterUrl=await uploadTripPoster(posterFile,tripId);
+       await api('viaggi',`id=eq.${tripId}`,{method:'PATCH',body:{locandina:posterUrl}});
+     }catch(e){posterWarning=' Locandina non caricata: '+(e?.message||e);log('LOCANDINA VIAGGIO: '+(e?.message||e))}
+   }
+
+   // 3) Verifica diretta no-cache: il viaggio deve essere realmente leggibile da Supabase.
+   dgGetCache.clear();
+   const verify=await api('viaggi',`select=*&id=eq.${tripId}&limit=1`,{noCache:true,timeout:15000});
+   if(!Array.isArray(verify)||!verify.length)throw new Error('Il viaggio è stato inviato ma non è rileggibile da Supabase. Riprova la sincronizzazione.');
+
+   closeModal();
+   await loadAll(true);
+   const visible=state.viaggi.some(v=>v.id===tripId);
+   if(!visible){state.viaggi.push(verify[0]);state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));renderTrips()}
+   toast((id?'Viaggio aggiornato e sincronizzato':'Viaggio creato e sincronizzato su Supabase')+(posterWarning?' · senza locandina':''),!posterWarning);
+   if(posterWarning)log(posterWarning.trim());
+ }catch(e){
+   const msg=e?.message||String(e);
+   toast('Viaggio non salvato: '+msg,false);log('VIAGGIO: '+msg);
+ }finally{
+   window.__dgTripSaving=false;
+   if(btn){btn.disabled=false;btn.textContent='Salva viaggio'}
+ }
 }
+async function syncTripsNow(){
+ try{
+   const before=state.viaggi.length;
+   dgGetCache.clear();
+   const rows=await api('viaggi','select=*&order=data_partenza.asc',{noCache:true,timeout:15000});
+   const stops=await api('viaggi_fermate','select=*&order=viaggio_id.asc,ordine.asc',{noCache:true,timeout:15000});
+   state.viaggi=Array.isArray(rows)?rows:[]; state.viaggiFermate=Array.isArray(stops)?stops:[];
+   renderTrips(); dgSaveSafeCache73(); markSynced(); setStatus('live');
+   toast(`Supabase sincronizzato: ${state.viaggi.length} viaggi caricati${state.viaggi.length!==before?` (${state.viaggi.length-before>0?'+':''}${state.viaggi.length-before})`:''}`);
+   log('Sincronizzazione manuale viaggi completata: '+state.viaggi.length+' record');
+ }catch(e){toast('Sincronizzazione viaggi non riuscita: '+(e?.message||e),false);log('SYNC VIAGGI: '+(e?.message||e))}
+}
+window.syncTripsNow=syncTripsNow;
 function openClientModal(id=''){const c=state.clienti.find(x=>x.id===id)||{};openModal(id?'Modifica cliente':'Nuovo cliente',`<div class="form-grid"><div class="field"><label>Nome</label><input id="c_nome" value="${esc(c.nome||'')}"></div><div class="field"><label>Cognome</label><input id="c_cognome" value="${esc(c.cognome||'')}"></div><div class="field"><label>Telefono</label><input id="c_tel" value="${esc(c.telefono||'')}"></div><div class="field"><label>Email</label><input id="c_email" value="${esc(c.email||'')}"></div><div class="field"><label>Codice fiscale</label><input id="c_cf" value="${esc(c.codice_fiscale||'')}"></div><div class="field"><label>Città</label><input id="c_city" value="${esc(c.citta||'')}"></div><div class="field"><label>CAP</label><input id="c_cap" value="${esc(c.cap||'')}"></div><div class="field"><label>Provincia</label><input id="c_prov" value="${esc(c.provincia||'')}"></div><div class="field full"><label>Note</label><textarea id="c_note">${esc(c.note||'')}</textarea></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveClient('${id}')">Salva cliente</button>`)}
 async function saveClient(id){const body={nome:$('c_nome').value.trim(),cognome:$('c_cognome').value.trim(),telefono:$('c_tel').value||null,email:$('c_email').value||null,codice_fiscale:$('c_cf').value||null,citta:$('c_city').value||null,cap:$('c_cap').value||null,provincia:$('c_prov').value||null,note:$('c_note').value||null,stato_cliente:'Attivo',codice_cliente:id?(state.clienti.find(x=>x.id===id)?.codice_cliente||null):'CL-'+String(Date.now()).slice(-6)};try{if(id)await api('clienti',`id=eq.${id}`,{method:'PATCH',body});else await api('clienti','',{method:'POST',body});closeModal();toast('Cliente salvato su Supabase');await loadAll()}catch(e){toast(e.message,false)}}
 let modalSelectedSeats=[];
@@ -2818,10 +2883,14 @@ async function executeLocal(a){const p=a.params||{},t=a.type;
  if(t==='create_client'){const r=await api('clienti','',{method:'POST',body:{nome:p.name||'',cognome:p.surname||'',telefono:p.phone||null,email:p.email||null,note:p.notes||null,stato_cliente:'Attivo',codice_cliente:'CL-'+String(Date.now()).slice(-6)},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
  if(t==='add_client_note'){const c=state.clienti.find(x=>x.id===p.client_id);if(!c)throw new Error('Cliente non trovato');const note=[c.note,`[AI ${new Date().toLocaleString('it-IT')}] ${p.note}`].filter(Boolean).join('\n');await api('clienti',`id=eq.${c.id}`,{method:'PATCH',body:{note}});return {type:t,id:c.id}}
  if(t==='create_trip'){
-   const id=(typeof newUUID==='function'?newUUID():crypto.randomUUID()),code='VG-'+String(Date.now()).slice(-8),seats=Number(p.seats||0);
-   const body={titolo:p.title,destinazione:p.destination||p.title,luogo_partenza:p.departure_place||null,data_partenza:p.date,ora_partenza:p.time||null,prezzo:Number(p.price||0),posti_totali:seats,descrizione:p.description||null,stato:'Programmato',pubblicato:p.published?'SI':'NO',id_viaggio:code,minimo_partecipanti:Number(p.minimum_participants||40)};
-   await rpc('dg_save_trip_v13',{p_id:id,p_data:body,p_stops:[]});
-   await aiAudit('AI_CREATE_TRIP','viaggi',id,{code});return {type:t,id,code}
+   const id=(typeof newUUID==='function'?newUUID():crypto.randomUUID()),code='DG-V-'+String(id).replace(/-/g,'').slice(0,8).toUpperCase(),seats=Number(p.seats||0);
+   const rawStops=Array.isArray(p.departure_stops)?p.departure_stops:String(p.departure_place||'').split(/[|,;\n]+/);
+   const stops=rawStops.map(x=>String(x||'').trim()).filter(Boolean);
+   if(!stops.length)throw new Error('Per creare un viaggio servono almeno una fermata/luogo di partenza.');
+   const body={titolo:p.title,destinazione:p.destination||p.title,luogo_partenza:stops.join(' | '),data_partenza:p.date,ora_partenza:p.time||null,prezzo:Number(p.price||0),posti_totali:seats,descrizione:p.description||null,stato:'Programmato',pubblicato:p.published?'SI':'NO',id_viaggio:code,minimo_partecipanti:Number(p.minimum_participants||40)};
+   await rpc('dg_save_trip_v14',{p_id:id,p_data:body,p_stops:stops});
+   await loadAll(true);
+   await aiAudit('AI_CREATE_TRIP','viaggi',id,{code,stops});return {type:t,id,code}
  }
  if(t==='create_stop'){const r=await api('viaggi_fermate','',{method:'POST',body:{viaggio_id:p.trip_id,nome:p.name,orario:p.time||null,punto_incontro:p.meeting_point||null,ordine:Number(p.order||0),attiva:true},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
  if(t==='publish_trip'){await api('viaggi',`id=eq.${p.trip_id}`,{method:'PATCH',body:{pubblicato:p.published?'SI':'NO'}});return {type:t,id:p.trip_id}}
@@ -3248,7 +3317,7 @@ function injectPages(){
   const content=document.querySelector('.content'); if(!content||el('page-crm'))return;
   content.insertAdjacentHTML('beforeend',`
 <section class="page" id="page-crm">
- <div class="section-title"><div><h2>Clienti, CRM & Lista d’attesa</h2><p class="section-subtitle">Storico cliente, follow-up commerciali e recupero immediato dei posti liberati.</p></div><div class="quick-actions"><button class="btn btn-primary" data-dg-write="operazioni:write" onclick="openClientModal()">+ Cliente</button><button class="btn btn-primary" data-dg-write="operazioni:write" onclick="openWaitlist7()">+ Lista attesa</button><button class="btn btn-secondary" data-dg-write="crm:write" onclick="openCRMTask7()">+ Follow-up</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+ <div class="section-title"><div><h2>Clienti, CRM & Lista d’attesa</h2><p class="section-subtitle">Storico cliente, follow-up commerciali e recupero immediato dei posti liberati.</p></div><div class="quick-actions"><button class="btn btn-primary" data-dg-write="operazioni:write" onclick="openClientModal()">+ Cliente</button><button class="btn btn-primary" data-dg-write="operazioni:write" onclick="openWaitlist7()">+ Lista attesa</button><button class="btn btn-secondary" data-dg-write="crm:write" onclick="openCRMTask7()">+ Follow-up</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
  <div class="optional-grid" id="crm7Kpis"></div>
  <div class="detail-grid" style="margin-top:12px"><div class="card"><div class="card-head"><h3>⏳ Lista d’attesa</h3><span class="pill wait" id="wait7Count">0</span></div><div class="card-body" id="wait7List"></div></div><div class="card"><div class="card-head"><h3>📞 Follow-up CRM</h3><span class="pill info" id="crm7Count">0</span></div><div class="card-body" id="crm7Tasks"></div></div></div>
  <div class="card" style="margin-top:12px"><div class="card-head"><h3>👤 Anagrafica clienti 360°</h3><input id="crm7Search" placeholder="Cerca cliente, telefono, email..." oninput="renderCRM7()" style="max-width:310px"></div><div class="card-body" id="crm7Clients"></div></div>
@@ -3264,7 +3333,7 @@ function injectPages(){
  <div class="detail-grid" style="margin-top:12px"><div class="card"><div class="card-head"><h3>⇄ Trasferimenti tra operatori</h3></div><div class="card-body" id="cash7Transfers"></div></div><div class="card"><div class="card-head"><h3>📊 Controllo finanziario</h3></div><div class="card-body" id="cash7Finance"></div></div></div>
 </section>
 <section class="page" id="page-sentinella">
- <div class="section-title"><div><h2>🛡️ Sentinella DELGROSSO</h2><p class="section-subtitle">Salute sistema, integrità dati, alert operativi e traccia delle modifiche.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="runSentinel7()">♥ Controlla ora</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+ <div class="section-title"><div><h2>🛡️ Sentinella DELGROSSO</h2><p class="section-subtitle">Salute sistema, integrità dati, alert operativi e traccia delle modifiche.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="runSentinel7()">♥ Controlla ora</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
  <div class="pro-health-grid" id="sentinel7Health"></div>
  <div class="detail-grid" style="margin-top:12px"><div class="card"><div class="card-head"><h3>🚨 Priorità operative</h3></div><div class="card-body" id="sentinel7Alerts"></div></div><div class="card"><div class="card-head"><h3>🧪 Integrità dati</h3></div><div class="card-body" id="sentinel7Integrity"></div></div></div>
  <div class="card" style="margin-top:12px"><div class="card-head"><h3>🧾 Registro attività / Audit</h3></div><div class="card-body" id="sentinel7Audit"></div></div>
@@ -3567,7 +3636,7 @@ function injectUI72(){
  if(mg&&!mg.querySelector('[data-dg72="partenze"]')){const bs=[...mg.querySelectorAll('button')],vi=bs.find(b=>String(b.getAttribute('onclick')||'').includes("'viaggi'"));if(vi)vi.insertAdjacentHTML('afterend',`<button data-dg72="partenze" onclick="mobileGo('partenze')">🚦<span>Centro Partenze</span></button>`)}
  const content=document.querySelector('.content');
  if(content&&!$72('page-partenze'))content.insertAdjacentHTML('beforeend',`<section class="page" id="page-partenze">
- <div class="section-title"><div><h2>🚦 Centro Partenze</h2><p class="section-subtitle">Semaforo operativo, acconti da recuperare, dati da completare e manifest passeggeri.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="printBriefing72()">🖨️ Briefing</button><button class="btn btn-secondary" onclick="loadAll()">↻ Sincronizza</button></div></div>
+ <div class="section-title"><div><h2>🚦 Centro Partenze</h2><p class="section-subtitle">Semaforo operativo, acconti da recuperare, dati da completare e manifest passeggeri.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="printBriefing72()">🖨️ Briefing</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
  <div id="dg72DepartureKpis" class="dg72-kpis"></div>
  <div class="dg72-brief"><h3>Obiettivo: partire senza sorprese</h3><p>Il semaforo considera minimo partecipanti, mezzo, fermate, acconti, contatti e assegnazione posti vicino alla partenza.</p></div>
  <div class="detail-grid"><div class="card"><div class="card-head"><h3>🚌 Semaforo prossime partenze</h3><select id="dg72Range" onchange="renderDepartures72()"><option value="30">30 giorni</option><option value="60" selected>60 giorni</option><option value="120">120 giorni</option><option value="365">Tutte</option></select></div><div class="card-body" id="dg72Trips"></div></div><div class="card"><div class="card-head"><h3>💶 Acconti da recuperare</h3><span class="pill wait" id="dg72DepositCount">0</span></div><div class="card-body" id="dg72Deposits"></div></div></div>
@@ -3944,7 +4013,7 @@ function renderMasterDashboard(){
  const page=M('page-dashboard'),metrics=M('dashMetrics');if(!page||!metrics)return;
  let bar=M('dgMasterDashboardToolbar');if(!bar){bar=document.createElement('div');bar.id='dgMasterDashboardToolbar';bar.className='dg-master-toolbar';metrics.insertAdjacentElement('beforebegin',bar)}
  const future=(state.viaggi||[]).filter(activeTrip).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza))),next=future[0],nextS=next?tripStats(next):null,futureIds=new Set(future.map(v=>v.id)),bookings=(state.prenotazioni||[]).filter(b=>futureIds.has(b.viaggio_id)&&activeBooking(b)),pax=bookings.reduce((z,b)=>z+n(b.posti),0),tripIn=(state.pagamenti||[]).filter(x=>String(x.tipo||'').toLowerCase()!=='rimborso').reduce((z,x)=>z+Math.abs(n(x.importo)),0),tripRf=(state.pagamenti||[]).filter(x=>String(x.tipo||'').toLowerCase()==='rimborso').reduce((z,x)=>z+Math.abs(n(x.importo)),0),rentIn=(state.noleggiPagamenti||[]).filter(x=>String(x.tipo||'').toLowerCase()!=='rimborso').reduce((z,x)=>z+Math.abs(n(x.importo)),0),rentRf=(state.noleggiPagamenti||[]).filter(x=>String(x.tipo||'').toLowerCase()==='rimborso').reduce((z,x)=>z+Math.abs(n(x.importo)),0),net=tripIn+rentIn-tripRf-rentRf,residual=bookings.reduce((z,b)=>z+Math.max(n(b.saldo),0),0)+(state.noleggi||[]).filter(x=>!/annull|complet/i.test(String(x.stato_noleggio||''))).reduce((z,x)=>z+Math.max(n(x.saldo),0),0),overdue=bookings.filter(b=>b.scadenza_acconto&&String(b.scadenza_acconto).slice(0,10)<romeISODate()&&n(b.pagato)<=0).length,quality=(state.dataQualityIssues||[]).length,prior=priorityItems();
- bar.innerHTML=`<div><strong>🎛️ Control Room DELGROSSO</strong><small>${prior.length} priorità da verificare · ${overdue} acconti scaduti · ${future.length} partenze future</small></div><div class="dg-master-actions"><button class="primary" onclick="openBookingModal()">+ Prenotazione</button><button onclick="openPaymentModal()">+ Pagamento</button><button onclick="go('partenze')">Centro Partenze</button><button onclick="go('assistente')">AI 360°</button><button onclick="loadAll()">↻ Sincronizza</button></div>`;
+ bar.innerHTML=`<div><strong>🎛️ Control Room DELGROSSO</strong><small>${prior.length} priorità da verificare · ${overdue} acconti scaduti · ${future.length} partenze future</small></div><div class="dg-master-actions"><button class="primary" onclick="openBookingModal()">+ Prenotazione</button><button onclick="openPaymentModal()">+ Pagamento</button><button onclick="go('partenze')">Centro Partenze</button><button onclick="go('assistente')">AI 360°</button><button onclick="loadAll(true)">↻ Sincronizza</button></div>`;
  metrics.className='dg-master-kpis';metrics.innerHTML=[['info','🚌 Prossima partenza',next?dateIT(next.data_partenza):'—',next?`${next.titolo||next.destinazione} · ${nextS.pax}/${nextS.min}`:'Nessun viaggio futuro'],['good','👥 Passeggeri futuri',pax,`${future.length} partenze attive`],['good','💶 Incassi netti',money(net),'Viaggi + noleggi − rimborsi'],['info','⏳ Residui da incassare',money(residual),'Prenotazioni + noleggi'],[overdue?'bad':'good','⚠️ Acconti scaduti',overdue,overdue?'Da recuperare':'Nessuno scaduto'],[quality?'warn':'good','🔎 Qualità dati',quality,quality?'Da controllare':'Dati coerenti']].map(x=>`<div class="dg-master-kpi ${x[0]}"><small>${x[1]}</small><b>${x[2]}</b><em>${esc(String(x[3]))}</em></div>`).join('');
  const nt=M('nextTrips');if(nt){nt.innerHTML=future.slice(0,7).map(v=>{const s=tripStats(v),income=(state.pagamenti||[]).filter(p=>p.viaggio_id===v.id).reduce((z,p)=>z+(String(p.tipo||'').toLowerCase()==='rimborso'?-Math.abs(n(p.importo)):Math.abs(n(p.importo))),0);return `<div class="dg-master-trip"><div><b>${esc(v.titolo||v.destinazione||'Viaggio')}</b><small>${dateIT(v.data_partenza)} ${esc(v.ora_partenza||'')} · ${s.pax}/${s.cap} posti · minimo ${s.min}</small><div class="dg-master-progress"><i style="width:${s.fill}%"></i></div></div><div class="metric-mid"><small>Semaforo</small><span class="dg-master-score ${s.score<70?'economy-negative':s.score>=90?'economy-positive':''}">${s.score}/100</span></div><div class="metric-mid"><small>Da raggiungere</small><b>${s.missing?`-${s.missing} persone`:'Minimo raggiunto'}</b></div><div class="metric-mid"><small>Incassato</small><b>${money(income)}</b></div><button class="btn btn-secondary btn-sm" onclick="openTripDetail('${v.id}')">Dossier 360°</button></div>`}).join('')||'<div class="empty">Nessuna partenza futura.</div>';const head=nt.closest('.card')?.querySelector('.card-head h3');if(head)head.textContent='🚌 Prossime partenze · stato operativo'}
  const al=M('alerts');if(al){al.innerHTML=prior.map(x=>`<div class="dg-master-priority"><span>${x.icon}</span><div><b>${esc(x.title||'Priorità')}</b><small>${esc(x.sub||'')}</small></div><button class="btn btn-secondary btn-sm" onclick="go('${x.go}')">Apri</button></div>`).join('')||'<div class="empty">✅ Nessuna criticità ad alta priorità.</div>';const head=al.closest('.card')?.querySelector('.card-head h3');if(head)head.textContent='⚠️ Priorità operative'}
