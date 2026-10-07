@@ -965,7 +965,7 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-viaggi">
-  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
+  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-secondary" onclick="openDuplicateTripPicker()">📄 Duplica viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
   <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Viaggio</th><th>Partenza</th><th>Posti</th><th>Prezzo</th><th>Stato</th><th></th></tr></thead><tbody id="tripsTable"></tbody></table></div>
 </section>
@@ -1565,12 +1565,12 @@ function renderTrips(){
    const rowStyle=lastFive?'background:rgba(245,158,11,.08)':'';
    const availability=remaining===0?'<br><small style="font-weight:800;color:#dc2626">Nessun posto libero</small>':lastFive?`<br><small style="font-weight:800;color:#d97706">⚠ Ultimi ${remaining} posti</small>`:`<br><small>${remaining} liberi</small>`;
    const status=`<span class="pill ${sold?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(sold?'SOLD OUT':(v.stato||'Programmato'))}</span> <span class="pill ${online?'ok':'wait'}">${online?'Online':'Offline'}</span>`;
-   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> `;
+   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
    if(lastFive&&online)actions+=`<button class="btn btn-danger btn-sm" onclick="setTripOnlineState('${v.id}','SOLD_OUT')">🔴 SOLD OUT</button> `;
    if(sold)actions+=`<button class="btn btn-secondary btn-sm" onclick="setTripOnlineState('${v.id}','REOPEN')">🟢 Riapri vendite</button> `;
    if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
    else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
-   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b><br><small>${esc(v.id_viaggio||v.destinazione)}</small></td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:310px">${actions}</td></tr>`;
+   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b><br><small>${esc(v.id_viaggio||v.destinazione)}</small></td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:410px">${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
 }
 function renderBookings(){
@@ -2039,6 +2039,88 @@ function renderStats(){const inc=state.pagamenti.reduce((s,p)=>s+Number(p.tipo==
 
 function openModal(title,body,foot){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modalFoot').innerHTML=foot;$('modal').classList.add('on')}
 function closeModal(){$('modal').classList.remove('on')} window.closeModal=closeModal;
+
+// === DELGROSSO: duplicazione rapida viaggio (cambia solo data + bus) ===
+function dgDupTripOptions(selected=''){
+  return (state.viaggi||[]).slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))).map(v=>`<option value="${v.id}" ${v.id===selected?'selected':''}>${dateIT(v.data_partenza)} · ${esc(v.titolo||v.destinazione||'Viaggio')}</option>`).join('');
+}
+function dgDupBusOptions(selected=''){
+  return (state.flotta||[]).filter(f=>f.attivo!==false).slice().sort((a,b)=>String(a.titolo||a.modello||'').localeCompare(String(b.titolo||b.modello||''))).map(f=>`<option value="${f.id}" ${f.id===selected?'selected':''}>${esc(f.titolo||`${f.marca||''} ${f.modello||''}`.trim())} · ${Number(f.posti||0)} posti${f.stato?` · ${esc(f.stato)}`:''}</option>`).join('');
+}
+function openDuplicateTripPicker(){
+  const first=(state.viaggi||[]).slice().sort((a,b)=>String(b.data_partenza||'').localeCompare(String(a.data_partenza||'')))[0]?.id||'';
+  openModal('📄 Duplica viaggio',`
+    <div class="statusline live" style="margin-bottom:12px"><b>Copia una partenza già esistente</b><br>Il gestionale copierà itinerario, prezzo, descrizione, fermate, orari, punto d’incontro, minimo partecipanti e locandina. Tu cambierai solo data e bus.</div>
+    <div class="field"><label>Viaggio da copiare</label><select id="dup_source"><option value="">— Seleziona viaggio —</option>${dgDupTripOptions(first)}</select></div>
+  `,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="openDuplicateTripFromPicker()">Continua</button>`);
+}
+function openDuplicateTripFromPicker(){
+  const id=$('dup_source')?.value||'';
+  if(!id){toast('Seleziona il viaggio da duplicare.',false);return}
+  closeModal();
+  setTimeout(()=>openDuplicateTripModal(id),40);
+}
+function openDuplicateTripModal(sourceId){
+  const s=(state.viaggi||[]).find(v=>v.id===sourceId);
+  if(!s){toast('Viaggio originale non trovato.',false);return}
+  openModal('📄 Duplica viaggio',`
+    <div class="statusline live" style="margin-bottom:12px">
+      <b>${esc(s.titolo||s.destinazione||'Viaggio')}</b><br>
+      Partenza originale: ${dateIT(s.data_partenza)} · ${money(s.prezzo)} · ${Number(s.posti_totali||0)} posti<br>
+      <small>La nuova partenza avrà 0 prenotati, 0 pagamenti e 0 posti occupati. Lo stato riparte da <b>Programmato</b>. La visibilità online/offline viene copiata dall'originale.</small>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Nuova data *</label><input id="dup_date" type="date" onchange="previewDuplicateTrip('${sourceId}')"></div>
+      <div class="field"><label>Nuovo bus *</label><select id="dup_bus" onchange="previewDuplicateTrip('${sourceId}')"><option value="">— Seleziona bus —</option>${dgDupBusOptions('')}</select></div>
+      <div class="field full"><div id="dup_preview" class="statusline">Seleziona nuova data e bus. Titolo e capienza verranno aggiornati automaticamente.</div></div>
+    </div>
+  `,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" id="dup_confirm" onclick="executeDuplicateTrip('${sourceId}')">📄 Duplica viaggio</button>`);
+  previewDuplicateTrip(sourceId);
+}
+function previewDuplicateTrip(sourceId){
+  const s=(state.viaggi||[]).find(v=>v.id===sourceId), d=$('dup_date')?.value||'', busId=$('dup_bus')?.value||'', out=$('dup_preview'), btn=$('dup_confirm');
+  if(!out)return;
+  if(!d||!busId){out.className='statusline';out.innerHTML='Seleziona <b>nuova data</b> e <b>bus</b>.';if(btn)btn.disabled=true;return}
+  if(s&&d===s.data_partenza){out.className='statusline off';out.textContent='La nuova data deve essere diversa dalla partenza originale.';if(btn)btn.disabled=true;return}
+  const bus=(state.flotta||[]).find(f=>f.id===busId);
+  const conflict=(state.viaggi||[]).find(v=>v.id!==sourceId&&v.data_partenza===d&&v.autobus_id===busId&&!/annull|cancel/i.test(String(v.stato||'')));
+  if(conflict){out.className='statusline warn';out.innerHTML=`⚠️ ${esc(bus?.titolo||'Bus')} risulta già assegnato a <b>${esc(conflict.titolo||conflict.destinazione||'un altro viaggio')}</b> nella stessa data.<br>Il duplicato verrà comunque creato, ma resterà <b>BUS DA ASSEGNARE</b>.`;}
+  else{out.className='statusline live';out.innerHTML=`✅ Pronto: nuova data <b>${dateIT(d)}</b> · bus <b>${esc(bus?.titolo||bus?.modello||'')}</b> · ${Number(bus?.posti||0)} posti.`;}
+  if(btn)btn.disabled=false;
+}
+async function executeDuplicateTrip(sourceId){
+  const d=$('dup_date')?.value||'', busId=$('dup_bus')?.value||'', btn=$('dup_confirm'), out=$('dup_preview');
+  if(!d||!busId){toast('Seleziona nuova data e bus.',false);return}
+  if(btn){btn.disabled=true;btn.textContent='Duplicazione…'}
+  if(out){out.className='statusline warn';out.textContent='Duplicazione e sincronizzazione con Supabase…'}
+  try{
+    const raw=await rpc('dg_duplicate_trip_v1',{p_source_trip_id:sourceId,p_new_date:d,p_bus_id:busId});
+    const r=Array.isArray(raw)?raw[0]:raw;
+    if(!r?.success||!r?.trip_id)throw new Error('Supabase non ha restituito il nuovo viaggio.');
+    dgGetCache.clear();
+    const verify=await api('viaggi',`select=*&id=eq.${r.trip_id}&limit=1`,{noCache:true,timeout:15000});
+    if(!Array.isArray(verify)||!verify.length)throw new Error('Viaggio duplicato ma non rileggibile da Supabase.');
+    const [rows,stops]=await Promise.all([
+      api('viaggi','select=*&order=data_partenza.asc',{noCache:true,timeout:15000}),
+      api('viaggi_fermate','select=*&order=viaggio_id.asc,ordine.asc',{noCache:true,timeout:15000})
+    ]);
+    state.viaggi=Array.isArray(rows)?rows:state.viaggi;
+    state.viaggiFermate=Array.isArray(stops)?stops:state.viaggiFermate;
+    try{renderTrips();renderDashboard();}catch{}
+    markSynced();setStatus('live');closeModal();
+    if(r.bus_conflict)toast(`Viaggio duplicato per il ${dateIT(r.new_date)}. Attenzione: ${r.bus_conflict_reason||'bus non disponibile'}; mezzo lasciato DA ASSEGNARE.`,false);
+    else toast(`Viaggio duplicato per il ${dateIT(r.new_date)} con ${r.assigned_bus||r.requested_bus||'il nuovo bus'}.`,true);
+    log(`DUPLICA VIAGGIO OK: ${sourceId} -> ${r.trip_id} · ${r.new_date}`);
+  }catch(e){
+    const msg=e?.message||String(e);if(out){out.className='statusline off';out.textContent='Errore: '+msg}toast('Duplicazione non riuscita: '+msg,false);log('DUPLICA VIAGGIO: '+msg);
+  }finally{if(btn){btn.disabled=false;btn.textContent='📄 Duplica viaggio'}}
+}
+window.openDuplicateTripPicker=openDuplicateTripPicker;
+window.openDuplicateTripFromPicker=openDuplicateTripFromPicker;
+window.openDuplicateTripModal=openDuplicateTripModal;
+window.previewDuplicateTrip=previewDuplicateTrip;
+window.executeDuplicateTrip=executeDuplicateTrip;
+
 function openTripModal(id=''){const v=state.viaggi.find(x=>x.id===id)||{};const savedStops=id?(state.viaggiFermate||[]).filter(x=>x.viaggio_id===id&&x.attiva!==false).sort((a,b)=>(a.ordine||0)-(b.ordine||0)).map(x=>x.nome):[];const stopText=savedStops.length?savedStops.join('\n'):String(v.luogo_partenza||'').split('|').map(x=>x.trim()).filter(Boolean).join('\n');openModal(id?'Modifica viaggio':'Nuovo viaggio',`<div class="form-grid">
 <div class="field"><label>Titolo</label><input id="f_titolo" value="${esc(v.titolo||'')}"></div><div class="field"><label>Destinazione</label><input id="f_dest" value="${esc(v.destinazione||'')}"></div>
 <div class="field full"><label>Fermate di partenza <small>(una per riga)</small></label><textarea id="f_part" rows="4" placeholder="San Severo\nApricena\nSan Nicandro G.co">${esc(stopText)}</textarea><small>Il sito mostrerà ogni riga come scelta separata.</small></div><div class="field"><label>Data</label><input id="f_date" type="date" value="${esc(v.data_partenza||'')}"></div>
@@ -2046,7 +2128,7 @@ function openTripModal(id=''){const v=state.viaggi.find(x=>x.id===id)||{};const 
 <div class="field"><label>Posti totali</label><input id="f_seats" type="number" value="${v.posti_totali??63}"></div><div class="field"><label>Autobus</label><select id="f_bus"><option value="">Seleziona</option>${state.flotta.map(f=>`<option value="${f.id}" ${v.autobus_id===f.id?'selected':''}>${esc(f.titolo||f.marca+' '+f.modello)} · ${f.posti||0}</option>`).join('')}</select></div>
 <div class="field"><label>Stato</label><select id="f_status">${['Programmato','Confermato','SOLD OUT','Annullato'].map(s=>`<option ${v.stato===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>Pubblicato</label><select id="f_pub"><option ${v.pubblicato==='SI'?'selected':''}>SI</option><option ${v.pubblicato!=='SI'?'selected':''}>NO</option></select></div>
 <div class="field full"><label>Descrizione</label><textarea id="f_desc" rows="3">${esc(v.descrizione||'')}</textarea></div>
-<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">BUILD TRIP-R15 · Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}});const sb=$('tripSaveBtn');if(sb){sb.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.saveTrip(id)}}}
+<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">BUILD TRIP-R16 · Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}});const sb=$('tripSaveBtn');if(sb){sb.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.saveTrip(id)}}}
 async function uploadTripPoster(file,tripId){if(!file)return null;if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error('La locandina deve essere JPG, PNG o WEBP.');if(file.size>12*1024*1024)throw new Error('La locandina supera 12 MB. Riduci la dimensione e riprova.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`viaggi/${tripId}/${Date.now()}.${ext}`;const r=await fetch(`${SUPA_URL}/storage/v1/object/locandine/${path}`,{method:'POST',headers:{...accessHeaders(),'Content-Type':file.type,'x-upsert':'true'},body:file});if(!r.ok){let m='';try{m=(await r.json())?.message||''}catch{}throw new Error(m||'Caricamento locandina non riuscito.')}return `${SUPA_URL}/storage/v1/object/public/locandine/${path}`}
 async function saveTrip(id){
  const status=(msg,kind='warn')=>{const el=$('tripSaveStatus');if(el){el.textContent=msg;el.className='statusline full '+kind}}
@@ -2105,7 +2187,8 @@ async function saveTrip(id){
    const saved=await rpc('dg_save_trip_v14',{p_id:tripId,p_data:body,p_stops:stops});
    const savedTrip=Array.isArray(saved)?saved[0]:saved;
    if(!savedTrip?.id)throw new Error('Supabase non ha restituito il viaggio appena salvato.');
-   status('Viaggio creato. Verifica immediata…','live');
+   const selectedBusUnavailable=Boolean(busId&&!savedTrip.autobus_id);
+   status(selectedBusUnavailable?'Viaggio salvato · bus non disponibile: lasciato DA ASSEGNARE.':'Viaggio creato. Verifica immediata…',selectedBusUnavailable?'warn':'live');
 
    // Rilettura diretta senza cache. Se non torna, l'utente vede un errore esplicito.
    dgGetCache.clear();
@@ -2154,6 +2237,7 @@ async function saveTrip(id){
    closeModal();
    const offlineNote=pub==='NO'?' · salvato nel gestionale, non pubblicato online':'';
    if(posterWarning)toast((id?'Viaggio aggiornato':'Viaggio creato')+offlineNote+' · locandina non caricata: '+posterWarning,false);
+   else if(selectedBusUnavailable)toast((id?'Viaggio aggiornato':'Viaggio creato')+' e sincronizzato su Supabase'+offlineNote+' · ATTENZIONE: bus non disponibile, mezzo lasciato DA ASSEGNARE.',false);
    else toast((id?'Viaggio aggiornato':'Viaggio creato')+' e sincronizzato su Supabase'+offlineNote,true);
    log(`VIAGGIO OK: ${tripId} · ${title} · ${date} · pubblicato ${pub}`);
    return true;
