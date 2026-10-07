@@ -1285,13 +1285,23 @@ async function api(table,query='',opts={}){
   try{return await promise}finally{if(method==='GET'&&!noCache)dgInflight.delete(key)}
 }
 
-async function rpc(name,body){
-  const make=()=>fetch(`${SUPA_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:accessHeaders(),body:JSON.stringify(body||{}),cache:'no-store'});
-  let out=await parseResponse(await make());
-  if(out.status===401&&authSession?.refresh_token){if(await refreshAuth())out=await parseResponse(await make())}
+async function rpc(name,body,timeout=20000){
+  const make=async()=>{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeout);
+    try{return await fetch(`${SUPA_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:accessHeaders(),body:JSON.stringify(body||{}),cache:'no-store',signal:controller.signal})}
+    finally{clearTimeout(timer)}
+  };
+  let response;
+  try{response=await make()}catch(e){if(e?.name==='AbortError')throw new Error(`RPC ${name}: timeout dopo ${Math.round(timeout/1000)} secondi`);throw e}
+  let out=await parseResponse(response);
+  if(out.status===401&&authSession?.refresh_token){
+    if(await refreshAuth()){
+      try{response=await make()}catch(e){if(e?.name==='AbortError')throw new Error(`RPC ${name}: timeout dopo ${Math.round(timeout/1000)} secondi`);throw e}
+      out=await parseResponse(response);
+    }
+  }
   if(!out.ok)throw new Error(`RPC ${name}: HTTP ${out.status} ${out.data?.message||out.data?.hint||out.data||''}`);
-  // Le RPC del gestionale possono modificare piu tabelle: dopo una scrittura
-  // invalidiamo la cache REST per evitare di mostrare dati precedenti.
   dgGetCache.clear();
   return out.data;
 }
@@ -2036,87 +2046,129 @@ function openTripModal(id=''){const v=state.viaggi.find(x=>x.id===id)||{};const 
 <div class="field"><label>Posti totali</label><input id="f_seats" type="number" value="${v.posti_totali??63}"></div><div class="field"><label>Autobus</label><select id="f_bus"><option value="">Seleziona</option>${state.flotta.map(f=>`<option value="${f.id}" ${v.autobus_id===f.id?'selected':''}>${esc(f.titolo||f.marca+' '+f.modello)} · ${f.posti||0}</option>`).join('')}</select></div>
 <div class="field"><label>Stato</label><select id="f_status">${['Programmato','Confermato','SOLD OUT','Annullato'].map(s=>`<option ${v.stato===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>Pubblicato</label><select id="f_pub"><option ${v.pubblicato==='SI'?'selected':''}>SI</option><option ${v.pubblicato!=='SI'?'selected':''}>NO</option></select></div>
 <div class="field full"><label>Descrizione</label><textarea id="f_desc" rows="3">${esc(v.descrizione||'')}</textarea></div>
-<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary" onclick="saveTrip('${id}')">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}})}
+<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">BUILD TRIP-R15 · Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}});const sb=$('tripSaveBtn');if(sb){sb.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.saveTrip(id)}}}
 async function uploadTripPoster(file,tripId){if(!file)return null;if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error('La locandina deve essere JPG, PNG o WEBP.');if(file.size>12*1024*1024)throw new Error('La locandina supera 12 MB. Riduci la dimensione e riprova.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`viaggi/${tripId}/${Date.now()}.${ext}`;const r=await fetch(`${SUPA_URL}/storage/v1/object/locandine/${path}`,{method:'POST',headers:{...accessHeaders(),'Content-Type':file.type,'x-upsert':'true'},body:file});if(!r.ok){let m='';try{m=(await r.json())?.message||''}catch{}throw new Error(m||'Caricamento locandina non riuscito.')}return `${SUPA_URL}/storage/v1/object/public/locandine/${path}`}
 async function saveTrip(id){
- if(window.__dgTripSaving)return;
+ const status=(msg,kind='warn')=>{const el=$('tripSaveStatus');if(el){el.textContent=msg;el.className='statusline full '+kind}}
+ const fail=(msg)=>{status('Errore: '+msg,'off');toast(msg,false);log('VIAGGIO: '+msg);return false}
  const btn=$('tripSaveBtn');
- const old=id?state.viaggi.find(x=>x.id===id):null;
- const bus=state.flotta.find(x=>x.id===$('f_bus')?.value);
- const total=Number($('f_seats')?.value)||0;
- const stops=String($('f_part')?.value||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- const title=String($('f_titolo')?.value||'').trim(), dest=String($('f_dest')?.value||'').trim(), date=$('f_date')?.value||'';
- const tripFail=(msg)=>{if($('tripSaveStatus')){$('tripSaveStatus').textContent='Errore: '+msg;$('tripSaveStatus').className='statusline full off'}toast(msg,false);log('VIAGGIO VALIDAZIONE: '+msg);return false};
- if(!title||!dest||!date)return tripFail('Titolo, destinazione e data sono obbligatori.');
- if(total<1)return tripFail('Inserisci una capienza valida.');
- if(!stops.length)return tripFail('Inserisci almeno una fermata di partenza.');
- const busyEvents=bus?dgDateBusy(bus.id,date,id):[];
- const busConflict=Boolean(bus&&busyEvents.length);
- const busConflictMsg=busConflict?`Il mezzo ${bus.titolo||bus.marca||'selezionato'} risulta già impegnato il ${date}: ${busyEvents.map(e=>e.label).join(' · ')}. Il viaggio verrà salvato senza autobus assegnato, così non perdi la nuova partenza.`:'';
- if(busConflict){
-   log('VIAGGIO: '+busConflictMsg);
-   if($('tripSaveStatus')){$('tripSaveStatus').textContent='⚠️ '+busConflictMsg;$('tripSaveStatus').className='statusline full warn'}
-   toast('⚠️ Mezzo già occupato: salvo il viaggio senza assegnare il bus.',false);
- }
- const tripId=id||newUUID();
- const body={
-   titolo:title,destinazione:dest,luogo_partenza:stops.join(' | '),data_partenza:date,
-   ora_partenza:$('f_time')?.value||null,prezzo:Math.round((Number($('f_price')?.value)||0)*100)/100,
-   descrizione:$('f_desc')?.value||null,autobus_id:busConflict?null:(bus?.id||null),
-   autobus:busConflict?null:(bus?`${bus.marca||''} ${bus.modello||''}`.trim():null),posti_totali:total,
-   stato:$('f_status')?.value||'Programmato',pubblicato:$('f_pub')?.value||'NO',
-   minimo_partecipanti:Number(old?.minimo_partecipanti||40)||40
- };
- const posterFile=$('f_locandina')?.files?.[0]||null, removePoster=Boolean($('f_remove_locandina')?.checked);
- if(removePoster)body.locandina=null;
- window.__dgTripSaving=true;
- if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}; if($('tripSaveStatus')){$('tripSaveStatus').textContent='Salvataggio viaggio su Supabase…';$('tripSaveStatus').className='statusline full warn'}
- try{
-   // 1) Prima salviamo sempre il viaggio su Postgres. Un problema di upload locandina
-   // non deve mai impedire la creazione del viaggio.
-   const saved=await rpc('dg_save_trip_v14',{p_id:tripId,p_data:body,p_stops:stops}); if($('tripSaveStatus')){$('tripSaveStatus').textContent='Viaggio salvato. Verifica sincronizzazione…';$('tripSaveStatus').className='statusline full live'}
-   const savedTrip=Array.isArray(saved)?saved[0]:saved;
-   if(savedTrip?.id){
-     const i=state.viaggi.findIndex(x=>x.id===savedTrip.id);
-     if(i>=0)state.viaggi[i]=savedTrip; else state.viaggi.push(savedTrip);
-     state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));
-     renderTrips();
+ const now=Date.now();
+ if(window.__dgTripSaving){
+   if(!window.__dgTripSavingAt || now-window.__dgTripSavingAt>45000){
+     window.__dgTripSaving=false;window.__dgTripSavingAt=0;
+   }else{
+     return fail('Un salvataggio è già in corso. Attendi qualche secondo.');
    }
+ }
+ window.__dgTripSaving=true;window.__dgTripSavingAt=now;
+ if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}
+ status('Invio del viaggio a Supabase…','warn');
+ try{
+   // Tutto il percorso è dentro il try: nessun controllo può più interrompere il click in silenzio.
+   const old=id?state.viaggi.find(x=>x.id===id):null;
+   const title=String($('f_titolo')?.value||'').trim();
+   const dest=String($('f_dest')?.value||'').trim();
+   const date=String($('f_date')?.value||'').trim();
+   const total=Number($('f_seats')?.value||0);
+   const stops=String($('f_part')?.value||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+   const busId=String($('f_bus')?.value||'').trim();
+   const bus=busId?(state.flotta||[]).find(x=>String(x.id)===busId):null;
+   const pub=String($('f_pub')?.value||'NO').toUpperCase()==='SI'?'SI':'NO';
+   const tripState=String($('f_status')?.value||'Programmato');
+   const price=Math.round((Number($('f_price')?.value||0))*100)/100;
 
-   // 2) La locandina viene caricata dopo. Se fallisce, il viaggio resta comunque salvato.
+   if(!title||!dest||!date)throw new Error('Titolo, destinazione e data sono obbligatori.');
+   if(!Number.isFinite(total)||total<1)throw new Error('Inserisci una capienza valida.');
+   if(!Number.isFinite(price)||price<0)throw new Error('Inserisci un prezzo valido.');
+   if(!stops.length)throw new Error('Inserisci almeno una fermata di partenza.');
+
+   const tripId=id||newUUID();
+   const body={
+     titolo:title,
+     destinazione:dest,
+     luogo_partenza:stops.join(' | '),
+     data_partenza:date,
+     ora_partenza:$('f_time')?.value||null,
+     prezzo:price,
+     descrizione:$('f_desc')?.value||null,
+     autobus_id:bus?.id||null,
+     autobus:bus?(bus.titolo||`${bus.marca||''} ${bus.modello||''}`.trim()):null,
+     posti_totali:total,
+     stato:tripState,
+     pubblicato:pub,
+     minimo_partecipanti:Number(old?.minimo_partecipanti||40)||40
+   };
+   if($('f_remove_locandina')?.checked)body.locandina=null;
+
+   // Prima il record DB: l'upload della locandina non può più bloccare la creazione del viaggio.
+   status('Salvataggio dati viaggio su Supabase…','warn');
+   const saved=await rpc('dg_save_trip_v14',{p_id:tripId,p_data:body,p_stops:stops});
+   const savedTrip=Array.isArray(saved)?saved[0]:saved;
+   if(!savedTrip?.id)throw new Error('Supabase non ha restituito il viaggio appena salvato.');
+   status('Viaggio creato. Verifica immediata…','live');
+
+   // Rilettura diretta senza cache. Se non torna, l'utente vede un errore esplicito.
+   dgGetCache.clear();
+   const verify=await api('viaggi',`select=*&id=eq.${tripId}&limit=1`,{noCache:true,timeout:15000});
+   if(!Array.isArray(verify)||!verify.length)throw new Error('Il viaggio risulta salvato ma non è rileggibile da Supabase. Premi Sincronizza Supabase.');
+
+   // Aggiorniamo subito lo stato locale, prima di qualsiasi upload immagine.
+   const confirmed=verify[0];
+   const i=(state.viaggi||[]).findIndex(x=>x.id===tripId);
+   if(i>=0)state.viaggi[i]=confirmed;else state.viaggi.push(confirmed);
+   state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));
+   try{renderTrips()}catch{}
+
+   // Locandina: fase separata e non bloccante.
+   const posterFile=$('f_locandina')?.files?.[0]||null;
    let posterWarning='';
    if(posterFile){
+     status('Viaggio salvato. Caricamento locandina…','live');
      try{
        const posterUrl=await uploadTripPoster(posterFile,tripId);
        await api('viaggi',`id=eq.${tripId}`,{method:'PATCH',body:{locandina:posterUrl}});
-     }catch(e){posterWarning=' Locandina non caricata: '+(e?.message||e);log('LOCANDINA VIAGGIO: '+(e?.message||e))}
+     }catch(e){
+       posterWarning=e?.message||String(e);
+       log('LOCANDINA VIAGGIO: '+posterWarning);
+     }
    }
 
-   // 3) Verifica diretta no-cache: il viaggio deve essere realmente leggibile da Supabase.
+   // Refresh completo senza cache delle tabelle viaggio collegate.
    dgGetCache.clear();
-   const verify=await api('viaggi',`select=*&id=eq.${tripId}&limit=1`,{noCache:true,timeout:15000});
-   if(!Array.isArray(verify)||!verify.length)throw new Error('Il viaggio è stato inviato ma non è rileggibile da Supabase. Riprova la sincronizzazione.');
+   try{
+     const [rows,stopRows]=await Promise.all([
+       api('viaggi','select=*&order=data_partenza.asc',{noCache:true,timeout:15000}),
+       api('viaggi_fermate','select=*&order=viaggio_id.asc,ordine.asc',{noCache:true,timeout:15000})
+     ]);
+     state.viaggi=Array.isArray(rows)?rows:state.viaggi;
+     state.viaggiFermate=Array.isArray(stopRows)?stopRows:state.viaggiFermate;
+   }catch(e){log('REFRESH VIAGGI: '+(e?.message||e))}
 
+   const finalVisible=(state.viaggi||[]).some(v=>v.id===tripId);
+   if(!finalVisible){
+     state.viaggi.push(confirmed);
+     state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));
+   }
+   try{renderTrips();renderDashboard();}catch{}
+   markSynced();setStatus('live');
    closeModal();
-   await loadAll(true);
-   const visible=state.viaggi.some(v=>v.id===tripId);
-   if(!visible){state.viaggi.push(verify[0]);state.viaggi.sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||'')));renderTrips()}
-   const warnings=[];
-   if(busConflict)warnings.push('mezzo non assegnato perché già occupato');
-   if(posterWarning)warnings.push('locandina non caricata');
-   const offlineNote=body.pubblicato==='NO'?' · salvato nel gestionale, NON visibile online':'';
-   toast((id?'Viaggio aggiornato e sincronizzato':'Viaggio creato e sincronizzato su Supabase')+offlineNote+(warnings.length?' · '+warnings.join(' · '):''),warnings.length===0);
-   if(busConflict)log('VIAGGIO SALVATO SENZA BUS: '+busConflictMsg);
-   if(posterWarning)log(posterWarning.trim());
+   const offlineNote=pub==='NO'?' · salvato nel gestionale, non pubblicato online':'';
+   if(posterWarning)toast((id?'Viaggio aggiornato':'Viaggio creato')+offlineNote+' · locandina non caricata: '+posterWarning,false);
+   else toast((id?'Viaggio aggiornato':'Viaggio creato')+' e sincronizzato su Supabase'+offlineNote,true);
+   log(`VIAGGIO OK: ${tripId} · ${title} · ${date} · pubblicato ${pub}`);
+   return true;
  }catch(e){
    const msg=e?.message||String(e);
-   if($('tripSaveStatus')){$('tripSaveStatus').textContent='Errore: '+msg;$('tripSaveStatus').className='statusline full off'}
-   toast('Viaggio non salvato: '+msg,false);log('VIAGGIO: '+msg);
+   fail('Viaggio non salvato: '+msg);
+   console.error('DELGROSSO saveTrip error',e);
+   return false;
  }finally{
-   window.__dgTripSaving=false;
+   window.__dgTripSaving=false;window.__dgTripSavingAt=0;
    if(btn){btn.disabled=false;btn.textContent='Salva viaggio'}
  }
 }
+window.saveTrip=saveTrip;
+
 async function syncTripsNow(){
  try{
    const before=state.viaggi.length;
@@ -4140,6 +4192,7 @@ const prevLoad=window.loadAll;if(typeof prevLoad==='function'){window.loadAll=as
 setTimeout(()=>{const s=F('controlTripSelect');if(s&&!s.dataset.boardingBound){s.dataset.boardingBound='1';s.addEventListener('change',()=>setTimeout(finalControlRoomSeparation,0))}},150);
 setTimeout(()=>{if(state?.page==='dashboard')finalDashboardSeparation();if(state?.page==='controlroom')finalControlRoomSeparation()},180);
 console.info('DELGROSSO MASTER · Dashboard/Control Room separate + Passeggeri per fermata');
+console.info('DELGROSSO BUILD TRIP-R15 · salvataggio viaggi hardening');
 })();
 </script>
 
