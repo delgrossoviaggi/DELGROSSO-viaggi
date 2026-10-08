@@ -986,7 +986,7 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-viaggi">
-  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-secondary" onclick="openDuplicateTripPicker()">📄 Duplica viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
+  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-purple" onclick="openBisTripPicker()">🚍 Apri BIS</button><button type="button" class="btn btn-secondary" onclick="openDuplicateTripPicker()">📄 Duplica viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
   <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Viaggio</th><th>Partenza</th><th>Posti</th><th>Prezzo</th><th>Stato</th><th></th></tr></thead><tbody id="tripsTable"></tbody></table></div>
 </section>
@@ -1585,13 +1585,20 @@ function renderTrips(){
    const lastFive=!sold&&remaining<=5;
    const rowStyle=lastFive?'background:rgba(245,158,11,.08)':'';
    const availability=remaining===0?'<br><small style="font-weight:800;color:#dc2626">Nessun posto libero</small>':lastFive?`<br><small style="font-weight:800;color:#d97706">⚠ Ultimi ${remaining} posti</small>`:`<br><small>${remaining} liberi</small>`;
+   const isBis=!!v.bis_parent_id||Number(v.bis_numero||1)>1;
+   const children=(state.viaggi||[]).filter(x=>x.bis_parent_id===v.id);
+   const hasBis=!isBis&&children.length>0;
+   const busNo=Number(v.bis_numero||1);
+   const bisBadge=isBis?` <span class="pill info">🚍 BUS ${busNo} · BIS</span>`:hasBis?` <span class="pill ok">🚍 BUS 1 · +${children.length} BIS</span>`:'';
+   const groupFree=hasBis?children.reduce((n,x)=>n+Math.max(0,Number(x.posti_liberi||0)),Math.max(0,remaining)):null;
+   const groupInfo=hasBis?`<br><small style="font-weight:800;color:#2563eb">Disponibilità gruppo: ${groupFree} posti su ${children.length+1} bus</small>`:'';
    const status=`<span class="pill ${sold?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(sold?'SOLD OUT':(v.stato||'Programmato'))}</span> <span class="pill ${online?'ok':'wait'}">${online?'Online':'Offline'}</span>`;
-   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
+   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> <button class="btn btn-purple btn-sm" onclick="openBisModal('${v.id}')">🚍 Apri BIS</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
    if(lastFive&&online)actions+=`<button class="btn btn-danger btn-sm" onclick="setTripOnlineState('${v.id}','SOLD_OUT')">🔴 SOLD OUT</button> `;
    if(sold)actions+=`<button class="btn btn-secondary btn-sm" onclick="setTripOnlineState('${v.id}','REOPEN')">🟢 Riapri vendite</button> `;
    if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
    else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
-   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b><br><small>${esc(v.id_viaggio||v.destinazione)}</small></td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:410px">${actions}</td></tr>`;
+   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b>${bisBadge}<br><small>${esc(v.id_viaggio||v.destinazione)}</small>${groupInfo}</td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:500px">${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
 }
 function renderBookings(){
@@ -2149,7 +2156,7 @@ function openTripModal(id=''){const v=state.viaggi.find(x=>x.id===id)||{};const 
 <div class="field"><label>Posti totali</label><input id="f_seats" type="number" value="${v.posti_totali??63}"></div><div class="field"><label>Autobus</label><select id="f_bus"><option value="">Seleziona</option>${state.flotta.map(f=>`<option value="${f.id}" ${v.autobus_id===f.id?'selected':''}>${esc(f.titolo||f.marca+' '+f.modello)} · ${f.posti||0}</option>`).join('')}</select></div>
 <div class="field"><label>Stato</label><select id="f_status">${['Programmato','Confermato','SOLD OUT','Annullato'].map(s=>`<option ${v.stato===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>Pubblicato</label><select id="f_pub"><option ${v.pubblicato==='SI'?'selected':''}>SI</option><option ${v.pubblicato!=='SI'?'selected':''}>NO</option></select></div>
 <div class="field full"><label>Descrizione</label><textarea id="f_desc" rows="3">${esc(v.descrizione||'')}</textarea></div>
-<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">BUILD TRIP-R17 · Radar Prenotati LIVE · Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}});const sb=$('tripSaveBtn');if(sb){sb.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.saveTrip(id)}}}
+<div class="field full"><label>📸 Locandina viaggio</label><input id="f_locandina" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP. Da iPhone puoi scegliere direttamente dalla libreria Foto.</small><div id="f_locandina_preview" style="margin-top:10px">${v.locandina?`<img src="${esc(v.locandina)}" alt="Locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><label style="display:inline-flex;gap:8px;align-items:center;margin-top:8px"><input id="f_remove_locandina" type="checkbox"> Rimuovi locandina attuale</label>`:'<small>Nessuna locandina caricata.</small>'}</div></div><div id="tripSaveStatus" class="statusline full" style="margin-top:4px">BUILD TRIP-R18 · BIS / Secondo Bus · Radar LIVE · Pronto al salvataggio su Supabase.</div></div>`, `<button type="button" class="btn btn-secondary" onclick="closeModal()">Annulla</button><button type="button" id="tripSaveBtn" class="btn btn-primary">Salva viaggio</button>`);const fi=$('f_locandina');if(fi)fi.addEventListener('change',()=>{const f=fi.files?.[0];if(f){const u=URL.createObjectURL(f);$('f_locandina_preview').innerHTML=`<img src="${u}" alt="Anteprima locandina" style="max-width:220px;max-height:300px;border-radius:14px;object-fit:cover"><br><small>${esc(f.name)}</small>`}});const sb=$('tripSaveBtn');if(sb){sb.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();window.saveTrip(id)}}}
 async function uploadTripPoster(file,tripId){if(!file)return null;if(!/^image\/(jpeg|png|webp)$/i.test(file.type))throw new Error('La locandina deve essere JPG, PNG o WEBP.');if(file.size>12*1024*1024)throw new Error('La locandina supera 12 MB. Riduci la dimensione e riprova.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`viaggi/${tripId}/${Date.now()}.${ext}`;const r=await fetch(`${SUPA_URL}/storage/v1/object/locandine/${path}`,{method:'POST',headers:{...accessHeaders(),'Content-Type':file.type,'x-upsert':'true'},body:file});if(!r.ok){let m='';try{m=(await r.json())?.message||''}catch{}throw new Error(m||'Caricamento locandina non riuscito.')}return `${SUPA_URL}/storage/v1/object/public/locandine/${path}`}
 async function saveTrip(id){
  const status=(msg,kind='warn')=>{const el=$('tripSaveStatus');if(el){el.textContent=msg;el.className='statusline full '+kind}}
@@ -4660,6 +4667,71 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
   const prevStart=startAutoSync;startAutoSync=function(){const r=prevStart.apply(this,arguments);setTimeout(()=>dgRadarRealtimeStart(),250);return r};window.startAutoSync=startAutoSync;
   const prevStop=stopAutoSync;stopAutoSync=function(){dgRadarRealtimeStop();return prevStop.apply(this,arguments)};window.stopAutoSync=stopAutoSync;
   if(authSession)setTimeout(()=>dgRadarRealtimeStart(),250);
+})();
+</script>
+
+<script id="dg-bis-r18">
+(()=>{
+  const el=id=>document.getElementById(id);
+  const norm=s=>String(s??'').trim();
+  function rootTrip(v){if(!v)return null;return (state.viaggi||[]).find(x=>x.id===(v.bis_parent_id||v.id))||v}
+  function groupFor(v){const r=rootTrip(v);if(!r)return[];return (state.viaggi||[]).filter(x=>x.id===r.id||x.bis_parent_id===r.id).sort((a,b)=>Number(a.bis_numero||1)-Number(b.bis_numero||1))}
+  function activeRentalOn(busId,date){return (state.noleggi||[]).some(n=>n.flotta_id===busId&&Number(n.acconto||0)>0&&!/annull|complet/i.test(String(n.stato_noleggio||''))&&String(n.data_partenza||'')<=date&&String(n.data_ritorno||n.data_partenza||'')>=date)}
+  function busIssue(bus,trip){
+    if(!bus)return 'Bus non valido';
+    if(/fuori|manut|blocc|indispon/i.test(String(bus.stato||'')))return 'Mezzo non disponibile: '+String(bus.stato||'');
+    const r=rootTrip(trip),date=r?.data_partenza||trip?.data_partenza||'';
+    const other=(state.viaggi||[]).find(v=>v.autobus_id===bus.id&&v.data_partenza===date&&!/annull|cancel/i.test(String(v.stato||'')));
+    if(other)return 'Già assegnato a '+(other.titolo||other.destinazione||'un altro viaggio');
+    if(activeRentalOn(bus.id,date))return 'Già impegnato in un noleggio confermato';
+    return '';
+  }
+  function availableBusOptions(trip){
+    return (state.flotta||[]).filter(b=>b.attivo!==false).slice().sort((a,b)=>Number(b.posti||0)-Number(a.posti||0)).map(b=>{
+      const issue=busIssue(b,trip), disabled=issue?'disabled':'';
+      return `<option value="${b.id}" ${disabled}>${esc(b.titolo||`${b.marca||''} ${b.modello||''}`.trim())} · ${Number(b.posti||0)} posti${issue?' · '+esc(issue):''}</option>`;
+    }).join('');
+  }
+  function tripOptions(){
+    const roots=(state.viaggi||[]).filter(v=>!v.bis_parent_id&&!/annull|cancel/i.test(String(v.stato||''))).slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))||String(a.titolo||'').localeCompare(String(b.titolo||'')));
+    return roots.map(v=>{const g=groupFor(v),free=g.reduce((n,x)=>n+Math.max(0,Number(x.posti_liberi||0)),0);return `<option value="${v.id}">${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${g.length} bus · ${free} posti liberi gruppo</option>`}).join('');
+  }
+  window.openBisTripPicker=function(){
+    const opts=tripOptions();
+    openModal('🚍 Apri BIS / Secondo Bus',`<div class="statusline live"><b>Nuovi posti sulla stessa data</b><br>Il BIS copia prezzo, locandina, fermate, orari e programma. Prenotazioni, pagamenti, posti e check-in restano separati.</div><div class="field" style="margin-top:12px"><label>Viaggio *</label><select id="bis_picker"><option value="">— Seleziona viaggio —</option>${opts}</select></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-purple" onclick="openBisFromPicker()">🚍 Continua</button>`)
+  };
+  window.openBisFromPicker=function(){const id=el('bis_picker')?.value||'';if(!id)return toast('Seleziona il viaggio.',false);openBisModal(id)};
+  window.openBisModal=function(id){
+    const v=(state.viaggi||[]).find(x=>x.id===id),r=rootTrip(v);if(!r)return toast('Viaggio non trovato.',false);
+    const g=groupFor(r),next=Math.max(...g.map(x=>Number(x.bis_numero||1)),1)+1;
+    const opts=availableBusOptions(r);
+    const runs=g.map(x=>`<div class="list-row"><div class="row-main"><strong>🚍 BUS ${Number(x.bis_numero||1)} · ${esc(x.autobus||'DA ASSEGNARE')}</strong><small>${Number(x.posti_occupati||0)}/${Number(x.posti_totali||0)} occupati · ${Number(x.posti_liberi||0)} liberi · ${String(x.pubblicato||'')==='SI'?'ONLINE':'OFFLINE'}</small></div></div>`).join('');
+    openModal(`🚍 Apri BIS · BUS ${next}`,`<div class="statusline live"><b>${esc(r.titolo||r.destinazione||'Viaggio')}</b><br>${dateIT(r.data_partenza)} · stesso prezzo ${money(r.prezzo)} · stessa locandina e fermate.</div><div style="margin-top:10px">${runs}</div><div class="form-grid" style="margin-top:12px"><div class="field full"><label>Nuovo autobus *</label><select id="bis_bus" onchange="previewBis('${r.id}')"><option value="">— Seleziona bus libero —</option>${opts}</select><small>Il gestionale esclude i mezzi già occupati, fuori servizio o impegnati in noleggi noti.</small></div><div class="field full"><label style="display:flex;gap:8px;align-items:center"><input id="bis_publish" type="checkbox" checked onchange="previewBis('${r.id}')" style="width:auto"> Pubblica subito sul sito</label><small>Se il Bus 1 è già pieno, verrà nascosto automaticamente dal sito e resterà online il BIS disponibile.</small></div></div><div id="bis_preview" class="statusline">Seleziona il nuovo bus.</div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-purple" id="bis_confirm" onclick="executeOpenBis('${r.id}')" disabled>🚍 Apri BIS</button>`);
+  };
+  window.previewBis=function(rootId){
+    const r=(state.viaggi||[]).find(x=>x.id===rootId),busId=el('bis_bus')?.value||'',out=el('bis_preview'),btn=el('bis_confirm');if(!out||!btn)return;
+    if(!busId){out.className='statusline';out.textContent='Seleziona il nuovo bus.';btn.disabled=true;return}
+    const b=(state.flotta||[]).find(x=>x.id===busId),issue=busIssue(b,r);if(issue){out.className='statusline off';out.textContent='Bus non disponibile: '+issue;btn.disabled=true;return}
+    const pub=!!el('bis_publish')?.checked;
+    out.className='statusline live';out.innerHTML=`✅ Verrà creato un nuovo bus da <b>${Number(b?.posti||0)} posti</b> sulla stessa data ${dateIT(r?.data_partenza)}.${pub?' Sarà pubblicato subito sul sito.':' Resterà offline finché non lo pubblicherai.'}`;btn.disabled=false;
+  };
+  window.executeOpenBis=async function(rootId){
+    const busId=el('bis_bus')?.value||'',pub=!!el('bis_publish')?.checked,btn=el('bis_confirm'),out=el('bis_preview');if(!busId)return toast('Seleziona il bus.',false);
+    if(btn){btn.disabled=true;btn.textContent='Apertura BIS…'}if(out){out.className='statusline warn';out.textContent='Creazione secondo autobus e sincronizzazione Supabase…'}
+    try{
+      const raw=await rpc('dg_open_trip_bis_v1',{p_source_trip_id:rootId,p_bus_id:busId,p_publish:pub},20000),r=Array.isArray(raw)?raw[0]:raw;
+      if(!r?.success||!r?.trip_id)throw new Error('Supabase non ha restituito il nuovo BIS.');
+      dgGetCache.clear();
+      const [trips,stops]=await Promise.all([api('viaggi','select=*&order=data_partenza.asc',{noCache:true,timeout:15000}),api('viaggi_fermate','select=*&order=viaggio_id.asc,ordine.asc',{noCache:true,timeout:15000})]);
+      if(Array.isArray(trips))state.viaggi=trips;if(Array.isArray(stops))state.viaggiFermate=stops;
+      try{renderTrips();renderDashboard();}catch{}
+      closeModal();markSynced();setStatus('live');
+      if(r.bus_conflict)toast(`BIS creato ma bus non disponibile: ${r.bus_conflict_reason||'mezzo da assegnare'}. Il BIS è rimasto offline.`,false);
+      else toast(`BIS aperto: BUS ${r.bis_numero} · ${r.capacity} nuovi posti${r.published==='SI'?' online':''}.`,true);
+      log(`APRI BIS OK: ${rootId} -> ${r.trip_id} · BUS ${r.bis_numero}`);
+    }catch(e){const msg=e?.message||String(e);if(out){out.className='statusline off';out.textContent='Errore: '+msg}toast('Apertura BIS non riuscita: '+msg,false);log('APRI BIS: '+msg)}
+    finally{if(btn){btn.disabled=false;btn.textContent='🚍 Apri BIS'}}
+  };
 })();
 </script>
 </body>
