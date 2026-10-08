@@ -1593,7 +1593,9 @@ function renderTrips(){
    const groupFree=hasBis?children.reduce((n,x)=>n+Math.max(0,Number(x.posti_liberi||0)),Math.max(0,remaining)):null;
    const groupInfo=hasBis?`<br><small style="font-weight:800;color:#2563eb">Disponibilità gruppo: ${groupFree} posti su ${children.length+1} bus</small>`:'';
    const status=`<span class="pill ${sold?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(sold?'SOLD OUT':(v.stato||'Programmato'))}</span> <span class="pill ${online?'ok':'wait'}">${online?'Online':'Offline'}</span>`;
-   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> <button class="btn btn-purple btn-sm" onclick="openBisModal('${v.id}')">🚍 Apri BIS</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
+   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> `;
+   if(isBis)actions+=`<button class="btn btn-purple btn-sm" onclick="openEditBisModal('${v.id}')">✏️ Modifica BIS</button> `;
+   actions+=`<button class="btn btn-purple btn-sm" onclick="openBisModal('${v.id}')">${isBis?'🚍 Altro BIS':'🚍 Apri BIS'}</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
    if(lastFive&&online)actions+=`<button class="btn btn-danger btn-sm" onclick="setTripOnlineState('${v.id}','SOLD_OUT')">🔴 SOLD OUT</button> `;
    if(sold)actions+=`<button class="btn btn-secondary btn-sm" onclick="setTripOnlineState('${v.id}','REOPEN')">🟢 Riapri vendite</button> `;
    if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
@@ -4670,7 +4672,7 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
 })();
 </script>
 
-<script id="dg-bis-r18">
+<script id="dg-bis-r19">
 (()=>{
   const el=id=>document.getElementById(id);
   const norm=s=>String(s??'').trim();
@@ -4731,6 +4733,56 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
       log(`APRI BIS OK: ${rootId} -> ${r.trip_id} · BUS ${r.bis_numero}`);
     }catch(e){const msg=e?.message||String(e);if(out){out.className='statusline off';out.textContent='Errore: '+msg}toast('Apertura BIS non riuscita: '+msg,false);log('APRI BIS: '+msg)}
     finally{if(btn){btn.disabled=false;btn.textContent='🚍 Apri BIS'}}
+  };
+
+  function editBisBusIssue(bus,bis){
+    if(!bus)return 'Bus non valido';
+    const r=rootTrip(bis),date=r?.data_partenza||bis?.data_partenza||'';
+    const occupied=Math.max(0,Number(bis?.posti_occupati||0));
+    if(bus.id===bis.autobus_id)return '';
+    if(/fuori|manut|blocc|indispon/i.test(String(bus.stato||'')))return 'Mezzo non disponibile: '+String(bus.stato||'');
+    if(Number(bus.posti||0)<occupied)return `Capienza insufficiente: ${occupied} passeggeri già assegnati, ma il bus ha ${Number(bus.posti||0)} posti`;
+    const other=(state.viaggi||[]).find(v=>v.id!==bis.id&&v.autobus_id===bus.id&&v.data_partenza===date&&!/annull|cancel/i.test(String(v.stato||'')));
+    if(other)return 'Già assegnato a '+(other.titolo||other.destinazione||'un altro viaggio');
+    if(activeRentalOn(bus.id,date))return 'Già impegnato in un noleggio confermato';
+    return '';
+  }
+  function editBisBusOptions(bis){
+    return (state.flotta||[]).filter(b=>b.attivo!==false).slice().sort((a,b)=>Number(b.posti||0)-Number(a.posti||0)).map(b=>{
+      const issue=editBisBusIssue(b,bis),selected=b.id===bis.autobus_id?'selected':'',disabled=issue&&b.id!==bis.autobus_id?'disabled':'';
+      return `<option value="${b.id}" ${selected} ${disabled}>${esc(b.titolo||`${b.marca||''} ${b.modello||''}`.trim())} · ${Number(b.posti||0)} posti${issue&&b.id!==bis.autobus_id?' · '+esc(issue):b.id===bis.autobus_id?' · attuale':''}</option>`;
+    }).join('');
+  }
+  window.openEditBisModal=function(id){
+    const bis=(state.viaggi||[]).find(x=>x.id===id);
+    if(!bis||!bis.bis_parent_id||Number(bis.bis_numero||1)<=1)return toast('Seleziona una corsa BIS.',false);
+    const r=rootTrip(bis),opts=editBisBusOptions(bis),online=String(bis.pubblicato||'').toUpperCase()==='SI';
+    openModal(`✏️ Modifica BIS · BUS ${Number(bis.bis_numero||2)}`,`<div class="statusline live"><b>${esc(r?.titolo||r?.destinazione||'Viaggio')}</b><br>${dateIT(r?.data_partenza)} · BUS ${Number(bis.bis_numero||2)} · ${Number(bis.posti_occupati||0)} passeggeri già assegnati.</div><div class="form-grid" style="margin-top:12px"><div class="field full"><label>Autobus BIS *</label><select id="edit_bis_bus" onchange="previewEditBis('${bis.id}')">${opts}</select><small>Puoi cambiare mezzo senza perdere prenotati, posti, pagamenti o fermate. La data resta quella del viaggio principale.</small></div><div class="field full"><label style="display:flex;gap:8px;align-items:center"><input id="edit_bis_publish" type="checkbox" ${online?'checked':''} onchange="previewEditBis('${bis.id}')" style="width:auto"> BIS visibile e prenotabile sul sito</label></div></div><div id="edit_bis_preview" class="statusline"></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-purple" id="edit_bis_confirm" onclick="executeEditBis('${bis.id}')">💾 Salva BIS</button>`);
+    previewEditBis(bis.id);
+  };
+  window.previewEditBis=function(id){
+    const bis=(state.viaggi||[]).find(x=>x.id===id),busId=el('edit_bis_bus')?.value||'',out=el('edit_bis_preview'),btn=el('edit_bis_confirm');if(!bis||!out||!btn)return;
+    const b=(state.flotta||[]).find(x=>x.id===busId),issue=editBisBusIssue(b,bis),pub=!!el('edit_bis_publish')?.checked;
+    if(issue){out.className='statusline off';out.textContent='Modifica non consentita: '+issue;btn.disabled=true;return}
+    const occupied=Math.max(0,Number(bis.posti_occupati||0)),capacity=Math.max(0,Number(b?.posti||0)),free=Math.max(0,capacity-occupied);
+    out.className='statusline live';out.innerHTML=`✅ BUS ${Number(bis.bis_numero||2)}: <b>${esc(b?.titolo||b?.modello||'Bus')}</b> · ${capacity} posti · ${occupied} occupati · ${free} liberi. ${pub?'Resterà online sul sito.':'Verrà tenuto offline.'}`;btn.disabled=false;
+  };
+  window.executeEditBis=async function(id){
+    const busId=el('edit_bis_bus')?.value||'',pub=!!el('edit_bis_publish')?.checked,btn=el('edit_bis_confirm'),out=el('edit_bis_preview');
+    if(!busId)return toast('Seleziona il bus.',false);
+    if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}if(out){out.className='statusline warn';out.textContent='Aggiornamento BIS e sincronizzazione Supabase…'}
+    try{
+      const raw=await rpc('dg_update_trip_bis_v1',{p_bis_trip_id:id,p_bus_id:busId,p_publish:pub},20000),r=Array.isArray(raw)?raw[0]:raw;
+      if(!r?.success)throw new Error('Supabase non ha confermato la modifica del BIS.');
+      dgGetCache.clear();
+      const trips=await api('viaggi','select=*&order=data_partenza.asc',{noCache:true,timeout:15000});
+      if(Array.isArray(trips))state.viaggi=trips;
+      try{renderTrips();renderDashboard();}catch{}
+      closeModal();markSynced();setStatus('live');
+      toast(`BIS aggiornato: BUS ${r.bis_numero} · ${r.bus} · ${r.free} posti liberi · ${r.published==='SI'?'ONLINE':'OFFLINE'}.`,true);
+      log(`MODIFICA BIS OK: ${id} · ${r.bus} · ${r.published}`);
+    }catch(e){const msg=e?.message||String(e);if(out){out.className='statusline off';out.textContent='Errore: '+msg}toast('Modifica BIS non riuscita: '+msg,false);log('MODIFICA BIS: '+msg)}
+    finally{if(btn){btn.disabled=false;btn.textContent='💾 Salva BIS'}}
   };
 })();
 </script>
