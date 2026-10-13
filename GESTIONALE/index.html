@@ -870,6 +870,11 @@ input,select,textarea,button{max-width:100%;font:inherit}
 const dgSessionStorage=window.dgSessionStorage;
 const dgLocalStorage=window.dgLocalStorage;
 </script>
+
+<style id="dg-closure360-css">
+.btn-dark{background:#102b44!important;color:#fff!important;border-color:#102b44!important}.btn-dark:hover{filter:brightness(1.08)}
+.dg-close360-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.dg-close360-metric{border:1px solid #dbe7f2;border-radius:14px;background:#f8fbff;padding:11px}.dg-close360-metric small{display:block;color:#647b91;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.dg-close360-metric b{display:block;color:#102b44;font-size:20px;margin-top:4px}.dg-close360-warning,.dg-close360-blocker{border-radius:12px;padding:10px 12px;margin:7px 0;font-size:12px;line-height:1.45}.dg-close360-warning{background:#fff7e6;border:1px solid #f6cf82;color:#8a4b00}.dg-close360-blocker{background:#fff0f0;border:1px solid #f1a2a2;color:#9e2323}.dg-close360-ok{background:#eaf8ef;border:1px solid #9ed5b1;color:#146b37;border-radius:12px;padding:10px 12px;margin:8px 0}.dg-close360-history{display:grid;gap:7px;margin-top:12px}.dg-close360-history>div{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid #e6edf4;padding-top:7px;font-size:11px}.dg-close360-history small{color:#66788c}@media(max-width:780px){.dg-close360-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dg-close360-metric b{font-size:17px}}
+</style>
 </head>
 <body>
 <section id="login">
@@ -945,7 +950,7 @@ const dgLocalStorage=window.dgLocalStorage;
 </section>
 
 <section class="page" id="page-controlroom">
-  <div class="section-title"><div><h2>🎛️ Control Room Operativa</h2><p class="section-subtitle">Operatività del giorno: partenze, fermate, passeggeri, acconti, posti, check-in, mezzi e anomalie.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
+  <div class="section-title"><div><h2>🎛️ Control Room Operativa</h2><p class="section-subtitle">Operatività del giorno: partenze, fermate, passeggeri, acconti, posti, check-in, mezzi e anomalie.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-dark" onclick="openTripClosure360(document.getElementById('controlTripSelect')?.value||'')">🔒 Chiusura 360°</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
   <div class="optional-toolbar">
     <select id="controlTripSelect"></select>
     <button class="btn btn-primary" onclick="openTripDetail(document.getElementById('controlTripSelect').value)">Apri dossier viaggio</button>
@@ -987,7 +992,7 @@ const dgLocalStorage=window.dgLocalStorage;
 
 <section class="page" id="page-viaggi">
   <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-purple" onclick="openBisTripPicker()">🚍 Apri BIS</button><button type="button" class="btn btn-secondary" onclick="openDuplicateTripPicker()">📄 Duplica viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
-  <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
+  <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Chiuso</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Viaggio</th><th>Partenza</th><th>Posti</th><th>Prezzo</th><th>Stato</th><th></th></tr></thead><tbody id="tripsTable"></tbody></table></div>
 </section>
 
@@ -1198,6 +1203,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 
 <script>
 
+// BUILD R21 · CHIUSURA VIAGGIO 360° · 2026-10-13
 const SUPA_URL='https://chkuayhbmitdmzmmvona.supabase.co';
 const APP_LOCAL_FILE=(location.protocol==='file:');
 if(APP_LOCAL_FILE){
@@ -1213,7 +1219,7 @@ let currentOperator={username:'nicola',name:'Nicola',role:'Amministratore'};
 const state={
   page:'dashboard',online:false,
   viaggi:[],prenotazioni:[],clienti:[],pagamenti:[],flotta:[],notifiche:[],assistenteEventi:[],assistenteAcconti:[],
-  checkin:[],preventivi:[],impostazioni:[],viaggiFermate:[],operatori:[],fornitori:[],listaAttesa:[],crmAttivita:[],documentiGestionali:[],cassaTrasferimenti:[],alertOperativi:[],redditivitaViaggi:[],systemHealth:[],
+  checkin:[],preventivi:[],impostazioni:[],viaggiFermate:[],viaggiChiusure:[],operatori:[],fornitori:[],listaAttesa:[],crmAttivita:[],documentiGestionali:[],cassaTrasferimenti:[],alertOperativi:[],redditivitaViaggi:[],systemHealth:[],
   noleggi:[],noleggiMezzi:[],noleggiPagamenti:[],cassaOperatori:[],
   prenotazionePosti:[],attivita:[],scadenze:[],audit:[],economia:[],carburante:[],manutenzioni:[],archivioDocumenti:[],anomalie:[],checklist:[],syncErrors:[]
 };
@@ -1446,12 +1452,12 @@ async function loadAll(forceFresh=false){
     ['audit_log_gestionale','select=*&order=created_at.desc&limit=150'],['archivio_documenti','select=*&order=updated_at.desc'],
     ['economia_movimenti','select=*&order=data_movimento.desc,created_at.desc'],['carburante_flotta','select=*&order=data_rifornimento.desc,created_at.desc'],
     ['manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc'],['anomalie_gestionale','select=*&order=created_at.desc'],['checklist_mezzi','select=*&order=data_check.desc,created_at.desc'],['dg_blocchi_flotta','select=*'],
-    ['operatori_gestionale','select=*&order=nome.asc'],['fornitori','select=*&order=ragione_sociale.asc'],['lista_attesa','select=*&order=created_at.asc'],['crm_attivita','select=*&order=created_at.desc'],['documenti_gestionali','select=*&order=created_at.desc'],['cassa_trasferimenti','select=*&order=created_at.desc'],['dg_alert_operativi','select=*&order=data_evento.asc'],['dg_viaggi_redditivita','select=*&order=data_partenza.desc'],['dg_system_health','select=*']
+    ['operatori_gestionale','select=*&order=nome.asc'],['fornitori','select=*&order=ragione_sociale.asc'],['lista_attesa','select=*&order=created_at.asc'],['crm_attivita','select=*&order=created_at.desc'],['documenti_gestionali','select=*&order=created_at.desc'],['cassa_trasferimenti','select=*&order=created_at.desc'],['dg_alert_operativi','select=*&order=data_evento.asc'],['dg_viaggi_redditivita','select=*&order=data_partenza.desc'],['dg_viaggi_chiusure','select=*&order=chiusa_at.desc'],['dg_system_health','select=*']
   ];
   const results=await Promise.allSettled(specs.map(x=>api(x[0],x[1])));
   const data={}, failed=[];
   results.forEach((r,i)=>{const name=specs[i][0]; if(r.status==='fulfilled') data[name]=r.value||[]; else {data[name]=state[name]||[]; failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}});
-  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],operatori:data.operatori_gestionale||[],fornitori:data.fornitori||[],listaAttesa:data.lista_attesa||[],crmAttivita:data.crm_attivita||[],documentiGestionali:data.documenti_gestionali||[],cassaTrasferimenti:data.cassa_trasferimenti||[],alertOperativi:data.dg_alert_operativi||[],redditivitaViaggi:data.dg_viaggi_redditivita||[],systemHealth:data.dg_system_health||[],syncErrors:failed,online:failed.length<specs.length});
+  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],operatori:data.operatori_gestionale||[],fornitori:data.fornitori||[],listaAttesa:data.lista_attesa||[],crmAttivita:data.crm_attivita||[],documentiGestionali:data.documenti_gestionali||[],cassaTrasferimenti:data.cassa_trasferimenti||[],alertOperativi:data.dg_alert_operativi||[],redditivitaViaggi:data.dg_viaggi_redditivita||[],viaggiChiusure:data.dg_viaggi_chiusure||[],systemHealth:data.dg_system_health||[],syncErrors:failed,online:failed.length<specs.length});
   try{if(typeof dgApplyOperatorProfile==='function')dgApplyOperatorProfile();}catch{}
   if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<specs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
   if(failed.length===specs.length){if(dgRestoreSafeCache73())log('Modalità offline limitata: caricati solo viaggi/flotta/fermate non sensibili');else log('Cache sicura non disponibile: nessun dato personale salvato sul dispositivo')}
@@ -1577,32 +1583,95 @@ async function setTripOnlineState(id,action){
    await loadAll();
  }catch(e){toast('Operazione non riuscita: '+(e?.message||e),false);log('STATO ONLINE VIAGGIO: '+(e?.message||e))}
 }
+function dgTripClosureHistory(tripId){return (state.viaggiChiusure||[]).filter(c=>c.viaggio_id===tripId).slice().sort((a,b)=>Number(b.versione||0)-Number(a.versione||0))}
+function dgActiveTripClosure(tripId){return dgTripClosureHistory(tripId).find(c=>String(c.stato_chiusura||'').toUpperCase()==='CHIUSA')||null}
 function renderTrips(){
  const q=($('tripSearch')?.value||'').toLowerCase(), st=$('tripStatus')?.value||'';
  const rows=state.viaggi.filter(v=>(!q||JSON.stringify(v).toLowerCase().includes(q))&&(!st||v.stato===st));
  $('tripsTable').innerHTML=rows.map(v=>{
-   const remaining=dgTripRemaining(v), sold=Boolean(v.sold_out_manual)||String(v.stato||'').toUpperCase()==='SOLD OUT', online=String(v.pubblicato||'').toUpperCase()==='SI';
-   const lastFive=!sold&&remaining<=5;
-   const rowStyle=lastFive?'background:rgba(245,158,11,.08)':'';
-   const availability=remaining===0?'<br><small style="font-weight:800;color:#dc2626">Nessun posto libero</small>':lastFive?`<br><small style="font-weight:800;color:#d97706">⚠ Ultimi ${remaining} posti</small>`:`<br><small>${remaining} liberi</small>`;
+   const closure=dgActiveTripClosure(v.id), closed=!!closure;
+   const remaining=dgTripRemaining(v), sold=!closed&&(Boolean(v.sold_out_manual)||String(v.stato||'').toUpperCase()==='SOLD OUT'), online=String(v.pubblicato||'').toUpperCase()==='SI';
+   const lastFive=!sold&&!closed&&remaining<=5;
+   const rowStyle=closed?'background:rgba(71,85,105,.07)':lastFive?'background:rgba(245,158,11,.08)':'';
+   const availability=closed?'<br><small style="font-weight:800;color:#475569">🔒 Snapshot storico attivo</small>':remaining===0?'<br><small style="font-weight:800;color:#dc2626">Nessun posto libero</small>':lastFive?`<br><small style="font-weight:800;color:#d97706">⚠ Ultimi ${remaining} posti</small>`:`<br><small>${remaining} liberi</small>`;
    const isBis=!!v.bis_parent_id||Number(v.bis_numero||1)>1;
    const children=(state.viaggi||[]).filter(x=>x.bis_parent_id===v.id);
    const hasBis=!isBis&&children.length>0;
    const busNo=Number(v.bis_numero||1);
    const bisBadge=isBis?` <span class="pill info">🚍 BUS ${busNo} · BIS</span>`:hasBis?` <span class="pill ok">🚍 BUS 1 · +${children.length} BIS</span>`:'';
+   const closeBadge=closed?` <span class="pill wait">🔒 Chiuso 360° v${Number(closure.versione||1)}</span>`:'';
    const groupFree=hasBis?children.reduce((n,x)=>n+Math.max(0,Number(x.posti_liberi||0)),Math.max(0,remaining)):null;
    const groupInfo=hasBis?`<br><small style="font-weight:800;color:#2563eb">Disponibilità gruppo: ${groupFree} posti su ${children.length+1} bus</small>`:'';
-   const status=`<span class="pill ${sold?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(sold?'SOLD OUT':(v.stato||'Programmato'))}</span> <span class="pill ${online?'ok':'wait'}">${online?'Online':'Offline'}</span>`;
-   let actions=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> `;
-   if(isBis)actions+=`<button class="btn btn-purple btn-sm" onclick="openEditBisModal('${v.id}')">✏️ Modifica BIS</button> `;
-   actions+=`<button class="btn btn-purple btn-sm" onclick="openBisModal('${v.id}')">${isBis?'🚍 Altro BIS':'🚍 Apri BIS'}</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
-   if(lastFive&&online)actions+=`<button class="btn btn-danger btn-sm" onclick="setTripOnlineState('${v.id}','SOLD_OUT')">🔴 SOLD OUT</button> `;
-   if(sold)actions+=`<button class="btn btn-secondary btn-sm" onclick="setTripOnlineState('${v.id}','REOPEN')">🟢 Riapri vendite</button> `;
-   if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
-   else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
-   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b>${bisBadge}<br><small>${esc(v.id_viaggio||v.destinazione)}</small>${groupInfo}</td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:500px">${actions}</td></tr>`;
+   const status=closed?`<span class="pill wait">Chiuso</span> <span class="pill wait">Offline</span>`:`<span class="pill ${sold?'danger':v.stato==='Confermato'?'ok':'info'}">${esc(sold?'SOLD OUT':(v.stato||'Programmato'))}</span> <span class="pill ${online?'ok':'wait'}">${online?'Online':'Offline'}</span>`;
+   let actions='';
+   if(closed){
+     actions+=`<button class="btn btn-dark btn-sm" onclick="openTripClosure360('${v.id}')">🔒 Apri chiusura</button> `;
+     actions+=`<button class="btn btn-ghost btn-sm" onclick="printTripClosure360('${v.id}')">🖨️ Report finale</button> `;
+     actions+=`<button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button>`;
+   }else{
+     actions+=`<button class="btn btn-secondary btn-sm" onclick="openTripModal('${v.id}')">Modifica</button> `;
+     if(isBis)actions+=`<button class="btn btn-purple btn-sm" onclick="openEditBisModal('${v.id}')">✏️ Modifica BIS</button> `;
+     actions+=`<button class="btn btn-purple btn-sm" onclick="openBisModal('${v.id}')">${isBis?'🚍 Altro BIS':'🚍 Apri BIS'}</button> <button class="btn btn-ghost btn-sm" onclick="openDuplicateTripModal('${v.id}')">📄 Duplica</button> `;
+     actions+=`<button class="btn btn-dark btn-sm" onclick="openTripClosure360('${v.id}')">🔒 Chiusura 360°</button> `;
+     if(lastFive&&online)actions+=`<button class="btn btn-danger btn-sm" onclick="setTripOnlineState('${v.id}','SOLD_OUT')">🔴 SOLD OUT</button> `;
+     if(sold)actions+=`<button class="btn btn-secondary btn-sm" onclick="setTripOnlineState('${v.id}','REOPEN')">🟢 Riapri vendite</button> `;
+     if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
+     else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
+   }
+   return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b>${bisBadge}${closeBadge}<br><small>${esc(v.id_viaggio||v.destinazione)}</small>${groupInfo}</td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:560px">${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
 }
+// === DELGROSSO R21: CHIUSURA VIAGGIO 360° ===
+function dgClose360Num(v){const n=Number(v||0);return Number.isFinite(n)?n:0}
+function dgClose360SummaryGrid(x={}){return `<div class="dg-close360-grid">
+ <div class="dg-close360-metric"><small>Passeggeri clienti</small><b>${dgClose360Num(x.passeggeri_clienti)}</b></div>
+ <div class="dg-close360-metric"><small>Check-in presenti</small><b>${dgClose360Num(x.checkin_presenti)} / ${dgClose360Num(x.passeggeri_clienti)+dgClose360Num(x.posti_riservati_azienda)}</b></div>
+ <div class="dg-close360-metric"><small>Valore prenotazioni</small><b>${money(x.valore_prenotazioni)}</b></div>
+ <div class="dg-close360-metric"><small>Incassato</small><b>${money(x.incassato)}</b></div>
+ <div class="dg-close360-metric"><small>Residuo</small><b>${money(x.residuo)}</b></div>
+ <div class="dg-close360-metric"><small>Rimborsi</small><b>${money(x.rimborsi)}</b></div>
+ <div class="dg-close360-metric"><small>Costi</small><b>${money(x.costi_economia)}</b></div>
+ <div class="dg-close360-metric"><small>Margine</small><b>${money(x.margine)}</b></div>
+ <div class="dg-close360-metric"><small>Documenti</small><b>${dgClose360Num(x.documenti)}</b></div>
+ <div class="dg-close360-metric"><small>Riserva DELGROSSO</small><b>${dgClose360Num(x.posti_riservati_azienda)}</b></div>
+</div>`}
+function dgClose360HistoryHTML(tripId){const rows=dgTripClosureHistory(tripId);if(!rows.length)return '';return `<div class="dg-close360-history"><b>Storico chiusure</b>${rows.map(c=>`<div><span>v${Number(c.versione||1)} · ${esc(c.stato_chiusura||'')}</span><small>${c.chiusa_at?new Date(c.chiusa_at).toLocaleString('it-IT'):'—'} · ${esc(c.chiusa_da_nome||'Operatore')}</small></div>`).join('')}</div>`}
+function dgClose360IssuesHTML(blockers=[],warnings=[]){return `${(blockers||[]).map(x=>`<div class="dg-close360-blocker">⛔ ${esc(x)}</div>`).join('')}${(warnings||[]).map(x=>`<div class="dg-close360-warning">⚠️ ${esc(x)}</div>`).join('')}${!(blockers||[]).length&&!(warnings||[]).length?'<div class="dg-close360-ok">✅ Nessuna anomalia rilevata: il viaggio è pronto per la chiusura.</div>':''}`}
+async function openTripClosure360(tripId){
+ const v=(state.viaggi||[]).find(x=>x.id===tripId);if(!v)return toast('Seleziona un viaggio',false);
+ openModal('🔒 Chiusura Viaggio 360°',`<div class="statusline">Controllo completo di <b>${esc(v.titolo||v.destinazione||'Viaggio')}</b>…</div>`,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>`);
+ try{
+   const p=await rpc('dg_trip_closure_preview_v1',{p_trip_id:tripId});
+   const active=p?.active_closure||dgActiveTripClosure(tripId);
+   if(active){
+     const sum=active.snapshot?.summary||active;
+     $('modalBody').innerHTML=`<div class="statusline live"><b>🔒 VIAGGIO CHIUSO OPERATIVAMENTE</b><br>Snapshot v${Number(active.versione||1)} · ${active.chiusa_at?new Date(active.chiusa_at).toLocaleString('it-IT'):'—'} · ${esc(active.chiusa_da_nome||'Operatore')}</div>${dgClose360SummaryGrid(sum)}${dgClose360IssuesHTML([],active.anomalie||[])}${active.note?`<div class="statusline"><b>Note di chiusura</b><br>${esc(active.note)}</div>`:''}${dgClose360HistoryHTML(tripId)}`;
+     $('modalFoot').innerHTML=`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-ghost" onclick="printTripClosure360('${tripId}')">🖨️ Report finale</button><button class="btn btn-danger" onclick="openReopenTrip360('${tripId}')">🔓 Riapri viaggio</button>`;
+     return;
+   }
+   const sum=p?.summary||{};
+   const blockers=p?.blockers||[],warnings=p?.warnings||[];
+   $('modalBody').innerHTML=`<div class="statusline live"><b>${esc(v.titolo||v.destinazione||'Viaggio')}</b><br>${dateIT(v.data_partenza)} · ${esc(v.autobus||'Bus da assegnare')} · ${Number(v.posti_occupati||0)}/${Number(v.posti_totali||0)} posti</div>${dgClose360SummaryGrid(sum)}${dgClose360IssuesHTML(blockers,warnings)}<div class="field"><label>Note finali / annotazioni</label><textarea id="dg_close360_note" rows="3" placeholder="Esempio: viaggio concluso regolarmente, note operative, differenze da ricordare…"></textarea></div>${warnings.length?`<label class="radar-check" style="margin-top:10px"><input id="dg_close360_force" type="checkbox"> Confermo di aver verificato le anomalie e voglio chiudere comunque il viaggio</label>`:''}${dgClose360HistoryHTML(tripId)}`;
+   $('modalFoot').innerHTML=`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-ghost" onclick="printTripClosure360('${tripId}')">🖨️ Anteprima report</button><button class="btn btn-dark" id="dgClose360Confirm" ${p?.can_close?'':'disabled'} onclick="executeTripClosure360('${tripId}')">🔒 Chiudi definitivamente</button>`;
+ }catch(e){$('modalBody').innerHTML=`<div class="dg-close360-blocker"><b>Controllo non riuscito</b><br>${esc(e?.message||e)}</div>`;toast('Chiusura 360°: '+(e?.message||e),false)}
+}
+window.openTripClosure360=openTripClosure360;
+async function executeTripClosure360(tripId){
+ const force=Boolean($('dg_close360_force')?.checked),note=$('dg_close360_note')?.value||'',btn=$('dgClose360Confirm');
+ if($('dg_close360_force')&&!force)return toast('Conferma di aver verificato le anomalie prima di chiudere.',false);
+ if(!confirm('Confermi la CHIUSURA OPERATIVA del viaggio? Verrà creato uno snapshot storico e il viaggio sarà tolto dal sito.'))return;
+ if(btn){btn.disabled=true;btn.textContent='Chiusura…'}
+ try{const r=await rpc('dg_close_trip_v1',{p_trip_id:tripId,p_note:note,p_force:force});toast(`Viaggio chiuso · snapshot v${r?.versione||1}`);closeModal();await loadAll(true);setTimeout(()=>openTripClosure360(tripId),80)}catch(e){toast('Chiusura non riuscita: '+(e?.message||e),false);if(btn){btn.disabled=false;btn.textContent='🔒 Chiudi definitivamente'}}
+}
+window.executeTripClosure360=executeTripClosure360;
+function openReopenTrip360(tripId){const c=dgActiveTripClosure(tripId);if(!c)return toast('Nessuna chiusura attiva.',false);openModal('🔓 Riapertura controllata',`<div class="dg-close360-warning"><b>Attenzione</b><br>La riapertura rende nuovamente modificabile il ciclo operativo del viaggio e ripristina stato/visibilità precedenti.</div><div class="field"><label>Motivo obbligatorio</label><textarea id="dg_reopen360_reason" rows="4" placeholder="Perché stai riaprendo questo viaggio?"></textarea></div>`,`<button class="btn btn-secondary" onclick="openTripClosure360('${tripId}')">Indietro</button><button class="btn btn-danger" onclick="executeReopenTrip360('${tripId}')">🔓 Riapri viaggio</button>`)}
+window.openReopenTrip360=openReopenTrip360;
+async function executeReopenTrip360(tripId){const reason=$('dg_reopen360_reason')?.value.trim()||'';if(reason.length<4)return toast('Inserisci il motivo della riapertura.',false);if(!confirm('Confermi la riapertura controllata del viaggio?'))return;try{await rpc('dg_reopen_trip_v1',{p_trip_id:tripId,p_reason:reason});toast('Viaggio riaperto correttamente');closeModal();await loadAll(true)}catch(e){toast('Riapertura non riuscita: '+(e?.message||e),false)}}
+window.executeReopenTrip360=executeReopenTrip360;
+function dgClosureReportHTML(v,snapshot,closure){const sum=snapshot?.summary||{},bookings=snapshot?.bookings||[],economy=snapshot?.economy||[],stops=snapshot?.stops||[],warnings=closure?.anomalie||[];return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chiusura 360° ${esc(v?.titolo||'Viaggio')}</title><style>body{font-family:Arial,sans-serif;color:#142235;padding:24px;line-height:1.4}h1{font-size:22px;margin:0}h2{font-size:15px;margin-top:24px;border-bottom:2px solid #16324f;padding-bottom:5px}.meta{color:#63768a;margin:5px 0 18px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.k{border:1px solid #dbe5ee;border-radius:9px;padding:9px}.k small{display:block;color:#63768a;font-size:9px;text-transform:uppercase}.k b{font-size:16px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{padding:6px;border-bottom:1px solid #dfe6ed;text-align:left}.warn{background:#fff6e5;border:1px solid #e9c77e;padding:8px;border-radius:8px;margin:5px 0}@media(max-width:700px){body{padding:10px}.grid{grid-template-columns:repeat(2,1fr)}}@media print{button{display:none}}</style></head><body><h1>DELGROSSO VIAGGI · CHIUSURA VIAGGIO 360°</h1><div class="meta"><b>${esc(v?.titolo||snapshot?.trip?.titolo||'Viaggio')}</b><br>${dateIT(v?.data_partenza||snapshot?.trip?.data_partenza)} · ${esc(snapshot?.trip?.autobus||v?.autobus||'')}</div><div class="grid"><div class="k"><small>Passeggeri</small><b>${dgClose360Num(sum.passeggeri_clienti)}</b></div><div class="k"><small>Check-in</small><b>${dgClose360Num(sum.checkin_presenti)}</b></div><div class="k"><small>Incassato</small><b>${money(sum.incassato)}</b></div><div class="k"><small>Residuo</small><b>${money(sum.residuo)}</b></div><div class="k"><small>Rimborsi</small><b>${money(sum.rimborsi)}</b></div><div class="k"><small>Costi</small><b>${money(sum.costi_economia)}</b></div><div class="k"><small>Margine</small><b>${money(sum.margine)}</b></div><div class="k"><small>Documenti</small><b>${dgClose360Num(sum.documenti)}</b></div></div>${warnings.length?`<h2>Anomalie annotate</h2>${warnings.map(x=>`<div class="warn">${esc(x)}</div>`).join('')}`:''}<h2>Fermate</h2><p>${stops.length?stops.map(x=>`${esc(x.nome)}${x.orario?' · '+esc(String(x.orario).slice(0,5)):''}${x.punto_incontro?' · '+esc(x.punto_incontro):''}`).join('<br>'):'—'}</p><h2>Manifest finale</h2><table><thead><tr><th>Cliente</th><th>Tel.</th><th>Pax</th><th>Fermata</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Saldo</th><th>Check-in</th></tr></thead><tbody>${bookings.map(b=>`<tr><td>${esc(b.cliente||'')}</td><td>${esc(b.telefono||'')}</td><td>${dgClose360Num(b.posti)}</td><td>${esc(b.fermata_partenza||'')}</td><td>${esc(b.posti_selezionati||'')}</td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td>${b.checkin_effettuato||String(b.checkin_stato||'').toUpperCase()==='PRESENTE'?'PRESENTE':'—'}</td></tr>`).join('')}</tbody></table><h2>Movimenti economici</h2><table><thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrizione</th><th>Importo</th></tr></thead><tbody>${economy.map(e=>`<tr><td>${dateIT(e.data_movimento)}</td><td>${esc(e.tipo||'')}</td><td>${esc(e.categoria||'')}</td><td>${esc(e.descrizione||'')}</td><td>${money(e.importo)}</td></tr>`).join('')}</tbody></table><p class="meta" style="margin-top:22px">Snapshot ${closure?`v${Number(closure.versione||1)} · chiuso ${closure.chiusa_at?new Date(closure.chiusa_at).toLocaleString('it-IT'):'—'} da ${esc(closure.chiusa_da_nome||'Operatore')}`:'ANTEPRIMA NON ANCORA CHIUSA'}</p></body></html>`}
+window.printTripClosure360=async function(tripId){const v=(state.viaggi||[]).find(x=>x.id===tripId);if(!v)return toast('Viaggio non trovato',false);try{const c=dgActiveTripClosure(tripId);let snapshot=c?.snapshot;if(!snapshot){const p=await rpc('dg_trip_closure_preview_v1',{p_trip_id:tripId});snapshot=p?.snapshot}if(!snapshot)throw new Error('Snapshot non disponibile');dgOpenDocumentHTML('Chiusura 360° · '+(v.titolo||v.destinazione||'Viaggio'),dgClosureReportHTML(v,snapshot,c),{orientation:'landscape'})}catch(e){toast('Report chiusura: '+(e?.message||e),false)}};
+// === FINE CHIUSURA VIAGGIO 360° ===
+
 function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
  const rows=state.prenotazioni.filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
@@ -3183,6 +3252,8 @@ async function executeLocal(a){const p=a.params||{},t=a.type;
  if(t==='economy_movement'){const body={tipo:p.movement_type||'Entrata',categoria:p.category||'Altro',descrizione:p.description,importo:Number(p.amount||0),data_movimento:p.date||romeDate(),metodo:p.method||null,viaggio_id:p.trip_id||null,noleggio_id:p.rental_id||null,flotta_id:p.vehicle_id||null,origine:'Assistente AI 360',note:p.notes||null};const r=await api('economia_movimenti','',{method:'POST',body,headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
  if(t==='create_task'){const r=await api('attivita_gestionale','',{method:'POST',body:{titolo:p.title,descrizione:p.description||null,stato:'aperta',priorita:p.priority||'normale',scadenza:p.due_date||null,assegnata_a:currentOperator?.name||'Nicola'},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
  if(t==='set_trip_online_state'){const id=p.trip_id||p.viaggio_id;if(!id)throw new Error('Viaggio non specificato');const result=await rpc('dg_set_trip_online_state',{p_trip_id:id,p_action:String(p.action||'').toUpperCase()});await aiAudit('AI_TRIP_ONLINE_STATE','viaggi',id,{action:p.action});return {type:t,id,result}}
+ if(t==='close_trip'){const id=p.trip_id||p.viaggio_id;if(!id)throw new Error('Viaggio non specificato');const preview=await rpc('dg_trip_closure_preview_v1',{p_trip_id:id});if(preview?.already_closed)return {type:t,id,result:{already_closed:true}};if((preview?.blockers||[]).length)throw new Error((preview.blockers||[])[0]);if((preview?.warnings||[]).length&&!p.force){setTimeout(()=>window.openTripClosure360?.(id),100);throw new Error('La Chiusura 360° richiede la verifica delle anomalie. Ho aperto il controllo completo.');}const result=await rpc('dg_close_trip_v1',{p_trip_id:id,p_note:p.note||'Chiusura richiesta tramite Assistente AI',p_force:Boolean(p.force)});await aiAudit('AI_CLOSE_TRIP_360','viaggi',id,{closure_id:result?.closure_id,versione:result?.versione});return {type:t,id,result}}
+ if(t==='reopen_trip'){const id=p.trip_id||p.viaggio_id,reason=String(p.reason||p.motivo||'').trim();if(!id)throw new Error('Viaggio non specificato');if(reason.length<4)throw new Error('Per riaprire il viaggio serve un motivo');const result=await rpc('dg_reopen_trip_v1',{p_trip_id:id,p_reason:reason});await aiAudit('AI_REOPEN_TRIP_360','viaggi',id,{reason});return {type:t,id,result}}
  if(t==='duplicate_trip'){const source=p.source_trip_id||p.trip_id,bus=p.bus_id||p.vehicle_id,date=p.new_date||p.date;if(!source||!bus||!date)throw new Error('Per duplicare servono viaggio origine, nuova data e bus');const result=await rpc('dg_duplicate_trip_v1',{p_source_trip_id:source,p_new_date:date,p_bus_id:bus});await aiAudit('AI_DUPLICATE_TRIP','viaggi',result?.trip_id||source,{source,new_date:date,bus_id:bus});return {type:t,result,id:result?.trip_id}}
  if(t==='open_bis'){const source=p.source_trip_id||p.trip_id,bus=p.bus_id||p.vehicle_id;if(!source||!bus)throw new Error('Per aprire il BIS servono viaggio e autobus');const result=await rpc('dg_open_trip_bis_v1',{p_source_trip_id:source,p_bus_id:bus,p_publish:p.publish!==false});await aiAudit('AI_OPEN_BIS','viaggi',result?.trip_id||source,{source,bus_id:bus,publish:p.publish!==false});return {type:t,result,id:result?.trip_id}}
  if(t==='edit_bis'){const id=p.bis_trip_id||p.trip_id,bus=p.bus_id||p.vehicle_id;if(!id||!bus)throw new Error('BIS o autobus non specificato');const result=await rpc('dg_update_trip_bis_v1',{p_bis_trip_id:id,p_bus_id:bus,p_publish:p.publish!==false});await aiAudit('AI_EDIT_BIS','viaggi',id,{bus_id:bus,publish:p.publish!==false});return {type:t,result,id}}
