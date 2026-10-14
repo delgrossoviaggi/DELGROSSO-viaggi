@@ -1,0 +1,24 @@
+/* DELGROSSO 2026 · alleggerimento UX */
+:root{--dg-blue:#1279dc;--dg-ink:#081b30}
+html{scroll-padding-top:90px}a,button{-webkit-tap-highlight-color:transparent}a:focus-visible,button:focus-visible{outline:3px solid #54c9ff;outline-offset:4px}
+.page-loader.dg-bus-loader{display:flex!important;align-items:center;justify-content:center;background:#071625;z-index:99999;opacity:1;visibility:visible;transition:opacity .32s ease,visibility .32s ease;pointer-events:auto}
+.page-loader.dg-bus-loader.hide{opacity:0;visibility:hidden;pointer-events:none}
+.dg-loader-content{width:min(330px,85vw);text-align:center;color:white;font-family:inherit}
+.dg-loader-content img{display:block;margin:0 auto 28px;width:128px;height:58px;object-fit:contain}
+.dg-loader-road{height:76px;position:relative;overflow:hidden;border-bottom:4px solid #a3bacb}
+.dg-loader-road:after{content:'';position:absolute;bottom:8px;left:0;width:200%;height:3px;background:repeating-linear-gradient(90deg,#fff 0 36px,transparent 36px 65px);opacity:.7;animation:dg-lanes 1s linear infinite}
+.dg-loader-bus{position:absolute;bottom:12px;width:116px;height:53px;left:calc(50% - 58px);animation:dg-bus-bounce .62s ease-in-out infinite alternate;filter:drop-shadow(0 7px 5px #0005)}
+.dg-loader-label{margin:18px 0 4px;font-size:14px;font-weight:800;letter-spacing:.09em}.dg-loader-sub{font-size:12px;color:#a9c3d9}
+@keyframes dg-lanes{to{transform:translateX(-65px)}}@keyframes dg-bus-bounce{to{transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.dg-loader-road:after,.dg-loader-bus{animation:none!important}html{scroll-behavior:auto!important}}
+body.home-dynamic .premium-hero{min-height:660px;min-height:min(820px,96svh)}
+body.home-dynamic .premium-hero-content{gap:40px}body.home-dynamic .hero-copy{max-width:780px}
+body.home-dynamic .premium-hero h1{font-size:clamp(46px,6.6vw,88px);line-height:1.03;letter-spacing:-.06em}
+body.home-dynamic .hero-copy p{max-width:610px;font-size:clamp(15px,1.4vw,18px)}
+.dg-hero-tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;align-items:center}
+.dg-hero-tools a{display:inline-flex;align-items:center;gap:9px;color:white;border:1px solid #ffffff4d;border-radius:999px;padding:11px 15px;font-size:12px;font-weight:800;background:#071b2b75;backdrop-filter:blur(10px);transition:transform .2s,background .2s}
+.dg-hero-tools a:hover{transform:translateY(-2px);background:#145b90}
+.dg-home-intro{padding:52px 0 35px;background:#fff}.dg-home-intro .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px}.dg-home-intro h2{margin:4px 0 12px;font-size:clamp(28px,3vw,40px);letter-spacing:-.045em}.dg-home-intro p{max-width:620px;margin:0;color:#536578;line-height:1.7}.dg-home-intro .btn{white-space:nowrap;background:#0b69b9;color:#fff}
+.dg-contact-footer{display:grid;grid-template-columns:1fr 1.2fr;gap:38px;padding-top:27px;padding-bottom:30px;border-top:1px solid #ffffff25;margin-top:25px}.dg-contact-footer h3{margin:0 0 16px;color:#91d6ff;font-size:12px;text-transform:uppercase;letter-spacing:.14em}.dg-contact-footer a{display:block;width:fit-content;max-width:100%;color:#e6edf5;padding:5px 0;line-height:1.45;font-size:13px;overflow-wrap:anywhere}.dg-contact-footer a:hover{text-decoration:underline;color:#fff}.dg-contact-footer small{color:#99adbe;font-size:12px}.dg-footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.dg-footer-actions a{padding:9px 14px;border-radius:10px;border:1px solid #ffffff45}
+.premium-footer .footer-grid{gap:30px}
+@media(max-width:760px){.dg-contact-footer{grid-template-columns:1fr;gap:22px}.dg-home-intro .wrap{display:block}.dg-home-intro .btn{margin-top:20px}.dg-hero-tools a{font-size:11px}.premium-footer{padding-bottom:100px!important}body.home-dynamic .premium-hero{min-height:680px;height:auto}body.home-dynamic .premium-hero-content{padding-top:150px;padding-bottom:90px}body.home-dynamic .premium-hero h1{font-size:clamp(43px,10vw,64px)}}

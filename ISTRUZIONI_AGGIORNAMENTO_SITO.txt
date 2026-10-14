@@ -1,0 +1,1 @@
+DELGROSSO SITO 2026 - Copiare i file dello ZIP nella root del repository rispettando le cartelle. NON sostituire GESTIONALE/index.html. Il nuovo index.html è la home pubblica. Il loader CSS + SVG è presente nelle pagine pubbliche e non nelle pagine di manutenzione. Verificare in staging le prenotazioni prima della pubblicazione.
