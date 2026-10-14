@@ -5417,5 +5417,179 @@ setTimeout(boot,700);
 </script>
 
 <script id="dgR24Marker">document.documentElement.dataset.dgMultibus="R24-SWAP";</script>
+
+<style id="dg-r28-modern-upgrade">
+:root{
+  --dg28-bg:#eef4f8;--dg28-surface:#ffffff;--dg28-surface-2:#f7fbff;--dg28-line:#d7e5ef;
+  --dg28-ink:#0f2740;--dg28-muted:#647b91;--dg28-primary:#0a7be7;--dg28-primary-2:#064f9a;
+  --dg28-ok:#0f9d67;--dg28-warn:#d97706;--dg28-danger:#dc2626;--dg28-shadow:0 10px 28px rgba(15,39,64,.08);
+}
+body,.main,.content{background:linear-gradient(180deg,#eef4f8 0%,#eaf1f6 100%)!important}
+.topbar{backdrop-filter:blur(10px)!important}
+.card,.module-card,.metric,.page-context,.pagebar,.ai360-shell,.dg-mb-bus,.statusline,.list-row{box-shadow:var(--dg28-shadow)!important}
+.card,.module-card,.metric,.list-row{border:1px solid var(--dg28-line)!important}
+.card-head,.module-card h3{letter-spacing:.02em}
+.table{border-collapse:separate!important;border-spacing:0!important}
+.table th{position:sticky;top:0;background:#edf5fb!important;z-index:1}
+.table tbody tr:hover td{background:#f6fbff!important}
+.section-title h2,.card-head h3,.module-card h3{color:var(--dg28-ink)!important}
+.section-subtitle,.row-main small,.page-context small{color:var(--dg28-muted)!important}
+.list-row{border-radius:14px!important;background:linear-gradient(180deg,#fff,#fbfdff)!important;padding:12px 14px!important;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.list-row .row-main{flex:1;min-width:0}
+.list-row .row-main strong{display:block;color:var(--dg28-ink)}
+.list-row .row-main small{display:block;margin-top:3px;line-height:1.35}
+.btn{font-weight:800!important}
+.btn-sm{min-height:34px!important}
+.pill{font-weight:800!important;letter-spacing:.02em}
+.dg28-notif-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.dg28-notif-stats{display:flex;gap:8px;flex-wrap:wrap}
+.dg28-notif-stats .pill{padding:7px 10px}
+.dg28-notif-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.dg28-notif-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.dg28-alert-note{margin:0 0 12px;padding:11px 12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}
+.dg28-alert-note b{color:#7c2d12}
+.dg28-loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(238,244,248,.92);backdrop-filter:blur(4px);z-index:99999}
+.dg28-loader.on{display:flex}
+.dg28-loader-card{width:min(92vw,420px);background:#fff;border:1px solid var(--dg28-line);border-radius:22px;box-shadow:0 18px 45px rgba(15,39,64,.18);padding:22px}
+.dg28-loader-title{font-size:20px;font-weight:900;color:var(--dg28-ink);margin-bottom:6px}
+.dg28-loader-sub{font-size:13px;color:var(--dg28-muted);margin-bottom:14px}
+.dg28-road{position:relative;height:72px;border-radius:18px;background:linear-gradient(180deg,#d9ecfb 0%,#eef8ff 56%,#c7d2da 57%,#94a3b8 100%);overflow:hidden;border:1px solid #d4e3ee}
+.dg28-road:before{content:"";position:absolute;left:0;right:0;bottom:18px;height:5px;background:repeating-linear-gradient(90deg,#fff 0 24px,transparent 24px 44px);opacity:.92;animation:dg28Road 1s linear infinite}
+.dg28-bus{position:absolute;bottom:14px;left:-56px;font-size:33px;filter:drop-shadow(0 6px 8px rgba(15,39,64,.22));animation:dg28Bus 3.1s ease-in-out infinite}
+.dg28-loader-progress{margin-top:14px;height:8px;border-radius:999px;background:#e6eef5;overflow:hidden}
+.dg28-loader-progress span{display:block;height:100%;width:42%;border-radius:999px;background:linear-gradient(90deg,var(--dg28-primary),#39a4ff);animation:dg28Progress 1.4s ease-in-out infinite}
+@keyframes dg28Bus{0%{transform:translateX(0)}50%{transform:translateX(230px)}100%{transform:translateX(460px)}}
+@keyframes dg28Road{0%{transform:translateX(0)}100%{transform:translateX(-44px)}}
+@keyframes dg28Progress{0%{margin-left:-10%;width:28%}50%{margin-left:42%;width:36%}100%{margin-left:100%;width:28%}}
+@media(max-width:720px){.dg28-notif-row{grid-template-columns:1fr}.dg28-notif-actions{justify-content:flex-start}.dg28-loader-card{padding:18px}.dg28-road{height:66px}}
+</style>
+<script id="dg-r28-modern-upgrade-js">
+(function(){
+  'use strict';
+  const gid=id=>document.getElementById(id);
+  function esc2(v){return (window.esc?window.esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])))}
+  function syntheticCapacityAlerts(){
+    const trips=Array.isArray(window.state?.viaggi)?window.state.viaggi:[];
+    const seats=Array.isArray(window.state?.prenotazionePosti)?window.state.prenotazionePosti:[];
+    const out=[];
+    for(const v of trips){
+      const cap=Number(v?.posti_totali||0);
+      if(!cap) continue;
+      const over=seats.filter(s=>s.viaggio_id===v.id && /^\d+$/.test(String(s.posto||'')) && Number(s.posto)>cap);
+      if(!over.length) continue;
+      const posti=[...new Set(over.map(x=>String(x.posto)))].sort((a,b)=>Number(a)-Number(b));
+      out.push({
+        id:'synthetic-capacity-'+v.id,
+        titolo:'Capienza viaggio incoerente',
+        dettaglio:`${v.titolo||v.destinazione||'Viaggio'}: impostato a ${cap} posti ma risultano assegnati anche i posti ${posti.join(', ')}. Verificare capienza autobus o riassegnazione posti.`,
+        tipo:'Integrità dati posti',
+        priorita:'Critica',
+        data_evento:v.data_partenza||null,
+        synthetic:true,
+        viaggio_id:v.id
+      });
+    }
+    return out;
+  }
+  function applySyntheticAlerts(){
+    if(!window.state) return;
+    const base=(Array.isArray(window.state.alertOperativi)?window.state.alertOperativi:[]).filter(x=>!x.synthetic);
+    window.state.alertOperativi=[...syntheticCapacityAlerts(),...base];
+  }
+  function ensureLoader(){
+    if(gid('dg28Loader')) return gid('dg28Loader');
+    const el=document.createElement('div');
+    el.id='dg28Loader'; el.className='dg28-loader';
+    el.innerHTML='<div class="dg28-loader-card"><div class="dg28-loader-title">🚍 Caricamento gestionale</div><div class="dg28-loader-sub" id="dg28LoaderText">Sto sincronizzando viaggi, prenotazioni, posti e notifiche…</div><div class="dg28-road"><div class="dg28-bus">🚌</div></div><div class="dg28-loader-progress"><span></span></div></div>';
+    document.body.appendChild(el); return el;
+  }
+  window.showBusLoader=function(msg){const el=ensureLoader(); const t=gid('dg28LoaderText'); if(t&&msg)t.textContent=msg; el.classList.add('on')};
+  window.hideBusLoader=function(){gid('dg28Loader')?.classList.remove('on')};
+  window.markNotificationRead=async function(id, read=true){
+    try{
+      await window.api('notifiche',`id=eq.${id}`,{method:'PATCH',body:{letto:!!read}});
+      const n=(window.state?.notifiche||[]).find(x=>x.id===id); if(n) n.letto=!!read;
+      if(typeof window.updateBadge==='function') window.updateBadge();
+      if(typeof window.renderNotifications==='function' && window.state?.page==='comunicazioni') window.renderNotifications();
+      if(typeof window.toast==='function') window.toast(read?'Notifica segnata come letta':'Notifica aggiornata');
+    }catch(e){ if(typeof window.toast==='function') window.toast('Operazione non riuscita: '+(e?.message||e),false); }
+  };
+  window.markAllNotificationsRead=async function(){
+    const unread=(window.state?.notifiche||[]).filter(n=>!n.letto);
+    if(!unread.length) return typeof window.toast==='function'&&window.toast('Non ci sono notifiche da aggiornare');
+    try{
+      await Promise.all(unread.map(n=>window.api('notifiche',`id=eq.${n.id}`,{method:'PATCH',body:{letto:true}})));
+      unread.forEach(n=>n.letto=true);
+      if(typeof window.updateBadge==='function') window.updateBadge();
+      if(typeof window.renderNotifications==='function') window.renderNotifications();
+      if(typeof window.toast==='function') window.toast('Tutte le notifiche sono state segnate come lette');
+    }catch(e){ if(typeof window.toast==='function') window.toast('Errore nelle notifiche: '+(e?.message||e),false); }
+  };
+  window.renderNotifications=function(){
+    const box=gid('notificationsList'); if(!box) return;
+    const rows=[...(window.state?.notifiche||[])];
+    const unread=rows.filter(n=>!n.letto).length;
+    box.innerHTML=`<div class="dg28-notif-toolbar"><div class="dg28-notif-stats"><span class="pill ${unread?'wait':'ok'}">${rows.length} notifiche</span><span class="pill ${unread?'danger':'neutral'}">${unread} da leggere</span></div><div class="dg28-notif-actions"><button class="btn btn-secondary btn-sm" onclick="loadAll(true)">↻ Aggiorna</button><button class="btn btn-primary btn-sm" onclick="markAllNotificationsRead()">✓ Segna tutte lette</button></div></div>`+
+      (rows.length?rows.map(n=>`<div class="list-row dg28-notif-row ${n.letto?'':'dg28-unread'}"><div class="row-main"><strong>${esc2(n.titolo||'Notifica')}</strong><small>${esc2(n.messaggio||'')}<br>${n.created_at?new Date(n.created_at).toLocaleString('it-IT'):''}</small></div><div class="dg28-notif-actions"><span class="pill ${n.letto?'neutral':'wait'}">${n.letto?'Letta':'Nuova'}</span>${n.letto?'':`<button class="btn btn-green btn-sm" onclick="markNotificationRead('${n.id}',true)">Segna letta</button>`}</div></div>`).join(''):'<div class="empty">Nessuna notifica.</div>');
+  };
+  const baseRenderControlRoom=window.renderControlRoom;
+  if(typeof baseRenderControlRoom==='function'){
+    window.renderControlRoom=function(){
+      const r=baseRenderControlRoom.apply(this,arguments);
+      try{
+        const tripId=gid('controlTripSelect')?.value||'';
+        const extra=syntheticCapacityAlerts().filter(x=>x.viaggio_id===tripId);
+        if(extra.length && gid('controlAlerts')){
+          const count=gid('controlAlertCount');
+          if(count){
+            const current=Number(count.textContent||0)||0;
+            count.textContent=String(current+extra.length);
+            count.className='pill danger';
+          }
+          gid('controlAlerts').insertAdjacentHTML('afterbegin',extra.map(a=>`<div class="list-row"><div class="row-main"><strong>🚨 ${esc2(a.titolo)}</strong><small>${esc2(a.dettaglio)}</small></div><span class="pill danger">ATTENZIONE</span></div>`).join(''));
+        }
+      }catch{}
+      return r;
+    }
+  }
+  const baseLoadAll=window.loadAll;
+  if(typeof baseLoadAll==='function'){
+    window.loadAll=async function(forceFresh){
+      try{ window.showBusLoader(forceFresh?'Sto aggiornando il gestionale e ricaricando i dati reali…':'Sto caricando il gestionale…'); }catch{}
+      try{
+        const res=await baseLoadAll.apply(this,arguments);
+        applySyntheticAlerts();
+        try{ if(typeof window.renderPage==='function') window.renderPage(window.state?.page||'dashboard'); if(typeof window.dashboardAlerts7==='function') window.dashboardAlerts7(); }catch{}
+        return res;
+      } finally {
+        setTimeout(()=>{ try{window.hideBusLoader()}catch{} },220);
+      }
+    }
+  }
+  const baseRenderPage=window.renderPage;
+  if(typeof baseRenderPage==='function'){
+    window.renderPage=function(p){ applySyntheticAlerts(); return baseRenderPage.apply(this,arguments); }
+  }
+  function bootPolish(){
+    ensureLoader();
+    document.documentElement.dataset.dgVersion='R28';
+    document.title='DELGROSSO — Future Control R28';
+    const meta=document.querySelector('meta[name="dg-build"]'); if(meta) meta.content='DELGROSSO-R28-MODERN-ALERTS-NOTIFICHE';
+    document.querySelectorAll('.version').forEach(x=>{x.innerHTML='DELGROSSO Future Control R28 · Modern Gestionale · Supabase LIVE<br>© DELGROSSO VIAGGI 2026 · © CREATED CRISTINO NICOLA PIO';});
+    const comm=gid('page-comunicazioni');
+    if(comm && !gid('dg28AlertBanner')){
+      const extra=syntheticCapacityAlerts();
+      if(extra.length){
+        const b=document.createElement('div'); b.id='dg28AlertBanner'; b.className='dg28-alert-note';
+        b.innerHTML='<b>Allarmi automatici:</b> rilevate anomalie sulla capienza posti di alcuni viaggi. Le trovi anche nella Sentinella / Alert operativi.';
+        comm.prepend(b);
+      }
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootPolish,{once:true}); else bootPolish();
+  window.addEventListener('load',()=>setTimeout(bootPolish,120),{once:true});
+})();
+</script>
+
 </body>
 </html>
