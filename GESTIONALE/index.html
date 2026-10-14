@@ -5742,5 +5742,355 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+<style id="dg-r31-ui-upgrade">
+.modal.dg-modal-wide .modal-box{width:min(96vw,1680px)!important;max-width:min(96vw,1680px)!important;height:min(96dvh,1400px)!important;max-height:96dvh!important}
+.modal.dg-modal-wide .modal-body{max-height:calc(96dvh - 154px)!important;overflow:auto!important}
+.modal.dg-modal-wide .modal-foot{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,.92),#fff)!important;z-index:4}
+.modal.dg-modal-wide .dg30-mb-shell{display:grid!important;grid-template-columns:minmax(360px,430px) minmax(0,1fr)!important;gap:14px!important;min-height:calc(96dvh - 310px)}
+.modal.dg-modal-wide .dg30-mb-panel{min-height:calc(96dvh - 310px)}
+.modal.dg-modal-wide .dg30-mb-body{max-height:calc(96dvh - 390px)!important;overflow:auto!important}
+.modal.dg-modal-wide .dg30-mb-toolbar{position:sticky;top:0;z-index:5;background:#fff;padding-bottom:10px}
+@media (max-width:1024px){
+  .modal.dg-modal-wide .modal-box{width:min(98vw,98vw)!important;max-width:min(98vw,98vw)!important;height:97dvh!important;max-height:97dvh!important}
+  .modal.dg-modal-wide .dg30-mb-shell{grid-template-columns:1fr!important;min-height:auto}
+  .modal.dg-modal-wide .dg30-mb-panel{min-height:unset}
+  .modal.dg-modal-wide .dg30-mb-body{max-height:none!important}
+}
+.dg-fleet-photo-wrap{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr);gap:14px;align-items:start}
+.dg-fleet-photo-preview{border:1px solid #dbe5ee;border-radius:18px;padding:10px;background:linear-gradient(180deg,#f8fbff,#eef4fb)}
+.dg-fleet-photo-preview img{width:100%;height:220px;object-fit:cover;border-radius:14px;background:#e8eef5}
+.dg-fleet-photo-empty{display:flex;align-items:center;justify-content:center;height:220px;border-radius:14px;border:2px dashed #c9d6e3;color:#5f7488;font-weight:700;background:#fff}
+.dg-fleet-photo-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.dg-fleet-photo-tools input[type=file]{display:block;width:100%}
+.dg-fleet-photo-tip{font-size:12px;color:#607487;line-height:1.4}
+.dg-cr-fleet-focus{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:14px;align-items:start;margin-bottom:14px}
+.dg-cr-fleet-focus img{width:100%;height:180px;object-fit:cover;border-radius:16px;background:#e8eef5;border:1px solid #dbe5ee}
+.dg-cr-fleet-meta{display:grid;gap:8px}
+.dg-cr-fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px}
+.dg-cr-fleet-mini{border:1px solid #dbe5ee;border-radius:16px;padding:10px;background:#fff}
+.dg-cr-fleet-mini img{width:100%;height:112px;object-fit:cover;border-radius:12px;background:#e8eef5;margin-bottom:8px}
+.dg-cr-fleet-mini .small{font-size:12px;color:#607487;line-height:1.35}
+@media (max-width:860px){.dg-fleet-photo-wrap,.dg-cr-fleet-focus{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+  const D=document;
+  const DEFAULT_IMG='';
+  const $$=id=>D.getElementById(id);
+  function escHtml(v){
+    try{return typeof esc==='function'?esc(v):String(v??'').replace(/[&<>\"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));}
+    catch(_){return String(v??'')}
+  }
+  function safeDate(v){try{return typeof dateIT==='function'?dateIT(v):String(v||'')}catch(_){return String(v||'')}}
+  function safeMoney(v){try{return typeof money==='function'?money(v):String(v||0)}catch(_){return String(v||0)}}
+  function tripFleet(trip){
+    if(!window.state||!trip)return null;
+    const fleetId=trip.flotta_id||trip.mezzo_id||trip.id_mezzo||'';
+    return (state.flotta||[]).find(f=>String(f.id)===String(fleetId)) || (state.flotta||[]).find(f=>String(f.targa||'')===String(trip.targa||'')) || null;
+  }
+  function fleetTitle(f){return f?(f.titolo||[f.marca,f.modello].filter(Boolean).join(' ')||'Mezzo'):''}
+  function setWide(on){const m=$$('modal'); if(m)m.classList.toggle('dg-modal-wide',!!on)}
+
+  const prevClose=window.closeModal;
+  window.closeModal=function(){ setWide(false); return prevClose?prevClose.apply(this,arguments):($$('modal')&&$$('modal').classList.remove('on')); };
+  try{closeModal=window.closeModal}catch(_){ }
+
+  const prevOpenMB=window.openMultiBusSeatManager;
+  if(typeof prevOpenMB==='function'){
+    window.openMultiBusSeatManager=function(){
+      const r=prevOpenMB.apply(this,arguments);
+      setTimeout(()=>{
+        setWide(true);
+        const b=$$('dg30Save'); if(b&&/Sposta cliente/i.test(b.textContent||'')) b.textContent='✅ Sposta clienti';
+      },0);
+      return r;
+    };
+    try{openMultiBusSeatManager=window.openMultiBusSeatManager}catch(_){ }
+  }
+
+  window.dgFleetSyncPreview=function(){
+    const img=$$('f2_preview_img'), empty=$$('f2_preview_empty'), src=($$('f2_img')?.value||'').trim();
+    if(!img||!empty)return;
+    if(src){ img.src=src; img.style.display='block'; empty.style.display='none'; }
+    else { img.removeAttribute('src'); img.style.display='none'; empty.style.display='flex'; }
+  };
+  window.dgFleetUseImageUrl=function(){
+    const url=($$('f2_img_url')?.value||'').trim();
+    if($$('f2_img')) $$('f2_img').value=url;
+    window.dgFleetSyncPreview();
+  };
+  window.dgFleetClearImage=function(){
+    if($$('f2_img')) $$('f2_img').value='';
+    if($$('f2_img_url')) $$('f2_img_url').value='';
+    if($$('f2_file')) $$('f2_file').value='';
+    window.dgFleetSyncPreview();
+  };
+  window.dgFleetReadFile=async function(input){
+    const file=input?.files?.[0];
+    if(!file)return;
+    try{
+      const reader=new FileReader();
+      reader.onload=()=>{
+        const img=new Image();
+        img.onload=()=>{
+          const max=1600;
+          let w=img.width||1,h=img.height||1;
+          if(w>max||h>max){const r=Math.min(max/w,max/h); w=Math.round(w*r); h=Math.round(h*r);}
+          const canvas=D.createElement('canvas'); canvas.width=w; canvas.height=h;
+          const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+          const out=canvas.toDataURL('image/jpeg',0.86);
+          if($$('f2_img')) $$('f2_img').value=out;
+          if($$('f2_img_url')) $$('f2_img_url').value='';
+          window.dgFleetSyncPreview();
+          try{toast('Foto mezzo caricata e pronta al salvataggio')}catch(_){ }
+        };
+        img.onerror=()=>{ if($$('f2_img')) $$('f2_img').value=String(reader.result||''); window.dgFleetSyncPreview(); };
+        img.src=String(reader.result||'');
+      };
+      reader.readAsDataURL(file);
+    }catch(e){ try{toast('Caricamento immagine non riuscito: '+(e.message||e),false)}catch(_){ alert(e.message||e) } }
+  };
+
+  window.openFleetModal=function(id=''){
+    const f=(window.state?.flotta||[]).find(x=>String(x.id)===String(id))||{};
+    if(typeof openModal!=='function')return;
+    openModal(id?'Modifica mezzo':'Nuovo mezzo',`
+      <div class="form-grid">
+        <div class="field"><label>Titolo</label><input id="f2_title" value="${escHtml(f.titolo||'')}"></div>
+        <div class="field"><label>Marca</label><input id="f2_marca" value="${escHtml(f.marca||'Irizar')}"></div>
+        <div class="field"><label>Modello</label><input id="f2_model" value="${escHtml(f.modello||'Scania PB')}"></div>
+        <div class="field"><label>Targa</label><input id="f2_targa" value="${escHtml(f.targa||'')}"></div>
+        <div class="field"><label>Posti</label><input id="f2_posti" type="number" min="0" value="${Number(f.posti??63)}"></div>
+        <div class="field"><label>Stato</label><select id="f2_stato"><option>Disponibile</option><option>Operativo</option><option>Manutenzione</option><option>Uso privato</option><option>Fuori servizio</option></select></div>
+        <div class="field"><label>Categoria</label><input id="f2_cat" value="${escHtml(f.categoria||'GT')}"></div>
+        <div class="field full">
+          <label>Foto del mezzo</label>
+          <div class="dg-fleet-photo-wrap">
+            <div class="dg-fleet-photo-preview">
+              <img id="f2_preview_img" style="display:none" alt="Anteprima mezzo">
+              <div id="f2_preview_empty" class="dg-fleet-photo-empty">Nessuna foto selezionata</div>
+              <div class="dg-fleet-photo-tools">
+                <input id="f2_file" type="file" accept="image/*" onchange="dgFleetReadFile(this)">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="dgFleetUseImageUrl()">Usa URL</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="dgFleetClearImage()">Rimuovi foto</button>
+              </div>
+            </div>
+            <div>
+              <div class="field"><label>Immagine URL (facoltativo)</label><input id="f2_img_url" value="${escHtml((f.immagine&&String(f.immagine).startsWith('data:'))?'':(f.immagine||''))}" placeholder="https://.../bus.jpg"></div>
+              <input id="f2_img" type="hidden" value="${escHtml(f.immagine||DEFAULT_IMG)}">
+              <div class="dg-fleet-photo-tip">Puoi caricare direttamente una nuova foto del mezzo oppure incollare un URL. La foto sarà visibile nella sezione Flotta e nella Control Room per i viaggi collegati a quel bus.</div>
+              <div class="field" style="margin-top:12px"><label>Descrizione / note</label><textarea id="f2_desc" rows="6" placeholder="Esempio: Bus GT principale, livrea bianca, 63 posti, usato per Napoli / gite giornaliere.">${escHtml(f.descrizione||'')}</textarea></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveFleet('${id}')">Salva su Supabase</button>`);
+    const stato=$$('f2_stato'); if(stato) stato.value=f.stato||'Disponibile';
+    setTimeout(()=>window.dgFleetSyncPreview(),0);
+  };
+  try{openFleetModal=window.openFleetModal}catch(_){ }
+
+  window.saveFleet=async function(id){
+    const body={
+      titolo:$$('f2_title')?.value||`${$$('f2_marca')?.value||''} ${$$('f2_model')?.value||''}`.trim(),
+      marca:$$('f2_marca')?.value||'',
+      modello:$$('f2_model')?.value||'',
+      targa:$$('f2_targa')?.value||null,
+      posti:Number($$('f2_posti')?.value)||0,
+      stato:$$('f2_stato')?.value||'Disponibile',
+      immagine:($$('f2_img')?.value||'').trim()||null,
+      categoria:$$('f2_cat')?.value||null,
+      descrizione:$$('f2_desc')?.value||null,
+      attivo:true
+    };
+    try{
+      if(id) await api('flotta',`id=eq.${id}`,{method:'PATCH',body});
+      else await api('flotta','',{method:'POST',body});
+      closeModal();
+      try{toast('Mezzo salvato su Supabase')}catch(_){ }
+      await loadAll();
+      if(state?.page==='controlroom') setTimeout(()=>window.renderControlRoom&&window.renderControlRoom(),80);
+    }catch(e){ try{toast(e.message||e,false)}catch(_){ alert(e.message||e) } }
+  };
+  try{saveFleet=window.saveFleet}catch(_){ }
+
+  const prevCtrl=window.renderControlRoom;
+  window.renderControlRoom=function(){
+    const r=typeof prevCtrl==='function'?prevCtrl.apply(this,arguments):undefined;
+    setTimeout(()=>{
+      const sel=$$('controlTripSelect'), box=$$('controlFleet');
+      if(!sel||!box||!window.state)return;
+      const v=(state.viaggi||[]).find(x=>String(x.id)===String(sel.value));
+      if(!v)return;
+      const fleet=tripFleet(v);
+      const tripDate=String(v.data_partenza||'').slice(0,10);
+      const dayTrips=(state.viaggi||[])
+        .filter(t=>String(t.data_partenza||'').slice(0,10)===tripDate && !/annull|cancel/i.test(String(t.stato||'')))
+        .sort((a,b)=>String(a.ora_partenza||'').localeCompare(String(b.ora_partenza||''))||String(a.titolo||'').localeCompare(String(b.titolo||'')));
+      const maint=(state.manutenzioni||[])
+        .filter(m=>fleet && String(m.flotta_id)===String(fleet.id) && m.stato!=='Annullata')
+        .sort((a,b)=>String(a.prossima_data||'9999').localeCompare(String(b.prossima_data||'9999')))[0];
+      const focus=fleet?`
+        <div class="dg-cr-fleet-focus">
+          ${fleet.immagine?`<img src="${escHtml(fleet.immagine)}" alt="${escHtml(fleetTitle(fleet))}">`:`<div class="dg-fleet-photo-empty">Nessuna foto mezzo</div>`}
+          <div class="dg-cr-fleet-meta">
+            <div class="list-row" style="margin:0"><div class="row-main"><strong>${escHtml(fleetTitle(fleet))}</strong><small>${escHtml(fleet.targa||'Targa non indicata')} · ${Number(fleet.posti||0)} posti · ${escHtml(fleet.categoria||'GT')}</small></div><span class="pill ${String(fleet.stato||'').toLowerCase().includes('manut')?'danger':'ok'}">${escHtml(fleet.stato||'Operativo')}</span></div>
+            <div class="statusline info"><b>Viaggio selezionato</b><br>${escHtml(v.titolo||v.destinazione||'Viaggio')} · ${safeDate(v.data_partenza)}${v.ora_partenza?` · ${escHtml(String(v.ora_partenza).slice(0,5))}`:''}</div>
+            ${maint?`<div class="statusline wait"><b>Prossima manutenzione</b><br>${escHtml(maint.tipo||'Intervento')} · ${safeDate(maint.prossima_data||'')}</div>`:'<div class="statusline ok"><b>Manutenzione</b><br>Nessuna manutenzione imminente collegata al mezzo.</div>'}
+          </div>
+        </div>`:`<div class="empty">Nessun mezzo assegnato direttamente al viaggio. Quando assegni il bus, qui apparirà anche la foto.</div>`;
+      const dayCards=dayTrips.map(t=>{
+        const tf=tripFleet(t);
+        return `<div class="dg-cr-fleet-mini">
+          ${tf?.immagine?`<img src="${escHtml(tf.immagine)}" alt="${escHtml(fleetTitle(tf))}">`:`<div class="dg-fleet-photo-empty" style="height:112px;margin-bottom:8px">Bus non assegnato</div>`}
+          <strong>${escHtml(t.titolo||t.destinazione||'Viaggio')}</strong>
+          <div class="small">${t.ora_partenza?escHtml(String(t.ora_partenza).slice(0,5))+' · ':''}${tf?escHtml(fleetTitle(tf)):'Da assegnare'}</div>
+          <div class="small">${tf?`${escHtml(tf.targa||'')} · ${Number(tf.posti||0)} posti`:'Nessun mezzo collegato'} </div>
+        </div>`;
+      }).join('') || '<div class="empty">Nessun altro servizio in questa data.</div>';
+      box.innerHTML=`${focus}<div class="statusline" style="margin-top:4px"><b>Mezzi / servizi della data</b><br>${safeDate(tripDate)} · qui puoi vedere subito quali bus sono presenti o già collegati a quella giornata.</div><div class="dg-cr-fleet-grid">${dayCards}</div>`;
+    },0);
+    return r;
+  };
+  try{renderControlRoom=window.renderControlRoom}catch(_){ }
+
+  setTimeout(()=>{ if(window.state?.page==='controlroom' && typeof window.renderControlRoom==='function') window.renderControlRoom(); },220);
+  console.info('DELGROSSO R31 · modal wide + flotta foto edit + control room bus photo');
+})();
+</script>
+<style id="dg-r32-premium-ui">
+:root{
+  --r32-bg:#edf3f8;
+  --r32-panel:#ffffff;
+  --r32-line:#d9e4ee;
+  --r32-ink:#10263b;
+  --r32-muted:#6f8295;
+  --r32-blue:#0a78df;
+  --r32-blue2:#0758a8;
+  --r32-navy:#071b2e;
+  --r32-navy2:#0b2d4a;
+  --r32-shadow:0 10px 28px rgba(9,38,64,.075);
+}
+body,.main,.content{background:linear-gradient(180deg,#edf3f8 0%,#eaf0f5 100%)!important;color:var(--r32-ink)!important}
+.sidebar{background:linear-gradient(180deg,#061522,#08243b 62%,#061522)!important;border-right:1px solid rgba(126,190,240,.12)!important}
+.brand{border-bottom:1px solid rgba(126,190,240,.10)!important}
+.nav button{border-radius:11px!important;margin:2px 8px!important;transition:background .14s ease,transform .14s ease,border-color .14s ease!important}
+.nav button:hover{transform:translateX(2px)!important}
+.nav button.active{background:linear-gradient(90deg,#0b74d1,#084c8d)!important;box-shadow:0 7px 18px rgba(0,75,145,.22)!important}
+.topbar{background:rgba(7,27,46,.96)!important;border-bottom:1px solid rgba(126,190,240,.12)!important;box-shadow:0 8px 24px rgba(8,31,52,.12)!important}
+.card,.module-card,.metric,.statusline,.list-row,.table-card,.dg71-panel{background:var(--r32-panel)!important;border:1px solid var(--r32-line)!important;box-shadow:var(--r32-shadow)!important}
+.card,.module-card,.metric,.table-card,.dg71-panel{border-radius:16px!important}
+.card-head{background:linear-gradient(180deg,#fff,#f8fbfd)!important;border-bottom:1px solid #e5edf4!important}
+.card-head h3,.section-title h2,.module-card h3{color:var(--r32-ink)!important}
+.section-subtitle,.row-main small,.card small,.module-card small{color:var(--r32-muted)!important}
+.btn{border-radius:10px!important;font-weight:800!important}
+.btn-primary{background:linear-gradient(135deg,var(--r32-blue),var(--r32-blue2))!important;box-shadow:0 6px 15px rgba(10,120,223,.16)!important}
+.btn-secondary{background:#f5f9fc!important;border-color:#d6e2ec!important;color:#27455f!important}
+.btn-ghost{background:#fff!important;border-color:#d6e2ec!important;color:#496176!important}
+.table th{background:#f1f6fa!important;color:#60758a!important;border-bottom:1px solid #dce7ef!important}
+.table td{border-bottom-color:#e7eef4!important}
+.table tbody tr:hover td{background:#f7fbff!important}
+.field input,.field select,.field textarea,.toolbar input,.toolbar select{background:#fcfeff!important;border:1px solid #d5e2ec!important;border-radius:10px!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#43a4eb!important;box-shadow:0 0 0 3px rgba(36,145,226,.11)!important}
+.page-context,.pagebar{background:linear-gradient(100deg,#0a2b47,#0b395f)!important;color:#fff!important;border-color:rgba(104,181,237,.16)!important}
+
+/* Fleet cards premium */
+#fleetCards{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(270px,1fr))!important;gap:16px!important}
+#fleetCards .module-card{overflow:hidden!important;padding:0!important}
+#fleetCards .module-card>img{height:180px!important;border-radius:0!important;cursor:zoom-in;transition:transform .18s ease,filter .18s ease!important}
+#fleetCards .module-card:hover>img{transform:scale(1.012);filter:saturate(1.03)}
+#fleetCards .module-card h3,#fleetCards .module-card p,#fleetCards .module-card span,#fleetCards .module-card>div{margin-left:14px;margin-right:14px}
+#fleetCards .module-card h3{margin-top:13px!important;margin-bottom:5px!important}
+#fleetCards .module-card>div:last-child{margin-bottom:14px!important}
+
+/* Control room bus cards */
+.dg-cr-fleet-focus,.dg-cr-fleet-mini{transition:border-color .14s ease,transform .14s ease,box-shadow .14s ease}
+.dg-cr-fleet-mini:hover{transform:translateY(-1px);border-color:#bdd4e6;box-shadow:0 10px 25px rgba(14,62,98,.08)}
+.dg-cr-fleet-focus img,.dg-cr-fleet-mini img{cursor:zoom-in}
+
+/* Modal refined */
+.modal{background:rgba(4,20,34,.50)!important;backdrop-filter:blur(8px)!important}
+.modal-box{border:1px solid rgba(255,255,255,.76)!important;box-shadow:0 24px 70px rgba(5,27,46,.24)!important}
+.modal-head{background:linear-gradient(180deg,#fff,#f7fafc)!important}
+.modal-foot{border-top:1px solid #dce7ef!important}
+
+/* Photo lightbox */
+.dg32-lightbox{position:fixed;inset:0;z-index:120000;background:rgba(3,14,25,.90);display:none;align-items:center;justify-content:center;padding:24px}
+.dg32-lightbox.on{display:flex}
+.dg32-lightbox-card{width:min(94vw,1200px);max-height:92vh;background:#071b2e;border:1px solid rgba(255,255,255,.14);border-radius:20px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.42)}
+.dg32-lightbox-head{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;color:#fff;border-bottom:1px solid rgba(255,255,255,.10)}
+.dg32-lightbox-title{font-weight:900;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dg32-lightbox-close{width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-size:19px;cursor:pointer}
+.dg32-lightbox-body{padding:12px;background:#020a12;display:flex;align-items:center;justify-content:center;max-height:calc(92vh - 66px);overflow:auto}
+.dg32-lightbox-body img{max-width:100%;max-height:calc(92vh - 92px);object-fit:contain;border-radius:12px}
+
+/* Dashboard tighter hierarchy */
+.metrics,.reference-metrics,.dl26-metrics{gap:12px!important}
+.metric{padding:14px!important}
+.metric b{letter-spacing:-.02em}
+.quick-actions{gap:8px!important}
+
+@media(max-width:820px){
+  .content{padding:12px 10px calc(104px + env(safe-area-inset-bottom))!important}
+  #fleetCards{grid-template-columns:1fr!important}
+  #fleetCards .module-card>img{height:210px!important}
+  .dg32-lightbox{padding:10px}
+  .dg32-lightbox-card{width:98vw;max-height:94vh;border-radius:16px}
+}
+</style>
+<script id="dg-r32-premium-runtime">
+(function(){
+'use strict';
+const D=document;
+const g=id=>D.getElementById(id);
+function ensureLightbox(){
+  if(g('dg32Lightbox')) return g('dg32Lightbox');
+  const el=D.createElement('div');
+  el.id='dg32Lightbox';el.className='dg32-lightbox';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
+  el.innerHTML='<div class="dg32-lightbox-card"><div class="dg32-lightbox-head"><div class="dg32-lightbox-title" id="dg32LightboxTitle">Foto mezzo</div><button type="button" class="dg32-lightbox-close" id="dg32LightboxClose" aria-label="Chiudi">✕</button></div><div class="dg32-lightbox-body"><img id="dg32LightboxImg" alt="Foto mezzo"></div></div>';
+  D.body.appendChild(el);
+  el.addEventListener('click',e=>{if(e.target===el)closeLightbox()});
+  g('dg32LightboxClose').addEventListener('click',closeLightbox);
+  D.addEventListener('keydown',e=>{if(e.key==='Escape'&&el.classList.contains('on'))closeLightbox()});
+  return el;
+}
+function closeLightbox(){const el=g('dg32Lightbox');if(el)el.classList.remove('on')}
+window.dg32OpenImage=function(src,title='Foto mezzo'){
+  if(!src)return;
+  const el=ensureLightbox();
+  g('dg32LightboxImg').src=src;
+  g('dg32LightboxTitle').textContent=title||'Foto mezzo';
+  el.classList.add('on');
+};
+function bindImageZoom(){
+  D.querySelectorAll('#fleetCards .module-card>img,.dg-cr-fleet-focus img,.dg-cr-fleet-mini img').forEach(img=>{
+    if(img.dataset.dg32Zoom)return;
+    img.dataset.dg32Zoom='1';
+    img.title='Clicca per ingrandire';
+    img.addEventListener('click',()=>window.dg32OpenImage(img.src,img.alt||'Foto mezzo'));
+  });
+}
+function mark(){
+  D.documentElement.dataset.dgVersion='R32';
+  D.title='DELGROSSO — Premium Gestionale R32';
+  const m=D.querySelector('meta[name="dg-build"]');if(m)m.content='DELGROSSO-R32-PREMIUM-UI-FLOTTA-CONTROLROOM';
+  D.querySelectorAll('.version').forEach(x=>{x.innerHTML='DELGROSSO Premium R32 · Flotta & Control Room visuale · Supabase LIVE<br>© DELGROSSO VIAGGI 2026 · © CREATED CRISTINO NICOLA PIO'});
+  bindImageZoom();
+}
+const oldRenderFleet=window.renderFleet;
+if(typeof oldRenderFleet==='function'){
+  window.renderFleet=function(){const r=oldRenderFleet.apply(this,arguments);setTimeout(bindImageZoom,0);return r};
+  try{renderFleet=window.renderFleet}catch(_){ }
+}
+const oldControl=window.renderControlRoom;
+if(typeof oldControl==='function'){
+  window.renderControlRoom=function(){const r=oldControl.apply(this,arguments);setTimeout(bindImageZoom,20);return r};
+  try{renderControlRoom=window.renderControlRoom}catch(_){ }
+}
+if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',()=>setTimeout(mark,100),{once:true});else setTimeout(mark,50);
+D.addEventListener('click',e=>{if(e.target.closest?.('[data-page="flotta"],button[onclick*="flotta"],button[onclick*="controlroom"]'))setTimeout(bindImageZoom,180)});
+setTimeout(mark,450);
+})();
+</script>
 </body>
 </html>
