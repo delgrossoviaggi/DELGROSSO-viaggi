@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta name="dg-build" content="DELGROSSO-R24-MULTIBUS-SWAP-OCCUPIED-SEATS">
+<meta name="dg-build" content="DELGROSSO-R27-FUTURE-CONTROL-SUPABASE-AI13">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
 <meta charset="utf-8">
@@ -3102,22 +3102,23 @@ function save(){/* Privacy 7.4: cronologia AI solo in memoria RAM della pagina. 
 function load(){history=[]}
 function clearHistory(){history=[];pending=null;attachment=null;drawPlan(null);updateAttachment();drawChat()}
 function add(role,text,meta={}){history.push({role,text,ts:Date.now(),...meta});save();drawChat()}
-function drawChat(){const box=q('ai360Messages');if(!box)return;box.innerHTML=history.map(x=>`<div class="ai360-msg ${x.role==='user'?'me':'bot'}"><div class="ai360-bubble">${x.role==='assistant'?'<b>🤖 Assistente DELGROSSO</b><br>':''}${h(x.text).replace(/\n/g,'<br>')}</div><small>${new Date(x.ts||Date.now()).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join('')||`<div class="ai360-welcome"><b>🤖 Assistente DELGROSSO AI 360 · R20</b><p>Scrivimi come in una chat: posso leggere, cercare, confrontare e gestire il gestionale. Ogni modifica resta sotto il tuo controllo e parte solo dopo conferma.</p><div class="ai360-examples"><button onclick="ai360Example('Mario Rossi, 4 persone per Assisi da San Nicandro, telefono 3331234567, 40 euro di acconto')">🎫 Prenotazione</button><button onclick="ai360Example('Chi deve ancora pagare l’acconto per Assisi?')">💶 Acconti</button><button onclick="ai360Example('Per il noleggio da 110 passeggeri seleziona due bus sufficienti e mostrami l’anteprima')">🚌 Noleggio multi-bus</button><button onclick="ai360Example('Isabella D’Amico mi ha dato 500 euro di acconto per il noleggio, bonifico')">💶 Acconto noleggio</button><button onclick="ai360Example('Elimina il pagamento errato con ricevuta DG-...')">🗑️ Elimina pagamento errato</button><button onclick="ai360Example('Rimborsa 30 euro a Mario Rossi per Assisi e preparami la ricevuta di rimborso')">↩️ Rimborso + ricevuta</button><button onclick="ai360Example('Il PB bianco ha fatto il tagliando oggi')">🔧 Flotta</button><button onclick="ai360Example('Cosa devo fare oggi?')">📋 Priorità</button><button onclick="ai360Example('Cerca tutti i prenotati Napoli su tutte le date')">🔎 Radar</button><button onclick="ai360Example('Metti SOLD OUT Napoli 22 novembre 2026')">🔴 SOLD OUT</button><button onclick="ai360Example('Sincronizza clienti con tutte le prenotazioni')">↻ Sync clienti</button><button onclick="ai360Example('Apri la sezione documenti')">📄 Documenti</button></div></div>`;box.scrollTop=box.scrollHeight}
+function drawChat(){const box=q('ai360Messages');if(!box)return;box.innerHTML=history.map(x=>`<div class="ai360-msg ${x.role==='user'?'me':'bot'}"><div class="ai360-bubble">${x.role==='assistant'?'<b>🤖 Assistente DELGROSSO</b><br>':''}${h(x.text).replace(/\n/g,'<br>')}</div><small>${new Date(x.ts||Date.now()).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join('')||`<div class="ai360-welcome"><b>🤖 Assistente DELGROSSO AI 360 · R27</b><p>Scrivimi come in una chat: posso leggere, cercare, confrontare e gestire il gestionale. Ogni modifica resta sotto il tuo controllo e parte solo dopo conferma.</p><div class="ai360-examples"><button onclick="ai360Example('Mario Rossi, 4 persone per Assisi da San Nicandro, telefono 3331234567, 40 euro di acconto')">🎫 Prenotazione</button><button onclick="ai360Example('Chi deve ancora pagare l’acconto per Assisi?')">💶 Acconti</button><button onclick="ai360Example('Per il noleggio da 110 passeggeri seleziona due bus sufficienti e mostrami l’anteprima')">🚌 Noleggio multi-bus</button><button onclick="ai360Example('Isabella D’Amico mi ha dato 500 euro di acconto per il noleggio, bonifico')">💶 Acconto noleggio</button><button onclick="ai360Example('Elimina il pagamento errato con ricevuta DG-...')">🗑️ Elimina pagamento errato</button><button onclick="ai360Example('Rimborsa 30 euro a Mario Rossi per Assisi e preparami la ricevuta di rimborso')">↩️ Rimborso + ricevuta</button><button onclick="ai360Example('Il PB bianco ha fatto il tagliando oggi')">🔧 Flotta</button><button onclick="ai360Example('Cosa devo fare oggi?')">📋 Priorità</button><button onclick="ai360Example('Cerca tutti i prenotati Napoli su tutte le date')">🔎 Radar</button><button onclick="ai360Example('Metti SOLD OUT Napoli 22 novembre 2026')">🔴 SOLD OUT</button><button onclick="ai360Example('Sincronizza clienti con tutte le prenotazioni')">↻ Sync clienti</button><button onclick="ai360Example('Apri la sezione documenti')">📄 Documenti</button></div></div>`;box.scrollTop=box.scrollHeight}
 function actionLine(a){return `<div class="ai360-action"><b>${h(a.label||a.type||'Operazione')}</b><small>${h(a.type||'')}</small></div>`}
 function drawPlan(plan,id){const box=q('ai360Plan');if(!box)return;if(!plan||!plan.actions?.length){box.innerHTML='';return}box.innerHTML=`<div class="ai360-plan-card"><div class="ai360-plan-head"><b>🔐 Anteprima — nessuna modifica ancora eseguita</b><span>${plan.actions.length} operazion${plan.actions.length===1?'e':'i'}</span></div>${(plan.preview||[]).map(x=>`<div class="ai360-preview">• ${h(x)}</div>`).join('')}${plan.actions.map(actionLine).join('')}<div class="ai360-confirm"><button class="btn btn-green" onclick="ai360Confirm('${h(id)}')">✓ CONFERMA TUTTO</button><button class="btn btn-secondary" onclick="ai360Cancel('${h(id)}')">Annulla</button></div></div>`}
 async function invoke(body){
- const run=async()=>{
-   const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),30000);
+ const run=async(timeout=18000)=>{
+   const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
    try{return await fetch(`${SUPA_URL}/functions/v1/${FN}`,{method:'POST',signal:ctrl.signal,headers:{apikey:SUPA_KEY,Authorization:'Bearer '+(authSession?.access_token||SUPA_KEY),'Content-Type':'application/json'},body:JSON.stringify(body)})}
    finally{clearTimeout(timer)}
  };
  let r;
- try{r=await run()}catch(e){await new Promise(x=>setTimeout(x,700));r=await run()}
- if(r.status===401&&authSession?.refresh_token){if(await refreshAuth())r=await run()}
+ try{r=await run()}
+ catch(e){const x=new Error(e?.name==='AbortError'?'ASSISTANT_TIMEOUT':'ASSISTANT_NETWORK');x.code=e?.name==='AbortError'?'ASSISTANT_TIMEOUT':'ASSISTANT_NETWORK';throw x}
+ if(r.status===401&&authSession?.refresh_token){if(await refreshAuth())r=await run(10000)}
  const t=await r.text();let data;try{data=JSON.parse(t)}catch{data={message:t}}
  if(!r.ok){const e=new Error(data?.message||data?.error||`HTTP ${r.status}`);e.code=data?.error;e.status=r.status;throw e}return data;
 }
-async function status(){const el=q('ai360Status');if(!el)return;el.textContent='● controllo assistente…';el.className='ai360-status wait';try{const r=await invoke({mode:'health'});if(r.advanced_ai_configured){el.textContent=`● AI 360 R20 ONLINE · ${r.model||'motore avanzato'}`;el.className='ai360-status live'}else if(r.operational){el.textContent=`● AI 360 R20 OPERATIVA · DATI REALI${r.operator?' · '+r.operator:''}`;el.className='ai360-status live'}else{el.textContent='● ASSISTENTE GESTIONALE DISPONIBILE';el.className='ai360-status wait'}}catch(e){el.textContent='● MODALITÀ LOCALE ATTIVA';el.className='ai360-status wait'}}
+async function status(){const el=q('ai360Status');if(!el)return;el.textContent='● controllo assistente…';el.className='ai360-status wait';try{const r=await invoke({mode:'health'});if(r.advanced_ai_configured){el.textContent=`● AI 360 R27 ONLINE · ${r.model||'motore avanzato'}`;el.className='ai360-status live'}else if(r.operational){el.textContent=`● AI 360 R27 OPERATIVA · DATI REALI${r.operator?' · '+r.operator:''}`;el.className='ai360-status live'}else{el.textContent='● ASSISTENTE GESTIONALE DISPONIBILE';el.className='ai360-status wait'}}catch(e){el.textContent='● MODALITÀ LOCALE ATTIVA';el.className='ai360-status wait'}}
 
 function emNorm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
 function emDate(msg){
@@ -3396,7 +3397,7 @@ async function cancel(id){try{if(!pending?.local)await invoke({mode:'cancel',pla
 function filePicked(file){if(!file){attachment=null;updateAttachment();return}if(file.size>5*1024*1024){toast('Allegato troppo grande: massimo 5 MB',false);return}if(!file.type.startsWith('image/')){toast('Per ora allega una locandina come immagine JPG/PNG/HEIC.',false);return}const r=new FileReader();r.onload=()=>{attachment={name:file.name,type:file.type,data_url:r.result};updateAttachment()};r.readAsDataURL(file)}
 function updateAttachment(){const e=q('ai360AttachName');if(e)e.textContent=attachment?`📎 ${attachment.name}`:'Nessun allegato'}
 function mic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return toast('Dettatura non disponibile su questo browser',false);const r=new SR();r.lang='it-IT';r.interimResults=false;r.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript||'';q('ai360Input').value=(q('ai360Input').value+' '+t).trim()};r.onerror=()=>toast('Dettatura non riuscita',false);r.start()}
-function render(){const p=q('page-assistente');if(!p)return;p.innerHTML=`<div class="section-title"><div><h2>🤖 Assistente DELGROSSO AI 360° · R20</h2><p class="section-subtitle">Chat operativa su tutto il gestionale: cerca, analizza, confronta e prepara operazioni. Ogni modifica parte solo dopo la tua conferma.</p></div><span id="ai360Status" class="ai360-status wait">● controllo AI…</span></div><div class="ai360-shell"><div id="ai360Messages" class="ai360-messages"></div><div id="ai360Plan"></div><div class="ai360-compose"><textarea id="ai360Input" rows="3" placeholder="Scrivi come in chat: es. Cerca tutti i prenotati Napoli, apri un BIS, registra un acconto, fammi il briefing di oggi…"></textarea><div class="ai360-tools"><label class="btn btn-secondary ai360-file">📎 Locandina<input id="ai360File" type="file" accept="image/*" hidden></label><button class="btn btn-secondary" id="ai360Mic">🎙️ Dettatura</button><button class="btn btn-secondary" id="ai360Clear">🧹 Pulisci chat</button><span id="ai360AttachName">Nessun allegato</span><button class="btn btn-primary" id="ai360Send">Invia ➜</button></div></div></div><div class="ai360-safety"><b>🔒 Regola fissa:</b> letture e controlli possono partire subito; prenotazioni, pagamenti, rimborsi, spostamenti, cancellazioni, viaggi/BIS, flotta, noleggi, documenti ed economia richiedono sempre la tua conferma.</div>`;drawChat();q('ai360Send').onclick=send;q('ai360Input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});q('ai360File').onchange=e=>filePicked(e.target.files?.[0]);q('ai360Mic').onclick=mic;q('ai360Clear').onclick=clearHistory;status()}
+function render(){const p=q('page-assistente');if(!p)return;p.innerHTML=`<div class="section-title"><div><h2>🤖 Assistente DELGROSSO AI 360° · R27</h2><p class="section-subtitle">Chat operativa su tutto il gestionale: cerca, analizza, confronta e prepara operazioni. Ogni modifica parte solo dopo la tua conferma.</p></div><span id="ai360Status" class="ai360-status wait">● controllo AI…</span></div><div class="ai360-shell"><div id="ai360Messages" class="ai360-messages"></div><div id="ai360Plan"></div><div class="ai360-compose"><textarea id="ai360Input" rows="3" placeholder="Scrivi come in chat: es. Cerca tutti i prenotati Napoli, apri un BIS, registra un acconto, fammi il briefing di oggi…"></textarea><div class="ai360-tools"><label class="btn btn-secondary ai360-file">📎 Locandina<input id="ai360File" type="file" accept="image/*" hidden></label><button class="btn btn-secondary" id="ai360Mic">🎙️ Dettatura</button><button class="btn btn-secondary" id="ai360Clear">🧹 Pulisci chat</button><span id="ai360AttachName">Nessun allegato</span><button class="btn btn-primary" id="ai360Send">Invia ➜</button></div></div></div><div class="ai360-safety"><b>🔒 Regola fissa:</b> letture e controlli possono partire subito; prenotazioni, pagamenti, rimborsi, spostamenti, cancellazioni, viaggi/BIS, flotta, noleggi, documenti ed economia richiedono sempre la tua conferma.</div>`;drawChat();q('ai360Send').onclick=send;q('ai360Input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});q('ai360File').onchange=e=>filePicked(e.target.files?.[0]);q('ai360Mic').onclick=mic;q('ai360Clear').onclick=clearHistory;status()}
 window.renderAssistant=render;window.ai360Send=send;window.ai360Clear=clearHistory;window.ai360Confirm=confirm;window.ai360Cancel=cancel;window.ai360Example=t=>{q('ai360Input').value=t;q('ai360Input').focus()};
 load();
 const css=document.createElement('style');css.id='dg-ai360-style';css.textContent=`.ai360-status{padding:8px 11px;border-radius:999px;font-size:12px;font-weight:900}.ai360-status.live{background:#e9fff3;color:#087a45}.ai360-status.wait{background:#fff7df;color:#8a5b00}.ai360-status.off{background:#fff0f3;color:#a51335}.ai360-shell{background:#fff;border:1px solid #dbe5ef;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(16,43,68,.08)}.ai360-messages{height:min(55vh,520px);overflow:auto;padding:18px;background:linear-gradient(180deg,#f7fbff,#fff)}.ai360-msg{display:flex;flex-direction:column;margin:8px 0;max-width:86%}.ai360-msg.me{margin-left:auto;align-items:flex-end}.ai360-msg.bot{align-items:flex-start}.ai360-bubble{padding:12px 14px;border-radius:16px;line-height:1.45;background:#fff;border:1px solid #dbe5ef}.ai360-msg.me .ai360-bubble{background:#0b67c8;color:#fff;border-color:#0b67c8}.ai360-msg small{font-size:10px;color:#789;margin:3px 7px}.ai360-welcome{max-width:720px;margin:45px auto;text-align:center;color:#29445d}.ai360-welcome b{font-size:21px}.ai360-examples{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}.ai360-examples button{border:1px solid #cfdeec;background:#fff;border-radius:999px;padding:8px 11px;cursor:pointer}.ai360-compose{border-top:1px solid #dbe5ef;padding:12px}.ai360-compose textarea{width:100%;font-size:16px;min-height:84px;resize:vertical}.ai360-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.ai360-tools #ai360AttachName{font-size:11px;color:#6b7f92;flex:1}.ai360-plan-card{margin:12px;border:2px solid #79aee8;border-radius:14px;padding:13px;background:#f5faff}.ai360-plan-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px}.ai360-plan-head span{font-size:11px;background:#dcecff;border-radius:999px;padding:4px 8px}.ai360-preview{padding:4px 0}.ai360-action{padding:9px 10px;background:#fff;border:1px solid #dbe5ef;border-radius:10px;margin-top:7px}.ai360-action small{display:block;color:#72869a;margin-top:2px}.ai360-confirm{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.ai360-safety{margin-top:10px;padding:11px 13px;border-radius:12px;background:#f6f9fc;border:1px solid #dfe8f1;font-size:12px;color:#52697f}@media(max-width:700px){.ai360-messages{height:48vh;padding:10px}.ai360-msg{max-width:94%}.ai360-tools{display:grid;grid-template-columns:1fr 1fr}.ai360-tools #ai360AttachName{grid-column:1/-1}.ai360-tools #ai360Send{grid-column:1/-1;min-height:48px}.ai360-confirm .btn{width:100%}.ai360-plan-head{flex-direction:column}.section-title .ai360-status{justify-self:start}}`;document.head.appendChild(css);
@@ -3731,6 +3732,7 @@ function injectNav(){
       <button data-page="dashboard" class="active"><span class="ico">⌂</span><span>Control Room</span></button>
       <button data-page="viaggi"><span class="ico">🚌</span><span>Viaggi</span></button>
       <button data-page="prenotazioni"><span class="ico">▣</span><span>Prenotazioni</span></button>
+      <button data-page="posti"><span class="ico">🪑</span><span>Gestione Posti</span></button>
       <button data-page="noleggi"><span class="ico">🚐</span><span>Noleggi</span></button>
       <button data-page="crm"><span class="ico">👥</span><span>Clienti & CRM</span></button>
       <button data-page="flotta"><span class="ico">🚍</span><span>Flotta</span></button>
@@ -3750,6 +3752,7 @@ function injectNav(){
       <button onclick="mobileGo('dashboard')">🎛️<span>Control Room</span></button>
       <button onclick="mobileGo('viaggi')">🚌<span>Viaggi</span></button>
       <button onclick="mobileGo('prenotazioni')">▣<span>Prenotazioni</span></button>
+      <button onclick="mobileGo('posti')">🪑<span>Gestione Posti</span></button>
       <button onclick="mobileGo('noleggi')">🚐<span>Noleggi</span></button>
       <button onclick="mobileGo('crm')">👥<span>Clienti & CRM</span></button>
       <button onclick="mobileGo('flotta')">🚍<span>Flotta</span></button>
@@ -5134,7 +5137,7 @@ function injectBioSettings22(){const page=q22('page-impostazioni'),cards=page?.q
 async function refreshAIStatus22(){const el=q22('dg22AiMode');if(!el||!authSession?.access_token)return;try{const r=await fetch(`${SUPA_URL}/functions/v1/delgrosso-ai360-v2`,{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+authSession.access_token,'Content-Type':'application/json'},body:JSON.stringify({mode:'status'})});const j=await r.json();if(!r.ok)throw new Error(j?.message||j?.error||'AI non raggiungibile');el.textContent=j.advanced_ai_configured?`AI AVANZATA ATTIVA · ${j.model||'modello configurato'} · backend v${j.version||'—'}`:`MOTORE OPERATIVO ATTIVO · backend v${j.version||'—'} · AI avanzata non configurata`;el.style.color=j.advanced_ai_configured?'#a9ffd3':'#ffe2a8'}catch(e){el.textContent='AI: controllo non disponibile';el.style.color='#ffc2c2'}}
 function enhanceAssistant22(){
  const page=q22('page-assistente');if(!page)return;
- const h=page.querySelector('.section-title h2');if(h)h.textContent='🤖 DELGROSSO Control AI · R22';
+ const h=page.querySelector('.section-title h2');if(h)h.textContent='🤖 DELGROSSO Control AI · R27';
  const sub=page.querySelector('.section-title .section-subtitle,.section-title p');if(sub)sub.textContent='Chat operativa completa: legge il gestionale LIVE, analizza e propone azioni; ogni modifica richiede conferma.';
  const shell=page.querySelector('.ai360-shell')||page.querySelector('.card');
  let cockpit=q22('dg22AiCockpit');if(!cockpit){cockpit=document.createElement('div');cockpit.id='dg22AiCockpit';cockpit.className='dg22-ai-cockpit';(shell||page.firstElementChild)?.insertAdjacentElement(shell?'beforebegin':'afterend',cockpit)}
@@ -5230,6 +5233,189 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  window.renderSeatPicker=function(){const tripId=document.getElementById('b_trip')?.value;if(!tripId||!document.getElementById('seatPicker'))return prevSeatPicker?.();const bId=window.currentBookingId||'',v=(state.viaggi||[]).find(x=>x.id===tripId)||{},busyMap=seatInfo(tripId),total=Math.max(0,Number(v.posti_totali||0));document.getElementById('seatPicker').innerHTML=Array.from({length:total},(_,i)=>{const n=String(i+1),busy=busyMap.get(n),self=busy&&busy.id===bId,blocked=busy&&!self,company=Boolean(busy?.riserva_aziendale),c=busy?stopStyle(busy.fermata_partenza):null,sel=(window.modalSelectedSeats||modalSelectedSeats||[]).includes(n),style=busy&&!company?`background:${c.bg};color:${c.fg};border-color:${c.border||c.bg}`:'';return `<button type="button" class="seat ${blocked?'busy':''} ${company?'company-reserved':''} ${sel?'selected':''}" style="${style}" ${blocked?'disabled':''} onclick="toggleSeat('${n}')" title="${busy?esc((busy.cliente||busy.cliente_nome||'Cliente')+' · '+(busy.fermata_partenza||'')):'Libero'}">${n}</button>`}).join('');document.getElementById('b_selected').value=modalSelectedSeats.join(', ');document.getElementById('b_seats').value=modalSelectedSeats.length||1}
 })();
 </script>
+
+<style id="dg-r27-future-control">
+:root{
+  --r27-navy:#071522;--r27-navy2:#0a2135;--r27-panel:#0e2940;
+  --r27-blue:#087ff0;--r27-cyan:#20b8ff;--r27-ink:#10253b;
+  --r27-muted:#6b8094;--r27-line:#d7e4ef;--r27-soft:#f4f8fc;
+  --r27-glow:0 10px 30px rgba(9,83,151,.12);
+}
+html,body{background:#eaf1f7!important}
+body{letter-spacing:.005em}
+.sidebar{background:linear-gradient(180deg,#06131f 0%,#071b2c 55%,#06131f 100%)!important;border-right:1px solid rgba(85,174,244,.16)!important}
+.brand{background:transparent!important}
+.nav button{border:1px solid transparent!important;transition:background .14s ease,border-color .14s ease,transform .14s ease!important}
+.nav button:hover{transform:translateX(2px)}
+.nav button.active,.nav button:hover{background:linear-gradient(90deg,rgba(9,119,230,.95),rgba(5,78,161,.92))!important;border-color:rgba(91,188,255,.22)!important;box-shadow:0 7px 20px rgba(0,83,170,.18)!important}
+.main{background:radial-gradient(circle at 85% 0%,rgba(22,146,239,.08),transparent 24%),linear-gradient(180deg,#edf4fa,#e8f0f7)!important}
+.topbar{background:rgba(6,21,34,.97)!important;border-bottom:1px solid rgba(79,167,236,.18)!important;box-shadow:0 8px 28px rgba(3,20,35,.14)!important;color:#fff!important}
+.top-brand strong,.top-brand small,.top-actions,.user{color:#eef8ff!important}
+.search{background:#0d2a41!important;border-color:rgba(104,183,241,.18)!important}
+.search input{color:#eff8ff!important}.search input::placeholder{color:#8fb0ca!important}
+.content{color:var(--r27-ink)!important}
+.page-context,.pagebar{background:linear-gradient(100deg,#09243a,#0a3353)!important;color:#fff!important;border:1px solid rgba(73,166,235,.18)!important;box-shadow:0 6px 18px rgba(5,37,63,.09)!important}
+.card,.module-card,.metric,.agenda-kpi,.dg-mb-control,.dg-seat-page-hero>div{
+  background:rgba(255,255,255,.97)!important;border-color:#d7e4ef!important;
+  box-shadow:0 8px 26px rgba(20,54,84,.065)!important;
+}
+.card,.module-card{border-radius:15px!important}
+.card-head{background:linear-gradient(180deg,#fff,#f8fbfe)!important;border-bottom-color:#e4edf5!important}
+.card-head h3,.section-title h2,.module-card h3{color:#102a43!important}
+.table th{background:#f1f6fa!important;color:#60768b!important}.table td{color:#173149!important}
+.table tbody tr:hover td{background:#f5faff!important}
+.btn{border-radius:10px!important;transition:transform .12s ease,box-shadow .12s ease,filter .12s ease}
+.btn:hover{transform:translateY(-1px);filter:saturate(1.06)}
+.btn-primary{background:linear-gradient(135deg,#0a85f3,#075fbd)!important;box-shadow:0 7px 16px rgba(8,120,229,.18)!important}
+.btn-green{background:linear-gradient(135deg,#14b87c,#07895a)!important}
+.field input,.field select,.field textarea,.toolbar input,.toolbar select{background:#fbfdff!important;border-color:#d6e3ee!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#43a9f4!important;box-shadow:0 0 0 3px rgba(32,158,245,.12)!important}
+
+/* Main seat shortcut in the menu */
+.dg-r27-seat-banner{margin:0 11px 10px;padding:11px;border:1px solid rgba(75,182,255,.25);border-radius:13px;background:linear-gradient(135deg,rgba(6,84,151,.44),rgba(7,37,65,.78));color:#fff;box-shadow:inset 0 1px rgba(255,255,255,.04),0 8px 24px rgba(0,0,0,.13)}
+.dg-r27-seat-banner small{display:block;color:#80cfff;font-weight:900;font-size:9px;letter-spacing:1.25px}
+.dg-r27-seat-banner b{display:block;font-size:12px;margin:4px 0}
+.dg-r27-seat-banner p{font-size:9px;line-height:1.35;color:#c4d9eb;margin:0 0 7px}
+.dg-r27-seat-banner button{width:100%;min-height:34px;border:0;border-radius:8px;background:#0c83ed;color:#fff;font-size:10px;font-weight:900;cursor:pointer}
+.dg-r27-seat-banner button:hover{background:#1697ff}
+.dg-r27-mobile-seat{margin:10px 0;padding:12px;border-radius:13px;background:linear-gradient(135deg,#0b3150,#095b9c);color:#fff}
+.dg-r27-mobile-seat b{font-size:13px}.dg-r27-mobile-seat small{display:block;color:#cbe6fb;margin:4px 0 8px;line-height:1.35}
+.dg-r27-mobile-seat button{width:100%;min-height:44px;border:0;border-radius:10px;background:#fff;color:#075aa9;font-weight:900}
+
+/* Quick command buttons */
+.dg-r27-top-actions{display:flex;gap:6px;align-items:center}
+.dg-r27-top-actions button{border:1px solid rgba(118,194,248,.18);background:#0d2940;color:#eaf6ff;border-radius:9px;min-height:36px;padding:7px 10px;font-size:10px;font-weight:900}
+.dg-r27-top-actions button:hover{background:#104068}
+
+/* Dashboard / control polish */
+.reference-hero,.dl26-static-hero{border:1px solid rgba(46,150,226,.18)!important;box-shadow:0 14px 35px rgba(18,55,85,.12)!important}
+.ref-metric,.dl26-metrics .metric{box-shadow:0 9px 22px rgba(12,72,120,.12)!important}
+.statusline{border:1px solid rgba(118,145,168,.13)}
+.sync-pill.live{box-shadow:0 0 0 3px rgba(16,185,129,.08)}
+
+/* Seat page is a command center */
+#page-posti .dg-seat-page-hero{background:linear-gradient(135deg,#f8fcff,#eef7ff)!important;border:1px solid #cfe2f2!important;border-radius:18px!important;padding:4px}
+#page-posti .dg-seat-page-hero .btn-primary{min-height:54px!important;font-size:15px!important}
+#page-posti .module-card{position:relative;overflow:hidden}
+#page-posti .module-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#1aa9ff,#0869c6)}
+.dg-mb-bus{border-color:#cbddea!important;box-shadow:0 12px 28px rgba(16,65,101,.09)!important}
+.dg-mb-bus-head{background:linear-gradient(135deg,#0a2a43,#0c456e)!important}
+.dg-mb-bus.bus-target .dg-mb-bus-head{background:linear-gradient(135deg,#075f4d,#07936d)!important}
+.dg-mb-seat.target-selected{box-shadow:0 0 0 4px rgba(24,184,124,.20),0 4px 14px rgba(7,95,74,.12)!important}
+
+/* Assistant R27 */
+#page-assistente .ai360-shell{border:1px solid #cfe0ee!important;border-radius:18px!important;box-shadow:0 14px 36px rgba(17,68,105,.10)!important}
+#page-assistente .ai360-messages{background:radial-gradient(circle at 100% 0%,rgba(12,135,237,.08),transparent 30%),linear-gradient(180deg,#f6fbff,#fff)!important}
+#page-assistente .ai360-bubble{border-radius:15px!important;box-shadow:0 4px 14px rgba(26,61,91,.04)}
+#page-assistente .ai360-msg.me .ai360-bubble{background:linear-gradient(135deg,#087ce6,#075ab5)!important}
+#page-assistente .ai360-status.live{background:#e2f9ef!important;color:#08754d!important;border:1px solid #bcebd7}
+#page-assistente .dg22-ai-cockpit{background:linear-gradient(135deg,#071e31,#0a3a5f)!important;border:1px solid rgba(91,183,247,.22)!important;box-shadow:0 12px 30px rgba(5,52,88,.14)!important}
+#page-assistente .dg-master-ai-quick button{border-radius:999px!important}
+.dg-r27-ai-note{margin:0 0 10px;padding:10px 12px;border:1px solid #cfe4f4;background:#f2f9ff;border-radius:11px;color:#315a78;font-size:11px}
+.dg-r27-ai-note b{color:#0b649f}
+
+/* Smoother, less expensive animation */
+*{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+@media(max-width:1000px){
+  .topbar{background:rgba(6,21,34,.98)!important}
+  .content{background:linear-gradient(180deg,#edf4fa,#e9f1f7)!important}
+  .dg-r27-top-actions{display:none!important}
+  .mobile-menu-panel{background:#edf4fa!important}
+  .mobile-menu-head{background:linear-gradient(135deg,#061522,#0a3555)!important}
+}
+@media(max-width:600px){
+  .card,.module-card{border-radius:13px!important}
+  .section-title h2{font-size:19px!important}
+  #page-posti .dg-seat-page-hero{padding:0!important}
+  .dg-mb-layout{gap:10px!important}
+}
+</style>
+
+
+<script id="dg-r27-future-control-runtime">
+(function(){
+'use strict';
+const byId=id=>document.getElementById(id);
+
+function goR27(page){
+  if(typeof window.go==='function') window.go(page);
+  else location.hash=page;
+}
+function injectSeatBanner(){
+  const sidebar=document.querySelector('.sidebar');
+  const brand=sidebar?.querySelector('.brand');
+  if(sidebar&&brand&&!byId('dgR27SeatBanner')){
+    const x=document.createElement('div');
+    x.id='dgR27SeatBanner'; x.className='dg-r27-seat-banner';
+    x.innerHTML='<small>BUS / BIS CONTROL</small><b>🪑 Gestione Posti Multi-Bus</b><p>Sposta e scambia passeggeri tra BUS dello stesso viaggio, anche su posti occupati.</p><button type="button">APRI GESTIONE POSTI →</button>';
+    x.querySelector('button').onclick=()=>goR27('posti');
+    brand.insertAdjacentElement('afterend',x);
+  }
+  const mobileStatus=document.querySelector('.mobile-menu-status');
+  if(mobileStatus&&!byId('dgR27MobileSeat')){
+    const x=document.createElement('div');x.id='dgR27MobileSeat';x.className='dg-r27-mobile-seat';
+    x.innerHTML='<b>🪑 Gestione Posti BUS/BIS</b><small>Cambia posti e sposta passeggeri tra gli autobus dello stesso viaggio.</small><button type="button">Apri Gestione Posti</button>';
+    x.querySelector('button').onclick=()=>{goR27('posti');document.getElementById('mobileMenu')?.classList.remove('on')};
+    mobileStatus.insertAdjacentElement('afterend',x);
+  }
+}
+function injectTopActions(){
+  const top=document.querySelector('.topbar .top-actions');
+  if(top&&!byId('dgR27TopActions')){
+    const x=document.createElement('div');x.id='dgR27TopActions';x.className='dg-r27-top-actions';
+    x.innerHTML='<button type="button">🪑 Posti BUS/BIS</button><button type="button">🤖 Assistente</button>';
+    const b=x.querySelectorAll('button');b[0].onclick=()=>goR27('posti');b[1].onclick=()=>goR27('assistente');
+    top.insertAdjacentElement('beforebegin',x);
+  }
+}
+function enhanceAssistant(){
+  const page=byId('page-assistente'); if(!page)return;
+  const h=page.querySelector('.section-title h2'); if(h)h.textContent='🤖 Assistente DELGROSSO AI 360° · R27';
+  const p=page.querySelector('.section-title p,.section-subtitle');
+  if(p)p.textContent='Assistente operativo con dati Supabase LIVE, risposta rapida e conferma obbligatoria per ogni modifica.';
+  const shell=page.querySelector('.ai360-shell');
+  if(shell&&!byId('dgR27AiNote')){
+    const n=document.createElement('div');n.id='dgR27AiNote';n.className='dg-r27-ai-note';
+    n.innerHTML='<b>R27 · Motore AI v13:</b> le domande operative usano percorsi rapidi sui dati reali; se il motore avanzato non risponde, il gestionale passa automaticamente alla modalità locale senza bloccarsi.';
+    shell.insertAdjacentElement('beforebegin',n);
+  }
+  const quick=byId('dgMasterAiQuick');
+  if(quick&&!quick.dataset.r27){
+    quick.dataset.r27='1';
+    const btn=document.createElement('button');
+    btn.type='button';btn.textContent='🪑 Gestione posti';
+    btn.onclick=()=>{const i=byId('ai360Input');if(i){i.value='Apri Gestione Posti per spostare passeggeri tra BUS e BIS dello stesso viaggio';window.ai360Send?.()}};
+    quick.prepend(btn);
+  }
+}
+function markR27(){
+  document.documentElement.dataset.dgVersion='R27';
+  document.documentElement.dataset.dgAiBackend='13';
+  document.title='DELGROSSO — Future Control R27';
+  const m=document.querySelector('meta[name="dg-build"]');if(m)m.content='DELGROSSO-R27-FUTURE-CONTROL-SUPABASE-AI13';
+  document.querySelectorAll('.version').forEach(x=>{
+    x.innerHTML='DELGROSSO Future Control R27 · Produzione · Supabase LIVE<br>© DELGROSSO VIAGGI 2026 · © CREATED CRISTINO NICOLA PIO';
+  });
+}
+function updatePostiContext(){
+  const labels=window.PAGE_META;
+  if(labels&&typeof labels==='object')labels.posti=['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus dello stesso viaggio'];
+}
+function boot(){
+  markR27();updatePostiContext();injectSeatBanner();injectTopActions();enhanceAssistant();
+}
+document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,220),{once:true});
+window.addEventListener('load',()=>setTimeout(boot,350),{once:true});
+const oldGo=window.go;
+if(typeof oldGo==='function'&&!oldGo.__r27){
+  const w=function(page){const r=oldGo.apply(this,arguments);setTimeout(()=>{injectSeatBanner();injectTopActions();if(page==='assistente')enhanceAssistant();markR27()},40);return r};
+  w.__r27=true;window.go=w;try{go=w}catch(_){}
+}
+setTimeout(boot,700);
+})();
+</script>
+
 <script id="dgR24Marker">document.documentElement.dataset.dgMultibus="R24-SWAP";</script>
 </body>
 </html>
