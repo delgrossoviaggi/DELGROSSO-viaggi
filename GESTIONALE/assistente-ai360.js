@@ -1,0 +1,231 @@
+/* DELGROSSO AI 360 — chat AI operativa con conferma umana */
+(function(){
+'use strict';
+const FN='delgrosso-ai360-v2';
+let history=[];
+let pending=null;
+let attachment=null;
+const HISTORY_VERSION='12';
+function historyKey(){
+  const uid=authSession?.user?.id||currentOperator?.username||'guest';
+  return `dg_ai360_history_v${HISTORY_VERSION}_${uid}`;
+}
+const q=id=>document.getElementById(id);
+const h=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function save(){try{sessionStorage.setItem(historyKey(),JSON.stringify(history.slice(-30)))}catch{}}
+function load(){
+  try{
+    // V12 intentionally starts a clean chat and keeps Nicola/Raffaele separate.
+    history=JSON.parse(sessionStorage.getItem(historyKey())||'[]');
+    history=history.filter(x=>!/(Failed to fetch|manca la chiave API|AI_NOT_CONFIGURED)/i.test(String(x?.text||'')));
+  }catch{history=[]}
+}
+function clearHistory(){
+  history=[];pending=null;attachment=null;
+  try{sessionStorage.removeItem(historyKey())}catch{}
+  drawPlan(null);updateAttachment();drawChat();
+}
+function add(role,text,meta={}){history.push({role,text,ts:Date.now(),...meta});save();drawChat()}
+function drawChat(){const box=q('ai360Messages');if(!box)return;box.innerHTML=history.map(x=>`<div class="ai360-msg ${x.role==='user'?'me':'bot'}"><div class="ai360-bubble">${x.role==='assistant'?'<b>🤖 Assistente DELGROSSO</b><br>':''}${h(x.text).replace(/\n/g,'<br>')}</div><small>${new Date(x.ts||Date.now()).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}</small></div>`).join('')||`<div class="ai360-welcome"><b>🤖 Assistente DELGROSSO AI 360</b><p>Scrivimi normalmente. Sono operativo anche senza servizi esterni per le funzioni principali del gestionale; preparo sempre l’anteprima prima di modificare i dati.</p><div class="ai360-examples"><button onclick="ai360Example('Mario Rossi, 4 persone per Assisi da San Nicandro, telefono 3331234567, 40 euro di acconto')">🎫 Prenotazione</button><button onclick="ai360Example('Chi deve ancora pagare l’acconto per Assisi?')">💶 Acconti</button><button onclick="ai360Example('Per il noleggio da 110 passeggeri seleziona due bus sufficienti e mostrami l’anteprima')">🚌 Noleggio multi-bus</button><button onclick="ai360Example('Isabella D’Amico mi ha dato 500 euro di acconto per il noleggio, bonifico')">💶 Acconto noleggio</button><button onclick="ai360Example('Elimina il pagamento errato con ricevuta DG-...')">🗑️ Elimina pagamento errato</button><button onclick="ai360Example('Rimborsa 30 euro a Mario Rossi per Assisi e preparami la ricevuta di rimborso')">↩️ Rimborso + ricevuta</button><button onclick="ai360Example('Il PB bianco ha fatto il tagliando oggi')">🔧 Flotta</button><button onclick="ai360Example('Cosa devo fare oggi?')">📋 Priorità</button></div></div>`;box.scrollTop=box.scrollHeight}
+function actionLine(a){return `<div class="ai360-action"><b>${h(a.label||a.type||'Operazione')}</b><small>${h(a.type||'')}</small></div>`}
+function drawPlan(plan,id){const box=q('ai360Plan');if(!box)return;if(!plan||!plan.actions?.length){box.innerHTML='';return}box.innerHTML=`<div class="ai360-plan-card"><div class="ai360-plan-head"><b>🔐 Anteprima — nessuna modifica ancora eseguita</b><span>${plan.actions.length} operazion${plan.actions.length===1?'e':'i'}</span></div>${(plan.preview||[]).map(x=>`<div class="ai360-preview">• ${h(x)}</div>`).join('')}${plan.actions.map(actionLine).join('')}<div class="ai360-confirm"><button class="btn btn-green" onclick="ai360Confirm('${h(id)}')">✓ CONFERMA TUTTO</button><button class="btn btn-secondary" onclick="ai360Cancel('${h(id)}')">Annulla</button></div></div>`}
+async function invoke(body){
+ const run=async()=>{
+   const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),20000);
+   try{return await fetch(`${SUPA_URL}/functions/v1/${FN}`,{method:'POST',signal:ctrl.signal,headers:{apikey:SUPA_KEY,Authorization:'Bearer '+(authSession?.access_token||SUPA_KEY),'Content-Type':'application/json'},body:JSON.stringify(body)})}
+   finally{clearTimeout(timer)}
+ };
+ let r;
+ try{r=await run()}catch(e){await new Promise(x=>setTimeout(x,700));r=await run()}
+ if(r.status===401&&authSession?.refresh_token){if(await refreshAuth())r=await run()}
+ const t=await r.text();let data;try{data=JSON.parse(t)}catch{data={message:t}}
+ if(!r.ok){const e=new Error(data?.message||data?.error||`HTTP ${r.status}`);e.code=data?.error;e.status=r.status;throw e}return data;
+}
+async function status(){const el=q('ai360Status');if(!el)return;el.textContent='● controllo AI…';el.className='ai360-status wait';try{const r=await invoke({mode:'health'});if(r.operational||r.ai_configured){el.textContent=`● AI ONLINE · ${r.model||'Gestionale AI operativo'}`;el.className='ai360-status live'}else{el.textContent='● AI GESTIONALE DISPONIBILE';el.className='ai360-status wait'}}catch(e){el.textContent='● MODALITÀ LOCALE ATTIVA';el.className='ai360-status wait'}}
+
+function emNorm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function emDate(msg){
+  const raw=String(msg||'');
+  let m=raw.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
+  if(m)return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  const months={gennaio:1,febbraio:2,marzo:3,aprile:4,maggio:5,giugno:6,luglio:7,agosto:8,settembre:9,ottobre:10,novembre:11,dicembre:12};
+  const n=emNorm(raw);
+  for(const [name,month] of Object.entries(months)){
+    const r=new RegExp(`\\b${name}\\s+(20\\d{2})\\b`).exec(n);
+    if(r){const last=new Date(Number(r[1]),month,0).getDate();return `${r[1]}-${String(month).padStart(2,'0')}-${String(last).padStart(2,'0')}`}
+  }
+  return null;
+}
+function emMoney(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0))}
+function emTrips(msg){
+  const n=emNorm(msg),date=emDate(msg),trips=state.viaggi||[];
+  const stop=new Set(['quanto','incassato','incassati','incasso','viaggio','gita','posti','rimangono','rimasti','liberi','disponibili','prenotati','persone','acconto','saldo','pagato','per']);
+  const words=n.split(' ').filter(w=>w.length>=4&&!stop.has(w)&&!/^20\d{2}$/.test(w));
+  const scored=trips.map(v=>{
+    const text=emNorm(`${v.titolo||''} ${v.destinazione||''}`);
+    let score=words.reduce((z,w)=>z+(text.includes(w)?1:0),0);
+    if(date&&String(v.data_partenza)===date)score+=5;
+    else if(date)score-=3;
+    return {v,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+  return scored.length?scored.map(x=>x.v):(date?trips.filter(v=>String(v.data_partenza)===date):[]);
+}
+function emFleet(msg){
+  const n=emNorm(msg),fleet=(state.flotta||[]).filter(f=>f.attivo!==false);
+  return fleet.filter(f=>{
+    const t=emNorm(`${f.titolo||''} ${f.marca||''} ${f.modello||''} ${f.targa||''}`);
+    if(n.includes('pb bianco'))return t.includes('pb')&&t.includes('bianco');
+    if(n.includes('century')||n.includes('grigio'))return t.includes('century')||t.includes('grigio');
+    if(n.includes('limousine'))return t.includes('limousine');
+    if(/\bpb\b/.test(n))return t.includes('pb')&&!t.includes('bianco');
+    return false;
+  });
+}
+function localEmergencyPlan(msg){
+  const n=emNorm(msg),date=emDate(msg);
+  if((n.includes('quanto')||n.includes('incass'))&&(n.includes('nicola')||n.includes('raffaele'))){
+    const who=n.includes('raffaele')?'raffaele':'nicola';
+    const r=(state.cassaOperatori||[]).find(x=>emNorm(x.username||x.nome)===who);
+    if(!r)return {assistant_message:'Non trovo il riepilogo cassa dell’operatore.',actions:[]};
+    return {assistant_message:`${r.nome}: cassa netta ${emMoney(r.cassa_netto)}. Viaggi ${emMoney(r.viaggi_incassati)}, noleggi ${emMoney(r.noleggi_incassati)}, rimborsi ${emMoney(Number(r.viaggi_rimborsi||0)+Number(r.noleggi_rimborsi||0))}.`,actions:[]};
+  }
+  if(n.includes('incassat')){
+    const trips=emTrips(msg);
+    if(trips.length!==1)return {assistant_message:'Indicami meglio destinazione e data del viaggio.',actions:[]};
+    const v=trips[0],rows=(state.pagamenti||[]).filter(x=>x.viaggio_id===v.id);
+    const pos=rows.filter(x=>emNorm(x.tipo)!=='rimborso').reduce((z,x)=>z+Math.abs(Number(x.importo||0)),0);
+    const ref=rows.filter(x=>emNorm(x.tipo)==='rimborso').reduce((z,x)=>z+Math.abs(Number(x.importo||0)),0);
+    return {assistant_message:`Per ${v.titolo||v.destinazione} del ${v.data_partenza}: incassati ${emMoney(pos)}, rimborsi ${emMoney(ref)}, netto ${emMoney(pos-ref)}.`,actions:[]};
+  }
+  if(n.includes('posti')&&(n.includes('rimang')||n.includes('liber')||n.includes('disponib'))){
+    const trips=emTrips(msg);
+    if(trips.length!==1)return {assistant_message:'Indicami meglio viaggio e data per controllare i posti.',actions:[]};
+    const v=trips[0],used=(state.prenotazioni||[]).filter(b=>b.viaggio_id===v.id&&!emNorm(b.stato).startsWith('annull')).reduce((z,b)=>z+Number(b.posti||0),0);
+    return {assistant_message:`${v.titolo||v.destinazione}: ${used} prenotati su ${Number(v.posti_totali||0)}, quindi ${Math.max(Number(v.posti_totali||0)-used,0)} posti liberi.`,actions:[]};
+  }
+  if((n.includes('estintor')||n.includes('scadenza estint'))&&date){
+    const vehicles=emFleet(msg);
+    if(!vehicles.length)return {assistant_message:'Non riesco a identificare il mezzo. Scrivi PB bianco, PB, Century grigio o Limousine Bus.',actions:[]};
+    const names=vehicles.map(v=>v.titolo||v.modello||v.targa);
+    return {
+      assistant_message:`Ho capito: scadenza estintori ${date} per ${names.join(', ')}.`,
+      preview:names.map(x=>`${x} → scadenza estintori ${date}`),
+      actions:[{type:'deadline',label:'Imposta scadenza estintori',params:{vehicle_ids:vehicles.map(v=>v.id),type:'Estintori',title:'Scadenza estintori',date,priority:'alta',notes:'Inserita tramite Assistente DELGROSSO AI 360'}}]
+    };
+  }
+  if(n.includes('chi')&&(n.includes('acconto')||n.includes('pagare'))){
+    const trips=emTrips(msg);
+    if(trips.length!==1)return {assistant_message:'Indicami meglio viaggio e data per controllare gli acconti.',actions:[]};
+    const v=trips[0],rows=(state.prenotazioni||[]).filter(b=>b.viaggio_id===v.id&&!emNorm(b.stato).startsWith('annull')&&Number(b.pagato||0)<=0);
+    return {assistant_message:rows.length?`Senza pagamento per ${v.titolo||v.destinazione}: ${rows.map(b=>b.cliente||b.cliente_nome).join(', ')}.`:`Per ${v.titolo||v.destinazione} non risultano prenotazioni completamente senza pagamento.`,actions:[]};
+  }
+  return null;
+}
+
+async function send(){const input=q('ai360Input'),msg=input?.value.trim();if(!msg)return;input.value='';add('user',msg);q('ai360Plan').innerHTML='';pending=null;const sendBtn=q('ai360Send');sendBtn.disabled=true;sendBtn.textContent='Analizzo…';add('assistant','Sto controllando i dati reali del gestionale e preparo il piano…',{temporary:true});const tmpIndex=history.length-1;
+ try{const r=await invoke({mode:'plan',message:msg,history:history.filter(x=>!x.temporary).slice(-8).map(x=>({role:x.role,content:x.text})),attachment});history.splice(tmpIndex,1);attachment=null;updateAttachment();const p=r.plan||{};add('assistant',p.needs_clarification?(p.clarification_question||p.assistant_message||'Mi serve un dato in più.'):(p.assistant_message||'Ho preparato il piano.'));if(p.actions?.length){pending={id:r.plan_id,plan:p};drawPlan(p,r.plan_id)}else drawPlan(null)}
+ catch(e){
+   history.splice(tmpIndex,1);
+   const local=localEmergencyPlan(msg);
+   if(local){
+     add('assistant',local.assistant_message||'Ho elaborato la richiesta in modalità di emergenza.');
+     if(local.actions?.length){
+       const id='LOCAL-'+Date.now();
+       pending={id,plan:{...local,requires_confirmation:true},local:true};
+       drawPlan(pending.plan,id);
+     }else drawPlan(null);
+   }else{
+     add('assistant','Connessione al motore non disponibile in questo momento. Il gestionale resta operativo e nessun dato è stato modificato. Riprova tra pochi secondi.');
+   }
+ }
+ finally{sendBtn.disabled=false;sendBtn.textContent='Invia ➜'}
+}
+const PATCH_ALLOW={prenotazioni:['cliente','cliente_nome','telefono','email','posti','totale','acconto','saldo','pagato','stato','note','fermata_partenza','giorni_acconto','scadenza_acconto','metodo_pagamento'],viaggi:['titolo','destinazione','luogo_partenza','data_partenza','ora_partenza','prezzo','descrizione','locandina','immagine','autobus','autobus_id','posti_totali','stato','pubblicato','costo_totale'],clienti:['nome','cognome','telefono','email','codice_fiscale','indirizzo','citta','cap','provincia','note','stato_cliente','provenienza'],flotta:['titolo','marca','modello','targa','categoria','anno','posti','stato','descrizione','attivo','seat_layout'],noleggi_bus:['referente','azienda','telefono','email','tratta_partenza','tratta_destinazione','fermate','data_partenza','ora_partenza','data_ritorno','ora_ritorno','passeggeri','servizio_tipo','prezzo_concordato','acconto','saldo','stato_pagamento','stato_noleggio','note','flotta_id'],attivita_gestionale:['titolo','descrizione','stato','priorita','scadenza','riferimento_tipo','riferimento_id','assegnata_a'],scadenze_gestionale:['titolo','descrizione','tipo','stato','priorita','data_scadenza','riferimento_tipo','riferimento_id','cliente_id','viaggio_id','prenotazione_id','importo','note']};
+function safePatch(entity,patch){const allow=PATCH_ALLOW[entity];if(!allow)throw new Error('Entità non autorizzata');const x={};allow.forEach(k=>{if(Object.prototype.hasOwnProperty.call(patch||{},k))x[k]=patch[k]});if(!Object.keys(x).length)throw new Error('Nessun campo valido da modificare');return x}
+async function aiAudit(action,entity,id,data={}){try{await api('audit_log_gestionale','',{method:'POST',body:{azione:action,entita:entity,entita_id:id||null,descrizione:'Operazione confermata tramite Assistente DELGROSSO AI 360',dati:data}})}catch{}}
+function romeDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+async function executeLocal(a){const p=a.params||{},t=a.type;
+ if(t==='create_booking'){
+   const v=state.viaggi.find(x=>x.id===p.trip_id);if(!v)throw new Error('Viaggio non trovato');const pax=Number(p.pax||0);if(pax<1)throw new Error('Numero posti non valido');const used=state.prenotazioni.filter(b=>b.viaggio_id===v.id&&String(b.stato||'').toLowerCase()!=='annullata').reduce((n,b)=>n+Number(b.posti||0),0);if(Number(v.posti_totali||0)>0&&used+pax>Number(v.posti_totali))throw new Error('Posti insufficienti');const code='AI-'+String(Date.now()).slice(-9),total=Number(p.total??Number(v.prezzo||0)*pax);const body={viaggio_id:v.id,cliente:String(p.customer_name||'').trim(),cliente_nome:String(p.customer_name||'').trim(),telefono:p.phone||null,email:p.email||null,posti:pax,totale:total,acconto:0,pagato:0,saldo:total,stato:'Confermata',note:p.notes||'Inserita tramite Assistente DELGROSSO AI 360',fermata_partenza:p.departure_stop||'',giorni_acconto:Number(p.deposit_days||2),data_prenotazione:romeDate(),codice:code,id_prenotazione:code,viaggio_codice:v.id_viaggio||null,posti_selezionati:''};const r=await api('prenotazioni','',{method:'POST',body,headers:{Prefer:'return=representation'}}),b=r?.[0];if(!b?.id)throw new Error('Prenotazione non creata');try{await rpc('dg_generate_confirmation',{p_booking_id:b.id})}catch{}await aiAudit('AI_CREATE_BOOKING','prenotazioni',b.id,{trip_id:v.id,pax});return {type:t,id:b.id,code};
+ }
+ if(t==='register_payment'){const amount=Number(p.amount||0);if(amount<=0)throw new Error('Importo pagamento non valido');const paymentType=p.payment_type||'Acconto';const r=await rpc('dg_register_payment',{p_booking_id:p.booking_id,p_tipo:paymentType,p_importo:amount,p_metodo:p.method||'Contanti',p_data:p.date||romeDate(),p_note:p.notes||'Registrato tramite Assistente AI 360'});try{await rpc('sync_prenotazione_pagamenti',{p_prenotazione_id:p.booking_id})}catch{}await aiAudit(paymentType==='Rimborso'?'AI_REFUND_PAYMENT':'AI_REGISTER_PAYMENT','prenotazioni',p.booking_id,{amount,payment_type:paymentType});return {type:t,result:r,receipt:{kind:'trip',id:r?.payment_id||null},payment_type:paymentType}}
+ if(t==='register_rental_payment'){const amount=Number(p.amount||0);if(amount<=0)throw new Error('Importo pagamento noleggio non valido');const rental=(state.noleggi||[]).find(x=>x.id===p.rental_id);if(!rental)throw new Error('Noleggio non trovato');const paymentType=p.payment_type||'Acconto';const r=await rpc('dg_register_rental_payment',{p_noleggio_id:p.rental_id,p_tipo:paymentType,p_importo:amount,p_metodo:p.method||'Contanti',p_data:p.date||romeDate(),p_note:p.notes||'Registrato tramite Assistente DELGROSSO AI 360'});await aiAudit(paymentType==='Rimborso'?'AI_REFUND_RENTAL_PAYMENT':'AI_REGISTER_RENTAL_PAYMENT','noleggi_bus',p.rental_id,{amount,payment_type:paymentType});return {type:t,result:r,receipt:{kind:'rental',id:r?.payment_id||null},payment_type:paymentType}}
+ if(t==='delete_payment'){
+   const id=p.payment_id;if(!id)throw new Error('Pagamento da eliminare non specificato');
+   const result=await rpc('dg_delete_payment',{p_payment_id:id,p_reason:p.reason||'Pagamento errato eliminato tramite Assistente AI'});
+   await aiAudit('AI_DELETE_PAYMENT','pagamenti',id,{reason:p.reason||'Pagamento errato'});
+   return {type:t,result}
+ }
+ if(t==='delete_rental_payment'){
+   const id=p.payment_id;if(!id)throw new Error('Pagamento noleggio da eliminare non specificato');
+   const result=await rpc('dg_delete_rental_payment',{p_payment_id:id,p_reason:p.reason||'Pagamento noleggio errato eliminato tramite Assistente AI'});
+   await aiAudit('AI_DELETE_RENTAL_PAYMENT','noleggi_bus_pagamenti',id,{reason:p.reason||'Pagamento errato'});
+   return {type:t,result}
+ }
+ if(t==='move_booking'){const b=state.prenotazioni.find(x=>x.id===p.booking_id),v=state.viaggi.find(x=>x.id===p.target_trip_id);if(!b||!v)throw new Error('Prenotazione o viaggio non trovato');const used=state.prenotazioni.filter(x=>x.viaggio_id===v.id&&x.id!==b.id&&String(x.stato||'').toLowerCase()!=='annullata').reduce((n,x)=>n+Number(x.posti||0),0);if(Number(v.posti_totali||0)>0&&used+Number(b.posti||0)>Number(v.posti_totali))throw new Error('Posti insufficienti nel viaggio di destinazione');const patch={viaggio_id:v.id,posti_selezionati:''};if(p.departure_stop)patch.fermata_partenza=p.departure_stop;await api('prenotazioni',`id=eq.${b.id}`,{method:'PATCH',body:patch});try{await api('prenotazione_posti',`prenotazione_id=eq.${b.id}`,{method:'DELETE'})}catch{}await aiAudit('AI_MOVE_BOOKING','prenotazioni',b.id,{target_trip_id:v.id});return {type:t,id:b.id}}
+ if(t==='cancel_booking'){await api('prenotazioni',`id=eq.${p.booking_id}`,{method:'PATCH',body:{stato:'Annullata'}});try{await api('prenotazione_posti',`prenotazione_id=eq.${p.booking_id}`,{method:'DELETE'})}catch{}await aiAudit('AI_CANCEL_BOOKING','prenotazioni',p.booking_id,{reason:p.reason});return {type:t,id:p.booking_id}}
+ if(t==='checkin'){const b=state.prenotazioni.find(x=>x.id===p.booking_id);if(!b)throw new Error('Prenotazione non trovata');const st=p.status||'PRESENTE',yes=String(st).toUpperCase()==='PRESENTE';await api('prenotazioni',`id=eq.${b.id}`,{method:'PATCH',body:{checkin_effettuato:yes,checkin_stato:st,checked_in_at:yes?new Date().toISOString():null,checkin_operatore:'Assistente AI 360'}});await api('accessi_checkin','',{method:'POST',body:{prenotazione_id:b.id,prenotazione_codice:b.codice||b.id_prenotazione||null,viaggio_id:b.viaggio_id,cliente:b.cliente,telefono:b.telefono||null,esito:st,operatore:'Assistente AI 360'}});return {type:t,id:b.id}}
+ if(t==='create_client'){const r=await api('clienti','',{method:'POST',body:{nome:p.name||'',cognome:p.surname||'',telefono:p.phone||null,email:p.email||null,note:p.notes||null,stato_cliente:'Attivo',codice_cliente:'CL-'+String(Date.now()).slice(-6)},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
+ if(t==='add_client_note'){const c=state.clienti.find(x=>x.id===p.client_id);if(!c)throw new Error('Cliente non trovato');const note=[c.note,`[AI ${new Date().toLocaleString('it-IT')}] ${p.note}`].filter(Boolean).join('\n');await api('clienti',`id=eq.${c.id}`,{method:'PATCH',body:{note}});return {type:t,id:c.id}}
+ if(t==='create_trip'){const code='VG-'+String(Date.now()).slice(-8),seats=Number(p.seats||0);const body={titolo:p.title,destinazione:p.destination||p.title,luogo_partenza:p.departure_place||null,data_partenza:p.date,ora_partenza:p.time||null,prezzo:Number(p.price||0),posti_totali:seats,posti_liberi:seats,posti_occupati:0,descrizione:p.description||null,stato:'Programmato',pubblicato:p.published?'SI':'NO',id_viaggio:code};const r=await api('viaggi','',{method:'POST',body,headers:{Prefer:'return=representation'}});const id=r?.[0]?.id;if(!id)throw new Error('Viaggio non creato');return {type:t,id,code}}
+ if(t==='create_stop'){const r=await api('viaggi_fermate','',{method:'POST',body:{viaggio_id:p.trip_id,nome:p.name,orario:p.time||null,punto_incontro:p.meeting_point||null,ordine:Number(p.order||0),attiva:true},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
+ if(t==='publish_trip'){await api('viaggi',`id=eq.${p.trip_id}`,{method:'PATCH',body:{pubblicato:p.published?'SI':'NO'}});return {type:t,id:p.trip_id}}
+ if(t==='assign_vehicle'){const v=state.viaggi.find(x=>x.id===p.trip_id),f=state.flotta.find(x=>x.id===p.vehicle_id);if(!v||!f)throw new Error('Viaggio o mezzo non trovato');const day=String(v.data_partenza||'').slice(0,10);const tripBusy=state.viaggi.some(x=>x.id!==v.id&&x.autobus_id===f.id&&String(x.data_partenza||'').slice(0,10)===day&&String(x.stato||'').toLowerCase()!=='annullato');const blocked=(state.dgBlocchi||[]).some(x=>x.flotta_id===f.id&&day>=String(x.data_inizio||'')&&day<=String(x.data_fine||''));const rentalIds=(state.noleggiMezzi||[]).filter(x=>x.flotta_id===f.id).map(x=>x.noleggio_id);const rentBusy=(state.noleggi||[]).some(n=>rentalIds.includes(n.id)&&day>=String(n.data_partenza||'').slice(0,10)&&day<=String(n.data_ritorno||n.data_partenza||'').slice(0,10)&&!['annullato','annullata'].includes(String(n.stato_noleggio||'').toLowerCase()));if(tripBusy||blocked||rentBusy)throw new Error('Mezzo non disponibile nella data del viaggio');await api('viaggi',`id=eq.${v.id}`,{method:'PATCH',body:{autobus_id:f.id,autobus:f.titolo||f.modello||f.targa}});return {type:t,id:v.id}}
+ if(t==='maintenance'){const r=await api('manutenzioni_flotta','',{method:'POST',body:{flotta_id:p.vehicle_id,tipo:p.type,descrizione:p.description||'Registrato tramite Assistente AI',data_intervento:p.date||romeDate(),km:p.km||null,costo:p.cost||null,officina:p.workshop||null,stato:'completata',prossima_data:p.next_date||null,prossimi_km:p.next_km||null,note:p.notes||null},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
+ if(t==='deadline'){let ids=Array.isArray(p.vehicle_ids)?p.vehicle_ids:[p.vehicle_id].filter(Boolean);const isExt=/estint/i.test(String(p.type||p.title||''));if(isExt&&!ids.length){ids=(state.flotta||[]).filter(f=>{const x=String([f.titolo,f.marca,f.modello,f.categoria].join(' ')).toLowerCase();return !x.includes('mercedes')&&!x.includes('v250')&&(x.includes('bus gt')||x.includes('limousine')||x.includes('irizar')||x.includes('scania'))}).map(f=>f.id)}const made=[];for(const id of ids){const f=(state.flotta||[]).find(x=>x.id===id);const existing=isExt?(state.scadenze||[]).find(x=>x.riferimento_id===id&&/estint/i.test(String(x.tipo||x.titolo||''))&&!/complet/i.test(String(x.stato||''))):null;const body={titolo:p.title||(isExt?`Scadenza estintori — ${f?.titolo||f?.targa||'Mezzo'}`:p.type),descrizione:p.notes||'Inserita tramite Assistente AI',tipo:p.type||'Scadenza',stato:'aperta',priorita:p.priority||'normale',data_scadenza:p.date,riferimento_tipo:'flotta',riferimento_id:id,note:p.notes||null};if(existing){await api('scadenze_gestionale',`id=eq.${existing.id}`,{method:'PATCH',body});made.push(existing.id)}else{const r=await api('scadenze_gestionale','',{method:'POST',body,headers:{Prefer:'return=representation'}});made.push(r?.[0]?.id)}}return {type:t,ids:made}}
+ if(t==='block_vehicle'){const r=await api('dg_blocchi_flotta','',{method:'POST',body:{flotta_id:p.vehicle_id,data_inizio:p.start_date,data_fine:p.end_date||p.start_date,motivo:p.reason||'Blocco Assistente AI'},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
+ if(t==='create_rental'){
+   const vehicleIds=Array.isArray(p.vehicle_ids)?p.vehicle_ids:[p.vehicle_id].filter(Boolean);
+   const body={...p};delete body.vehicle_ids;delete body.vehicle_id;body.flotta_id=null;
+   const r=await api('noleggi_bus','',{method:'POST',body,headers:{Prefer:'return=representation'}});
+   const id=r?.[0]?.id;if(!id)throw new Error('Noleggio non creato');
+   const assigned=await rpc('dg_set_rental_vehicles',{p_noleggio_id:id,p_vehicle_ids:vehicleIds});
+   await aiAudit('AI_CREATE_RENTAL','noleggi_bus',id,{vehicle_ids:vehicleIds,posti_totali:assigned?.posti_totali});
+   return {type:t,id,vehicle_ids:vehicleIds,capacity:assigned?.posti_totali}
+ }
+ if(t==='economy_movement'){const body={tipo:p.movement_type||'Entrata',categoria:p.category||'Altro',descrizione:p.description,importo:Number(p.amount||0),data_movimento:p.date||romeDate(),metodo:p.method||null,viaggio_id:p.trip_id||null,noleggio_id:p.rental_id||null,flotta_id:p.vehicle_id||null,origine:'Assistente AI 360',note:p.notes||null};const r=await api('economia_movimenti','',{method:'POST',body,headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
+ if(t==='create_task'){const r=await api('attivita_gestionale','',{method:'POST',body:{titolo:p.title,descrizione:p.description||null,stato:'aperta',priorita:p.priority||'normale',scadenza:p.due_date||null,assegnata_a:currentOperator?.name||'Nicola'},headers:{Prefer:'return=representation'}});return {type:t,id:r?.[0]?.id}}
+ if(['update_booking','update_client','update_trip','update_vehicle','update_rental','generic_update'].includes(t)){
+   const entity=t==='update_booking'?'prenotazioni':t==='update_client'?'clienti':t==='update_trip'?'viaggi':t==='update_vehicle'?'flotta':t==='update_rental'?'noleggi_bus':p.entity;
+   const id=t==='update_booking'?p.booking_id:t==='update_client'?p.client_id:t==='update_trip'?p.trip_id:t==='update_vehicle'?p.vehicle_id:t==='update_rental'?p.rental_id:p.id;
+   const patch=safePatch(entity,p.patch);
+   if(t==='update_rental')delete patch.flotta_id;
+   await api(entity,`id=eq.${id}`,{method:'PATCH',body:patch});
+   if(t==='update_rental'&&Array.isArray(p.vehicle_ids))await rpc('dg_set_rental_vehicles',{p_noleggio_id:id,p_vehicle_ids:p.vehicle_ids});
+   await aiAudit('AI_UPDATE',entity,id,{...patch,vehicle_ids:p.vehicle_ids});
+   return {type:t,entity,id,vehicle_ids:p.vehicle_ids||null}
+ }
+ throw new Error('Azione non supportata: '+t)
+}
+async function confirm(id){
+ if(!pending||pending.id!==id)return;
+ const box=q('ai360Plan');if(box)box.style.opacity='.6';
+ let results=[];
+ try{
+   const isLocal=!!pending?.local;
+   const c=isLocal?{plan:pending.plan}:await invoke({mode:'claim',plan_id:id});
+   for(const act of (c.plan?.actions||[]))results.push(await executeLocal(act));
+   if(!isLocal)await invoke({mode:'complete',plan_id:id,ok:true,result:results});
+   pending=null;drawPlan(null);
+   await loadAll();
+   const receipts=results.map(x=>x?.receipt).filter(x=>x?.id);
+   const refunds=results.filter(x=>String(x?.payment_type||'').toLowerCase()==='rimborso').length;
+   add('assistant',refunds?`✅ Rimborso registrato. Ho aggiornato il gestionale e preparato ${receipts.length===1?'la ricevuta di rimborso':'le ricevute di rimborso'}.`:'✅ Operazione confermata ed eseguita. Ho ricaricato i dati del gestionale.');
+   toast(refunds?'Assistente AI: rimborso registrato e ricevuta pronta':'Assistente AI: operazione eseguita');
+   setTimeout(()=>{for(const r of receipts){try{if(r.kind==='rental')printRentalPaymentReceipt(r.id);else printReceipt(r.id)}catch(_){}}},250);
+ }catch(e){
+   try{await invoke({mode:'complete',plan_id:id,ok:false,result:results,error:e.message})}catch{}
+   add('assistant','⚠️ Operazione non completata: '+e.message);
+   toast('Assistente AI: '+e.message,false)
+ }finally{if(box)box.style.opacity='1'}
+}
+async function cancel(id){try{if(!pending?.local)await invoke({mode:'cancel',plan_id:id})}catch{}pending=null;drawPlan(null);add('assistant','Operazione annullata. Non ho modificato i dati.')}
+function filePicked(file){if(!file){attachment=null;updateAttachment();return}if(file.size>5*1024*1024){toast('Allegato troppo grande: massimo 5 MB',false);return}if(!file.type.startsWith('image/')){toast('Per ora allega una locandina come immagine JPG/PNG/HEIC.',false);return}const r=new FileReader();r.onload=()=>{attachment={name:file.name,type:file.type,data_url:r.result};updateAttachment()};r.readAsDataURL(file)}
+function updateAttachment(){const e=q('ai360AttachName');if(e)e.textContent=attachment?`📎 ${attachment.name}`:'Nessun allegato'}
+function mic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return toast('Dettatura non disponibile su questo browser',false);const r=new SR();r.lang='it-IT';r.interimResults=false;r.onresult=e=>{const t=e.results?.[0]?.[0]?.transcript||'';q('ai360Input').value=(q('ai360Input').value+' '+t).trim()};r.onerror=()=>toast('Dettatura non riuscita',false);r.start()}
+function render(){const p=q('page-assistente');if(!p)return;p.innerHTML=`<div class="section-title"><div><h2>🤖 Assistente DELGROSSO AI 360°</h2><p class="section-subtitle">Scrivi come parli. L’AI legge il gestionale, prepara il lavoro e modifica i dati solo dopo la tua conferma.</p></div><span id="ai360Status" class="ai360-status wait">● controllo AI…</span></div><div class="ai360-shell"><div id="ai360Messages" class="ai360-messages"></div><div id="ai360Plan"></div><div class="ai360-compose"><textarea id="ai360Input" rows="3" placeholder="Es: Mario Rossi 4 persone Assisi da San Nicandro, 40 € acconto…"></textarea><div class="ai360-tools"><label class="btn btn-secondary ai360-file">📎 Locandina<input id="ai360File" type="file" accept="image/*" hidden></label><button class="btn btn-secondary" id="ai360Mic">🎙️ Dettatura</button><button class="btn btn-secondary" id="ai360Clear">🧹 Pulisci chat</button><span id="ai360AttachName">Nessun allegato</span><button class="btn btn-primary" id="ai360Send">Invia ➜</button></div></div></div><div class="ai360-safety"><b>🔒 Regola fissa:</b> letture e controlli possono partire subito; prenotazioni, pagamenti, rimborsi con relativa ricevuta, spostamenti, cancellazioni, viaggi, flotta, noleggi ed economia richiedono sempre la tua conferma.</div>`;drawChat();q('ai360Send').onclick=send;q('ai360Input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});q('ai360File').onchange=e=>filePicked(e.target.files?.[0]);q('ai360Mic').onclick=mic;q('ai360Clear').onclick=clearHistory;status()}
+window.renderAssistant=render;window.ai360Send=send;window.ai360Clear=clearHistory;window.ai360Confirm=confirm;window.ai360Cancel=cancel;window.ai360Example=t=>{q('ai360Input').value=t;q('ai360Input').focus()};
+load();
+const css=document.createElement('style');css.id='dg-ai360-style';css.textContent=`.ai360-status{padding:8px 11px;border-radius:999px;font-size:12px;font-weight:900}.ai360-status.live{background:#e9fff3;color:#087a45}.ai360-status.wait{background:#fff7df;color:#8a5b00}.ai360-status.off{background:#fff0f3;color:#a51335}.ai360-shell{background:#fff;border:1px solid #dbe5ef;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(16,43,68,.08)}.ai360-messages{height:min(55vh,520px);overflow:auto;padding:18px;background:linear-gradient(180deg,#f7fbff,#fff)}.ai360-msg{display:flex;flex-direction:column;margin:8px 0;max-width:86%}.ai360-msg.me{margin-left:auto;align-items:flex-end}.ai360-msg.bot{align-items:flex-start}.ai360-bubble{padding:12px 14px;border-radius:16px;line-height:1.45;background:#fff;border:1px solid #dbe5ef}.ai360-msg.me .ai360-bubble{background:#0b67c8;color:#fff;border-color:#0b67c8}.ai360-msg small{font-size:10px;color:#789;margin:3px 7px}.ai360-welcome{max-width:720px;margin:45px auto;text-align:center;color:#29445d}.ai360-welcome b{font-size:21px}.ai360-examples{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}.ai360-examples button{border:1px solid #cfdeec;background:#fff;border-radius:999px;padding:8px 11px;cursor:pointer}.ai360-compose{border-top:1px solid #dbe5ef;padding:12px}.ai360-compose textarea{width:100%;font-size:16px;min-height:84px;resize:vertical}.ai360-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.ai360-tools #ai360AttachName{font-size:11px;color:#6b7f92;flex:1}.ai360-plan-card{margin:12px;border:2px solid #79aee8;border-radius:14px;padding:13px;background:#f5faff}.ai360-plan-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:9px}.ai360-plan-head span{font-size:11px;background:#dcecff;border-radius:999px;padding:4px 8px}.ai360-preview{padding:4px 0}.ai360-action{padding:9px 10px;background:#fff;border:1px solid #dbe5ef;border-radius:10px;margin-top:7px}.ai360-action small{display:block;color:#72869a;margin-top:2px}.ai360-confirm{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.ai360-safety{margin-top:10px;padding:11px 13px;border-radius:12px;background:#f6f9fc;border:1px solid #dfe8f1;font-size:12px;color:#52697f}@media(max-width:700px){.ai360-messages{height:48vh;padding:10px}.ai360-msg{max-width:94%}.ai360-tools{display:grid;grid-template-columns:1fr 1fr}.ai360-tools #ai360AttachName{grid-column:1/-1}.ai360-tools #ai360Send{grid-column:1/-1;min-height:48px}.ai360-confirm .btn{width:100%}.ai360-plan-head{flex-direction:column}.section-title .ai360-status{justify-self:start}}`;document.head.appendChild(css);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{if(q('page-assistente')?.classList.contains('active'))render()},{once:true});else if(q('page-assistente')?.classList.contains('active'))render();
+})();

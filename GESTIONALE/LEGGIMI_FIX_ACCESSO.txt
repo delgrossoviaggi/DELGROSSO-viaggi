@@ -1,0 +1,6 @@
+FIX ACCESSO 17/10/2026
+CAUSA: il precedente pacchetto aveva inserito 10 riferimenti agli script di notifica, anche dentro stringhe HTML utilizzate per la stampa dei PDF. Questo rompeva il parsing di JavaScript e impediva di definire signIn.
+CORREZIONE: rimossi 9 inserimenti impropri e mantenuto un unico caricamento alla fine del documento HTML.
+VERIFICA: node --check su tutti gli script inline, integrita ZIP.
+NON sono state cambiate credenziali, database, tabelle, utenti, prenotazioni o pagamenti.
+Non certificato come test di login end-to-end autenticato: provare in staging prima di produzione.

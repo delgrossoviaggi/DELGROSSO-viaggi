@@ -1,0 +1,11 @@
+DELGROSSO Gestionale 4.2 — CONTROL ROOM OPERATIVA
+24/09/2026
+
+- Eliminata la seconda barra breadcrumb/data duplicata da tutte le pagine.
+- Control Room: lista automatica prenotati con recapiti telefonici.
+- Control Room: piantina automatica posti con nominativo sul posto occupato.
+- Control Room: elenco automatico prenotazioni senza acconto/pagamento registrato.
+- Stampe dedicate: lista prenotati, piantina posti, acconti mancanti.
+- Corretto markup metriche Dashboard.
+- Corretto Dossier 360° per timeline operativa.
+- Mantiene Performance Engine 4.1 e sincronizzazione Supabase.

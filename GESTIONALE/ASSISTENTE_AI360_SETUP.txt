@@ -1,0 +1,55 @@
+DELGROSSO ASSISTENTE AI 360° — INSTALLAZIONE
+
+STATO TECNICO
+- Vecchio Copilota V10 disattivato e rimosso dal caricamento.
+- Nuova chat AI: GESTIONALE/assistente-ai360.js
+- Edge Function delgrosso-ai360 già distribuita sul progetto Supabase gestionale.
+- Tabella server-side ai_operazioni già creata con RLS e nessuna policy client.
+- La funzione Edge richiede utente autenticato (verify_jwt=true).
+
+UNICO PASSAGGIO MANUALE NECESSARIO PER ATTIVARE L'AI
+Nel progetto Supabase gestionale aprire Edge Functions > Secrets e creare:
+OPENAI_API_KEY = la propria chiave API OpenAI
+
+Opzionale:
+OPENAI_MODEL = gpt-6-luna
+
+NON inserire mai la chiave OpenAI dentro index.html o assistente-ai360.js.
+
+COME FUNZIONA
+1. Scrivi normalmente nella chat, anche con refusi/abbreviazioni.
+2. La Edge Function legge i dati reali del gestionale e chiede al modello AI un piano strutturato.
+3. Se la richiesta è ambigua, l'AI chiede chiarimenti e non modifica nulla.
+4. Se sono previste modifiche, viene mostrata un'anteprima.
+5. Solo il pulsante CONFERMA TUTTO autorizza l'esecuzione.
+6. Al termine il gestionale ricarica i dati da Supabase e registra l'audit dove previsto.
+
+FUNZIONI OPERATIVE COLLEGATE
+- prenotazioni
+- pagamenti / acconti / saldi
+- spostamento e annullamento prenotazioni
+- check-in
+- clienti / note cliente
+- viaggi / fermate / pubblicazione
+- assegnazione mezzi
+- manutenzioni e scadenze flotta
+- blocchi mezzi e controllo disponibilità con viaggi/noleggi
+- noleggi bus
+- movimenti economia
+- attività/promemoria
+- aggiornamenti controllati delle principali entità
+- letture libere: domande, ricerche, riepiloghi, priorità
+- locandina immagine: può essere allegata alla chat per l'analisi dei dati del viaggio
+- dettatura vocale se supportata dal browser
+
+PROTEZIONI
+- piani AI con scadenza (30 minuti)
+- claim server-side prima dell'esecuzione per evitare doppia conferma
+- allowlist dei campi modificabili nel client
+- controllo capienza prima di creare/spostare prenotazioni
+- controllo disponibilità mezzo su viaggi, blocchi e noleggi
+- nessuna chiave AI nel browser
+- service worker network-first e nuova cache AI360 per evitare pagine vecchie/corrotte
+
+NOTA
+Il gestionale tradizionale continua a funzionare anche se l'AI non è configurata o temporaneamente non risponde.

@@ -1,0 +1,7 @@
+DELGROSSO OPERATIONS 360 - STABILIZZAZIONE SICURA
+Modifiche: layout desktop full-width, menu compatto, layout adattivo, app nascosta prima del login, mapping foto dai campi della scheda Flotta, data locale corretta.
+NON sono state modificate credenziali, database, Supabase, RPC, transazioni, posti o pagamenti.
+Non e' possibile certificare operativita' al 100% senza test end-to-end con ambiente di staging e database di prova.
+Le mappe posti della nuova Home sono ILLUSTRATIVE, non rappresentano occupazioni reali. Non usare per assegnare posti.
+Non caricare in produzione; usare solo per valutazione grafica, senza effettuare operazioni sui dati reali.
+Per tornare alla versione funzionante usare il gestionale originale.

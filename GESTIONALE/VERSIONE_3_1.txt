@@ -1,0 +1,4 @@
+DELGROSSO Gestionale 3.1 — Audit avanzato
+Interfaccia reference unificata PC + iPhone
+Control Room corretta
+Supabase mantenuto come database unico

@@ -1,0 +1,2 @@
+DELGROSSO Gestionale 4.6
+Control Room: piantina unificata alla geometria della selezione posti Prenotazione (4 colonne con corridoio centrale), nominativi sui posti prenotati e stampa coerente.

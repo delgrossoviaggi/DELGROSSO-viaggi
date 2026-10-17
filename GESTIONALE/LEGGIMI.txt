@@ -1,0 +1,24 @@
+DELGROSSO — AVVIO AUTOMATICO IPHONE V10
+========================================
+
+Ora che iphone.html funziona, questo pacchetto rende automatico il passaggio.
+
+1. Lascia nella cartella GESTIONALE i file V9 già funzionanti:
+   - iphone.html
+   - iphone-loader.js
+
+2. Carica anche:
+   - iphone-auto.js
+
+3. Apri GESTIONALE/index.html e, SUBITO DOPO il tag <head>, aggiungi:
+   <script src="./iphone-auto.js?v=10"></script>
+
+RISULTATO
+- iPhone: aprendo il normale /GESTIONALE/ viene mandato automaticamente a iphone.html.
+- PC: continua ad aprire index.html come adesso.
+- Android/iPad: restano sulla versione normale.
+- Supabase non viene modificato.
+
+EMERGENZA / TEST DESKTOP SU IPHONE
+Se serve evitare temporaneamente il reindirizzamento:
+index.html?desktop=1

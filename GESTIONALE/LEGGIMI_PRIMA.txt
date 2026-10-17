@@ -1,0 +1,10 @@
+IMPORTANTE
+
+Non aprire index.html con doppio clic per il funzionamento Supabase.
+
+1) Estrai tutto lo ZIP in una cartella.
+2) Avvia AVVIA_GESTIONALE.bat.
+3) Si aprira automaticamente http://127.0.0.1:8787/index.html.
+4) Accedi con le credenziali Supabase.
+
+Il gestionale usa il progetto Supabase chkuayhbmitdmzmmvona. Il database non viene copiato in locale: i dati restano su Supabase e le modifiche vengono sincronizzate online.

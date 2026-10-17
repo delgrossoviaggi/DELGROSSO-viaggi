@@ -1,0 +1,11 @@
+DELGROSSO Gestionale V5.5 - Assistente Operativo
+
+NOVITA:
+- Incolla messaggi WhatsApp nell Assistente.
+- Bozza prenotazione con controllo manuale prima della conferma.
+- Registrazione cliente + prenotazione sul viaggio selezionato.
+- Bozza acconto/saldo con associazione alla prenotazione corretta.
+- In caso di ambiguita il pagamento NON viene assegnato automaticamente.
+- Ogni scrittura richiede conferma esplicita dell operatore.
+
+Nota: le notifiche push iPhone a gestionale chiuso richiedono anche configurazione server/Web Push e chiavi push; non sono simulate in questa build.

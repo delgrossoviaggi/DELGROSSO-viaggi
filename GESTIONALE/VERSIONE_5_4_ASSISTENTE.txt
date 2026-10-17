@@ -1,0 +1,7 @@
+Versione 5.4 — Assistente DELGROSSO
+- Nuova sezione Assistente nel menu.
+- Elenco automatico acconti da ricevere, scaduti e in scadenza entro 24 ore.
+- Eventi automatici per nuove prenotazioni e acconti ricevuti.
+- Nuove prenotazioni registrano una notifica interna anche quando il gestionale non è aperto.
+- Backend Supabase operativo: assistente_eventi + dg_assistente_acconti.
+Nota: il rilevamento del messaggio WhatsApp effettivamente ricevuto richiede un'integrazione WhatsApp Business/API; un normale link WhatsApp non può confermare la ricezione del messaggio.

@@ -1,0 +1,7 @@
+DELGROSSO GESTIONALE V5.3 — BUS AUTOMATICO
+
+- Le normali modifiche di una prenotazione non vengono più bloccate dal controllo flotta se autobus/data/stato del viaggio non sono cambiati.
+- Se l'autobus di un viaggio è realmente occupato e viene modificata l'assegnazione/data/stato, Supabase cerca automaticamente un mezzo compatibile libero.
+- Restano rispettati blocchi flotta, noleggi confermati con acconto e altri viaggi della stessa data.
+- Se nessun mezzo compatibile è libero, il salvataggio viene fermato con un messaggio esplicito.
+- Corretto il conflitto del 06/12/2026: Larino=GS038BB, Napoli=FW125XE, San Marino/Gradara=FA013AN.

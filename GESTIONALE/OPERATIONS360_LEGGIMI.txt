@@ -1,0 +1,9 @@
+DELGROSSO OPERATIONS 360 - VERSIONE INTEGRATA DI TEST
+- Contiene tutti i file originali del gestionale e due nuovi file di interfaccia.
+- La Home ha layout a tre colonne, calendario, partenze dinamiche, foto originali e collegamenti ai moduli reali.
+- Tutte le altre sezioni ricevono uno stile orizzontale uniforme; il rifacimento integrale non è ancora completato.
+- La visualizzazione dei posti nella Home è indicativa, non dati di occupazione: usa Gestione Posti per operazioni reali.
+- Nessuna funzione di login o connessione Supabase modificata. Nessuna modifica al database.
+- Questa è una VERSIONE DI TEST, NON approvata per uso in produzione. Non effettuare operazioni sui dati reali.
+- Prima della messa in produzione: backup database verificato, test login e funzioni, controllo permessi, test di regressione.
+- Per ripristino: utilizzare lo ZIP originale senza i due file operations360.

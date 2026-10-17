@@ -1,0 +1,7 @@
+gestionale-bridge: version 8
+Project: bhsanrbadsqcpbtxupmr
+verify_jwt: false
+Health endpoint: GET ?health=1
+Booking endpoint: POST action=booking -> /rest/v1/rpc/create_public_booking_v3
+Required fields: viaggioId, nome, cognome, telefono, fermataPartenza, posti[]
+Notes: requestId idempotente; email facoltativa; scadenza acconto gestita dal gestionale.

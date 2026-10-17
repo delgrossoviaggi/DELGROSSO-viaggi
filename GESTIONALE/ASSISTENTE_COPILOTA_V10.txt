@@ -1,0 +1,21 @@
+DELGROSSO COPILOTA 360 V10
+
+Riparte dalla versione stabile con iPhone automatico.
+
+Mantiene il motore esistente per domande, ricerche, prenotazioni,
+pagamenti/acconti/saldi e riepiloghi.
+
+Aggiunge ANTEPRIMA + CONFERMA per:
+- spostamento e annullamento prenotazioni
+- check-in
+- pubblicazione/nascondimento viaggio
+- assegnazione mezzo con controllo conflitti
+- scadenze flotta multiple ed esclusioni
+- manutenzione/tagliando/pneumatici
+- blocco mezzo
+- attività/promemoria
+- note cliente
+- audit operazioni
+
+Nessuna scrittura di questi flussi parte durante l'interpretazione.
+In caso di ambiguità viene richiesta la selezione del record.

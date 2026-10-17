@@ -1,0 +1,12 @@
+DELGROSSO OPERATIONS 360 - RAPPORTO DI VERIFICA STATICA
+Data: 17 ottobre 2026
+Origine: ACCESSO_RIPRISTINATO_TEST
+File JavaScript esterni: 13, sintassi OK: 13
+Script inline: 31, sintassi OK: 31
+Errori JavaScript esterni: []
+Errori inline: []
+Funzione signIn definita: SI
+Plugin sperimentale notifiche rimosso per evitare effetti collaterali non verificati; le notifiche originali rimangono.
+COLLAUDO BROWSER NON ESEGUITO: Chromium blocca accesso HTTP e file:// con ERR_BLOCKED_BY_ADMINISTRATOR.
+NON COLLAUDATO: login reale, RLS, prenotazioni, spostamenti BUS/BIS, pagamenti, ricevute, notifiche cross-account e dispositivi iOS/Android.
+NESSUNA MODIFICA ALLA PRODUZIONE. Prima del deploy serve staging, backup e verifica su dispositivi reali.

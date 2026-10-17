@@ -1,0 +1,10 @@
+DELGROSSO ASSISTENTE 360 V8.1
+
+- collegato automaticamente a index.html
+- disponibile anche tramite iphone.html
+- corrette le chiavi stato per blocchi flotta e noleggi
+- mantiene anteprima + conferma sui flussi di scrittura già implementati
+- aggiunta governance: le richieste di modifica non riconosciute non scrivono alla cieca
+- nessun dato Supabase è incluso o modificato nel pacchetto
+
+IMPORTANTE: i flussi specializzati già presenti gestiscono prenotazioni, pagamenti, viaggi/locandine e flotta. Le operazioni non ancora dotate di un flusso transazionale specifico vengono fermate in anteprima invece di eseguire modifiche rischiose.
