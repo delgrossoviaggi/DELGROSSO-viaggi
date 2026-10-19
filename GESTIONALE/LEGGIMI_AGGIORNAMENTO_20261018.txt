@@ -1,0 +1,8 @@
+AGGIORNAMENTO NAVIGAZIONE E FLOTTA
+- La navigazione desktop e ora forzata verticalmente a sinistra tramite operations360.css.
+- Su smartphone resta il menu laterale a scomparsa.
+- La lista dei mezzi nella dashboard viene ricavata dai dati effettivi dello stato gestionale/Supabase; non vengono inventati mezzi o targhe.
+- Il Mercedes V250 viene escluso dal riepilogo della dashboard, non cancellato dalla flotta o dal database.
+- Per aggiornare nomi, targhe e foto reali: utilizzare Flotta nel gestionale.
+- Non sono state effettuate modifiche a Supabase.
+- Verifica statica effettuata; nessun collaudo browser reale dichiarato.

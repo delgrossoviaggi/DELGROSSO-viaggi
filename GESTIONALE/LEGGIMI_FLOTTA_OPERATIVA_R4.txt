@@ -1,0 +1,7 @@
+STATO OPERATIVO FLOTTA - R4
+Il riepilogo usa i dati di state.flotta, state.viaggi e state.prenotazioni, già caricati dal gestionale.
+Per ogni mezzo mostra il prossimo viaggio futuro associato tramite autobus_id, passeggeri e posti residui (se capienza nota), eventuale autista se presente nel viaggio.
+Segnala più viaggi assegnati nella stessa data come potenziale conflitto da verificare, senza assumere sovrapposizione di orari.
+Se non esistono assegnazioni future, mostra 'NESSUN SERVIZIO FUTURO REGISTRATO': NON dichiara il mezzo disponibile, perché manutenzione/noleggi potrebbero essere gestiti altrove.
+Il Mercedes V250 rimane escluso solo da questo riepilogo. Nessun dato viene cancellato.
+Non sono state aggiunte scritture a Supabase. Test statici effettuati, test funzionali browser non eseguiti.
