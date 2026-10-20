@@ -1,0 +1,37 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — FUTURE V6
+AGGIORNAMENTO FRONTEND PULITO · 19/10/2026
+
+COSA C'E' NELLO ZIP
+- 11 pagine del sito futuristico aggiornate con lo stesso header, footer, logo e grafica.
+- Tutte le quattro icone social ufficiali SVG: Facebook DELGROSSO, Facebook LIMOUSINE BUS,
+  Instagram DELGROSSO, Instagram LIMOUSINE BUS, con link aggiornati.
+- Credito in fondo al footer di ogni pagina:
+  © 2026 DELGROSSO VIAGGI — DEVELOPED IN PARTNERSHIP WITH CRISTINO NICOLA PIO
+- Foto reali autobus, sito mobile-friendly, catalogo viaggi, flotta e gallerie.
+- Risorse CSS/JS con versione v6 per evitare di vedere la vecchia grafica in cache.
+
+INSTALLAZIONE SEMPLICE NEL REPOSITORY GIA' ESISTENTE
+1. Prima crea una copia di backup del sito già presente su GitHub.
+2. Estrai lo ZIP: contiene subito index.html nella radice (non c'è una cartella da eliminare).
+3. Copia i file estratti sulla RADICE del repository DELGROSSO-viaggi, scegliendo
+   di AGGIORNARE soltanto i file con lo stesso nome. Aggiungi gli altri file nuovi.
+4. NON CANCELLARE I FILE NON PRESENTI NELLO ZIP: la versione futuristica conserva
+   la prenotazione preesistente, il backend, l'area riservata e la configurazione.
+5. Usa un'anteprima Vercel prima di pubblicare il nuovo sito sul dominio.
+
+PROTEZIONE DEI FLUSSI OPERATIVI
+Questo ZIP non contiene e NON SOVRASCRIVE: prenota.html, area-riservata.html,
+admin.html, privacy.html, cookie.html, GESTIONALE/, vercel.json, js/site.js,
+js/gestionale.js, js/ricevuta.js o js/site-config.js. DEVONO RIMANERE PRESENTI
+nel tuo repository. Non sono state apportate modifiche a Supabase né alle prenotazioni.
+La pagina dei viaggi FUTURE V6 mantiene il link verso prenota.html già operativo.
+
+IMPORTANTE
+Questo è un archivio di AGGIORNAMENTO DEL SITO ESISTENTE, pronto da sovrapporre.
+Non è un backup completo del repository GitHub. Non sostituisce WordPress o Supabase.
+Non è stato collaudato il salvataggio reale di prenotazioni/pagamenti: effettuare
+una prova controllata prima di pubblicare sul dominio principale.
+
+CONTATTI
+Raffaele 320 573 0466 · Nicola 366 212 7916 (WhatsApp)
+info@delgrossoviaggi.it · www.delgrossoviaggi.it
