@@ -1,0 +1,26 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — RIPRISTINO NOTIFICHE R33
+
+Contiene il gestionale completo dell'aggiornamento Incassi e Cassa V2, più:
+- Riparazione pagina Comunicazioni & Notifiche; il vecchio override R28 faceva riferimento a window.state anziché alla variabile state reale.
+- Avvisi automatici storici conservati; 73 presenti e 6 non letti al controllo del 20 ottobre 2026.
+- Nuova casella messaggi tra operatori (Nicola / Raffaele), invio e lettura riservata a mittente/destinatario.
+- Lettura notifiche distinta per operatore; nessuna modifica alla colonna storica notifiche.letto.
+- Contatore campanella e refresh automatico ogni 20 secondi con gestionale aperto.
+- Azioni: Aggiorna, Segna come letta, Segna tutte come lette, Apri prenotazioni/preventivi.
+- Avvisi del browser opzionali e solo quando il gestionale è aperto in una scheda attiva.
+
+BACKEND:
+La migrazione dg_operator_communications_and_private_notification_reads_v1 e' stata applicata
+nel progetto Supabase GESTIONALE chkuayhbmitdmzmmvona. Due nuove tabelle con RLS.
+NESSUNA modifica alle notifiche esistenti, prenotazioni, saldi, incassi o chiusure cassa.
+Non applicare la migrazione una seconda volta se risulta già presente.
+
+INSTALLAZIONE:
+Prima un backup di GitHub. Quindi sovrascrivere in repo la cartella GESTIONALE con
+quella presente in questo ZIP, preservando gli altri file. Verificare la preview di Vercel
+prima di pubblicare. Svuotare cache browser se compare ancora la versione precedente.
+
+TEST:
+Validati JavaScript e contenuto ZIP. La nuova interfaccia è stata provata con
+record sintetici; non sono stati inviati messaggi reali ai due operatori.
+I push in background a iPhone chiuso NON sono compresi in questa correzione.
