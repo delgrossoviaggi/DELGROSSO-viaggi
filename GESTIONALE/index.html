@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta name="dg-build" content="DELGROSSO-R36-CLASSIC-AI-PREVIEW">
+<meta name="dg-build" content="DELGROSSO-R38-CONTROL-ROOM">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
 <meta charset="utf-8">
@@ -988,7 +988,7 @@ img[src*="delgrosso-logo-ufficiale"],img[src*="delgrosso-logo-iphone"] {
 @media(max-width:430px){#page-dashboard .dl26-metrics{grid-template-columns:1fr 1fr!important}#page-dashboard .dg-r35-head-actions .btn{flex:1!important}#page-controlroom .optional-grid{grid-template-columns:1fr 1fr!important}#page-controlroom .dg-r35-ctrl-head{padding:11px!important}}
 </style>
 
-</head>
+<link rel="stylesheet" href="prenotazioni-control-room-r38.css?v=38"></head>
 <body>
 <section id="login">
   <div class="login-card">
@@ -1155,9 +1155,17 @@ img[src*="delgrosso-logo-ufficiale"],img[src*="delgrosso-logo-iphone"] {
 </section>
 
 <section class="page" id="page-prenotazioni">
-  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
-  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
-  <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
+  <div class="dg38-heading"><div><h2>🚌 Prenotazioni · Control Room</h2><p>Tutti i passeggeri e i posti dei tuoi autobus, nella stessa schermata.</p></div>
+    <div class="dg38-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva aziendale</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">⇄ Sposta data</button><button class="btn btn-primary" onclick="openBookingModal()">＋ Nuova prenotazione</button></div>
+  </div>
+  <div class="dg38-intro"><b>Controllo operativo BUS + BIS</b><div style="font-size:12px;margin-top:4px">Se un viaggio ha 2 o più autobus, qui trovi contemporaneamente <b>le piante di tutti i mezzi</b>, i posti occupati e disponibili e i clienti associati. Le prenotazioni vengono salvate sul singolo autobus, senza mescolare i posti.</div></div>
+  <div class="dg38-filterbar"><div><label for="dg38-trip">Seleziona viaggio e data</label><select id="dg38-trip" onchange="dg38.switchTrip(this.value)"></select></div><div><label for="dg38-bus">Filtra prenotazioni per bus</label><select id="dg38-bus" onchange="dg38.switchBus(this.value)"><option value="all">Tutti gli autobus</option></select></div><div class="dg38-live" id="dg38-live-status"><span class="dg38-dot"></span>In attesa della sincronizzazione</div></div>
+  <div id="dg38-trip-subtitle" style="color:#60778a;font-size:13px;font-weight:800;margin:9px 0"></div>
+  <div id="dg38-metrics" class="dg38-metrics" aria-live="polite"></div>
+  <div id="dg38-bus-cards" class="dg38-buses"></div>
+  <div class="dg38-list-head"><div><h3>Elenco dettagliato dei prenotati</h3><small id="dg38-booking-count" style="color:#7690a3">0 prenotazioni</small></div><div class="dg38-search"><input id="bookSearch" oninput="dg38.render()" placeholder="Cerca nome, telefono, codice, fermata…" aria-label="Cerca prenotazioni"><select id="bookFilter" onchange="dg38.render()" aria-label="Filtro stato"><option value="">Tutti gli stati</option><option value="Confermata">Confermata</option><option value="In attesa acconto">In attesa acconto</option><option value="Acconto Ricevuto">Acconto ricevuto</option><option value="Pagata">Pagata</option><option value="Riservata DELGROSSO">Riserva DELGROSSO</option><option value="Annullata">Annullata</option></select><button class="btn btn-secondary" type="button" onclick="dg38.manualRefresh()">↻ Aggiorna</button></div></div>
+  <div class="dg38-table-wrap"><table class="dg38-table"><thead><tr><th>Cliente / contatto</th><th>Autobus / data</th><th>Posti</th><th>Fermata</th><th>Totale / versato</th><th>Residuo / stato</th><th>Azioni</th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
+  <p style="font-size:11px;color:#607a8d;margin-top:12px">La disponibilità viene verificata automaticamente ogni 15 secondi mentre questa pagina è aperta, oltre agli aggiornamenti generali. <b>La conferma definitiva dei posti è affidata ai controlli del database</b>. Se i dati non sono aggiornati, non considerare garantita la disponibilità mostrata.</p>
 </section>
 
 <section class="page" id="page-preventivi">
@@ -6286,45 +6294,6 @@ setTimeout(mark,450);
 
 <!-- R34: Comunicazioni operative, caricamento reale fuori dai template di stampa -->
 <script src="comunicazioni-notifiche-r34.js?v=20261021" defer></script>
-<script>
-/* R37: monitor disponibilità per bus principale e bus bis; non modifica le prenotazioni */
-(function(){
-const el=id=>document.getElementById(id);
-const escR=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let busy=false;
-async function refreshBusAvailability(){
- const trip=el('b_trip'),picker=el('seatPicker');
- if(!trip||!picker||!trip.closest('.modal')&&!trip.closest('[role="dialog"]'))return;
- const v=((typeof state!=="undefined"?state:window.state)?.viaggi||[]).find(x=>x.id===trip.value);
- if(!v)return;
- let box=el('dg-r37-seats-live');
- if(!box){box=document.createElement('div');box.id='dg-r37-seats-live';box.style.cssText='padding:12px;margin:10px 0;border:1px solid #b5cce3;border-radius:12px;background:#f3f8ff;color:#18354c';picker.parentNode.insertBefore(box,picker);}
- if(busy)return;busy=true;
- try{
-  const candidates=((typeof state!=="undefined"?state:window.state)?.viaggi||[]).filter(x=>x.id===v.id||(x.data_partenza===v.data_partenza&&String(x.destinazione||x.titolo||'').toLowerCase()===String(v.destinazione||v.titolo||'').toLowerCase()));
-  const ids=candidates.map(x=>x.id);
-  const liveTrips=typeof api==='function'?await api('viaggi','id=in.('+ids.join(',')+')&select=*'):candidates;
-  const liveSeats=typeof api==='function'?await api('prenotazione_posti','viaggio_id=in.('+ids.join(',')+')&select=viaggio_id,posto,prenotazione_id'):[];
-  const html=liveTrips.map(x=>{
-    const tot=Number(x.posti_totali||0), seats=liveSeats.filter(z=>z.viaggio_id===x.id), occupied=new Set(seats.map(z=>String(z.posto))).size;
-    const occupiedN=Math.max(occupied,Number(x.posti_occupati||0));
-    const free=Math.max(0,tot-occupiedN);
-    const label=x.id===v.id?'BUS SELEZIONATO':('BUS BIS '+(x.bis_numero||''));
-    return '<div style="margin-top:7px"><b>'+escR(label)+'</b> — '+escR(x.titolo||x.destinazione||'')+': <b>'+free+' liberi</b> / '+occupiedN+' occupati su '+tot+' · <span style="color:#51677d">'+escR(x.id===v.id?'Selezionato':'Seleziona questo bus nel campo Viaggio per prenotare')+'</span></div>';
-  }).join('');
-  box.innerHTML='<b>🚌 Situazione posti dal database</b><small style="display:block">Aggiornamento automatico ogni 15 secondi. Ogni bus ha posti indipendenti.</small>'+html+'<small style="display:block;margin-top:6px">Verifica definitiva alla conferma: le disponibilità possono cambiare tra due aggiornamenti.</small>';
-  // Existing seat-picker handles selection. If free availability changed, refresh only when no selection in progress.
-  if(!(typeof modalSelectedSeats!=="undefined"?modalSelectedSeats:window.modalSelectedSeats)?.length && typeof renderSeatPicker==='function' && xIsSelectedTrip(liveTrips,trip.value)){
-    const state=typeof state!=="undefined"?state:window.state; if(state){state.prenotazionePosti=Array.isArray(state.prenotazionePosti)?state.prenotazionePosti:[];const idsSet=new Set(ids);state.prenotazionePosti=state.prenotazionePosti.filter(x=>!idsSet.has(x.viaggio_id)).concat(liveSeats);renderSeatPicker();}
-  }
- }catch(e){box.textContent='⚠️ Disponibilità live non verificabile: sincronizza il gestionale prima di assegnare posti.';}
- finally{busy=false;}
-}
-function xIsSelectedTrip(rows,id){return rows.some(x=>x.id===id)}
-setInterval(refreshBusAvailability,15000);
-document.addEventListener('change',e=>{if(e.target?.id==='b_trip')setTimeout(refreshBusAvailability,200)});
-document.addEventListener('click',e=>{if(/prenotazione|booking/i.test(e.target?.textContent||''))setTimeout(refreshBusAvailability,500)});
-})();
-</script>
-</body>
+
+<script src="prenotazioni-control-room-r38.js?v=38"></script><script src="documenti-stampa-r38.js?v=38"></script></body>
 </html>

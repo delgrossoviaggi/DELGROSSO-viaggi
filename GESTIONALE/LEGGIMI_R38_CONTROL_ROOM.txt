@@ -1,0 +1,42 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS
+GESTIONALE R38 — PRENOTAZIONI CONTROL ROOM / PREVENTIVI / DOCUMENTI
+22 OTTOBRE 2026
+
+COSA E' CAMBIATO
+1. La pagina Prenotazioni adesso mostra la data/viaggio scelta e, uno accanto all'altro, TUTTI gli autobus dello stesso viaggio (BUS 1 e BIS 2, BIS 3, ecc.), usando la relazione reale viaggi.bis_parent_id.
+2. Per ogni autobus: nome mezzo, capienza, posti occupati/liberi, singole poltrone e nome del prenotato, insieme al riepilogo dettagliato dei clienti (telefono, fermata, importi, acconto, saldo e stato).
+3. Un click sul posto libero avvia una nuova prenotazione sul bus corretto; un click sul posto occupato apre la prenotazione. La funzione originale di salvataggio resta dg_save_booking_v13, con blocchi transazionali e vincolo SQL UNIQUE(viaggio_id, posto).
+4. La pagina sincronizza i dati del viaggio selezionato da Supabase ogni 15 secondi quando visibile. Lo stesso controllo aggiorna la finestra di prenotazione quando e' aperta. Se viene aperto un nuovo BUS BIS da un altro operatore, entra nel monitor al successivo aggiornamento. La disponibilita' puo' cambiare tra due sincronizzazioni: la conferma RPC del database resta obbligatoria.
+5. I casi sospetti (prenotazioni attive senza poltrone assegnate, disallineamenti, posti duplicati nei dati letti) vengono segnalati; la disponibilita' non viene gonfiata con posti teoricamente vuoti.
+6. Stampe manuali delle CONFERME: aggiunto documento sostitutivo compatto con codice, cliente, viaggio, bus, data, fermata, numeri di posto, totale, versato e saldo. Se l'aggiornamento non e' raggiungibile, viene segnalato.
+7. Il modulo professionale delle RICEVUTE 7.4, che genera e archivia PDF via Edge Function, NON e' stato sostituito. E' stata aggiunta una funzione di stampa locale alternativa (printReceiptR38Local) per gli operatori.
+8. Preventivi: il campo data_redazione viene usato nel modulo R37 e nel nuovo PDF professionale emesso dal server; resta distinto dalla data del viaggio.
+
+MODIFICHE SUL DATABASE GIA' ESEGUITE CON L'ACCOUNT CONNESSO
+- Progetto Supabase "gestionale": aggiunta in modo non distruttivo la colonna preventivi.data_redazione e compilata la data per eventuali record precedenti. Verificato: nessun preventivo senza data.
+- Funzione Edge professionale "professional-quotes": aggiornata alla v2 per stampare nel PDF la data di redazione quando valorizzata.
+- Verificati su database i vincoli UNIQUE (viaggio_id, posto) ed esistenza delle RPC dg_save_booking_v13 e dg_reseat_booking_multibus_v1. Nessun cambiamento a prenotazioni, pagamenti, clienti, assegnazioni o check-in.
+
+INSTALLAZIONE
+A) PER VERCEL/SITO WEB: salvare una copia della versione attiva, poi sostituire tutti i file di GESTIONALE, COMPRESI prenotazioni-control-room-r38.css, prenotazioni-control-room-r38.js e documenti-stampa-r38.js. Aprire index.html. NON copiare solo index.html senza le nuove risorse.
+B) FILE SINGOLO: utilizzare DELGROSSO_GESTIONALE_COMPLETO_MASTER.html della R38 (contiene le nuove risorse incorporate e verifica SHA-256). Non mischiare copie R37 e R38.
+C) La migrazione SQL/AGGIORNAMENTO_R37_PREVENTIVI.sql e' ancora inclusa per installazioni con un altro progetto: NON serve ripeterla sul progetto "gestionale" appena verificato.
+
+VERIFICHE DI ACCETTAZIONE DA ESEGUIRE PRIMA DI PUBBLICARE
+- Fare il backup del gestionale attualmente operativo e del database.
+- Aprire un viaggio che abbia BUS 1 + BUS BIS: controllare separatamente i posti e i nominativi.
+- Inserire una prenotazione TEST su un posto libero del BIS; verificare che NON occupi lo stesso posto sul BUS 1; poi annullare il test e verificare il ritorno disponibile.
+- Aprire il sito da due operatori differenti: controllare che un posto assegnato da uno appaia occupato sull'altro dopo l'aggiornamento e che il database respinga un tentativo di duplicazione.
+- Stampare una conferma reale in modo controllato e controllare tutte le informazioni e la stampa PDF da PC e iPhone.
+- Verificare la generazione e l'invio AUTOMATICO del PDF dal sito: il servizio send-booking-confirmation riceve un PDF generato dal sito, percio' la sua qualita' dipende anche dal codice del sito che crea l'allegato. R38 aggiusta la stampa manuale nel gestionale ma non sostituisce il generatore PDF del sito (non presente in questo archivio).
+- Verificare il PDF professionale di preventivo con data_redazione diversa da data_viaggio.
+
+COLLAUDO TECNICO ESEGUITO IN QUESTA CONSEGNA
+- Test automatico locale su due bus (53 e 64 posti), assegnazioni separate, prenotazioni annullate, posti senza assegnazione: superato.
+- Analisi sintattica JavaScript dei blocchi HTML per web e file singolo: superata.
+- Verifica SHA-256 del file singolo: superata.
+- Esame delle tabelle e dei vincoli SQL in lettura, e verifica della nuova colonna data_redazione: superato.
+- NON sono stati eseguiti test di prenotazione/scrittura con clienti sul database di produzione; prima del rilascio fare i test operativi sopra.
+
+NOTA TECNICA
+La sincronizzazione automatica e' a intervalli di 15 secondi (non e' uno stream istantaneo al millisecondo). Il controllo di coerenza e unicita' definitivo avviene in Supabase. Il mantenimento delle funzioni originali di BUS BIS e dei posti evita migrazioni rischiose.
