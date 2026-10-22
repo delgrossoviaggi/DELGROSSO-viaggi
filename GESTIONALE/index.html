@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta name="dg-build" content="DELGROSSO-R27-FUTURE-CONTROL-SUPABASE-AI13">
+<meta name="dg-build" content="DELGROSSO-R36-CLASSIC-AI-PREVIEW">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
 <meta charset="utf-8">
@@ -1049,7 +1049,7 @@ img[src*="delgrosso-logo-ufficiale"],img[src*="delgrosso-logo-iphone"] {
 <div class="content">
 
 <section class="page active" id="page-dashboard">
-  <div class="dg-r35-head"><div><span class="dg-r35-eyebrow">DELGROSSO OPERATIONS 360° · R35</span><h2>Dashboard operativa</h2><p>La panoramica classica, aggiornata con le operazioni di oggi.</p></div><div class="dg-r35-head-actions"><button class="btn btn-primary" onclick="go('controlroom')">🎛️ Apri Control Room</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div><div class="dl26-hero dl26-static-hero">
+  <div class="dg-r35-head"><div><span class="dg-r35-eyebrow">DELGROSSO OPERATIONS 360° · R36 PREVIEW</span><h2>Dashboard operativa</h2><p>La panoramica classica, aggiornata con le operazioni di oggi.</p></div><div class="dg-r35-head-actions"><button class="btn btn-primary" onclick="go('controlroom')">🎛️ Apri Control Room</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div><div class="dl26-hero dl26-static-hero">
     <img class="dl26-static-hero-img" src="assets/dashboard-hero-static.jpg" alt="DELGROSSO Viaggi - Bus GT">
     <div class="dl26-static-hero-overlay"></div>
     <div class="dl26-static-hero-copy">
@@ -3213,7 +3213,7 @@ window.printRentalPaymentReceipt=function(id){
 /* DELGROSSO AI 360 — chat AI operativa con conferma umana */
 (function(){
 'use strict';
-const FN='delgrosso-ai360-v2';
+const FN='delgrosso-ai360-v4-preview';
 let history=[];
 let pending=null;
 let attachment=null;
@@ -3419,12 +3419,13 @@ async function send(){const input=q('ai360Input'),msg=input?.value.trim();if(!ms
    history.splice(tmpIndex,1);
    const local=localEmergencyPlan(msg);
    if(local){
-     add('assistant',local.assistant_message||'Ho elaborato la richiesta in modalità di emergenza.');
      if(local.actions?.length){
-       const id='LOCAL-'+Date.now();
-       pending={id,plan:{...local,requires_confirmation:true},local:true};
-       drawPlan(pending.plan,id);
-     }else drawPlan(null);
+       add('assistant','Il motore AI remoto non è disponibile. Posso continuare a rispondere alle domande di consultazione, ma per sicurezza non preparo modifiche in modalità offline. Riprova dopo la verifica del collegamento.');
+       drawPlan(null);
+     }else{
+       add('assistant',local.assistant_message||'Ho elaborato la richiesta in modalità di lettura.');
+       drawPlan(null);
+     }
    }else{
      add('assistant','Il motore AI remoto non ha risposto ('+(e?.code||e?.message||'errore di connessione')+'). Le risposte rapide su dati caricati sono comunque attive. Per richieste complesse verifica il servizio AI in Impostazioni; nessun dato è stato modificato.');
    }
