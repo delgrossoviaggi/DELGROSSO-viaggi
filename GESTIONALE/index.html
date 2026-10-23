@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta name="dg-build" content="DELGROSSO-R39-QUOTE-OPERATORI">
+<meta name="dg-build" content="DELGROSSO-R41-NOLEGGI-RISERVE">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
 <meta charset="utf-8">
@@ -2286,7 +2286,7 @@ function updateRentalFleetCapacity(){
 function renderRentals(){
  const q=($('rentalSearch')?.value||'').toLowerCase(), st=$('rentalStatus')?.value||'';
  const rows=state.noleggi.filter(r=>(!q||JSON.stringify(r).toLowerCase().includes(q))&&(!st||r.stato_noleggio===st));
- $('rentalsTable').innerHTML=rows.map(r=>{const mezzi=rentalVehicles(r.id),cap=mezzi.reduce((n,f)=>n+Number(f.posti||0),0);return `<tr><td><b>${esc(r.id_noleggio||r.id?.slice(0,8))}</b></td><td>${esc(r.referente||r.azienda||'—')}<br><small>${esc(r.telefono||'')}</small></td><td>${esc(r.tratta_partenza)} → ${esc(r.tratta_destinazione)}<br><small>🚌 ${esc(rentalVehicleLabel(r.id))}${mezzi.length?` · ${cap} posti`:''}</small></td><td>${dateIT(r.data_partenza)}<br><small>${r.ora_partenza||''}</small></td><td>${r.passeggeri||0}</td><td>${money(r.prezzo_concordato)}</td><td>${esc(r.stato_pagamento||'Da pagare')}<br><small>Acc. ${money(r.acconto)} · Saldo ${money(r.saldo)}</small></td><td><span class="pill ${r.stato_noleggio==='Completato'?'ok':r.stato_noleggio==='Annullato'?'danger':'info'}">${esc(r.stato_noleggio||'Richiesto')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openRentalModal('${r.id}')">Apri</button></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Nessun noleggio.</td></tr>';
+ $('rentalsTable').innerHTML=rows.map(r=>{const mezzi=rentalVehicles(r.id),cap=mezzi.reduce((n,f)=>n+Number(f.posti||0),0);return `<tr><td><b>${esc(r.id_noleggio||r.id?.slice(0,8))}</b></td><td>${esc(r.referente||r.azienda||'—')}<br><small>${esc(r.telefono||'')}</small></td><td>${esc(r.tratta_partenza)} → ${esc(r.tratta_destinazione)}<br><small>🚌 ${esc(rentalVehicleLabel(r.id))}${mezzi.length?` · ${cap} posti`:''}</small></td><td>${dateIT(r.data_partenza)}<br><small>${r.ora_partenza||''}</small></td><td>${r.passeggeri||0}</td><td>${r.servizio_tipo==='Viaggio DELGROSSO VIAGGI'?'<span class="pill ok">Interno · nessuna quota</span>':money(r.prezzo_concordato)}</td><td>${esc(r.stato_pagamento||'Da pagare')}<br><small>Acc. ${money(r.acconto)} · Saldo ${money(r.saldo)}</small></td><td><span class="pill ${r.stato_noleggio==='Completato'?'ok':r.stato_noleggio==='Annullato'?'danger':'info'}">${esc(r.stato_noleggio||'Richiesto')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="openRentalModal('${r.id}')">✏️ Modifica</button><button class="btn btn-danger btn-sm" onclick="dgR41OpenRemoveRental('${r.id}')">🗑️ Elimina / annulla</button></div></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Nessun noleggio.</td></tr>';
 }
 function dgDateBusy(fid,date,excludeTrip=''){return dgFleetEvents(fid).filter(e=>e.start<=date&&e.end>=date&&e.id!==excludeTrip)}
 function dgOpenFleetCalendar(fid,month){
@@ -2968,27 +2968,60 @@ function openRentalModal(id=''){
  <div class="field"><label>Ora</label><input id="r_time" type="time" value="${esc(r.ora_partenza||'')}"></div>
  <div class="field"><label>Data ritorno</label><input id="r_back" type="date" value="${esc(r.data_ritorno||'')}"></div>
  <div class="field"><label>Passeggeri</label><input id="r_pax" type="number" min="1" value="${r.passeggeri??1}" oninput="updateRentalFleetCapacity()"></div>
- <div class="field"><label>Prezzo concordato €</label><input id="r_price" type="number" step=".01" value="${r.prezzo_concordato??0}"></div>
- <div class="field"><label>Stato noleggio</label><select id="r_status">${['Richiesto','Confermato','In servizio','Completato','Annullato'].map(x=>`<option ${r.stato_noleggio===x?'selected':''}>${x}</option>`).join('')}</select></div>
+ <div class="field"><label>Tipologia servizio</label><select id="r_service" onchange="dgR41ToggleRentalPrice()">${[...new Set(['Andata e ritorno','Solo andata','Viaggio DELGROSSO VIAGGI',r.servizio_tipo||''])].filter(Boolean).map(x=>`<option value="${esc(x)}" ${String(r.servizio_tipo||'Andata e ritorno')===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div>
+ <div class="field" id="r_price_field"><label>Prezzo concordato €</label><input id="r_price" type="number" step=".01" min="0" value="${r.prezzo_concordato??0}"></div>
+ <div class="field full" id="r_internal_note" style="display:none"><div class="statusline" style="background:#eef9f3;border:1px solid #b5e5ca;padding:12px;border-radius:12px"><b>🚌 Viaggio interno DELGROSSO VIAGGI</b><br>Servizio organizzativo aziendale, senza quota commerciale. Nessun prezzo richiesto o credito da riscuotere.</div></div>
+ <div class="field"><label>Stato noleggio</label><select id="r_status">${['Richiesto','Confermato','In corso','Completato','Annullato'].map(x=>`<option ${r.stato_noleggio===x?'selected':''}>${x}</option>`).join('')}</select></div>
  <div class="field full"><label>🚌 Mezzi da assegnare (selezione multipla)</label><div>${rentalFleetCheckboxes(id)}</div><div id="r_fleet_capacity" style="margin-top:8px;padding:10px;border-radius:10px;background:#f6f9fc;border:1px solid #dfe8f1"></div><small>Puoi selezionare più autobus fino a raggiungere o superare i posti richiesti. Il sistema controlla automaticamente capienza e disponibilità nelle date del noleggio.</small></div>
  <div class="field full"><label>Note</label><textarea id="r_note">${esc(r.note||'')}</textarea></div>
  </div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-primary" onclick="saveRental('${id}')">Salva noleggio</button>`);
- setTimeout(updateRentalFleetCapacity,0);
+ setTimeout(()=>{dgR41ToggleRentalPrice();updateRentalFleetCapacity()},0);
 }
+function dgR41ToggleRentalPrice(){
+ const internal=$('r_service')?.value==='Viaggio DELGROSSO VIAGGI';
+ const priceField=$('r_price_field'),hint=$('r_internal_note');if(priceField)priceField.style.display=internal?'none':'';
+ if(hint)hint.style.display=internal?'block':'none';
+ const price=$('r_price');if(price){if(internal&&!price.disabled){price.dataset.r41OriginalPrice=price.value;price.value='0'}else if(!internal&&price.disabled){price.value=price.dataset.r41OriginalPrice||'0'}price.disabled=internal}
+}
+
 async function saveRental(id){
- const old=id?state.noleggi.find(x=>x.id===id):null, price=Math.round((Number($('r_price').value)||0)*100)/100, status=$('r_status').value, pax=Number($('r_pax').value)||1, vehicleIds=selectedRentalVehicleIds();
+ const old=id?state.noleggi.find(x=>x.id===id):null, internal=$('r_service').value==='Viaggio DELGROSSO VIAGGI', price=internal?0:Math.round((Number($('r_price').value)||0)*100)/100, status=$('r_status').value, pax=Number($('r_pax').value)||1, vehicleIds=selectedRentalVehicleIds();
  const cap=(state.flotta||[]).filter(f=>vehicleIds.includes(f.id)).reduce((n,f)=>n+Number(f.posti||0),0);
  if(!$('r_from').value.trim()||!$('r_to').value.trim()||!$('r_date').value)return toast('Partenza, destinazione e data sono obbligatorie.',false);
  if(pax<1)return toast('Inserisci un numero passeggeri valido.',false); if(price<0)return toast('Prezzo non valido.',false);
- if(status==='Confermato'&&Number(old?.acconto||0)<=0)return toast('Per confermare il noleggio registra prima un acconto.',false);
+ if(status==='Confermato'&&!internal&&Number(old?.acconto||0)<=0)return toast('Per confermare il noleggio registra prima un acconto.',false);
  if(status==='Confermato'&&!vehicleIds.length)return toast('Per confermare il noleggio seleziona almeno un mezzo.',false);
  if(vehicleIds.length&&cap<pax)return toast(`Capienza insufficiente: ${cap} posti disponibili per ${pax} passeggeri.`,false);
  const rentalId=id||newUUID();
- const body={id_noleggio:old?.id_noleggio||null,referente:$('r_ref').value||null,azienda:$('r_company').value||null,telefono:$('r_tel').value||null,email:$('r_email').value||null,tratta_partenza:$('r_from').value.trim(),tratta_destinazione:$('r_to').value.trim(),data_partenza:$('r_date').value,ora_partenza:$('r_time').value||null,data_ritorno:$('r_back').value||null,passeggeri:pax,servizio_tipo:'Andata e ritorno',prezzo_concordato:price,stato_noleggio:status,note:$('r_note').value||null};
+ const body={id_noleggio:old?.id_noleggio||null,referente:$('r_ref').value||null,azienda:$('r_company').value||null,telefono:$('r_tel').value||null,email:$('r_email').value||null,tratta_partenza:$('r_from').value.trim(),tratta_destinazione:$('r_to').value.trim(),data_partenza:$('r_date').value,ora_partenza:$('r_time').value||null,data_ritorno:$('r_back').value||null,passeggeri:pax,servizio_tipo:$('r_service').value,prezzo_concordato:price,stato_noleggio:status,note:$('r_note').value||null};
  try{
-   const saved=await rpc('dg_save_rental_v14',{p_id:rentalId,p_data:body,p_vehicle_ids:vehicleIds});
+   const saved=await rpc('dg_save_rental_v15',{p_id:rentalId,p_data:body,p_vehicle_ids:vehicleIds});
    closeModal(); toast(`Noleggio salvato · ${saved?.mezzi??vehicleIds.length} mezzo/i · ${saved?.posti_totali??cap} posti`); await loadAll();
  }catch(e){toast('Noleggio non salvato: '+e.message,false);log('NOLEGGIO: '+e.message)}
+}
+// R41: cancellazione protetta server-side. Se esistono documenti/incassi si archivia,
+// non si distruggono le scritture contabili.
+async function dgR41OpenRemoveRental(id){
+ const r=(state.noleggi||[]).find(x=>x.id===id);if(!r)return toast('Noleggio non trovato',false);
+ try{
+  const preview=await rpc('dg_manage_rental_v1',{p_rental_id:id,p_action:'preview'});
+  if(!preview?.success)throw Error('Impossibile verificare i collegamenti del noleggio');
+  const protectedMode=preview.action==='archivia',code=String(preview.code||'');
+  openModal(protectedMode?'🗃️ Annulla e conserva noleggio':'🗑️ Elimina noleggio',`
+   <div class="statusline" style="padding:14px;border:1px solid ${protectedMode?'#fbbf24':'#fca5a5'};border-radius:12px;background:${protectedMode?'#fffbeb':'#fff1f2'}">
+    <b>${protectedMode?'Noleggio con movimenti/documenti: verrà ANNULLATO e conservato.':'Noleggio privo di movimenti: può essere eliminato.'}</b>
+    <p style="margin:8px 0 0">Codice: <b>${esc(code)}</b><br>Pagamenti: ${Number(preview.payment_count)||0} · Economia: ${Number(preview.economy_count)||0} · Documenti: ${Number(preview.document_count)||0}</p>
+   </div>
+   <div class="field" style="margin-top:14px"><label>Per confermare digita il codice <b>${esc(code)}</b></label><input id="dg_r41_confirm_code" autocomplete="off" placeholder="Codice esatto del noleggio"></div>
+  `,`<button class="btn btn-secondary" onclick="closeModal()">Torna indietro</button><button class="btn btn-danger" onclick="dgR41ConfirmRemoveRental('${id}')">${protectedMode?'Annulla conservando gli incassi':'Elimina definitivamente'}</button>`);
+ }catch(e){toast('Verifica noleggio non riuscita: '+e.message,false)}
+}
+async function dgR41ConfirmRemoveRental(id){
+ const code=$('dg_r41_confirm_code')?.value?.trim();if(!code)return toast('Digita il codice di conferma',false);
+ try{
+  const result=await rpc('dg_manage_rental_v1',{p_rental_id:id,p_action:'remove',p_confirmation:code});
+  closeModal();await loadAll();toast(result?.message||'Operazione completata');
+ }catch(e){toast('Noleggio non modificato: '+e.message,false)}
 }
 function toggleMobileMenu(force){
   const el=document.getElementById('mobileMenu');
@@ -5054,17 +5087,69 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
         <div><small>Saldo</small><b>€ 0,00</b></div>
       </div>
       ${b.note?`<div class="statusline" style="margin-top:12px"><b>Note</b><br>${esc(b.note)}</div>`:''}
-    `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-secondary" onclick="closeModal();openMoveBookingsModal('${id}')">🔄 Sposta data</button><button class="btn btn-danger" onclick="cancelBooking('${id}')">Libera posti</button>`);
+    `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-primary" onclick="dgR41EditCompanyReservation('${id}')">✏️ Modifica posti</button><button class="btn btn-secondary" onclick="closeModal();openMoveBookingsModal('${id}')">🔄 Sposta data</button><button class="btn btn-danger" onclick="dgR41ReleaseCompanyReservation('${id}')">Libera posti</button>`);
+  };
+  // R41 - modifica della riserva aziendale nello stesso bus con protezione da posti occupati.
+  let dgR41CompanyEdit={id:'',seats:new Set()};
+  window.dgR41EditCompanyReservation=function(id){
+    const b=(state.prenotazioni||[]).find(x=>x.id===id);
+    if(!b||!companyBooking(b))return toast('Riserva DELGROSSO non trovata',false);
+    if(/annull|cancel/i.test(String(b.stato||'')))return toast('Questa riserva è già stata liberata',false);
+    dgR41CompanyEdit={id,seats:new Set(bookingSeats(b).map(String))};
+    const v=(state.viaggi||[]).find(x=>x.id===b.viaggio_id);
+    openModal('✏️ Modifica posti riservati DELGROSSO',`
+      <div class="statusline" style="margin-bottom:12px;padding:11px;border:1px solid #ddd6fe;border-radius:12px;background:#faf5ff"><b>${esc(v?.titolo||v?.destinazione||'Viaggio')}</b><br>Seleziona i posti aziendali da mantenere. I posti deselezionati saranno liberati. Non puoi selezionare quelli già assegnati ad altri clienti.</div>
+      <div id="dg_r41_reserve_counter" style="font-weight:800;margin:8px 0"></div>
+      <div id="dg_r41_reserve_seats" class="seat-picker" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(48px,1fr));gap:7px;max-height:300px;overflow:auto;padding:10px;border:1px solid #e2e8f0;border-radius:12px"></div>
+      <div class="field" style="margin-top:14px"><label>Nota riserva</label><textarea id="dg_r41_reserve_note" rows="2">${esc(b.note||'')}</textarea></div>
+      <small style="display:block;color:#64748b;margin-top:8px">Per liberare tutti i posti usa “Libera intera riserva”: la modifica richiede almeno un posto.</small>
+    `,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-danger" onclick="dgR41ReleaseCompanyReservation('${id}')">Libera intera riserva</button><button class="btn btn-primary" id="dg_r41_reserve_save" onclick="dgR41SaveCompanyReservation('${id}')">Salva modifica</button>`);
+    dgR41RenderCompanyEditSeats();
+  };
+  window.dgR41RenderCompanyEditSeats=function(){
+    const id=dgR41CompanyEdit.id,b=(state.prenotazioni||[]).find(x=>x.id===id);
+    const v=b&&(state.viaggi||[]).find(x=>x.id===b.viaggio_id),host=$('dg_r41_reserve_seats');if(!host||!v)return;
+    const busy=occupiedSeatSet(v.id,id);
+    const max=Math.max(0,Math.min(100,Number(v.posti_totali||0)));
+    host.innerHTML=Array.from({length:max},(_,i)=>{const n=String(i+1),used=busy.has(n),sel=dgR41CompanyEdit.seats.has(n);return `<button type="button" class="btn ${sel?'btn-purple':used?'btn-secondary':'btn-ghost'}" style="min-height:47px;${sel?'background:#7c3aed;color:#fff;':used?'opacity:.4;cursor:not-allowed;':'border:1px solid #cbd5e1;'}" ${used?'disabled':''} onclick="dgR41ToggleCompanyEditSeat('${n}')" title="${used?'Occupato da un altro cliente':sel?'Riservato DELGROSSO':'Libero'}">${n}${sel?' ✓':''}</button>`}).join('');
+    const label=$('dg_r41_reserve_counter');if(label)label.textContent=dgR41CompanyEdit.seats.size+' posti selezionati · Viola: riservato · Grigio: occupato';
+    const btn=$('dg_r41_reserve_save');if(btn)btn.disabled=dgR41CompanyEdit.seats.size===0;
+  };
+  window.dgR41ToggleCompanyEditSeat=function(seat){
+    if(dgR41CompanyEdit.seats.has(seat))dgR41CompanyEdit.seats.delete(seat);else dgR41CompanyEdit.seats.add(seat);
+    dgR41RenderCompanyEditSeats();
+  };
+  window.dgR41SaveCompanyReservation=async function(id){
+    const b=(state.prenotazioni||[]).find(x=>x.id===id);
+    if(!b||dgR41CompanyEdit.id!==id)return toast('Riserva non disponibile, aggiorna il gestionale',false);
+    const seats=[...dgR41CompanyEdit.seats].sort((a,z)=>Number(a)-Number(z));
+    if(!seats.length)return toast('Per liberare tutti i posti usa “Libera intera riserva”',false);
+    const old=bookingSeats(b).sort((a,z)=>Number(a)-Number(z));
+    const note=$('dg_r41_reserve_note')?.value||'';
+    if(!confirm(`Modificare la riserva DELGROSSO?\nDa: ${old.join(', ')}\nA: ${seats.join(', ')}\nPosti: ${old.length} → ${seats.length}\n\nI posti rimossi torneranno disponibili.`))return;
+    const btn=$('dg_r41_reserve_save');if(btn)btn.disabled=true;
+    try{
+      await rpc('dg_save_booking_v13',{p_id:id,p_data:{viaggio_id:b.viaggio_id,cliente:'DELGROSSO VIAGGI',telefono:null,email:null,posti:seats.length,totale:0,stato:'Riservata DELGROSSO',note:note||'Posti riservati gratuitamente a DELGROSSO VIAGGI',fermata_partenza:'RISERVA AZIENDALE',giorni_acconto:90},p_seats:seats});
+      closeModal();await loadAll();toast(`Riserva modificata: ${seats.length} posti DELGROSSO`);
+    }catch(e){toast('Modifica NON salvata: '+e.message,false);if(btn)btn.disabled=false;}
+  };
+  window.dgR41ReleaseCompanyReservation=async function(id){
+    const b=(state.prenotazioni||[]).find(x=>x.id===id);
+    if(!b||!companyBooking(b))return toast('Riserva non trovata',false);
+    const old=bookingSeats(b);
+    if(!confirm(`Liberare TUTTI i ${old.length} posti riservati DELGROSSO?\n\nPosti: ${old.join(', ')}\n\nLa riserva verrà eliminata se senza movimenti economici; altrimenti annullata e conservata. Nessun cliente verrà eliminato.`))return;
+    try{const r=await rpc('dg_delete_booking',{p_booking_id:id});closeModal();await loadAll();toast(r?.mode==='eliminata'?'Riserva eliminata: posti liberati':'Riserva annullata e posti liberati');}
+    catch(e){toast('Posti NON liberati: '+e.message,false)}
   };
   // Prenotazioni: vista speciale per le riserve aziendali.
   window.renderBookings=function(){
     const q=($('bookSearch')?.value||'').toLowerCase(),st=$('bookFilter')?.value||'';
     const rows=(state.prenotazioni||[]).filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
     $('bookingsTable').innerHTML=rows.map(b=>{
-      const company=companyBooking(b),rowClass=company?' class="dg-company-row"':'';
+      const company=companyBooking(b),inactive=/annull|cancel/i.test(String(b.stato||'')),rowClass=company?' class="dg-company-row"':'';
       const moneyCols=company?'<td><span class="pill company">GRATUITA</span></td><td>€ 0,00</td><td>€ 0,00</td>':`<td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td>`;
-      const status=company?'<span class="pill company">🎟️ Riservata DELGROSSO</span>':`<span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span>`;
-      const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button>`;
+      const status=company?(inactive?'<span class="pill danger">Riserva liberata / annullata</span>':'<span class="pill company">🎟️ Riservata DELGROSSO</span>'):`<span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span>`;
+      const actions=company?(inactive?'<span class="pill">Nessun posto bloccato</span>':`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-secondary btn-sm" onclick="dgR41EditCompanyReservation('${b.id}')">✏️ Posti</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="dgR41ReleaseCompanyReservation('${b.id}')">Libera</button>`):`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button>`;
       return `<tr${rowClass}><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente||b.cliente_nome||'Cliente')}${company?'<br><small>Riserva aziendale gratuita</small>':`<br><small>${esc(b.telefono||'')}</small>`}</td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td>${moneyCols}<td>${status}</td><td>${actions}</td></tr>`;
     }).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
   };
@@ -5075,6 +5160,8 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
     $('seatPicker').innerHTML=Array.from({length:total},(_,i)=>{const n=String(i+1),isBusy=busy.includes(n),isCompany=company.has(n),sel=modalSelectedSeats.includes(n);return `<button type="button" class="seat ${isBusy?'busy':''} ${isCompany?'company-reserved':''} ${sel?'selected':''}" ${isBusy?'disabled':''} onclick="toggleSeat('${n}')" title="${isCompany?'Riservato DELGROSSO':isBusy?'Occupato':'Libero'}">${n}</button>`}).join('');
     $('b_selected').value=modalSelectedSeats.join(', ');$('b_seats').value=modalSelectedSeats.length||1;
   };
+  const dgR41OriginalCancelBooking=window.cancelBooking;
+  window.cancelBooking=function(id){const b=(state.prenotazioni||[]).find(x=>x.id===id);if(companyBooking(b))return dgR41ReleaseCompanyReservation(id);return dgR41OriginalCancelBooking(id);};
   const originalOpenBooking=window.openBookingModal;
   window.openBookingModal=function(id=''){
     const b=id?(state.prenotazioni||[]).find(x=>x.id===id):null;
