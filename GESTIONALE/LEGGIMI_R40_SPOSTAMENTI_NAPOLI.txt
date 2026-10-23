@@ -1,0 +1,12 @@
+DELGROSSO GESTIONALE R40 — 23 ottobre 2026
+- Pagina Prenotazioni: pulsante rapido per gestire BUS 1 e BUS BIS Napoli 22 novembre.
+- Accanto a ciascun cliente: Cambia posto (stesso BUS), Cambia BUS (altra pianta).
+- Tocco di posto occupato apre gestione posti già precompilata sul cliente (con aggiornamento dati prima).
+- Interfaccia permette esplicitamente la scelta del BUS di origine anche come destinazione, per spostare posti sullo stesso mezzo.
+- Spostamenti eseguiti solo dopo conferma tramite RPC atomica esistente dg_reseat_bookings_multibus_v2, che mantiene la prenotazione e collega i pagamenti.
+- Scambi automatici con prenotazioni occupanti solo scegliendo tutti i posti dei rispettivi clienti.
+- Ricontrollare ricevute/conferme PDF dopo ogni cambio posto: i PDF archiviati potrebbero contenere vecchi posti.
+- NON modifica in massa alcuna prenotazione, NON libera/ripubblica viaggi sul sito.
+- Su Supabase Napoli 22/11 BUS 1 e BUS BIS sono attualmente pubblicato=NO.
+- Controllare in anteprima prima di pubblicare su Vercel, e salvare un backup.
+- Il connettore GitHub attuale ha permessi solo di lettura: il nuovo codice non è stato distribuito automaticamente online.
