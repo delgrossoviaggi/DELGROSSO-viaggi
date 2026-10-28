@@ -1,7 +1,0 @@
-R3 - Correzione della dashboard sotto il menu
-CAUSA: display:block su #app causava l'impilamento verticale di sidebar e main.
-SOLUZIONE: CSS Grid esplicita con due colonne e stessa riga; sidebar sticky, dashboard in colonna 2.
-Mobile: menu a scomparsa e dashboard a larghezza piena.
-Nessuna modifica a dati Supabase o operazioni di business.
-Test effettuati: integrita ZIP e presenza struttura DOM/CSS. NON e stato eseguito collaudo browser autentico.
-Caricare TUTTO il contenuto di GESTIONALE nella cartella omonima del repository, poi testare in anteprima Vercel prima della produzione.

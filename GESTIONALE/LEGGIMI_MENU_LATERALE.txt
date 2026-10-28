@@ -1,9 +1,0 @@
-DELGROSSO OPERATIONS 360 - MENU LATERALE SINISTRA
-
-Desktop: barra laterale fissa a sinistra.
-Tablet / iOS / Android: menu laterale sinistro a scomparsa, aperto con il pulsante in alto a sinistra.
-La barra di navigazione inferiore viene nascosta per evitare doppioni.
-La barra superiore mantiene ricerca, notifiche e utente.
-Nessuna modifica a Supabase, alle prenotazioni o ai pagamenti.
-Verifica: integrita ZIP e struttura CSS/HTML. Test login e browser mobili reali NON eseguiti.
-Pubblicare prima su branch di anteprima.

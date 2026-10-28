@@ -1,5 +1,0 @@
-Logo ufficiale aggiornato con immagine allegata il 17 ottobre 2026.
-Ritaglio con margine bianco per garantire leggibilita del marchio nero.
-Regole CSS di contrasto applicate a intestazioni, schermate mobili e dashboard.
-Non sono state modificate funzioni di prenotazione, login, pagamenti o database.
-Collaudo visivo browser e funzionale su dispositivi reali non eseguito.

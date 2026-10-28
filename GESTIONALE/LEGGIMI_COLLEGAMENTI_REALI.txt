@@ -1,8 +1,0 @@
-COLLEGAMENTI REALI - VERSIONE DI COLLAUDO, NON DI PRODUZIONE
-- La locandina deriva ESCLUSIVAMENTE dal campo viaggio.locandina.
-- Ogni bus deriva dal campo viaggio.autobus_id, compresi i viaggi BIS collegati tramite bis_parent_id.
-- La capienza e i passeggeri sono aggregati per le corse BUS/BIS dello stesso gruppo.
-- La piantina interattiva esistente rimane nella pagina Gestione Posti; la dashboard apre questa pagina.
-- Non vengono rappresentati finti posti liberi/occupati nelle piantine.
-- Nessuna operazione SQL, cancellazione o modifica dati.
-- Non certificato end-to-end: richiede test autenticati e backup verificato.

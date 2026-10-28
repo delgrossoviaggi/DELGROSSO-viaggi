@@ -1,7 +1,0 @@
-R37 — Correzioni preventivi, stampa e disponibilità.
-1) In Supabase SQL Editor eseguire SQL/AGGIORNAMENTO_R37_PREVENTIVI.sql.
-2) Usare index.html con i file della cartella per la distribuzione web, oppure DELGROSSO_GESTIONALE_COMPLETO_MASTER.html per il file singolo. Non sostituire i due senza un backup.
-3) Preventivi: nuovo campo Data redazione modificabile; Data servizio resta separata.
-4) Stampe: attesa caricamento pagina, immagini e font prima di avviare la stampa desktop. Verificare anche la generazione automatica PDF backend / Edge Functions, che non è inclusa in questo ZIP.
-5) Prenotazioni: box di disponibilità live ogni 15 secondi per partenza e bus correlati. La selezione resta nel bus scelto. Il blocco atomico dei posti deve essere garantito anche dal database.
-ATTENZIONE: intervento statico non collaudato contro il Supabase live; testare con prenotazioni di prova prima del rilascio.
