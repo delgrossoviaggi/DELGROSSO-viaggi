@@ -1,7 +1,7 @@
 /* DELGROSSO Gestionale - AI 360 recovery-safe
    Navigation is network-first and never stores index.html.
    Only DELGROSSO Gestionale caches are cleaned. */
-const CACHE='delgrosso-gestionale-v59-mobile';
+const CACHE='delgrosso-gestionale-v60-mobile';
 
 self.addEventListener('install',event=>{
   self.skipWaiting();

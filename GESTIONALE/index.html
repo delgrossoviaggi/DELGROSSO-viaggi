@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta name="dg-build" content="DELGROSSO-GITHUB-V57-PULITO-20261028">
+<meta name="dg-build" content="DELGROSSO-GITHUB-V60-MOBILE-SINGLE-HEADER">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
 <meta charset="utf-8">
@@ -1697,7 +1697,7 @@ function startAutoSync(){
   },30000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy)loadAll(true)},{passive:true})}}
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
-function go(page){window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
+function go(page){if(!document.getElementById('page-'+page))page='dashboard';window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
 const PAGE_META={caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
 function updatePageChrome(page){const m=PAGE_META[page]||PAGE_META.dashboard;const t=$('topPageTitle'),s=$('topPageSubtitle'),c=$('pageCrumb');if(t)t.textContent=m[0];if(s)s.textContent=m[1];if(c)c.textContent=m[0];}
 
@@ -4023,7 +4023,7 @@ function showApp(){
   $id('app')?.classList.add('on');
   updateOperatorUI();
   try{window.dg51UpdateAccountIdentity?.()}catch(e){console.warn('Profilo V51',e)}
-  try{go(location.hash.slice(1)||'dashboard')}catch(e){console.warn('go dashboard',e)}
+  try{const requested=decodeURIComponent(location.hash.slice(1)||'dashboard'); const route=document.getElementById('page-'+requested)?requested:'dashboard';go(route)}catch(e){console.warn('go dashboard',e);try{go('dashboard')}catch(_){}}
 }
 async function syncAfterOpen(){
   try{restoreCacheFast()}catch(e){console.warn('cache',e)}
@@ -7782,6 +7782,79 @@ window.dg56ConfirmArchive=async function(id){
  }catch(e){toast('Operazione non completata: '+textError(e),false);if(button){button.disabled=false;button.textContent=archived?'Archivia viaggio':'Ripristina viaggio'}}
  finally{working=false}
 };
+})();
+</script>
+
+<style id="dg60-single-mobile-shell">
+/* V60: whenever the new DELGROSSO header is active, the legacy one must be hidden. */
+html body.dg44-ready.dg44-authenticated #app.app.on > main.main > header.topbar,
+html body.dg44-ready.dg44-authenticated #app.app.on > main.main > .topbar{
+ display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;
+ margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;
+}
+html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.active #dg44-workspace {
+ display:block!important; visibility:visible!important;opacity:1!important;
+}
+@media screen and (max-width:1000px){
+  html body.dg44-ready.dg44-authenticated #app.app.on > main.main > header.topbar,
+  html body.dg44-ready.dg44-authenticated #app.app.on > main.main > .topbar,
+  html body.dg44-ready.dg44-authenticated #app.app.on #pageContext,
+  html body.dg44-ready.dg44-authenticated #app.app.on .page-context,
+  html body.dg44-ready.dg44-authenticated #app.app.on .mobile-nav {
+    display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;
+    margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;
+  }
+  html body.dg44-ready.dg44-authenticated #app.app.on > main.main{
+    padding-top:74px!important;margin-top:0!important;
+    margin-left:0!important;width:100%!important;max-width:100%!important;
+    min-height:100dvh!important;
+  }
+  html body.dg44-ready.dg44-authenticated #app.app.on > main.main > .content{
+    padding-top:10px!important;min-height:calc(100dvh - 74px)!important;
+    width:100%!important;max-width:100%!important;
+  }
+  html body.dg44-ready.dg44-authenticated #dg44-header{height:74px!important;min-height:74px!important}
+  html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.active #dg44-workspace{
+    display:block!important;visibility:visible!important;opacity:1!important;
+  }
+  html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.active{
+    display:block!important;min-height:calc(100dvh - 100px);
+  }
+}
+@media screen and (max-width:390px){
+  html body.dg44-ready.dg44-authenticated #dg44-logo-btn{width:clamp(115px,39vw,152px)!important;max-width:40vw!important}
+  html body.dg44-ready.dg44-authenticated #dg44-logo{width:100%!important;max-width:100%!important}
+  html body.dg44-ready.dg44-authenticated .dg44-head-right{gap:5px!important}
+}
+/* Avoid a horizontal scroll from a legacy toolbar on touch devices. */
+@media screen and (max-width:1000px){
+  html body.dg44-ready #app.app.on{overflow-x:clip!important}
+  html body.dg44-ready #app.app.on > main.main .content{overflow-x:clip!important}
+}
+</style>
+
+<script id="dg60-mobile-route-guard">
+(function(){
+ 'use strict';
+ function guard(){
+   if(!document.body.classList.contains('dg44-authenticated')) return;
+   const app=document.getElementById('app');if(!app?.classList.contains('on'))return;
+   const legacy=app.querySelector('main.main > header.topbar');
+   // Never show both headers, regardless of viewport width.
+   if(document.getElementById('dg44-header')){
+     if(legacy){legacy.setAttribute('aria-hidden','true');legacy.style.setProperty('display','none','important')}
+   }else if(legacy){legacy.removeAttribute('aria-hidden');legacy.style.removeProperty('display')}
+   const active=app.querySelector('.content > .page.active');
+   if(!active && typeof window.go==='function'){
+     window.go('dashboard');
+   }
+ }
+ document.addEventListener('DOMContentLoaded',function(){guard();setTimeout(guard,200);setTimeout(guard,1200)});
+ window.addEventListener('resize',guard,{passive:true});
+ window.addEventListener('pageshow',function(){setTimeout(guard,0)});
+ window.addEventListener('hashchange',function(){setTimeout(guard,80)});
+ // After login, a very small bounded check makes sure older user sessions have a visible page.
+ let checks=0;const timer=setInterval(function(){guard();if(++checks>=12)clearInterval(timer)},450);
 })();
 </script>
 </body>
