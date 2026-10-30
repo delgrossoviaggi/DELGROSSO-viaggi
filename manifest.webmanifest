@@ -1,12 +1,41 @@
 {
-  "name": "DELGROSSO Viaggi & Limousine Bus",
+  "name": "DELGROSSO Gestionale",
   "short_name": "DELGROSSO",
-  "start_url": "/index.html",
+  "description": "Gestione operativa DELGROSSO Viaggi & Limousine BUS",
+  "start_url": "./index.html#dashboard",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#03111f",
-  "theme_color": "#03111f",
-  "description": "Viaggi organizzati, Bus Gran Turismo e Limousine Bus.",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "any",
+  "background_color": "#061a2d",
+  "theme_color": "#061a2d",
   "icons": [
-    {"src":"/favicon.png","sizes":"any","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "assets/delgrosso-app-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/delgrosso-app-icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/delgrosso-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/delgrosso-app-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }
