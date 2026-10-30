@@ -1,8 +1,0 @@
-DELGROSSO VIAGGI — RESTYLING AGENZIA PREMIUM COMPLETO
-
-Pagine pubbliche aggiornate: area-riservata.html, chi-siamo.html, contatti.html, cookie.html, flotta.html, index.html, limousine.html, news.html, noleggio.html, partyontheroad.html, prenota.html, preventivo.html, privacy.html, viaggi.html, viaggio.html
-
-Invariati i file amministrativi, il codice di integrazione con il gestionale e le pagine di manutenzione.
-Per pubblicare: copiare sul repository il contenuto di questa cartella rispettando cartelle e percorsi.
-Prima del rilascio effettuare prove end-to-end su prenotazioni, preventivi, pagamenti e vista mobile.
-Nota: privacy.html contiene già una bozza che va completata legalmente prima della pubblicazione.
