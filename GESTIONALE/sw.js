@@ -1,7 +1,7 @@
 /* DELGROSSO Gestionale - AI 360 recovery-safe
    Navigation is network-first and never stores index.html.
    Only DELGROSSO Gestionale caches are cleaned. */
-const CACHE='delgrosso-gestionale-v60-mobile';
+const CACHE='delgrosso-gestionale-v63-whatsapp-gratis';
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
@@ -20,6 +20,8 @@ self.addEventListener('fetch',event=>{
   if(req.method!=='GET') return;
   const url=new URL(req.url);
   if(url.origin!==location.origin) return;
+  // Never intercept or cache authenticated/API actions.
+  if(url.pathname.startsWith('/api/')) return;
 
   if(req.mode==='navigate' || req.destination==='document'){
     event.respondWith(fetch(req,{cache:'no-store'}).catch(()=>new Response(
