@@ -1,0 +1,102 @@
+
+/* DELGROSSO V22 — Navy + Arancio caldo + Bianco */
+:root{
+  --dg-navy:#071B2E;
+  --dg-navy-2:#0D2A45;
+  --dg-navy-3:#123A5C;
+  --dg-orange:#F28C28;
+  --dg-orange-2:#FFAA45;
+  --dg-white:#FFFFFF;
+  --dg-ivory:#F7F4EF;
+  --dg-ink:#0A1724;
+  --dg-muted:#5E6B78;
+  --dg-border:rgba(7,27,46,.14);
+}
+html,body{background:var(--dg-ivory);color:var(--dg-ink)}
+header,.site-header,.topbar,.nav-shell{background:var(--dg-navy)!important;color:var(--dg-white)!important}
+header a,.site-header a,.topbar a,.nav-shell a{color:var(--dg-white)}
+footer,.site-footer{background:var(--dg-navy)!important;color:var(--dg-white)!important}
+footer a,.site-footer a{color:var(--dg-white)}
+button,.btn,.button,[class*="cta"],a.btn,a.button{
+  border-color:transparent;
+}
+.btn-primary,.button-primary,[class*="primary-cta"],.limo-cta{
+  background:var(--dg-orange)!important;color:var(--dg-navy)!important;
+}
+.btn-primary:hover,.button-primary:hover,[class*="primary-cta"]:hover,.limo-cta:hover{
+  background:var(--dg-orange-2)!important;
+}
+.badge,.pill,.tag,.eyebrow,.kicker{accent-color:var(--dg-orange)}
+a{accent-color:var(--dg-orange)}
+::selection{background:var(--dg-orange);color:var(--dg-navy)}
+
+
+/* V23: leggibilità universale su fotografie e fondi dinamici */
+.dg-readable-copy{
+  position:relative!important;
+  z-index:2!important;
+  isolation:isolate;
+}
+.dg-readable-copy::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-18px -22px;
+  border-radius:18px;
+  background:linear-gradient(90deg,rgba(3,16,28,.88),rgba(3,16,28,.66) 62%,rgba(3,16,28,.12));
+  backdrop-filter:blur(1.5px);
+  -webkit-backdrop-filter:blur(1.5px);
+  pointer-events:none;
+}
+.dg-readable-copy h1,.dg-readable-copy h2,.dg-readable-copy h3,.dg-readable-copy h4,
+.dg-readable-copy p,.dg-readable-copy span,.dg-readable-copy strong,.dg-readable-copy small,.dg-readable-copy a{
+  color:#fff!important;
+  text-shadow:0 2px 10px rgba(0,0,0,.62)!important;
+}
+@media(max-width:700px){
+ .dg-readable-copy::before{inset:-14px -15px;background:rgba(3,16,28,.74)}
+}
+
+/* V24 — crediti footer in basso a sinistra */
+.dg-footer-credits{
+  width:100%;
+  box-sizing:border-box;
+  margin-top:28px;
+  padding:18px 0 6px;
+  text-align:left!important;
+  color:rgba(255,255,255,.72)!important;
+  font-size:11px;
+  line-height:1.65;
+  letter-spacing:.055em;
+  font-weight:700;
+}
+.dg-footer-credits div{color:inherit!important;text-align:left!important}
+@media(max-width:700px){
+  .dg-footer-credits{font-size:10px;margin-top:22px;padding-top:15px}
+}
+
+
+/* DELGROSSO V25 — nuova palette */
+:root{
+ --dg-bg:#F4F7FA; --dg-surface:#FFFFFF; --dg-navy:#061C2F; --dg-navy2:#0B304D;
+ --dg-orange:#F47B20; --dg-orange2:#FF9A45; --dg-text:#102333; --dg-muted:#526575;
+ --dg-line:rgba(6,28,47,.13);
+}
+html,body{background:var(--dg-bg)!important;color:var(--dg-text)}
+header,.site-header,.topbar,.nav-shell,footer,.site-footer{background:var(--dg-navy)!important;color:#fff!important}
+.btn-primary,.button-primary,.limo-cta,[class*="primary-cta"]{background:var(--dg-orange)!important;color:#061C2F!important}
+.btn-primary:hover,.button-primary:hover,.limo-cta:hover,[class*="primary-cta"]:hover{background:var(--dg-orange2)!important}
+::selection{background:var(--dg-orange);color:#061C2F}
+.dg-footer-credits{color:rgba(255,255,255,.82)!important}
+
+/* V25: protezione leggibilità testo su immagini */
+.dg-photo-copy{position:relative!important;z-index:1!important;isolation:isolate}
+.dg-photo-copy:before{
+ content:"";position:absolute;z-index:-1;inset:-14px -18px;border-radius:16px;
+ background:linear-gradient(90deg,rgba(3,17,29,.88),rgba(3,17,29,.62) 68%,rgba(3,17,29,.08));
+ pointer-events:none
+}
+.dg-photo-copy,.dg-photo-copy *{color:#fff!important}
+.dg-photo-copy h1,.dg-photo-copy h2,.dg-photo-copy h3,.dg-photo-copy p,.dg-photo-copy span,.dg-photo-copy strong{
+ text-shadow:0 2px 9px rgba(0,0,0,.78)!important
+}
