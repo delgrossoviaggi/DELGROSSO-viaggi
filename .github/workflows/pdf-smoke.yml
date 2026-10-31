@@ -8,6 +8,7 @@ on:
       - 'prenota.html'
       - 'js/gestionale.js'
       - 'supabase/functions/send-booking-confirmation/index.ts'
+      - 'supabase/patches/guard_public_booking_capacity.sql'
       - '.github/workflows/pdf-smoke.yml'
   push:
     branches:
@@ -20,6 +21,7 @@ on:
       - 'prenota.html'
       - 'js/gestionale.js'
       - 'supabase/functions/send-booking-confirmation/index.ts'
+      - 'supabase/patches/guard_public_booking_capacity.sql'
       - '.github/workflows/pdf-smoke.yml'
 permissions:
   contents: read
