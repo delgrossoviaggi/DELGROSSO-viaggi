@@ -1,9 +1,13 @@
-name: Booking PDF smoke tests
+name: Booking and PDF regression checks
 on:
   pull_request:
     paths:
       - 'js/ricevuta.js'
       - 'tests/pdf-smoke.mjs'
+      - 'tests/booking-page-smoke.mjs'
+      - 'prenota.html'
+      - 'js/gestionale.js'
+      - 'supabase/functions/send-booking-confirmation/index.ts'
       - '.github/workflows/pdf-smoke.yml'
   push:
     branches:
@@ -12,6 +16,10 @@ on:
     paths:
       - 'js/ricevuta.js'
       - 'tests/pdf-smoke.mjs'
+      - 'tests/booking-page-smoke.mjs'
+      - 'prenota.html'
+      - 'js/gestionale.js'
+      - 'supabase/functions/send-booking-confirmation/index.ts'
       - '.github/workflows/pdf-smoke.yml'
 permissions:
   contents: read
@@ -24,4 +32,6 @@ jobs:
         with:
           node-version: '22'
       - name: Validate booking PDF
-        run: node tests/pdf-smoke.mjs
+        run: |
+          node tests/pdf-smoke.mjs
+          node tests/booking-page-smoke.mjs
