@@ -59,7 +59,7 @@
 const sel=document.querySelector('#viaggio'),seats=document.querySelector('#seats'),details=document.querySelector('#details'),msg=document.querySelector('#msg'),form=document.querySelector('#booking'),submit=document.querySelector('#submit');
 const title=document.querySelector('#sumTitle'),date=document.querySelector('#sumDate'),time=document.querySelector('#sumTime'),sumSeats=document.querySelector('#sumSeats'),sumTotal=document.querySelector('#sumTotal');
 const busCard=document.querySelector('#busCard'),busTitle=document.querySelector('#busTitle'),busMeta=document.querySelector('#busMeta'),busBadge=document.querySelector('#busBadge');
-let trips=[],current=null,selected=[],booked=[],scale=1,loadToken=0;
+let trips=[],current=null,selected=[],booked=[],scale=1,loadToken=0,maxBookableSeats=0;
 
 /* Stessa logica della piantina del Gestionale: GT53 / GT63 / GT63B e righe reali. */
 const REAL_LAYOUTS={
@@ -99,10 +99,18 @@ function normalizeLayout(bus){
 }
 function seatButton(cell,occ){
  const id=String(cell.id??cell.number??cell.value??'').trim(), b=document.createElement('button');
- b.type='button';b.className=`seat ${occ.has(id)?'occupied':'available'}`;b.dataset.seat=id;b.setAttribute('aria-label',`Posto ${id.padStart(2,'0')}`);b.title=occ.has(id)?`Posto ${id} · già occupato`:`Posto ${id} · disponibile`;
+ const beyondCapacity=Number(id)>Number(current?.posti_totali||0);
+ b.type='button';b.className=`seat ${occ.has(id)||beyondCapacity?'occupied':'available'}`;b.dataset.seat=id;b.setAttribute('aria-label',`Posto ${id.padStart(2,'0')}`);b.title=occ.has(id)?`Posto ${id} · già occupato`:`Posto ${id} · disponibile`;
  b.innerHTML=`<span class="seat__number">${esc(String(cell.label||id).padStart(2,'0'))}</span><span class="seat__icon">${SVG.seat}</span>`;
- if(occ.has(id)){b.disabled=true;return b}
- b.onclick=()=>{const n=Number(id);if(selected.includes(n)){selected=selected.filter(x=>x!==n);b.classList.remove('selected');b.classList.add('available');b.title=`Posto ${id} · disponibile`}else{selected.push(n);b.classList.remove('available');b.classList.add('selected');b.title=`Posto ${id} · selezionato`};updateSummary()};
+ if(occ.has(id)||beyondCapacity){b.disabled=true;return b}
+ b.onclick=()=>{const n=Number(id);if(selected.includes(n)){selected=selected.filter(x=>x!==n);b.classList.remove('selected');b.classList.add('available');b.title=`Posto ${id} · disponibile`}else{
+  if(selected.length>=maxBookableSeats){
+   let warning=document.querySelector('#seatLimitWarning');
+   if(!warning){warning=document.createElement('p');warning.id='seatLimitWarning';warning.setAttribute('role','alert');warning.style.color='#a63232';details.appendChild(warning)}
+   warning.textContent=`Per questa partenza puoi prenotare al massimo ${maxBookableSeats} posti.`;
+   return;
+  }
+  selected.push(n);b.classList.remove('available');b.classList.add('selected');b.title=`Posto ${id} · selezionato`};updateSummary()};
  return b;
 }
 function voidCell(type){
@@ -125,7 +133,7 @@ function renderSeats(bus){
  tools.innerHTML=`<small>La disposizione è quella del Gestionale: clicca sul numero del posto per selezionarlo.</small><div class="zoom"><button type="button" id="zoomOut" aria-label="Riduci">−</button><button type="button" id="zoomReset">100%</button><button type="button" id="zoomIn" aria-label="Ingrandisci">+</button></div>`;
  const container=document.createElement('div');container.className='bus-map-container';
  const header=document.createElement('div');header.className='bus-map-header';
- header.innerHTML=`<div class="seat-map-front"><span class="seat-map-front__icon">${SVG.steering}</span><span class="seat-map-front__title">${esc(model.config.frontLabel||`FRONTE BUS ${model.model}`)}</span><span class="seat-map-front__driver">${SVG.steering} ${esc(model.config.driverLabel||'AUTISTA')}</span></div><p class="seat-map-stats"><strong>${seatCells.length-occupiedOnMap}</strong> disponibili &nbsp;·&nbsp; <strong>${occupiedOnMap}</strong> occupati &nbsp;·&nbsp; <strong>${seatCells.length}</strong> posti totali</p>`;
+ header.innerHTML=`<div class="seat-map-front"><span class="seat-map-front__icon">${SVG.steering}</span><span class="seat-map-front__title">${esc(model.config.frontLabel||`FRONTE BUS ${model.model}`)}</span><span class="seat-map-front__driver">${SVG.steering} ${esc(model.config.driverLabel||'AUTISTA')}</span></div><p class="seat-map-stats"><strong>${maxBookableSeats}</strong> prenotabili &nbsp;·&nbsp; <strong>${booked.length}</strong> posti assegnati &nbsp;·&nbsp; <strong>${Number(current.posti_totali||seatCells.length)}</strong> posti di capienza</p>`;
  container.appendChild(header);
  const mapGrid=document.createElement('div');mapGrid.className='seat-map-grid';
  const legend=document.createElement('div');legend.className='seat-map-legend';
@@ -172,7 +180,7 @@ async function load(){
  const trip=trips.find(v=>String(v.id)===String(sel.value))||null;
  current=trip;
  // Immediately clear the previous trip's seats so they cannot be booked by mistake.
- selected=[];booked=[];
+ selected=[];booked=[];maxBookableSeats=0;
  busCard.style.display='none';
  seats.innerHTML='';
  form.classList.remove('soldout-booking');
@@ -204,7 +212,10 @@ async function load(){
   const layoutSeats=normalized.layout.flatMap(r=>Array.isArray(r.cells)?r.cells:[]).filter(c=>c?.type==='seat');
   const seatIds=new Set(layoutSeats.map(c=>String(c.id??c.number??c.value??'')));
   const bookedOnLayout=booked.filter(id=>seatIds.has(String(id)));
-  const free=Math.max(0,layoutSeats.length-bookedOnLayout.length);
+  const mapFree=Math.max(0,layoutSeats.length-bookedOnLayout.length);
+  const inventory=typeof gestTripAvailability==='function'?gestTripAvailability(trip):{known:false};
+  const free=inventory.known?Math.min(mapFree,inventory.free):mapFree;
+  maxBookableSeats=free;
   const busInfo=bus?.bus||bus||{},busName=[busInfo?.marca,busInfo?.modello].filter(Boolean).join(' ')||normalized.config?.name||'Autobus assegnato';
   details.innerHTML=`<strong>${esc(trip.destinazione||trip.titolo||'')}</strong> · ${esc(gestFmtDate(trip.data_partenza))} · ore ${esc(gestFmtTime(trip.ora_partenza))}<br>${esc(trip.luogo_partenza||'')}<div class="trip-stats"><span class="pill">💶 <strong>€ ${Number(trip.prezzo||0).toFixed(0)}</strong> / persona</span><span class="pill">💺 <strong>${free}</strong> posti liberi</span><span class="pill">🚌 <strong>${esc(busName)}</strong></span></div>`;
   renderSeats(bus);
