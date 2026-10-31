@@ -52,7 +52,12 @@
     }
     const content=[];
     const line=(x,y,text,size=11,bold=false)=>{
-      content.push(`BT /F1 ${size} Tf ${bold?'1':'0'} Tr 1 0 0 1 ${x} ${y} Tm (${pdfEscape(text)}) Tj ET`);
+      // Keep long customer names and trip titles within the A4 page margins.
+      const available=Math.max(60,W-x-50);
+      const maxChars=Math.max(8,Math.floor(available/(size*0.56)));
+      const normalized=latinText(text).replace(/[\r\n\t]+/g,' ').trim();
+      const label=normalized.length>maxChars?normalized.slice(0,maxChars-3)+'...':normalized;
+      content.push(`BT /F1 ${size} Tf 0 Tr 1 0 0 1 ${x} ${y} Tm (${pdfEscape(label)}) Tj ET`);
     };
     content.push('q');
     if(imageId){
