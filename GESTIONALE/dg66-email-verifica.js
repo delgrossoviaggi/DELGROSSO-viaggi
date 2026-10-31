@@ -14,6 +14,7 @@ function mount(){
  '<p style="margin:0 0 9px;font-size:13px">Il server può inviare automaticamente quando il servizio email è attivo. Da qui puoi <b>verificare l’esito</b> e richiedere il reinvio di un documento già archiviato, senza WhatsApp API.</p>'+
  '<div class="form-grid"><div class="field"><label>Tipo documento</label><select id="dg66Kind"><option value="booking">Conferma prenotazione</option><option value="payment">Ricevuta acconto / saldo</option></select></div>'+
  '<div class="field"><label>Riferimento</label><select id="dg66Target"><option value="">— Scegli una prenotazione —</option></select></div></div>'+
+ '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:9px 0;font-size:12px"><label><input type="checkbox" id="dg66MissingOnly" style="margin-right:6px">Mostra solo conferme senza PDF</label><span id="dg66MissingSummary" role="status"></span></div>'+
  '<div id="dg66EmailState" class="statusline info" style="margin:10px 0">Seleziona una prenotazione per verificare email e PDF.</div>'+
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
  '<button type="button" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
@@ -22,13 +23,19 @@ function mount(){
  parent.after(div);
  $('dg66Kind')?.addEventListener('change',window.dg66RefreshEmail);
  $('dg66Target')?.addEventListener('change',window.dg66RefreshEmail);
+ $('dg66MissingOnly')?.addEventListener('change',window.dg66RefreshEmail);
  fill();
 }
-function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,100)}
+function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,500)}
 function payList(){return (typeof state==='undefined'?[]:state.pagamenti||[]).filter(p=>/^(acconto|saldo)$/i.test(String(p.tipo||''))&&/^registrato$/i.test(String(p.stato||''))).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,150)}
 function findBooking(id){return (typeof state==='undefined'?[]:state.prenotazioni||[]).find(b=>b.id===id)}
 function fill(){const type=$('dg66Kind')?.value||'booking',target=$('dg66Target');if(!target)return;const val=target.value;
- const rows=type==='booking'?bookList():payList();
+ const allBookings=bookList();
+ const outstanding=allBookings.filter(x=>!x.confirmation_storage_path).length;
+ const showMissing=type==='booking'&&Boolean($('dg66MissingOnly')?.checked);
+ const rows=type==='booking'?(showMissing?allBookings.filter(x=>!x.confirmation_storage_path):allBookings):payList();
+ const only=$('dg66MissingOnly');if(only)only.disabled=type!=='booking';
+ const summary=$('dg66MissingSummary');if(summary)summary.textContent=outstanding+' senza PDF su '+allBookings.length+' prenotazioni caricate';
  target.innerHTML='<option value="">— Scegli un documento —</option>'+rows.map(x=>{
  const b=type==='booking'?x:findBooking(x.prenotazione_id);return '<option value="'+esc(x.id)+'">'+esc((b?.cliente||b?.cliente_nome||x.cliente||'Cliente')+' · '+(type==='payment'?String(x.tipo||'')+' '+String(x.receipt_number||''):(x.codice||x.confirmation_number||'Prenotazione'))).slice(0,105)+'</option>'}).join('');
  if(rows.some(x=>x.id===val))target.value=val;
