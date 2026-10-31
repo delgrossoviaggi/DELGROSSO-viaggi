@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+
+const html = readFileSync(new URL('../GESTIONALE/index.html', import.meta.url), 'utf8');
+const match = (pattern, name) => {
+  const m = pattern.exec(html);
+  assert.ok(m, name + ' not found');
+  return m[1];
+};
+const main = vm.runInNewContext(match(/const MAIN=(\[[^\r\n]*\]);/, 'Main desktop menu'));
+const more = vm.runInNewContext(match(/const EXTRA=(\[[^\r\n]*\]);/, 'Secondary menu'));
+const mainAgenda = main.filter(([id]) => id === 'agenda');
+assert.equal(mainAgenda.length, 1, 'Agenda must appear exactly once in the main desktop sidebar');
+assert.equal(mainAgenda[0][1], 'Agenda operativa');
+assert.ok(main.findIndex(([id]) => id === 'agenda') <= 4, 'Agenda must be visible near the top');
+assert.equal(more.filter(([id]) => id === 'agenda').length, 0, 'Agenda must not remain hidden in More');
+assert.ok(html.includes('id="dg69-agenda-shortcut"'), 'Desktop header Agenda shortcut missing');
+assert.ok(html.includes('onclick="dg44Go(\'agenda\')"'), 'Header or quick action must navigate to Agenda');
+assert.ok(html.includes('id="page-agenda"'), 'Agenda page must exist');
+assert.ok(html.includes('function renderAgenda(){'), 'Agenda renderer missing');
+assert.ok(html.includes("if(p==='agenda')renderAgenda();"), 'Agenda route must call renderer');
+assert.ok(html.includes('id="agendaSearch"'), 'Agenda search missing');
+assert.ok(html.includes('id="agendaFilter"'), 'Agenda type filter missing');
+assert.ok(html.includes('id="agendaPeriod"'), 'Agenda date filter missing');
+assert.ok(html.includes('id="agendaList"'), 'Agenda event list missing');
+assert.ok(html.includes('id="agendaKpis"'), 'Agenda KPIs missing');
+assert.ok(html.includes('id="dg69-desktop-agenda-navigation"'), 'Desktop agenda navigation styling missing');
+assert.ok(html.includes("['agenda','Agenda operativa','calendar']"), 'Agenda must use the existing route');
+console.log('Desktop Agenda menu, shortcut, page and filters verified');
