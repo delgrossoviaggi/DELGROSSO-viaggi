@@ -63,6 +63,7 @@
     }
     content.push('Q');
     line(50,690,'CONFERMA DI PRENOTAZIONE',21,true);
+    if(data.riferimento) line(50,655,`Riferimento: ${data.riferimento}`,10,false);
     content.push('0.78 0.78 0.78 RG 1 w 50 670 m 545 670 l S');
     line(50,630,'Viaggio',9,false); line(50,610,data.viaggio,14,true);
     line(50,575,'Data e ora',9,false); line(50,555,`${data.data||''}${data.ora?' - '+data.ora:''}`,12,true);
