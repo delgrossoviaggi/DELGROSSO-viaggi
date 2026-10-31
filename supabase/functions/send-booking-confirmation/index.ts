@@ -56,6 +56,12 @@ function fresh(b:R,minutes=20){
   const ms=Date.now()-new Date(b.created_at||0).getTime();
   return Number.isFinite(ms)&&ms>=0&&ms<=minutes*60000;
 }
+function validPdf(bytes:Uint8Array){
+ if(bytes.length<600||bytes.length>5000000)return false;
+ if(String.fromCharCode(...bytes.subarray(0,5))!=='%PDF-')return false;
+ const last=new TextDecoder().decode(bytes.subarray(Math.max(0,bytes.length-1024)));
+ return last.includes('%%EOF');
+}
 function tokenOK(b:R,p:R){
   const supplied=T(p.token||p.confirmation_token||p.booking?.confirmation_token);
   return !!supplied && !!b.confirmation_token && supplied===T(b.confirmation_token);
@@ -64,9 +70,11 @@ async function sendMail(b:R,tr:R,path:string,number:string){
   if(!validEmail(b.email))return {sent:false,error:null};
   const s=await smtp();if(!s.pass)throw new Error("Password SMTP non configurata");
   const f=await sb.storage.from("ricevute-prenotazioni").download(path);if(f.error)throw f.error;
+  const verifiedPdf=new Uint8Array(await f.data.arrayBuffer());
+  if(!validPdf(verifiedPdf))throw new Error("PDF archiviato incompleto o danneggiato: invio bloccato");
   const tx=nodemailer.createTransport({host:s.host,port:s.port,secure:s.secure,auth:{user:s.user,pass:s.pass}});
   const nome=T(b.cliente_nome||b.cliente,"Cliente"),dest=T(tr?.destinazione||tr?.titolo||b.viaggio_codice,"—");
-  await tx.sendMail({from:{name:s.fromName,address:s.fromEmail},to:T(b.email),replyTo:s.replyTo,subject:`Conferma prenotazione ${number} - Del Grosso Viaggi`,text:`Buongiorno ${nome},\n\nla tua prenotazione è stata registrata correttamente.\n\nViaggio: ${dest}\nNumero prenotazione: ${number}\n\nIn allegato trovi la conferma di prenotazione da conservare e presentare al check-in.\n\nDel Grosso Viaggi & Limousine Bus`,attachments:[{filename:`Conferma_Prenotazione_${number}.pdf`,content:new Uint8Array(await f.data.arrayBuffer()),contentType:"application/pdf"}]});
+  await tx.sendMail({from:{name:s.fromName,address:s.fromEmail},to:T(b.email),replyTo:s.replyTo,subject:`Conferma prenotazione ${number} - Del Grosso Viaggi`,text:`Buongiorno ${nome},\n\nla tua prenotazione è stata registrata correttamente.\n\nViaggio: ${dest}\nNumero prenotazione: ${number}\n\nIn allegato trovi la conferma di prenotazione da conservare e presentare al check-in.\n\nDel Grosso Viaggi & Limousine Bus`,attachments:[{filename:`Conferma_Prenotazione_${number}.pdf`,content:verifiedPdf,contentType:"application/pdf"}]});
   return {sent:true,error:null};
 }
 
@@ -116,7 +124,7 @@ Deno.serve(async(req)=>{
 
     if(b.confirmation_storage_path)return J({success:false,error:"Conferma già archiviata: usare il documento esistente"},409);
     const pdf=pdfBytes(T(p.pdfBase64)),path=`conferme/${number}.pdf`;
-    if(pdf.length<100||pdf.length>5000000||pdf[0]!==37||pdf[1]!==80||pdf[2]!==68||pdf[3]!==70||pdf[4]!==45)return J({success:false,error:"Il file non è un PDF valido o supera 5 MB"},400);
+    if(!validPdf(pdf))return J({success:false,error:"Il file non è un PDF valido o supera 5 MB"},400);
     const up=await sb.storage.from("ricevute-prenotazioni").upload(path,pdf,{contentType:"application/pdf",upsert:false});
     if(up.error)throw up.error;
     const now=new Date().toISOString();
