@@ -62,6 +62,11 @@ function validPdf(bytes:Uint8Array){
  const last=new TextDecoder().decode(bytes.subarray(Math.max(0,bytes.length-1024)));
  return last.includes('%%EOF');
 }
+function pdfMatchesBooking(bytes:Uint8Array,number:string){
+  // Public and operator booking confirmations embed the official booking number.
+  // A PDF with valid framing but no booking reference must never be emailed as this booking.
+  return validPdf(bytes) && !!number && new TextDecoder("latin1").decode(bytes).includes(number);
+}
 function tokenOK(b:R,p:R){
   const supplied=T(p.token||p.confirmation_token||p.booking?.confirmation_token);
   return !!supplied && !!b.confirmation_token && supplied===T(b.confirmation_token);
@@ -144,9 +149,29 @@ Deno.serve(async(req)=>{
 
     if(b.confirmation_storage_path)return J({success:false,error:"Conferma già archiviata: usare il documento esistente"},409);
     const pdf=pdfBytes(T(p.pdfBase64)),path=`conferme/${number}.pdf`;
-    if(!validPdf(pdf))return J({success:false,error:"Il file non è un PDF valido o supera 5 MB"},400);
+    if(!pdfMatchesBooking(pdf,number))return J({success:false,error:"PDF non valido oppure privo del codice di questa prenotazione"},400);
     const up=await sb.storage.from("ricevute-prenotazioni").upload(path,pdf,{contentType:"application/pdf",upsert:false});
-    if(up.error)throw up.error;
+    if(up.error){
+      // A previous upload can succeed even when its metadata update or HTTP response fails.
+      // Never overwrite: only relink a matching, intact PDF already present at this exact path.
+      const status=T((up.error as R).statusCode);
+      const duplicate=status==="409"||/already exists|duplicate|conflict|già esiste/i.test(T(up.error.message));
+      if(!duplicate)throw up.error;
+      const existing=await sb.storage.from("ricevute-prenotazioni").download(path);
+      if(existing.error)throw existing.error;
+      const prior=new Uint8Array(await existing.data.arrayBuffer());
+      if(!pdfMatchesBooking(prior,number))return J({success:false,error:"Documento già presente ma non verificabile: richiedere controllo operatore"},409);
+      const saved=await sb.from("prenotazioni")
+        .update({confirmation_storage_path:path,confirmation_generated_at:new Date().toISOString()})
+        .eq("id",b.id).is("confirmation_storage_path",null).select("id").maybeSingle();
+      if(saved.error)throw saved.error;
+      if(!saved.data){
+        const current=await bookingByRef(String(b.id));
+        if(T(current?.confirmation_storage_path)!==path)return J({success:false,error:"Un altro documento risulta archiviato: verifica operatore necessaria"},409);
+      }
+      // Do not send a second email after a collision; operator can inspect and resend.
+      return J({success:true,alreadyArchived:true,recovered:true,storedPath:path,confirmationNumber:number,emailSent:false});
+    }
     const now=new Date().toISOString();
     const base={id_prenotazione:number,confirmation_number:number,codice:number,confirmation_storage_path:path,confirmation_generated_at:now,confirmation_email_sent:false,confirmation_email_sent_at:null,confirmation_email_error:null};
     const u=await sb.from("prenotazioni").update(base).eq("id",b.id);if(u.error)throw u.error;
