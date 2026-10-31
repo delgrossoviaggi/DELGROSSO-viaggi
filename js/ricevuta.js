@@ -1,5 +1,5 @@
-/* DELGROSSO - Ricevuta PDF prenotazione
-   PDF generato interamente nel browser: nessuna libreria esterna, nessun dato inviato a servizi terzi. */
+/* DELGROSSO - Conferma PDF prenotazione
+   Generazione locale nel browser. Il flusso di prenotazione può inviare il PDF al server per archiviarlo. */
 (function(){
   'use strict';
 
@@ -9,7 +9,9 @@
       .replace(/[òóôöõ]/gi,'o').replace(/[ùúûü]/gi,'u').replace(/[ç]/gi,'c')
       .replace(/[ÀÁÂÄÃÅ]/g,'A').replace(/[ÈÉÊË]/g,'E').replace(/[ÌÍÎÏ]/g,'I')
       .replace(/[ÒÓÔÖÕ]/g,'O').replace(/[ÙÚÛÜ]/g,'U').replace(/[Ç]/g,'C')
-      .replace(/€/g,'EUR');
+      .replace(/€/g,'EUR')
+      .replace(/[–—−]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
+      .replace(/[^\x20-\x7E]/g,' ');
   }
   function pdfEscape(value){
     return latinText(value).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
@@ -20,6 +22,7 @@
     const out=new Uint8Array(total); let off=0; arr.forEach(a=>{out.set(a,off);off+=a.length}); return out;
   }
   function jpegInfo(bytes){
+    if(bytes.length<64||bytes[0]!==0xFF||bytes[1]!==0xD8)return null;
     let i=2;
     while(i<bytes.length-9){
       if(bytes[i]!==0xFF){i++;continue}
@@ -28,16 +31,18 @@
       if(i+1>=bytes.length) break;
       const len=(bytes[i]<<8)|bytes[i+1];
       if(marker>=0xC0&&marker<=0xC3){
-        return {height:(bytes[i+3]<<8)|bytes[i+4],width:(bytes[i+5]<<8)|bytes[i+6]};
+        const height=(bytes[i+3]<<8)|bytes[i+4],width=(bytes[i+5]<<8)|bytes[i+6];
+        return width>0&&height>0&&bytes[i+7]===3?{height,width}:null;
       }
       i+=len;
     }
-    return {width:1,height:1};
+    return null;
   }
   async function loadLogo(){
     try{
       const r=await fetch('assets/logo.JPEG',{cache:'no-store'}); if(!r.ok) return null;
-      const b=new Uint8Array(await r.arrayBuffer()); return {bytes:b,...jpegInfo(b)};
+      const b=new Uint8Array(await r.arrayBuffer()),info=jpegInfo(b);
+      return info?{bytes:b,...info}:null;
     }catch(e){return null}
   }
   function buildPdf(data,logo){
@@ -46,13 +51,19 @@
     const catalog=add('<< /Type /Catalog /Pages 2 0 R >>');
     const pages=2;
     const font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    const fontBold=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
     let imageId=null;
     if(logo){
       imageId=add({dict:`<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logo.bytes.length} >>`,stream:logo.bytes});
     }
     const content=[];
     const line=(x,y,text,size=11,bold=false)=>{
-      content.push(`BT /F1 ${size} Tf ${bold?'1':'0'} Tr 1 0 0 1 ${x} ${y} Tm (${pdfEscape(text)}) Tj ET`);
+      // Keep long customer names and trip titles within the A4 page margins.
+      const available=Math.max(60,W-x-50);
+      const maxChars=Math.max(8,Math.floor(available/(size*0.56)));
+      const normalized=latinText(text).replace(/[\r\n\t]+/g,' ').trim();
+      const label=normalized.length>maxChars?normalized.slice(0,maxChars-3)+'...':normalized;
+      content.push(`BT /F${bold?'2':'1'} ${size} Tf 0 Tr 1 0 0 1 ${x} ${y} Tm (${pdfEscape(label)}) Tj ET`);
     };
     content.push('q');
     if(imageId){
@@ -62,23 +73,27 @@
       line(50,760,'DELGROSSO VIAGGI & LIMOUSINE BUS',15,true);
     }
     content.push('Q');
-    line(50,690,'RICEVUTA DI PRENOTAZIONE',21,true);
+    line(50,690,'CONFERMA DI PRENOTAZIONE',21,true);
+    if(data.riferimento) line(50,655,`Riferimento: ${data.riferimento}`,10,false);
     content.push('0.78 0.78 0.78 RG 1 w 50 670 m 545 670 l S');
     line(50,630,'Viaggio',9,false); line(50,610,data.viaggio,14,true);
     line(50,575,'Data e ora',9,false); line(50,555,`${data.data||''}${data.ora?' - '+data.ora:''}`,12,true);
     line(50,515,'Nome',9,false); line(50,495,data.nome,12,true);
     line(310,515,'Cognome',9,false); line(310,495,data.cognome,12,true);
     line(50,455,'Recapito telefonico',9,false); line(50,435,data.telefono,12,true);
+    line(50,412,`Fermata di partenza: ${data.fermataPartenza||'Da verificare'}`,10,false);
     line(50,395,'N. posti prenotati',9,false); line(50,375,String(data.numeroPosti),14,true);
     line(310,395,'Posti scelti',9,false); line(310,375,data.posti.join(' - '),14,true);
     line(50,330,'Prezzo per persona',9,false); line(50,310,`EUR ${data.prezzo.toFixed(2)}`,12,true);
     line(50,265,'TOTALE VIAGGIO',10,false); line(50,235,`EUR ${data.totale.toFixed(2)}`,25,true);
     content.push('0.94 0.97 1 rg 50 175 495 42 re f');
-    line(65,198,'Conserva questa ricevuta come conferma della prenotazione.',10,true);
+    content.push('0 0 0 rg');
+    line(65,198,'Conserva questo documento come conferma della prenotazione.',10,true);
+    line(50,142,'La conferma non costituisce ricevuta di pagamento.',9,false);
     line(50,105,'DELGROSSO Viaggi & Limousine Bus',9,false);
-    line(50,88,'Ricevuta generata automaticamente dal sito ufficiale.',8,false);
+    line(50,88,'Conferma generata automaticamente dal sito ufficiale.',8,false);
     const stream=content.join('\n');
-    const resources=`<< /Font << /F1 ${font} 0 R >>${imageId?` /XObject << /Im1 ${imageId} 0 R >>`:''} >>`;
+    const resources=`<< /Font << /F1 ${font} 0 R /F2 ${fontBold} 0 R >>${imageId?` /XObject << /Im1 ${imageId} 0 R >>`:''} >>`;
     const contentId=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
     const pageId=add(`<< /Type /Page /Parent ${pages} 0 R /MediaBox [0 0 ${W} ${H}] /Resources ${resources} /Contents ${contentId} 0 R >>`);
     // Rebuild Pages now that page id is known.
@@ -106,12 +121,17 @@
   async function generate(data){
     const logo=await loadLogo();
     const bytes=buildPdf(data,logo);
+    // Fail closed if PDF generation returned an empty or malformed payload.
+    if(bytes.length<100 || String.fromCharCode(...bytes.subarray(0,5))!=='%PDF-'){
+      throw new Error('Impossibile generare una conferma PDF valida.');
+    }
     return new Blob([bytes],{type:'application/pdf'});
   }
   window.DGReceipt={
+    generate,
     async download(data){
       const blob=await generate(data); const url=URL.createObjectURL(blob); const a=document.createElement('a');
-      a.href=url; a.download=`ricevuta-prenotazione-${slug(data.viaggio)}.pdf`; document.body.appendChild(a); a.click(); a.remove();
+      a.href=url; a.download=`conferma-prenotazione-${slug(data.viaggio)}.pdf`; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),15000); return true;
     }
   };
