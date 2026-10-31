@@ -16,6 +16,7 @@ function mount(){
  '<div class="field"><label>Riferimento</label><select id="dg66Target"><option value="">— Scegli una prenotazione —</option></select></div></div>'+
  '<div id="dg66EmailState" class="statusline info" style="margin:10px 0">Seleziona una prenotazione per verificare email e PDF.</div>'+
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
+ '<button type="button" id="dg66SmtpCheck" class="btn btn-secondary" onclick="dg66CheckSmtp()">🔒 Verifica connessione SMTP</button> '+
  '<button type="button" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
  '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Rigenera conferma PDF mancante</button> '+
  '<button type="button" id="dg66OpenDocument" class="btn btn-secondary" onclick="dg66OpenDocument()" style="display:none">👁 Apri e verifica PDF</button>';
@@ -72,6 +73,25 @@ window.dg66OpenDocument=async function(){
   if(tab)tab.close();
   if(box)box.textContent='⚠ Apertura del PDF non riuscita: '+(e.message||String(e));
  }finally{viewingDocument=false;if(btn)btn.disabled=false;}
+};
+let smtpCheckRunning=false;
+window.dg66CheckSmtp=async function(){
+ if(smtpCheckRunning)return;
+ const box=$('dg66EmailState'),btn=$('dg66SmtpCheck');
+ smtpCheckRunning=true;if(btn)btn.disabled=true;
+ if(box)box.textContent='Verifica connessione SMTP in corso: non viene inviata alcuna email...';
+ try{
+  if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')throw Error('Sessione operatore non disponibile.');
+  const response=await fetch(SUPA_URL+'/functions/v1/send-booking-confirmation',{
+   method:'POST',headers:{...accessHeaders(),'Content-Type':'application/json'},
+   body:JSON.stringify({action:'smtp_check'}),cache:'no-store'
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.success)throw Error(result.error||'Il server SMTP non risponde.');
+  if(box)box.textContent='✅ Connessione e autenticazione SMTP verificate. Nessuna email è stata inviata. La consegna delle email reali resta da collaudare.';
+ }catch(error){
+  if(box)box.textContent='⚠ Verifica SMTP non superata: '+(error.message||String(error));
+ }finally{smtpCheckRunning=false;if(btn)btn.disabled=false;}
 };
 let emailSending=false;
 window.dg66ResendEmail=async function(){
