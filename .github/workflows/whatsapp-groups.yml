@@ -1,0 +1,25 @@
+name: WhatsApp group invitation regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'GESTIONALE/dg61-quote-whatsapp.js'
+      - 'tests/whatsapp-group-invite-smoke.mjs'
+      - '.github/workflows/whatsapp-groups.yml'
+  pull_request:
+    paths:
+      - 'GESTIONALE/dg61-quote-whatsapp.js'
+      - 'tests/whatsapp-group-invite-smoke.mjs'
+      - '.github/workflows/whatsapp-groups.yml'
+permissions:
+  contents: read
+jobs:
+  validate-whatsapp-group-invites:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test group link validation and saving
+        run: node tests/whatsapp-group-invite-smoke.mjs
