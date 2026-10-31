@@ -155,7 +155,7 @@ async function loadStops(trip,token){
  if(!trip){stop.innerHTML='<option value="">Seleziona la fermata…</option>';return}
  let arr=[];
  try{
-  arr=(await getTripStops(trip.id)).map(x=>typeof x==='string'?x:String(x?.nome||'')).map(x=>x.trim()).filter(Boolean);
+  arr=(await getTripStops(String(trip.active_viaggio_id||trip.id))).map(x=>typeof x==='string'?x:String(x?.nome||'')).map(x=>x.trim()).filter(Boolean);
  }catch(e){console.warn('Fermate strutturate non disponibili',e)}
  // A slow response from a previous journey must never overwrite the current stops.
  if(token!==loadToken)return;
@@ -196,7 +196,8 @@ async function load(){
  details.textContent='Preparazione della tua esperienza di viaggio…';
  try{
   // Stops, occupied seats and bus layout are independent: load all in parallel.
-  const [,bs,bus]=await Promise.all([loadStops(trip,token),getBookedSeats(trip.id),getBusLayout(trip.id)]);
+  const runId=String(trip.active_viaggio_id||trip.id);
+  const [,bs,bus]=await Promise.all([loadStops(trip,token),getBookedSeats(runId),getBusLayout(runId)]);
   if(token!==loadToken)return;
   booked=Array.isArray(bs)?bs.map(String):[];
   const normalized=normalizeLayout(bus);
@@ -226,7 +227,7 @@ try{
  const q=new URLSearchParams(location.search).get('viaggio');if(q&&trips.some(v=>String(v.id)===String(q)))sel.value=q;await load();
 }catch(e){console.error(e);sel.innerHTML='<option value="">Errore collegamento partenze</option>';details.className='notice error';details.textContent='Non riesco a caricare le partenze in questo momento.'}
 sel.onchange=load;
-form.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;msg.style.display='block';msg.className='notice';if(!current){msg.textContent='Seleziona una partenza.';return}if(typeof gestTripIsSoldOut==='function'&&gestTripIsSoldOut(current)){msg.className='notice error';msg.textContent='SOLD OUT: questo viaggio è al completo.';return}if(!selected.length){msg.textContent='Seleziona almeno un posto sulla piantina.';return}const fermataPartenza=document.querySelector('#fermataPartenza').value.trim();if(!fermataPartenza){msg.className='notice error';msg.textContent='Seleziona la fermata da cui partirai.';return}const bookingTrip=current,bookingSeats=selected.slice();submit.disabled=true;sel.disabled=true;seats.style.pointerEvents='none';submit.textContent='Invio in corso…';msg.textContent='Verifica disponibilità e registrazione…';let bookingConfirmed=false,bookingRequested=false;try{const latestBooked=new Set((await getBookedSeats(bookingTrip.id)).map(String));if(bookingSeats.some(n=>latestBooked.has(String(n)))){await load();throw new Error('Uno dei posti selezionati è stato occupato. Seleziona un altro posto sulla piantina.')}bookingRequested=true;const result=await createGestionaleBooking({viaggioId:bookingTrip.id,nome:document.querySelector('#nome').value.trim(),cognome:document.querySelector('#cognome').value.trim(),telefono:document.querySelector('#telefono').value.trim(),email:(document.querySelector('#email').value.trim()||null),note:document.querySelector('#note').value.trim(),posti:bookingSeats,fermataPartenza});if(!result?.success){bookingRequested=false;throw new Error(result?.error||'Prenotazione non accettata')}bookingConfirmed=true;msg.className='notice success';
+form.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;msg.style.display='block';msg.className='notice';if(!current){msg.textContent='Seleziona una partenza.';return}if(typeof gestTripIsSoldOut==='function'&&gestTripIsSoldOut(current)){msg.className='notice error';msg.textContent='SOLD OUT: questo viaggio è al completo.';return}if(!selected.length){msg.textContent='Seleziona almeno un posto sulla piantina.';return}const fermataPartenza=document.querySelector('#fermataPartenza').value.trim();if(!fermataPartenza){msg.className='notice error';msg.textContent='Seleziona la fermata da cui partirai.';return}const bookingTrip=current,bookingRunId=String(current.active_viaggio_id||current.id),bookingSeats=selected.slice();submit.disabled=true;sel.disabled=true;seats.style.pointerEvents='none';submit.textContent='Invio in corso…';msg.textContent='Verifica disponibilità e registrazione…';let bookingConfirmed=false,bookingRequested=false;try{const latestBooked=new Set((await getBookedSeats(bookingRunId)).map(String));if(bookingSeats.some(n=>latestBooked.has(String(n)))){await load();throw new Error('Uno dei posti selezionati è stato occupato. Seleziona un altro posto sulla piantina.')}bookingRequested=true;const result=await createGestionaleBooking({viaggioId:bookingRunId,nome:document.querySelector('#nome').value.trim(),cognome:document.querySelector('#cognome').value.trim(),telefono:document.querySelector('#telefono').value.trim(),email:(document.querySelector('#email').value.trim()||null),note:document.querySelector('#note').value.trim(),posti:bookingSeats,fermataPartenza});if(!result?.success){bookingRequested=false;throw new Error(result?.error||'Prenotazione non accettata')}bookingConfirmed=true;msg.className='notice success';
 const bookedSeats=(result.posti||bookingSeats).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
 const serverTotal=Number(result.totale);
 const bookingTotal=Number.isFinite(serverTotal)&&serverTotal>=0?serverTotal:Number(bookingTrip.prezzo||0)*bookedSeats.length;
