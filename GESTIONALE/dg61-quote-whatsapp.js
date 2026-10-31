@@ -123,9 +123,60 @@ window.dg61SendManualMessage=function(){const b=getBooking();if(!b)return toast(
  safeWhatsAppChat(b.telefono,$('dg61WaPreview')?.value||preparedMessage(b,kind));
 };
 window.dg61CopyMessage=async()=>{const text=$('dg61WaPreview')?.value||'';try{await navigator.clipboard.writeText(text);toast('Messaggio copiato')}catch{toast('Copia non disponibile: seleziona il testo.',false)}};
+// WhatsApp Business on iPhone may paste a full shared message or an invite
+// with query parameters. Store only the canonical invitation, not the shared text.
+function dg61NormalizeGroupInvite(raw){
+ const text=String(raw||'').normalize('NFKC').replace(/[\u200B-\u200D\u2060\uFEFF]/g,'').trim();
+ const pattern=/(?:^|[\s*("'<>])((?:https?:\/\/)?(?:www\.)?chat\.whatsapp\.com\/(?:invite\/)?[A-Za-z0-9_-]{8,64})(?=$|[\s)"'<>/?#.,!?])/gi;
+ for(const match of text.matchAll(pattern)){
+  try{
+   const rawUrl=match[1];
+   const u=new URL(/^https?:\/\//i.test(rawUrl)?rawUrl:'https://'+rawUrl);
+   if(u.hostname.toLowerCase()!=='chat.whatsapp.com'&&u.hostname.toLowerCase()!=='www.chat.whatsapp.com')continue;
+   const p=u.pathname.match(/^\/(?:invite\/)?([A-Za-z0-9_-]{8,64})\/?$/);
+   if(p)return 'https://chat.whatsapp.com/'+p[1];
+  }catch{}
+ }
+ return '';
+}
+window.dg61NormalizeGroupInvite=dg61NormalizeGroupInvite;
 window.dg61RenderGroupLink=()=>{if($('dg61GroupUrl'))$('dg61GroupUrl').value=getInvite($('dg61GroupTrip')?.value)};
-window.dg61SaveGroupLink=async()=>{const trip_id=$('dg61GroupTrip')?.value,url=$('dg61GroupUrl')?.value.trim();if(!trip_id||!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{8,}$/.test(url))return toast('Inserisci un link invito valido creato nell’app.',false);
- try{await api('dg_whatsapp_trip_invites_v61','on_conflict=trip_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:uid()}});toast('Link salvato');await loadAll(true)}catch(e){toast('Salvataggio link: '+e.message,false)}};
+let dg61SavingGroupLink=false;
+window.dg61SaveGroupLink=async()=>{
+ if(dg61SavingGroupLink)return;
+ const trip_id=$('dg61GroupTrip')?.value,input=$('dg61GroupUrl');
+ if(!trip_id)return toast('Seleziona prima il viaggio o il BUS BIS.',false);
+ const url=dg61NormalizeGroupInvite(input?.value);
+ if(!url){
+  input?.focus();
+  return toast('Link WhatsApp non riconosciuto. Copia tutto il link d’invito dal gruppo WhatsApp Business, non il nome del gruppo.',false);
+ }
+ if(input)input.value=url;
+ const saveButton=document.querySelector('button[onclick="dg61SaveGroupLink()"]');
+ dg61SavingGroupLink=true;
+ if(saveButton)saveButton.disabled=true;
+ try{
+  const saved=await api('dg_whatsapp_trip_invites_v61','on_conflict=trip_id',{
+   method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},
+   body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:uid()}
+  });
+  // The previous implementation declared success even if no row was returned.
+  const confirmed=Array.isArray(saved)?saved.find(x=>x.trip_id===trip_id&&x.invite_url===url):null;
+  if(!confirmed)throw new Error('Il server non ha confermato il link. Verifica i permessi del tuo accesso.');
+  const invites=state.whatsappInvites||[];
+  const idx=invites.findIndex(x=>x.trip_id===trip_id);
+  if(idx>=0)invites[idx]=confirmed;else invites.push(confirmed);
+  state.whatsappInvites=invites;
+  if(typeof window.dg68RenderGroups==='function')window.dg68RenderGroups();
+  toast('Link del gruppo WhatsApp salvato correttamente.');
+  try{await loadAll(true)}catch(refreshError){console.warn('Aggiornamento elenco gruppi non riuscito',refreshError)}
+ }catch(e){
+  toast('Non riesco a salvare il link: '+(e?.message||'controlla la connessione e riprova.'),false);
+ }finally{
+  dg61SavingGroupLink=false;
+  if(saveButton)saveButton.disabled=false;
+ }
+};
 window.dg61CopyGroupLink=async()=>{const link=$('dg61GroupUrl')?.value||'';if(!link)return toast('Nessun invito salvato.',false);try{await navigator.clipboard.writeText(link);toast('Link copiato')}catch{toast('Copia link non disponibile',false)}};
 window.dg61SaveOptin=async()=>{const phone=normalizedPhone($('dg61OptPhone')?.value),source=$('dg61OptSource')?.value;if(!phone)return toast('Numero non valido.',false);if(!confirm('Confermi di aver verificato il consenso esplicito del cliente a essere contattato su WhatsApp?'))return;
  try{await api('dg_whatsapp_optins_v61','on_conflict=phone',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:{phone,customer_name:($('dg61OptName')?.value||'').trim(),consent_source:source,consent_at:new Date().toISOString(),revoked_at:null,updated_at:new Date().toISOString(),updated_by:uid()}});toast('Consenso registrato');await loadAll(true)}catch(e){toast(e.message,false)}};
