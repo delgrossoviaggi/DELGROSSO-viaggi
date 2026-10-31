@@ -1,5 +1,5 @@
-/* DELGROSSO - Ricevuta PDF prenotazione
-   PDF generato interamente nel browser: nessuna libreria esterna, nessun dato inviato a servizi terzi. */
+/* DELGROSSO - Conferma PDF prenotazione
+   Generazione locale nel browser. Il flusso di prenotazione può inviare il PDF al server per archiviarlo. */
 (function(){
   'use strict';
 
@@ -108,6 +108,10 @@
   async function generate(data){
     const logo=await loadLogo();
     const bytes=buildPdf(data,logo);
+    // Fail closed if PDF generation returned an empty or malformed payload.
+    if(bytes.length<100 || String.fromCharCode(...bytes.subarray(0,5))!=='%PDF-'){
+      throw new Error('Impossibile generare una conferma PDF valida.');
+    }
     return new Blob([bytes],{type:'application/pdf'});
   }
   window.DGReceipt={
