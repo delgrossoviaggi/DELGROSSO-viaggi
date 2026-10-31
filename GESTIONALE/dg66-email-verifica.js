@@ -14,28 +14,22 @@ function mount(){
  '<p style="margin:0 0 9px;font-size:13px">Il server può inviare automaticamente quando il servizio email è attivo. Da qui puoi <b>verificare l’esito</b> e richiedere il reinvio di un documento già archiviato, senza WhatsApp API.</p>'+
  '<div class="form-grid"><div class="field"><label>Tipo documento</label><select id="dg66Kind"><option value="booking">Conferma prenotazione</option><option value="payment">Ricevuta acconto / saldo</option></select></div>'+
  '<div class="field"><label>Riferimento</label><select id="dg66Target"><option value="">— Scegli una prenotazione —</option></select></div></div>'+
- '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:9px 0;font-size:12px"><label><input type="checkbox" id="dg66MissingOnly" style="margin-right:6px">Mostra solo conferme senza PDF</label><span id="dg66MissingSummary" role="status"></span></div>'+
  '<div id="dg66EmailState" class="statusline info" style="margin:10px 0">Seleziona una prenotazione per verificare email e PDF.</div>'+
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
+ '<button type="button" id="dg66SmtpCheck" class="btn btn-secondary" onclick="dg66CheckSmtp()">🔒 Verifica connessione SMTP</button> '+
  '<button type="button" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
  '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Rigenera conferma PDF mancante</button> '+
  '<button type="button" id="dg66OpenDocument" class="btn btn-secondary" onclick="dg66OpenDocument()" style="display:none">👁 Apri e verifica PDF</button>';
  parent.after(div);
  $('dg66Kind')?.addEventListener('change',window.dg66RefreshEmail);
  $('dg66Target')?.addEventListener('change',window.dg66RefreshEmail);
- $('dg66MissingOnly')?.addEventListener('change',window.dg66RefreshEmail);
  fill();
 }
-function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,500)}
+function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,100)}
 function payList(){return (typeof state==='undefined'?[]:state.pagamenti||[]).filter(p=>/^(acconto|saldo)$/i.test(String(p.tipo||''))&&/^registrato$/i.test(String(p.stato||''))).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,150)}
 function findBooking(id){return (typeof state==='undefined'?[]:state.prenotazioni||[]).find(b=>b.id===id)}
 function fill(){const type=$('dg66Kind')?.value||'booking',target=$('dg66Target');if(!target)return;const val=target.value;
- const allBookings=bookList();
- const outstanding=allBookings.filter(x=>!x.confirmation_storage_path).length;
- const showMissing=type==='booking'&&Boolean($('dg66MissingOnly')?.checked);
- const rows=type==='booking'?(showMissing?allBookings.filter(x=>!x.confirmation_storage_path):allBookings):payList();
- const only=$('dg66MissingOnly');if(only)only.disabled=type!=='booking';
- const summary=$('dg66MissingSummary');if(summary)summary.textContent=outstanding+' senza PDF su '+allBookings.length+' prenotazioni caricate';
+ const rows=type==='booking'?bookList():payList();
  target.innerHTML='<option value="">— Scegli un documento —</option>'+rows.map(x=>{
  const b=type==='booking'?x:findBooking(x.prenotazione_id);return '<option value="'+esc(x.id)+'">'+esc((b?.cliente||b?.cliente_nome||x.cliente||'Cliente')+' · '+(type==='payment'?String(x.tipo||'')+' '+String(x.receipt_number||''):(x.codice||x.confirmation_number||'Prenotazione'))).slice(0,105)+'</option>'}).join('');
  if(rows.some(x=>x.id===val))target.value=val;
@@ -79,6 +73,25 @@ window.dg66OpenDocument=async function(){
   if(tab)tab.close();
   if(box)box.textContent='⚠ Apertura del PDF non riuscita: '+(e.message||String(e));
  }finally{viewingDocument=false;if(btn)btn.disabled=false;}
+};
+let smtpCheckRunning=false;
+window.dg66CheckSmtp=async function(){
+ if(smtpCheckRunning)return;
+ const box=$('dg66EmailState'),btn=$('dg66SmtpCheck');
+ smtpCheckRunning=true;if(btn)btn.disabled=true;
+ if(box)box.textContent='Verifica connessione SMTP in corso: non viene inviata alcuna email...';
+ try{
+  if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')throw Error('Sessione operatore non disponibile.');
+  const response=await fetch(SUPA_URL+'/functions/v1/send-booking-confirmation',{
+   method:'POST',headers:{...accessHeaders(),'Content-Type':'application/json'},
+   body:JSON.stringify({action:'smtp_check'}),cache:'no-store'
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.success)throw Error(result.error||'Il server SMTP non risponde.');
+  if(box)box.textContent='✅ Connessione e autenticazione SMTP verificate. Nessuna email è stata inviata. La consegna delle email reali resta da collaudare.';
+ }catch(error){
+  if(box)box.textContent='⚠ Verifica SMTP non superata: '+(error.message||String(error));
+ }finally{smtpCheckRunning=false;if(btn)btn.disabled=false;}
 };
 let emailSending=false;
 window.dg66ResendEmail=async function(){
