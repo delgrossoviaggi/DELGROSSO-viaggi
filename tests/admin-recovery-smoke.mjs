@@ -27,4 +27,7 @@ assert.equal(result.totale,50);
 assert.equal(result.fermataPartenza,'Apricena');
 assert.equal(result.posti.join(','),'4,5');
 assert.equal(result.viaggio,'Napoli - Spaccanapoli');
-console.log('Authenticated operator PDF recovery smoke test passed');
+assert.ok(source.includes('id="dg66MissingOnly"'), 'Missing PDF quick filter required');
+assert.ok(source.includes("allBookings.filter(x=>!x.confirmation_storage_path)"), 'Count of missing PDFs required');
+assert.ok(source.includes("showMissing?allBookings.filter(x=>!x.confirmation_storage_path):allBookings"), 'Missing-only list must not include archived PDFs');
+console.log('Authenticated operator PDF recovery and missing-document filtering smoke tests passed');
