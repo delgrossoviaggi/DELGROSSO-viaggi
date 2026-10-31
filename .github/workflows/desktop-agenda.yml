@@ -1,0 +1,24 @@
+name: Desktop Agenda navigation
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'GESTIONALE/index.html'
+      - 'tests/desktop-agenda-smoke.mjs'
+      - '.github/workflows/desktop-agenda.yml'
+  pull_request:
+    paths:
+      - 'GESTIONALE/index.html'
+      - 'tests/desktop-agenda-smoke.mjs'
+      - '.github/workflows/desktop-agenda.yml'
+permissions:
+  contents: read
+jobs:
+  agenda-navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/desktop-agenda-smoke.mjs
