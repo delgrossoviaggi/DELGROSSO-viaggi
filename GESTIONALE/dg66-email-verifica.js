@@ -17,7 +17,8 @@ function mount(){
  '<div id="dg66EmailState" class="statusline info" style="margin:10px 0">Seleziona una prenotazione per verificare email e PDF.</div>'+
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
  '<button type="button" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
- '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Rigenera conferma PDF mancante</button>';
+ '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Rigenera conferma PDF mancante</button> '+
+ '<button type="button" id="dg66OpenDocument" class="btn btn-secondary" onclick="dg66OpenDocument()" style="display:none">👁 Apri e verifica PDF</button>';
  parent.after(div);
  $('dg66Kind')?.addEventListener('change',window.dg66RefreshEmail);
  $('dg66Target')?.addEventListener('change',window.dg66RefreshEmail);
@@ -34,13 +35,43 @@ function fill(){const type=$('dg66Kind')?.value||'booking',target=$('dg66Target'
 }
 window.dg66RefreshEmail=function(){fill();const type=$('dg66Kind')?.value||'booking',id=$('dg66Target')?.value,box=$('dg66EmailState');if(!box)return;
  const row=type==='booking'?bookList().find(x=>x.id===id):payList().find(x=>x.id===id);
- if(!row){box.textContent='Seleziona prima un documento.';const button=$('dg66GenerateMissing');if(button)button.style.display='none';return}
+ if(!row){box.textContent='Seleziona prima un documento.';const button=$('dg66GenerateMissing');if(button)button.style.display='none';const open=$('dg66OpenDocument');if(open)open.style.display='none';return}
  const b=type==='booking'?row:findBooking(row.prenotazione_id);
  const hasPdf=!!(type==='booking'?row.confirmation_storage_path:row.receipt_storage_path);
  const button=$('dg66GenerateMissing');if(button)button.style.display=type==='booking'&&!hasPdf?'inline-flex':'none';
+ const open=$('dg66OpenDocument');if(open)open.style.display=hasPdf?'inline-flex':'none';
  const sent=(type==='booking'?row.confirmation_email_sent:row.receipt_email_sent)===true;
  const err=type==='booking'?row.confirmation_email_error:row.receipt_email_error;
  box.innerHTML='<b>Destinatario:</b> '+esc(b?.email||'mancante')+' · <b>PDF:</b> '+(hasPdf?'archiviato':'da generare')+' · <b>Invio:</b> '+(sent?'segnato come inviato':'non verificato')+(err?'<div style="color:#a12">Errore: '+esc(err).slice(0,200)+'</div>':'')+'<p style="font-size:12px">Un invio già tentato non viene ripetuto automaticamente; il reinvio richiede un clic e un PDF esistente.</p>';
+};
+let viewingDocument=false;
+window.dg66OpenDocument=async function(){
+ if(viewingDocument)return;
+ const kind=$('dg66Kind')?.value||'booking',id=$('dg66Target')?.value;
+ const row=(kind==='booking'?bookList():payList()).find(x=>x.id===id);
+ if(!row)return alert('Seleziona una prenotazione o un pagamento.');
+ const path=kind==='booking'?row.confirmation_storage_path:row.receipt_storage_path;
+ if(!path)return alert('Nessun PDF archiviato per questo documento.');
+ if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')return alert('Sessione gestionale non disponibile.');
+ // Open the blank tab synchronously, within the user's click, to avoid iOS/Safari pop-up blocking.
+ const tab=window.open('about:blank','_blank');
+ const btn=$('dg66OpenDocument'),box=$('dg66EmailState');
+ viewingDocument=true;if(btn)btn.disabled=true;
+ if(tab){tab.document.title='Verifica PDF DELGROSSO';tab.document.body.textContent='Preparazione del documento PDF...';}
+ try{
+  const endpoint=kind==='booking'?'send-booking-confirmation':'send-payment-receipt';
+  const payload=kind==='booking'?{action:'signed_url',bookingId:id}:{action:'signed_url',path};
+  const response=await fetch(SUPA_URL+'/functions/v1/'+endpoint,{method:'POST',headers:accessHeaders(),body:JSON.stringify(payload),cache:'no-store'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok||!data.success||!data.signedUrl)throw Error(data.error||'Impossibile aprire il documento.');
+  const url=new URL(data.signedUrl, SUPA_URL);
+  if(url.protocol!=='https:'||url.origin!==new URL(SUPA_URL).origin||!url.pathname.includes('/storage/v1/object/sign/ricevute-prenotazioni/'))throw Error('URL documento non riconosciuto.');
+  if(tab)tab.location.replace(url.href);else window.location.assign(url.href);
+  if(box)box.textContent='PDF aperto per il controllo. Verifica contenuto e importi prima di reinviare.';
+ }catch(e){
+  if(tab)tab.close();
+  if(box)box.textContent='⚠ Apertura del PDF non riuscita: '+(e.message||String(e));
+ }finally{viewingDocument=false;if(btn)btn.disabled=false;}
 };
 let emailSending=false;
 window.dg66ResendEmail=async function(){
