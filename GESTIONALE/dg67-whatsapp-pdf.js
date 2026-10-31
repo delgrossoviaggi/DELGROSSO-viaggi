@@ -63,14 +63,18 @@ async function prepare(kind,id,key){
   const r=await fetch(response.signedUrl,{cache:'no-store'});
   if(!r.ok)throw Error('Documento non scaricabile (HTTP '+r.status+')');
   const blob=await r.blob();
-  if(blob.size<150||blob.size>15*1024*1024)throw Error('Dimensione del documento non valida');
-  const type=blob.type||'application/pdf';
-  if(!/pdf/i.test(type))throw Error('Il documento restituito non è un PDF');
+  if(blob.size<600||blob.size>15*1024*1024)throw Error('Dimensione del documento non valida');
+  const first=new Uint8Array(await blob.slice(0,5).arrayBuffer());
+  const header=String.fromCharCode(...first);
+  const tail=await blob.slice(Math.max(0,blob.size-256)).text();
+  if(header!=='%PDF-'||!tail.includes('%%EOF'))throw Error('Il documento PDF è incompleto o danneggiato: invio bloccato');
+  const type='application/pdf';
   if(key!==requestSerial||!modalActive())return;
   fileName=fname(response.filename||(kind==='booking'?'DELGROSSO_Conferma_'+id.slice(0,8)+'.pdf':'DELGROSSO_Ricevuta_'+id.slice(0,8)+'.pdf'));
   file=new File([blob],fileName,{type:'application/pdf'});
   const down=el('dg67Download'),share=el('dg67Share'),pc=el('dg67Desktop');
   if(down)down.disabled=false;
+  const inspect=el('dg67Preview');if(inspect)inspect.disabled=false;
   if(share){
     const supported=typeof navigator.share==='function' && typeof navigator.canShare==='function' && navigator.canShare({files:[file]});
     share.disabled=!supported;
@@ -82,6 +86,14 @@ async function prepare(kind,id,key){
   if(key!==requestSerial||!modalActive())return;
   file=null;fileName='';notice('⚠️ PDF non disponibile: '+String(error.message||error)+'. Usa il pulsante originale “Apri PDF” o verifica il server.',false);
  }
+}
+function preview(){
+ if(!file){notice('Prepara prima il documento PDF.',false);return}
+ const url=URL.createObjectURL(file),tab=window.open(url,'_blank');
+ if(!tab){URL.revokeObjectURL(url);notice('Il browser ha bloccato l’anteprima. Usa “Scarica solo PDF” per controllarlo.',false);return}
+ tab.opener=null;
+ setTimeout(()=>URL.revokeObjectURL(url),120000);
+ notice('Controlla testo, date e importi nel PDF prima di inviarlo al cliente.');
 }
 function download(){
  if(!file){notice('Il documento PDF non è ancora pronto.',false);return}
@@ -116,8 +128,9 @@ function panel(kind,id){
  const share=document.createElement('button');share.type='button';share.id='dg67Share';share.className='btn btn-green';share.disabled=true;share.textContent='📲 Condividi PDF (telefono)';share.addEventListener('click',nativeShare);
  const pc=document.createElement('button');pc.type='button';pc.id='dg67Desktop';pc.className='btn btn-primary';pc.disabled=true;pc.textContent='💻 Apri chat + scarica PDF';pc.addEventListener('click',desktop);
  const down=document.createElement('button');down.type='button';down.id='dg67Download';down.className='btn btn-secondary';down.disabled=true;down.textContent='📄 Scarica solo PDF';down.addEventListener('click',download);
- const retry=document.createElement('button');retry.type='button';retry.className='btn btn-secondary';retry.textContent='↻ Rigenera PDF';retry.addEventListener('click',()=>{file=null;down.disabled=pc.disabled=share.disabled=true;prepare(kind,id,serial)});
- foot.prepend(share,pc,down,retry);
+ const inspect=document.createElement('button');inspect.type='button';inspect.id='dg67Preview';inspect.className='btn btn-secondary';inspect.disabled=true;inspect.textContent='👁 Controlla PDF';inspect.addEventListener('click',preview);
+ const retry=document.createElement('button');retry.type='button';retry.className='btn btn-secondary';retry.textContent='↻ Rigenera PDF';retry.addEventListener('click',()=>{file=null;down.disabled=pc.disabled=share.disabled=true;const inspect=el('dg67Preview');if(inspect)inspect.disabled=true;prepare(kind,id,serial)});
+ foot.prepend(share,pc,down,inspect,retry);
  prepare(kind,id,serial);
 }
 function patch(){
