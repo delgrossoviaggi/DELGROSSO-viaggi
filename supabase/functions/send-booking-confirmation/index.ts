@@ -83,6 +83,26 @@ Deno.serve(async(req)=>{
   if(req.method!=="POST")return J({success:false,error:"Metodo non consentito"},405);
   try{
     const p=await req.json() as R;
+    if(p.action==="smtp_check"){
+      // Operator-only connection/authentication check. Never sends a message.
+      if(!await operator(req))return J({success:false,error:"Controllo SMTP riservato agli operatori"},403);
+      let tx:any=null;
+      try{
+        const settings=await smtp();
+        if(!settings.pass)return J({success:false,error:"Password SMTP assente nelle impostazioni"},503);
+        if(!settings.user||!settings.fromEmail)return J({success:false,error:"Mittente SMTP non configurato"},503);
+        tx=nodemailer.createTransport({
+          host:settings.host,port:settings.port,secure:settings.secure,
+          auth:{user:settings.user,pass:settings.pass},
+          connectionTimeout:8000,greetingTimeout:8000,socketTimeout:10000
+        });
+        await tx.verify();
+        return J({success:true,smtpConfigured:true,authenticated:true,message:"Connessione SMTP verificata. Nessuna email inviata."});
+      }catch(e){
+        console.warn("SMTP diagnostic unsuccessful",e instanceof Error?e.name:"error");
+        return J({success:false,smtpConfigured:true,error:"Connessione o autenticazione SMTP non riuscita. Controllare host, porta, credenziali e log del servizio."},503);
+      }finally{try{tx?.close()}catch{}}
+    }
     const ref=T(p.bookingId||p.id_prenotazione||p.booking?.id||p.booking?.id_prenotazione||p.booking?.confirmation_number||p.booking?.codice);
     let b=await bookingByRef(ref);
     if(!b && p.action==="signed_url")b=await bookingByPath(T(p.path));
