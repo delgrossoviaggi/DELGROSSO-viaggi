@@ -63,5 +63,48 @@ assert.ok(!stopElement.innerHTML.includes('San Severo'),'Stale trip overwrote st
 assert.equal(stopElement.disabled,false,'Current trip stop should remain selectable');
 console.log('Out-of-order mobile trip switch test passed');
 
+
+// Seat selection must be capped by server-reported remaining passengers,
+// including legacy bookings whose seat numbers are outside the visual map.
+assert.ok(html.includes('Math.min(mapFree,inventory.free)'), 'Remaining seats must be capped by server inventory');
+assert.ok(html.includes('maxBookableSeats=free;'), 'Seat-selection maximum missing');
+const seatStart=html.indexOf('function seatButton(cell,occ){');
+const seatEnd=html.indexOf('\nfunction voidCell(',seatStart);
+assert.ok(seatStart>0&&seatEnd>seatStart, 'Seat handler not found');
+const buttons=[];
+const mkElement=(tag)=>{
+  const element={
+    tag,style:{},dataset:{},disabled:false,
+    classList:{add(){},remove(){}},
+    setAttribute(){},
+    appendChild(){},
+    innerHTML:'',title:'',onclick:null
+  };
+  if(tag==='button')buttons.push(element);
+  return element;
+};
+const seatCtx={
+  selected:[], maxBookableSeats:1,
+  current:{posti_totali:53}, SVG:{seat:'<svg/>'},
+  document:{createElement:mkElement,querySelector:()=>null},
+  details:{appendChild(){}},
+  esc:s=>s, updateSummary(){},
+  Number, String, Set
+};
+vm.runInNewContext(html.slice(seatStart,seatEnd)+'\nglobalThis.createSeat=seatButton;',seatCtx);
+const outside=seatCtx.createSeat({id:59,label:'59'},new Set());
+assert.equal(outside.disabled,true,'Out-of-capacity seat must be disabled');
+const firstSeat=seatCtx.createSeat({id:1,label:'01'},new Set());
+const secondSeat=seatCtx.createSeat({id:2,label:'02'},new Set());
+firstSeat.onclick();
+assert.equal(seatCtx.selected.length,1,'First seat should be selected');
+secondSeat.onclick();
+assert.equal(seatCtx.selected.length,1,'Must reject more seats than remaining capacity');
+firstSeat.onclick();
+assert.equal(seatCtx.selected.length,0,'Deselecting must release capacity');
+secondSeat.onclick();
+assert.equal(seatCtx.selected.length,1,'A different seat can be selected after deselecting');
+console.log('Capacity-limited seat selection test passed');
+
 console.log('Booking page scripts parsed: '+count);
 console.log('Booking integration smoke tests passed');
