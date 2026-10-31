@@ -22,6 +22,7 @@ function harness(apiOverride){
  const context={
   URL,console,state,
   window:{},
+  $:x=>inputs[x],
   document:{
    getElementById:x=>inputs[x],
    querySelector:()=>button
