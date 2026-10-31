@@ -1,0 +1,42 @@
+name: Production PDF regression checks
+on:
+  pull_request:
+    paths:
+      - 'js/ricevuta.js'
+      - 'assets/logo.JPEG'
+      - 'tests/pdf-smoke.mjs'
+      - '.github/workflows/pdf-smoke.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'js/ricevuta.js'
+      - 'assets/logo.JPEG'
+      - 'tests/pdf-smoke.mjs'
+      - '.github/workflows/pdf-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  pdf-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate booking PDF
+        run: |
+          node tests/pdf-smoke.mjs
+      - name: Render and read actual PDF (prevent blank customer confirmations)
+        run: |
+          if ! command -v pdftoppm >/dev/null || ! command -v pdftotext >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y poppler-utils
+          fi
+          pdfinfo /tmp/delgrosso-pdf-regression.pdf | grep -E 'Pages:[[:space:]]+1'
+          pdftotext -layout /tmp/delgrosso-pdf-regression.pdf /tmp/delgrosso-pdf-text.txt
+          grep -Fq 'CONFERMA DI PRENOTAZIONE' /tmp/delgrosso-pdf-text.txt
+          grep -Fq 'DG-P-TEST1234' /tmp/delgrosso-pdf-text.txt
+          grep -Fq 'Niccolo' /tmp/delgrosso-pdf-text.txt
+          pdftoppm -f 1 -l 1 -scale-to 600 -gray -singlefile /tmp/delgrosso-pdf-regression.pdf /tmp/delgrosso-pdf-render
+          python3 -c "from pathlib import Path; b=Path('/tmp/delgrosso-pdf-render.pgm').read_bytes(); i=b.index(b'\\n255\\n')+5; dark=sum(x<200 for x in b[i:]); assert dark>1000, f'Blank PDF render: only {dark} dark pixels'; print(f'PDF nonblank verified: {dark} dark pixels')"
