@@ -6,6 +6,8 @@ on:
       - 'assets/logo.JPEG'
       - 'tests/pdf-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
+      - 'tests/admin-recovery-smoke.mjs'
+      - 'GESTIONALE/dg66-email-verifica.js'
       - 'prenota.html'
       - 'js/gestionale.js'
       - 'supabase/functions/send-booking-confirmation/index.ts'
@@ -20,6 +22,8 @@ on:
       - 'assets/logo.JPEG'
       - 'tests/pdf-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
+      - 'tests/admin-recovery-smoke.mjs'
+      - 'GESTIONALE/dg66-email-verifica.js'
       - 'prenota.html'
       - 'js/gestionale.js'
       - 'supabase/functions/send-booking-confirmation/index.ts'
@@ -40,6 +44,7 @@ jobs:
         run: |
           node tests/pdf-smoke.mjs
           node tests/booking-page-smoke.mjs
+          node tests/admin-recovery-smoke.mjs
       - name: Render and read actual PDF (prevent blank customer confirmations)
         run: |
           if ! command -v pdftoppm >/dev/null || ! command -v pdftotext >/dev/null; then
