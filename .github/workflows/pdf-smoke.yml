@@ -6,6 +6,7 @@ on:
       - 'tests/pdf-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
       - 'tests/admin-recovery-smoke.mjs'
+      - 'tests/smtp-diagnostic-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
       - 'GESTIONALE/index.html'
@@ -26,6 +27,7 @@ on:
       - 'tests/pdf-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
       - 'tests/admin-recovery-smoke.mjs'
+      - 'tests/smtp-diagnostic-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
       - 'GESTIONALE/index.html'
@@ -52,6 +54,7 @@ jobs:
           node tests/pdf-smoke.mjs
           node tests/booking-page-smoke.mjs
           node tests/admin-recovery-smoke.mjs
+          node tests/smtp-diagnostic-smoke.mjs
           node tests/whatsapp-pdf-smoke.mjs
           node tests/desktop-agenda-smoke.mjs
       - name: Render and read actual PDF (prevent blank customer confirmations)
