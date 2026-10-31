@@ -5,6 +5,7 @@ on:
       - 'js/ricevuta.js'
       - 'assets/logo.JPEG'
       - 'tests/pdf-smoke.mjs'
+      - 'tests/confirmation-pdf-integrity-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
       - 'tests/admin-recovery-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
@@ -24,6 +25,7 @@ on:
       - 'js/ricevuta.js'
       - 'assets/logo.JPEG'
       - 'tests/pdf-smoke.mjs'
+      - 'tests/confirmation-pdf-integrity-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
       - 'tests/admin-recovery-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
@@ -49,6 +51,7 @@ jobs:
       - name: Validate booking PDF
         run: |
           node tests/pdf-smoke.mjs
+          node tests/confirmation-pdf-integrity-smoke.mjs
           node tests/booking-page-smoke.mjs
           node tests/admin-recovery-smoke.mjs
           node tests/whatsapp-pdf-smoke.mjs
