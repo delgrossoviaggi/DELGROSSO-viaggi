@@ -28,8 +28,12 @@ assert.ok(server.includes('pdf.length>5000000'), 'PDF upload validation missing'
 assert.ok(server.includes('confirmation_email_error:emailError'), 'SMTP failure tracking missing');
 
 
-assert.ok(html.includes('Promise.all([loadStops(trip,token),getBookedSeats(trip.id),getBusLayout(trip.id)])'),
+assert.ok(html.includes('Promise.all([loadStops(trip,token),getBookedSeats(runId),getBusLayout(runId)])'),
   'Stops, seat availability and layout should load concurrently');
+assert.ok(html.includes('const runId=String(trip.active_viaggio_id||trip.id);'), 'Bus seat map must use the active BIS vehicle');
+assert.ok(html.includes('bookingRunId=String(current.active_viaggio_id||current.id)'), 'Reservation must use the active BIS vehicle');
+assert.ok(html.includes('viaggioId:bookingRunId'), 'Booking request must target chosen BUS BIS');
+assert.ok(html.includes('getBookedSeats(bookingRunId)'), 'Pre-submit seat check must target chosen BUS BIS');
 assert.ok(html.includes('submit.disabled=true'), 'Booking must be disabled while loading');
 assert.ok(html.includes('if(token!==loadToken)return'), 'Stale requests must be ignored');
 
@@ -47,9 +51,9 @@ const stopCtx={
   console
 };
 vm.runInNewContext(html.slice(stopStart,stopEnd)+'\nglobalThis.checkStops=loadStops;',stopCtx);
-const first=stopCtx.checkStops({id:'old-trip',luogo_partenza:'San Severo'},1);
+const first=stopCtx.checkStops({id:'old-root',active_viaggio_id:'old-trip',luogo_partenza:'San Severo'},1);
 stopCtx.loadToken=2;
-const second=stopCtx.checkStops({id:'latest-trip',luogo_partenza:'Apricena'},2);
+const second=stopCtx.checkStops({id:'latest-root',active_viaggio_id:'latest-trip',luogo_partenza:'Apricena'},2);
 requests.get('latest-trip')([{nome:'Apricena'}]);
 await second;
 assert.ok(stopElement.innerHTML.includes('Apricena'),'Latest trip stops not applied');
