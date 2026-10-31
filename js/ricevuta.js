@@ -62,7 +62,7 @@
       line(50,760,'DELGROSSO VIAGGI & LIMOUSINE BUS',15,true);
     }
     content.push('Q');
-    line(50,690,'RICEVUTA DI PRENOTAZIONE',21,true);
+    line(50,690,'CONFERMA DI PRENOTAZIONE',21,true);
     content.push('0.78 0.78 0.78 RG 1 w 50 670 m 545 670 l S');
     line(50,630,'Viaggio',9,false); line(50,610,data.viaggio,14,true);
     line(50,575,'Data e ora',9,false); line(50,555,`${data.data||''}${data.ora?' - '+data.ora:''}`,12,true);
@@ -74,9 +74,9 @@
     line(50,330,'Prezzo per persona',9,false); line(50,310,`EUR ${data.prezzo.toFixed(2)}`,12,true);
     line(50,265,'TOTALE VIAGGIO',10,false); line(50,235,`EUR ${data.totale.toFixed(2)}`,25,true);
     content.push('0.94 0.97 1 rg 50 175 495 42 re f');
-    line(65,198,'Conserva questa ricevuta come conferma della prenotazione.',10,true);
+    line(65,198,'Conserva questo documento come conferma della prenotazione.',10,true);
     line(50,105,'DELGROSSO Viaggi & Limousine Bus',9,false);
-    line(50,88,'Ricevuta generata automaticamente dal sito ufficiale.',8,false);
+    line(50,88,'Conferma generata automaticamente dal sito ufficiale.',8,false);
     const stream=content.join('\n');
     const resources=`<< /Font << /F1 ${font} 0 R >>${imageId?` /XObject << /Im1 ${imageId} 0 R >>`:''} >>`;
     const contentId=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
