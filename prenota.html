@@ -174,6 +174,8 @@ try{
 sel.onchange=load;
 form.onsubmit=async e=>{e.preventDefault();if(submit.disabled)return;msg.style.display='block';msg.className='notice';if(!current){msg.textContent='Seleziona una partenza.';return}if(typeof gestTripIsSoldOut==='function'&&gestTripIsSoldOut(current)){msg.className='notice error';msg.textContent='SOLD OUT: questo viaggio è al completo.';return}if(!selected.length){msg.textContent='Seleziona almeno un posto sulla piantina.';return}const fermataPartenza=document.querySelector('#fermataPartenza').value.trim();if(!fermataPartenza){msg.className='notice error';msg.textContent='Seleziona la fermata da cui partirai.';return}const bookingTrip=current,bookingSeats=selected.slice();submit.disabled=true;sel.disabled=true;seats.style.pointerEvents='none';submit.textContent='Invio in corso…';msg.textContent='Verifica disponibilità e registrazione…';let bookingConfirmed=false,bookingRequested=false;try{const latestBooked=new Set((await getBookedSeats(bookingTrip.id)).map(String));if(bookingSeats.some(n=>latestBooked.has(String(n)))){await load();throw new Error('Uno dei posti selezionati è stato occupato. Seleziona un altro posto sulla piantina.')}bookingRequested=true;const result=await createGestionaleBooking({viaggioId:bookingTrip.id,nome:document.querySelector('#nome').value.trim(),cognome:document.querySelector('#cognome').value.trim(),telefono:document.querySelector('#telefono').value.trim(),email:(document.querySelector('#email').value.trim()||null),note:document.querySelector('#note').value.trim(),posti:bookingSeats,fermataPartenza});if(!result?.success){bookingRequested=false;throw new Error(result?.error||'Prenotazione non accettata')}bookingConfirmed=true;msg.className='notice success';
 const bookedSeats=(result.posti||bookingSeats).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+const serverTotal=Number(result.totale);
+const bookingTotal=Number.isFinite(serverTotal)&&serverTotal>=0?serverTotal:Number(bookingTrip.prezzo||0)*bookedSeats.length;
 const receiptData={
   riferimento:String(result.numero||result.confirmationNumber||result.id_prenotazione||result.codice||''),
   viaggio:bookingTrip.titolo||bookingTrip.destinazione||'Viaggio',
@@ -185,8 +187,8 @@ const receiptData={
   fermataPartenza,
   numeroPosti:bookedSeats.length,
   posti:bookedSeats,
-  prezzo:Number(bookingTrip.prezzo||0),
-  totale:Number(bookingTrip.prezzo||0)*bookedSeats.length
+  prezzo:bookedSeats.length?bookingTotal/bookedSeats.length:0,
+  totale:bookingTotal
 };
 // Generate a single PDF for the customer and for secure archival.
 const confirmationPdf=DGReceipt.generate(receiptData);
