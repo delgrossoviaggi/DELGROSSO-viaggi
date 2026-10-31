@@ -8,6 +8,7 @@ on:
       - 'tests/confirmation-pdf-integrity-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
       - 'tests/admin-recovery-smoke.mjs'
+      - 'tests/smtp-diagnostic-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
       - 'GESTIONALE/dg66-email-verifica.js'
@@ -28,6 +29,7 @@ on:
       - 'tests/confirmation-pdf-integrity-smoke.mjs'
       - 'tests/booking-page-smoke.mjs'
       - 'tests/admin-recovery-smoke.mjs'
+      - 'tests/smtp-diagnostic-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
       - 'GESTIONALE/dg66-email-verifica.js'
@@ -54,6 +56,7 @@ jobs:
           node tests/confirmation-pdf-integrity-smoke.mjs
           node tests/booking-page-smoke.mjs
           node tests/admin-recovery-smoke.mjs
+          node tests/smtp-diagnostic-smoke.mjs
           node tests/whatsapp-pdf-smoke.mjs
       - name: Render and read actual PDF (prevent blank customer confirmations)
         run: |
