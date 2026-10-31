@@ -75,6 +75,7 @@
     line(50,265,'TOTALE VIAGGIO',10,false); line(50,235,`EUR ${data.totale.toFixed(2)}`,25,true);
     content.push('0.94 0.97 1 rg 50 175 495 42 re f');
     line(65,198,'Conserva questo documento come conferma della prenotazione.',10,true);
+    line(50,142,'La conferma non costituisce ricevuta di pagamento.',9,false);
     line(50,105,'DELGROSSO Viaggi & Limousine Bus',9,false);
     line(50,88,'Conferma generata automaticamente dal sito ufficiale.',8,false);
     const stream=content.join('\n');
@@ -111,7 +112,7 @@
   window.DGReceipt={
     async download(data){
       const blob=await generate(data); const url=URL.createObjectURL(blob); const a=document.createElement('a');
-      a.href=url; a.download=`ricevuta-prenotazione-${slug(data.viaggio)}.pdf`; document.body.appendChild(a); a.click(); a.remove();
+      a.href=url; a.download=`conferma-prenotazione-${slug(data.viaggio)}.pdf`; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(url),15000); return true;
     }
   };
