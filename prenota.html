@@ -147,23 +147,77 @@ function renderSeats(bus){
  const applyScale=()=>{const rowsEl=container.querySelector('.seat-map-rows');if(rowsEl)rowsEl.style.transform=`scale(${scale})`;rowsEl.style.transformOrigin='top center';tools.querySelector('#zoomReset').textContent=Math.round(scale*100)+'%'};
  tools.querySelector('#zoomIn').onclick=()=>{scale=Math.min(1.14,scale+.05);applyScale()};tools.querySelector('#zoomOut').onclick=()=>{scale=Math.max(.9,scale-.05);applyScale()};tools.querySelector('#zoomReset').onclick=()=>{scale=1;applyScale()};
 }
-async function loadStops(){const stop=document.querySelector('#fermataPartenza');if(!stop)return;stop.innerHTML='<option value="">Caricamento fermate…</option>';stop.disabled=true;if(!current){stop.innerHTML='<option value="">Seleziona la fermata…</option>';return}let arr=[];try{arr=(await getTripStops(current.id)).map(x=>typeof x==='string'?x:String(x?.nome||'')).map(x=>x.trim()).filter(Boolean)}catch(e){console.warn('Fermate strutturate non disponibili',e)}if(!arr.length){const raw=String(current?.luogo_partenza||'').trim();arr=raw.split(/\s*(?:\||;|,|\n|\/|\u2022|\s+-\s+)\s*/).map(x=>x.trim()).filter(Boolean)}stop.innerHTML='<option value="">Seleziona la fermata…</option>'+[...new Set(arr)].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');stop.disabled=!arr.length;}
+async function loadStops(trip,token){
+ const stop=document.querySelector('#fermataPartenza');
+ if(!stop)return;
+ stop.innerHTML='<option value="">Caricamento fermate…</option>';
+ stop.disabled=true;
+ if(!trip){stop.innerHTML='<option value="">Seleziona la fermata…</option>';return}
+ let arr=[];
+ try{
+  arr=(await getTripStops(trip.id)).map(x=>typeof x==='string'?x:String(x?.nome||'')).map(x=>x.trim()).filter(Boolean);
+ }catch(e){console.warn('Fermate strutturate non disponibili',e)}
+ // A slow response from a previous journey must never overwrite the current stops.
+ if(token!==loadToken)return;
+ if(!arr.length){
+  const raw=String(trip.luogo_partenza||'').trim();
+  arr=raw.split(/\s*(?:\||;|,|\n|\/|\u2022|\s+-\s+)\s*/).map(x=>x.trim()).filter(Boolean);
+ }
+ stop.innerHTML='<option value="">Seleziona la fermata…</option>'+[...new Set(arr)].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+ stop.disabled=!arr.length;
+}
 function showCurrent(){title.textContent=current?(current.titolo||current.destinazione):'Seleziona una partenza';date.textContent=current?gestFmtDate(current.data_partenza):'—';time.textContent=current?`${gestFmtTime(current.ora_partenza)} · ${current.luogo_partenza||''}`:'—';updateSummary()}
 async function load(){
- const token=++loadToken;current=trips.find(v=>String(v.id)===String(sel.value))||null;showCurrent();await loadStops();selected=[];booked=[];busCard.style.display='none';seats.innerHTML='';submit.disabled=false;submit.textContent='Invia prenotazione';form.classList.remove('soldout-booking');
- details.className='notice';details.textContent='Seleziona una partenza per visualizzare il dettaglio e i posti disponibili.';if(!current)return;
+ const token=++loadToken;
+ const trip=trips.find(v=>String(v.id)===String(sel.value))||null;
+ current=trip;
+ // Immediately clear the previous trip's seats so they cannot be booked by mistake.
+ selected=[];booked=[];
+ busCard.style.display='none';
+ seats.innerHTML='';
+ form.classList.remove('soldout-booking');
+ details.className='notice';
+ details.textContent='Seleziona una partenza per visualizzare il dettaglio e i posti disponibili.';
+ submit.disabled=true;
+ submit.textContent=trip?'Caricamento posti…':'Seleziona un viaggio';
+ const stop=document.querySelector('#fermataPartenza');
+ if(stop){stop.innerHTML='<option value="">Caricamento fermate…</option>';stop.disabled=true}
+ showCurrent();
+ if(!trip){void loadStops(null,token);return}
+ const availability=typeof gestTripAvailability==='function'?gestTripAvailability(trip):{soldOut:Number(trip.posti_liberi??0)<=0,free:Number(trip.posti_liberi??0),total:Number(trip.posti_totali??0)};
+ if(availability.soldOut){
+  details.className='notice error';
+  details.innerHTML=`<div class="soldout-banner"><strong>SOLD OUT</strong><span>VIAGGIO AL COMPLETO</span></div><strong>${esc(trip.destinazione||trip.titolo||'')}</strong> · ${esc(gestFmtDate(trip.data_partenza))} · ore ${esc(gestFmtTime(trip.ora_partenza))}<br>${esc(trip.luogo_partenza||'')}<div class="trip-stats"><span class="pill">💺 <strong>Posti esauriti</strong></span></div>`;
+  form.classList.add('soldout-booking');
+  submit.textContent='SOLD OUT';
+  if(stop)stop.innerHTML='<option value="">Posti esauriti</option>';
+  return;
+ }
  details.textContent='Preparazione della tua esperienza di viaggio…';
- const availability=typeof gestTripAvailability==='function'?gestTripAvailability(current):{soldOut:Number(current.posti_liberi??0)<=0,free:Number(current.posti_liberi??0),total:Number(current.posti_totali??0)};
- if(availability.soldOut){details.className='notice error';details.innerHTML=`<div class="soldout-banner"><strong>SOLD OUT</strong><span>VIAGGIO AL COMPLETO</span></div><strong>${esc(current.destinazione||current.titolo||'')}</strong> · ${esc(gestFmtDate(current.data_partenza))} · ore ${esc(gestFmtTime(current.ora_partenza))}<br>${esc(current.luogo_partenza||'')}<div class="trip-stats"><span class="pill">💺 <strong>Posti esauriti</strong></span></div>`;form.classList.add('soldout-booking');submit.disabled=true;submit.textContent='SOLD OUT';busCard.style.display='none';return;}
  try{
-   const [bs,bus]=await Promise.all([getBookedSeats(current.id),getBusLayout(current.id)]);if(token!==loadToken)return;
-   booked=Array.isArray(bs)?bs.map(String):[];const normalized=normalizeLayout(bus);const layoutSeats=normalized.layout.flatMap(r=>Array.isArray(r.cells)?r.cells:[]).filter(c=>c?.type==='seat');
-   const seatIds=new Set(layoutSeats.map(c=>String(c.id??c.number??c.value??''))),bookedOnLayout=booked.filter(id=>seatIds.has(String(id)));
-   const total=Number(normalized.config?.totalSeats||layoutSeats.length||current.posti_totali||0),free=Math.max(0,layoutSeats.length-bookedOnLayout.length);
-   const busInfo=bus?.bus||bus||{},busName=[busInfo?.marca,busInfo?.modello].filter(Boolean).join(' ')||normalized.config?.name||'Autobus assegnato';
-   details.innerHTML=`<strong>${esc(current.destinazione||current.titolo||'')}</strong> · ${esc(gestFmtDate(current.data_partenza))} · ore ${esc(gestFmtTime(current.ora_partenza))}<br>${esc(current.luogo_partenza||'')}<div class="trip-stats"><span class="pill">💶 <strong>€ ${Number(current.prezzo||0).toFixed(0)}</strong> / persona</span><span class="pill">💺 <strong>${free}</strong> posti liberi</span><span class="pill">🚌 <strong>${esc(busName)}</strong></span></div>`;
-   renderSeats(bus);
- }catch(e){console.error(e);details.className='notice error';details.textContent='Non è stato possibile caricare la piantina e la disponibilità. Ricarica la pagina e riprova.';busCard.style.display='none'}
+  // Stops, occupied seats and bus layout are independent: load all in parallel.
+  const [,bs,bus]=await Promise.all([loadStops(trip,token),getBookedSeats(trip.id),getBusLayout(trip.id)]);
+  if(token!==loadToken)return;
+  booked=Array.isArray(bs)?bs.map(String):[];
+  const normalized=normalizeLayout(bus);
+  const layoutSeats=normalized.layout.flatMap(r=>Array.isArray(r.cells)?r.cells:[]).filter(c=>c?.type==='seat');
+  const seatIds=new Set(layoutSeats.map(c=>String(c.id??c.number??c.value??'')));
+  const bookedOnLayout=booked.filter(id=>seatIds.has(String(id)));
+  const free=Math.max(0,layoutSeats.length-bookedOnLayout.length);
+  const busInfo=bus?.bus||bus||{},busName=[busInfo?.marca,busInfo?.modello].filter(Boolean).join(' ')||normalized.config?.name||'Autobus assegnato';
+  details.innerHTML=`<strong>${esc(trip.destinazione||trip.titolo||'')}</strong> · ${esc(gestFmtDate(trip.data_partenza))} · ore ${esc(gestFmtTime(trip.ora_partenza))}<br>${esc(trip.luogo_partenza||'')}<div class="trip-stats"><span class="pill">💶 <strong>€ ${Number(trip.prezzo||0).toFixed(0)}</strong> / persona</span><span class="pill">💺 <strong>${free}</strong> posti liberi</span><span class="pill">🚌 <strong>${esc(busName)}</strong></span></div>`;
+  renderSeats(bus);
+  submit.disabled=free<=0;
+  submit.textContent=free<=0?'SOLD OUT':'Invia prenotazione';
+ }catch(e){
+  if(token!==loadToken)return;
+  console.error(e);
+  details.className='notice error';
+  details.textContent='Non è stato possibile caricare la piantina e la disponibilità. Ricarica la pagina e riprova.';
+  busCard.style.display='none';
+  submit.disabled=true;
+  submit.textContent='Ricarica per riprovare';
+ }
 }
 try{
  trips=await getGestionaleTrips();
