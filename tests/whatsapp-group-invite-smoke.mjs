@@ -7,11 +7,14 @@ new vm.Script(js,{filename:'dg61-quote-whatsapp.js'});
 const first=js.indexOf('function dg61NormalizeGroupInvite(raw){');
 const last=js.indexOf('\nwindow.dg61CopyGroupLink=',first);
 assert.ok(first>0&&last>first,'WhatsApp invite link normalization and save code must exist');
-const code=js.slice(first,last);
+const uidStart=js.indexOf('const uid=()=>');
+const uidEnd=js.indexOf(';',uidStart)+1;
+assert.ok(uidStart>0&&uidEnd>uidStart,'Authenticated operator ID helper missing');
+const code=js.slice(uidStart,uidEnd)+'\n'+js.slice(first,last);
 const id='DCb6HluikWDaB123456789',valid='https://chat.whatsapp.com/'+id;
 const trip='00000000-0000-4000-8000-000000000123';
 
-function harness(apiOverride){
+function harness(apiOverride,authenticated=true){
  const inputs={
   dg61GroupTrip:{value:trip},
   dg61GroupUrl:{value:'',focus(){}}
@@ -21,6 +24,7 @@ function harness(apiOverride){
  let reloads=0;
  const context={
   URL,console,state,
+  authSession:authenticated?{user:{id:trip}}:null,
   window:{},
   $:x=>inputs[x],
   document:{
@@ -28,7 +32,6 @@ function harness(apiOverride){
    querySelector:()=>button
   },
   toast:(message,ok)=>messages.push({message,ok}),
-  uid:()=>trip,
   api:async(table,qs,config)=>{
    requests.push({table,qs,config});
    if(apiOverride)return apiOverride(config,requests.length);
@@ -76,4 +79,12 @@ invalid.inputs.dg61GroupUrl.value='https://example.org/fake';
 await invalid.save();
 assert.equal(invalid.requests.length,0,'Invalid links must never be sent to database');
 assert.equal(invalid.button.disabled,false);
-console.log('WhatsApp Business invite parsing, persistence and failure reporting tests passed');
+
+const expired=harness(null,false);
+expired.inputs.dg61GroupUrl.value=valid;
+await expired.save();
+assert.equal(expired.requests.length,0,'No database write without a valid operator session');
+assert.ok(expired.messages.some(x=>x.message.includes('Sessione scaduta')),'Show meaningful login prompt');
+assert.equal(expired.button.disabled,false,'Expired login must leave button usable');
+
+console.log('WhatsApp Business invite parsing, auth UID, persistence and failure reporting tests passed');
