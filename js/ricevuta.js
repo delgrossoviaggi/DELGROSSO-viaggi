@@ -111,6 +111,7 @@
     return new Blob([bytes],{type:'application/pdf'});
   }
   window.DGReceipt={
+    generate,
     async download(data){
       const blob=await generate(data); const url=URL.createObjectURL(blob); const a=document.createElement('a');
       a.href=url; a.download=`conferma-prenotazione-${slug(data.viaggio)}.pdf`; document.body.appendChild(a); a.click(); a.remove();
