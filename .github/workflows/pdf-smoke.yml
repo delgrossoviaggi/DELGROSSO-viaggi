@@ -8,6 +8,8 @@ on:
       - 'tests/admin-recovery-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
+      - 'GESTIONALE/index.html'
+      - 'tests/desktop-agenda-smoke.mjs'
       - 'GESTIONALE/dg66-email-verifica.js'
       - 'prenota.html'
       - 'js/gestionale.js'
@@ -25,6 +27,8 @@ on:
       - 'tests/admin-recovery-smoke.mjs'
       - 'tests/whatsapp-pdf-smoke.mjs'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
+      - 'GESTIONALE/index.html'
+      - 'tests/desktop-agenda-smoke.mjs'
       - 'GESTIONALE/dg66-email-verifica.js'
       - 'prenota.html'
       - 'js/gestionale.js'
@@ -47,6 +51,7 @@ jobs:
           node tests/booking-page-smoke.mjs
           node tests/admin-recovery-smoke.mjs
           node tests/whatsapp-pdf-smoke.mjs
+          node tests/desktop-agenda-smoke.mjs
       - name: Render and read actual PDF (prevent blank customer confirmations)
         run: |
           if ! command -v pdftoppm >/dev/null || ! command -v pdftotext >/dev/null; then
