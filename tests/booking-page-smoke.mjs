@@ -6,6 +6,7 @@ const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const html=read('prenota.html');
 const bridge=read('js/gestionale.js');
 const server=read('supabase/functions/send-booking-confirmation/index.ts');
+const siteBridge=read('supabase/functions/gestionale-bridge/index.ts');
 const capacitySql=read('supabase/patches/guard_public_booking_capacity.sql');
 assert.ok(capacitySql.includes('v_occupied + v_posti'),'Database passenger capacity guard must be versioned');
 assert.ok(capacitySql.includes('cardinality(string_to_array(p.posti_selezionati'),'Legacy passenger count guard must be present');
@@ -21,7 +22,11 @@ new vm.Script(bridge,{filename:'js/gestionale.js'});
 
 assert.ok(html.includes('result.numero'), 'Official booking number missing');
 assert.ok(html.includes('const confirmationPdf=DGReceipt.generate(receiptData)'), 'PDF should be generated once');
-assert.ok(html.includes('action:\'issue\''), 'PDF issue action missing');
+assert.ok(html.includes("gestBridge('archive-booking',{bookingId,token,pdfBase64:btoa(encoded)})"), 'PDF must use site bridge with token');
+assert.ok(html.includes("gestBridge('booking-pdf-url',{bookingId,token})"), 'PDF retry must retrieve existing archive');
+assert.ok(siteBridge.includes('token:String(token)'), 'Site bridge must forward the booking token');
+assert.ok(siteBridge.includes('if(!bookingId||!token||!pdfBase64)'), 'Site bridge must reject missing token');
+assert.ok(bridge.includes("action==='archive-booking'?55000:18000"), 'Archive needs extended timeout');
 assert.ok(html.includes('await archiveConfirmation()'), 'PDF archival not called');
 assert.ok(html.includes('<a id="downloadReceipt"'), 'Native customer PDF link missing');
 assert.ok(bridge.includes('stableRequestId'), 'Idempotent booking request identifier missing');
@@ -108,6 +113,39 @@ assert.equal(seatCtx.selected.length,0,'Deselecting must release capacity');
 secondSeat.onclick();
 assert.equal(seatCtx.selected.length,1,'A different seat can be selected after deselecting');
 console.log('Capacity-limited seat selection test passed');
+
+
+const archiveStart=html.indexOf('async function archiveConfirmation(){');
+const archiveEnd=html.indexOf('\nmsg.innerHTML=',archiveStart);
+assert.ok(archiveStart>0&&archiveEnd>archiveStart,'PDF archive function missing');
+const archiveSource=html.slice(archiveStart,archiveEnd);
+async function runArchive(mock){
+ const calls=[];
+ const context={
+  result:{id:'00000000-0000-4000-8000-000000000001',token:'synthetic-private-token'},
+  confirmationPdf:Promise.resolve(new Blob([Uint8Array.from([37,80,68,70,45,49,46,52,10])],{type:'application/pdf'})),
+  Uint8Array,btoa,console,
+  gestBridge:async(action,payload)=>{calls.push({action,payload});return mock(action,payload)}
+ };
+ vm.runInNewContext(archiveSource+'\nglobalThis.archiveTest=archiveConfirmation;',context);
+ return {result:await context.archiveTest(),calls};
+}
+const issued=await runArchive(async(action,payload)=>{
+ assert.equal(action,'archive-booking');
+ assert.equal(payload.token,'synthetic-private-token');
+ assert.ok(payload.pdfBase64);
+ return {success:true,emailSent:true};
+});
+assert.equal(issued.result.emailSent,true);
+assert.equal(issued.calls.length,1);
+const recovered=await runArchive(async(action)=>{
+ if(action==='archive-booking')throw Error('Network timeout after upload');
+ if(action==='booking-pdf-url')return {success:true,signedUrl:'https://example.invalid/fictional.pdf'};
+ throw Error('Unexpected action');
+});
+assert.equal(recovered.result.alreadyArchived,true,'Must recover existing document after uncertain network error');
+assert.equal(recovered.calls.length,2);
+console.log('Public PDF archive and retry integration smoke test passed');
 
 console.log('Booking page scripts parsed: '+count);
 console.log('Booking integration smoke tests passed');
