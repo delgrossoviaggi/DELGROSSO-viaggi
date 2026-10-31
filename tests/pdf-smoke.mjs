@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,writeFileSync} from 'node:fs';
 import vm from 'node:vm';
 
 const source = readFileSync(new URL('../js/ricevuta.js', import.meta.url), 'utf8');
@@ -48,4 +48,11 @@ console.log('Basic PDF: '+validatePdf(one)+' bytes');
 const invalidLogo=loadGenerator(async()=>({ok:true,arrayBuffer:async()=>Uint8Array.from([1,2,3]).buffer}));
 const two=Buffer.from(await (await invalidLogo({...booking,viaggio:'Viaggio molto lungo '.repeat(15),nome:'Nicola '.repeat(20)})).arrayBuffer());
 console.log('Long fields and invalid logo: '+validatePdf(two)+' bytes');
+const jpg=readFileSync(new URL('../assets/logo.JPEG',import.meta.url));
+const goodLogo=loadGenerator(async()=>({ok:true,arrayBuffer:async()=>jpg.buffer.slice(jpg.byteOffset,jpg.byteOffset+jpg.byteLength)}));
+const three=Buffer.from(await (await goodLogo(booking)).arrayBuffer());
+assert.ok(three.includes(Buffer.from('/Subtype /Image')), 'Logo should be embedded in PDF');
+console.log('Actual JPEG logo: '+validatePdf(three)+' bytes');
+writeFileSync('/tmp/delgrosso-pdf-regression.pdf',three);
+writeFileSync('/tmp/delgrosso-pdf-no-logo.pdf',one);
 console.log('PDF smoke tests passed');
