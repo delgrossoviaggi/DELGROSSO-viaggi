@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+
+const server=readFileSync(new URL('../supabase/functions/send-booking-confirmation/index.ts',import.meta.url),'utf8');
+const admin=readFileSync(new URL('../GESTIONALE/dg66-email-verifica.js',import.meta.url),'utf8');
+new vm.Script(admin,{filename:'dg66-email-verifica.js'});
+const begin=server.indexOf('if(p.action==="smtp_check"){');
+const end=server.indexOf('const ref=T(p.bookingId',begin);
+assert.ok(begin>0&&end>begin,'SMTP check handler not found before booking lookup');
+const fn=server.slice(begin,end);
+assert.ok(fn.includes('if(!await operator(req))'),'Only authorized operators can check SMTP');
+assert.ok(fn.includes('await tx.verify()'),'Must verify transport connection and credentials');
+assert.ok(!fn.includes('sendMail('),'SMTP check may not send email');
+assert.ok(!fn.includes('.update('),'SMTP check must not mutate booking or payment records');
+assert.ok(fn.includes('connectionTimeout:8000'),'Diagnostic must have a timeout');
+assert.ok(fn.includes('tx?.close()'),'Diagnostic must release connection');
+assert.ok(admin.includes('id="dg66SmtpCheck"'),'Operator check button missing');
+assert.ok(admin.includes('window.dg66CheckSmtp=async function()'),'Operator handler missing');
+assert.ok(admin.includes("action:'smtp_check'"),'Correct diagnostic action required');
+assert.ok(admin.includes('if(smtpCheckRunning)return;'),'Prevent repeated checks');
+assert.ok(admin.includes('Nessuna email è stata inviata'),'Never claim that customer email was sent');
+console.log('SMTP connection-only diagnostic security tests passed');
