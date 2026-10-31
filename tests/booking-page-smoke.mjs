@@ -147,5 +147,48 @@ assert.equal(recovered.result.alreadyArchived,true,'Must recover existing docume
 assert.equal(recovered.calls.length,2);
 console.log('Public PDF archive and retry integration smoke test passed');
 
+
+// Simulate a confirmed booking whose PDF archival temporarily fails.
+// Retrying must not submit a new booking or touch booked seats.
+assert.ok(html.includes('Codice prenotazione: <strong>'), 'Show booking reference even if PDF fails');
+assert.ok(html.includes("retryArchiveButton.type='button'"), 'Retry must not submit booking form');
+assert.ok(html.includes('if(customerPdfReady)await tryArchiveWithoutBooking()'), 'Only archive a generated PDF');
+const retryStart=html.indexOf("const archiveStatus=document.createElement('p');");
+const retryEnd=html.indexOf('\nselected=[];form.querySelectorAll(',retryStart);
+assert.ok(retryStart>=0&&retryEnd>retryStart,'Retry UI snippet missing');
+async function simulateArchiveRetry(failOnce,pdfReady=true) {
+ const controls=[];
+ const msg={appendChild(element){controls.push(element)}};
+ const document={createElement(tag){
+  return {tag,hidden:false,disabled:false,style:{},handlers:{},
+   setAttribute(){},addEventListener(event,cb){this.handlers[event]=cb}};
+ }};
+ let calls=0;
+ const archiveConfirmation=async()=>{
+  calls++;
+  if(failOnce&&calls===1)throw Error('Network disconnected');
+  return {success:true,emailSent:false};
+ };
+ const context={document,msg,customerPdfReady:pdfReady,archiveConfirmation,controls,console:{error(){}}};
+ const code=html.slice(retryStart,retryEnd);
+ const run=new Function('context','return (async function(){with(context){'+code+'\nreturn {archiveStatus,retryArchiveButton};}}).call(context);');
+ const state=await run(context);
+ return {state,calls:()=>calls,click:async()=>{
+  state.retryArchiveButton.handlers.click();
+  await new Promise(resolve=>setImmediate(resolve));
+ }};
+}
+const retryFlow=await simulateArchiveRetry(true);
+assert.equal(retryFlow.calls(),1,'Exactly one initial archival attempt');
+assert.equal(retryFlow.state.retryArchiveButton.hidden,false,'Show retry after archive failure');
+await retryFlow.click();
+assert.equal(retryFlow.calls(),2,'Retry should invoke archive once');
+assert.equal(retryFlow.state.retryArchiveButton.hidden,true,'Hide retry after success');
+assert.equal(retryFlow.state.retryArchiveButton.disabled,false,'Restore button state');
+const noPdf=await simulateArchiveRetry(false,false);
+assert.equal(noPdf.calls(),0,'Do not archive when PDF generation fails');
+assert.equal(noPdf.state.retryArchiveButton.hidden,true,'Do not expose retry without a PDF');
+console.log('Customer PDF archive retry UI smoke test passed');
+
 console.log('Booking page scripts parsed: '+count);
 console.log('Booking integration smoke tests passed');
