@@ -88,14 +88,20 @@ function bookingReceiptData(b,tr){
 }
 async function ensureReceiptGenerator(){
  if(window.DGReceipt?.generate)return window.DGReceipt;
- await new Promise((resolve,reject)=>{
-  const script=document.createElement('script');
-  script.src='/js/ricevuta.js?v=69';
-  script.onload=resolve;
-  script.onerror=()=>reject(new Error('Generatore PDF non disponibile sul sito.'));
-  document.head.appendChild(script);
- });
- if(!window.DGReceipt?.generate)throw new Error('Generatore PDF non inizializzato.');
+ const sources=['/js/ricevuta.js?v=70','https://www.delgrossoviaggi.it/js/ricevuta.js?v=70'];
+ for(const source of sources){
+  try{
+   await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=source;
+    script.onload=resolve;
+    script.onerror=()=>reject(new Error('Script PDF non disponibile.'));
+    document.head.appendChild(script);
+   });
+   if(window.DGReceipt?.generate)return window.DGReceipt;
+  }catch(e){console.warn('Generatore PDF: fonte non raggiungibile',e)}
+ }
+ throw new Error('Generatore PDF non inizializzato.');
  return window.DGReceipt;
 }
 window.dg66GenerateMissing=async function(){
