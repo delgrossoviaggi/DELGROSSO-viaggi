@@ -81,6 +81,7 @@
     line(50,515,'Nome',9,false); line(50,495,data.nome,12,true);
     line(310,515,'Cognome',9,false); line(310,495,data.cognome,12,true);
     line(50,455,'Recapito telefonico',9,false); line(50,435,data.telefono,12,true);
+    line(50,412,`Fermata di partenza: ${data.fermataPartenza||'Da verificare'}`,10,false);
     line(50,395,'N. posti prenotati',9,false); line(50,375,String(data.numeroPosti),14,true);
     line(310,395,'Posti scelti',9,false); line(310,375,data.posti.join(' - '),14,true);
     line(50,330,'Prezzo per persona',9,false); line(50,310,`EUR ${data.prezzo.toFixed(2)}`,12,true);
