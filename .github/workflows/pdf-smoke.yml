@@ -5,6 +5,12 @@ on:
       - 'js/ricevuta.js'
       - 'assets/logo.JPEG'
       - 'tests/pdf-smoke.mjs'
+      - 'tests/booking-page-smoke.mjs'
+      - 'prenota.html'
+      - 'js/gestionale.js'
+      - 'supabase/functions/send-booking-confirmation/index.ts'
+      - 'supabase/functions/send-payment-receipt/index.ts'
+      - 'supabase/patches/guard_public_booking_capacity.sql'
       - '.github/workflows/pdf-smoke.yml'
   push:
     branches:
@@ -13,6 +19,12 @@ on:
       - 'js/ricevuta.js'
       - 'assets/logo.JPEG'
       - 'tests/pdf-smoke.mjs'
+      - 'tests/booking-page-smoke.mjs'
+      - 'prenota.html'
+      - 'js/gestionale.js'
+      - 'supabase/functions/send-booking-confirmation/index.ts'
+      - 'supabase/functions/send-payment-receipt/index.ts'
+      - 'supabase/patches/guard_public_booking_capacity.sql'
       - '.github/workflows/pdf-smoke.yml'
 permissions:
   contents: read
@@ -27,6 +39,7 @@ jobs:
       - name: Validate booking PDF
         run: |
           node tests/pdf-smoke.mjs
+          node tests/booking-page-smoke.mjs
       - name: Render and read actual PDF (prevent blank customer confirmations)
         run: |
           if ! command -v pdftoppm >/dev/null || ! command -v pdftotext >/dev/null; then
