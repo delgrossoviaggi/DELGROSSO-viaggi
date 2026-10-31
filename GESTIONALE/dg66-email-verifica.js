@@ -66,5 +66,17 @@ window.dg66ResendEmail=async function(){
 };
 const original=window.dg61RenderWhatsApp;
 if(typeof original==='function')window.dg61RenderWhatsApp=function(){original.apply(this,arguments);mount()};
-let count=0;const timer=setInterval(()=>{mount();if(++count>12)clearInterval(timer)},500);
+function initializeEmailPanel(){
+ mount();
+ if($('dg66EmailPanel'))return;
+ // Observe lazy-loaded WhatsApp panel without polling on mobile devices.
+ const observer=new MutationObserver(()=>{
+  mount();
+  if($('dg66EmailPanel'))observer.disconnect();
+ });
+ observer.observe(document.body,{childList:true,subtree:true});
+ window.addEventListener('pagehide',()=>observer.disconnect(),{once:true});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeEmailPanel,{once:true});
+else initializeEmailPanel();
 })();
