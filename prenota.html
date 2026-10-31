@@ -200,6 +200,14 @@ async function archiveConfirmation(){
   body:JSON.stringify({action:'issue',bookingId,token,pdfBase64:btoa(encoded)})
  });
  const data=await response.json().catch(()=>({}));
+ if(response.status===409){
+  const check=await fetch('https://chkuayhbmitdmzmmvona.supabase.co/functions/v1/send-booking-confirmation',{
+   method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({action:'signed_url',bookingId,token})
+  });
+  const existing=await check.json().catch(()=>({}));
+  if(check.ok&&existing.success&&existing.signedUrl)return {success:true,emailSent:false,alreadyArchived:true};
+ }
  if(!response.ok||!data.success)throw new Error(data.error||'Archiviazione non riuscita.');
  return data;
 }
