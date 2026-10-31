@@ -89,8 +89,9 @@ async function prepare(kind,id,key){
 }
 function preview(){
  if(!file){notice('Prepara prima il documento PDF.',false);return}
- const url=URL.createObjectURL(file),tab=window.open(url,'_blank','noopener');
+ const url=URL.createObjectURL(file),tab=window.open(url,'_blank');
  if(!tab){URL.revokeObjectURL(url);notice('Il browser ha bloccato l’anteprima. Usa “Scarica solo PDF” per controllarlo.',false);return}
+ tab.opener=null;
  setTimeout(()=>URL.revokeObjectURL(url),120000);
  notice('Controlla testo, date e importi nel PDF prima di inviarlo al cliente.');
 }
