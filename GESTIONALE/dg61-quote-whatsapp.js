@@ -5,6 +5,9 @@
 'use strict';
 const WA_BUSINESS='393208815899';
 const $=id=>document.getElementById(id);
+// Recover the authenticated Supabase user in this module's own scope.
+// The identically named helper in another IIFE is not visible here.
+const uid=()=>typeof authSession!=='undefined'?(authSession?.user?.id||null):null;
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const euro=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const canManage=()=>typeof can==='function'&&can('cassa','write');
@@ -146,6 +149,7 @@ window.dg61SaveGroupLink=async()=>{
  if(dg61SavingGroupLink)return;
  const trip_id=$('dg61GroupTrip')?.value,input=$('dg61GroupUrl');
  if(!trip_id)return toast('Seleziona prima il viaggio o il BUS BIS.',false);
+ if(!uid())return toast('Sessione scaduta: accedi nuovamente al gestionale e riprova.',false);
  const url=dg61NormalizeGroupInvite(input?.value);
  if(!url){
   input?.focus();
