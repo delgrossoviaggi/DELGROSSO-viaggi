@@ -278,11 +278,13 @@ async function archiveConfirmation(){
  }catch(checkError){console.warn('Verifica PDF esistente non disponibile',checkError)}
  throw issueError;
 }
-msg.innerHTML=`<strong>Prenotazione registrata correttamente.</strong><br>La conferma PDF è disponibile per il download; l’invio via email non è ancora garantito.<br>Posti: ${esc(bookedSeats.join(', '))}<br><span id="receiptStatus">Generazione conferma PDF in corso…</span><br><a id="downloadReceipt" class="btn btn-blue" style="margin-top:10px" aria-disabled="true">📄 Preparo il PDF…</a>`;
+msg.innerHTML=`<strong>Prenotazione registrata correttamente.</strong><br>Codice prenotazione: <strong>${esc(receiptData.riferimento)}</strong><br>La conferma PDF è disponibile per il download; l’invio via email non è ancora garantito.<br>Posti: ${esc(bookedSeats.join(', '))}<br><span id="receiptStatus">Generazione conferma PDF in corso…</span><br><a id="downloadReceipt" class="btn btn-blue" style="margin-top:10px" aria-disabled="true">📄 Preparo il PDF…</a>`;
 const downloadBtn=document.querySelector('#downloadReceipt'),receiptStatus=document.querySelector('#receiptStatus');
+let customerPdfReady=false;
 try{
  const blob=await confirmationPdf;
  const url=URL.createObjectURL(blob);
+ customerPdfReady=true;
  downloadBtn.href=url;
  downloadBtn.download='conferma-'+(receiptData.riferimento||'prenotazione')+'.pdf';
  downloadBtn.target='_blank';
@@ -300,19 +302,42 @@ try{
 const archiveStatus=document.createElement('p');
 archiveStatus.style.fontSize='13px';
 archiveStatus.setAttribute('role','status');
-archiveStatus.textContent='Archiviazione della conferma in corso…';
 msg.appendChild(archiveStatus);
-try{
- const archived=await archiveConfirmation();
- archiveStatus.textContent=archived.alreadyArchived
-  ?'Conferma già presente nell’archivio. Lo stato email va verificato dal gestionale.'
-  :archived.emailSent
-   ?'Conferma archiviata. Invio email accettato dal server; verifica la consegna nella casella.'
-   :'Conferma archiviata. Email non confermata: DELGROSSO potrà verificare l’invio dal gestionale.';
-}catch(archiveError){
- console.error('Archiviazione conferma',archiveError);
- archiveStatus.textContent='Prenotazione registrata, ma archiviazione PDF non verificata. Apri e salva la conferma disponibile, poi contatta DELGROSSO.';
+// A retry only reuses the existing booking token and the original PDF.
+// It never submits another booking or changes seats/payments.
+const retryArchiveButton=document.createElement('button');
+retryArchiveButton.type='button';
+retryArchiveButton.className='btn btn-blue';
+retryArchiveButton.hidden=true;
+retryArchiveButton.style.marginTop='8px';
+retryArchiveButton.textContent='↻ Riprova il salvataggio del PDF';
+msg.appendChild(retryArchiveButton);
+let archiving=false;
+async function tryArchiveWithoutBooking(){
+ if(archiving)return;
+ archiving=true;
+ retryArchiveButton.disabled=true;
+ retryArchiveButton.hidden=true;
+ archiveStatus.textContent='Verifica e salvataggio della conferma in corso…';
+ try{
+  const archived=await archiveConfirmation();
+  archiveStatus.textContent=archived.alreadyArchived
+   ?'Conferma già presente nell’archivio. Lo stato email va verificato dal gestionale.'
+   :archived.emailSent
+    ?'Conferma archiviata. Invio email accettato dal server; verifica la consegna nella casella.'
+    :'Conferma archiviata. Email non confermata: DELGROSSO potrà verificare l’invio dal gestionale.';
+ }catch(archiveError){
+  console.error('Archiviazione conferma',archiveError);
+  archiveStatus.textContent='La prenotazione è confermata, ma il salvataggio online del PDF non è verificato. Puoi riprovare qui, senza registrare una seconda prenotazione.';
+  retryArchiveButton.hidden=false;
+ }finally{
+  archiving=false;
+  retryArchiveButton.disabled=false;
+ }
 }
+retryArchiveButton.addEventListener('click',()=>{void tryArchiveWithoutBooking()});
+if(customerPdfReady)await tryArchiveWithoutBooking();
+else archiveStatus.textContent='Conferma prenotazione registrata. Il PDF non è stato generato: comunica il codice a DELGROSSO per ricevere il documento.';
 selected=[];form.querySelectorAll('input,textarea').forEach(x=>x.value='');try{await load()}catch(refreshError){console.warn('Ricaricamento posti non riuscito',refreshError)}}catch(err){console.error(err);if(bookingConfirmed){msg.className='notice success';msg.textContent='Prenotazione registrata. La conferma PDF non è disponibile al momento: contattaci per riceverla.'}else{msg.className='notice error';msg.textContent=(err?.message||'Non è stato possibile completare la prenotazione.'); if(bookingRequested&&/fetch|network|rete|tempo|collegamento/i.test(String(err?.message||''))){msg.innerHTML='<strong>Collegamento momentaneamente instabile.</strong><br>Non possiamo verificare l&#39;esito della richiesta. Prima di riprovare, contatta DELGROSSO con nome, viaggio e posti scelti: controlleremo se la prenotazione è già registrata.'}}}finally{sel.disabled=false;seats.style.pointerEvents='';submit.disabled=bookingConfirmed||Boolean(current&&gestTripIsSoldOut(current));submit.textContent=bookingConfirmed?'Prenotazione registrata':submit.disabled?'SOLD OUT':'Invia prenotazione'}}
 })();
 </script>
