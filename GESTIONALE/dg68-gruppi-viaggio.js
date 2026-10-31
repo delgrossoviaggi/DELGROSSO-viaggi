@@ -141,7 +141,20 @@ function attach(){
  $('dg68CopyRoster')?.addEventListener('click',()=>exportList(false));
  $('dg68Refresh')?.addEventListener('click',async()=>{renderNotifications();renderRoster();await consentRefresh(true)});
 }
-function update(){if(!getState()||!$('page-whatsapp'))return;attach();renderNotifications();renderRoster();void consentRefresh(false)}
+let renderQueued=false;
+function update(){
+ if(!getState()||!$('page-whatsapp'))return;
+ attach();
+ // Skip costly DOM rebuilding while another management page is open.
+ if(!$('page-whatsapp').classList.contains('active'))return;
+ if(renderQueued)return;
+ renderQueued=true;
+ requestAnimationFrame(()=>{
+  renderQueued=false;
+  if(!$('page-whatsapp')?.classList.contains('active'))return;
+  renderNotifications();renderRoster();void consentRefresh(false);
+ });
+}
 // Entrando nel Centro WhatsApp leggiamo lo stato già caricato da Supabase.
 const prior=window.dg61RenderWhatsApp;
 if(typeof prior==='function')window.dg61RenderWhatsApp=function(){const result=prior.apply(this,arguments);update();return result};

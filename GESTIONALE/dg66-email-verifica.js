@@ -39,7 +39,9 @@ window.dg66RefreshEmail=function(){fill();const type=$('dg66Kind')?.value||'book
  const err=type==='booking'?row.confirmation_email_error:row.receipt_email_error;
  box.innerHTML='<b>Destinatario:</b> '+esc(b?.email||'mancante')+' · <b>PDF:</b> '+(hasPdf?'archiviato':'da generare')+' · <b>Invio:</b> '+(sent?'segnato come inviato':'non verificato')+(err?'<div style="color:#a12">Errore: '+esc(err).slice(0,200)+'</div>':'')+'<p style="font-size:12px">Un invio già tentato non viene ripetuto automaticamente; il reinvio richiede un clic e un PDF esistente.</p>';
 };
+let emailSending=false;
 window.dg66ResendEmail=async function(){
+ if(emailSending)return;
  const kind=$('dg66Kind')?.value||'booking',id=$('dg66Target')?.value;
  const p=payList().find(x=>x.id===id),b=kind==='booking'?findBooking(id):findBooking(p?.prenotazione_id),r=kind==='booking'?b:p;
  if(!r||!b)return alert('Seleziona un documento.');
@@ -48,6 +50,9 @@ window.dg66ResendEmail=async function(){
  if(!path)return alert('PDF non archiviato: genera prima la conferma o la ricevuta reale dal gestionale.');
  if(!confirm('Inviare nuovamente il documento già archiviato a '+b.email+'?'))return;
  const box=$('dg66EmailState');if(box)box.textContent='Invio in corso...';
+ emailSending=true;
+ const resendButton=$('dg66EmailPanel')?.querySelector('button[onclick="dg66ResendEmail()"]');
+ if(resendButton)resendButton.disabled=true;
  try{
   if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')throw Error('Sessione gestionale non disponibile');
   const endpoint=kind==='booking'?'send-booking-confirmation':'send-payment-receipt';
@@ -57,8 +62,21 @@ window.dg66ResendEmail=async function(){
   // Refresh underlying data only on explicit action.
   if(typeof loadAll==='function')await loadAll(true);
  }catch(e){if(box)box.textContent='⚠ Invio non riuscito: '+(e.message||String(e));}
+ finally{emailSending=false;if(resendButton)resendButton.disabled=false;}
 };
 const original=window.dg61RenderWhatsApp;
 if(typeof original==='function')window.dg61RenderWhatsApp=function(){original.apply(this,arguments);mount()};
-let count=0;const timer=setInterval(()=>{mount();if(++count>12)clearInterval(timer)},500);
+function initializeEmailPanel(){
+ mount();
+ if($('dg66EmailPanel'))return;
+ // Observe lazy-loaded WhatsApp panel without polling on mobile devices.
+ const observer=new MutationObserver(()=>{
+  mount();
+  if($('dg66EmailPanel'))observer.disconnect();
+ });
+ observer.observe(document.body,{childList:true,subtree:true});
+ window.addEventListener('pagehide',()=>observer.disconnect(),{once:true});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeEmailPanel,{once:true});
+else initializeEmailPanel();
 })();
