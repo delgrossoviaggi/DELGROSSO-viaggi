@@ -1,0 +1,27 @@
+name: Booking PDF smoke tests
+on:
+  pull_request:
+    paths:
+      - 'js/ricevuta.js'
+      - 'tests/pdf-smoke.mjs'
+      - '.github/workflows/pdf-smoke.yml'
+  push:
+    branches:
+      - main
+      - 'fix/**'
+    paths:
+      - 'js/ricevuta.js'
+      - 'tests/pdf-smoke.mjs'
+      - '.github/workflows/pdf-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  pdf-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate booking PDF
+        run: node tests/pdf-smoke.mjs
