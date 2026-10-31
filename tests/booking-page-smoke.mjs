@@ -8,6 +8,11 @@ const bridge=read('js/gestionale.js');
 const server=read('supabase/functions/send-booking-confirmation/index.ts');
 const siteBridge=read('supabase/functions/gestionale-bridge/index.ts');
 const capacitySql=read('supabase/patches/guard_public_booking_capacity.sql');
+const concurrentSql=read('supabase/patches/idempotent_public_booking_under_concurrency.sql');
+assert.equal((concurrentSql.match(/if v_request_id is not null then/g)||[]).length,2,'Concurrent booking must recheck idempotency after lock');
+assert.ok(concurrentSql.indexOf('pg_advisory_xact_lock')<concurrentSql.lastIndexOf('if v_request_id is not null then'),'Replay check must happen after lock');
+assert.ok(concurrentSql.includes('v_occupied + v_posti'),'Capacity protection must remain');
+assert.ok(concurrentSql.includes('Numero di posto non valido'),'Seat protection must remain');
 assert.ok(capacitySql.includes('v_occupied + v_posti'),'Database passenger capacity guard must be versioned');
 assert.ok(capacitySql.includes('cardinality(string_to_array(p.posti_selezionati'),'Legacy passenger count guard must be present');
 
