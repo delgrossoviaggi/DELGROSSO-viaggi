@@ -6,6 +6,9 @@ const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const html=read('prenota.html');
 const bridge=read('js/gestionale.js');
 const server=read('supabase/functions/send-booking-confirmation/index.ts');
+const capacitySql=read('supabase/patches/guard_public_booking_capacity.sql');
+assert.ok(capacitySql.includes('v_occupied + v_posti'),'Database passenger capacity guard must be versioned');
+assert.ok(capacitySql.includes('cardinality(string_to_array(p.posti_selezionati'),'Legacy passenger count guard must be present');
 
 let count=0;
 for(const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
