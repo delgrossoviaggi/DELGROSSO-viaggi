@@ -9,7 +9,7 @@ const gestEsc = s => String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 
 async function gestBridge(action, payload={}){
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),18000);
+  const timeout=setTimeout(()=>controller.abort(),action==='archive-booking'?55000:18000);
   let res;
   try{
     res = await fetch(GESTIONALE_BRIDGE, {
