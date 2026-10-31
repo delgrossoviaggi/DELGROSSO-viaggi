@@ -223,9 +223,11 @@ archiveStatus.textContent='Archiviazione della conferma in corso…';
 msg.appendChild(archiveStatus);
 try{
  const archived=await archiveConfirmation();
- archiveStatus.textContent=archived.emailSent
-  ?'Conferma archiviata. Invio email accettato dal server; verifica la consegna nella casella.'
-  :'Conferma archiviata. Email non confermata: DELGROSSO potrà verificare l’invio dal gestionale.';
+ archiveStatus.textContent=archived.alreadyArchived
+  ?'Conferma già presente nell’archivio. Lo stato email va verificato dal gestionale.'
+  :archived.emailSent
+   ?'Conferma archiviata. Invio email accettato dal server; verifica la consegna nella casella.'
+   :'Conferma archiviata. Email non confermata: DELGROSSO potrà verificare l’invio dal gestionale.';
 }catch(archiveError){
  console.error('Archiviazione conferma',archiveError);
  archiveStatus.textContent='Prenotazione registrata, ma archiviazione PDF non verificata. Conserva la conferma scaricata e contatta DELGROSSO.';
