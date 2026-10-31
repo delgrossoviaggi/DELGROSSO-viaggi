@@ -227,12 +227,12 @@ Deno.serve(async(req)=>{
       // Public bookings use a per-booking token; do not accept arbitrary customer details.
       const {bookingId,token,pdfBase64}=payload||{};
       if(!bookingId||!token||!pdfBase64)return response({error:"Prenotazione, token e PDF sono obbligatori."},400);
-      const archived=await callGestionaleWithRetry(`/functions/v1/send-booking-confirmation`,{
+      const archived=await callGestionale(`/functions/v1/send-booking-confirmation`,{
         action:"issue",
         bookingId:String(bookingId),
         token:String(token),
         pdfBase64:String(pdfBase64)
-      });
+      },40000);
       return response(archived);
     }
     if(action==="booking-pdf-url"){
