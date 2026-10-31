@@ -9,7 +9,9 @@
       .replace(/[òóôöõ]/gi,'o').replace(/[ùúûü]/gi,'u').replace(/[ç]/gi,'c')
       .replace(/[ÀÁÂÄÃÅ]/g,'A').replace(/[ÈÉÊË]/g,'E').replace(/[ÌÍÎÏ]/g,'I')
       .replace(/[ÒÓÔÖÕ]/g,'O').replace(/[ÙÚÛÜ]/g,'U').replace(/[Ç]/g,'C')
-      .replace(/€/g,'EUR');
+      .replace(/€/g,'EUR')
+      .replace(/[–—−]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
+      .replace(/[^\x20-\x7E]/g,' ');
   }
   function pdfEscape(value){
     return latinText(value).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
@@ -20,6 +22,7 @@
     const out=new Uint8Array(total); let off=0; arr.forEach(a=>{out.set(a,off);off+=a.length}); return out;
   }
   function jpegInfo(bytes){
+    if(bytes.length<64||bytes[0]!==0xFF||bytes[1]!==0xD8)return null;
     let i=2;
     while(i<bytes.length-9){
       if(bytes[i]!==0xFF){i++;continue}
@@ -28,16 +31,18 @@
       if(i+1>=bytes.length) break;
       const len=(bytes[i]<<8)|bytes[i+1];
       if(marker>=0xC0&&marker<=0xC3){
-        return {height:(bytes[i+3]<<8)|bytes[i+4],width:(bytes[i+5]<<8)|bytes[i+6]};
+        const height=(bytes[i+3]<<8)|bytes[i+4],width=(bytes[i+5]<<8)|bytes[i+6];
+        return width>0&&height>0&&bytes[i+7]===3?{height,width}:null;
       }
       i+=len;
     }
-    return {width:1,height:1};
+    return null;
   }
   async function loadLogo(){
     try{
       const r=await fetch('assets/logo.JPEG',{cache:'no-store'}); if(!r.ok) return null;
-      const b=new Uint8Array(await r.arrayBuffer()); return {bytes:b,...jpegInfo(b)};
+      const b=new Uint8Array(await r.arrayBuffer()),info=jpegInfo(b);
+      return info?{bytes:b,...info}:null;
     }catch(e){return null}
   }
   function buildPdf(data,logo){
@@ -46,6 +51,7 @@
     const catalog=add('<< /Type /Catalog /Pages 2 0 R >>');
     const pages=2;
     const font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    const fontBold=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
     let imageId=null;
     if(logo){
       imageId=add({dict:`<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logo.bytes.length} >>`,stream:logo.bytes});
@@ -57,7 +63,7 @@
       const maxChars=Math.max(8,Math.floor(available/(size*0.56)));
       const normalized=latinText(text).replace(/[\r\n\t]+/g,' ').trim();
       const label=normalized.length>maxChars?normalized.slice(0,maxChars-3)+'...':normalized;
-      content.push(`BT /F1 ${size} Tf 0 Tr 1 0 0 1 ${x} ${y} Tm (${pdfEscape(label)}) Tj ET`);
+      content.push(`BT /F${bold?'2':'1'} ${size} Tf 0 Tr 1 0 0 1 ${x} ${y} Tm (${pdfEscape(label)}) Tj ET`);
     };
     content.push('q');
     if(imageId){
@@ -80,12 +86,13 @@
     line(50,330,'Prezzo per persona',9,false); line(50,310,`EUR ${data.prezzo.toFixed(2)}`,12,true);
     line(50,265,'TOTALE VIAGGIO',10,false); line(50,235,`EUR ${data.totale.toFixed(2)}`,25,true);
     content.push('0.94 0.97 1 rg 50 175 495 42 re f');
+    content.push('0 0 0 rg');
     line(65,198,'Conserva questo documento come conferma della prenotazione.',10,true);
     line(50,142,'La conferma non costituisce ricevuta di pagamento.',9,false);
     line(50,105,'DELGROSSO Viaggi & Limousine Bus',9,false);
     line(50,88,'Conferma generata automaticamente dal sito ufficiale.',8,false);
     const stream=content.join('\n');
-    const resources=`<< /Font << /F1 ${font} 0 R >>${imageId?` /XObject << /Im1 ${imageId} 0 R >>`:''} >>`;
+    const resources=`<< /Font << /F1 ${font} 0 R /F2 ${fontBold} 0 R >>${imageId?` /XObject << /Im1 ${imageId} 0 R >>`:''} >>`;
     const contentId=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
     const pageId=add(`<< /Type /Page /Parent ${pages} 0 R /MediaBox [0 0 ${W} ${H}] /Resources ${resources} /Contents ${contentId} 0 R >>`);
     // Rebuild Pages now that page id is known.
