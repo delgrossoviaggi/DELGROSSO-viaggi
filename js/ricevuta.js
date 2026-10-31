@@ -40,7 +40,7 @@
   }
   async function loadLogo(){
     try{
-      const r=await fetch('assets/logo.JPEG',{cache:'no-store'}); if(!r.ok) return null;
+      const r=await fetch('/assets/logo.JPEG',{cache:'no-store'}); if(!r.ok) return null;
       const b=new Uint8Array(await r.arrayBuffer()),info=jpegInfo(b);
       return info?{bytes:b,...info}:null;
     }catch(e){return null}
