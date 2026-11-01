@@ -4,11 +4,17 @@ on:
     branches: [main]
     paths:
       - 'GESTIONALE/dg61-quote-whatsapp.js'
+      - 'GESTIONALE/dg68-gruppi-viaggio.js'
+      - 'GESTIONALE/index.html'
+      - 'tests/whatsapp-consent-invite-smoke.mjs'
       - 'tests/whatsapp-group-invite-smoke.mjs'
       - '.github/workflows/whatsapp-groups.yml'
   pull_request:
     paths:
       - 'GESTIONALE/dg61-quote-whatsapp.js'
+      - 'GESTIONALE/dg68-gruppi-viaggio.js'
+      - 'GESTIONALE/index.html'
+      - 'tests/whatsapp-consent-invite-smoke.mjs'
       - 'tests/whatsapp-group-invite-smoke.mjs'
       - '.github/workflows/whatsapp-groups.yml'
 permissions:
@@ -23,3 +29,5 @@ jobs:
           node-version: '22'
       - name: Test group link validation and saving
         run: node tests/whatsapp-group-invite-smoke.mjs
+      - name: Test explicit group consent and manual invitation
+        run: node tests/whatsapp-consent-invite-smoke.mjs
