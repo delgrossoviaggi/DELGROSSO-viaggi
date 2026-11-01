@@ -171,6 +171,7 @@ async function recordGroupConsent(id,tel){
   consents.add(booking.id+'|'+id);
   lastConsentRead=Date.now();
   renderRoster();
+  try{window.dg63Render?.()}catch(e){console.warn('Vista WhatsApp precedente non aggiornata',e)}
   show('Consenso registrato. Il pulsante “Invita” è ora disponibile per questo prenotato; nessun messaggio è stato inviato.');
  }catch(e){show('Consenso non salvato: '+(e?.message||'verifica i permessi operatore'),true)}
  finally{savingGroupConsent=false}
@@ -205,5 +206,16 @@ function update(){if(!getState()||!$('page-whatsapp'))return;attach();renderNoti
 const prior=window.dg61RenderWhatsApp;
 if(typeof prior==='function')window.dg61RenderWhatsApp=function(){const result=prior.apply(this,arguments);update();return result};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{attach();if($('page-whatsapp')?.classList.contains('active'))update()},{once:true});else{attach();if($('page-whatsapp')?.classList.contains('active'))update()}
+window.dg68HasGroupConsent=(bookingId,tripId)=>consentsLoaded&&consents.has(String(bookingId)+'|'+String(tripId));
+window.dg68FocusGroupConsent=(bookingId,tripId)=>{
+ const selected=getTrip(tripId),root=$('dg68Root'),bus=$('dg68Bus');
+ if(!selected||!root||!bus)return show('Sezione Gruppi viaggio non disponibile.',true);
+ root.value=rootId(selected);
+ renderRoster();
+ bus.value=tripId;
+ renderRoster();
+ $('dg68Roster')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+ show('Seleziona il prenotato: usa “Chiedi consenso”, poi “Registra consenso” solo dopo un SI reale. Il pulsante Invita si attiva successivamente.');
+};
 window.dg68RefreshTripGroups=update;
 })();
