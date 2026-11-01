@@ -41,7 +41,7 @@ function harness(apiOverride,authenticated=true){
   getInvite:()=>''
  };
  vm.runInNewContext(code,context);
- return {normalize:context.window.dg61NormalizeGroupInvite,save:context.window.dg61SaveGroupLink,inputs,button,messages,requests,state,reloads:()=>reloads};
+ return {normalize:context.window.dg61NormalizeGroupInvite,save:context.window.dg61SaveGroupLink,render:context.window.dg61RenderGroupLink,inputs,button,messages,requests,state,reloads:()=>reloads};
 }
 const norm=harness().normalize;
 for(const raw of [
@@ -55,6 +55,14 @@ for(const raw of [
 ])assert.equal(norm(raw),valid,'Failed to normalize valid WhatsApp link');
 for(const raw of ['https://evilchat.whatsapp.com/'+id,'https://chat.whatsapp.com.evil.tld/'+id,'https://chat.whatsapp.com/short','niente link'])assert.equal(norm(raw),'','Must reject malformed/malicious links');
 
+// Background synchronization must not clear a link pasted on iPhone.
+const draft=harness();
+draft.inputs.dg61GroupUrl.value='';
+draft.render();
+draft.inputs.dg61GroupUrl.value='Testo invito '+valid;
+draft.render();
+assert.equal(draft.inputs.dg61GroupUrl.value,'Testo invito '+valid,'Background sync erased the pasted invite');
+
 const good=harness();
 good.inputs.dg61GroupUrl.value='Invito al gruppo: '+valid+'?mode=ac_t';
 await good.save();
@@ -66,6 +74,17 @@ assert.equal(good.state.whatsappInvites.length,1,'Saved invite must appear witho
 assert.equal(good.reloads(),1);
 assert.equal(good.button.disabled,false);
 assert.ok(good.messages.some(x=>x.message.includes('salvato correttamente')),'Show success after server confirms');
+
+const noPostBody=harness(async(config,n)=>{
+ if(n===1)return [];
+ return [{trip_id:trip,invite_url:valid,updated_by:trip}];
+});
+noPostBody.inputs.dg61GroupUrl.value=valid;
+await noPostBody.save();
+assert.equal(noPostBody.requests.length,2,'No POST representation must be verified with a GET');
+assert.ok(noPostBody.requests[1].qs.startsWith('select=trip_id,invite_url,updated_by&trip_id=eq.'));
+assert.equal(noPostBody.state.whatsappInvites.length,1,'Saved database row should confirm the invite');
+assert.ok(noPostBody.messages.some(x=>x.message.includes('salvato correttamente')));
 
 const rejected=harness(async()=>[]);
 rejected.inputs.dg61GroupUrl.value=valid;
