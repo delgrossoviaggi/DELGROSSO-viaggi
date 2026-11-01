@@ -138,10 +138,10 @@ function manualChat(tel,message){
 function requestGroupConsent(id,tel){
  const v=getTrip(id),person=v?perBus(v).people.find(p=>p.tel===tel):null;
  if(!person)return show('Prenotato o numero di telefono non disponibile.',true);
- const message='DELGROSSO VIAGGI & LIMOUSINE BUS\\n\\nGentile '+person.names[0]+
+ const message='DELGROSSO VIAGGI & LIMOUSINE BUS\n\nGentile '+person.names[0]+
   ', per gli aggiornamenti organizzativi del viaggio '+tripLabel(v)+
-  ' vorremmo inviarti il link al gruppo WhatsApp del tuo autobus. La partecipazione è facoltativa e gli altri membri potranno vedere il tuo numero di telefono.\\n\\n'+
-  'Se desideri ricevere il link, rispondi SI. Altrimenti rispondi NO: riceverai le informazioni del viaggio tramite gli altri canali concordati.\\n\\nDELGROSSO VIAGGI';
+  ' vorremmo inviarti il link al gruppo WhatsApp del tuo autobus. La partecipazione è facoltativa e gli altri membri potranno vedere il tuo numero di telefono.\n\n'+
+  'Se desideri ricevere il link, rispondi SI. Altrimenti rispondi NO: riceverai le informazioni del viaggio tramite gli altri canali concordati.\n\nDELGROSSO VIAGGI';
  manualChat(tel,message);
  show('Chat aperta per chiedere il consenso. Invia tu il messaggio da WhatsApp Business; registra il consenso solo dopo una risposta SI.');
 }
