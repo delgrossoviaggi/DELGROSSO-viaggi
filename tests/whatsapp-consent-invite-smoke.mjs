@@ -75,4 +75,35 @@ trigger({dg68Invite:trip+'|'+phone});
 assert.equal(clicks.length,2,'Invitation opens one manual WhatsApp chat');
 assert.ok(decodeURIComponent(clicks[1]).includes(inviteUrl),'Final invitation must include the correct bus invite URL');
 assert.ok(source.includes("if(!person||!consentsLoaded||!person.bookings.some"),'Invite consent guard must remain');
+
+const legacy=readFileSync(new URL('../GESTIONALE/dg63-whatsapp-gratis.js',import.meta.url),'utf8');
+new vm.Script(legacy,{filename:'dg63-whatsapp-gratis.js'});
+assert.ok(legacy.includes("function hasGroupConsent(b)"),'Legacy WhatsApp view must check trip-specific consent');
+assert.ok(legacy.includes("'Gestisci consenso'"),'Legacy list must guide operator instead of showing a disabled invitation');
+assert.ok(legacy.includes("(invite&&!hasGroupConsent(b))"),'Invitation preview must check group consent');
+const legacyStart=legacy.indexOf('window.dg63InviteBooking=id=>{');
+const legacyEnd=legacy.indexOf('\nwindow.dg63CopyGroupTitle=',legacyStart);
+assert.ok(legacyStart>=0&&legacyEnd>legacyStart,'Legacy invitation handler not found');
+async function runLegacyInvitation(consent){
+ let focused=0,opened=0;
+ const w={
+  dg68FocusGroupConsent(id,tid){assert.equal(id,booking);assert.equal(tid,trip);focused++},
+  dg63SelectBooking(){},
+  dg63OpenChat(){opened++},
+  toast(){}
+ };
+ const b={id:booking,viaggio_id:trip};
+ vm.runInNewContext(legacy.slice(legacyStart,legacyEnd),
+  {window:w,booking:()=>b,hasGroupConsent:()=>consent,state:{whatsappInvites:[{trip_id:trip,invite_url:inviteUrl}]}});
+ w.dg63InviteBooking(booking);
+ return {focused,opened};
+}
+const before=await runLegacyInvitation(false);
+assert.equal(before.focused,1,'Legacy view must open consent management before invitation');
+assert.equal(before.opened,0,'Legacy view cannot send invitation without consent');
+const after=await runLegacyInvitation(true);
+assert.equal(after.focused,0);
+assert.equal(after.opened,1,'Legacy view should enable manual invitation after consent');
+console.log('Old and new WhatsApp invitation views are consistent');
+
 console.log('Napoli WhatsApp manual consent and invitation workflow passed');
