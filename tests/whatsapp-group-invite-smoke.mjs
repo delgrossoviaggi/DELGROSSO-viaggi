@@ -89,7 +89,7 @@ assert.ok(noPostBody.messages.some(x=>x.message.includes('salvato correttamente'
 const rejected=harness(async()=>[]);
 rejected.inputs.dg61GroupUrl.value=valid;
 await rejected.save();
-assert.equal(rejected.requests.length,1);
+assert.equal(rejected.requests.length,2,'Missing POST representation must trigger a read-back before error');
 assert.equal(rejected.state.whatsappInvites.length,0,'No unconfirmed URL should enter local state');
 assert.ok(!rejected.messages.some(x=>x.message.includes('salvato correttamente')),'Never show a false success');
 
