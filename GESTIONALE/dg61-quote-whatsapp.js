@@ -143,13 +143,24 @@ function dg61NormalizeGroupInvite(raw){
  return '';
 }
 window.dg61NormalizeGroupInvite=dg61NormalizeGroupInvite;
-window.dg61RenderGroupLink=()=>{if($('dg61GroupUrl'))$('dg61GroupUrl').value=getInvite($('dg61GroupTrip')?.value)};
+// Do not erase a pasted but unsaved invite during automatic background sync.
+let dg61GroupLinkTrip='';
+let dg61GroupLinkLastShown='';
+window.dg61RenderGroupLink=()=>{
+ const input=$('dg61GroupUrl'),trip=String($('dg61GroupTrip')?.value||'');
+ if(!input)return;
+ if(trip===dg61GroupLinkTrip&&input.value!==dg61GroupLinkLastShown)return;
+ dg61GroupLinkTrip=trip;
+ dg61GroupLinkLastShown=getInvite(trip);
+ input.value=dg61GroupLinkLastShown;
+};
 let dg61SavingGroupLink=false;
 window.dg61SaveGroupLink=async()=>{
  if(dg61SavingGroupLink)return;
  const trip_id=$('dg61GroupTrip')?.value,input=$('dg61GroupUrl');
  if(!trip_id)return toast('Seleziona prima il viaggio o il BUS BIS.',false);
- if(!uid())return toast('Sessione scaduta: accedi nuovamente al gestionale e riprova.',false);
+ const operatorId=uid();
+ if(!operatorId)return toast('Sessione scaduta: accedi nuovamente al gestionale e riprova.',false);
  const url=dg61NormalizeGroupInvite(input?.value);
  if(!url){
   input?.focus();
@@ -162,20 +173,37 @@ window.dg61SaveGroupLink=async()=>{
  try{
   const saved=await api('dg_whatsapp_trip_invites_v61','on_conflict=trip_id',{
    method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},
-   body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:uid()}
+   body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:operatorId}
   });
-  // The previous implementation declared success even if no row was returned.
-  const confirmed=Array.isArray(saved)?saved.find(x=>x.trip_id===trip_id&&x.invite_url===url):null;
-  if(!confirmed)throw new Error('Il server non ha confermato il link. Verifica i permessi del tuo accesso.');
+  // An upsert may succeed with no representation. Verify that the row exists
+  // before deciding whether a retry or an operator permissions check is needed.
+  let confirmed=Array.isArray(saved)?saved.find(x=>String(x.trip_id)===String(trip_id)&&x.invite_url===url):null;
+  if(!confirmed){
+   const readBack=await api('dg_whatsapp_trip_invites_v61',
+    'select=trip_id,invite_url,updated_by&trip_id=eq.'+encodeURIComponent(trip_id),
+    {noCache:true});
+   confirmed=Array.isArray(readBack)?readBack.find(x=>String(x.trip_id)===String(trip_id)&&x.invite_url===url):null;
+  }
+  if(!confirmed)throw new Error('Supabase non ha confermato il salvataggio. Controlla i permessi WhatsApp del tuo operatore.');
   const invites=state.whatsappInvites||[];
   const idx=invites.findIndex(x=>x.trip_id===trip_id);
   if(idx>=0)invites[idx]=confirmed;else invites.push(confirmed);
   state.whatsappInvites=invites;
+  dg61GroupLinkTrip=String(trip_id);
+  dg61GroupLinkLastShown=url;
   if(typeof window.dg68RenderGroups==='function')window.dg68RenderGroups();
   toast('Link del gruppo WhatsApp salvato correttamente.');
   try{await loadAll(true)}catch(refreshError){console.warn('Aggiornamento elenco gruppi non riuscito',refreshError)}
  }catch(e){
-  toast('Non riesco a salvare il link: '+(e?.message||'controlla la connessione e riprova.'),false);
+  const msg=String(e?.message||'controlla la connessione e riprova.');
+  const explanation=/HTTP 401|JWT expired|invalid JWT|invalid claim/i.test(msg)
+   ?'Sessione scaduta: esci e accedi nuovamente al gestionale.'
+   :/HTTP 403|permission denied|42501|row-level security|violates row-level security|non ha confermato il salvataggio/i.test(msg)
+    ?'Supabase non autorizza il salvataggio: controllare permessi operatore e sessione. '+msg
+    :/HTTP 409|unique constraint|23505/i.test(msg)
+     ?'Un link risulta già associato a questo bus. Ricarica il gestionale e riprova. '+msg
+     :'Errore di salvataggio: '+msg;
+  toast(explanation,false);
  }finally{
   dg61SavingGroupLink=false;
   if(saveButton)saveButton.disabled=false;
