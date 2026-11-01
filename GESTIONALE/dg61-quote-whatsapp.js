@@ -171,6 +171,13 @@ window.dg61SaveGroupLink=async()=>{
  dg61SavingGroupLink=true;
  if(saveButton)saveButton.disabled=true;
  try{
+  // Cached mobile screens can outlive the Supabase Auth session.
+  // Verify the server-side session before trying to write the group link.
+  try{await rpc('dg_security_status',{});}
+  catch(sessionError){
+   toast('La sessione del gestionale non è più valida. Esci e accedi nuovamente, poi salva il link.',false);
+   return;
+  }
   const saved=await api('dg_whatsapp_trip_invites_v61','on_conflict=trip_id',{
    method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},
    body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:operatorId}
