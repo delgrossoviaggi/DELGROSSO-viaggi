@@ -5,6 +5,7 @@ on:
     paths:
       - 'GESTIONALE/dg61-quote-whatsapp.js'
       - 'GESTIONALE/dg68-gruppi-viaggio.js'
+      - 'GESTIONALE/dg63-whatsapp-gratis.js'
       - 'GESTIONALE/index.html'
       - 'tests/whatsapp-consent-invite-smoke.mjs'
       - 'tests/whatsapp-group-invite-smoke.mjs'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'GESTIONALE/dg61-quote-whatsapp.js'
       - 'GESTIONALE/dg68-gruppi-viaggio.js'
+      - 'GESTIONALE/dg63-whatsapp-gratis.js'
       - 'GESTIONALE/index.html'
       - 'tests/whatsapp-consent-invite-smoke.mjs'
       - 'tests/whatsapp-group-invite-smoke.mjs'
