@@ -21,6 +21,7 @@ const upcoming=v=>{if(!v||v.archiviato_at)return false;const d=dateValue(v.data_
 const canceled=b=>!!b.riserva_aziendale||/annull|cancel|storn/i.test(String(b.stato||''));
 function bookings(){return (state.prenotazioni||[]).filter(b=>!canceled(b)&&phone(b.telefono)&&upcoming(trip(b)));}
 function optedIn(b){return (state.whatsappOptins||[]).some(o=>!o.revoked_at&&phone(o.phone)===phone(b.telefono))}
+function hasGroupConsent(b){return !!b&&typeof window.dg68HasGroupConsent==='function'&&window.dg68HasGroupConsent(b.id,b.viaggio_id)}
 function payments(b){return (state.pagamenti||[]).filter(p=>p.prenotazione_id===b.id&&Number(p.importo)>0&&!/annull|rimbors|storn|failed|rifiutat/i.test(String(p.stato||'')+' '+String(p.tipo||''))).sort((a,b)=>String(b.data_pagamento||b.created_at||'').localeCompare(String(a.data_pagamento||a.created_at||'')))}
 function nameTrip(b){const v=trip(b);return String(v?.titolo||v?.destinazione||'Viaggio')}
 function item(b,label){return `<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${esc(nameTrip(b))} · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${label}</small></div><div class="dg63-item-buttons"><button class="btn btn-primary btn-sm" type="button" onclick="dg63SelectBooking('${b.id}','${label.includes('Acconto')?'deposit':label.includes('Saldo')?'balance':'confirmation'}')">Prepara</button></div></div>`}
@@ -49,7 +50,7 @@ function renderInviteRoster(){
  const persons=bookings().filter(b=>b.viaggio_id===id).sort((a,b)=>String(a.cliente||'').localeCompare(String(b.cliente||'')));
  const invite=(state.whatsappInvites||[]).find(i=>i.trip_id===id)?.invite_url||'';
  box.innerHTML='<div class="dg63-info">'+(t?'Prenotati con telefono per '+esc(t.titolo||t.destinazione||'il viaggio')+': <b>'+persons.length+'</b>':'Seleziona un viaggio.')+(invite?' · <b>Invito salvato</b>':' · <b>Prima crea il gruppo dall’app WhatsApp Business e salva il link.</b>')+'</div>'+
- (persons.length?persons.map(b=>`<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${Number(b.posti)||0} pax · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${optedIn(b)?'Consenso contatto registrato':'Consenso WhatsApp da verificare'}</small></div><button type="button" class="btn btn-secondary btn-sm" ${!invite||!optedIn(b)?'disabled title="Serve un link invito e il consenso registrato"':''} onclick="dg63InviteBooking('${b.id}')">Invita</button></div>`).join(''):'<div class="empty">Nessuna prenotazione attiva con telefono per questo viaggio.</div>');
+ (persons.length?persons.map(b=>`<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${Number(b.posti)||0} pax · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${hasGroupConsent(b)?'✓ Consenso specifico al gruppo registrato':'Consenso gruppo da richiedere o registrare'}</small></div><button type="button" class="btn btn-secondary btn-sm" onclick="dg63InviteBooking('${b.id}')">${invite&&hasGroupConsent(b)?'Invita':'Gestisci consenso'}</button></div>`).join(''):'<div class="empty">Nessuna prenotazione attiva con telefono per questo viaggio.</div>');
 }
 function defaultPreview(b,kind){
  if(!b)return '';
@@ -76,10 +77,10 @@ function updatePreview(){
  ta.value=defaultPreview(b,k);
  const send=$('dg63ManualSend'),receipt=k==='receipt',invite=k==='invitation',due=k==='deposit'||k==='balance';
  const moneyBlock=(k==='deposit'&&Number(b?.pagato||0)>0)||(k==='balance'&&Number(b?.saldo||0)<=0);
- const withoutConsent=(due||invite)&&b&&!optedIn(b);
+ const withoutConsent=b&&((due&&!optedIn(b))||(invite&&!hasGroupConsent(b)));
  const canSend=!!b&&!!phone(b.telefono)&&!!ta.value&&!moneyBlock&&!withoutConsent;
  if(send)send.disabled=!canSend;
- const info=$('dg63PreviewInfo');if(info){info.textContent=!b?'Seleziona una prenotazione.':withoutConsent?'Registra prima il consenso al contatto WhatsApp verificato.':moneyBlock?'La situazione contabile non giustifica questo promemoria. Verifica prima il pagamento.':receipt&&!ta.value?'Seleziona una ricevuta registrata, quindi apri e salva il PDF da allegare in WhatsApp.':invite&&!ta.value?'Nessun link d’invito salvato per questo viaggio.':k==='confirmation'&&!/conferm/i.test(String(b.stato||''))?'La prenotazione non risulta confermata: verrà indicata soltanto come richiesta registrata.':'Anteprima pronta: controlla i dati, poi premi Apri chat. Nessun messaggio viene inviato automaticamente.';info.className='statusline '+(canSend?'info':'warn')}
+ const info=$('dg63PreviewInfo');if(info){info.textContent=!b?'Seleziona una prenotazione.':withoutConsent?(invite?'Registra prima il consenso specifico al gruppo nel riquadro Gruppi viaggio.':'Registra prima il consenso al contatto WhatsApp verificato.'):moneyBlock?'La situazione contabile non giustifica questo promemoria. Verifica prima il pagamento.':receipt&&!ta.value?'Seleziona una ricevuta registrata, quindi apri e salva il PDF da allegare in WhatsApp.':invite&&!ta.value?'Nessun link d’invito salvato per questo viaggio.':k==='confirmation'&&!/conferm/i.test(String(b.stato||''))?'La prenotazione non risulta confermata: verrà indicata soltanto come richiesta registrata.':'Anteprima pronta: controlla i dati, poi premi Apri chat. Nessun messaggio viene inviato automaticamente.';info.className='statusline '+(canSend?'info':'warn')}
 }
 function afterRender(){renderQueue();renderReceipts();renderInviteRoster();updatePreview();renderRental();}
 window.dg63SelectBooking=(id,kind)=>{
@@ -112,9 +113,12 @@ window.dg63OpenReceipt=()=>{
  if(typeof window.go==='function')window.go('pagamenti');
 };
 window.dg63InviteBooking=id=>{
- const b=booking(id);if(!b||!optedIn(b))return window.toast?.('Consenso WhatsApp da verificare.',false);
+ const b=booking(id);if(!b)return window.toast?.('Prenotazione non disponibile.',false);
  const link=(state.whatsappInvites||[]).find(t=>t.trip_id===b.viaggio_id)?.invite_url;
- if(!link)return window.toast?.('Inserisci prima il link del gruppo.',false);
+ if(!hasGroupConsent(b)||!link){
+  if(typeof window.dg68FocusGroupConsent==='function')return window.dg68FocusGroupConsent(b.id,b.viaggio_id);
+  return window.toast?.('Apri Gruppi viaggio per chiedere e registrare il consenso specifico al gruppo.',false);
+ }
  window.dg63SelectBooking(id,'invitation');window.dg63OpenChat();
 };
 window.dg63CopyGroupTitle=async()=>{
