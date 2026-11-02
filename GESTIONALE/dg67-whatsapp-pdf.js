@@ -16,9 +16,26 @@ let requestSerial=0;
 let selected=null;
 let file=null;
 let fileName='';
+let storedPdfUrl='';
 const notice=(message,success)=>{const box=el('dg67State');if(box)box.textContent=message;if(success!=null&&typeof window.toast==='function')window.toast(message,success)};
 const fname=s=>String(s||'DELGROSSO_Documento.pdf').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120);
 function msg(){return el(selected?.kind==='booking'?'dg64BookingText':'dg64ReceiptText')?.value?.trim()||''}
+// Storage links are temporary and may open in Safari even when a browser fetch fails.
+// Only allow our own private receipts bucket, never arbitrary destinations.
+function trustedSignedUrl(raw){
+ try{
+  if(typeof SUPA_URL!=='string'||!SUPA_URL)return '';
+  const base=new URL(SUPA_URL),url=new URL(String(raw||''),base);
+  return url.protocol==='https:'&&url.origin===base.origin&&
+   url.pathname.startsWith('/storage/v1/object/sign/ricevute-prenotazioni/')&&
+   url.searchParams.has('token')?url.href:'';
+ }catch{return ''}
+}
+function openStoredPdf(){
+ if(!storedPdfUrl){notice('Collegamento PDF non disponibile. Riapri il documento dal gestionale.',false);return}
+ const a=document.createElement('a');a.href=storedPdfUrl;a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove();
+ notice('Documento archiviato aperto. Da Safari puoi salvarlo o condividerlo su WhatsApp Business; controlla il PDF prima dell’invio.');
+}
 function chat(){
  if(!selected)return;
  const tel=phone(selected.tel),message=msg();
@@ -57,10 +74,17 @@ async function fetchSigned(kind,id){
  return out;
 }
 async function prepare(kind,id,key){
+ storedPdfUrl='';
+ const original=el('dg67OpenStored');if(original)original.disabled=true;
  notice('Preparazione del documento PDF in corso…');
  try{
   const response=await fetchSigned(kind,id);
-  const r=await fetch(response.signedUrl,{cache:'no-store'});
+  if(key!==requestSerial||!modalActive())return;
+  storedPdfUrl=trustedSignedUrl(response.signedUrl);
+  if(!storedPdfUrl)throw Error('Collegamento archiviato non valido: verifica il server');
+  if(original)original.disabled=false;
+  // Signed URL is reusable for direct opening if iOS Safari blocks cross-origin fetch.
+  const r=await fetch(storedPdfUrl,{cache:'no-store'});
   if(!r.ok)throw Error('Documento non scaricabile (HTTP '+r.status+')');
   const blob=await r.blob();
   if(blob.size<600||blob.size>15*1024*1024)throw Error('Dimensione del documento non valida');
@@ -84,7 +108,13 @@ async function prepare(kind,id,key){
   notice('✅ PDF pronto: '+fileName+'. Nessun messaggio è stato inviato.');
  }catch(error){
   if(key!==requestSerial||!modalActive())return;
-  file=null;fileName='';notice('⚠️ PDF non disponibile: '+String(error.message||error)+'. Usa il pulsante originale “Apri PDF” o verifica il server.',false);
+  file=null;fileName='';
+  const reason=String(error?.message||error);
+  const detail=/load failed|failed to fetch|networkerror|network request failed/i.test(reason)
+   ?'Connessione al servizio documenti non riuscita.':reason;
+  notice(storedPdfUrl
+   ?'⚠️ Caricamento automatico non riuscito: '+detail+' Il documento è archiviato: premi “Apri PDF originale” per visualizzarlo e condividerlo da Safari.'
+   :'⚠️ PDF non caricato: '+detail+' Usa “Apri ricevuta PDF” o riaccedi al gestionale e riprova.',false);
  }
 }
 function preview(){
@@ -116,7 +146,7 @@ function desktop(){
 function panel(kind,id){
  requestSerial++;const serial=requestSerial;
  const b=kind==='booking'?booking(id):booking(payment(id)?.prenotazione_id);
- selected={kind,id,tel:b?.telefono};file=null;fileName='';
+ selected={kind,id,tel:b?.telefono};file=null;fileName='';storedPdfUrl='';
  const body=el('modalBody'),foot=el('modalFoot');
  if(!body||!foot||!selected.tel)return;
  const old=el('dg67Panel');if(old)old.remove();
@@ -129,8 +159,9 @@ function panel(kind,id){
  const pc=document.createElement('button');pc.type='button';pc.id='dg67Desktop';pc.className='btn btn-primary';pc.disabled=true;pc.textContent='💻 Apri chat + scarica PDF';pc.addEventListener('click',desktop);
  const down=document.createElement('button');down.type='button';down.id='dg67Download';down.className='btn btn-secondary';down.disabled=true;down.textContent='📄 Scarica solo PDF';down.addEventListener('click',download);
  const inspect=document.createElement('button');inspect.type='button';inspect.id='dg67Preview';inspect.className='btn btn-secondary';inspect.disabled=true;inspect.textContent='👁 Controlla PDF';inspect.addEventListener('click',preview);
- const retry=document.createElement('button');retry.type='button';retry.className='btn btn-secondary';retry.textContent='↻ Rigenera PDF';retry.addEventListener('click',()=>{file=null;down.disabled=pc.disabled=share.disabled=true;const inspect=el('dg67Preview');if(inspect)inspect.disabled=true;prepare(kind,id,serial)});
- foot.prepend(share,pc,down,inspect,retry);
+ const stored=document.createElement('button');stored.type='button';stored.id='dg67OpenStored';stored.className='btn btn-secondary';stored.disabled=true;stored.textContent='📄 Apri PDF originale';stored.addEventListener('click',openStoredPdf);
+ const retry=document.createElement('button');retry.type='button';retry.className='btn btn-secondary';retry.textContent='↻ Riprova caricamento';retry.addEventListener('click',()=>{file=null;storedPdfUrl='';stored.disabled=true;down.disabled=pc.disabled=share.disabled=true;const inspect=el('dg67Preview');if(inspect)inspect.disabled=true;prepare(kind,id,serial)});
+ foot.prepend(share,pc,down,inspect,stored,retry);
  prepare(kind,id,serial);
 }
 function patch(){
