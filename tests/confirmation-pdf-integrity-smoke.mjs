@@ -4,7 +4,8 @@ import vm from 'node:vm';
 
 const src=readFileSync(new URL('../supabase/functions/send-booking-confirmation/index.ts',import.meta.url),'utf8');
 const start=src.indexOf('function validPdf(bytes:Uint8Array){');
-const end=src.indexOf('\nfunction tokenOK(',start);
+// Extract only the JavaScript-compatible validator; the next helper is TypeScript.
+const end=src.indexOf('\nfunction pdfMatchesBooking(',start);
 assert.ok(start>=0&&end>start,'PDF validation missing');
 const context={Uint8Array,TextDecoder};
 vm.runInNewContext(src.slice(start,end).replace('bytes:Uint8Array','bytes')+'\nglobalThis.validate=validPdf;',context);
