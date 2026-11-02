@@ -10,5 +10,5 @@ assert.ok(source.includes("throw Error('Il documento PDF è incompleto o dannegg
 assert.ok(source.includes("inspect.textContent='👁 Controlla PDF'"),'Operator must be able to preview PDF');
 assert.ok(source.includes("tab.opener=null"),'PDF preview must not expose opener');
 assert.ok(source.includes("if(!file){notice('Prepara prima"),'Share requires a prepared document');
-assert.ok(source.includes("foot.prepend(share,pc,down,inspect,retry)"),'Preview must appear in WhatsApp controls');
+assert.ok(source.includes("foot.prepend(share,pc,down,inspect,stored,retry)"),'Preview must appear in WhatsApp controls');
 console.log('WhatsApp PDF validation and preview checks passed');

@@ -37,7 +37,7 @@ assert.ok(html.includes('<a id="downloadReceipt"'), 'Native customer PDF link mi
 assert.ok(bridge.includes('stableRequestId'), 'Idempotent booking request identifier missing');
 
 assert.ok(server.includes('Reinvio riservato agli operatori'), 'Protected email resend missing');
-assert.ok(server.includes('pdf.length>5000000'), 'PDF upload validation missing');
+assert.ok(server.includes('if(!pdfMatchesBooking(pdf,number))'), 'PDF upload must validate integrity and matching booking number');
 assert.ok(server.includes('confirmation_email_error:emailError'), 'SMTP failure tracking missing');
 
 
