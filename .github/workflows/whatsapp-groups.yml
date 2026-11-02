@@ -7,6 +7,7 @@ on:
       - 'GESTIONALE/dg68-gruppi-viaggio.js'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
       - 'tests/whatsapp-pdf-ios-recovery-smoke.mjs'
+      - 'tests/whatsapp-pdf-direct-storage-smoke.mjs'
       - 'GESTIONALE/dg63-whatsapp-gratis.js'
       - 'GESTIONALE/index.html'
       - 'tests/whatsapp-consent-invite-smoke.mjs'
@@ -18,6 +19,7 @@ on:
       - 'GESTIONALE/dg68-gruppi-viaggio.js'
       - 'GESTIONALE/dg67-whatsapp-pdf.js'
       - 'tests/whatsapp-pdf-ios-recovery-smoke.mjs'
+      - 'tests/whatsapp-pdf-direct-storage-smoke.mjs'
       - 'GESTIONALE/dg63-whatsapp-gratis.js'
       - 'GESTIONALE/index.html'
       - 'tests/whatsapp-consent-invite-smoke.mjs'
@@ -39,3 +41,5 @@ jobs:
         run: node tests/whatsapp-consent-invite-smoke.mjs
       - name: Test iPhone PDF existing-document recovery
         run: node tests/whatsapp-pdf-ios-recovery-smoke.mjs
+      - name: Test operator-only Storage PDF recovery without reissue
+        run: node tests/whatsapp-pdf-direct-storage-smoke.mjs
