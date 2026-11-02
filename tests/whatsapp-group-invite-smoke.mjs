@@ -39,7 +39,7 @@ function harness(apiOverride,authenticated=true){
    return [{...config.body}];
   },
   loadAll:async()=>{reloads++},
-  getInvite:()=>''
+  getInvite:id=>state.whatsappInvites.find(x=>x.trip_id===id)?.invite_url||''
  };
  vm.runInNewContext(code,context);
  return {normalize:context.window.dg61NormalizeGroupInvite,save:context.window.dg61SaveGroupLink,render:context.window.dg61RenderGroupLink,inputs,button,messages,requests,state,reloads:()=>reloads};
