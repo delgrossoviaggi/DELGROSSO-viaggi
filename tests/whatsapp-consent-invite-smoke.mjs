@@ -32,8 +32,8 @@ const state={
  whatsappInvites:[{trip_id:trip,invite_url:inviteUrl}]
 };
 const calls=[];
-let agrees=true;
-const window={dg61RenderWhatsApp(){},confirm(){return agrees}};
+let agrees=true,legacyRefreshes=0;
+const window={dg61RenderWhatsApp(){},dg63Render(){legacyRefreshes++},confirm(){return agrees}};
 const api=async(table,params,options)=>{
  calls.push({table,params,options});
  if(options?.method==='POST')return [{...options.body}];
@@ -45,6 +45,7 @@ for(let i=0;i<8;i++)await Promise.resolve();
 const roster=()=>fields.dg68Roster.innerHTML;
 const writes=()=>calls.filter(x=>x.options?.method==='POST');
 const trigger=dataset=>fields['page-whatsapp'].handlers.click({target:{closest:()=>({dataset})}});
+assert.ok(legacyRefreshes>0,'Old WhatsApp customer list must refresh after consent load');
 assert.ok(roster().includes('data-dg68-request='),'Request consent action must be available');
 assert.ok(roster().includes('data-dg68-consent='),'Record consent action must be available');
 assert.ok(!roster().includes('data-dg68-invite='),'Do not enable invitation before recorded consent');
