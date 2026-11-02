@@ -22,7 +22,7 @@ assert.equal(valid(pdf('%PDF-1.4\n','no-end-marker')),false,'Missing EOF must fa
 assert.equal(valid(pdf('garbage','\n%%EOF\n')),false,'Invalid header must fail');
 assert.equal(valid(pdf('%PDF-1.4\n','\n%%EOF\n',400)),false,'Too-small PDF must fail');
 assert.ok(src.includes('if(!validPdf(verifiedPdf))'), 'Mail sending must reject corrupted archived PDFs');
-assert.ok(src.includes('if(!validPdf(pdf))'), 'Archival must reject corrupted incoming PDFs');
+assert.ok(src.includes('if(!pdfMatchesBooking(pdf,number))'), 'Archival must reject corrupted PDFs or PDFs with a mismatched booking number');
 assert.ok(src.includes('tokenOK(b,p)'), 'Booking token authorization must remain');
 assert.ok(src.includes('Reinvio riservato agli operatori'), 'Email resend must remain operator-only');
 console.log('Booking PDF integrity checks passed');
