@@ -217,5 +217,7 @@ window.dg68FocusGroupConsent=(bookingId,tripId)=>{
  $('dg68Roster')?.scrollIntoView?.({behavior:'smooth',block:'start'});
  show('Seleziona il prenotato: usa “Chiedi consenso”, poi “Registra consenso” solo dopo un SI reale. Il pulsante Invita si attiva successivamente.');
 };
+// Keep the V61 link editor and V68 roster synchronized immediately after a save.
+window.dg68RenderGroups=renderRoster;
 window.dg68RefreshTripGroups=update;
 })();

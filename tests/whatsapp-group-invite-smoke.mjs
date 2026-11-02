@@ -35,10 +35,11 @@ function harness(apiOverride,authenticated=true){
   api:async(table,qs,config)=>{
    requests.push({table,qs,config});
    if(apiOverride)return apiOverride(config,requests.length);
+   if(!config?.method)return state.whatsappInvites.filter(x=>x.trip_id===trip);
    return [{...config.body}];
   },
   loadAll:async()=>{reloads++},
-  getInvite:()=>''
+  getInvite:id=>state.whatsappInvites.find(x=>x.trip_id===id)?.invite_url||''
  };
  vm.runInNewContext(code,context);
  return {normalize:context.window.dg61NormalizeGroupInvite,save:context.window.dg61SaveGroupLink,render:context.window.dg61RenderGroupLink,inputs,button,messages,requests,state,reloads:()=>reloads};
@@ -53,6 +54,7 @@ for(const raw of [
  'https://chat.whatsapp.com/invite/'+id,
  valid.slice(0,36)+'\u200B'+valid.slice(36)
 ])assert.equal(norm(raw),valid,'Failed to normalize valid WhatsApp link');
+assert.equal(norm('https://chat.whatsapp.com/DCb6HluikWD8HBBkzSCqxk?s=cl&p=i&mlu=4&ilr=4&iam=2'),'https://chat.whatsapp.com/DCb6HluikWD8HBBkzSCqxk','Actual Napoli group link from WhatsApp share must normalize');
 for(const raw of ['https://evilchat.whatsapp.com/'+id,'https://chat.whatsapp.com.evil.tld/'+id,'https://chat.whatsapp.com/short','niente link'])assert.equal(norm(raw),'','Must reject malformed/malicious links');
 
 // Background synchronization must not clear a link pasted on iPhone.
@@ -74,6 +76,14 @@ assert.equal(good.state.whatsappInvites.length,1,'Saved invite must appear witho
 assert.equal(good.reloads(),1);
 assert.equal(good.button.disabled,false);
 assert.ok(good.messages.some(x=>x.message.includes('salvato correttamente')),'Show success after server confirms');
+
+const existing=harness();
+existing.state.whatsappInvites=[{trip_id:trip,invite_url:valid}];
+existing.inputs.dg61GroupUrl.value=valid+'?s=cl&p=i&mlu=4&ilr=4&iam=2';
+await existing.save();
+assert.equal(existing.requests.length,1,'Already saved group invite should be confirmed with a read, not rewritten');
+assert.ok(!existing.requests[0].config.method,'Already saved invite must not trigger an unnecessary POST');
+assert.ok(existing.messages.some(x=>x.message.includes('già salvato e verificato')),'Already saved invite should show a clear success message');
 
 const noPostBody=harness(async(config,n)=>{
  if(n===1)return [];
