@@ -33,7 +33,7 @@ async function consentRefresh(force=false){
   consents=new Set((Array.isArray(rows)?rows:[]).filter(c=>!c.revoked_at).map(c=>String(c.booking_id)+'|'+String(c.trip_id)));
   consentsLoaded=true;lastConsentRead=Date.now();show('Consensi aggiornati. Nessun invito viene inviato automaticamente.');
  }catch(e){consentsLoaded=false;consents.clear();show('Consensi non verificabili: inviti disattivati finché non sono disponibili.',true)}
- finally{loadingConsents=false;renderRoster();}
+ finally{loadingConsents=false;renderRoster();try{window.dg63Render?.()}catch(e){console.warn('Aggiornamento elenco prenotati non riuscito',e)}}
 }
 function roots(){
  const ids=[...new Set(allTrips().filter(v=>!v.archiviato_at).map(v=>rootId(v)))];
@@ -214,8 +214,14 @@ window.dg68FocusGroupConsent=(bookingId,tripId)=>{
  renderRoster();
  bus.value=tripId;
  renderRoster();
- $('dg68Roster')?.scrollIntoView?.({behavior:'smooth',block:'start'});
- show('Seleziona il prenotato: usa “Chiedi consenso”, poi “Registra consenso” solo dopo un SI reale. Il pulsante Invita si attiva successivamente.');
+ const b=allBookings().find(x=>String(x.id)===String(bookingId)&&String(x.viaggio_id)===String(tripId));
+ const key=String(tripId)+'|'+validPhone(b?.telefono);
+ const list=$('dg68Roster');
+ const actions=[...(list?.querySelectorAll?.('[data-dg68-request],[data-dg68-consent],[data-dg68-invite]')||[])];
+ const button=actions.find(el=>[el.dataset.dg68Request,el.dataset.dg68Consent,el.dataset.dg68Invite].includes(key));
+ (button||list)?.scrollIntoView?.({behavior:'smooth',block:'center'});
+ button?.focus?.();
+ show('Per questo prenotato premi “Chiedi consenso”; dopo una risposta SI reale, usa “Registra consenso”, quindi “Invita”.');
 };
 // Keep the V61 link editor and V68 roster synchronized immediately after a save.
 window.dg68RenderGroups=renderRoster;

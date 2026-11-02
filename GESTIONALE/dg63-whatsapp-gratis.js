@@ -50,6 +50,7 @@ function renderInviteRoster(){
  const persons=bookings().filter(b=>b.viaggio_id===id).sort((a,b)=>String(a.cliente||'').localeCompare(String(b.cliente||'')));
  const invite=(state.whatsappInvites||[]).find(i=>i.trip_id===id)?.invite_url||'';
  box.innerHTML='<div class="dg63-info">'+(t?'Prenotati con telefono per '+esc(t.titolo||t.destinazione||'il viaggio')+': <b>'+persons.length+'</b>':'Seleziona un viaggio.')+(invite?' · <b>Invito salvato</b>':' · <b>Prima crea il gruppo dall’app WhatsApp Business e salva il link.</b>')+'</div>'+
+ (persons.some(b=>!hasGroupConsent(b))?'<div class="dg63-info">Per i clienti senza consenso premi <b>Gestisci consenso</b>: si aprirà il contatto nella sezione Gruppi viaggio. Prima chiedi l’adesione al gruppo, poi registra la risposta positiva e usa <b>Invita</b>. Non è necessario salvare i numeri nella rubrica.</div>':'')+
  (persons.length?persons.map(b=>`<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${Number(b.posti)||0} pax · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${hasGroupConsent(b)?'✓ Consenso specifico al gruppo registrato':'Consenso gruppo da richiedere o registrare'}</small></div><button type="button" class="btn btn-secondary btn-sm" onclick="dg63InviteBooking('${b.id}')">${invite&&hasGroupConsent(b)?'Invita':'Gestisci consenso'}</button></div>`).join(''):'<div class="empty">Nessuna prenotazione attiva con telefono per questo viaggio.</div>');
 }
 function defaultPreview(b,kind){
