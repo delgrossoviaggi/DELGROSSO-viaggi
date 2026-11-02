@@ -43,35 +43,61 @@ function chat(){
  // Per WhatsApp Web si possono precompilare testo e numero; allegati non supportati.
  const a=document.createElement('a');a.href='https://wa.me/'+tel+'?text='+encodeURIComponent(message);a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove();
 }
+// Read-only signed URLs from Supabase Storage. Access is checked by
+// storage.objects RLS (active operators only); no public bucket or new receipt.
+async function existingPdfUrl(path){
+ const valid=String(path||'').trim();
+ if(!valid||valid.startsWith('/')||valid.includes('\\')||valid.split('/').some(x=>!x||x==='.'||x==='..'))
+  throw Error('Percorso PDF archiviato non valido');
+ if(typeof SUPA_URL!=='string'||typeof accessHeaders!=='function')
+  throw Error('Sessione gestionale non disponibile');
+ const objectPath=valid.split('/').map(encodeURIComponent).join('/');
+ const endpoint=SUPA_URL+'/storage/v1/object/sign/ricevute-prenotazioni/'+objectPath;
+ const response=await fetch(endpoint,{
+  method:'POST',
+  headers:{...accessHeaders(),'Content-Type':'application/json'},
+  body:JSON.stringify({expiresIn:600}),
+  cache:'no-store'
+ });
+ const body=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(body.message||body.error||'Accesso al PDF non autorizzato (HTTP '+response.status+')');
+ let raw=String(body.signedURL||body.signedUrl||'');
+ if(raw.startsWith('/object/sign/'))raw=SUPA_URL+'/storage/v1'+raw;
+ else if(raw.startsWith('/storage/v1/'))raw=SUPA_URL+raw;
+ const signedUrl=trustedSignedUrl(raw);
+ if(!signedUrl)throw Error('Collegamento temporaneo al PDF non valido');
+ return {success:true,signedUrl};
+}
 async function fetchSigned(kind,id){
- if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')throw Error('Sessione gestionale non disponibile');
- let endpoint,payload;
+ if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')
+  throw Error('Sessione gestionale non disponibile');
  if(kind==='booking'){
-   endpoint='dg67-booking-pdf';payload={bookingId:id};
- }else{
-   const p=payment(id);
-   if(!p)throw Error('Pagamento non trovato');
-   // Evita doppie emissioni se un altro operatore ha gia generato la ricevuta.
-   if(typeof api==='function'){
-     const latest=await api('pagamenti','id=eq.'+encodeURIComponent(id)+'&select=id,receipt_professional_path,receipt_number',{noCache:true});
-     if(Array.isArray(latest)&&latest[0]){
-       p.receipt_professional_path=latest[0].receipt_professional_path||null;
-       p.receipt_number=latest[0].receipt_number||p.receipt_number;
-     }
-   }
-   if(p.receipt_professional_path){
-     // Documento professionale gia archiviato: NON rigenerare e NON creare una nuova versione.
-     endpoint='send-payment-receipt';payload={action:'signed_url',path:p.receipt_professional_path};
-   }else{
-     // Prima emissione PDF professionale, solo se non esiste.
-     endpoint='professional-receipts';payload={action:'generate',kind:'trip',id,reissue:false};
-   }
+  const b=booking(id);
+  // Existing archived booking confirmations always win; never reissue.
+  if(b?.confirmation_storage_path)return existingPdfUrl(b.confirmation_storage_path);
+  const resp=await fetch(SUPA_URL+'/functions/v1/dg67-booking-pdf',{
+   method:'POST',headers:{...accessHeaders(),'Content-Type':'application/json'},
+   body:JSON.stringify({bookingId:id}),cache:'no-store'
+  });
+  const out=await resp.json().catch(()=>({}));
+  if(!resp.ok||!out.success||!out.signedUrl)throw Error(out.error||'Impossibile ottenere la conferma (HTTP '+resp.status+')');
+  return out;
  }
- const resp=await fetch(`${SUPA_URL}/functions/v1/${endpoint}`,{method:'POST',headers:accessHeaders(),body:JSON.stringify(payload),cache:'no-store'});
- const out=await resp.json().catch(()=>({}));
- if(!resp.ok||!out.success||!out.signedUrl)throw Error(out.error||`Impossibile ottenere il PDF (HTTP ${resp.status})`);
- if(kind==='payment'&&out.path){const p=payment(id);if(p)p.receipt_professional_path=out.path;}
- return out;
+ const p=payment(id);
+ if(!p)throw Error('Pagamento non trovato');
+ // Read the authoritative path so another operator cannot accidentally issue
+ // a duplicate receipt after an out-of-date browser session.
+ if(typeof api==='function'){
+  const latest=await api('pagamenti','id=eq.'+encodeURIComponent(id)+'&select=id,receipt_professional_path,receipt_storage_path,receipt_number',{noCache:true});
+  if(Array.isArray(latest)&&latest[0]){
+   p.receipt_professional_path=latest[0].receipt_professional_path||null;
+   p.receipt_storage_path=latest[0].receipt_storage_path||null;
+   p.receipt_number=latest[0].receipt_number||p.receipt_number;
+  }
+ }
+ const existing=p.receipt_professional_path||p.receipt_storage_path;
+ if(!existing)throw Error('Ricevuta non archiviata: verifica il documento in Pagamenti. Non viene generata una nuova copia.');
+ return existingPdfUrl(existing);
 }
 async function prepare(kind,id,key){
  storedPdfUrl='';
