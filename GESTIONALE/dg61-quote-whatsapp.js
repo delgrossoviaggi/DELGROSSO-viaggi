@@ -117,10 +117,16 @@ window.dg61OpenClient=phone=>safeWhatsAppChat(phone,'Buongiorno, siamo DELGROSSO
 window.dg61WorkInbox=async id=>{try{await api('dg_whatsapp_inbox_v61','id=eq.'+id,{method:'PATCH',body:{status:'in_lavorazione'}});await loadAll(true)}catch(e){toast(e.message,false)}};
 window.dg61CompleteInbox=async id=>{try{await api('dg_whatsapp_inbox_v61','id=eq.'+id,{method:'PATCH',body:{status:'completata'}});await loadAll(true)}catch(e){toast(e.message,false)}};
 window.dg61SendManualMessage=function(){const b=getBooking();if(!b)return toast('Scegli una prenotazione.',false);const kind=$('dg61WaKind').value;
- if(['deposit','balance','invitation'].includes(kind)){
+ if(['deposit','balance'].includes(kind)){
    const phone=normalizedPhone(b.telefono);
    const opt=(state.whatsappOptins||[]).find(x=>normalizedPhone(x.phone)===phone&&!x.revoked_at);
    if(!opt)return toast('Prima registra il consenso WhatsApp verificato del cliente.',false);
+ }
+ if(kind==='invitation'){
+   const phone=normalizedPhone(b.telefono);
+   if(!getInvite(b.viaggio_id))return toast('Salva prima il link del gruppo WhatsApp di questo autobus.',false);
+   if((state.whatsappOptins||[]).some(x=>normalizedPhone(x.phone)===phone&&x.revoked_at))
+    return toast('Questo cliente ha revocato il contatto WhatsApp: non inviare il link.',false);
  }
  if(kind==='receipt')alert('ATTENZIONE: il testo non contiene il PDF. Allega la ricevuta autentica dal gestionale prima di inviare.');
  safeWhatsAppChat(b.telefono,$('dg61WaPreview')?.value||preparedMessage(b,kind));
