@@ -82,9 +82,9 @@ BEGIN
   END IF;
 
   INSERT INTO public.audit_log_gestionale(
-    id,user_id,azione,entita,entita_id,descrizione,dati
+    user_id,azione,entita,entita_id,descrizione,dati
   )
-  SELECT gen_random_uuid(),null,'RICOSTRUZIONE_POSTI_V75','prenotazioni',
+  SELECT null,'RICOSTRUZIONE_POSTI_V75','prenotazioni',
          booking_id,'Ripristino collegamenti posti già assegnati, senza spostamenti',
          jsonb_build_object('posti_ricollegati',count(*),
                             'origine','posti_selezionati già salvati')
