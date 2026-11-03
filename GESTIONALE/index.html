@@ -5456,6 +5456,7 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
       const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button>`;
       return `<tr${rowClass}><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente||b.cliente_nome||'Cliente')}${company?'<br><small>Riserva aziendale gratuita</small>':`<br><small>${esc(b.telefono||'')}</small>`}</td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td>${moneyCols}<td>${status}</td><td>${actions}</td></tr>`;
     }).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+    window.dg75RenderIntegrity?.();
   };
   // Pianta posti standard: le riserve DELGROSSO sono evidenziate in viola.
   window.renderSeatPicker=function(){
@@ -7969,5 +7970,6 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="dg66-email-verifica.js?v=66" defer></script>
 <script src="dg67-whatsapp-pdf.js?v=67" defer></script>
 <script src="dg68-gruppi-viaggio.js?v=74" defer></script>
+<script src="dg75-integrita.js?v=75" defer></script>
 </body>
 </html>
