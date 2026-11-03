@@ -47,11 +47,11 @@ BEGIN
   IF EXISTS (
     SELECT 1
     FROM dg_v75_seat_candidates c
-    JOIN public.prenotazioni other ON other.viaggio_id=c.viaggio_id
-      AND other.id<>c.booking_id
-      AND coalesce(other.stato,'') !~* '(annull|cancel|storn|rimbors)'
+    JOIN public.prenotazioni other_booking ON other_booking.viaggio_id=c.viaggio_id
+      AND other_booking.id<>c.booking_id
+      AND coalesce(other_booking.stato,'') !~* '(annull|cancel|storn|rimbors)'
     CROSS JOIN LATERAL unnest(string_to_array(regexp_replace(
-       coalesce(other.posti_selezionati,''),'[[:space:]]+','','g'),',')) x
+       coalesce(other_booking.posti_selezionati,''),'[[:space:]]+','','g'),',')) x
     WHERE trim(x)=c.seat
   ) OR EXISTS (
     SELECT 1 FROM dg_v75_seat_candidates c
