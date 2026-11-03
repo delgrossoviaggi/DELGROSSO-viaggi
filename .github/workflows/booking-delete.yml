@@ -1,0 +1,29 @@
+name: Safe booking deletion regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'GESTIONALE/index.html'
+      - 'GESTIONALE/sw.js'
+      - 'supabase/patches/safe_booking_delete_preserve_payments_outbound_20261103.sql'
+      - 'tests/booking-delete-safe-smoke.mjs'
+      - '.github/workflows/booking-delete.yml'
+  pull_request:
+    paths:
+      - 'GESTIONALE/index.html'
+      - 'GESTIONALE/sw.js'
+      - 'supabase/patches/safe_booking_delete_preserve_payments_outbound_20261103.sql'
+      - 'tests/booking-delete-safe-smoke.mjs'
+      - '.github/workflows/booking-delete.yml'
+permissions:
+  contents: read
+jobs:
+  booking-delete-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test booking delete without changing live bookings
+        run: node tests/booking-delete-safe-smoke.mjs
