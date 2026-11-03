@@ -46,15 +46,20 @@ const roster=()=>fields.dg68Roster.innerHTML;
 const writes=()=>calls.filter(x=>x.options?.method==='POST');
 const trigger=dataset=>fields['page-whatsapp'].handlers.click({target:{closest:()=>({dataset})}});
 assert.ok(legacyRefreshes>0,'Old WhatsApp customer list must refresh after consent load');
-assert.ok(roster().includes('data-dg68-request='),'Request consent action must be available');
+assert.ok(!roster().includes('data-dg68-request='),'Optional link invitation should not force a second consent request');
 assert.ok(roster().includes('data-dg68-consent='),'Record consent action must be available');
-assert.ok(!roster().includes('data-dg68-invite='),'Do not enable invitation before recorded consent');
+assert.ok(roster().includes('data-dg68-invite='),'Voluntary group link invite must be available without recorded consent');
 assert.equal(writes().length,0);
+trigger({dg68Invite:trip+'|'+phone});
+assert.equal(clicks.length,1,'Voluntary group invite should open one manual WhatsApp chat');
+assert.ok(decodeURIComponent(clicks[0]).includes(inviteUrl),'Voluntary invite must include the saved bus link');
+assert.ok(decodeURIComponent(clicks[0]).includes('facoltativa'),'Group invitation must disclose that joining is optional');
+assert.equal(writes().length,0,'Sending a voluntary link must never fabricate a consent record');
 
 trigger({dg68Request:trip+'|'+phone});
-assert.equal(clicks.length,1,'Request should open one WhatsApp chat');
-assert.ok(decodeURIComponent(clicks[0]).includes('rispondi SI'),'Consent request must ask for an explicit reply');
-assert.ok(!decodeURIComponent(clicks[0]).includes(inviteUrl),'Consent request must not disclose group link before consent');
+assert.equal(clicks.length,2,'Optional explicit consent request should still be available to operators');
+assert.ok(decodeURIComponent(clicks[1]).includes('rispondi SI'),'Optional consent request must ask for an explicit reply');
+assert.ok(!decodeURIComponent(clicks[1]).includes(inviteUrl),'Separate consent request must not include the link');
 assert.equal(writes().length,0,'Asking must not mark consent in database');
 
 agrees=false;
@@ -73,15 +78,16 @@ assert.equal(writes()[0].options.body.recorded_by,operatorId);
 assert.ok(roster().includes('data-dg68-invite='),'Invitation must be enabled after confirmed consent');
 
 trigger({dg68Invite:trip+'|'+phone});
-assert.equal(clicks.length,2,'Invitation opens one manual WhatsApp chat');
-assert.ok(decodeURIComponent(clicks[1]).includes(inviteUrl),'Final invitation must include the correct bus invite URL');
-assert.ok(source.includes("if(!person||!consentsLoaded||!person.bookings.some"),'Invite consent guard must remain');
+assert.equal(clicks.length,3,'A fresh manual invitation can be reopened after consent was recorded');
+assert.ok(decodeURIComponent(clicks[2]).includes(inviteUrl),'Invitation must keep the correct bus invite URL');
+assert.ok(!source.includes("if(!person||!consentsLoaded||!person.bookings.some"),'Voluntary link invitation must not require prior group membership consent');
+assert.ok(source.includes('if(revokedWhatsApp(tel))'),'Explicitly revoked WhatsApp contact must remain blocked');
 
 const legacy=readFileSync(new URL('../GESTIONALE/dg63-whatsapp-gratis.js',import.meta.url),'utf8');
 new vm.Script(legacy,{filename:'dg63-whatsapp-gratis.js'});
 assert.ok(legacy.includes("function hasGroupConsent(b)"),'Legacy WhatsApp view must check trip-specific consent');
-assert.ok(legacy.includes("'Gestisci consenso'"),'Legacy list must guide operator instead of showing a disabled invitation');
-assert.ok(legacy.includes("(invite&&!hasGroupConsent(b))"),'Invitation preview must check group consent');
+assert.ok(legacy.includes("'Invita con link'"),'Legacy customer list must offer an optional link');
+assert.ok(legacy.includes("(invite&&revokedWhatsApp(b))"),'Manual preview must block revoked WhatsApp contacts');
 const legacyStart=legacy.indexOf('window.dg63InviteBooking=id=>{');
 const legacyEnd=legacy.indexOf('\nwindow.dg63CopyGroupTitle=',legacyStart);
 assert.ok(legacyStart>=0&&legacyEnd>legacyStart,'Legacy invitation handler not found');
@@ -95,16 +101,16 @@ async function runLegacyInvitation(consent){
  };
  const b={id:booking,viaggio_id:trip};
  vm.runInNewContext(legacy.slice(legacyStart,legacyEnd),
-  {window:w,booking:()=>b,hasGroupConsent:()=>consent,state:{whatsappInvites:[{trip_id:trip,invite_url:inviteUrl}]}});
+  {window:w,booking:()=>b,revokedWhatsApp:()=>false,hasGroupConsent:()=>consent,state:{whatsappInvites:[{trip_id:trip,invite_url:inviteUrl}]}});
  w.dg63InviteBooking(booking);
  return {focused,opened};
 }
 const before=await runLegacyInvitation(false);
-assert.equal(before.focused,1,'Legacy view must open consent management before invitation');
-assert.equal(before.opened,0,'Legacy view cannot send invitation without consent');
+assert.equal(before.focused,0,'Voluntary link invitation must not force a consent screen');
+assert.equal(before.opened,1,'Legacy view must allow manual link invitation before recording consent');
 const after=await runLegacyInvitation(true);
 assert.equal(after.focused,0);
 assert.equal(after.opened,1,'Legacy view should enable manual invitation after consent');
 console.log('Old and new WhatsApp invitation views are consistent');
 
-console.log('Napoli WhatsApp manual consent and invitation workflow passed');
+console.log('Napoli voluntary WhatsApp group invite and optional recorded consent workflow passed');
