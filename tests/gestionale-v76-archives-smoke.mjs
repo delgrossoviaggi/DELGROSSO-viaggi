@@ -10,7 +10,7 @@ const migration=file('supabase/patches/v76_rls_initplan_operator_comms_20261103.
 new vm.Script(email,{filename:'dg66-email-verifica.js'});
 new vm.Script(integrity,{filename:'dg75-integrita.js'});
 assert.ok(/dg66-email-verifica\.js\?v=(76|77)/.test(html),'Email PDF controls must be cache-busted');
-assert.ok(html.includes('dg75-integrita.js?v=76'),'Integrity panel must be cache-busted');
+assert.ok(/dg75-integrita\.js\?v=(76|77)/.test(html),'Integrity panel must be cache-busted');
 
 const start=email.indexOf('function fill(){'),end=email.indexOf('\nwindow.dg66RefreshEmail=',start);
 assert.ok(start>0&&end>start,'Archive filter helper not found');
