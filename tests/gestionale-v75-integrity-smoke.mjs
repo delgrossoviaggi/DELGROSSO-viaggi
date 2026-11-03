@@ -41,7 +41,7 @@ assert.equal(quality.missingSeats[0].id,'unassigned');
 assert.equal(quality.missingSeats[0].needsChoice,true,'Do not invent a seat when there is no documented number');
 assert.equal(quality.noArchivedConfirmation,2,'Historical archived PDF inventory should include noncompany bookings');
 assert.equal(quality.noProfessionalReceipt,1);
-assert.ok(/dg75-integrita\.js\?v=(75|76|77)/.test(html),'Integrity module not loaded');
+assert.ok(/dg75-integrita\.js\?v=(75|76|77|78)/.test(html),'Integrity module not loaded');
 assert.ok(html.includes('window.dg75RenderIntegrity?.()'),'Booking view must refresh audit after loading data');
 assert.ok(!src.includes("await rpc("),'Integrity UI must never alter bookings through RPC');
 assert.ok(!src.includes("await api("),'Integrity UI must never write back');

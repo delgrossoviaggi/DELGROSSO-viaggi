@@ -104,6 +104,7 @@ function render(){
     '<button type="button" class="btn btn-secondary btn-sm" data-dg75-pdf="1">Verifica conferme</button>'+
     '<button type="button" class="btn btn-secondary btn-sm" data-dg75-payments="1">Verifica pagamenti</button></div>'+
    '<p style="font-size:11px;color:#64748b;margin:7px 0 0">La data di generazione non prova che il PDF sia stato archiviato o consegnato. Per le conferme già segnate come generate, la nuova emissione è bloccata finché non viene verificato lo storico.</p>';
+ window.dg78RenderArchive?.();
 }
 window.dg75AuditIntegrity=audit;
 window.dg75RenderIntegrity=render;
