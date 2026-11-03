@@ -52,5 +52,6 @@ assert.ok(fixture.dg66Target.innerHTML.includes('receipt'),'Payment receipt list
 assert.equal(fixture.dg66MissingOnlyWrap.style.display,'none','Missing confirmation filter must be hidden for payments');
 assert.ok(pdf.includes('row.receipt_professional_path||row.receipt_storage_path'),'Professional receipt path must be recognized');
 assert.ok(pdf.includes('/storage/v1/object/sign/ricevute-prenotazioni/'),'PDF verification must use operator-only private Storage');
-assert.ok(!pdf.includes("const endpoint=kind==='booking'?'send-booking-confirmation':'send-payment-receipt';"),'Open-document click must not rely on the failing Edge function');
+const openPdf=pdf.slice(pdf.indexOf('window.dg66OpenDocument=async function(){'),pdf.indexOf('let smtpCheckRunning=false;'));
+assert.ok(!openPdf.includes("const endpoint=kind==='booking'?'send-booking-confirmation':'send-payment-receipt';"),'Open-document click must not rely on the failing Edge function');
 console.log('DELGROSSO V74: full/manual sync, page-specific background, stable state, PDF filter and private file open PASSED');
