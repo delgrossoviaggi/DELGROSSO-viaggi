@@ -11,7 +11,7 @@ new vm.Script(email,{filename:'dg66-email-verifica.js'});
 new vm.Script(dashboard,{filename:'dg75-integrita.js'});
 assert.ok(html.includes('dg66-email-verifica.js?v=77'));
 assert.ok(/dg75-integrita\.js\?v=(77|78)/.test(html));
-assert.ok(sw.includes('delgrosso-gestionale-v77-safe-pdf-review'));
+assert.ok(/delgrosso-gestionale-v(77-safe-pdf-review|78-archive-reconciliation)/.test(sw));
 
 const window={};
 vm.runInNewContext(dashboard,{
