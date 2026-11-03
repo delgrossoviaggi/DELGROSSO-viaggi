@@ -14,11 +14,11 @@ function mount(){
  '<p style="margin:0 0 9px;font-size:13px">Il server può inviare automaticamente quando il servizio email è attivo. Da qui puoi <b>verificare l’esito</b> e richiedere il reinvio di un documento già archiviato, senza WhatsApp API.</p>'+
  '<div class="form-grid"><div class="field"><label>Tipo documento</label><select id="dg66Kind"><option value="booking">Conferma prenotazione</option><option value="payment">Ricevuta acconto / saldo</option></select></div>'+
  '<div class="field"><label>Riferimento</label><select id="dg66Target"><option value="">— Scegli una prenotazione —</option></select></div></div>'+
- '<label id="dg66MissingOnlyWrap" style="display:flex;align-items:center;gap:8px;margin:9px 0"><input type="checkbox" id="dg66MissingOnly"> Mostra solo conferme PDF mancanti <strong id="dg66MissingCount" style="font-size:12px"></strong></label>'+ 
+ '<label id="dg66MissingOnlyWrap" style="display:flex;align-items:center;gap:8px;margin:9px 0"><input type="checkbox" id="dg66MissingOnly"> <span id="dg66MissingLabel">Mostra solo conferme senza percorso PDF</span> <strong id="dg66MissingCount" style="font-size:12px"></strong></label>'+ 
  '<div id="dg66EmailState" class="statusline info" style="margin:10px 0">Seleziona una prenotazione per verificare email e PDF.</div>'+
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
  '<button type="button" id="dg66SmtpCheck" class="btn btn-secondary" onclick="dg66CheckSmtp()">🔒 Verifica connessione SMTP</button> '+
- '<button type="button" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
+ '<button type="button" id="dg66ResendBtn" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
  '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Rigenera conferma PDF mancante</button> '+
  '<button type="button" id="dg66OpenDocument" class="btn btn-secondary" onclick="dg66OpenDocument()" style="display:none">👁 Apri e verifica PDF</button>';
  parent.after(div);
@@ -27,28 +27,54 @@ function mount(){
  $('dg66MissingOnly')?.addEventListener('change',window.dg66RefreshEmail);
  fill();
 }
-function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,100)}
-function payList(){return (typeof state==='undefined'?[]:state.pagamenti||[]).filter(p=>/^(acconto|saldo)$/i.test(String(p.tipo||''))&&/^registrato$/i.test(String(p.stato||''))).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,150)}
+function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))}
+function payList(){return (typeof state==='undefined'?[]:state.pagamenti||[]).filter(p=>/^(acconto|saldo|rimborso)$/i.test(String(p.tipo||''))&&/^registrato$/i.test(String(p.stato||''))).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,150)}
 function findBooking(id){return (typeof state==='undefined'?[]:state.prenotazioni||[]).find(b=>b.id===id)}
 function fill(){const type=$('dg66Kind')?.value||'booking',target=$('dg66Target');if(!target)return;const val=target.value;
- const allBookings=bookList(),showMissing=!!$('dg66MissingOnly')?.checked;
- const rows=type==='booking'?(showMissing?allBookings.filter(x=>!x.confirmation_storage_path):allBookings):payList();
- const badge=$('dg66MissingCount');if(badge)badge.textContent='('+allBookings.filter(x=>!x.confirmation_storage_path).length+' da verificare)';
- const wrap=$('dg66MissingOnlyWrap');if(wrap)wrap.style.display=type==='booking'?'flex':'none';
+ const allBookings=bookList(),allPayments=payList(),showMissing=!!$('dg66MissingOnly')?.checked;
+ const rows=type==='booking'?(showMissing?allBookings.filter(x=>!x.confirmation_storage_path):allBookings)
+    :(showMissing?allPayments.filter(x=>!(x.receipt_professional_path||x.receipt_storage_path)):allPayments);
+ const missingCount=type==='booking'
+  ?allBookings.filter(x=>!x.confirmation_storage_path).length
+  :allPayments.filter(x=>!(x.receipt_professional_path||x.receipt_storage_path)).length;
+ const badge=$('dg66MissingCount');if(badge)badge.textContent='('+missingCount+' da verificare)';
+ const label=$('dg66MissingLabel');if(label)label.textContent=type==='booking'?'Mostra solo conferme senza percorso PDF':'Mostra solo pagamenti senza percorso PDF';
+ const wrap=$('dg66MissingOnlyWrap');if(wrap)wrap.style.display='flex';
  target.innerHTML='<option value="">— Scegli un documento —</option>'+rows.map(x=>{
  const b=type==='booking'?x:findBooking(x.prenotazione_id);return '<option value="'+esc(x.id)+'">'+esc((b?.cliente||b?.cliente_nome||x.cliente||'Cliente')+' · '+(type==='payment'?String(x.tipo||'')+' '+String(x.receipt_number||''):(x.codice||x.confirmation_number||'Prenotazione'))).slice(0,105)+'</option>'}).join('');
  if(rows.some(x=>x.id===val))target.value=val;
 }
 window.dg66RefreshEmail=function(){fill();const type=$('dg66Kind')?.value||'booking',id=$('dg66Target')?.value,box=$('dg66EmailState');if(!box)return;
  const row=type==='booking'?bookList().find(x=>x.id===id):payList().find(x=>x.id===id);
- if(!row){box.textContent='Seleziona prima un documento.';const button=$('dg66GenerateMissing');if(button)button.style.display='none';const open=$('dg66OpenDocument');if(open)open.style.display='none';return}
+ if(!row){box.textContent='Seleziona prima un documento.';const button=$('dg66GenerateMissing');if(button)button.style.display='none';const open=$('dg66OpenDocument');if(open)open.style.display='none';const resend=$('dg66ResendBtn');if(resend)resend.disabled=true;return}
  const b=type==='booking'?row:findBooking(row.prenotazione_id);
  const hasPdf=!!(type==='booking'?row.confirmation_storage_path:(row.receipt_professional_path||row.receipt_storage_path));
  const button=$('dg66GenerateMissing');if(button)button.style.display=type==='booking'&&!hasPdf?'inline-flex':'none';
  const open=$('dg66OpenDocument');if(open)open.style.display=hasPdf?'inline-flex':'none';
+ const refund=type==='payment'&&/^rimborso$/i.test(String(row.tipo||''));
+ const resend=$('dg66ResendBtn');if(resend){
+  resend.disabled=!hasPdf||refund;resend.title=refund?'Rimborso: verifica l’archivio e contatta il cliente; reinvio non previsto.':(!hasPdf?'Nessun documento PDF registrato.':'Reinvio manuale del documento esistente');
+ }
  const sent=(type==='booking'?row.confirmation_email_sent:row.receipt_email_sent)===true;
  const err=type==='booking'?row.confirmation_email_error:row.receipt_email_error;
- box.innerHTML='<b>Destinatario:</b> '+esc(b?.email||'mancante')+' · <b>PDF:</b> '+(hasPdf?'archiviato':'da generare')+' · <b>Invio:</b> '+(sent?'segnato come inviato':'non verificato')+(err?'<div style="color:#a12">Errore: '+esc(err).slice(0,200)+'</div>':'')+'<p style="font-size:12px">Un invio già tentato non viene ripetuto automaticamente; il reinvio richiede un clic e un PDF esistente.</p>';
+ box.innerHTML='<b>Destinatario:</b> '+esc(b?.email||'mancante')+
+  ' · <b>PDF:</b> '+(hasPdf?'percorso archiviato; apri per verificare':'nessun percorso PDF registrato')+
+  ' · <b>Tipo:</b> '+esc(type==='booking'?'Conferma':row.tipo||'Pagamento')+
+  ' · <b>Invio:</b> '+(sent?'segnato come inviato':'non verificato')+
+  (err?'<div style="color:#a12">Errore: '+esc(err).slice(0,200)+'</div>':'')+
+  (refund?'<p style="font-size:12px">I rimborsi richiedono una verifica contabile distinta. Nessun reinvio email automatico è previsto per questa voce.</p>':
+   '<p style="font-size:12px">Il percorso PDF non dimostra l’avvenuta consegna. Controlla il file prima dell’eventuale reinvio manuale; non creare duplicati.</p>');
+};
+// Opens a read-only review list from the V76 integrity panel.
+window.dg66OpenMissing=function(kind='booking'){
+ mount();
+ const panel=$('dg66EmailPanel');
+ if(!panel)return false;
+ const type=$('dg66Kind');if(type)type.value=kind==='payment'?'payment':'booking';
+ const only=$('dg66MissingOnly');if(only)only.checked=true;
+ window.dg66RefreshEmail();
+ panel.scrollIntoView?.({behavior:'smooth',block:'start'});
+ return true;
 };
 let viewingDocument=false;
 window.dg66OpenDocument=async function(){
@@ -115,13 +141,14 @@ window.dg66ResendEmail=async function(){
  const kind=$('dg66Kind')?.value||'booking',id=$('dg66Target')?.value;
  const p=payList().find(x=>x.id===id),b=kind==='booking'?findBooking(id):findBooking(p?.prenotazione_id),r=kind==='booking'?b:p;
  if(!r||!b)return alert('Seleziona un documento.');
+ if(kind==='payment'&&/^rimborso$/i.test(String(r.tipo||'')))return alert('Il reinvio automatico non è previsto per i rimborsi. Verifica prima la documentazione contabile.');
  if(!email(b.email))return alert('Il cliente non ha un indirizzo email valido.');
  const path=kind==='booking'?r.confirmation_storage_path:(r.receipt_professional_path||r.receipt_storage_path);
  if(!path)return alert('PDF non archiviato: genera prima la conferma o la ricevuta reale dal gestionale.');
  if(!confirm('Inviare nuovamente il documento già archiviato a '+b.email+'?'))return;
  const box=$('dg66EmailState');if(box)box.textContent='Invio in corso...';
  emailSending=true;
- const resendButton=$('dg66EmailPanel')?.querySelector('button[onclick="dg66ResendEmail()"]');
+ const resendButton=$('dg66ResendBtn');
  if(resendButton)resendButton.disabled=true;
  try{
   if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')throw Error('Sessione gestionale non disponibile');

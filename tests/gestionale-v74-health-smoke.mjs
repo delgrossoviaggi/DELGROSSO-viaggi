@@ -49,7 +49,7 @@ assert.ok(fixture.dg66Target.innerHTML.includes('stored'),'Unfiltered list must 
 fixture.dg66Kind.value='payment';
 scope.fillFilter();
 assert.ok(fixture.dg66Target.innerHTML.includes('receipt'),'Payment receipt list must remain available');
-assert.equal(fixture.dg66MissingOnlyWrap.style.display,'none','Missing confirmation filter must be hidden for payments');
+assert.equal(fixture.dg66MissingOnlyWrap.style.display,'flex','V76 keeps the missing-PDF filter visible for payment audits');
 assert.ok(pdf.includes('row.receipt_professional_path||row.receipt_storage_path'),'Professional receipt path must be recognized');
 assert.ok(pdf.includes('/storage/v1/object/sign/ricevute-prenotazioni/'),'PDF verification must use operator-only private Storage');
 const openPdf=pdf.slice(pdf.indexOf('window.dg66OpenDocument=async function(){'),pdf.indexOf('let smtpCheckRunning=false;'));
