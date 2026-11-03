@@ -28,8 +28,13 @@ function audit(current){
  });
  const normalBookings=(current.prenotazioni||[]).filter(b=>!b.riserva_aziendale);
  const noArchivedConfirmation=normalBookings.filter(b=>!b.confirmation_storage_path).length;
- const noProfessionalReceipt=(current.pagamenti||[]).filter(p=>!p.receipt_professional_path).length;
- return {missingSeats,noArchivedConfirmation,noProfessionalReceipt};
+ const paymentRecords=current.pagamenti||[];
+ const noProfessionalReceipt=paymentRecords.filter(p=>!p.receipt_professional_path).length;
+ const noPdfPayments=paymentRecords.filter(p=>!(p.receipt_professional_path||p.receipt_storage_path));
+ const missingAccontiSaldi=noPdfPayments.filter(p=>/^(acconto|saldo)$/i.test(String(p.tipo||''))).length;
+ const missingRimborsi=noPdfPayments.filter(p=>/^rimborso$/i.test(String(p.tipo||''))).length;
+ return {missingSeats,noArchivedConfirmation,noProfessionalReceipt,
+   missingAccontiSaldi,missingRimborsi,noPdfPayments:noPdfPayments.length};
 }
 function mount(){
  const root=$('page-prenotazioni');
@@ -51,13 +56,17 @@ function mount(){
    if(typeof window.openBookingModal==='function')window.openBookingModal(id);
    return;
   }
-  const docsButton=event.target.closest?.('[data-dg75-pdf]');
+  const docsButton=event.target.closest?.('[data-dg75-pdf],[data-dg75-payments]');
   if(docsButton){
    if(typeof go==='function')go('whatsapp');
-   const missing=$('dg66MissingOnly');
-   if(missing)missing.checked=true;
-   window.dg66RefreshEmail?.();
-   $('dg66EmailPanel')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+   const kind=docsButton.hasAttribute('data-dg75-payments')?'payment':'booking';
+   if(window.dg66OpenMissing?.(kind)!==true){
+    const type=$('dg66Kind');if(type)type.value=kind;
+    const missing=$('dg66MissingOnly');if(missing)missing.checked=true;
+    window.dg66RefreshEmail?.();
+    $('dg66EmailPanel')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+   }
+   return;
   }
  });
  return panel;
@@ -88,8 +97,9 @@ function render(){
    detail+
    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:9px;border-top:1px solid #e2e8f0;font-size:12px;color:#475569">'+
     '<b>Archivio PDF:</b> '+data.noArchivedConfirmation+' conferme senza percorso archiviato · '+
-    data.noProfessionalReceipt+' pagamenti senza PDF professionale.'+
-    '<button type="button" class="btn btn-secondary btn-sm" data-dg75-pdf="1">Verifica conferme mancanti</button></div>'+
+    data.noPdfPayments+' pagamenti senza percorso PDF ('+data.missingAccontiSaldi+' acconti/saldi, '+data.missingRimborsi+' rimborsi). '+
+    '<button type="button" class="btn btn-secondary btn-sm" data-dg75-pdf="1">Verifica conferme</button>'+
+    '<button type="button" class="btn btn-secondary btn-sm" data-dg75-payments="1">Verifica pagamenti</button></div>'+
    '<p style="font-size:11px;color:#64748b;margin:7px 0 0">I documenti storici senza percorso digitale potrebbero essere stati inviati con altri metodi. Controlla prima di emettere nuove copie.</p>';
 }
 window.dg75AuditIntegrity=audit;
