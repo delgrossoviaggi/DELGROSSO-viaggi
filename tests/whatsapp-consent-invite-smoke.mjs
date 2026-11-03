@@ -80,6 +80,16 @@ assert.ok(roster().includes('data-dg68-invite='),'Invitation must be enabled aft
 trigger({dg68Invite:trip+'|'+phone});
 assert.equal(clicks.length,3,'A fresh manual invitation can be reopened after consent was recorded');
 assert.ok(decodeURIComponent(clicks[2]).includes(inviteUrl),'Invitation must keep the correct bus invite URL');
+state.whatsappOptins=[{phone:'3208888888',revoked_at:'2026-11-03T10:00:00Z'}];
+window.dg68RefreshTripGroups();
+assert.ok(roster().includes('Contatto WhatsApp revocato'),'Opted-out customers must be visibly marked');
+const beforeRevokedClick=clicks.length;
+trigger({dg68Invite:trip+'|'+phone});
+assert.equal(clicks.length,beforeRevokedClick,'Direct invocation must also block a revoked WhatsApp contact');
+state.whatsappOptins=[];
+state.whatsappInvites=[];
+window.dg68RefreshTripGroups();
+assert.ok(roster().includes('Salva prima il link del gruppo'),'Invitation without a matching bus link must be disabled');
 assert.ok(!source.includes("if(!person||!consentsLoaded||!person.bookings.some"),'Voluntary link invitation must not require prior group membership consent');
 assert.ok(source.includes('if(revokedWhatsApp(tel))'),'Explicitly revoked WhatsApp contact must remain blocked');
 
