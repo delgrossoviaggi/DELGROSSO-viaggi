@@ -14,6 +14,7 @@ function mount(){
  '<p style="margin:0 0 9px;font-size:13px">Il server può inviare automaticamente quando il servizio email è attivo. Da qui puoi <b>verificare l’esito</b> e richiedere il reinvio di un documento già archiviato, senza WhatsApp API.</p>'+
  '<div class="form-grid"><div class="field"><label>Tipo documento</label><select id="dg66Kind"><option value="booking">Conferma prenotazione</option><option value="payment">Ricevuta acconto / saldo</option></select></div>'+
  '<div class="field"><label>Riferimento</label><select id="dg66Target"><option value="">— Scegli una prenotazione —</option></select></div></div>'+
+ '<label id="dg66MissingOnlyWrap" style="display:flex;align-items:center;gap:8px;margin:9px 0"><input type="checkbox" id="dg66MissingOnly"> Mostra solo conferme PDF mancanti <strong id="dg66MissingCount" style="font-size:12px"></strong></label>'+ 
  '<div id="dg66EmailState" class="statusline info" style="margin:10px 0">Seleziona una prenotazione per verificare email e PDF.</div>'+
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
  '<button type="button" id="dg66SmtpCheck" class="btn btn-secondary" onclick="dg66CheckSmtp()">🔒 Verifica connessione SMTP</button> '+
@@ -23,13 +24,17 @@ function mount(){
  parent.after(div);
  $('dg66Kind')?.addEventListener('change',window.dg66RefreshEmail);
  $('dg66Target')?.addEventListener('change',window.dg66RefreshEmail);
+ $('dg66MissingOnly')?.addEventListener('change',window.dg66RefreshEmail);
  fill();
 }
 function bookList(){return (typeof state==='undefined'?[]:state.prenotazioni||[]).filter(b=>!b.riserva_aziendale).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,100)}
 function payList(){return (typeof state==='undefined'?[]:state.pagamenti||[]).filter(p=>/^(acconto|saldo)$/i.test(String(p.tipo||''))&&/^registrato$/i.test(String(p.stato||''))).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,150)}
 function findBooking(id){return (typeof state==='undefined'?[]:state.prenotazioni||[]).find(b=>b.id===id)}
 function fill(){const type=$('dg66Kind')?.value||'booking',target=$('dg66Target');if(!target)return;const val=target.value;
- const rows=type==='booking'?bookList():payList();
+ const allBookings=bookList(),showMissing=!!$('dg66MissingOnly')?.checked;
+ const rows=type==='booking'?(showMissing?allBookings.filter(x=>!x.confirmation_storage_path):allBookings):payList();
+ const badge=$('dg66MissingCount');if(badge)badge.textContent='('+allBookings.filter(x=>!x.confirmation_storage_path).length+' da verificare)';
+ const wrap=$('dg66MissingOnlyWrap');if(wrap)wrap.style.display=type==='booking'?'flex':'none';
  target.innerHTML='<option value="">— Scegli un documento —</option>'+rows.map(x=>{
  const b=type==='booking'?x:findBooking(x.prenotazione_id);return '<option value="'+esc(x.id)+'">'+esc((b?.cliente||b?.cliente_nome||x.cliente||'Cliente')+' · '+(type==='payment'?String(x.tipo||'')+' '+String(x.receipt_number||''):(x.codice||x.confirmation_number||'Prenotazione'))).slice(0,105)+'</option>'}).join('');
  if(rows.some(x=>x.id===val))target.value=val;
@@ -38,7 +43,7 @@ window.dg66RefreshEmail=function(){fill();const type=$('dg66Kind')?.value||'book
  const row=type==='booking'?bookList().find(x=>x.id===id):payList().find(x=>x.id===id);
  if(!row){box.textContent='Seleziona prima un documento.';const button=$('dg66GenerateMissing');if(button)button.style.display='none';const open=$('dg66OpenDocument');if(open)open.style.display='none';return}
  const b=type==='booking'?row:findBooking(row.prenotazione_id);
- const hasPdf=!!(type==='booking'?row.confirmation_storage_path:row.receipt_storage_path);
+ const hasPdf=!!(type==='booking'?row.confirmation_storage_path:(row.receipt_professional_path||row.receipt_storage_path));
  const button=$('dg66GenerateMissing');if(button)button.style.display=type==='booking'&&!hasPdf?'inline-flex':'none';
  const open=$('dg66OpenDocument');if(open)open.style.display=hasPdf?'inline-flex':'none';
  const sent=(type==='booking'?row.confirmation_email_sent:row.receipt_email_sent)===true;
@@ -51,7 +56,7 @@ window.dg66OpenDocument=async function(){
  const kind=$('dg66Kind')?.value||'booking',id=$('dg66Target')?.value;
  const row=(kind==='booking'?bookList():payList()).find(x=>x.id===id);
  if(!row)return alert('Seleziona una prenotazione o un pagamento.');
- const path=kind==='booking'?row.confirmation_storage_path:row.receipt_storage_path;
+ const path=kind==='booking'?row.confirmation_storage_path:(row.receipt_professional_path||row.receipt_storage_path);
  if(!path)return alert('Nessun PDF archiviato per questo documento.');
  if(typeof SUPA_URL==='undefined'||typeof accessHeaders!=='function')return alert('Sessione gestionale non disponibile.');
  // Open the blank tab synchronously, within the user's click, to avoid iOS/Safari pop-up blocking.
@@ -60,13 +65,24 @@ window.dg66OpenDocument=async function(){
  viewingDocument=true;if(btn)btn.disabled=true;
  if(tab){tab.document.title='Verifica PDF DELGROSSO';tab.document.body.textContent='Preparazione del documento PDF...';}
  try{
-  const endpoint=kind==='booking'?'send-booking-confirmation':'send-payment-receipt';
-  const payload=kind==='booking'?{action:'signed_url',bookingId:id}:{action:'signed_url',path};
-  const response=await fetch(SUPA_URL+'/functions/v1/'+endpoint,{method:'POST',headers:accessHeaders(),body:JSON.stringify(payload),cache:'no-store'});
+  // Read an existing archived PDF through operator-only Supabase Storage.
+  // This avoids an extra Edge Function request which can fail on iPhone.
+  const clean=String(path).trim();
+  if(!clean||clean.startsWith('/')||clean.includes('\\')||clean.split('/').some(x=>!x||x==='..'||x==='.'))
+    throw Error('Percorso del documento non valido.');
+  const objectPath=clean.split('/').map(encodeURIComponent).join('/');
+  const response=await fetch(SUPA_URL+'/storage/v1/object/sign/ricevute-prenotazioni/'+objectPath,{
+   method:'POST',headers:{...accessHeaders(),'Content-Type':'application/json'},
+   body:JSON.stringify({expiresIn:600}),cache:'no-store'
+  });
   const data=await response.json().catch(()=>({}));
-  if(!response.ok||!data.success||!data.signedUrl)throw Error(data.error||'Impossibile aprire il documento.');
-  const url=new URL(data.signedUrl, SUPA_URL);
-  if(url.protocol!=='https:'||url.origin!==new URL(SUPA_URL).origin||!url.pathname.includes('/storage/v1/object/sign/ricevute-prenotazioni/'))throw Error('URL documento non riconosciuto.');
+  if(!response.ok)throw Error(data.error||data.message||'Servizio archivio non disponibile: HTTP '+response.status);
+  let signed=String(data.signedURL||data.signedUrl||'');
+  if(signed.startsWith('/object/sign/'))signed=SUPA_URL+'/storage/v1'+signed;
+  else if(signed.startsWith('/storage/v1/'))signed=SUPA_URL+signed;
+  const url=new URL(signed, SUPA_URL);
+  if(url.protocol!=='https:'||url.origin!==new URL(SUPA_URL).origin||!url.pathname.startsWith('/storage/v1/object/sign/ricevute-prenotazioni/')||!url.searchParams.has('token'))
+   throw Error('Collegamento PDF non valido.');
   if(tab)tab.location.replace(url.href);else window.location.assign(url.href);
   if(box)box.textContent='PDF aperto per il controllo. Verifica contenuto e importi prima di reinviare.';
  }catch(e){
@@ -100,7 +116,7 @@ window.dg66ResendEmail=async function(){
  const p=payList().find(x=>x.id===id),b=kind==='booking'?findBooking(id):findBooking(p?.prenotazione_id),r=kind==='booking'?b:p;
  if(!r||!b)return alert('Seleziona un documento.');
  if(!email(b.email))return alert('Il cliente non ha un indirizzo email valido.');
- const path=kind==='booking'?r.confirmation_storage_path:r.receipt_storage_path;
+ const path=kind==='booking'?r.confirmation_storage_path:(r.receipt_professional_path||r.receipt_storage_path);
  if(!path)return alert('PDF non archiviato: genera prima la conferma o la ricevuta reale dal gestionale.');
  if(!confirm('Inviare nuovamente il documento già archiviato a '+b.email+'?'))return;
  const box=$('dg66EmailState');if(box)box.textContent='Invio in corso...';
