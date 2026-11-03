@@ -43,17 +43,5 @@ BEGIN
       r.policyname,r.schemaname,r.tablename,v_using,v_check);
   END LOOP;
 
-  SELECT count(*) INTO v_count FROM pg_policies
-  WHERE schemaname='public'
-    AND tablename IN (
-      'dg_notification_reads','dg_operator_communications',
-      'dg_whatsapp_trip_invites_v61','dg_whatsapp_optins_v61'
-    )
-    AND (coalesce(qual,'') LIKE '%auth.uid()%'
-      OR coalesce(with_check,'') LIKE '%auth.uid()%')
-    AND (coalesce(qual,'') NOT LIKE '%( SELECT auth.uid() AS uid)%'
-      OR coalesce(with_check,'') NOT LIKE '%( SELECT auth.uid() AS uid)%');
-  -- Do not error based on prettified Postgres expression formatting; separately
-  -- verify with pg_policies and Supabase performance advisors after deployment.
 END
 $v76$;
