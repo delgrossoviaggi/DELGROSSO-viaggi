@@ -1286,7 +1286,7 @@ body{background:#f3f7fc!important;color:#102f58!important}
 
 <section class="page" id="page-prenotazioni">
   <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
-  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
+  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="attive" selected>Attive (escluse annullate)</option><option value="">Tutte, incluse annullate</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
 </section>
 
@@ -2051,8 +2051,8 @@ window.printTripClosure360=async function(tripId){const v=(state.viaggi||[]).fin
 
 function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
- const rows=state.prenotazioni.filter(b=>(!q||(JSON.stringify(b)+' '+tripName(b.viaggio_id)).toLowerCase().includes(q))&&(!st||b.stato===st));
- $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">✏️ Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+ const rows=state.prenotazioni.filter(b=>(!q||(JSON.stringify(b)+' '+tripName(b.viaggio_id)).toLowerCase().includes(q))&&(st==='attive'?!/annull|cancel|storn|rimbors/i.test(String(b.stato||'')):(!st||b.stato===st)));
+ $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">✏️ Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
 }
 
 // === DELGROSSO: spostamento prenotati tra date mantenendo gli stessi posti ===
@@ -2959,29 +2959,43 @@ async function cancelBooking(id){
  }catch(e){toast('Impossibile annullare la prenotazione: '+e.message,false)}
 }
 async function deleteBooking(id){
- if(!confirm("ATTENZIONE: eliminare definitivamente questa prenotazione? L'operazione non è reversibile."))return;
- const b=state.prenotazioni.find(x=>x.id===id);
- if(!b)return toast('Prenotazione non trovata',false);
+ const b=(state.prenotazioni||[]).find(x=>x.id===id);
+ if(!b)return toast('Prenotazione non trovata. Aggiorna l’elenco.',false);
+ if(window.dgBookingDeleteBusy)return toast('Eliminazione o annullamento già in corso.',false);
+ const linked=(state.pagamenti||[]).filter(p=>p.prenotazione_id===id);
+ const name=String(b.cliente||b.cliente_nome||'Cliente').trim();
+ const ref=String(b.codice||b.confirmation_number||b.id_prenotazione||id.slice(0,8));
+ const warning=linked.length
+  ?'Sono presenti '+linked.length+' movimenti contabili. La prenotazione NON verrà cancellata definitivamente: verrà ANNULLATA, i posti liberati e pagamenti e ricevute conservati.'
+  :'Senza pagamenti o registrazioni di invio collegate, la prenotazione sarà ELIMINATA definitivamente. Se il server rileva documenti contabili o invii già registrati, verrà invece ANNULLATA e conservata.';
+ if(!confirm('GESTIONE PRENOTAZIONE DELGROSSO\\n\\nCliente: '+name+'\\nRiferimento: '+ref+'\\n\\n'+warning+'\\n\\nConfermi di procedere?'))return;
+ window.dgBookingDeleteBusy=true;
+ let outcome;
  try{
-   // Usa la RPC esistente quando disponibile: è la via preferibile perché
-   // può gestire anche le tabelle collegate.
-   const r=await rpc('dg_delete_booking',{p_booking_id:id});
-   closeModal();
-   toast(r?.mode==='eliminata'?'Prenotazione eliminata definitivamente':'Prenotazione rimossa');
-   await loadAll();
- }catch(rpcError){
-   // Fallback: libera i posti e prova la cancellazione diretta.
-   try{await rpc('dg_sync_booking_seats',{p_booking_id:id,p_seats:[]})}catch(_){}
-   try{
-     await api('prenotazioni',`id=eq.${id}`,{method:'DELETE'});
-     closeModal();
-     toast('Prenotazione eliminata');
-     await loadAll();
-   }catch(deleteError){
-     toast('Eliminazione non riuscita: '+deleteError.message,false);
-     log('DELETE PRENOTAZIONE RPC: '+rpcError.message+' | REST: '+deleteError.message);
-   }
+   // Only the protected server RPC may delete or cancel. No direct REST fallback:
+   // an RPC failure must never first free seats or discard linked accounting.
+   outcome=await rpc('dg_delete_booking',{p_booking_id:id});
+   if(!outcome||String(outcome.booking_id)!==String(id)||!['eliminata','annullata'].includes(outcome.mode))
+     throw new Error('Il server non ha confermato la cancellazione o l’annullamento.');
+   // Read back the authoritative result instead of trusting HTTP 200 alone.
+   const check=await api('prenotazioni','select=id,stato,posti&id=eq.'+encodeURIComponent(id),{noCache:true});
+   if(!Array.isArray(check))throw new Error('Non è stato possibile verificare lo stato aggiornato.');
+   if(outcome.mode==='eliminata'&&check.length)throw new Error('La prenotazione risulta ancora presente nel database.');
+   if(outcome.mode==='annullata'&&!(check.length===1&&check[0].stato==='Annullata'&&Number(check[0].posti)===0))
+     throw new Error('L’annullamento non risulta confermato nel database.');
+ }catch(error){
+   toast('Operazione non confermata: '+(error?.message||'controlla la connessione e aggiorna la pagina'),false);
+   log('ELIMINA PRENOTAZIONE: '+(error?.message||String(error)));
+   window.dgBookingDeleteBusy=false;
+   return;
  }
+ window.dgBookingDeleteBusy=false;
+ closeModal();
+ toast(outcome.mode==='eliminata'
+  ?'✅ Prenotazione eliminata definitivamente e posti liberati.'
+  :'✅ Prenotazione ANNULLATA e posti liberati. Pagamenti, ricevute e storico conservati: scegli “Tutte, incluse annullate” per visualizzarla.');
+ try{await loadAll(true);}
+ catch(error){toast('Operazione eseguita, ma l’elenco non si è aggiornato. Premi Aggiorna: '+(error?.message||''),false);}
 }
 function openPaymentModal(pre=''){const b=state.prenotazioni.find(x=>x.id===pre)||state.prenotazioni[0]||{};const client=String(b.cliente||'').trim(),trip=b.viaggio_id||'';openModal('Registra pagamento',`<div class="form-grid"><div class="field"><label>Cliente</label><select id="p_client">${paymentClientOptions(client)}</select></div><div class="field"><label>Viaggio</label><select id="p_trip">${paymentTripOptions(trip)}</select></div><div class="field full"><label>Prenotazione del cliente per questo viaggio</label><select id="p_booking">${paymentBookingOptions(client,trip,pre)}</select></div><div class="field"><label>Tipo movimento</label><select id="p_type"><option>Acconto</option><option>Saldo</option><option>Rimborso</option></select></div><div class="field"><label>Importo €</label><input id="p_amount" type="number" step=".01"></div><div class="field"><label>Metodo</label><select id="p_method"><option>Contanti</option><option>Bonifico</option><option>POS</option><option>PayPal</option><option>Altro</option></select></div><div class="field"><label>Data pagamento</label><input id="p_date" type="date" value="${romeISODate()}"></div><div class="field full"><label>Note</label><textarea id="p_note"></textarea></div></div><div class="statusline" style="margin-top:8px" id="p_summary">Seleziona cliente e viaggio per associare correttamente l'acconto.</div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-green" onclick="savePayment()">✓ Registra pagamento</button>`);$('p_client').addEventListener('change',syncPaymentBookings);$('p_trip').addEventListener('change',syncPaymentBookings);$('p_booking').addEventListener('change',updatePaySummary);updatePaySummary()}
 function updatePaySummary(){const b=state.prenotazioni.find(x=>x.id===$('p_booking')?.value);if(!b){if($('p_summary'))$('p_summary').textContent="Seleziona cliente e viaggio per associare correttamente l'acconto.";return}if($('p_client'))$('p_client').value=String(b.cliente||'').trim();if($('p_trip'))$('p_trip').value=b.viaggio_id||'';$('p_summary').textContent=`${tripName(b.viaggio_id)} · Totale ${money(b.totale)} · Già pagato ${money(b.pagato)} · Residuo ${money(b.saldo)}`}
@@ -5413,12 +5427,12 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
   // Prenotazioni: vista speciale per le riserve aziendali.
   window.renderBookings=function(){
     const q=($('bookSearch')?.value||'').toLowerCase(),st=$('bookFilter')?.value||'';
-    const rows=(state.prenotazioni||[]).filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
+    const rows=(state.prenotazioni||[]).filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(st==='attive'?!/annull|cancel|storn|rimbors/i.test(String(b.stato||'')):(!st||b.stato===st)));
     $('bookingsTable').innerHTML=rows.map(b=>{
       const company=companyBooking(b),rowClass=company?' class="dg-company-row"':'';
       const moneyCols=company?'<td><span class="pill company">GRATUITA</span></td><td>€ 0,00</td><td>€ 0,00</td>':`<td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td>`;
       const status=company?'<span class="pill company">🎟️ Riservata DELGROSSO</span>':`<span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span>`;
-      const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button>`;
+      const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button>`;
       return `<tr${rowClass}><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente||b.cliente_nome||'Cliente')}${company?'<br><small>Riserva aziendale gratuita</small>':`<br><small>${esc(b.telefono||'')}</small>`}</td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td>${moneyCols}<td>${status}</td><td>${actions}</td></tr>`;
     }).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
   };
