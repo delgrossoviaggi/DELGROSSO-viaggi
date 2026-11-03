@@ -68,6 +68,8 @@ function perBus(v){
  return {all,people:[...withTel.values()].sort((a,b)=>a.names[0].localeCompare(b.names[0],'it')),missing};
 }
 const linkFor=v=>(getState()?.whatsappInvites||[]).find(i=>i.trip_id===v.id)?.invite_url||'';
+const revokedWhatsApp=tel=>(getState()?.whatsappOptins||[]).some(o=>o.revoked_at&&validPhone(o.phone)===tel);
+
 function renderNotifications(){
  const elem=$('dg68BookingsBox');if(!elem)return;
  const now=Date.now(),wk=now-7*86400000;
@@ -87,17 +89,19 @@ function renderRoster(){
   cnt+=data.all.length;contacts+=data.people.length;pax+=data.all.reduce((n,b)=>n+Number(b.posti||0),0);missing+=data.missing;
   const persons=data.people.map(rec=>{
    const approved=consentsLoaded&&rec.bookings.some(b=>consents.has(b.id+'|'+v.id));
-   const invite=approved&&validLink;
+   const declined=revokedWhatsApp(rec.tel);
+   const invite=validLink&&!declined;
    const key=esc(v.id)+'|'+esc(rec.tel);
-   const actions=approved
-    ? '<button type="button" class="btn btn-primary btn-sm" data-dg68-invite="'+key+'" '+(invite?'':'disabled title="Salva prima il link di questo bus"')+'>Invita</button>'
-    : '<button type="button" class="btn btn-secondary btn-sm" data-dg68-request="'+key+'">Chiedi consenso</button>'+
-      '<button type="button" class="btn btn-secondary btn-sm" data-dg68-consent="'+key+'" '+(consentsLoaded?'':'disabled title="Consensi non verificabili"')+'>✓ Registra consenso</button>';
-   return '<div class="dg68-line"><div><b>'+esc(rec.names.join(' / '))+'</b><small>+'+esc(rec.tel)+' · '+rec.pax+' posti · '+esc(rec.stops.join(', ')||'Fermata da verificare')+(rec.bookings.length>1?' · '+rec.bookings.length+' prenotazioni':'')+'</small><small class="'+(approved?'dg68-ok':'dg68-muted')+'">'+(approved?'✓ Consenso al gruppo registrato':'Consenso al gruppo non ancora registrato')+'</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">'+actions+'</div></div>';
+   // Sharing an optional group link is not the same as adding the customer to a group.
+   // Never mark consent accepted when the operator merely opens the WhatsApp chat.
+   const actions='<button type="button" class="btn btn-primary btn-sm" data-dg68-invite="'+key+'" '+(invite?'':'disabled title="'+(declined?'Cliente con contatto WhatsApp revocato':'Salva prima il link del gruppo di questo bus')+'"')+'>Invita con link</button>'+
+      (!approved&&!declined&&consentsLoaded?'<button type="button" class="btn btn-secondary btn-sm" data-dg68-consent="'+key+'">Registra consenso già ricevuto</button>':'');
+   const status=declined?'Contatto WhatsApp revocato: non inviare':approved?'✓ Consenso specifico al gruppo registrato':'Il cliente sceglie liberamente se entrare tramite link';
+   return '<div class="dg68-line"><div><b>'+esc(rec.names.join(' / '))+'</b><small>+'+esc(rec.tel)+' · '+rec.pax+' posti · '+esc(rec.stops.join(', ')||'Fermata da verificare')+(rec.bookings.length>1?' · '+rec.bookings.length+' prenotazioni':'')+'</small><small class="'+(approved?'dg68-ok':'dg68-muted')+'">'+status+'</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">'+actions+'</div></div>';
   }).join('');
-  const pending=data.people.filter(rec=>!consentsLoaded||!rec.bookings.some(b=>consents.has(b.id+'|'+v.id))).length;
+  const available=data.people.filter(rec=>!revokedWhatsApp(rec.tel)).length;
   return '<div class="dg68-group"><div class="dg68-group-head"><div><h4>'+esc(label)+' · '+esc(v.titolo||v.destinazione||'Viaggio')+'</h4><small>'+data.all.length+' prenotazioni · '+data.people.length+' numeri unici · '+data.missing+' senza telefono</small></div><div><span class="'+(validLink?'dg68-ok':'dg68-muted')+'">'+(validLink?'✓ Link invito salvato':'Link gruppo non inserito')+'</span><button type="button" class="btn btn-secondary btn-sm" data-dg68-link="'+esc(v.id)+'">Gestisci link</button></div></div>'+
- (pending?'<p class="dg68-note" style="padding:9px;margin:4px 0">Consensi da verificare: <strong>'+pending+'</strong>. Premi “Chiedi consenso”, invia manualmente il messaggio, e solo dopo una risposta positiva usa “Registra consenso”. Poi si abilita “Invita”.</p>':'')+
+ '<p class="dg68-note" style="padding:9px;margin:4px 0"><strong>'+available+'</strong> recapiti invitabili. Premi “Invita con link” per preparare un messaggio individuale: il cliente decide se entrare, vedendo il proprio numero condiviso nel gruppo. Nessun ingresso né invio è automatico. Per aggiungere direttamente qualcuno al gruppo è invece necessario un consenso specifico documentato.</p>'+
  (persons||'<div class="dg68-empty">Nessun numero WhatsApp valido per questo bus.</div>')+'</div>';
  }).join('');
  stats.innerHTML='<div class="dg68-metrics"><span><b>'+cnt+'</b> prenotazioni</span><span><b>'+pax+'</b> posti prenotati</span><span><b>'+contacts+'</b> numeri unici</span><span><b>'+missing+'</b> prenotazioni senza telefono</span></div>';
@@ -178,11 +182,12 @@ async function recordGroupConsent(id,tel){
 }
 function invite(id,tel){
  const v=getTrip(id),data=v?perBus(v):null,person=data?.people.find(p=>p.tel===tel),link=v?linkFor(v):'';
- if(!person||!consentsLoaded||!person.bookings.some(b=>consents.has(b.id+'|'+id)))return show('Invito non disponibile: verifica il consenso specifico al gruppo.',true);
+ if(!person)return show('Prenotato con telefono non disponibile.',true);
+ if(revokedWhatsApp(tel))return show('Il cliente ha revocato i contatti WhatsApp: non inviare inviti.',true);
  if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{10,}$/.test(link))return show('Salva prima un link di invito valido per il bus.',true);
- const name=person.names[0];const m='DELGROSSO VIAGGI & LIMOUSINE BUS\n\nGentile '+name+', per gli aggiornamenti del viaggio '+tripLabel(v)+' ('+groupLabel(v,groupTrips(rootId(v)).indexOf(v))+') puoi scegliere di unirti al gruppo WhatsApp tramite questo link:\n'+link+'\n\nL’adesione è volontaria; gli altri membri potranno vedere il tuo numero di telefono.\n\nDELGROSSO VIAGGI';
+ const name=person.names[0];const m='DELGROSSO VIAGGI & LIMOUSINE BUS\n\nGentile '+name+', per ricevere gli aggiornamenti organizzativi del viaggio '+tripLabel(v)+' ('+groupLabel(v,groupTrips(rootId(v)).indexOf(v))+') ti invitiamo, se lo desideri, a entrare nel gruppo WhatsApp del tuo autobus.\n\nTocca il link solo se vuoi partecipare: entrando nel gruppo il tuo numero di telefono sarà visibile agli altri partecipanti. La partecipazione è facoltativa.\n'+link+'\n\nSe preferisci non entrare, riceverai le comunicazioni essenziali del viaggio tramite i contatti concordati.\n\nDELGROSSO VIAGGI';
  manualChat(tel,m);
- show('Chat aperta con invito pronto. Devi scegliere l’account Business e premere Invia.');
+ show('Invito volontario pronto in chat. Devi inviarlo tu da WhatsApp Business; il cliente entrerà nel gruppo soltanto se apre il link.');
 }
 function attach(){
  const section=$('page-whatsapp');if(!section||section.dataset.dg68Ready)return;
@@ -221,7 +226,7 @@ window.dg68FocusGroupConsent=(bookingId,tripId)=>{
  const button=actions.find(el=>[el.dataset.dg68Request,el.dataset.dg68Consent,el.dataset.dg68Invite].includes(key));
  (button||list)?.scrollIntoView?.({behavior:'smooth',block:'center'});
  button?.focus?.();
- show('Per questo prenotato premi “Chiedi consenso”; dopo una risposta SI reale, usa “Registra consenso”, quindi “Invita”.');
+ show('Premi “Invita con link” per invitare il prenotato senza inserirlo direttamente nel gruppo. Se hai già un consenso specifico documentato, puoi anche registrarlo.');
 };
 // Keep the V61 link editor and V68 roster synchronized immediately after a save.
 window.dg68RenderGroups=renderRoster;
