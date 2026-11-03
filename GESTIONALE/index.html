@@ -1757,10 +1757,10 @@ function startAutoSync(){
     if(document.visibilityState!=='visible'||!authSession||syncBusy||loadAllBusy)return;
     const mobile=window.matchMedia('(max-width:768px)').matches;
     const operational=['prenotazioni','controlroom','posti','pagamenti','noleggi','caricamento','flotta'].includes(state.page);
-    if(mobile&&!operational&&Date.now()-dgLastAutoMobile<90000)return;
+    if(mobile&&!operational&&Date.now()-dgLastAutoMobile<180000)return;
     if(mobile)dgLastAutoMobile=Date.now();
-    await loadAll(true,true);
-  },30000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy)loadAll(true)},{passive:true})}}
+    await loadAll(false,true);
+  },90000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy && Date.now()-dgLastRefreshAt>45000)loadAll(false,true)},{passive:true})}}
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
 function go(page){if(!document.getElementById('page-'+page))page='dashboard';window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
@@ -1797,6 +1797,7 @@ function dgPurgeLegacySensitive73(){
 }
 dgPurgeLegacySensitive73();
 let dg59FleetLastFetched=0;
+let dgLastRefreshAt=0;
 async function loadAll(forceFresh=false,background=false){
   if(forceFresh)dgGetCache.clear();
   if(loadAllBusy){loadAllQueued=true;return {ok:false,queued:true}}
@@ -1813,25 +1814,45 @@ async function loadAll(forceFresh=false,background=false){
     ['manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc'],['anomalie_gestionale','select=*&order=created_at.desc'],['checklist_mezzi','select=*&order=data_check.desc,created_at.desc'],['dg_blocchi_flotta','select=*'],
     ['operatori_gestionale','select=*&order=nome.asc'],['fornitori','select=*&order=ragione_sociale.asc'],['lista_attesa','select=*&order=created_at.asc'],['crm_attivita','select=*&order=created_at.desc'],['documenti_gestionali','select=*&order=created_at.desc'],['cassa_trasferimenti','select=*&order=created_at.desc'],['dg_quote_transfers_v61','select=*&order=created_at.desc&limit=500'],['dg_whatsapp_inbox_v61','select=*&order=received_at.desc&limit=200'],['dg_whatsapp_trip_invites_v61','select=*'],['dg_whatsapp_optins_v61','select=*'],['dg_alert_operativi','select=*&order=data_evento.asc'],['dg_viaggi_redditivita','select=*&order=data_partenza.desc'],['dg_viaggi_chiusure','select=*&order=chiusa_at.desc'],['dg_system_health','select=*']
   ];
+
+  // V74: refresh only operational and visible-page tables while in background.
+  // Unfetched tables keep their exact in-memory state, including private records.
+  const dgDataAliases={"viaggi":"viaggi","viaggi_fermate":"viaggiFermate","prenotazioni":"prenotazioni","clienti":"clienti","pagamenti":"pagamenti","flotta":"flotta","notifiche":"notifiche","assistente_eventi":"assistenteEventi","dg_assistente_acconti":"assistenteAcconti","accessi_checkin":"checkin","preventivi":"preventivi","noleggi_bus":"noleggi","noleggi_bus_mezzi":"noleggiMezzi","noleggi_bus_pagamenti":"noleggiPagamenti","dg_cassa_operatori":"cassaOperatori","prenotazione_posti":"prenotazionePosti","attivita_gestionale":"attivita","scadenze_gestionale":"scadenze","audit_log_gestionale":"audit","archivio_documenti":"archivioDocumenti","economia_movimenti":"economia","carburante_flotta":"carburante","manutenzioni_flotta":"manutenzioni","anomalie_gestionale":"anomalie","checklist_mezzi":"checklist","dg_blocchi_flotta":"dgBlocchi","operatori_gestionale":"operatori","fornitori":"fornitori","lista_attesa":"listaAttesa","crm_attivita":"crmAttivita","documenti_gestionali":"documentiGestionali","cassa_trasferimenti":"cassaTrasferimenti","dg_quote_transfers_v61":"quoteTransfers","dg_whatsapp_inbox_v61":"whatsappInbox","dg_whatsapp_trip_invites_v61":"whatsappInvites","dg_whatsapp_optins_v61":"whatsappOptins","dg_alert_operativi":"alertOperativi","dg_viaggi_redditivita":"redditivitaViaggi","dg_viaggi_chiusure":"viaggiChiusure","dg_system_health":"systemHealth"};
+  const dgFastCore=new Set(["viaggi","viaggi_fermate","prenotazioni","pagamenti","prenotazione_posti","notifiche","noleggi_bus","noleggi_bus_pagamenti","economia_movimenti","dg_alert_operativi"]);
+  const dgPageExtras={"whatsapp":["dg_whatsapp_trip_invites_v61","dg_whatsapp_optins_v61","dg_whatsapp_inbox_v61"],"controlroom":["accessi_checkin","dg_blocchi_flotta"],"operativo":["accessi_checkin","dg_assistente_acconti"],"agenda":["scadenze_gestionale","attivita_gestionale"],"flotta":["flotta","carburante_flotta","manutenzioni_flotta","checklist_mezzi"],"cassa":["dg_cassa_operatori","cassa_trasferimenti","dg_quote_transfers_v61"],"contabilitaquote":["dg_cassa_operatori","dg_quote_transfers_v61"],"preventivi":["preventivi"],"clienti":["clienti","crm_attivita"],"documenti":["archivio_documenti","documenti_gestionali"],"pro":["dg_viaggi_redditivita","dg_system_health","dg_viaggi_chiusure"],"sentinella":["dg_system_health","anomalie_gestionale","checklist_mezzi"],"amministrazione":["audit_log_gestionale","operatori_gestionale"],"noleggi":["noleggi_bus_mezzi"],"pagamenti":["dg_cassa_operatori"],"economia":["dg_viaggi_redditivita","cassa_trasferimenti"],"crm":["clienti","crm_attivita","lista_attesa"],"fornitori":["fornitori"],"backup":["audit_log_gestionale"],"assistente":["assistente_eventi","dg_assistente_acconti"]};
+  const dgExtras=new Set(dgPageExtras[state.page]||[]);
+  const dgActiveSpecs=background
+    ?specs.filter(([name])=>dgFastCore.has(name)||dgExtras.has(name)):specs;
   const dg59ReuseFleet=background && window.matchMedia('(max-width:768px)').matches
     && state.page!=='flotta' && (state.flotta||[]).length>0
     && Date.now()-dg59FleetLastFetched<120000;
-  const results=await Promise.allSettled(specs.map(x=>
+  const results=await Promise.allSettled(dgActiveSpecs.map(x=>
     dg59ReuseFleet && x[0]==='flotta' ? Promise.resolve(state.flotta) : api(x[0],x[1])
   ));
-  if(!dg59ReuseFleet && results[5]?.status==='fulfilled') dg59FleetLastFetched=Date.now();
+  const fleetIndex=dgActiveSpecs.findIndex(x=>x[0]==='flotta');
+  if(fleetIndex>=0&&!dg59ReuseFleet && results[fleetIndex]?.status==='fulfilled') dg59FleetLastFetched=Date.now();
   const data={}, failed=[];
-  results.forEach((r,i)=>{const name=specs[i][0]; if(r.status==='fulfilled') data[name]=r.value||[]; else {data[name]=state[name]||[]; failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}});
-  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],operatori:data.operatori_gestionale||[],fornitori:data.fornitori||[],listaAttesa:data.lista_attesa||[],crmAttivita:data.crm_attivita||[],documentiGestionali:data.documenti_gestionali||[],cassaTrasferimenti:data.cassa_trasferimenti||[],quoteTransfers:data.dg_quote_transfers_v61||[],whatsappInbox:data.dg_whatsapp_inbox_v61||[],whatsappInvites:data.dg_whatsapp_trip_invites_v61||[],whatsappOptins:data.dg_whatsapp_optins_v61||[],alertOperativi:data.dg_alert_operativi||[],redditivitaViaggi:data.dg_viaggi_redditivita||[],viaggiChiusure:data.dg_viaggi_chiusure||[],systemHealth:data.dg_system_health||[],syncErrors:failed,online:failed.length<specs.length});
+  if(background)for(const [name] of specs){
+    if(!dgActiveSpecs.some(([requested])=>requested===name))
+      data[name]=state[dgDataAliases[name]||name]||[];
+  }
+  results.forEach((r,i)=>{const name=dgActiveSpecs[i][0];
+    if(r.status==='fulfilled')data[name]=r.value||[];
+    else {data[name]=state[dgDataAliases[name]||name]||[];
+      failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}
+  });
+  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],operatori:data.operatori_gestionale||[],fornitori:data.fornitori||[],listaAttesa:data.lista_attesa||[],crmAttivita:data.crm_attivita||[],documentiGestionali:data.documenti_gestionali||[],cassaTrasferimenti:data.cassa_trasferimenti||[],quoteTransfers:data.dg_quote_transfers_v61||[],whatsappInbox:data.dg_whatsapp_inbox_v61||[],whatsappInvites:data.dg_whatsapp_trip_invites_v61||[],whatsappOptins:data.dg_whatsapp_optins_v61||[],alertOperativi:data.dg_alert_operativi||[],redditivitaViaggi:data.dg_viaggi_redditivita||[],viaggiChiusure:data.dg_viaggi_chiusure||[],systemHealth:data.dg_system_health||[],syncErrors:failed,online:failed.length<dgActiveSpecs.length});
   if(typeof window.dg48AfterLoadAll==='function')window.dg48AfterLoadAll(data.notifiche||[],failed.find(x=>x.table==='notifiche')||null);
   try{if(typeof dgApplyOperatorProfile==='function')dgApplyOperatorProfile();}catch{}
-  if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<specs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
-  if(failed.length===specs.length){if(dgRestoreSafeCache73())log('Modalità offline limitata: caricati solo viaggi/flotta/fermate non sensibili');else log('Cache sicura non disponibile: nessun dato personale salvato sul dispositivo')}
-  markSynced();
+  if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<dgActiveSpecs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
+  if(failed.length===dgActiveSpecs.length){if(dgRestoreSafeCache73())log('Modalità offline limitata: caricati solo viaggi/flotta/fermate non sensibili');else log('Cache sicura non disponibile: nessun dato personale salvato sul dispositivo')}
+  markSynced();dgLastRefreshAt=Date.now();
   try{if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;await rpc('dg_reconcile_payments_economia',{});}}catch(e){log('Riconciliazione Economia: '+e.message)}
   dgSaveSafeCache73();
-  renderPage(state.page);updateBadge();initFleetCarousels();if(typeof renderPro==='function')renderPro();
-  try{if(typeof window.dg44Render==='function')window.dg44Render()}catch(e){console.warn('Dashboard foto flotta',e)}
+  renderPage(state.page);updateBadge();
+  if(!background||state.page==='flotta'||state.page==='dashboard')initFleetCarousels();
+  if(state.page==='pro'&&typeof renderPro==='function')renderPro();
+  try{if(state.page==='dashboard'&&typeof window.dg44Render==='function')window.dg44Render()}catch(e){console.warn('Dashboard foto flotta',e)}
   if(failed.length)toast('Sincronizzazione parziale: '+failed.length+' modulo/i non disponibili. Gli altri restano operativi.',false);
   return {ok:failed.length===0,failed};
   }finally{
