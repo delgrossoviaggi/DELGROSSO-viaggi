@@ -19,7 +19,7 @@ function mount(){
  '<button type="button" class="btn btn-secondary" onclick="dg66RefreshEmail()">↻ Controlla email</button> '+
  '<button type="button" id="dg66SmtpCheck" class="btn btn-secondary" onclick="dg66CheckSmtp()">🔒 Verifica connessione SMTP</button> '+
  '<button type="button" id="dg66ResendBtn" class="btn btn-primary" onclick="dg66ResendEmail()">✉️ Reinvia documento già archiviato</button> '+
- '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Rigenera conferma PDF mancante</button> '+
+ '<button type="button" id="dg66GenerateMissing" class="btn btn-secondary" onclick="dg66GenerateMissing()" style="display:none">📄 Archivia conferma non ancora generata</button> '+
  '<button type="button" id="dg66OpenDocument" class="btn btn-secondary" onclick="dg66OpenDocument()" style="display:none">👁 Apri e verifica PDF</button>';
  parent.after(div);
  $('dg66Kind')?.addEventListener('change',window.dg66RefreshEmail);
@@ -49,7 +49,14 @@ window.dg66RefreshEmail=function(){fill();const type=$('dg66Kind')?.value||'book
  if(!row){box.textContent='Seleziona prima un documento.';const button=$('dg66GenerateMissing');if(button)button.style.display='none';const open=$('dg66OpenDocument');if(open)open.style.display='none';const resend=$('dg66ResendBtn');if(resend)resend.disabled=true;return}
  const b=type==='booking'?row:findBooking(row.prenotazione_id);
  const hasPdf=!!(type==='booking'?row.confirmation_storage_path:(row.receipt_professional_path||row.receipt_storage_path));
- const button=$('dg66GenerateMissing');if(button)button.style.display=type==='booking'&&!hasPdf?'inline-flex':'none';
+ const previouslyGenerated=type==='booking'&&!!row.confirmation_generated_at;
+ const button=$('dg66GenerateMissing');
+ if(button){
+  button.style.display=type==='booking'&&!hasPdf?'inline-flex':'none';
+  button.disabled=!!previouslyGenerated;
+  button.title=previouslyGenerated?'La generazione è già registrata: verifica prima l’archivio per evitare documenti duplicati.':
+   'Crea un documento soltanto se non risulta alcuna generazione precedente.';
+ }
  const open=$('dg66OpenDocument');if(open)open.style.display=hasPdf?'inline-flex':'none';
  const refund=type==='payment'&&/^rimborso$/i.test(String(row.tipo||''));
  const resend=$('dg66ResendBtn');if(resend){
@@ -58,7 +65,7 @@ window.dg66RefreshEmail=function(){fill();const type=$('dg66Kind')?.value||'book
  const sent=(type==='booking'?row.confirmation_email_sent:row.receipt_email_sent)===true;
  const err=type==='booking'?row.confirmation_email_error:row.receipt_email_error;
  box.innerHTML='<b>Destinatario:</b> '+esc(b?.email||'mancante')+
-  ' · <b>PDF:</b> '+(hasPdf?'percorso archiviato; apri per verificare':'nessun percorso PDF registrato')+
+  ' · <b>PDF:</b> '+(hasPdf?'percorso archiviato; apri per verificare':(previouslyGenerated?'GENERATO in precedenza, ma SENZA percorso archiviato: verifica prima di emettere nuovamente':'Non risulta generato né archiviato'))+
   ' · <b>Tipo:</b> '+esc(type==='booking'?'Conferma':row.tipo||'Pagamento')+
   ' · <b>Invio:</b> '+(sent?'segnato come inviato':'non verificato')+
   (err?'<div style="color:#a12">Errore: '+esc(err).slice(0,200)+'</div>':'')+
@@ -205,6 +212,7 @@ window.dg66GenerateMissing=async function(){
  const local=bookList().find(b=>b.id===bookingId);
  if(!local)return alert('Seleziona una prenotazione.');
  if(local.confirmation_storage_path)return alert('La conferma risulta già archiviata: usa il reinvio.');
+ if(local.confirmation_generated_at)return alert('La conferma risulta già generata, ma manca il percorso archiviato. Non creare un duplicato: controlla prima l’archivio storico e gli invii.');
  const destination=String(local.email||'').trim();
  if(!confirm('Rigenerare e archiviare la conferma della prenotazione '+(local.codice||local.confirmation_number||'')+'?'+(email(destination)?'\nIl server tenterà anche l’invio a '+destination+'.':'\nSenza email valida, il documento sarà soltanto archiviato.')+'\nQuesta operazione NON crea una nuova prenotazione e NON cambia i posti.'))return;
  const box=$('dg66EmailState'),button=$('dg66GenerateMissing');
@@ -218,6 +226,7 @@ window.dg66GenerateMissing=async function(){
   const info=await context.json().catch(()=>({}));
   if(!context.ok||!info.success)throw new Error(info.error||'Impossibile verificare la prenotazione.');
   if(info.booking?.confirmation_storage_path)throw new Error('Una conferma è già archiviata. Controlla il documento prima di procedere.');
+  if(info.booking?.confirmation_generated_at)throw new Error('Generazione precedente rilevata dal server: emissione bloccata per evitare duplicati.');
   const generator=await ensureReceiptGenerator();
   const pdf=await generator.generate(bookingReceiptData(info.booking||{},info.trip||{}));
   const raw=new Uint8Array(await pdf.arrayBuffer());
