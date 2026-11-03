@@ -1,0 +1,47 @@
+name: V76 archive security and performance checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'GESTIONALE/index.html'
+      - 'GESTIONALE/dg66-email-verifica.js'
+      - 'GESTIONALE/dg75-integrita.js'
+      - 'GESTIONALE/sw.js'
+      - 'tests/gestionale-v76-archives-smoke.mjs'
+      - 'tests/gestionale-v74-health-smoke.mjs'
+      - 'supabase/patches/v76_rls_initplan_operator_comms_20261103.sql'
+      - '.github/workflows/gestionale-v76.yml'
+  pull_request:
+    paths:
+      - 'GESTIONALE/index.html'
+      - 'GESTIONALE/dg66-email-verifica.js'
+      - 'GESTIONALE/dg75-integrita.js'
+      - 'GESTIONALE/sw.js'
+      - 'tests/gestionale-v76-archives-smoke.mjs'
+      - 'tests/gestionale-v74-health-smoke.mjs'
+      - 'supabase/patches/v76_rls_initplan_operator_comms_20261103.sql'
+      - '.github/workflows/gestionale-v76.yml'
+permissions:
+  contents: read
+jobs:
+  archive-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify V76 archive filters and RLS scope
+        run: node tests/gestionale-v76-archives-smoke.mjs
+      - name: Verify V75 seat integrity
+        run: node tests/gestionale-v75-integrity-smoke.mjs
+      - name: Verify V74 mobile performance and PDF UI
+        run: node tests/gestionale-v74-health-smoke.mjs
+      - name: Verify historical PDF operator recovery
+        run: node tests/admin-recovery-smoke.mjs
+      - name: Verify deletion and accounting protections
+        run: node tests/booking-delete-safe-smoke.mjs
+      - name: Verify WhatsApp manual group invitation
+        run: node tests/whatsapp-consent-invite-smoke.mjs
