@@ -10,7 +10,7 @@ const end=html.indexOf('  const dg59ReuseFleet=',start);
 assert.ok(start>0&&end>start,'Main synchronization config cannot be isolated');
 const syncSource=html.slice(start,end)+'\nglobalThis.audit={specs,dgDataAliases,dgActiveSpecs};';
 new vm.Script(syncSource);
-const run=(page,background)=>vm.runInNewContext(syncSource,{state:{page},background,Set}).audit;
+const run=(page,background)=>vm.runInNewContext(syncSource,{state:{page},background,Set});
 const full=run('dashboard',false),dashboard=run('dashboard',true),whatsapp=run('whatsapp',true),fleet=run('flotta',true),finance=run('pagamenti',true);
 assert.ok(full.specs.length>=35,'Full refresh must still cover the core system');
 assert.equal(full.dgActiveSpecs.length,full.specs.length,'Manual full refresh must retain ALL tables');
