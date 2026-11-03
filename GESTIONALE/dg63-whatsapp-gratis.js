@@ -22,6 +22,7 @@ const canceled=b=>!!b.riserva_aziendale||/annull|cancel|storn/i.test(String(b.st
 function bookings(){return (state.prenotazioni||[]).filter(b=>!canceled(b)&&phone(b.telefono)&&upcoming(trip(b)));}
 function optedIn(b){return (state.whatsappOptins||[]).some(o=>!o.revoked_at&&phone(o.phone)===phone(b.telefono))}
 function hasGroupConsent(b){return !!b&&typeof window.dg68HasGroupConsent==='function'&&window.dg68HasGroupConsent(b.id,b.viaggio_id)}
+function revokedWhatsApp(b){return !!b&&(state.whatsappOptins||[]).some(o=>o.revoked_at&&phone(o.phone)===phone(b.telefono))}
 function payments(b){return (state.pagamenti||[]).filter(p=>p.prenotazione_id===b.id&&Number(p.importo)>0&&!/annull|rimbors|storn|failed|rifiutat/i.test(String(p.stato||'')+' '+String(p.tipo||''))).sort((a,b)=>String(b.data_pagamento||b.created_at||'').localeCompare(String(a.data_pagamento||a.created_at||'')))}
 function nameTrip(b){const v=trip(b);return String(v?.titolo||v?.destinazione||'Viaggio')}
 function item(b,label){return `<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${esc(nameTrip(b))} · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${label}</small></div><div class="dg63-item-buttons"><button class="btn btn-primary btn-sm" type="button" onclick="dg63SelectBooking('${b.id}','${label.includes('Acconto')?'deposit':label.includes('Saldo')?'balance':'confirmation'}')">Prepara</button></div></div>`}
@@ -50,8 +51,8 @@ function renderInviteRoster(){
  const persons=bookings().filter(b=>b.viaggio_id===id).sort((a,b)=>String(a.cliente||'').localeCompare(String(b.cliente||'')));
  const invite=(state.whatsappInvites||[]).find(i=>i.trip_id===id)?.invite_url||'';
  box.innerHTML='<div class="dg63-info">'+(t?'Prenotati con telefono per '+esc(t.titolo||t.destinazione||'il viaggio')+': <b>'+persons.length+'</b>':'Seleziona un viaggio.')+(invite?' · <b>Invito salvato</b>':' · <b>Prima crea il gruppo dall’app WhatsApp Business e salva il link.</b>')+'</div>'+
- (persons.some(b=>!hasGroupConsent(b))?'<div class="dg63-info">Per i clienti senza consenso premi <b>Gestisci consenso</b>: si aprirà il contatto nella sezione Gruppi viaggio. Prima chiedi l’adesione al gruppo, poi registra la risposta positiva e usa <b>Invita</b>. Non è necessario salvare i numeri nella rubrica.</div>':'')+
- (persons.length?persons.map(b=>`<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${Number(b.posti)||0} pax · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${hasGroupConsent(b)?'✓ Consenso specifico al gruppo registrato':'Consenso gruppo da richiedere o registrare'}</small></div><button type="button" class="btn btn-secondary btn-sm" onclick="dg63InviteBooking('${b.id}')">${invite&&hasGroupConsent(b)?'Invita':'Gestisci consenso'}</button></div>`).join(''):'<div class="empty">Nessuna prenotazione attiva con telefono per questo viaggio.</div>');
+ '<div class="dg63-info">Il link è un invito volontario: apri la chat del singolo prenotato, invia tu il messaggio da WhatsApp Business e il cliente potrà decidere se entrare. Non devi salvare i numeri nella rubrica; chi ha revocato i contatti WhatsApp non va invitato.</div>'+
+ (persons.length?persons.map(b=>`<div class="dg63-item"><div class="dg63-item-title"><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>${Number(b.posti)||0} pax · ${esc(b.fermata_partenza||'Fermata da verificare')}</small><small>${revokedWhatsApp(b)?'Contatto WhatsApp revocato':hasGroupConsent(b)?'✓ Consenso specifico registrato':'Adesione facoltativa tramite link'}</small></div><button type="button" class="btn btn-secondary btn-sm" ${revokedWhatsApp(b)?'disabled title="Contatto WhatsApp revocato"':''} onclick="dg63InviteBooking('${b.id}')">${invite?'Invita con link':'Gestisci link'}</button></div>`).join(''):'<div class="empty">Nessuna prenotazione attiva con telefono per questo viaggio.</div>');
 }
 function defaultPreview(b,kind){
  if(!b)return '';
@@ -69,7 +70,7 @@ function defaultPreview(b,kind){
  }
  if(kind==='invitation'){
   const url=(state.whatsappInvites||[]).find(t=>t.trip_id===b.viaggio_id)?.invite_url;
-  return url?text+`per gli aggiornamenti del viaggio ${tripTitle} puoi scegliere liberamente di unirti al gruppo WhatsApp:\n${url}\n\nLa partecipazione è facoltativa. Gli altri partecipanti potranno vedere il tuo numero di telefono.`:'';
+  return url?text+`per ricevere gli aggiornamenti organizzativi del viaggio ${tripTitle} puoi entrare, se lo desideri, nel gruppo WhatsApp del tuo autobus:\n${url}\n\nL'adesione è facoltativa. Entrando nel gruppo il tuo numero di telefono sarà visibile agli altri partecipanti. Se preferisci non entrare, riceverai le comunicazioni essenziali attraverso i recapiti concordati.`:'';
  }
  return '';
 }
@@ -78,10 +79,10 @@ function updatePreview(){
  ta.value=defaultPreview(b,k);
  const send=$('dg63ManualSend'),receipt=k==='receipt',invite=k==='invitation',due=k==='deposit'||k==='balance';
  const moneyBlock=(k==='deposit'&&Number(b?.pagato||0)>0)||(k==='balance'&&Number(b?.saldo||0)<=0);
- const withoutConsent=b&&((due&&!optedIn(b))||(invite&&!hasGroupConsent(b)));
+ const withoutConsent=b&&((due&&!optedIn(b))||(invite&&revokedWhatsApp(b)));
  const canSend=!!b&&!!phone(b.telefono)&&!!ta.value&&!moneyBlock&&!withoutConsent;
  if(send)send.disabled=!canSend;
- const info=$('dg63PreviewInfo');if(info){info.textContent=!b?'Seleziona una prenotazione.':withoutConsent?(invite?'Registra prima il consenso specifico al gruppo nel riquadro Gruppi viaggio.':'Registra prima il consenso al contatto WhatsApp verificato.'):moneyBlock?'La situazione contabile non giustifica questo promemoria. Verifica prima il pagamento.':receipt&&!ta.value?'Seleziona una ricevuta registrata, quindi apri e salva il PDF da allegare in WhatsApp.':invite&&!ta.value?'Nessun link d’invito salvato per questo viaggio.':k==='confirmation'&&!/conferm/i.test(String(b.stato||''))?'La prenotazione non risulta confermata: verrà indicata soltanto come richiesta registrata.':'Anteprima pronta: controlla i dati, poi premi Apri chat. Nessun messaggio viene inviato automaticamente.';info.className='statusline '+(canSend?'info':'warn')}
+ const info=$('dg63PreviewInfo');if(info){info.textContent=!b?'Seleziona una prenotazione.':withoutConsent?(invite?'Il cliente ha revocato i contatti WhatsApp: non inviare.':'Registra prima il consenso al contatto WhatsApp verificato.'):moneyBlock?'La situazione contabile non giustifica questo promemoria. Verifica prima il pagamento.':receipt&&!ta.value?'Seleziona una ricevuta registrata, quindi apri e salva il PDF da allegare in WhatsApp.':invite&&!ta.value?'Nessun link d’invito salvato per questo viaggio.':k==='confirmation'&&!/conferm/i.test(String(b.stato||''))?'La prenotazione non risulta confermata: verrà indicata soltanto come richiesta registrata.':'Anteprima pronta: controlla i dati, poi premi Apri chat. Nessun messaggio viene inviato automaticamente.';info.className='statusline '+(canSend?'info':'warn')}
 }
 function afterRender(){renderQueue();renderReceipts();renderInviteRoster();updatePreview();renderRental();}
 window.dg63SelectBooking=(id,kind)=>{
@@ -99,6 +100,7 @@ window.dg63OpenChat=()=>{
  const t=$('dg61WaPreview')?.value||'';
  if(!b||!phone(b.telefono)||!t)return window.toast?.('Messaggio non pronto. Verifica il cliente e i dati.',false);
  if($('dg63ManualSend')?.disabled)return window.toast?.('Prima risolvi il controllo indicato nell’anteprima.',false);
+ if(k==='invitation'&&revokedWhatsApp(b))return window.toast?.('Contatto WhatsApp revocato: invito bloccato.',false);
  if(k==='receipt'&&!window.confirm('Hai già aperto la ricevuta reale e sei pronto ad allegare il PDF nella chat? Il collegamento NON allega file automaticamente.'))return;
  const url='https://wa.me/'+phone(b.telefono)+'?text='+encodeURIComponent(t.replace(/\n\[ATTENZIONE OPERATORE:[^\n]*\]$/,''));
  // Direct user click; no network requests or automatic send.
@@ -115,10 +117,14 @@ window.dg63OpenReceipt=()=>{
 };
 window.dg63InviteBooking=id=>{
  const b=booking(id);if(!b)return window.toast?.('Prenotazione non disponibile.',false);
+ if(revokedWhatsApp(b))return window.toast?.('Il contatto WhatsApp è stato revocato: non inviare il link.',false);
  const link=(state.whatsappInvites||[]).find(t=>t.trip_id===b.viaggio_id)?.invite_url;
- if(!hasGroupConsent(b)||!link){
-  if(typeof window.dg68FocusGroupConsent==='function')return window.dg68FocusGroupConsent(b.id,b.viaggio_id);
-  return window.toast?.('Apri Gruppi viaggio per chiedere e registrare il consenso specifico al gruppo.',false);
+ if(!link){
+  const t=$('dg61GroupTrip');if(t)t.value=b.viaggio_id;
+  window.dg61RenderGroupLink?.();
+  $('dg61GroupUrl')?.scrollIntoView?.({behavior:'smooth',block:'center'});
+  $('dg61GroupUrl')?.focus?.();
+  return window.toast?.('Salva prima il link WhatsApp per il bus di questo viaggio.',false);
  }
  window.dg63SelectBooking(id,'invitation');window.dg63OpenChat();
 };
