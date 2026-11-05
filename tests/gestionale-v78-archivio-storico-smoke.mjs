@@ -11,7 +11,7 @@ const sw=read('GESTIONALE/sw.js');
 new vm.Script(src,{filename:'dg78-archivio-storico.js'});
 assert.ok(html.includes('dg78-archivio-storico.js?v=78'),'V78 module must be loaded');
 assert.ok(desk.includes('window.dg78RenderArchive?.()'),'Booking updates must retain the V78 archive widget');
-assert.ok(sw.includes('delgrosso-gestionale-v78-archive-reconciliation'),'Mobile cached scripts must be invalidated');
+assert.ok(/delgrosso-gestionale-v(78-archive-reconciliation|79-departure-pdf)/.test(sw),'Mobile cached scripts must be invalidated');
 assert.ok(!src.includes('/rest/v1/'),'Archive review must not write bookings through the Data API');
 assert.ok(!src.includes("method:'DELETE'")&&!src.includes("method:'PUT'"),'Archive review must not mutate or delete original PDFs');
 
