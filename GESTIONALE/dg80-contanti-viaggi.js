@@ -52,10 +52,10 @@ async function reload(){
 function rowTable(items){
  if(!items.length)return '<p class="dg80-empty">Nessun pagamento in contanti registrato per questo operatore.</p>';
  return '<div class="dg80-scroll"><table class="dg80-table"><thead><tr>'+
-  '<th>Data</th><th>Chi ha consegnato i soldi</th><th>Prenotazione</th><th>Tipo</th><th>Importo</th></tr></thead><tbody>'+
+  '<th>Data</th><th>Cliente registrato</th><th>Prenotazione</th><th>Tipo</th><th>Importo</th></tr></thead><tbody>'+
   items.map(m=>'<tr>'+
    '<td>'+esc(dateIT(m.date))+'</td>'+
-   '<td><b>'+esc(m.cliente)+'</b>'+(m.bookingStatus?'<small>'+esc(m.bookingStatus)+'</small>':'')+'</td>'+
+   '<td><b>'+esc(m.cliente)+'</b><small>Origine: '+esc(m.clienteOrigine||'da verificare')+'</small>'+(m.bookingStatus?'<small>'+esc(m.bookingStatus)+'</small>':'')+'</td>'+
    '<td>'+esc(m.booking||'—')+(m.bus>1?' <small>BUS '+esc(m.bus)+'</small>':'')+'</td>'+
    '<td>'+esc(m.tipo)+(m.refund?' <span class="dg80-red">· Uscita</span>':'')+'</td>'+
    '<td class="dg80-amount '+(m.amount<0?'dg80-red':'')+'">'+e(m.amount)+'</td>'+
@@ -64,7 +64,7 @@ function rowTable(items){
 function officerCard(group,key,label){
  const list=group.movements.filter(x=>x.owner===key);
  return '<div class="dg80-owner"><div class="dg80-owner-top"><strong>'+label+'</strong><b>'+e(group[key])+'</b></div>'+
-  '<div class="dg80-owner-sub">'+list.length+' movimenti · elenco dei clienti che hanno versato contanti</div>'+
+  '<div class="dg80-owner-sub">'+list.length+' movimenti · nominativi registrati sui pagamenti/prenotazioni</div>'+
   rowTable(list)+'</div>';
 }
 function groupCard(g,autoOpen){
