@@ -16,7 +16,7 @@ assert.ok(html.includes('dg79-partenza-pdf.js?v=79'));
 assert.ok(html.includes('dg79-riepilogo-partenza.js?v=79'));
 assert.ok(html.includes("dg79DownloadTripReport('"),'Trip rows must let the operator generate PDF');
 assert.ok(html.includes('window.dg79RenderToday?.()'),'Dashboard must surface the report on the departure date');
-assert.ok(sw.includes('delgrosso-gestionale-v79-departure-pdf'),'Mobile caches must be refreshed');
+assert.ok(/delgrosso-gestionale-v(79-departure-pdf|80-cash-by-trip)/.test(sw),'Mobile caches must be refreshed');
 assert.ok(uiSource.includes("{noCache:true}"),'Financial source must be reread from Supabase');
 assert.ok(!uiSource.includes("method:'PATCH'")&&!uiSource.includes("method:'POST'"),
  'Export must not change any booking, payment or financial data');
