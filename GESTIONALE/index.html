@@ -1870,7 +1870,7 @@ function restoreCacheFast(){
 function updateBadge(){const n=(state.notifiche||[]).filter(x=>!x.letto).length;const pill=$('notifBadge');if(pill)pill.textContent=n;const head=$('dg44-bell-count');if(head){const alerts=(state.alertOperativi||[]).filter(x=>!x.risolto&&!x.chiuso).length;head.textContent=n+alerts;head.hidden=(n+alerts)===0;}}
 function renderPage(p){
   try{
-    if(p==='dashboard')renderDashboard();
+    if(p==='dashboard'){renderDashboard();window.dg79RenderToday?.();}
     if(p==='viaggi')renderTrips();
     if(p==='caricamento')dg52RenderTripsManagement();
     if(p==='prenotazioni')renderBookings();
@@ -2009,6 +2009,7 @@ function renderTrips(){
      if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
      else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
    }
+   actions+=` <button type="button" class="btn btn-primary btn-sm" onclick="dg79DownloadTripReport('${v.id}')">📄 PDF partenza</button>`;
    actions+=` <button type="button" class="btn btn-sm dg47-delete" onclick="openTripDeleteDialog('${v.id}')">🗑 Elimina</button>`;
    return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b>${bisBadge}${closeBadge}<br><small>${esc(v.id_viaggio||v.destinazione)}</small>${groupInfo}</td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:560px">${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
@@ -7972,5 +7973,8 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="dg68-gruppi-viaggio.js?v=74" defer></script>
 <script src="dg75-integrita.js?v=78" defer></script>
 <script src="dg78-archivio-storico.js?v=78" defer></script>
+<script src="dg79-partenza-modello.js?v=79" defer></script>
+<script src="dg79-partenza-pdf.js?v=79" defer></script>
+<script src="dg79-riepilogo-partenza.js?v=79" defer></script>
 </body>
 </html>
