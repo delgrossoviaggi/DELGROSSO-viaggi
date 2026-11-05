@@ -1101,6 +1101,7 @@ body{background:#f3f7fc!important;color:#102f58!important}
 #dg69-agenda-shortcut:hover,#dg69-agenda-shortcut:focus-visible{background:#0b77d8;color:#fff;outline-offset:2px}
 @media(max-width:1000px){#dg69-agenda-shortcut{display:none}}
 </style>
+<link rel="stylesheet" href="dg80-contanti.css?v=80">
 </head>
 <body>
 <section id="login">
@@ -1127,6 +1128,7 @@ body{background:#f3f7fc!important;color:#102f58!important}
     <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
     <button data-page="clienti"><span class="ico">👤</span><span>Clienti</span></button>
     <button data-page="contabilitaquote"><span class="ico">▤</span><span>Quote Nicola / Raffaele</span></button>
+    <button data-page="contantiviaggi"><span class="ico">💶</span><span>Contanti per viaggio</span></button>
     <button data-page="pagamenti"><span class="ico">▣</span><span>Pagamenti</span></button>
     <button data-page="operativo"><span class="ico">⚙</span><span>Operativo</span></button>
     <button data-page="noleggi"><span class="ico">🚐</span><span>Noleggi</span></button>
@@ -1427,6 +1429,28 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 
 
 
+<section class="page" id="page-contantiviaggi">
+ <div class="section-title"><div><h2>💶 Contanti per viaggio · Nicola e Raffaele</h2>
+  <p class="section-subtitle">Ogni pagamento in contanti, per cliente e per viaggio. Controllo della cassa senza confondere incassi e passaggi di denaro.</p></div>
+  <div class="section-actions"><button type="button" class="btn btn-secondary" onclick="dg80RefreshCashTrips()">↻ Aggiorna da Supabase</button>
+  <button type="button" class="btn btn-primary" onclick="dg80ExportCashCSV()">↓ Scarica elenco Excel/CSV</button>
+  <button type="button" class="btn btn-secondary" onclick="window.print()">🖨️ Stampa</button></div>
+ </div>
+ <div class="dg80-shell">
+  <div class="dg80-intro"><b>Contanti ricevuti dai clienti, separati per operatore.</b> Apri un viaggio per vedere i clienti registrati nei pagamenti di Nicola e Raffaele, con importo e data. Il nominativo deriva dal pagamento o, se mancante, dalla prenotazione: può non coincidere con la persona che ha consegnato fisicamente il denaro. Acconti e saldi aumentano la cassa; i rimborsi la diminuiscono. I passaggi di contanti tra operatori sono riportati a parte e non generano nuovi incassi. <b>Non sono inclusi i noleggi né le spese aziendali.</b></div>
+  <div class="dg80-toolbar">
+   <label>Viaggio <select id="dg80TripSelect" onchange="dg80ApplyCashFilters()"><option value="">Tutti i viaggi</option></select></label>
+   <label>Cerca cliente o prenotazione <input id="dg80Search" type="search" placeholder="Nome, riferimento, destinazione…" oninput="dg80ApplyCashFilters()"></label>
+   <label class="dg80-checkbox"><input id="dg80ShowEmpty" type="checkbox" onchange="dg80ApplyCashFilters()"> Mostra anche viaggi senza incassi</label>
+  </div>
+  <div id="dg80CashMeta" class="dg80-muted" aria-live="polite"></div>
+  <div id="dg80CashMetrics" class="dg80-metrics"></div>
+  <div id="dg80CashResults"></div>
+  <div id="dg80Unlinked" class="dg80-panel" aria-live="polite"></div>
+  <div id="dg80PhysicalBalance" class="dg80-panel"></div>
+  <div id="dg80CashWarnings"></div>
+ </div>
+</section>
 <section class="page" id="page-contabilitaquote">
 <div class="section-title"><h2>Contabilità Quote · Nicola & Raffaele</h2><div class="section-actions"><button class="btn btn-secondary" onclick="dgQuoteRefresh()">↻ Aggiorna</button><button class="btn btn-primary" onclick="dgQuotePrint()">Stampa riepilogo</button><button class="btn btn-primary" onclick="dg61OpenQuoteTransfer()">⇄ Trasferisci quota</button></div></div>
 <div class="dgquote-wrap"><div class="dgquote-hint">Dati provenienti dai pagamenti caricati dal gestionale. I movimenti senza incassatore identificato restano <b>Da attribuire</b>. I trasferimenti di cassa non costituiscono nuovi incassi.</div>
@@ -1704,6 +1728,7 @@ async function signOut(reason=''){
   stopAutoSync();
   authSession=null;
   try{dgWipeSensitiveState73()}catch{}
+  try{window.dg80ResetCashTrips?.()}catch{}
   try{dgPurgeLegacySensitive73();dgLocalStorage.removeItem('dg_safe_cache_v73');dgLocalStorage.removeItem('dg_last_sync');dgLocalStorage.removeItem('dg_last_sync_ts')}catch{}
   if(typeof window.dg48ResetNotifications==='function')window.dg48ResetNotifications();
   dgSessionStorage.removeItem('dg_auth');dgSessionStorage.removeItem('dg_login');dgSessionStorage.removeItem('dg_operator');dgSessionStorage.removeItem('dg71_pinned_trips');
@@ -1764,7 +1789,7 @@ function startAutoSync(){
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
 function go(page){if(!document.getElementById('page-'+page))page='dashboard';window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
-const PAGE_META={caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],whatsapp:['WhatsApp Business','Richieste, promemoria e gruppi di viaggio'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
+const PAGE_META={contantiviaggi:['Contanti per viaggio','Incassi Nicola / Raffaele per viaggio e per cliente'],caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],whatsapp:['WhatsApp Business','Richieste, promemoria e gruppi di viaggio'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
 function updatePageChrome(page){const m=PAGE_META[page]||PAGE_META.dashboard;const t=$('topPageTitle'),s=$('topPageSubtitle'),c=$('pageCrumb');if(t)t.textContent=m[0];if(s)s.textContent=m[1];if(c)c.textContent=m[0];}
 
 window.go=go; updatePageChrome(state.page||'dashboard');
@@ -1878,6 +1903,7 @@ function renderPage(p){
     if(p==='clienti')renderClients();
     if(p==='pagamenti')renderPayments();
     if(p==='contabilitaquote')dgQuoteRender();
+    if(p==='contantiviaggi')window.dg80RenderCashTrips?.();
     if(p==='whatsapp'&&typeof window.dg61RenderWhatsApp==='function')window.dg61RenderWhatsApp();
     if(p==='operativo')renderOperativo();
     if(p==='noleggi')renderRentals();
@@ -4319,6 +4345,7 @@ function injectNav(){
       <button data-page="crm"><span class="ico">👥</span><span>Clienti & CRM</span></button>
       <button data-page="flotta"><span class="ico">🚍</span><span>Flotta</span></button>
       <button data-page="cassa"><span class="ico">€</span><span>Economia & Cassa</span></button>
+      <button data-page="contantiviaggi"><span class="ico">💶</span><span>Contanti per viaggio</span></button>
       <button data-page="documenti"><span class="ico">▤</span><span>Documenti</span></button>
       <div class="dg-nav-label">STRUMENTI</div>
       <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
@@ -4339,6 +4366,7 @@ function injectNav(){
       <button onclick="mobileGo('crm')">👥<span>Clienti & CRM</span></button>
       <button onclick="mobileGo('flotta')">🚍<span>Flotta</span></button>
       <button onclick="mobileGo('cassa')">€<span>Economia & Cassa</span></button>
+      <button onclick="mobileGo('contantiviaggi')">💶<span>Contanti viaggi</span></button>
       <button onclick="mobileGo('documenti')">📄<span>Documenti</span></button>
       <button onclick="mobileGo('preventivi')">📄<span>Preventivi</span></button>
       <button onclick="mobileGo('pagamenti')">💳<span>Pagamenti</span></button>
@@ -7976,5 +8004,7 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="dg79-partenza-modello.js?v=79" defer></script>
 <script src="dg79-partenza-pdf.js?v=79" defer></script>
 <script src="dg79-riepilogo-partenza.js?v=79" defer></script>
+<script src="dg80-contanti-modello.js?v=80" defer></script>
+<script src="dg80-contanti-viaggi.js?v=80" defer></script>
 </body>
 </html>
