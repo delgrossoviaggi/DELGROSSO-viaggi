@@ -72,7 +72,8 @@ function build(input={}){
   const rec={
    id:paymentId,amount,owner:who,refund:refund(p),
    date:txt(p.data_pagamento||p.created_at).slice(0,10),
-   cliente:txt(b?.cliente||b?.cliente_nome||p.cliente)||'Cliente non identificato',
+   cliente:txt(p.cliente||b?.cliente||b?.cliente_nome)||'Cliente non identificato',
+   clienteOrigine:txt(p.cliente)?'pagamento':b?'prenotazione':'nessuna anagrafica',
    booking:txt(b?.codice||b?.confirmation_number||b?.id_prenotazione||''),
    bookingStatus:closedBooking(b)?'Prenotazione annullata':'',
    tipo:txt(p.tipo)||'Pagamento',receipt:txt(p.receipt_number||p.ricevuta),
