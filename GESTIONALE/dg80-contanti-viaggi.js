@@ -173,9 +173,9 @@ window.dg80RenderCashTrips=function(){
 window.dg80RefreshCashTrips=reload;
 window.dg80ApplyCashFilters=function(){
  filters={
-  trip:$('#dg80TripSelect')?.value||'',
-  query:$('#dg80Search')?.value||'',
-  showEmpty:!!$('#dg80ShowEmpty')?.checked
+  trip:$('dg80TripSelect')?.value||'',
+  query:$('dg80Search')?.value||'',
+  showEmpty:!!$('dg80ShowEmpty')?.checked
  };
  renderOnly();
 };
