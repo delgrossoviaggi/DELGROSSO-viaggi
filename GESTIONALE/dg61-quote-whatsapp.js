@@ -5,9 +5,6 @@
 'use strict';
 const WA_BUSINESS='393208815899';
 const $=id=>document.getElementById(id);
-// Recover the authenticated Supabase user in this module's own scope.
-// The identically named helper in another IIFE is not visible here.
-const uid=()=>typeof authSession!=='undefined'?(authSession?.user?.id||null):null;
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const euro=n=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n)||0);
 const canManage=()=>typeof can==='function'&&can('cassa','write');
@@ -117,118 +114,18 @@ window.dg61OpenClient=phone=>safeWhatsAppChat(phone,'Buongiorno, siamo DELGROSSO
 window.dg61WorkInbox=async id=>{try{await api('dg_whatsapp_inbox_v61','id=eq.'+id,{method:'PATCH',body:{status:'in_lavorazione'}});await loadAll(true)}catch(e){toast(e.message,false)}};
 window.dg61CompleteInbox=async id=>{try{await api('dg_whatsapp_inbox_v61','id=eq.'+id,{method:'PATCH',body:{status:'completata'}});await loadAll(true)}catch(e){toast(e.message,false)}};
 window.dg61SendManualMessage=function(){const b=getBooking();if(!b)return toast('Scegli una prenotazione.',false);const kind=$('dg61WaKind').value;
- if(['deposit','balance'].includes(kind)){
+ if(['deposit','balance','invitation'].includes(kind)){
    const phone=normalizedPhone(b.telefono);
    const opt=(state.whatsappOptins||[]).find(x=>normalizedPhone(x.phone)===phone&&!x.revoked_at);
    if(!opt)return toast('Prima registra il consenso WhatsApp verificato del cliente.',false);
- }
- if(kind==='invitation'){
-   const phone=normalizedPhone(b.telefono);
-   if(!getInvite(b.viaggio_id))return toast('Salva prima il link del gruppo WhatsApp di questo autobus.',false);
-   if((state.whatsappOptins||[]).some(x=>normalizedPhone(x.phone)===phone&&x.revoked_at))
-    return toast('Questo cliente ha revocato il contatto WhatsApp: non inviare il link.',false);
  }
  if(kind==='receipt')alert('ATTENZIONE: il testo non contiene il PDF. Allega la ricevuta autentica dal gestionale prima di inviare.');
  safeWhatsAppChat(b.telefono,$('dg61WaPreview')?.value||preparedMessage(b,kind));
 };
 window.dg61CopyMessage=async()=>{const text=$('dg61WaPreview')?.value||'';try{await navigator.clipboard.writeText(text);toast('Messaggio copiato')}catch{toast('Copia non disponibile: seleziona il testo.',false)}};
-// WhatsApp Business on iPhone may paste a full shared message or an invite
-// with query parameters. Store only the canonical invitation, not the shared text.
-function dg61NormalizeGroupInvite(raw){
- const text=String(raw||'').normalize('NFKC').replace(/[\u200B-\u200D\u2060\uFEFF]/g,'').trim();
- const pattern=/(?:^|[\s*("'<>])((?:https?:\/\/)?(?:www\.)?chat\.whatsapp\.com\/(?:invite\/)?[A-Za-z0-9_-]{8,64})(?=$|[\s)"'<>/?#.,!?])/gi;
- for(const match of text.matchAll(pattern)){
-  try{
-   const rawUrl=match[1];
-   const u=new URL(/^https?:\/\//i.test(rawUrl)?rawUrl:'https://'+rawUrl);
-   if(u.hostname.toLowerCase()!=='chat.whatsapp.com'&&u.hostname.toLowerCase()!=='www.chat.whatsapp.com')continue;
-   const p=u.pathname.match(/^\/(?:invite\/)?([A-Za-z0-9_-]{8,64})\/?$/);
-   if(p)return 'https://chat.whatsapp.com/'+p[1];
-  }catch{}
- }
- return '';
-}
-window.dg61NormalizeGroupInvite=dg61NormalizeGroupInvite;
-// Do not erase a pasted but unsaved invite during automatic background sync.
-let dg61GroupLinkTrip='';
-let dg61GroupLinkLastShown='';
-window.dg61RenderGroupLink=()=>{
- const input=$('dg61GroupUrl'),trip=String($('dg61GroupTrip')?.value||'');
- if(!input)return;
- if(trip===dg61GroupLinkTrip&&input.value!==dg61GroupLinkLastShown)return;
- dg61GroupLinkTrip=trip;
- dg61GroupLinkLastShown=getInvite(trip);
- input.value=dg61GroupLinkLastShown;
-};
-let dg61SavingGroupLink=false;
-window.dg61SaveGroupLink=async()=>{
- if(dg61SavingGroupLink)return;
- const trip_id=$('dg61GroupTrip')?.value,input=$('dg61GroupUrl');
- if(!trip_id)return toast('Seleziona prima il viaggio o il BUS BIS.',false);
- const operatorId=uid();
- if(!operatorId)return toast('Sessione scaduta: accedi nuovamente al gestionale e riprova.',false);
- const url=dg61NormalizeGroupInvite(input?.value);
- if(!url){
-  input?.focus();
-  return toast('Link WhatsApp non riconosciuto. Copia tutto il link d’invito dal gruppo WhatsApp Business, non il nome del gruppo.',false);
- }
- if(input)input.value=url;
- const saveButton=document.querySelector('button[onclick="dg61SaveGroupLink()"]');
- dg61SavingGroupLink=true;
- if(saveButton)saveButton.disabled=true;
- try{
-  // The REST call enforces the authenticated session and operator RLS.
-  // Avoid an unrelated RPC preflight which may reject a perfectly valid saved link.
-  if(getInvite(trip_id)===url){
-   const existing=await api('dg_whatsapp_trip_invites_v61',
-    'select=trip_id,invite_url,updated_by&trip_id=eq.'+encodeURIComponent(trip_id),
-    {noCache:true});
-   if(Array.isArray(existing)&&existing.some(x=>String(x.trip_id)===String(trip_id)&&x.invite_url===url)){
-    dg61GroupLinkTrip=String(trip_id);
-    dg61GroupLinkLastShown=url;
-    window.dg68RenderGroups?.();
-    toast('Link del gruppo già salvato e verificato per questo bus.');
-    return;
-   }
-  }
-  const saved=await api('dg_whatsapp_trip_invites_v61','on_conflict=trip_id',{
-   method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},
-   body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:operatorId}
-  });
-  // An upsert may succeed with no representation. Verify that the row exists
-  // before deciding whether a retry or an operator permissions check is needed.
-  let confirmed=Array.isArray(saved)?saved.find(x=>String(x.trip_id)===String(trip_id)&&x.invite_url===url):null;
-  if(!confirmed){
-   const readBack=await api('dg_whatsapp_trip_invites_v61',
-    'select=trip_id,invite_url,updated_by&trip_id=eq.'+encodeURIComponent(trip_id),
-    {noCache:true});
-   confirmed=Array.isArray(readBack)?readBack.find(x=>String(x.trip_id)===String(trip_id)&&x.invite_url===url):null;
-  }
-  if(!confirmed)throw new Error('Supabase non ha confermato il salvataggio. Controlla i permessi WhatsApp del tuo operatore.');
-  const invites=state.whatsappInvites||[];
-  const idx=invites.findIndex(x=>x.trip_id===trip_id);
-  if(idx>=0)invites[idx]=confirmed;else invites.push(confirmed);
-  state.whatsappInvites=invites;
-  dg61GroupLinkTrip=String(trip_id);
-  dg61GroupLinkLastShown=url;
-  if(typeof window.dg68RenderGroups==='function')window.dg68RenderGroups();
-  toast('Link del gruppo WhatsApp salvato correttamente.');
-  try{await loadAll(true)}catch(refreshError){console.warn('Aggiornamento elenco gruppi non riuscito',refreshError)}
- }catch(e){
-  const msg=String(e?.message||'controlla la connessione e riprova.');
-  const explanation=/HTTP 401|JWT expired|invalid JWT|invalid claim/i.test(msg)
-   ?'Sessione scaduta: esci e accedi nuovamente al gestionale.'
-   :/HTTP 403|permission denied|42501|row-level security|violates row-level security|non ha confermato il salvataggio/i.test(msg)
-    ?'Supabase non autorizza il salvataggio: controllare permessi operatore e sessione. '+msg
-    :/HTTP 409|unique constraint|23505/i.test(msg)
-     ?'Un link risulta già associato a questo bus. Ricarica il gestionale e riprova. '+msg
-     :'Errore di salvataggio: '+msg;
-  toast(explanation,false);
- }finally{
-  dg61SavingGroupLink=false;
-  if(saveButton)saveButton.disabled=false;
- }
-};
+window.dg61RenderGroupLink=()=>{if($('dg61GroupUrl'))$('dg61GroupUrl').value=getInvite($('dg61GroupTrip')?.value)};
+window.dg61SaveGroupLink=async()=>{const trip_id=$('dg61GroupTrip')?.value,url=$('dg61GroupUrl')?.value.trim();if(!trip_id||!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{8,}$/.test(url))return toast('Inserisci un link invito valido creato nell’app.',false);
+ try{await api('dg_whatsapp_trip_invites_v61','on_conflict=trip_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:{trip_id,invite_url:url,updated_at:new Date().toISOString(),updated_by:uid()}});toast('Link salvato');await loadAll(true)}catch(e){toast('Salvataggio link: '+e.message,false)}};
 window.dg61CopyGroupLink=async()=>{const link=$('dg61GroupUrl')?.value||'';if(!link)return toast('Nessun invito salvato.',false);try{await navigator.clipboard.writeText(link);toast('Link copiato')}catch{toast('Copia link non disponibile',false)}};
 window.dg61SaveOptin=async()=>{const phone=normalizedPhone($('dg61OptPhone')?.value),source=$('dg61OptSource')?.value;if(!phone)return toast('Numero non valido.',false);if(!confirm('Confermi di aver verificato il consenso esplicito del cliente a essere contattato su WhatsApp?'))return;
  try{await api('dg_whatsapp_optins_v61','on_conflict=phone',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:{phone,customer_name:($('dg61OptName')?.value||'').trim(),consent_source:source,consent_at:new Date().toISOString(),revoked_at:null,updated_at:new Date().toISOString(),updated_by:uid()}});toast('Consenso registrato');await loadAll(true)}catch(e){toast(e.message,false)}};

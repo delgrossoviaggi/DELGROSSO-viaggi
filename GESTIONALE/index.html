@@ -1093,15 +1093,6 @@ body{background:#f3f7fc!important;color:#102f58!important}
 .dg68-empty{padding:13px;font-size:12px;color:#66778b}
 @media(max-width:700px){.dg68-filters{grid-template-columns:1fr}.dg68-line{flex-wrap:wrap}.dg68-line button{margin-top:4px}.dg68-group-head>div:last-child{width:100%}}
 </style>
-<style id="dg69-desktop-agenda-navigation">
-#dg44-sidebar-menu [data-dg44-target="agenda"]{background:#e9f4ff;border:1px solid #bfdfff;color:#124e83;font-weight:850}
-#dg44-sidebar-menu [data-dg44-target="agenda"]:hover,
-#dg44-sidebar-menu [data-dg44-target="agenda"].active{background:#0875db;color:#fff;border-color:#0875db}
-#dg69-agenda-shortcut{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:39px;padding:7px 12px;border:1px solid #bcd8f2;border-radius:10px;background:#ecf5ff;color:#0a477f;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
-#dg69-agenda-shortcut:hover,#dg69-agenda-shortcut:focus-visible{background:#0b77d8;color:#fff;outline-offset:2px}
-@media(max-width:1000px){#dg69-agenda-shortcut{display:none}}
-</style>
-<link rel="stylesheet" href="dg80-contanti.css?v=80">
 </head>
 <body>
 <section id="login">
@@ -1128,7 +1119,6 @@ body{background:#f3f7fc!important;color:#102f58!important}
     <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
     <button data-page="clienti"><span class="ico">👤</span><span>Clienti</span></button>
     <button data-page="contabilitaquote"><span class="ico">▤</span><span>Quote Nicola / Raffaele</span></button>
-    <button data-page="contantiviaggi"><span class="ico">💶</span><span>Contanti per viaggio</span></button>
     <button data-page="pagamenti"><span class="ico">▣</span><span>Pagamenti</span></button>
     <button data-page="operativo"><span class="ico">⚙</span><span>Operativo</span></button>
     <button data-page="noleggi"><span class="ico">🚐</span><span>Noleggi</span></button>
@@ -1288,7 +1278,7 @@ body{background:#f3f7fc!important;color:#102f58!important}
 
 <section class="page" id="page-prenotazioni">
   <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
-  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="attive" selected>Attive (escluse annullate)</option><option value="">Tutte, incluse annullate</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
+  <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
 </section>
 
@@ -1429,28 +1419,6 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 
 
 
-<section class="page" id="page-contantiviaggi">
- <div class="section-title"><div><h2>💶 Contanti per viaggio · Nicola e Raffaele</h2>
-  <p class="section-subtitle">Ogni pagamento in contanti, per cliente e per viaggio. Controllo della cassa senza confondere incassi e passaggi di denaro.</p></div>
-  <div class="section-actions"><button type="button" class="btn btn-secondary" onclick="dg80RefreshCashTrips()">↻ Aggiorna da Supabase</button>
-  <button type="button" class="btn btn-primary" onclick="dg80ExportCashCSV()">↓ Scarica elenco Excel/CSV</button>
-  <button type="button" class="btn btn-secondary" onclick="window.print()">🖨️ Stampa</button></div>
- </div>
- <div class="dg80-shell">
-  <div class="dg80-intro"><b>Contanti ricevuti dai clienti, separati per operatore.</b> Apri un viaggio per vedere i clienti registrati nei pagamenti di Nicola e Raffaele, con importo e data. Il nominativo deriva dal pagamento o, se mancante, dalla prenotazione: può non coincidere con la persona che ha consegnato fisicamente il denaro. Acconti e saldi aumentano la cassa; i rimborsi la diminuiscono. I passaggi di contanti tra operatori sono riportati a parte e non generano nuovi incassi. <b>Non sono inclusi i noleggi né le spese aziendali.</b></div>
-  <div class="dg80-toolbar">
-   <label>Viaggio <select id="dg80TripSelect" onchange="dg80ApplyCashFilters()"><option value="">Tutti i viaggi</option></select></label>
-   <label>Cerca cliente o prenotazione <input id="dg80Search" type="search" placeholder="Nome, riferimento, destinazione…" oninput="dg80ApplyCashFilters()"></label>
-   <label class="dg80-checkbox"><input id="dg80ShowEmpty" type="checkbox" onchange="dg80ApplyCashFilters()"> Mostra anche viaggi senza incassi</label>
-  </div>
-  <div id="dg80CashMeta" class="dg80-muted" aria-live="polite"></div>
-  <div id="dg80CashMetrics" class="dg80-metrics"></div>
-  <div id="dg80CashResults"></div>
-  <div id="dg80Unlinked" class="dg80-panel" aria-live="polite"></div>
-  <div id="dg80PhysicalBalance" class="dg80-panel"></div>
-  <div id="dg80CashWarnings"></div>
- </div>
-</section>
 <section class="page" id="page-contabilitaquote">
 <div class="section-title"><h2>Contabilità Quote · Nicola & Raffaele</h2><div class="section-actions"><button class="btn btn-secondary" onclick="dgQuoteRefresh()">↻ Aggiorna</button><button class="btn btn-primary" onclick="dgQuotePrint()">Stampa riepilogo</button><button class="btn btn-primary" onclick="dg61OpenQuoteTransfer()">⇄ Trasferisci quota</button></div></div>
 <div class="dgquote-wrap"><div class="dgquote-hint">Dati provenienti dai pagamenti caricati dal gestionale. I movimenti senza incassatore identificato restano <b>Da attribuire</b>. I trasferimenti di cassa non costituiscono nuovi incassi.</div>
@@ -1728,7 +1696,6 @@ async function signOut(reason=''){
   stopAutoSync();
   authSession=null;
   try{dgWipeSensitiveState73()}catch{}
-  try{window.dg80ResetCashTrips?.()}catch{}
   try{dgPurgeLegacySensitive73();dgLocalStorage.removeItem('dg_safe_cache_v73');dgLocalStorage.removeItem('dg_last_sync');dgLocalStorage.removeItem('dg_last_sync_ts')}catch{}
   if(typeof window.dg48ResetNotifications==='function')window.dg48ResetNotifications();
   dgSessionStorage.removeItem('dg_auth');dgSessionStorage.removeItem('dg_login');dgSessionStorage.removeItem('dg_operator');dgSessionStorage.removeItem('dg71_pinned_trips');
@@ -1782,14 +1749,14 @@ function startAutoSync(){
     if(document.visibilityState!=='visible'||!authSession||syncBusy||loadAllBusy)return;
     const mobile=window.matchMedia('(max-width:768px)').matches;
     const operational=['prenotazioni','controlroom','posti','pagamenti','noleggi','caricamento','flotta'].includes(state.page);
-    if(mobile&&!operational&&Date.now()-dgLastAutoMobile<180000)return;
+    if(mobile&&!operational&&Date.now()-dgLastAutoMobile<90000)return;
     if(mobile)dgLastAutoMobile=Date.now();
-    await loadAll(false,true);
-  },90000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy && Date.now()-dgLastRefreshAt>45000)loadAll(false,true)},{passive:true})}}
+    await loadAll(true,true);
+  },30000);if(!window.__dgVisibilitySync){window.__dgVisibilitySync=true;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible' && authSession && !syncBusy && !loadAllBusy)loadAll(true)},{passive:true})}}
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
 function go(page){if(!document.getElementById('page-'+page))page='dashboard';window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
-const PAGE_META={contantiviaggi:['Contanti per viaggio','Incassi Nicola / Raffaele per viaggio e per cliente'],caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],whatsapp:['WhatsApp Business','Richieste, promemoria e gruppi di viaggio'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
+const PAGE_META={caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],whatsapp:['WhatsApp Business','Richieste, promemoria e gruppi di viaggio'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
 function updatePageChrome(page){const m=PAGE_META[page]||PAGE_META.dashboard;const t=$('topPageTitle'),s=$('topPageSubtitle'),c=$('pageCrumb');if(t)t.textContent=m[0];if(s)s.textContent=m[1];if(c)c.textContent=m[0];}
 
 window.go=go; updatePageChrome(state.page||'dashboard');
@@ -1822,7 +1789,6 @@ function dgPurgeLegacySensitive73(){
 }
 dgPurgeLegacySensitive73();
 let dg59FleetLastFetched=0;
-let dgLastRefreshAt=0;
 async function loadAll(forceFresh=false,background=false){
   if(forceFresh)dgGetCache.clear();
   if(loadAllBusy){loadAllQueued=true;return {ok:false,queued:true}}
@@ -1839,45 +1805,25 @@ async function loadAll(forceFresh=false,background=false){
     ['manutenzioni_flotta','select=*&order=data_intervento.desc,created_at.desc'],['anomalie_gestionale','select=*&order=created_at.desc'],['checklist_mezzi','select=*&order=data_check.desc,created_at.desc'],['dg_blocchi_flotta','select=*'],
     ['operatori_gestionale','select=*&order=nome.asc'],['fornitori','select=*&order=ragione_sociale.asc'],['lista_attesa','select=*&order=created_at.asc'],['crm_attivita','select=*&order=created_at.desc'],['documenti_gestionali','select=*&order=created_at.desc'],['cassa_trasferimenti','select=*&order=created_at.desc'],['dg_quote_transfers_v61','select=*&order=created_at.desc&limit=500'],['dg_whatsapp_inbox_v61','select=*&order=received_at.desc&limit=200'],['dg_whatsapp_trip_invites_v61','select=*'],['dg_whatsapp_optins_v61','select=*'],['dg_alert_operativi','select=*&order=data_evento.asc'],['dg_viaggi_redditivita','select=*&order=data_partenza.desc'],['dg_viaggi_chiusure','select=*&order=chiusa_at.desc'],['dg_system_health','select=*']
   ];
-
-  // V74: refresh only operational and visible-page tables while in background.
-  // Unfetched tables keep their exact in-memory state, including private records.
-  const dgDataAliases={"viaggi":"viaggi","viaggi_fermate":"viaggiFermate","prenotazioni":"prenotazioni","clienti":"clienti","pagamenti":"pagamenti","flotta":"flotta","notifiche":"notifiche","assistente_eventi":"assistenteEventi","dg_assistente_acconti":"assistenteAcconti","accessi_checkin":"checkin","preventivi":"preventivi","noleggi_bus":"noleggi","noleggi_bus_mezzi":"noleggiMezzi","noleggi_bus_pagamenti":"noleggiPagamenti","dg_cassa_operatori":"cassaOperatori","prenotazione_posti":"prenotazionePosti","attivita_gestionale":"attivita","scadenze_gestionale":"scadenze","audit_log_gestionale":"audit","archivio_documenti":"archivioDocumenti","economia_movimenti":"economia","carburante_flotta":"carburante","manutenzioni_flotta":"manutenzioni","anomalie_gestionale":"anomalie","checklist_mezzi":"checklist","dg_blocchi_flotta":"dgBlocchi","operatori_gestionale":"operatori","fornitori":"fornitori","lista_attesa":"listaAttesa","crm_attivita":"crmAttivita","documenti_gestionali":"documentiGestionali","cassa_trasferimenti":"cassaTrasferimenti","dg_quote_transfers_v61":"quoteTransfers","dg_whatsapp_inbox_v61":"whatsappInbox","dg_whatsapp_trip_invites_v61":"whatsappInvites","dg_whatsapp_optins_v61":"whatsappOptins","dg_alert_operativi":"alertOperativi","dg_viaggi_redditivita":"redditivitaViaggi","dg_viaggi_chiusure":"viaggiChiusure","dg_system_health":"systemHealth"};
-  const dgFastCore=new Set(["viaggi","viaggi_fermate","prenotazioni","pagamenti","prenotazione_posti","notifiche","noleggi_bus","noleggi_bus_pagamenti","economia_movimenti","dg_alert_operativi"]);
-  const dgPageExtras={"whatsapp":["dg_whatsapp_trip_invites_v61","dg_whatsapp_optins_v61","dg_whatsapp_inbox_v61"],"controlroom":["accessi_checkin","dg_blocchi_flotta"],"operativo":["accessi_checkin","dg_assistente_acconti"],"agenda":["scadenze_gestionale","attivita_gestionale"],"flotta":["flotta","carburante_flotta","manutenzioni_flotta","checklist_mezzi"],"cassa":["dg_cassa_operatori","cassa_trasferimenti","dg_quote_transfers_v61"],"contabilitaquote":["dg_cassa_operatori","dg_quote_transfers_v61"],"preventivi":["preventivi"],"clienti":["clienti","crm_attivita"],"documenti":["archivio_documenti","documenti_gestionali"],"pro":["dg_viaggi_redditivita","dg_system_health","dg_viaggi_chiusure"],"sentinella":["dg_system_health","anomalie_gestionale","checklist_mezzi"],"amministrazione":["audit_log_gestionale","operatori_gestionale"],"noleggi":["noleggi_bus_mezzi"],"pagamenti":["dg_cassa_operatori"],"economia":["dg_viaggi_redditivita","cassa_trasferimenti"],"crm":["clienti","crm_attivita","lista_attesa"],"fornitori":["fornitori"],"backup":["audit_log_gestionale"],"assistente":["assistente_eventi","dg_assistente_acconti"]};
-  const dgExtras=new Set(dgPageExtras[state.page]||[]);
-  const dgActiveSpecs=background
-    ?specs.filter(([name])=>dgFastCore.has(name)||dgExtras.has(name)):specs;
   const dg59ReuseFleet=background && window.matchMedia('(max-width:768px)').matches
     && state.page!=='flotta' && (state.flotta||[]).length>0
     && Date.now()-dg59FleetLastFetched<120000;
-  const results=await Promise.allSettled(dgActiveSpecs.map(x=>
+  const results=await Promise.allSettled(specs.map(x=>
     dg59ReuseFleet && x[0]==='flotta' ? Promise.resolve(state.flotta) : api(x[0],x[1])
   ));
-  const fleetIndex=dgActiveSpecs.findIndex(x=>x[0]==='flotta');
-  if(fleetIndex>=0&&!dg59ReuseFleet && results[fleetIndex]?.status==='fulfilled') dg59FleetLastFetched=Date.now();
+  if(!dg59ReuseFleet && results[5]?.status==='fulfilled') dg59FleetLastFetched=Date.now();
   const data={}, failed=[];
-  if(background)for(const [name] of specs){
-    if(!dgActiveSpecs.some(([requested])=>requested===name))
-      data[name]=state[dgDataAliases[name]||name]||[];
-  }
-  results.forEach((r,i)=>{const name=dgActiveSpecs[i][0];
-    if(r.status==='fulfilled')data[name]=r.value||[];
-    else {data[name]=state[dgDataAliases[name]||name]||[];
-      failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}
-  });
-  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],operatori:data.operatori_gestionale||[],fornitori:data.fornitori||[],listaAttesa:data.lista_attesa||[],crmAttivita:data.crm_attivita||[],documentiGestionali:data.documenti_gestionali||[],cassaTrasferimenti:data.cassa_trasferimenti||[],quoteTransfers:data.dg_quote_transfers_v61||[],whatsappInbox:data.dg_whatsapp_inbox_v61||[],whatsappInvites:data.dg_whatsapp_trip_invites_v61||[],whatsappOptins:data.dg_whatsapp_optins_v61||[],alertOperativi:data.dg_alert_operativi||[],redditivitaViaggi:data.dg_viaggi_redditivita||[],viaggiChiusure:data.dg_viaggi_chiusure||[],systemHealth:data.dg_system_health||[],syncErrors:failed,online:failed.length<dgActiveSpecs.length});
+  results.forEach((r,i)=>{const name=specs[i][0]; if(r.status==='fulfilled') data[name]=r.value||[]; else {data[name]=state[name]||[]; failed.push({table:name,error:String(r.reason?.message||r.reason||'errore')});}});
+  Object.assign(state,{viaggi:data.viaggi||[],viaggiFermate:data.viaggi_fermate||[],prenotazioni:data.prenotazioni||[],clienti:data.clienti||[],pagamenti:data.pagamenti||[],flotta:data.flotta||[],notifiche:data.notifiche||[],assistenteEventi:data.assistente_eventi||[],assistenteAcconti:data.dg_assistente_acconti||[],checkin:data.accessi_checkin||[],preventivi:data.preventivi||[],impostazioni:[],noleggi:data.noleggi_bus||[],noleggiMezzi:data.noleggi_bus_mezzi||[],noleggiPagamenti:data.noleggi_bus_pagamenti||[],cassaOperatori:data.dg_cassa_operatori||[],prenotazionePosti:data.prenotazione_posti||[],attivita:data.attivita_gestionale||[],scadenze:data.scadenze_gestionale||[],audit:data.audit_log_gestionale||[],archivioDocumenti:data.archivio_documenti||[],economia:data.economia_movimenti||[],carburante:data.carburante_flotta||[],manutenzioni:data.manutenzioni_flotta||[],anomalie:data.anomalie_gestionale||[],checklist:data.checklist_mezzi||[],dgBlocchi:data.dg_blocchi_flotta||[],operatori:data.operatori_gestionale||[],fornitori:data.fornitori||[],listaAttesa:data.lista_attesa||[],crmAttivita:data.crm_attivita||[],documentiGestionali:data.documenti_gestionali||[],cassaTrasferimenti:data.cassa_trasferimenti||[],quoteTransfers:data.dg_quote_transfers_v61||[],whatsappInbox:data.dg_whatsapp_inbox_v61||[],whatsappInvites:data.dg_whatsapp_trip_invites_v61||[],whatsappOptins:data.dg_whatsapp_optins_v61||[],alertOperativi:data.dg_alert_operativi||[],redditivitaViaggi:data.dg_viaggi_redditivita||[],viaggiChiusure:data.dg_viaggi_chiusure||[],systemHealth:data.dg_system_health||[],syncErrors:failed,online:failed.length<specs.length});
   if(typeof window.dg48AfterLoadAll==='function')window.dg48AfterLoadAll(data.notifiche||[],failed.find(x=>x.table==='notifiche')||null);
   try{if(typeof dgApplyOperatorProfile==='function')dgApplyOperatorProfile();}catch{}
-  if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<dgActiveSpecs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
-  if(failed.length===dgActiveSpecs.length){if(dgRestoreSafeCache73())log('Modalità offline limitata: caricati solo viaggi/flotta/fermate non sensibili');else log('Cache sicura non disponibile: nessun dato personale salvato sul dispositivo')}
-  markSynced();dgLastRefreshAt=Date.now();
+  if(!failed.length){setStatus('live');log('Sincronizzazione completa: tutti i moduli online');}else if(failed.length<specs.length){setStatus('degraded',failed.map(x=>x.table).join(', '));log('Sincronizzazione parziale: '+failed.map(x=>x.table).join(', '));}else{setStatus('off','nessun modulo raggiungibile');log('Supabase non raggiungibile');}
+  if(failed.length===specs.length){if(dgRestoreSafeCache73())log('Modalità offline limitata: caricati solo viaggi/flotta/fermate non sensibili');else log('Cache sicura non disponibile: nessun dato personale salvato sul dispositivo')}
+  markSynced();
   try{if(!window.__dgEconomyReconciled){window.__dgEconomyReconciled=true;await rpc('dg_reconcile_payments_economia',{});}}catch(e){log('Riconciliazione Economia: '+e.message)}
   dgSaveSafeCache73();
-  renderPage(state.page);updateBadge();
-  if(!background||state.page==='flotta'||state.page==='dashboard')initFleetCarousels();
-  if(state.page==='pro'&&typeof renderPro==='function')renderPro();
-  try{if(state.page==='dashboard'&&typeof window.dg44Render==='function')window.dg44Render()}catch(e){console.warn('Dashboard foto flotta',e)}
+  renderPage(state.page);updateBadge();initFleetCarousels();if(typeof renderPro==='function')renderPro();
+  try{if(typeof window.dg44Render==='function')window.dg44Render()}catch(e){console.warn('Dashboard foto flotta',e)}
   if(failed.length)toast('Sincronizzazione parziale: '+failed.length+' modulo/i non disponibili. Gli altri restano operativi.',false);
   return {ok:failed.length===0,failed};
   }finally{
@@ -1895,7 +1841,7 @@ function restoreCacheFast(){
 function updateBadge(){const n=(state.notifiche||[]).filter(x=>!x.letto).length;const pill=$('notifBadge');if(pill)pill.textContent=n;const head=$('dg44-bell-count');if(head){const alerts=(state.alertOperativi||[]).filter(x=>!x.risolto&&!x.chiuso).length;head.textContent=n+alerts;head.hidden=(n+alerts)===0;}}
 function renderPage(p){
   try{
-    if(p==='dashboard'){renderDashboard();window.dg79RenderToday?.();}
+    if(p==='dashboard')renderDashboard();
     if(p==='viaggi')renderTrips();
     if(p==='caricamento')dg52RenderTripsManagement();
     if(p==='prenotazioni')renderBookings();
@@ -1903,7 +1849,6 @@ function renderPage(p){
     if(p==='clienti')renderClients();
     if(p==='pagamenti')renderPayments();
     if(p==='contabilitaquote')dgQuoteRender();
-    if(p==='contantiviaggi')window.dg80RenderCashTrips?.();
     if(p==='whatsapp'&&typeof window.dg61RenderWhatsApp==='function')window.dg61RenderWhatsApp();
     if(p==='operativo')renderOperativo();
     if(p==='noleggi')renderRentals();
@@ -2035,7 +1980,6 @@ function renderTrips(){
      if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
      else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
    }
-   actions+=` <button type="button" class="btn btn-primary btn-sm" onclick="dg79DownloadTripReport('${v.id}')">📄 PDF partenza</button>`;
    actions+=` <button type="button" class="btn btn-sm dg47-delete" onclick="openTripDeleteDialog('${v.id}')">🗑 Elimina</button>`;
    return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b>${bisBadge}${closeBadge}<br><small>${esc(v.id_viaggio||v.destinazione)}</small>${groupInfo}</td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:560px">${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
@@ -2099,8 +2043,8 @@ window.printTripClosure360=async function(tripId){const v=(state.viaggi||[]).fin
 
 function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
- const rows=state.prenotazioni.filter(b=>(!q||(JSON.stringify(b)+' '+tripName(b.viaggio_id)).toLowerCase().includes(q))&&(st==='attive'?!/annull|cancel|storn|rimbors/i.test(String(b.stato||'')):(!st||b.stato===st)));
- $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">✏️ Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+ const rows=state.prenotazioni.filter(b=>(!q||(JSON.stringify(b)+' '+tripName(b.viaggio_id)).toLowerCase().includes(q))&&(!st||b.stato===st));
+ $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">✏️ Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
 }
 
 // === DELGROSSO: spostamento prenotati tra date mantenendo gli stessi posti ===
@@ -3007,43 +2951,29 @@ async function cancelBooking(id){
  }catch(e){toast('Impossibile annullare la prenotazione: '+e.message,false)}
 }
 async function deleteBooking(id){
- const b=(state.prenotazioni||[]).find(x=>x.id===id);
- if(!b)return toast('Prenotazione non trovata. Aggiorna l’elenco.',false);
- if(window.dgBookingDeleteBusy)return toast('Eliminazione o annullamento già in corso.',false);
- const linked=(state.pagamenti||[]).filter(p=>p.prenotazione_id===id);
- const name=String(b.cliente||b.cliente_nome||'Cliente').trim();
- const ref=String(b.codice||b.confirmation_number||b.id_prenotazione||id.slice(0,8));
- const warning=linked.length
-  ?'Sono presenti '+linked.length+' movimenti contabili. La prenotazione NON verrà cancellata definitivamente: verrà ANNULLATA, i posti liberati e pagamenti e ricevute conservati.'
-  :'Senza pagamenti o registrazioni di invio collegate, la prenotazione sarà ELIMINATA definitivamente. Se il server rileva documenti contabili o invii già registrati, verrà invece ANNULLATA e conservata.';
- if(!confirm('GESTIONE PRENOTAZIONE DELGROSSO\\n\\nCliente: '+name+'\\nRiferimento: '+ref+'\\n\\n'+warning+'\\n\\nConfermi di procedere?'))return;
- window.dgBookingDeleteBusy=true;
- let outcome;
+ if(!confirm("ATTENZIONE: eliminare definitivamente questa prenotazione? L'operazione non è reversibile."))return;
+ const b=state.prenotazioni.find(x=>x.id===id);
+ if(!b)return toast('Prenotazione non trovata',false);
  try{
-   // Only the protected server RPC may delete or cancel. No direct REST fallback:
-   // an RPC failure must never first free seats or discard linked accounting.
-   outcome=await rpc('dg_delete_booking',{p_booking_id:id});
-   if(!outcome||String(outcome.booking_id)!==String(id)||!['eliminata','annullata'].includes(outcome.mode))
-     throw new Error('Il server non ha confermato la cancellazione o l’annullamento.');
-   // Read back the authoritative result instead of trusting HTTP 200 alone.
-   const check=await api('prenotazioni','select=id,stato,posti&id=eq.'+encodeURIComponent(id),{noCache:true});
-   if(!Array.isArray(check))throw new Error('Non è stato possibile verificare lo stato aggiornato.');
-   if(outcome.mode==='eliminata'&&check.length)throw new Error('La prenotazione risulta ancora presente nel database.');
-   if(outcome.mode==='annullata'&&!(check.length===1&&check[0].stato==='Annullata'&&Number(check[0].posti)===0))
-     throw new Error('L’annullamento non risulta confermato nel database.');
- }catch(error){
-   toast('Operazione non confermata: '+(error?.message||'controlla la connessione e aggiorna la pagina'),false);
-   log('ELIMINA PRENOTAZIONE: '+(error?.message||String(error)));
-   window.dgBookingDeleteBusy=false;
-   return;
+   // Usa la RPC esistente quando disponibile: è la via preferibile perché
+   // può gestire anche le tabelle collegate.
+   const r=await rpc('dg_delete_booking',{p_booking_id:id});
+   closeModal();
+   toast(r?.mode==='eliminata'?'Prenotazione eliminata definitivamente':'Prenotazione rimossa');
+   await loadAll();
+ }catch(rpcError){
+   // Fallback: libera i posti e prova la cancellazione diretta.
+   try{await rpc('dg_sync_booking_seats',{p_booking_id:id,p_seats:[]})}catch(_){}
+   try{
+     await api('prenotazioni',`id=eq.${id}`,{method:'DELETE'});
+     closeModal();
+     toast('Prenotazione eliminata');
+     await loadAll();
+   }catch(deleteError){
+     toast('Eliminazione non riuscita: '+deleteError.message,false);
+     log('DELETE PRENOTAZIONE RPC: '+rpcError.message+' | REST: '+deleteError.message);
+   }
  }
- window.dgBookingDeleteBusy=false;
- closeModal();
- toast(outcome.mode==='eliminata'
-  ?'✅ Prenotazione eliminata definitivamente e posti liberati.'
-  :'✅ Prenotazione ANNULLATA e posti liberati. Pagamenti, ricevute e storico conservati: scegli “Tutte, incluse annullate” per visualizzarla.');
- try{await loadAll(true);}
- catch(error){toast('Operazione eseguita, ma l’elenco non si è aggiornato. Premi Aggiorna: '+(error?.message||''),false);}
 }
 function openPaymentModal(pre=''){const b=state.prenotazioni.find(x=>x.id===pre)||state.prenotazioni[0]||{};const client=String(b.cliente||'').trim(),trip=b.viaggio_id||'';openModal('Registra pagamento',`<div class="form-grid"><div class="field"><label>Cliente</label><select id="p_client">${paymentClientOptions(client)}</select></div><div class="field"><label>Viaggio</label><select id="p_trip">${paymentTripOptions(trip)}</select></div><div class="field full"><label>Prenotazione del cliente per questo viaggio</label><select id="p_booking">${paymentBookingOptions(client,trip,pre)}</select></div><div class="field"><label>Tipo movimento</label><select id="p_type"><option>Acconto</option><option>Saldo</option><option>Rimborso</option></select></div><div class="field"><label>Importo €</label><input id="p_amount" type="number" step=".01"></div><div class="field"><label>Metodo</label><select id="p_method"><option>Contanti</option><option>Bonifico</option><option>POS</option><option>PayPal</option><option>Altro</option></select></div><div class="field"><label>Data pagamento</label><input id="p_date" type="date" value="${romeISODate()}"></div><div class="field full"><label>Note</label><textarea id="p_note"></textarea></div></div><div class="statusline" style="margin-top:8px" id="p_summary">Seleziona cliente e viaggio per associare correttamente l'acconto.</div>`,`<button class="btn btn-secondary" onclick="closeModal()">Annulla</button><button class="btn btn-green" onclick="savePayment()">✓ Registra pagamento</button>`);$('p_client').addEventListener('change',syncPaymentBookings);$('p_trip').addEventListener('change',syncPaymentBookings);$('p_booking').addEventListener('change',updatePaySummary);updatePaySummary()}
 function updatePaySummary(){const b=state.prenotazioni.find(x=>x.id===$('p_booking')?.value);if(!b){if($('p_summary'))$('p_summary').textContent="Seleziona cliente e viaggio per associare correttamente l'acconto.";return}if($('p_client'))$('p_client').value=String(b.cliente||'').trim();if($('p_trip'))$('p_trip').value=b.viaggio_id||'';$('p_summary').textContent=`${tripName(b.viaggio_id)} · Totale ${money(b.totale)} · Già pagato ${money(b.pagato)} · Residuo ${money(b.saldo)}`}
@@ -4345,7 +4275,6 @@ function injectNav(){
       <button data-page="crm"><span class="ico">👥</span><span>Clienti & CRM</span></button>
       <button data-page="flotta"><span class="ico">🚍</span><span>Flotta</span></button>
       <button data-page="cassa"><span class="ico">€</span><span>Economia & Cassa</span></button>
-      <button data-page="contantiviaggi"><span class="ico">💶</span><span>Contanti per viaggio</span></button>
       <button data-page="documenti"><span class="ico">▤</span><span>Documenti</span></button>
       <div class="dg-nav-label">STRUMENTI</div>
       <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
@@ -4366,7 +4295,6 @@ function injectNav(){
       <button onclick="mobileGo('crm')">👥<span>Clienti & CRM</span></button>
       <button onclick="mobileGo('flotta')">🚍<span>Flotta</span></button>
       <button onclick="mobileGo('cassa')">€<span>Economia & Cassa</span></button>
-      <button onclick="mobileGo('contantiviaggi')">💶<span>Contanti viaggi</span></button>
       <button onclick="mobileGo('documenti')">📄<span>Documenti</span></button>
       <button onclick="mobileGo('preventivi')">📄<span>Preventivi</span></button>
       <button onclick="mobileGo('pagamenti')">💳<span>Pagamenti</span></button>
@@ -5477,15 +5405,14 @@ html.dg-keyboard-open .modal-box{max-height:calc(var(--dg-vh,1vh)*98)!important}
   // Prenotazioni: vista speciale per le riserve aziendali.
   window.renderBookings=function(){
     const q=($('bookSearch')?.value||'').toLowerCase(),st=$('bookFilter')?.value||'';
-    const rows=(state.prenotazioni||[]).filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(st==='attive'?!/annull|cancel|storn|rimbors/i.test(String(b.stato||'')):(!st||b.stato===st)));
+    const rows=(state.prenotazioni||[]).filter(b=>(!q||JSON.stringify(b).toLowerCase().includes(q))&&(!st||b.stato===st));
     $('bookingsTable').innerHTML=rows.map(b=>{
       const company=companyBooking(b),rowClass=company?' class="dg-company-row"':'';
       const moneyCols=company?'<td><span class="pill company">GRATUITA</span></td><td>€ 0,00</td><td>€ 0,00</td>':`<td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td>`;
       const status=company?'<span class="pill company">🎟️ Riservata DELGROSSO</span>':`<span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span>`;
-      const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️ Elimina</button>`;
+      const actions=company?`<button class="btn btn-purple btn-sm" onclick="openCompanyReservationDetail('${b.id}')">Gestisci riserva</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Libera</button>`:`<button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">Apri</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button>`;
       return `<tr${rowClass}><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente||b.cliente_nome||'Cliente')}${company?'<br><small>Riserva aziendale gratuita</small>':`<br><small>${esc(b.telefono||'')}</small>`}</td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td>${moneyCols}<td>${status}</td><td>${actions}</td></tr>`;
     }).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
-    window.dg75RenderIntegrity?.();
   };
   // Pianta posti standard: le riserve DELGROSSO sono evidenziate in viola.
   window.renderSeatPicker=function(){
@@ -7071,8 +6998,8 @@ const ico={
  dots:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
 };
 const S=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ico[k]||ico.file}</svg>`;
-const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POSTI E PASSEGGERI','seat'],['viaggi','Partenze','calendar'],['agenda','Agenda operativa','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
-const EXTRA=[['posti','Gestione posti BUS / BIS','seat'],['preventivi','Preventivi','receipt'],['contabilitaquote','Quote Nicola / Raffaele','wallet'],['comunicazioni','Notifiche','bell'],['operativo','Operativo','check'],['statistiche','Controllo','chart'],['assistente','Assistente AI','spark'],['backup','Backup e esportazione','folder'],['pro','Centro Pro','chart']];
+const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POSTI E PASSEGGERI','seat'],['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
+const EXTRA=[['posti','Gestione posti BUS / BIS','seat'],['preventivi','Preventivi','receipt'],['contabilitaquote','Quote Nicola / Raffaele','wallet'],['comunicazioni','Notifiche','bell'],['operativo','Operativo','check'],['statistiche','Controllo','chart'],['agenda','Agenda','calendar'],['assistente','Assistente AI','spark'],['backup','Backup e esportazione','folder'],['pro','Centro Pro','chart']];
 const data=()=>typeof state!=='undefined'?state:{};
 const array=k=>Array.isArray(data()[k])?data()[k]:[];
 const isCancelled=v=>/annull|cancell|rimbors|storn/i.test(String(v?.stato||v?.stato_prenotazione||''));
@@ -7094,7 +7021,7 @@ function build(){
  // Remove escaped newline artifacts left outside the app by previous builds.
  [...document.body.childNodes].filter(n=>n.nodeType===3&&/^(?:\s|\\n)+$/.test(n.nodeValue||'')).forEach(n=>n.remove());
  const top=document.createElement('header');top.id='dg44-header';
- top.innerHTML=`<button type="button" id="dg44-mobile-toggle" onclick="dg44ToggleMenu()" aria-label="Apri o chiudi il menu">☰</button><button id="dg44-logo-btn" onclick="dg44Go('dashboard')" aria-label="Torna alla scrivania"><img id="dg44-logo" src="delgrosso-logo-originale-bianco.png" alt="Logo originale DELGROSSO Viaggi Limousine Bus"></button><div class="dg44-slogan">La strada è la stessa. Noi no.<span>DELGROSSO. La differenza si riconosce.</span></div><div class="dg44-head-right"><button id="dg69-agenda-shortcut" type="button" onclick="dg44Go('agenda')" aria-label="Apri l'Agenda operativa" title="Agenda operativa">📅 <span>Agenda</span></button><div class="dg44-date">${S('calendar')}<span><strong id="dg44-date-day"></strong><br><span id="dg44-date-full"></span></span></div><button type="button" class="dg44-icon-btn" onclick="dg48OpenNotifications()" title="Apri e aggiorna le notifiche" aria-label="Notifiche">${S('bell')}<span class="dg44-badge" id="dg44-bell-count" hidden>0</span></button><button type="button" class="dg44-user" onclick="dg44ToggleProfile()" aria-label="Profilo e impostazioni"><span class="dg44-avatar">${S('person')}</span><span><b id="dg51-account-name">Operatore</b><small id="dg44-operator">Amministratore</small></span>${S('down')}</button></div><div class="dg44-drop" id="dg44-user-menu"><button type="button" onclick="dg44ToggleProfile();dg44Go('impostazioni')">${S('settings')} &nbsp; Impostazioni</button><button type="button" onclick="dg44ToggleProfile();dg44SignOut()">${S('person')} &nbsp; Esci dal gestionale</button></div>`;
+ top.innerHTML=`<button type="button" id="dg44-mobile-toggle" onclick="dg44ToggleMenu()" aria-label="Apri o chiudi il menu">☰</button><button id="dg44-logo-btn" onclick="dg44Go('dashboard')" aria-label="Torna alla scrivania"><img id="dg44-logo" src="delgrosso-logo-originale-bianco.png" alt="Logo originale DELGROSSO Viaggi Limousine Bus"></button><div class="dg44-slogan">La strada è la stessa. Noi no.<span>DELGROSSO. La differenza si riconosce.</span></div><div class="dg44-head-right"><div class="dg44-date">${S('calendar')}<span><strong id="dg44-date-day"></strong><br><span id="dg44-date-full"></span></span></div><button type="button" class="dg44-icon-btn" onclick="dg48OpenNotifications()" title="Apri e aggiorna le notifiche" aria-label="Notifiche">${S('bell')}<span class="dg44-badge" id="dg44-bell-count" hidden>0</span></button><button type="button" class="dg44-user" onclick="dg44ToggleProfile()" aria-label="Profilo e impostazioni"><span class="dg44-avatar">${S('person')}</span><span><b id="dg51-account-name">Operatore</b><small id="dg44-operator">Amministratore</small></span>${S('down')}</button></div><div class="dg44-drop" id="dg44-user-menu"><button type="button" onclick="dg44ToggleProfile();dg44Go('impostazioni')">${S('settings')} &nbsp; Impostazioni</button><button type="button" onclick="dg44ToggleProfile();dg44SignOut()">${S('person')} &nbsp; Esci dal gestionale</button></div>`;
  document.body.appendChild(top);
  const nav=document.createElement('div');nav.id='dg44-sidebar-menu';nav.innerHTML=`<div class="dg44-menu-title">MENU AZIENDALE</div>${MAIN.map(navLink).join('')}<div class="dg44-more-toggle"><button type="button" class="dg44-nav-button" id="dg44-more-toggle" onclick="dg44ToggleMore()" aria-expanded="false"><span class="dg44-nav-icon">${S('dots')}</span><span>Tutte le funzioni ▾</span></button></div><div class="dg44-more-panel" id="dg44-more">${EXTRA.map(navLink).join('')}</div>`;sidebar.prepend(nav);
  const overlay=document.createElement('div');overlay.id='dg44-overlay';overlay.addEventListener('click',closeMenu);document.body.appendChild(overlay);
@@ -7102,7 +7029,7 @@ function build(){
  <div class="dg44-hero-row"><div class="dg44-intro"><div class="dg44-crumb">DIREZIONE / SCRIVANIA</div><h1>Buongiorno, DELGROSSO.</h1><p>La tua attività, sotto controllo.</p></div><div class="dg44-hero-visual" id="dg44-hero-visual" aria-label="Fotografie reali della flotta DELGROSSO collegate a Supabase"><div class="dg44-hero-empty" role="status">Le fotografie dei bus compariranno dopo la sincronizzazione della Flotta.</div></div></div>
  <div class="dg54-direct"><div><strong>🎛️ Control Room · Posti e Passeggeri</strong><span>Consulta piantina, prenotati e BUS BIS per ogni partenza</span></div><button type="button" onclick="dg44Go('controlroom')">Apri Control Room →</button></div>
  <div class="dg44-stats" id="dg44-stats" aria-live="polite"></div>
- <div class="dg44-two-up"><section class="dg44-card"><div class="dg44-card-head"><h2>${S('calendar')} Le prossime partenze</h2><div class="dg47-trip-actions"><button type="button" class="dg47-new-trip" onclick="dg47NewTrip()">+ Nuovo viaggio</button><button type="button" onclick="dg44Go('viaggi')">Vedi tutte →</button></div></div><div class="dg44-trip-list" id="dg44-trips"></div></section><section class="dg44-card"><div class="dg44-card-head"><h2>${S('bell')} Notifiche e attività</h2><button type="button" onclick="dg44Go('agenda')">Apri Agenda →</button><button type="button" onclick="dg44Go('comunicazioni')">Notifiche →</button></div><div class="dg44-notice-list" id="dg44-notices"></div></section></div>
+ <div class="dg44-two-up"><section class="dg44-card"><div class="dg44-card-head"><h2>${S('calendar')} Le prossime partenze</h2><div class="dg47-trip-actions"><button type="button" class="dg47-new-trip" onclick="dg47NewTrip()">+ Nuovo viaggio</button><button type="button" onclick="dg44Go('viaggi')">Vedi tutte →</button></div></div><div class="dg44-trip-list" id="dg44-trips"></div></section><section class="dg44-card"><div class="dg44-card-head"><h2>${S('bell')} Notifiche e attività</h2><button type="button" onclick="dg44Go('comunicazioni')">Vedi tutte →</button></div><div class="dg44-notice-list" id="dg44-notices"></div></section></div>
  <section class="dg44-card dg49-urgent" aria-label="Attività urgenti" id="dg49-urgent-panel"><div class="dg44-card-head"><h2>${S('clock')} Attività urgenti</h2><button type="button" onclick="dg44Go('operativo')">Centro operativo →</button></div><div class="dg49-priority-grid" id="dg49-urgent-items"></div><div class="dg49-urgent-foot" id="dg49-urgent-caption"></div></section>
  <div class="dg44-two-up lower"><section class="dg44-card"><div class="dg44-card-head"><h2>${S('bus')} Flotta aziendale</h2><button type="button" onclick="dg44Go('flotta')">Dettagli →</button></div><div class="dg44-fleet-grid" id="dg44-fleet"></div></section><section class="dg44-card"><div class="dg44-card-head"><h2>${S('chart')} Riepilogo economico <span style="font-size:12px;font-weight:500;color:#7386a1">(mese in corso)</span></h2><button type="button" onclick="dg44Go('economia')">Dettagli →</button></div><div class="dg44-economy" id="dg44-economy"></div></section></div>
  <div class="dg44-endbar"><span id="dg44-data-note">I dati provengono dal gestionale collegato. Se non sono caricati, sincronizza.</span><div class="dg44-actions"><button type="button" onclick="dg44Go('prenotazioni')">Prenotazioni</button><button type="button" onclick="dg44Go('posti')">Posti BUS/BIS</button><button type="button" onclick="dg44Go('contabilitaquote')">Quote Nicola / Raffaele</button><button type="button" onclick="typeof loadAll==='function'?loadAll(true).then(()=>{window.dg44Render?.()}).catch(()=>{}):void(0)">↻ Sincronizza</button></div></div>`;
@@ -7991,20 +7918,13 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
  let checks=0;const timer=setInterval(function(){guard();if(++checks>=12)clearInterval(timer)},450);
 })();
 </script>
-<script src="dg61-quote-whatsapp.js?v=71" defer></script>
+<script src="dg61-quote-whatsapp.js?v=62" defer></script>
 <script src="dg62-whatsapp-cloud.js?v=62" defer></script>
-<script src="dg63-whatsapp-gratis.js?v=74" defer></script>
+<script src="dg63-whatsapp-gratis.js?v=63" defer></script>
 <script src="dg64-whatsapp-actions.js?v=66" defer></script>
 <script src="dg65-comms-status.js?v=66" defer></script>
-<script src="dg66-email-verifica.js?v=77" defer></script>
+<script src="dg66-email-verifica.js?v=66" defer></script>
 <script src="dg67-whatsapp-pdf.js?v=67" defer></script>
-<script src="dg68-gruppi-viaggio.js?v=74" defer></script>
-<script src="dg75-integrita.js?v=78" defer></script>
-<script src="dg78-archivio-storico.js?v=78" defer></script>
-<script src="dg79-partenza-modello.js?v=79" defer></script>
-<script src="dg79-partenza-pdf.js?v=79" defer></script>
-<script src="dg79-riepilogo-partenza.js?v=79" defer></script>
-<script src="dg80-contanti-modello.js?v=80" defer></script>
-<script src="dg80-contanti-viaggi.js?v=80" defer></script>
+<script src="dg68-gruppi-viaggio.js?v=68" defer></script>
 </body>
 </html>
