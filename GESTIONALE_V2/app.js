@@ -129,7 +129,11 @@
   const url=$('supa-url').value.trim().replace(/\/+$/,'');
   if(url!==EXPECTED_URL){$('login-error').textContent='URL non corrispondente al progetto gestionale verificato.';return}
   const apiKey=$('supa-key').value.trim();
-  if(!apiKey||/^(sb_secret_|eyJ.*service_role)/.test(apiKey)){$('login-error').textContent='Non utilizzare una chiave segreta. Serve publishable / anon.';return}
+  let isPublicKey=apiKey.startsWith('sb_publishable_');
+  if(!isPublicKey&&apiKey.split('.').length===3){
+   try{const payload=JSON.parse(atob(apiKey.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));isPublicKey=payload.role==='anon'}catch(e){isPublicKey=false}
+  }
+  if(!isPublicKey){$('login-error').textContent='Usa solo la chiave publishable oppure la vecchia anon. Le chiavi secret / service_role sono vietate.';return}
   const email=$('supa-email').value.trim(),password=$('supa-password').value;
   $('confirm-login').disabled=true;
   try{
