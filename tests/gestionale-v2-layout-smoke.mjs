@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const old=read('prenota.html'), code=read('GESTIONALE_V2/seat-model.js'), app=read('GESTIONALE_V2/app.js');
+const html=read('GESTIONALE_V2/index.html'), css=read('GESTIONALE_V2/app.css');
+const root={};
+vm.runInNewContext(code,{window:root,module:{exports:{}}});
+const M=root.DG2SeatModel;
+assert.ok(M&&M.legacy,'Deve esportare le piantine');
+const start=old.indexOf('const REAL_LAYOUTS='),end=old.indexOf('};',start)+2;
+assert.ok(start>=0&&end>start,'Le piantine originali devono essere recuperabili dal sito esistente');
+const context={};vm.runInNewContext(old.slice(start,end)+';this.REAL=REAL_LAYOUTS;',context);
+for(const [key,size] of [['GT53',53],['GT63',63],['GT63B',63]]){
+ assert.equal(JSON.stringify(M.legacy[key]),JSON.stringify(context.REAL[key]),'La piantina '+key+' deve essere IDENTICA a quella originale');
+ assert.equal(M.count(M.legacy[key]),size,'Numero sedili '+key);
+ assert.equal(M.validate(M.legacy[key]),'','Modello originale valido');
+}
+const copied=M.fromLegacy('GT53');copied.rows[0][0]=999;
+assert.equal(M.legacy.GT53.rows[0][0],1,'Le modifiche non possono alterare il modello originale');
+const duplicate=M.fromLegacy('GT53');duplicate.rows[0][0]=2;
+assert.ok(M.validate(duplicate).includes('duplicato'),'Blocco numerazione doppia');
+const custom=M.fresh('Mio bus');custom.rows[0][0]=1;
+assert.equal(M.count(custom),1);
+assert.equal(M.validate(custom),'','Una nuova piantina deve essere creabile');
+new vm.Script(app);
+assert.ok(html.includes('id="seats-map"')&&html.includes('id="save-layout"')&&html.includes('id="import-layout"'),'Editor visualizzato');
+assert.ok(html.includes('id="page-cassa"')&&html.includes('id="page-viaggi"'),'Sezioni importanti presenti');
+assert.ok(css.includes('@media(max-width:720px)'),'Layout mobile responsive');
+assert.ok(app.includes("method:'GET'"),'Supabase letture solo GET');
+assert.ok(!/method\s*:\s*['"](?:PATCH|DELETE|PUT)['"]/.test(app),'Nessuna scrittura sui registri Supabase');
+console.log('V2 smoke: piantine fedeli GT53/GT63/GT63B, editor, sicurezza base, JS e responsive PASS');

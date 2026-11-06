@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DELGROSSO · Gestionale 2.0 — Anteprima isolata</title>
+<meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="./app.css">
+</head><body>
+<div class="shell">
+ <aside class="sidebar">
+  <div class="brand"><div class="brand-icon">D</div><div><strong>DELGROSSO</strong><small>GESTIONALE 2.0</small></div></div>
+  <div class="nav" role="navigation" aria-label="Menu">
+   <button data-page="dashboard" class="nav-btn active">◈ <span>Dashboard</span></button>
+   <button data-page="piantine" class="nav-btn">▦ <span>Editor piantine</span></button>
+   <button data-page="viaggi" class="nav-btn">◷ <span>Viaggi e BUS BIS</span></button>
+   <button data-page="prenotazioni" class="nav-btn">☷ <span>Prenotazioni</span></button>
+   <button data-page="cassa" class="nav-btn">€ <span>Cassa Nicola / Raffaele</span></button>
+   <button data-page="flotta" class="nav-btn">▤ <span>Flotta</span></button>
+  </div>
+  <div class="sidebar-foot"><span class="dot"></span> Prototipo isolato<br>La produzione non viene modificata</div>
+ </aside>
+ <main class="main">
+  <header class="topbar"><div><h1 id="page-title">Control Room</h1><p>DELGROSSO VIAGGI · Anteprima della nuova piattaforma</p></div>
+   <div class="top-actions"><span class="badge" id="mode-badge">MODALITÀ DEMO</span><button id="login-button" class="button primary">Collega Supabase · sola lettura</button><button id="logout-button" class="button" hidden>Disconnetti</button></div>
+  </header>
+  <div class="container">
+   <div class="notice">🛡️ Questa versione è un progetto separato. Non salva, cambia o elimina prenotazioni e pagamenti del gestionale attuale. Le modifiche alle piantine sono bozze locali, esportabili in JSON.</div>
+   <section id="page-dashboard" class="page active">
+    <div class="section-head"><div><h2>Panoramica operativa</h2><p>Viaggi, passeggeri e stato operativo in un unico spazio.</p></div><button class="button" id="refresh">Aggiorna dati</button></div>
+    <div class="kpis"><div class="kpi"><label>Viaggi registrati</label><strong id="kpi-trips">—</strong><small>Nel database disponibile</small></div><div class="kpi"><label>Prenotazioni</label><strong id="kpi-bookings">—</strong><small>Record registrati</small></div><div class="kpi"><label>Posti assegnati</label><strong id="kpi-seats">—</strong><small>Da prenotazione_posti</small></div><div class="kpi"><label>Autobus e mezzi</label><strong id="kpi-buses">—</strong><small>Anagrafica flotta</small></div></div>
+    <div class="panel"><h3>Partenze</h3><div class="scroll"><table><thead><tr><th>Viaggio</th><th>Data</th><th>Stato</th><th>Bus</th></tr></thead><tbody id="dashboard-trips"><tr><td colspan="4" class="empty">Connetti un operatore autorizzato per visualizzare i dati aggiornati.</td></tr></tbody></table></div></div>
+   </section>
+   <section id="page-piantine" class="page">
+    <div class="section-head"><div><h2>Editor piantine autobus</h2><p>Modelli originali invariati · editing diretto di sedili, porte, corridoi e numeri.</p></div><div class="actions"><button class="button" id="new-layout">+ Nuova piantina</button><button class="button primary" id="save-layout">Salva bozza</button></div></div>
+    <div class="editor">
+     <div class="panel"><div class="formrow"><label>Modello piantina<select id="layout-select"></select></label><label>Nome<input id="layout-name" maxlength="100"></label></div>
+      <div class="legend"><span><b class="legend-free"></b> Posto libero</span><span><b class="legend-busy"></b> Occupato</span><span><b class="legend-door"></b> Porta</span></div>
+      <div class="bus-shape"><div class="bus-front"><span>FRONTE BUS</span><span>◉ AUTISTA</span></div><div id="seats-map"></div></div>
+      <p class="hint">Premi un sedile o una cella per cambiarla. Le piantine GT53 / GT63 / GT63B sono copiate esattamente dal gestionale precedente, senza cambiarne la numerazione.</p>
+     </div>
+     <div class="panel editor-side">
+      <h3>Strumenti</h3><p id="layout-info" class="subtext">—</p>
+      <div class="actions"><button class="button" id="add-row">+ Aggiungi fila</button><button class="button" id="remove-row">Rimuovi ultima fila</button></div>
+      <div class="actions"><button class="button" id="copy-layout">Copia modello</button><button class="button" id="reset-layout">Ripristina modello</button></div>
+      <hr><h3>Importazione ed esportazione</h3>
+      <div class="actions"><button class="button primary" id="export-layout">Esporta JSON</button><label class="button import">Importa JSON<input type="file" id="import-layout" accept=".json,application/json" hidden></label></div>
+      <p class="hint">Le bozze vengono salvate nel browser in uso, non su Supabase. Esporta il JSON per conservarle o trasferirle su un altro dispositivo.</p>
+      <div id="editor-status" class="inline-status" role="status"></div>
+      <hr><h3>Verifica posti occupati</h3><label>Viaggio<select id="seat-trip-select"><option value="">Nessun viaggio selezionato</option></select></label>
+      <p class="hint">Con un accesso Supabase autorizzato, i posti occupati sono visualizzati in sola lettura. In modalità editor possono essere modificati solo i disegni locali, non le prenotazioni.</p>
+     </div>
+    </div>
+   </section>
+   <section id="page-viaggi" class="page"><div class="section-head"><div><h2>Viaggi e BUS BIS</h2><p>Lettura degli stessi record del database attuale.</p></div></div><div class="panel scroll"><table><thead><tr><th>Viaggio</th><th>Data</th><th>Partenza</th><th>Capienza</th><th>BUS BIS</th></tr></thead><tbody id="trips-list"><tr><td colspan="5" class="empty">Collega Supabase per visualizzare i viaggi.</td></tr></tbody></table></div></section>
+   <section id="page-prenotazioni" class="page"><div class="section-head"><div><h2>Prenotazioni</h2><p>Nessuna modifica ai record esistenti.</p></div></div><div class="panel"><div id="bookings-summary" class="empty">Il riepilogo delle prenotazioni sarà disponibile dopo il collegamento autorizzato. Le modifiche saranno abilitate solo dopo il collaudo.</div></div></section>
+   <section id="page-cassa" class="page"><div class="section-head"><div><h2>Cassa Nicola / Raffaele</h2><p>Progettata per incassi distinti, rimborsi, trasferimenti e rapporto per singolo viaggio.</p></div></div><div class="panel"><div class="notice caution">Prima di visualizzare totali contabili, ricreeremo e testeremo la logica certificata della V80 (rimborsi, BUS BIS, POS escluso dai contanti, pagamenti non attribuiti). Non pubblichiamo numeri non verificati.</div></div></section>
+   <section id="page-flotta" class="page"><div class="section-head"><div><h2>Flotta</h2><p>Capienza e collegamento agli stessi layout originali.</p></div></div><div class="panel scroll"><table><thead><tr><th>Modello</th><th>Posti</th><th>Piantina</th><th>Stato</th></tr></thead><tbody id="fleet-list"><tr><td colspan="4" class="empty">Collega Supabase per visualizzare la flotta.</td></tr></tbody></table></div></section>
+  </div>
+ </main>
+</div>
+<dialog id="login-dialog"><form id="login-form" method="dialog"><h2>Collegamento Supabase</h2><p class="hint">Modalità di sola lettura con account operatore autorizzato. Non inserire mai chiavi secret o service_role.</p>
+<label>URL progetto Supabase<input id="supa-url" type="url" required placeholder="https://...supabase.co" autocomplete="off"></label>
+<label>Chiave publishable / anon<input id="supa-key" type="text" required placeholder="sb_publishable_..." autocomplete="off"></label>
+<label>Email operatore<input id="supa-email" type="email" required autocomplete="username"></label><label>Password<input id="supa-password" type="password" required autocomplete="current-password"></label>
+<div id="login-error" class="error" role="alert"></div><div class="actions"><button type="button" class="button" id="close-login">Annulla</button><button type="submit" class="button primary" id="confirm-login">Accedi</button></div></form></dialog>
+<script defer src="./seat-model.js"></script><script defer src="./app.js"></script>
+</body></html>
