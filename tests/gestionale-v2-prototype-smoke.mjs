@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+const source=read('GESTIONALE_V2/seat-model.js');
+const app=read('GESTIONALE_V2/app.js');
+const html=read('GESTIONALE_V2/index.html');
+const css=read('GESTIONALE_V2/app.css');
+const original=read('prenota.html');
+const match=original.match(/const REAL_LAYOUTS=([\s\S]*?);\s*const SVG=/);
+assert.ok(match,'Original seat maps must remain available in prenota.html');
+const current=vm.runInNewContext('('+match[1]+')');
+const environment={window:{}};
+vm.runInNewContext(source,environment);
+const M=environment.window.DG2SeatModel;
+assert.deepEqual(Object.keys(M.legacy).sort(),['GT53','GT63','GT63B']);
+for(const key of ['GT53','GT63','GT63B']){
+  assert.equal(JSON.stringify(M.legacy[key]),JSON.stringify(current[key]),key+' original layout must be identical');
+  assert.equal(M.count(M.legacy[key]),key==='GT53'?53:63,key+' correct seat count');
+  assert.equal(M.validate(M.legacy[key]),'',key+' model valid');
+}
+assert.match(M.validate({...M.legacy.GT53,rows:[[1,1,'aisle',3,4]]}),/duplicato/i,'duplicate seat numbers rejected');
+assert.match(M.validate({...M.legacy.GT53,rows:[['bad',2,'aisle',3,4]]}),/non valida/i,'unknown cell rejected');
+const copy=M.fromLegacy('GT53');copy.rows[0][0]=900;assert.equal(M.legacy.GT53.rows[0][0],1,'editing must not mutate legacy template');
+new vm.Script(app);new vm.Script(source);
+assert.match(app,/method:'GET'/,'production PostgREST fetches should use GET only');
+assert.ok(!/method:\s*['"](?:POST|PUT|PATCH|DELETE)['"][\s\S]{0,120}\/rest\/v1/i.test(app),'no production rest writes');
+assert.match(app,/sb_secret_/,'secret keys must be refused in browser');
+assert.ok(html.includes('GESTIONALE 2.0')&&html.includes('seat-model.js')&&html.includes('app.js'));
+assert.ok(html.includes('id="seats-map"')&&html.includes('id="page-cassa"'));
+assert.ok(css.includes('@media(max-width:720px)'),'mobile responsive rules present');
+console.log('DELGROSSO V2: exact original seat maps, editor validation, code syntax, read-only prototype and responsive UI PASS');
