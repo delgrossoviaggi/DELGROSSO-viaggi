@@ -1,0 +1,37 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — Gestionale 2.0
+RELEASE GITHUB MANUALE · 7 NOVEMBRE 2026
+
+QUESTA CARTELLA SI CARICA NELLA ROOT DEL REPOSITORY DELGROSSO-viaggi:
+  GESTIONALE_V2/index.html
+  GESTIONALE_V2/app.js
+  GESTIONALE_V2/app.css
+  GESTIONALE_V2/assets/...
+
+NON caricare lo ZIP come singolo file su GitHub: devi estrarlo prima.
+NON sostituire il gestionale preesistente GESTIONALE/ e non eliminare
+il sito, prenota.html o le immagini gia presenti.
+
+ACCESSO:
+  Utente: Nicola oppure Raffaele (account gia configurati su Supabase)
+  Password: la password ATTUALE del rispettivo account Supabase Auth.
+  Non contiene password predefinite o dati privati di clienti.
+
+Questa release legge i dati reali da Supabase e puo scrivere soltanto
+con login valido, permessi RLS ed esplicita attivazione della scrittura.
+La funzione backend Supabase dg2-operator-login deve gia essere attiva.
+Le chiavi sb_secret o service_role non vanno mai inserite nel browser.
+
+COSA E' OPERATIVO NEL CODICE:
+  - Dashboard, viaggi attivi e archiviati, modifica, archivio, restore
+  - Cancellazione protetta dopo anteprima del database
+  - Prenotazioni, posti GT originali e BUS BIS
+  - Rubrica clienti e storico quote e operatore che ha incassato
+  - Cassa separata con trasferimenti, pagamenti e rimborsi da verificare
+  - PDF quote per singolo viaggio con logo originale, BUS BIS, contanti/POS
+  - Flotta da Supabase Storage, noleggi, preventivi, agenda e notifiche
+  - Editor piantine, integrita, archivio e Chiusura 360 in consultazione.
+
+ATTENZIONE: non e' stato completato il collaudo reale di tutte le scritture
+con gli account operatore. Le automazioni WhatsApp/email e il deposito
+automatico PDF in Supabase non sono incluse nel nuovo frontend.
+Leggere il file README_GITHUB.md fornito con lo ZIP di consegna.
