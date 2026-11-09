@@ -1,7 +1,7 @@
 /* DELGROSSO Gestionale - AI 360 recovery-safe
    Navigation is network-first and never stores index.html.
    Only DELGROSSO Gestionale caches are cleaned. */
-const CACHE='delgrosso-business-suite-unificata-20261109';
+const CACHE='delgrosso-business-suite-v4-menu-visibile-20261109';
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
@@ -10,7 +10,7 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>/^delgrosso-gestionale-/i.test(k) && k!==CACHE).map(k=>caches.delete(k)));
+    await Promise.all(keys.filter(k=>/^delgrosso-(gestionale|business-suite)/i.test(k) && k!==CACHE).map(k=>caches.delete(k)));
     await self.clients.claim();
   })());
 });

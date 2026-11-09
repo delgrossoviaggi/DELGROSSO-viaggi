@@ -12,11 +12,4 @@
       refreshToken:src.refresh_token,expiresAt:validUntil,userId:src.user.id}));
   }catch(e){console.info('Modulo V2: sessione singola non disponibile');}
 })();
-window.addEventListener('message',function(event){
- if(event.source!==window.parent||event.origin!==window.location.origin)return;
- if(event.data?.kind!=='dg-suite-nav')return;
- const page=String(event.data.page||'');
- if(!['prenotazioni','pagamenti','cassa','piantine','archivio','notifiche'].includes(page))return;
- const btn=document.querySelector('.navbtn[data-page="'+page+'"]');
- if(btn)btn.click();
-});
+/* Page navigation is handled once by the main app router, which supports every V4 module. */

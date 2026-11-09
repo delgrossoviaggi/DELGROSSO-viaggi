@@ -1,0 +1,16 @@
+
+/* DG V4 — direct access to Business Suite modules, same V1 visual language. */
+#sideNav .dg-v4-navhead{padding:12px 14px 6px;color:#72839a!important;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+#sideNav button.dg-v4-direct{min-height:45px!important;gap:9px!important;border:1px solid transparent!important;background:transparent!important;color:#13335b!important;font-weight:750!important;text-align:left!important;width:100%!important;padding:11px 13px!important;display:flex!important;align-items:center!important;border-radius:10px!important}
+#sideNav button.dg-v4-direct:hover,#sideNav button.dg-v4-direct.active{background:#d8e9fb!important;border-color:#b8d6f7!important;color:#12375f!important}
+#sideNav button.dg-v4-direct .ico{font-size:17px;min-width:23px;display:inline-block;text-align:center}
+.dg-v4-shortcuts{background:#f8fbff;border:1px solid #cddff1;border-radius:16px;padding:18px;margin:12px 0 20px;box-shadow:0 8px 23px #0d31500d}
+.dg-v4-shortcuts h3{font-size:19px;margin:0 0 4px;color:#15375e}
+.dg-v4-shortcuts p{margin:0 0 12px;color:#61758d;font-size:13px}
+.dg-v4-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.dg-v4-card{cursor:pointer;display:flex;align-items:flex-start;gap:10px;text-align:left;border:1px solid #ccdff1;background:white;border-radius:12px;padding:13px;min-height:82px;color:#123859;box-shadow:0 1px 5px #133d6611}
+.dg-v4-card:hover,.dg-v4-card:focus-visible{background:#eaf4ff;border-color:#649fdb}
+.dg-v4-card b{display:block;font-size:13px}.dg-v4-card small{font-size:11px;display:block;color:#63788d;margin-top:3px;line-height:1.35}.dg-v4-card-icon{font-size:23px}
+.dg-v4-version{font-size:11px;color:#58738a;margin-bottom:8px}
+@media(max-width:1050px){.dg-v4-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:590px){.dg-v4-shortcuts{padding:12px;margin:9px 0 16px}.dg-v4-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.dg-v4-card{padding:10px;min-height:95px;gap:6px}.dg-v4-card-icon{font-size:18px}.dg-v4-card b{font-size:12px}.dg-v4-card small{font-size:10px}}

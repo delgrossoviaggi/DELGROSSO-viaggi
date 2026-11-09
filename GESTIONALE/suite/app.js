@@ -110,6 +110,20 @@ async function verifyOperatorSession(){
  const o=await r.json();return Array.isArray(o)&&o.some(x=>x.user_id===state.userId&&x.attivo===true&&ALLOWED_OPERATOR_ALIASES.includes(normalizeLogin(x.username)));
 }
 async function restoreSession(){
+ // One login: embedded V2 asks the authenticated V1 parent for the current Supabase session.
+ // Never show another operator-password form inside the same Business Suite.
+ try {
+  if(window.parent!==window && window.parent.location.origin===location.origin && typeof window.parent.dgSuiteGetSession==='function'){
+   const shared=await window.parent.dgSuiteGetSession();
+   if(shared?.access_token && shared?.refresh_token && shared?.user?.id){
+    state.token=shared.access_token;state.refreshToken=shared.refresh_token;
+    state.userId=shared.user.id;state.expiresAt=Number(shared.expires_at||0)*1000;
+    if(await verifyOperatorSession()){
+     state.mode='live';state.write=true;persistSession();return true;
+    }
+   }
+  }
+ }catch(e){console.warn('Sessione unica V1/V2 non disponibile:',e?.message||e)}
  let old;try{old=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch{}
  if(!old?.token||!old?.refreshToken||!old?.userId)return false;
  state.token=old.token;state.refreshToken=old.refreshToken;state.expiresAt=old.expiresAt||0;state.userId=old.userId;
