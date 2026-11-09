@@ -45,12 +45,12 @@ function pdfBytes(pages){
  return out;
 }
 class Sheet{
- constructor(){this.pages=[];this.y=0;this.newPage()}
+ constructor(kind='RIEPILOGO QUOTE'){this.kind=kind;this.pages=[];this.y=0;this.newPage()}
  add(code){this.pages[this.pages.length-1].push(code)}
  box(x,y,w,h,color){this.add(color.join(' ')+' rg '+x.toFixed(2)+' '+(H-y-h).toFixed(2)+' '+w.toFixed(2)+' '+h.toFixed(2)+' re f')}
  rule(x,y,w,color=[0.78,0.83,0.9]){this.add(color.join(' ')+' RG 0.5 w '+x+' '+(H-y).toFixed(2)+' m '+(x+w)+' '+(H-y).toFixed(2)+' l S')}
  label(txt,x,y,size=9,bold=false,color=[0.12,0.19,0.31]){this.add(color.join(' ')+' rg BT /F'+(bold?'2':'1')+' '+size+' Tf 1 0 0 1 '+x.toFixed(2)+' '+(H-y).toFixed(2)+' Tm <'+hex(txt)+'> Tj ET')}
- newPage(){this.pages.push([]);this.y=110;this.box(0,0,W,82,[1,1,1]);this.add('q 154 0 0 43 42 '+(H-18-43).toFixed(2)+' cm /ImLogo Do Q');this.label('RIEPILOGO QUOTE',244,39,13,true,[0.07,0.16,0.31]);this.label('VIAGGIO / PARTENZA - REPORT INTERNO',244,57,8,false,[0.35,0.45,0.59]);this.box(0,82,W,5,[0.07,0.16,0.31]);}
+ newPage(){this.pages.push([]);this.y=110;this.box(0,0,W,82,[1,1,1]);this.add('q 154 0 0 43 42 '+(H-18-43).toFixed(2)+' cm /ImLogo Do Q');this.label(this.kind,244,39,13,true,[0.07,0.16,0.31]);this.label(this.kind==='CONFERMA PRENOTAZIONE'?'RIEPILOGO PRENOTAZIONE - USO AZIENDALE':'VIAGGIO / PARTENZA - REPORT INTERNO',244,57,8,false,[0.35,0.45,0.59]);this.box(0,82,W,5,[0.07,0.16,0.31]);}
  ensure(space){if(this.y+space>H-67)this.newPage()}
  heading(txt){this.ensure(37);this.y+=8;this.box(42,this.y-14,W-84,27,[0.91,0.94,0.99]);this.label(txt,49,this.y+3,11,true);this.y+=30}
  paragraph(txt,style=''){const width=95;const words=text(txt).split(' ');let line='';for(const word of words){if((line+' '+word).length>width){this.ensure(16);this.label(line,43,this.y,8,style==='bold');this.y+=14;line=word}else line+=(line?' ':'')+word}if(line){this.ensure(16);this.label(line,43,this.y,8,style==='bold');this.y+=14}}
@@ -100,5 +100,39 @@ function makeTripPdf(g){if(!g||!g.trip)throw Error('Seleziona un viaggio valido'
  return doc.finish();
 }
 function saveTripPdf(g){const bytes=makeTripPdf(g),blob=new Blob([bytes],{type:'application/pdf'}),href=URL.createObjectURL(blob);const a=document.createElement('a');const safe=text(g.trip.titolo||'viaggio').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,42);a.download='DELGROSSO_QUOTE_'+date(g.trip.data_partenza).replaceAll('/','-')+'_'+safe+'.pdf';a.href=href;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),45000);return a.download}
-root.DG2Pdf={makeTripPdf,saveTripPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
+function makeBookingPdf(b,t,movements=[]){
+ if(!b?.id||!t?.id)throw Error('Prenotazione o viaggio mancanti');
+ const doc=new Sheet('CONFERMA PRENOTAZIONE');doc.y=140;
+ const cents=n=>Math.round((Number(n)||0)*100);
+ const archived=false;
+ doc.label('CONFERMA DI PRENOTAZIONE',42,126,14,true);
+ doc.heading('DATI DELLA PRENOTAZIONE');
+ doc.paragraph('Numero: '+text(b.confirmation_number||b.codice||b.id_prenotazione||b.id));
+ doc.paragraph('Referente: '+text(b.cliente));
+ doc.paragraph('Telefono: '+text(b.telefono||'non indicato')+'  |  Email: '+text(b.email||'non indicata'));
+ doc.paragraph('Registrata il: '+(b.created_at?new Date(b.created_at).toLocaleString('it-IT',{timeZone:'Europe/Rome'}):new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'})));
+ doc.heading('VIAGGIO E POSTI');
+ doc.paragraph('Viaggio: '+text(t.titolo||t.destinazione));
+ doc.paragraph('Data partenza: '+date(t.data_partenza)+'  |  Ora: '+text(t.ora_partenza||'da confermare'));
+ doc.paragraph('Fermata: '+text(b.fermata_partenza||'da confermare'));
+ doc.paragraph('Autobus: '+text(t.autobus||'Autobus GT')+'  |  Passeggeri: '+Number(b.posti||0));
+ doc.paragraph('Posti assegnati: '+text(b.posti_selezionati||'non assegnati'));
+ doc.paragraph('Stato della prenotazione: '+text(b.stato||'da confermare'));
+ doc.heading('SITUAZIONE ECONOMICA');
+ doc.stat('Totale prenotazione',cents(b.totale));
+ doc.stat('Versato risultante dall’archivio',cents(b.pagato));
+ doc.stat('Residuo',cents(Math.max(0,Number(b.totale||0)-Number(b.pagato||0))));
+ if(movements.length){doc.paragraph('Movimenti registrati: '+movements.length+' (verificare la sezione Pagamenti).');}
+ doc.heading('CONDIZIONI E AVVERTENZE');
+ doc.paragraph('Gli acconti seguono le condizioni della prenotazione. In caso di rinuncia del cliente si applicano le condizioni comunicate; se il viaggio non raggiunge il minimo previsto, verificare le condizioni di rimborso.');
+ doc.paragraph('Questa è una conferma di prenotazione e un riepilogo operativo; non sostituisce ricevuta fiscale o fattura. Le modifiche successive possono rendere superata questa versione del documento.');
+ doc.paragraph('Generato il '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' · DELGROSSO VIAGGI & LIMOUSINE BUS');
+ return doc.finish();
+}
+function saveBookingPdf(b,t,movements=[]){
+ const bytes=makeBookingPdf(b,t,movements),blob=new Blob([bytes],{type:'application/pdf'}),href=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=href;a.download='DELGROSSO_CONFERMA_'+text(b.confirmation_number||b.codice||b.id).replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),5000);return a.download;
+}
+root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
 })(typeof window!=='undefined'?window:globalThis);
