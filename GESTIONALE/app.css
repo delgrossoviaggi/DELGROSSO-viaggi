@@ -82,30 +82,3 @@
 .trip-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:10px;border-top:1px solid #eaf0f8}
 .trip-actions .btn{white-space:nowrap}
 @media(max-width:750px){.trip-grid{grid-template-columns:1fr}.trip-card{padding:14px}.trip-facts{gap:4px}.trip-facts b{font-size:11px}}
-/* Gestionale 2.0 · Booking seat picker, receipt status and notifications (08.11.2026). */
-.booking-seat-layout{margin:12px 0 20px;background:#f8faff;border:1px solid #dae4f1;border-radius:18px;padding:13px 10px;min-width:0}
-.booking-seat-summary{background:#e9f1ff;color:#1a365d;font-size:12px;line-height:1.85;border-radius:12px;padding:10px 12px}
-.booking-seat-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:13px;font-size:11px;color:#5b7090;font-weight:700}
-.booking-seat-legend .taken{color:#be5268}.booking-seat-legend .selected{color:#4169dc}.booking-seat-legend .mine{color:#168267}
-.booking-seat-layout .bus{max-width:430px}
-.booking-seat-layout .seat:disabled{opacity:1;cursor:not-allowed}
-.booking-seat-layout .seat.selected{background:#4169dc;color:white;border-color:#2953cd;box-shadow:0 2px 5px #1e42a333}
-.booking-seat-layout .seat.mine:not(.selected){background:#e4f8f0;color:#187b56;border:1px solid #93d6b6}
-.booking-seat-layout .seat.selected:before{background:#abc0ff}
-.booking-seat-layout .seat.occupied{background:#ffdee8;color:#bd4561;border-color:#eab0c0}
-.booking-seat-layout .seat.door{font-size:8px}
-.notification-item{border:1px solid #e2e9f4;background:#fafcff;border-radius:13px;padding:16px;margin:10px 0;line-height:1.55}
-.notification-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.notification-item p{font-size:12px;color:#5e708b;margin:7px 0 12px;line-height:1.6}
-@media(max-width:550px){.booking-seat-layout{padding:9px 6px}.booking-seat-layout .bus{padding:13px 8px;border-width:4px}.booking-seat-layout .bus-row{gap:4px}.booking-seat-layout .seat{height:38px;font-size:12px}#edit-dialog.wide{max-height:93vh}.notification-item{padding:11px}}
-
-/* Payment workflow: selected journey -> searchable bookings -> correct customer. */
-#payment-booking-detail{min-height:44px;font-size:.88rem;line-height:1.5;grid-column:1/-1}
-#edit-dialog input[name="client_search"]{width:100%}
-#edit-dialog select[name="booking"]{width:100%;min-height:43px}
-#edit-dialog select:disabled{opacity:.8;background:#eef3f8;cursor:not-allowed}
-@media(max-width:550px){
-  #edit-dialog{max-height:calc(100dvh - 18px);max-height:calc(100vh - 18px);overscroll-behavior:contain;padding:16px 14px}
-  #edit-dialog #edit-form > .actions{position:sticky;bottom:-16px;background:#fff;border-top:1px solid #e5edf8;padding:11px 0 12px;z-index:3}
-  #edit-dialog #edit-submit{min-width:120px}
-}
