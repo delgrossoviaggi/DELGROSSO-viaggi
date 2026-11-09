@@ -1,6 +1,7 @@
 /* DELGROSSO VIAGGI 2.0 — standalone, no dependencies.
    Production data is never bundled or cached. Server-side Supabase RLS and RPC enforce writes.
-   UI write operations require explicit operator opt-in AND an authenticated session. */
+   After verified operator login, writes are available without repeated settings toggles.
+   Supabase Auth, RLS, server checks and explicit confirmation for destructive tasks remain. */
 (function(){'use strict';
 const $=id=>document.getElementById(id),Model=window.DG2SeatModel,Cash=window.DG2Cash,Ledger=window.DG2Ledger,Pdf=window.DG2Pdf;
 const URL_BASE='https://chkuayhbmitdmzmmvona.supabase.co';
@@ -57,14 +58,14 @@ function updateMode(){
  const online=state.mode==='live'&&Boolean(state.token);
  const x=$('mode-indicator');
  x.className='mode '+(online?(state.write?'write':'live'):'');
- x.textContent=!online?'ACCESSO RICHIESTO':state.write?'SUPABASE · OPERATIVO':'SUPABASE · LETTURA';
- $('side-state').textContent=!online?'Accedi con l’account operatore':state.write?'Dati reali · modifiche abilitate':'Dati reali · sola lettura';
+ x.textContent=!online?'ACCESSO RICHIESTO':'SUPABASE · OPERATIVO';
+ $('side-state').textContent=!online?'Accedi con l’account operatore':'Operatore verificato · modifiche disponibili';
  $('btn-login').hidden=online;$('btn-logout').hidden=!online;
- $('banner').innerHTML=!online?'🔐 <b>Accesso operatore obbligatorio.</b> Il gestionale è collegato a Supabase ma non mostra dati prima del login.':state.write?'⚠️ <b>Scrittura sul database esistente abilitata.</b> Ogni operazione è tracciata e filtrata dai permessi Supabase.':'🔒 <b>Supabase collegato.</b> Dati reali aggiornati; per scrivere abilita le modifiche nelle Impostazioni dopo un backup verificato.';
- $('banner').classList.toggle('warning',online&&state.write);
+ $('banner').innerHTML=!online?'🔐 <b>Accesso operatore obbligatorio.</b> Il gestionale è collegato a Supabase ma non mostra dati prima del login.':'🔐 <b>Operatore autenticato.</b> Operazioni disponibili secondo i tuoi permessi Supabase. Non serve attivare la scrittura nelle Impostazioni.';
+ $('banner').classList.toggle('warning',false);
 }
 const canWrite=()=>state.mode==='live'&&state.write&&Boolean(state.token);
-function requireWrite(){if(canWrite())return true;notify('Modifiche disabilitate: accedi e attiva la scrittura nelle Impostazioni dopo il backup.',true);return false}
+function requireWrite(){if(canWrite())return true;notify('Accedi come operatore autorizzato per apportare modifiche su Supabase.',true);return false}
 const uuid=()=>{if(globalThis.crypto?.randomUUID)return crypto.randomUUID();const a=new Uint8Array(16);crypto.getRandomValues(a);a[6]=a[6]&15|64;a[8]=a[8]&63|128;return [...a].map((v,i)=>v.toString(16).padStart(2,'0')+([3,5,7,9].includes(i)?'-':'')).join('')};
 const isConfigured=()=>state.mode==='live'&&!!state.token;
 function persistSession(){
@@ -76,7 +77,7 @@ async function withTimeout(url,opts={},milliseconds=22000){
 }
 async function request(path,{method='GET',body,prefer}={}){
  if(!isConfigured())throw Error('Accesso Supabase richiesto');
- if(method!=='GET'&&!requireWrite())throw Error('Scrittura disabilitata');
+ if(method!=='GET'&&!requireWrite())throw Error('Accesso operatore richiesto per modificare i dati');
  const go=async()=>withTimeout(URL_BASE+'/rest/v1/'+path,{method,headers:{apikey:PUBLIC_KEY,Authorization:'Bearer '+state.token,'Content-Type':'application/json',...(prefer?{'Prefer':prefer}:{})},...(body!==undefined?{body:JSON.stringify(body)}:{}),cache:'no-store'});
  let r;
  try{r=await go()}catch(e){if(method==='GET')r=await go();else throw e} // Never blindly retry writes.
@@ -100,7 +101,7 @@ async function restoreSession(){
  try{
   if(Date.now()>state.expiresAt-60000&&!await refreshToken())throw Error('Sessione scaduta');
   if(!await verifyOperatorSession())throw Error('Operatore non autorizzato');
-  state.mode='live';state.write=false;persistSession();return true;
+  state.mode='live';state.write=true;persistSession();return true;
  }catch{state.token='';state.refreshToken='';state.userId='';state.mode='locked';persistSession();return false}
 }
 async function rows(name,select='*'){
@@ -164,7 +165,7 @@ async function login(event){
   const ops=await opResp.json();
   if(!Array.isArray(ops)||!ops.some(o=>o.user_id===state.userId&&o.attivo===true&&normalizeLogin(o.username)===username))
    throw Error('Profilo operatore non autorizzato.');
-  state.mode='live';state.write=false;persistSession();$('auth-password').value='';$('auth-dialog').close();updateMode();await sync();
+  state.mode='live';state.write=true;persistSession();$('auth-password').value='';$('auth-dialog').close();updateMode();await sync();
  }catch(err){
   // Never leave a partially authenticated session accessible after an error.
   state.token='';state.refreshToken='';state.expiresAt=0;state.userId='';state.mode='locked';state.write=false;
@@ -239,8 +240,8 @@ function renderCash(){if(state.mode==='live'&&state.failedTables?.some(e=>/^(pag
  return section('Cassa Nicola e Raffaele','Ogni incasso attribuito all’operatore effettivo, mai supposto',btn('Riepilogo PDF','cash-print')+btn('CSV','cash-csv')+btn('Trasferimento cassa','cash-transfer','primary'))+`<div class="kpis">${kpis}</div>${panel('Contanti per viaggio',table(['Viaggio','Nicola','Raffaele','Da attribuire','Totale','Movimenti',''],rs))}${panel('Saldo in carico dopo i trasferimenti',`<div class="three-col"><div class="helpbox"><b>Nicola</b><h2>${Cash.euro(inc.nicola)}</h2></div><div class="helpbox"><b>Raffaele</b><h2>${Cash.euro(inc.raffaele)}</h2></div><div class="helpbox"><b>Da attribuire</b><h2>${Cash.euro(inc.nonAttribuiti)}</h2></div></div><p class="hint">I trasferimenti tra operatori non diventano nuovi incassi. Pagamenti POS e non contanti sono esclusi. Rimborsi e prenotazioni annullate restano tracciabili.</p>`)}${panel('Controlli automatici',`<p class="inlineinfo">Movimenti non contanti esclusi: <b>${result.excludedMethods}</b>. Rimborsi: <b>${Cash.euro(totals.refunds)}</b>.</p>${result.issues.length?result.issues.map(s=>`<p class="error">⚠ ${esc(s)}</p>`).join(''):'<p class="textgood">✓ Nessuna anomalia rilevata dal modello contanti.</p>'}`)}`;
 }
 function renderPayments(){const q=state.options.search.toLowerCase();const ps=state.data.payments.filter(p=>((p.cliente||'')+' '+(p.receipt_number||'')+' '+(p.tipo||'')+' '+(tripFor(p.viaggio_id)?.titolo||'')).toLowerCase().includes(q));const operMap=new Map(state.data.operators.map(o=>[o.user_id,o.nome||o.username]));
- const rs=ps.slice().sort((a,b)=>String(b.data_pagamento||b.created_at).localeCompare(String(a.data_pagamento||a.created_at))).map(p=>tr([fmt(p.receipt_number||String(p.id||'').slice(0,8)),fmt(p.cliente||bookingFor(p.prenotazione_id)?.cliente),fmt(tripFor(p.viaggio_id)?.titolo),tag(p.tipo),money(p.importo),fmt(p.metodo_pagamento||p.metodo),fmt(operMap.get(p.incassato_da_user_id)||p.incassato_da||'Non indicato'),date(p.data_pagamento||p.created_at)],btn('Ricevuta PDF','payment-print','small',`data-id="${esc(p.id)}"`)+btn('Modifica movimento','payment-edit','small',`data-id="${esc(p.id)}"`)));
- return section('Pagamenti e movimenti','Registrazioni e ricevute',btn('+ Registra pagamento','payment-new','primary')+btn('Esporta CSV','payments-csv'))+panel('Registro pagamenti',`<div class="filterbar"><input data-filter="search" value="${esc(state.options.search)}" placeholder="Cerca cliente, ricevuta, tipo, viaggio"></div>${table(['Ricevuta','Cliente','Viaggio','Tipo','Importo','Metodo','Incassato da','Data',''],rs)}`);
+ const rs=ps.slice().sort((a,b)=>String(b.data_pagamento||b.created_at).localeCompare(String(a.data_pagamento||a.created_at))).map(p=>tr([fmt(p.receipt_number||String(p.id||'').slice(0,8)),fmt(p.cliente||bookingFor(p.prenotazione_id)?.cliente),fmt(tripFor(p.viaggio_id)?.titolo),tag(p.tipo),money(p.importo),fmt(p.metodo_pagamento||p.metodo),fmt(operMap.get(p.incassato_da_user_id)||p.incassato_da||'Non indicato'),date(p.data_pagamento||p.created_at)],btn(p.receipt_professional_path?'Apri ricevuta originale':'Genera ricevuta','payment-print','small',`data-id="${esc(p.id)}"`)+(p.receipt_professional_path?btn('Rigenera','payment-reissue','small',`data-id="${esc(p.id)}"`):'')+btn('Modifica movimento','payment-edit','small',`data-id="${esc(p.id)}"`)));
+ return section('Pagamenti e movimenti','Seleziona il viaggio, cerca il prenotato e registra la quota con ricevuta professionale',btn('+ Registra pagamento','payment-new','primary')+btn('Esporta CSV','payments-csv'))+panel('Registro pagamenti',`<div class="filterbar"><input data-filter="search" value="${esc(state.options.search)}" placeholder="Cerca cliente, ricevuta, tipo, viaggio"></div>${table(['Ricevuta','Cliente','Viaggio','Tipo','Importo','Metodo','Incassato da','Data',''],rs)}`);
 }
 function renderAgenda(){const events=state.data.trips.filter(t=>t.data_partenza).map(t=>({date:t.data_partenza,title:t.titolo,type:'Partenza',meta:t.ora_partenza||'',id:t.id}));
  for(const t of state.data.tasks){const dt=t.data_scadenza||t.scadenza||t.data; if(dt)events.push({date:dt,title:t.titolo||t.descrizione||'Scadenza',type:'Scadenza',meta:t.stato||'',id:t.id})}
@@ -410,8 +411,8 @@ function renderClosures(){
 }
 function renderSettings(){
  return section('Impostazioni e sicurezza','Connessione al gestionale originale')+
- panel('Connessione Supabase',`<div class="helpbox"><b>Database:</b> ${esc(URL_BASE)}<br><b>Stato:</b> ${state.write?'Operativo · modifica abilitata':'Connesso · lettura'}<br><b>Operatore:</b> ${fmt(state.userId)}<br><b>Protezione:</b> Supabase Auth + Row Level Security (RLS).</div><p class="hint">Le password non vengono salvate. Le sessioni sono conservate solo nella scheda del browser (sessionStorage), eliminate al logout o alla chiusura della scheda. Viene usata soltanto la chiave publishable di Supabase.</p><div class="actions">${btn(state.write?'Disattiva modifiche':'Abilita modifiche reali','toggle-write',state.write?'danger':'outline')}${btn('Aggiorna da Supabase','refresh')}${btn('Controllo integrità','integrity-open')}</div>`)+
- panel('Protezione produzione','<p class="subtle">Il nuovo frontend opera sul database esistente. Nessuna migrazione di vecchi dati è richiesta per leggere viaggi, prenotazioni, posti, pagamenti e flotta. Prima di attivare modifiche assicurarsi che esista un backup ripristinabile. La tabella aggiuntiva per le piantine personalizzate è una migrazione opzionale.</p>')+
+ panel('Connessione Supabase',`<div class="helpbox"><b>Database:</b> ${esc(URL_BASE)}<br><b>Stato:</b> ${state.write?'Operativo · modifica abilitata':'Connesso · lettura'}<br><b>Operatore:</b> ${fmt(state.userId)}<br><b>Protezione:</b> Supabase Auth + Row Level Security (RLS).</div><p class="hint">Le password non vengono salvate. Le sessioni sono conservate solo nella scheda del browser (sessionStorage), eliminate al logout o alla chiusura della scheda. Viene usata soltanto la chiave publishable di Supabase.</p><div class="actions">${btn('Aggiorna da Supabase','refresh')}${btn('Controllo integrità','integrity-open')}</div>`)+
+ panel('Protezione produzione','<p class="subtle">Dopo il login e la verifica del profilo operatore, le scritture sono disponibili automaticamente, senza un secondo interruttore. Le modifiche restano soggette a Supabase RLS, autorizzazioni e verifiche server; le cancellazioni richiedono conferma. Conserva un backup ripristinabile del database e dello Storage.</p>')+
  panel('Integrazioni',table(['Servizio','Gestione'],[
  ['Supabase Auth / RLS','Connesso, secondo permessi operatore'],
  ['Prenotazioni / posti / BUS BIS','RPC del database esistente'],
@@ -440,7 +441,7 @@ async function doWrite(callback){
    return notify('Prenotazione confermata dal server ma non ancora visibile nell’elenco: controlla i permessi e premi Aggiorna prima di riprovare.',true);
   }
   if(state.failedTables.length)return notify('Salvataggio confermato; alcune sezioni non sono state aggiornate. Verifica connessione e permessi.',true);
-  notify(result?.receiptWarning?'Prenotazione salvata. PDF da archiviare: '+result.receiptWarning:'Dati salvati e riletti da Supabase',Boolean(result?.receiptWarning));
+  notify(result?.receiptWarning?result.receiptWarning:(result?.receiptCreated?'Pagamento salvato e ricevuta professionale archiviata su Supabase':'Dati salvati e riletti da Supabase'),Boolean(result?.receiptWarning));
  }
  catch(e){notify('Operazione non completata: '+e.message,true);console.error(e)}
  finally{state.writeBusy=false;if(sub){sub.disabled=false;sub.textContent='Salva'}}
@@ -590,12 +591,68 @@ function rentalForm(id=''){
 function quoteForm(id=''){const old=state.data.quotes.find(q=>q.id===id)||{};openForm(id?'Modifica preventivo':'Nuovo preventivo',`<div class="formgrid">${field('nome','Nome',old.nome||'', 'text',true)}${field('cognome','Cognome',old.cognome||'')}${field('telefono','Telefono',old.telefono||'', 'tel',true)}${field('destinazione','Destinazione',old.destinazione||'', 'text',true)}${field('origine','Origine',old.origine||'Gestionale','text',true)}${field('data_partenza','Data partenza',old.data_partenza||'','date')}${field('passeggeri','Passeggeri',old.passeggeri||40,'number',true,'min="1"')}${field('importo','Importo €',old.importo_preventivo||old.importo||0,'number',true,'min="0" step="0.01"')}</div>`,async f=>{
  const row={nome:val(f,'nome'),cognome:val(f,'cognome')||null,telefono:val(f,'telefono'),destinazione:val(f,'destinazione'),origine:val(f,'origine'),stato:'Bozza',data_partenza:val(f,'data_partenza')||null,passeggeri:Number(val(f,'passeggeri')),numero_passeggeri:Number(val(f,'passeggeri')),importo:Number(val(f,'importo')),importo_preventivo:Number(val(f,'importo'))};if(id){delete row.stato;delete row.origine;await apiUpdate('preventivi',id,row)}else{row.id=uuid();await apiInsert('preventivi',row)}
  });}
+// Professional receipt service from the legacy production app. No admin secrets in the browser.
+async function createOfficialPaymentReceipt(paymentId,reissue=false){
+ if(!requireWrite())throw Error('Accesso operatore richiesto');
+ if(!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(String(paymentId||'')))throw Error('ID pagamento non valido');
+ const response=await withTimeout(URL_BASE+'/functions/v1/professional-receipts',{
+  method:'POST',headers:{apikey:PUBLIC_KEY,Authorization:'Bearer '+state.token,'Content-Type':'application/json'},
+  body:JSON.stringify({action:'generate',kind:'trip',id:paymentId,reissue:!!reissue}),cache:'no-store'
+ },45000);
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok||data.success!==true||!data.path)throw Error(data.error||'La ricevuta professionale non è stata archiviata');
+ return data;
+}
+async function viewOfficialPaymentReceipt(paymentId,forceReissue=false){
+ const payment=state.data.payments.find(p=>p.id===paymentId);if(!payment)throw Error('Pagamento non trovato');
+ if(!forceReissue&&payment.receipt_professional_path){return openArchivedPdf('ricevute-prenotazioni',payment.receipt_professional_path)}
+ if(!requireWrite())return;
+ if(forceReissue){const ok=confirm('Rigenerare la ricevuta ufficiale? La versione precedente rimarrà conservata nello storico.');if(!ok)return}
+ // Generate and archive on the existing official Supabase backend.
+ try{
+  const result=await createOfficialPaymentReceipt(paymentId,forceReissue);
+  await sync();notify('Ricevuta professionale creata e archiviata. Premi Apri ricevuta originale per visualizzarla.');
+  return result;
+ }catch(err){notify('Ricevuta non generata: '+err.message+'. Il pagamento rimane registrato.',true);throw err}
+}
+const paymentTripOptions=()=>state.data.trips.slice().sort((a,b)=>String(b.data_partenza||'').localeCompare(String(a.data_partenza||''))).map(t=>[t.id,tripLabel(t)+(t.archiviato_at?' · ARCHIVIATO':'')]);
+function updatePaymentBookingList(form){
+ const tripId=form?.elements?.namedItem('trip')?.value||'';
+ const query=String(form?.elements?.namedItem('client_search')?.value||'').toLocaleLowerCase('it-IT').trim();
+ const select=form?.elements?.namedItem('booking');if(!select)return;
+ const oldValue=select.value;
+ const all=state.data.bookings.filter(b=>b.viaggio_id===tripId&&!isCancelled(b))
+  .sort((a,b)=>String(a.cliente||'').localeCompare(String(b.cliente||''),'it'));
+ const matches=all.filter(b=>!query||[b.cliente,b.cliente_nome,b.telefono,b.codice,b.confirmation_number].some(x=>String(x||'').toLocaleLowerCase('it-IT').includes(query)));
+ const selected=matches.some(b=>b.id===oldValue)?oldValue:(matches.length===1?matches[0].id:'');
+ select.innerHTML='<option value="">— Seleziona cliente prenotato —</option>'+asOptions(matches.map(b=>[b.id,(b.cliente||'Cliente')+' · '+b.posti+' posti · '+money(Math.max(0,num(b.totale)-num(b.pagato)))+' residuo'] ),selected);
+ // In case of ambiguity the operator must pick the exact booking, no default to the first customer.
+ if(selected)select.value=selected;
+ const info=form.querySelector('#payment-booking-detail');const b=bookingFor(select.value);
+ if(info){info.textContent=b?'Prenotazione '+(b.codice||b.confirmation_number||b.id.slice(0,8))+' · '+num(b.posti)+' persone · totale '+money(b.totale)+' · versato '+money(b.pagato)+' · residuo '+money(Math.max(0,num(b.totale)-num(b.pagato))):matches.length?'Seleziona la prenotazione corretta.':'Nessuna prenotazione corrispondente a questa ricerca.';}
+}
 function paymentForm(id=''){
- const p=state.data.payments.find(x=>x.id===id)||{},bookings=state.data.bookings.filter(b=>!isCancelled(b)||b.id===p.prenotazione_id),ops=state.data.operators.filter(o=>o.attivo!==false);
- const b=bookingFor(p.prenotazione_id);
- openForm(id?'Modifica movimento di pagamento':'Registra pagamento',`<div class="formgrid">${fieldSelect('booking','Prenotazione',bookings.map(b=>[b.id,(b.cliente||'Cliente')+' · '+(tripFor(b.viaggio_id)?.titolo||'')]),p.prenotazione_id||bookings[0]?.id)}${fieldSelect('tipo','Tipo pagamento',[['Acconto','Acconto'],['Saldo','Saldo'],['Rimborso','Rimborso'],['Altro','Altro']],p.tipo||'Acconto')}${field('importo','Importo (€)',p.importo??0,'number',true,'min="0.01" step="0.01"')}${fieldSelect('metodo','Metodo',[['Contanti','Contanti'],['POS','POS'],['Bonifico','Bonifico']],p.metodo_pagamento||p.metodo||'Contanti')}${fieldSelect('operatore','Incassato da',ops.map(o=>[o.user_id,o.nome||o.username]),p.incassato_da_user_id||ops.find(o=>o.user_id===state.userId)?.user_id||ops[0]?.user_id)}${field('data_pagamento','Data pagamento',p.data_pagamento||dateISO(),'date',true)}</div><p class="hint">Gli incassi sono attribuiti solo all’operatore realmente indicato. Modificare una quota già registrata può rendere superata la ricevuta precedente: rigenerare il documento ufficiale usando la funzione di ricevute.</p>`,async f=>{
-  const bookingId=val(f,'booking'),bk=bookingFor(bookingId),op=state.data.operators.find(o=>o.user_id===val(f,'operatore'));
-  if(!bk||!op)throw Error('Prenotazione o operatore mancante');
+ if(state.failedTables.some(x=>/^(viaggi|prenotazioni|pagamenti|operatori_gestionale):/.test(x))){return notify('Non è possibile aprire i pagamenti: carica prima gli archivi completi da Supabase.',true)}
+ const p=state.data.payments.find(x=>x.id===id)||{},ops=state.data.operators.filter(o=>o.attivo!==false);
+ const oldBooking=bookingFor(p.prenotazione_id),tripId=p.viaggio_id||oldBooking?.viaggio_id||'';
+ const trips=paymentTripOptions();
+ if(id&&tripId&&!trips.some(([tid])=>tid===tripId))trips.push([tripId,tripLabel(tripFor(tripId)||{titolo:'Viaggio archiviato'})]);
+ const markup=`<div class="formgrid">${fieldSelect('trip','1 · Scegli il viaggio',[['','— Seleziona un viaggio —'],...trips],tripId)}
+ ${field('client_search','2 · Cerca cliente prenotato','', 'search',false,'autocomplete="off" placeholder="Nome, cognome, telefono o codice"')}
+ <label>3 · Seleziona prenotazione<select name="booking" required><option value="">— Scegli prima il viaggio —</option></select></label>
+ <div id="payment-booking-detail" class="helpbox" aria-live="polite">Seleziona un viaggio per vedere i clienti prenotati.</div></div>
+ <div class="formgrid">${fieldSelect('tipo','Tipo pagamento',[['Acconto','Acconto'],['Saldo','Saldo'],['Rimborso','Rimborso'],['Altro','Altro']],p.tipo||'Acconto')}
+ ${field('importo','Importo (€)',p.importo??'','number',true,'min="0.01" step="0.01"')}
+ ${fieldSelect('metodo','Metodo',[['Contanti','Contanti'],['POS','POS'],['Bonifico','Bonifico']],p.metodo_pagamento||p.metodo||'Contanti')}
+ ${fieldSelect('operatore','Incassato da',ops.map(o=>[o.user_id,o.nome||o.username]),p.incassato_da_user_id||ops.find(o=>o.user_id===state.userId)?.user_id||ops[0]?.user_id)}
+ ${field('data_pagamento','Data pagamento',p.data_pagamento||dateISO(),'date',true)}</div>
+ <p class="hint">Dopo il salvataggio viene richiesta al servizio storico DELGROSSO la <b>ricevuta professionale originale</b>, archiviata su Supabase. In caso di errore il pagamento rimane registrato e puoi usare “Genera ricevuta”.</p>`;
+ openForm(id?'Modifica movimento di pagamento':'Registra pagamento',markup,async f=>{
+  if(state.failedTables.some(x=>/^(viaggi|prenotazioni|pagamenti|operatori_gestionale):/.test(x)))throw Error('Elenco incompleto: aggiorna gli archivi prima di registrare il pagamento');
+  const selectedTrip=id?tripId:val(f,'trip'),bookingId=id?p.prenotazione_id:val(f,'booking'),bk=bookingFor(bookingId),op=state.data.operators.find(o=>o.user_id===val(f,'operatore'));
+  if(!selectedTrip)throw Error('Seleziona prima il viaggio');
+  if(!bk||bk.viaggio_id!==selectedTrip)throw Error('Seleziona un cliente prenotato al viaggio scelto');
+  if(!op||op.attivo===false)throw Error('Seleziona un operatore abilitato');
   if(id&&bk.id!==p.prenotazione_id)throw Error('Non è consentito spostare un pagamento su un’altra prenotazione da questa schermata');
   const amount=Number(val(f,'importo')),type=val(f,'tipo');if(!Number.isFinite(amount)||amount<=0)throw Error('L’importo deve essere maggiore di zero');
   if(type==='Rimborso')throw Error('I rimborsi devono passare dalla procedura ufficiale di cassa, non da questa maschera.');
@@ -603,12 +660,29 @@ function paymentForm(id=''){
   const alreadyPaid=otherPayments.reduce((sum,x)=>sum+(/rimborso/i.test(x.tipo)?-Math.abs(num(x.importo)):Math.abs(num(x.importo))),0);
   if(alreadyPaid+amount>num(bk.totale)+0.005)throw Error('L’importo complessivo supera il totale della prenotazione');
   const row={prenotazione_id:bk.id,viaggio_id:bk.viaggio_id,cliente:bk.cliente,viaggio:tripFor(bk.viaggio_id)?.titolo||'',persone:num(bk.posti),tipo:type,importo:amount,metodo:val(f,'metodo'),metodo_pagamento:val(f,'metodo'),incassato_da_user_id:op.user_id,incassato_da:op.username,data_pagamento:val(f,'data_pagamento'),stato:'Registrato'};
+  let savedPaymentId=id;
   if(id){await apiUpdate('pagamenti',id,row)}else{
-   Object.assign(row,{id:uuid(),totale:num(bk.totale),acconto:type==='Acconto'?amount:0,saldo:Math.max(num(bk.totale)-alreadyPaid-amount,0),pagato:Math.max(alreadyPaid+amount,0)});
-   await apiInsert('pagamenti',row);
+   savedPaymentId=uuid();Object.assign(row,{id:savedPaymentId,totale:num(bk.totale),acconto:type==='Acconto'?amount:0,saldo:Math.max(num(bk.totale)-alreadyPaid-amount,0),pagato:Math.max(alreadyPaid+amount,0)});
+   const inserted=await apiInsert('pagamenti',row);
+   if(!Array.isArray(inserted)||inserted.length!==1||inserted[0].id!==savedPaymentId)throw Error('Pagamento non confermato: verifica il registro prima di riprovare');
   }
+  // Payment is already committed. Receipt generation failure must not request another payment.
+  try{
+   await createOfficialPaymentReceipt(savedPaymentId,Boolean(id));
+   return {savedPaymentId,receiptCreated:true};
+  }catch(e){return {savedPaymentId,receiptWarning:'Pagamento registrato ma ricevuta professionale da generare: '+e.message};}
  });
+ const form=$('edit-form');
+ if(id){const trip=form.elements.namedItem('trip');trip.disabled=true;trip.dataset.locked='true';}
+ updatePaymentBookingList(form);
+ if(id){const sel=form.elements.namedItem('booking');
+   // Temporarily fill the search with the exact booking to avoid an ambiguous default.
+   const search=form.elements.namedItem('client_search');search.value=oldBooking?.cliente||'';
+   updatePaymentBookingList(form);sel.value=p.prenotazione_id||'';updatePaymentBookingList(form);
+   sel.disabled=true;
+ }
 }
+
 function printableBooking(b){const t=tripFor(b.viaggio_id),lines=state.data.payments.filter(p=>p.prenotazione_id===b.id);return `<h2>Conferma prenotazione</h2><p>Codice: <b>${fmt(b.codice||b.confirmation_number||b.id)}</b></p><p>Cliente: <b>${fmt(b.cliente)}</b><br>Viaggio: <b>${fmt(t?.titolo)}</b><br>Data: <b>${date(t?.data_partenza)}</b><br>Fermata: ${fmt(b.fermata_partenza)}<br>Persone: ${num(b.posti)}<br>Posti assegnati: <b>${fmt(b.posti_selezionati)}</b></p><div class="total">Totale: ${money(b.totale)}</div><div class="total">Versato: ${money(b.pagato)}</div><div class="total">Residuo: ${money(num(b.totale)-num(b.pagato))}</div><h2>Pagamenti collegati</h2>${table(['Data','Tipo','Importo','Metodo'],lines.map(p=>tr([date(p.data_pagamento||p.created_at),fmt(p.tipo),money(p.importo),fmt(p.metodo_pagamento||p.metodo)])))}<p class="print-note">Documento per consultazione operativa. Le ricevute fiscali e i documenti già archiviati restano nel gestionale originale.</p>`}
 function printableDeparture(id){const t=tripFor(id);if(!t)return '';const bs=state.data.bookings.filter(b=>b.viaggio_id===id&&!isCancelled(b)),count=bs.reduce((s,b)=>s+num(b.posti),0);return `<h2>Riepilogo partenza · ${fmt(t.titolo)}</h2><p>Data: ${date(t.data_partenza)} · Ora: ${fmt(t.ora_partenza)} · Autobus: ${fmt(busFor(t.autobus_id)?.modello||t.autobus||'—')} · Prenotati: ${count}</p>${table(['N.','Cliente','Posti','Fermata','Totale','Pagato','Residuo','Check-in'],bs.map((b,i)=>tr([String(i+1),fmt(b.cliente),fmt(b.posti_selezionati),fmt(b.fermata_partenza),money(b.totale),money(b.pagato),money(num(b.totale)-num(b.pagato)),b.checkin_effettuato?'SI':'NO'])))}<div class="total">Partecipanti: ${count}</div><div class="total">Totale quote prenotate: ${money(bs.reduce((s,b)=>s+num(b.totale),0))}</div><div class="total">Totale da incassare: ${money(bs.reduce((s,b)=>s+Math.max(0,num(b.totale)-num(b.pagato)),0))}</div>`}
 function downloadTripPdf(id){if(!isConfigured())return notify('Accedi prima di scaricare il PDF',true);try{const g=reportForTrip(id),name=Pdf.saveTripPdf(g);notify('PDF creato: '+name)}catch(e){notify('Impossibile creare il PDF: '+e.message,true)}}
@@ -747,7 +821,8 @@ async function handleAction(action,el){const id=el.dataset.id||'';
  case 'cash-trip-print':return printHtml('Contanti viaggio',printableCash(id||state.options.cashTrip));
  case 'cash-trip-download':return downloadTripPdf(id||state.options.cashTrip);
  case 'payment-new':return paymentForm();case 'payment-edit':return paymentForm(id);
- case 'payment-print':return printHtml('Ricevuta movimento',printablePayment(id));
+ case 'payment-print':return viewOfficialPaymentReceipt(id);
+ case 'payment-reissue':return viewOfficialPaymentReceipt(id,true);
  case 'agenda-print':return printHtml('Agenda',`<h2>Agenda ${fmt(state.options.agendaMonth)}</h2>`+table(['Data','Viaggio'],state.data.trips.filter(t=>String(t.data_partenza).startsWith(state.options.agendaMonth)).map(t=>tr([date(t.data_partenza),fmt(t.titolo)]))));
  case 'fleet-new':return fleetForm();case 'fleet-edit':return fleetForm(id);
  case 'rental-new':return rentalForm();case 'rental-edit':return rentalForm(id);
@@ -756,11 +831,6 @@ async function handleAction(action,el){const id=el.dataset.id||'';
  case 'wa-save':return saveWA(id);
  case 'wa-invite':return inviteWA(id);
  case 'refresh':return await sync();
- case 'toggle-write':{
-  if(state.mode!=='live')return;
-  if(state.write){state.write=false;updateMode();render();return notify('Scritture disattivate')}
-  const answer=prompt('Per abilitare modifiche REALI su Supabase, dopo aver verificato un BACKUP ripristinabile, digita: ATTIVA');
-  if(answer!=='ATTIVA')return notify('Attivazione annullata');state.write=true;updateMode();render();return notify('Attenzione: modifiche reali abilitate')}
  case 'dashboard-print':return printHtml('Riepilogo operativo',`<h2>Viaggi</h2>${table(['Viaggio','Data','Pax','Stato'],state.data.trips.map(t=>tr([fmt(t.titolo),date(t.data_partenza),bookingsCount(t.id),fmt(t.stato)])))}`);
  case 'trip-csv':return exportCSV([['Viaggio','Data','Ora','Pax','Capienza','Stato'],...state.data.trips.map(t=>[t.titolo,t.data_partenza,t.ora_partenza,bookingsCount(t.id),t.posti_totali,t.stato])],'DELGROSSO_VIAGGI');
  case 'booking-csv':return exportCSV([['Codice','Cliente','Viaggio','Posti','Fermata','Totale','Versato','Residuo','Stato'],...state.data.bookings.map(b=>[b.codice,b.cliente,tripFor(b.viaggio_id)?.titolo,b.posti_selezionati,b.fermata_partenza,b.totale,b.pagato,num(b.totale)-num(b.pagato),b.stato])],'DELGROSSO_PRENOTAZIONI');
@@ -827,6 +897,9 @@ async function init(){
  document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{state.page=b.dataset.page;state.options.search='';if(state.page==='control')state.selectedSeats.clear();$('edit-dialog').close();render();window.scrollTo(0,0)}));
  // Propose actual fleet capacity when changing bus, not the legacy 53-seat default.
  $('edit-dialog').addEventListener('change',e=>{
+  if(e.target.form?.id==='edit-form' && ['trip','booking'].includes(e.target.name) && e.target.form.elements.namedItem('client_search')){
+    updatePaymentBookingList(e.target.form);return;
+  }
   if(e.target.name==='viaggio_id'&&state.bookingDraft){const d=state.bookingDraft;d.selected.clear();d.tripId=e.target.value;updateBookingSeatPanel();refreshBookingTripSeats(e.target.value).then(updateBookingSeatPanel).catch(x=>notify('Piantina non aggiornata: '+x.message,true));return;}
   if(e.target.name==='posti'&&state.bookingDraft){updateBookingSeatPanel();return;}
   if(e.target.name!=='autobus_id')return;
@@ -837,7 +910,9 @@ async function init(){
   cap.value=String(bus.posti);
   notify('Capienza aggiornata automaticamente: '+bus.posti+' posti ('+(bus.seat_layout||'piantina flotta')+')');
  });
- $('edit-dialog').addEventListener('input',e=>{const d=state.bookingDraft;if(!d)return;if(e.target.name==='posti'){updateBookingSeatPanel();if(!d.totalEdited){const t=tripFor(d.tripId);const form=$('edit-form'),total=form?.elements?.namedItem('totale');if(total&&t)total.value=String(Math.round((num(t.prezzo)*d.people)*100)/100)}}if(e.target.name==='totale')d.totalEdited=true;});
+ $('edit-dialog').addEventListener('input',e=>{
+  if(e.target.name==='client_search'&&e.target.form?.elements.namedItem('trip')){updatePaymentBookingList(e.target.form);return;}
+  const d=state.bookingDraft;if(!d)return;if(e.target.name==='posti'){updateBookingSeatPanel();if(!d.totalEdited){const t=tripFor(d.tripId);const form=$('edit-form'),total=form?.elements?.namedItem('totale');if(total&&t)total.value=String(Math.round((num(t.prezzo)*d.people)*100)/100)}}if(e.target.name==='totale')d.totalEdited=true;});
  $('edit-dialog').addEventListener('submit',e=>{if(e.target.id==='edit-form'){e.preventDefault();const fn=state.modalSubmit;if(typeof fn==='function')doWrite(()=>fn(e.target))}});
  $('edit-dialog').addEventListener('click',e=>{if(e.target.closest('#edit-cancel')){$('edit-dialog').close();state.bookingDraft=null}});
  $('content').addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(!el)return;Promise.resolve(handleAction(el.dataset.action,el)).catch(x=>notify(x.message,true))});
