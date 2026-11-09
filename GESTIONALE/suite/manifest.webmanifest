@@ -1,0 +1,11 @@
+{
+  "name": "DELGROSSO VIAGGI - Gestionale 2.0",
+  "short_name": "DELGROSSO 2.0",
+  "description": "Gestionale operativo con autenticazione Supabase",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#10203b",
+  "lang": "it",
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

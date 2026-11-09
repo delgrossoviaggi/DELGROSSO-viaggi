@@ -14,13 +14,13 @@ const SESSION_KEY='dg2_operator_session_tab_v1';
 const ALLOWED_OPERATOR_ALIASES=['nicola','raffaele'];
 const normalizeLogin=input=>String(input||'').trim().toLowerCase();
 
-const pageInfo={dashboard:['Control Room','Il tuo centro operativo'],viaggi:['Viaggi e partenze','Pianificazione, fermate e BUS BIS'],prenotazioni:['Prenotazioni','Clienti, caparre e saldo'],control:['Posti e Check-in','Piantine originali e spostamenti'],piantine:['Editor piantine','Crea e modifica gli schemi'],cassa:['Cassa Nicola e Raffaele','Incassi separati, trasferimenti e rimborsi'],pagamenti:['Movimenti e pagamenti','Ricevute, acconti e saldi'],operativo:['Centro operativo','Presenze, attività e partenze'],assistente:['Assistente operativo','Acconti da verificare e segnalazioni'],agenda:['Agenda completa','Appuntamenti, attività e scadenze'],fermate:['Passeggeri per paese','Conteggio per fermata di partenza e BUS BIS'],statistiche:['Statistiche','Viaggi, occupazione e dati operativi'],economia:['Economia','Entrate e uscite registrate'],backup:['Backup & export','Esportazione CSV degli archivi'],flotta:['Flotta','Tutti i mezzi e le piantine'],noleggi:['Noleggi autobus','Disponibilità e contratti'],preventivi:['Preventivi','Richieste e offerte'],clienti:['Clienti','Rubrica clienti e prenotazioni'],whatsapp:['WhatsApp gruppi','Inviti con controllo del consenso'],comunicazioni:['Comunicazioni','Messaggi tra operatori'],flottaoperativa:['Manutenzioni e carburante','Controlli tecnici, rifornimenti e blocchi mezzi'],centropro:['Centro Pro','CRM, anomalie e checklist'],notifiche:['Notifiche','Aggiornamenti gestionali'],integrita:['Integrità dati','Controlli tra prenotazioni, posti e pagamenti'],archivio:['Archivio documenti','Storico documenti e ricevute esistenti'],chiusure:['Chiusura 360','Chiusure storiche, saldi e margini'],impostazioni:['Impostazioni','Accesso, sicurezza, esportazione dati']};
-const initial={trips:[],bookings:[],seats:[],fleet:[],payments:[],operators:[],transfers:[],stops:[],rentals:[],quotes:[],clients:[],notifications:[],assistantEvents:[],documents:[],receipts:[],closures:[],waitlist:[],groupInvites:[],groupConsents:[],tasks:[],activities:[],economy:[],layoutTemplates:[],operatorMessages:[],maintenances:[],fuel:[],fleetBlocks:[],crm:[],anomalies:[],checklists:[]};
-const state={bookingDraft:null,noticeCount:0,writeBusy:false,page:'dashboard',mode:'locked',write:false,token:'',refreshToken:'',expiresAt:0,userId:'',failedTables:[],data:structuredClone(initial),options:{search:'',tripId:'',bookingId:'',cashTrip:'',agendaMonth:new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit'}).format(new Date()),agendaFilter:'tutti',agendaSearch:'',agendaStatus:'aperti',boardingTripId:'',statsTripId:'',tripView:'attivi'},layoutKey:'GT53',layout:Model.fromLegacy('GT53'),drafts:{},selectedSeats:new Set(),busy:false};
+const pageInfo={dashboard:['Control Room','Il tuo centro operativo'],viaggi:['Viaggi e partenze','Pianificazione, fermate e BUS BIS'],prenotazioni:['Prenotazioni','Clienti, caparre e saldo'],control:['Posti e Check-in','Piantine originali e spostamenti'],piantine:['Editor piantine','Crea e modifica gli schemi'],cassa:['Cassa Nicola e Raffaele','Incassi separati, trasferimenti e rimborsi'],pagamenti:['Movimenti e pagamenti','Ricevute, acconti e saldi'],agenda:['Agenda','Partenze e scadenze'],flotta:['Flotta','Tutti i mezzi e le piantine'],noleggi:['Noleggi autobus','Disponibilità e contratti'],preventivi:['Preventivi','Richieste e offerte'],clienti:['Clienti','Rubrica clienti e prenotazioni'],whatsapp:['WhatsApp gruppi','Inviti con controllo del consenso'],notifiche:['Notifiche','Aggiornamenti gestionali'],integrita:['Integrità dati','Controlli tra prenotazioni, posti e pagamenti'],archivio:['Archivio documenti','Storico documenti e ricevute esistenti'],chiusure:['Chiusura 360','Chiusure storiche, saldi e margini'],impostazioni:['Impostazioni','Accesso, sicurezza, esportazione dati']};
+const initial={trips:[],bookings:[],seats:[],fleet:[],payments:[],operators:[],transfers:[],stops:[],rentals:[],quotes:[],clients:[],notifications:[],documents:[],receipts:[],closures:[],waitlist:[],groupInvites:[],groupConsents:[],tasks:[],economy:[],layoutTemplates:[]};
+const state={bookingDraft:null,noticeCount:0,writeBusy:false,page:'dashboard',mode:'locked',write:false,token:'',refreshToken:'',expiresAt:0,userId:'',failedTables:[],data:structuredClone(initial),options:{search:'',tripId:'',bookingId:'',cashTrip:'',agendaMonth:new Date().toISOString().slice(0,7),tripView:'attivi'},layoutKey:'GT53',layout:Model.fromLegacy('GT53'),drafts:{},selectedSeats:new Set(),busy:false};
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=x=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(x)||0);
 const date=x=>x&&/^\d{4}-\d{2}-\d{2}/.test(x)?x.slice(8,10)+'/'+x.slice(5,7)+'/'+x.slice(0,4):x||'—';
-const dateISO=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),num=x=>Number(x)||0;
+const dateISO=()=>new Date().toISOString().slice(0,10),num=x=>Number(x)||0;
 const localTime=x=>{if(!x)return '—';const d=new Date(x);return Number.isNaN(d.getTime())?'Data non valida':d.toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});};
 const fmt=x=>esc(x??'—'),asOptions=(items,active)=>items.map(([v,t])=>`<option value="${esc(v)}" ${String(v)===String(active)?'selected':''}>${esc(t)}</option>`).join('');
 const tag=s=>{const x=String(s||'').toLowerCase();return `<span class="tag ${/conferm|pagat|attiv|disponib|registrat/.test(x)?'green':/annull|scadut|rifiut/.test(x)?'red':'amber'}">${esc(s||'—')}</span>`};
@@ -115,7 +115,7 @@ async function rows(name,select='*'){
  }
  throw Error('Elenco '+name+' troppo grande: usare filtri server');
 }
-const datasets=[['trips','viaggi'],['bookings','prenotazioni'],['seats','prenotazione_posti'],['fleet','flotta'],['payments','pagamenti'],['operators','operatori_gestionale'],['transfers','cassa_trasferimenti'],['stops','viaggi_fermate'],['rentals','noleggi_bus'],['quotes','preventivi'],['clients','clienti'],['notifications','notifiche'],['assistantEvents','assistente_eventi'],['documents','documenti_gestionali'],['receipts','ricevute_versioni'],['closures','dg_viaggi_chiusure'],['waitlist','lista_attesa'],['groupInvites','dg_whatsapp_trip_invites_v61'],['groupConsents','dg_trip_group_consents_v65'],['tasks','scadenze_gestionale'],['activities','attivita_gestionale'],['economy','economia_movimenti'],['operatorMessages','dg_operator_communications'],['maintenances','manutenzioni_flotta'],['fuel','carburante_flotta'],['fleetBlocks','dg_blocchi_flotta'],['crm','crm_attivita'],['anomalies','anomalie_gestionale'],['checklists','checklist_mezzi'],['layoutTemplates','dg2_piantine']];
+const datasets=[['trips','viaggi'],['bookings','prenotazioni'],['seats','prenotazione_posti'],['fleet','flotta'],['payments','pagamenti'],['operators','operatori_gestionale'],['transfers','cassa_trasferimenti'],['stops','viaggi_fermate'],['rentals','noleggi_bus'],['quotes','preventivi'],['clients','clienti'],['notifications','notifiche'],['documents','documenti_gestionali'],['receipts','ricevute_versioni'],['closures','dg_viaggi_chiusure'],['waitlist','lista_attesa'],['groupInvites','dg_whatsapp_trip_invites_v61'],['groupConsents','dg_trip_group_consents_v65'],['tasks','scadenze_gestionale'],['economy','economia_movimenti'],['layoutTemplates','dg2_piantine']];
 async function sync(){if(!isConfigured())return;if(state.busy)return;state.busy=true; const newData=structuredClone(initial),fail=[];
  try{
  // Parallelismo limitato: più fluido del caricamento seriale, senza sovraccaricare Supabase.
@@ -243,96 +243,12 @@ function renderPayments(){const q=state.options.search.toLowerCase();const ps=st
  const rs=ps.slice().sort((a,b)=>String(b.data_pagamento||b.created_at).localeCompare(String(a.data_pagamento||a.created_at))).map(p=>tr([fmt(p.receipt_number||String(p.id||'').slice(0,8)),fmt(p.cliente||bookingFor(p.prenotazione_id)?.cliente),fmt(tripFor(p.viaggio_id)?.titolo),tag(p.tipo),money(p.importo),fmt(p.metodo_pagamento||p.metodo),fmt(operMap.get(p.incassato_da_user_id)||p.incassato_da||'Non indicato'),date(p.data_pagamento||p.created_at)],btn(p.receipt_professional_path?'Apri ricevuta originale':'Genera ricevuta','payment-print','small',`data-id="${esc(p.id)}"`)+(p.receipt_professional_path?btn('Rigenera','payment-reissue','small',`data-id="${esc(p.id)}"`):'')+btn('Modifica movimento','payment-edit','small',`data-id="${esc(p.id)}"`)));
  return section('Pagamenti e movimenti','Seleziona il viaggio, cerca il prenotato e registra la quota con ricevuta professionale',btn('+ Registra pagamento','payment-new','primary')+btn('Esporta CSV','payments-csv'))+panel('Registro pagamenti',`<div class="filterbar"><input data-filter="search" value="${esc(state.options.search)}" placeholder="Cerca cliente, ricevuta, tipo, viaggio"></div>${table(['Ricevuta','Cliente','Viaggio','Tipo','Importo','Metodo','Incassato da','Data',''],rs)}`);
 }
-function agendaEvents(){
- const d=state.data, events=[];
- for(const t of d.trips||[])if(t.data_partenza)events.push({kind:'viaggio',date:t.data_partenza,title:t.titolo||t.destinazione||'Viaggio',detail:(t.ora_partenza||'')+' · '+(t.luogo_partenza||'')+' · '+bookingsCount(t.id)+' passeggeri',status:t.stato||'',id:t.id,closed:false});
- for(const t of d.rentals||[])if(t.data_partenza)events.push({kind:'noleggio',date:t.data_partenza,title:(t.referente||t.azienda||'Noleggio')+' · '+(t.tratta_partenza||'')+' → '+(t.tratta_destinazione||''),detail:(t.ora_partenza||'')+' · '+(t.passeggeri||0)+' pax',status:t.stato_noleggio||'',id:t.id,closed:!!t.archiviato_at});
- for(const t of d.tasks||[])if(t.data_scadenza)events.push({kind:'scadenza',date:t.data_scadenza,title:t.titolo||'Scadenza',detail:(t.tipo||'')+' · '+(t.note||t.descrizione||''),status:t.stato||'aperta',id:t.id,closed:/completat|chius|annull/i.test(t.stato||'')});
- for(const t of d.activities||[])if(t.scadenza)events.push({kind:'attivita',date:t.scadenza,title:t.titolo||'Attività',detail:(t.assegnata_a||'')+' · '+(t.descrizione||''),status:t.stato||'aperta',id:t.id,closed:/completat|chius|annull/i.test(t.stato||'')});
- return events.sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.kind).localeCompare(String(b.kind)));
-}
-function renderMonthCalendar(events,month){
- const [y,m]=String(month||'').split('-').map(Number);
- if(!Number.isInteger(y)||!Number.isInteger(m)||m<1||m>12)return '';
- const blanks=(new Date(y,m-1,1).getDay()+6)%7,days=new Date(y,m,0).getDate();
- const labels=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
- const cells=labels.map(s=>`<span class="agenda-weekday">${s}</span>`);
- for(let k=0;k<blanks;k++)cells.push('<span class="agenda-blank" aria-hidden="true"></span>');
- for(let day=1;day<=days;day++){
-  const key=month+'-'+String(day).padStart(2,'0');const items=events.filter(e=>e.date===key),today=key===dateISO();
-  const chips=items.slice(0,3).map(e=>`<span class="agenda-chip ${esc(e.kind)}" title="${esc(e.title)}">${esc(e.title)}</span>`).join('');
-  const overflow=items.length>3?`<span class="agenda-more">+${items.length-3} altri</span>`:'';
-  cells.push(`<button type="button" class="agenda-day ${today?'today':''}" data-action="agenda-day" data-date="${esc(key)}" title="Aggiungi impegno il ${date(key)}"><strong>${day}</strong><span class="agenda-day-count">${items.length?items.length+' eventi':'+'}</span>${chips}${overflow}</button>`);
- }
- return `<div class="agenda-calendar" role="group" aria-label="Calendario operativo ${esc(month)}">${cells.join('')}</div><p class="hint">Tocca un giorno per aggiungere rapidamente un nuovo impegno. Viaggi, noleggi, attività e scadenze sono visualizzati nello stesso calendario.</p>`;
-}
-
-function renderAgenda(){
- const needed=['scadenze_gestionale','attivita_gestionale'];const failed=state.failedTables.filter(x=>needed.some(n=>x.startsWith(n+':')));
- const all=agendaEvents(),month=state.options.agendaMonth,filter=state.options.agendaFilter,query=state.options.agendaSearch.toLowerCase().trim(),status=state.options.agendaStatus;
- const rs=all.filter(e=>String(e.date).startsWith(month)&&(filter==='tutti'||e.kind===filter)&&(status==='tutti'||!e.closed)&&(!query||(e.title+' '+e.detail+' '+e.status).toLowerCase().includes(query)));
- const pending=all.filter(e=>(e.kind==='scadenza'||e.kind==='attivita')&&!e.closed);
- const past=pending.filter(e=>e.date<dateISO());
- const kpi=[['Eventi nel mese',rs.length],['Da completare',pending.length],['In ritardo',past.length],['Viaggi del mese',all.filter(e=>e.kind==='viaggio'&&e.date.startsWith(month)).length]].map(([name,qty])=>`<div class="kpi"><span>${esc(name)}</span><strong>${qty}</strong></div>`).join('');
- const action=e=>e.kind==='scadenza'||e.kind==='attivita'?`<div class="tableactions">${btn('Modifica','agenda-edit','small',`data-kind="${esc(e.kind)}" data-id="${esc(e.id)}"`)}${!e.closed?btn('✓ Completa','agenda-complete','small',`data-kind="${esc(e.kind)}" data-id="${esc(e.id)}"`):btn('Riapri','agenda-reopen','small',`data-kind="${esc(e.kind)}" data-id="${esc(e.id)}"`)}${btn('Elimina','agenda-delete','small',`data-kind="${esc(e.kind)}" data-id="${esc(e.id)}"`)}</div>`:e.kind==='viaggio'?btn('Viaggio','trip-edit','small',`data-id="${esc(e.id)}"`):btn('Noleggio','rental-edit','small',`data-id="${esc(e.id)}"`);
- const html=table(['Data','Impegno','Tipo','Dettagli','Stato',''],rs.map(e=>tr([date(e.date),`<b>${fmt(e.title)}</b>`,tag(e.kind),fmt(e.detail),e.closed?tag('Completata'):tag(e.status||'Aperta'),action(e)])),'Nessun evento corrispondente. Puoi aggiungere un’attività o una scadenza.');
- return section('Agenda operativa completa','Le funzioni attività e scadenze provengono dal gestionale precedente: salvataggio su Supabase',btn('+ Nuova attività','agenda-activity-new','primary')+btn('+ Nuova scadenza','agenda-deadline-new','primary')+btn('Stampa agenda','agenda-print'))+(failed.length?panel('Collegamento agenda',`<p class="error">Impossibile leggere alcune tabelle: ${fmt(failed.join(' | '))}. Non vengono inventati dati.</p>`):'')+`<div class="kpis">${kpi}</div>`+panel('Calendario e impegni',`<div class="filterbar agenda-filters"><label>Mese<input id="agenda-month" type="month" value="${esc(month)}"></label><label>Tipo<select id="agenda-kind">${asOptions([['tutti','Tutti'],['viaggio','Viaggi'],['noleggio','Noleggi'],['attivita','Attività'],['scadenza','Scadenze']],filter)}</select></label><label>Stato<select id="agenda-status">${asOptions([['aperti','Aperti'],['tutti','Tutti, anche completati']],status)}</select></label><label>Cerca<input id="agenda-search" value="${esc(state.options.agendaSearch)}" placeholder="Cerca appuntamento, luogo o nome"></label></div>${renderMonthCalendar(all,month)}${html}<p class="hint">Le partenze e i noleggi si modificano nelle rispettive schede. Le attività e le scadenze vengono salvate in Supabase; non sono note locali.</p>`);
-}
-function agendaForm(kind,id='',selectedDay=''){
- if(!requireWrite())return;
- const deadline=kind==='scadenza',tab=deadline?'scadenze_gestionale':'attivita_gestionale',items=deadline?state.data.tasks:state.data.activities,old=items.find(x=>x.id===id)||{};
- const kinds=deadline?[['operativa','Operativa'],['acconto','Acconto'],['pagamento','Pagamento'],['documento','Documento'],['promemoria','Promemoria'],['altro','Altro']]:[];
- const extra=deadline?fieldSelect('tipo','Tipo scadenza',kinds,old.tipo||'operativa')+field('importo','Importo € (facoltativo)',old.importo??'','number',false,'min="0" step="0.01"')+fieldSelect('viaggio_id','Viaggio collegato',[['','— Nessuno —'],...state.data.trips.map(t=>[t.id,tripLabel(t)])],old.viaggio_id||''):field('assegnata_a','Assegnata a',old.assegnata_a||currentOperatorName());
- const body=`<div class="formgrid">${field('titolo','Titolo',old.titolo||'','text',true,'maxlength="180"')}${field('data','Data',deadline?old.data_scadenza||selectedDay||dateISO():old.scadenza||selectedDay||dateISO(),'date',true)}${fieldSelect('priorita','Priorità',[['normale','Normale'],['alta','Alta'],['bassa','Bassa']],old.priorita||'normale')}${fieldSelect('stato','Stato',[['aperta','Aperta'],['in corso','In corso'],['completata','Completata']],old.stato||'aperta')}${extra}</div><label>${deadline?'Note':'Descrizione'}<textarea name="descrizione" rows="4" maxlength="2000">${esc(deadline?old.note||old.descrizione||'':old.descrizione||'')}</textarea></label><p class="hint">Le modifiche saranno disponibili a Nicola e Raffaele tramite Supabase. Non serve abilitare la scrittura dalle Impostazioni.</p>`;
- openForm((id?'Modifica ':'Nuova ')+(deadline?'scadenza':'attività'),body,async f=>{
-  const title=val(f,'titolo'),theDate=val(f,'data');if(!title||!/^\d{4}-\d{2}-\d{2}$/.test(theDate))throw Error('Titolo e data obbligatori.');
-  const finished=/completat/i.test(val(f,'stato')),status=val(f,'stato');
-  const row=deadline?{titolo:title,data_scadenza:theDate,descrizione:val(f,'descrizione')||null,note:val(f,'descrizione')||null,tipo:val(f,'tipo')||'operativa',stato:status,priorita:val(f,'priorita'),viaggio_id:val(f,'viaggio_id')||null,importo:val(f,'importo')===''?null:Number(val(f,'importo')),completata_at:finished?(old.completata_at||new Date().toISOString()):null}:{titolo:title,scadenza:theDate,descrizione:val(f,'descrizione')||null,stato:status,priorita:val(f,'priorita'),assegnata_a:val(f,'assegnata_a')||null,completata_at:finished?(old.completata_at||new Date().toISOString()):null};
-  if(deadline && row.importo!==null && (!Number.isFinite(row.importo)||row.importo<0))throw Error('Importo non valido');
-  if(id)await apiUpdate(tab,id,row);else await apiInsert(tab,row);
- });
-}
-function currentOperatorName(){const o=state.data.operators.find(x=>x.user_id===state.userId);return o?.nome||o?.username||''}
-function agendaToggle(kind,id,complete){if(!requireWrite())return;const tab=kind==='scadenza'?'scadenze_gestionale':'attivita_gestionale';if(!id)return;return confirmAction((complete?'Completare':'Riaprire')+' questo impegno?',async()=>{await apiUpdate(tab,id,{stato:complete?'completata':'aperta',completata_at:complete?new Date().toISOString():null});await sync();notify('Agenda aggiornata su Supabase')})}
-function agendaDelete(kind,id){if(!requireWrite())return;const tab=kind==='scadenza'?'scadenze_gestionale':'attivita_gestionale';const row=(kind==='scadenza'?state.data.tasks:state.data.activities).find(x=>x.id===id);if(!row)return notify('Impegno non trovato',true);return confirmAction('Eliminare definitivamente «'+row.titolo+'»? Le attività collegate a viaggi restano nel loro archivio.',async()=>{const deleted=await request(tab+'?id=eq.'+encodeURIComponent(id),{method:'DELETE',prefer:'return=representation'});if(!Array.isArray(deleted)||deleted.length!==1)throw Error('Cancellazione non confermata');await sync();notify('Impegno eliminato')})}
-function normalizeBoardingTown(raw){
- const s=String(raw||'').trim();if(!s)return 'DA ASSEGNARE';const n=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ');
- if(n.includes('SAN MARCO IN LAMIS')&&n.includes('SAN GIOVANNI ROTONDO'))return 'San Marco in Lamis / San Giovanni Rotondo';
- for(const [needle,canonical] of [['SAN NICANDRO','San Nicandro Garganico'],['SAN SEVERO','San Severo'],['APRICENA','Apricena'],['POGGIO IMPERIALE','Poggio Imperiale'],['LESINA','Lesina'],['TERMOLI','Termoli'],['FOGGIA','Foggia'],['SAN MARCO IN LAMIS','San Marco in Lamis'],['SAN GIOVANNI ROTONDO','San Giovanni Rotondo'],['TORREMAGGIORE','Torremaggiore']])if(n.includes(needle))return canonical;
- return s;
-}
-function groupedBoarding(id){const trips=state.data.trips,ref=tripFor(id),root=ref?.bis_parent_id||id,linked=trips.filter(t=>t.id===root||t.bis_parent_id===root),tripIds=new Set(linked.map(t=>t.id));
- const groups=new Map();for(const b of state.data.bookings){if(!tripIds.has(b.viaggio_id)||isCancelled(b))continue;const town=normalizeBoardingTown(b.fermata_partenza),key=town;let g=groups.get(key);if(!g){g={town,pax:0,bookings:[],busCounts:new Map()};groups.set(key,g)}g.pax+=num(b.posti);g.bookings.push(b);const name=tripFor(b.viaggio_id)?.bis_parent_id?'BUS BIS '+(tripFor(b.viaggio_id)?.bis_numero||2):'BUS 1';g.busCounts.set(name,(g.busCounts.get(name)||0)+num(b.posti))}
- const order=['San Severo','Apricena','San Nicandro Garganico','Lesina','Poggio Imperiale','Foggia','San Marco in Lamis','San Giovanni Rotondo','Torremaggiore','Termoli','DA ASSEGNARE'];const list=[...groups.values()].sort((a,b)=>{const x=order.indexOf(a.town),y=order.indexOf(b.town);return (x<0?90:x)-(y<0?90:y)||a.town.localeCompare(b.town,'it')});return {list,linked,total:list.reduce((a,g)=>a+g.pax,0),missing:list.find(g=>g.town==='DA ASSEGNARE')?.pax||0};
-}
-function getBoardingTrip(){const available=state.data.trips.filter(t=>!t.archiviato_at&&t.bis_parent_id===null||!t.archiviato_at&&!t.bis_parent_id);const id=state.options.boardingTripId;return tripFor(id)||available[0]||state.data.trips[0]||null}
-function renderBoarding(){
- if(state.failedTables.some(x=>/^(prenotazioni|viaggi):/.test(x)))return panel('Impossibile conteggiare','I dati di viaggi o prenotazioni non sono disponibili: aggiornare la sessione prima di fare il report.');
- const trips=state.data.trips.filter(t=>!t.bis_parent_id);const selected=getBoardingTrip();if(!selected)return panel('Conteggio fermate','Nessun viaggio disponibile.');
- const out=groupedBoarding(selected.id),groupStats=out.list.map(g=>`<article class="boarding-card ${g.town==='DA ASSEGNARE'?'boarding-alert':''}"><header><b>🚏 ${fmt(g.town)}</b><span class="tag">${g.pax} passeggeri</span></header><div class="subtle">${g.bookings.length} prenotazion${g.bookings.length===1?'e':'i'} · ${[...g.busCounts].map(([k,n])=>esc(k)+': '+n).join(' · ')}</div><details><summary>Mostra nominativi e posti</summary>${table(['Cliente / referente','Passeggeri','Posti','BUS','Telefono'],g.bookings.map(b=>tr([fmt(b.cliente),num(b.posti),fmt(b.posti_selezionati),fmt(tripFor(b.viaggio_id)?.titolo||'BUS'),fmt(b.telefono)])))}</details></article>`).join('');
- const assigned=out.total-out.missing;
- return section('Passeggeri per paese','Conteggio e lista nominativi recuperati dalla Control Room del vecchio gestionale',btn('Stampa per fermata','boarding-print')+btn('Esporta CSV','boarding-csv'))+`<div class="filterbar"><label>Seleziona il viaggio e gli eventuali BUS BIS<select id="boarding-trip">${asOptions(trips.map(t=>[t.id,tripLabel(t)]),selected.id)}</select></label></div><div class="kpis"><div class="kpi"><span>Totale passeggeri</span><strong>${out.total}</strong></div><div class="kpi"><span>Con fermata assegnata</span><strong>${assigned}</strong></div><div class="kpi"><span>Senza paese/fermata</span><strong>${out.missing}</strong></div><div class="kpi"><span>Paesi di salita</span><strong>${out.list.filter(g=>g.town!=='DA ASSEGNARE').length}</strong></div></div>`+panel('Suddivisione per paese',`<div class="boarding-grid">${groupStats||'<p class="subtle">Nessun passeggero per questa partenza.</p>'}</div><p class="hint">I conteggi includono tutti gli autobus collegati (BUS 1 e BUS BIS), escludendo le prenotazioni annullate. Eventuali fermate senza nome rimangono “Da assegnare”, non sono attribuite arbitrariamente.</p>`);
-}
-function printableBoarding(){const t=getBoardingTrip(),out=groupedBoarding(t.id);return `<h2>Riepilogo fermate · ${fmt(t.titolo)}</h2><p>Data viaggio: ${date(t.data_partenza)} · Passeggeri totali: <b>${out.total}</b> · Da assegnare: ${out.missing}</p>${out.list.map(g=>`<h2>${fmt(g.town)} — ${g.pax} passeggeri</h2>${table(['Cliente','Pax','Posti','Autobus','Telefono'],g.bookings.map(b=>tr([fmt(b.cliente),num(b.posti),fmt(b.posti_selezionati),fmt(tripFor(b.viaggio_id)?.titolo),fmt(b.telefono)])))}`).join('')}`}
-function exportBoarding(){const t=getBoardingTrip(),g=groupedBoarding(t.id);exportCSV([['Viaggio','Data','Paese / Fermata','Cliente','Pax','Posti','Autobus','Telefono'],...g.list.flatMap(x=>x.bookings.map(b=>[t.titolo,t.data_partenza,x.town,b.cliente,b.posti,b.posti_selezionati,tripFor(b.viaggio_id)?.titolo,b.telefono]))],'DELGROSSO_FERMATE_'+(t.data_partenza||''))}
-function renderStatistics(){const trps=state.data.trips.filter(t=>!t.archiviato_at),active=state.data.bookings.filter(b=>!isCancelled(b)),booked=active.reduce((a,b)=>a+num(b.posti),0),capacity=trps.reduce((a,b)=>a+num(b.posti_totali),0);
- const summary=[['Viaggi',trps.length],['Prenotazioni attive',active.length],['Passeggeri',booked],['Occupazione',capacity?Math.round(booked/capacity*100)+'%':'—'],['Mezzi',state.data.fleet.length]];
- return section('Statistiche operative','Indicatori dei viaggi e del numero di passeggeri; entrate e spese nella sezione Economia',btn('Esporta CSV','stats-csv'))+`<div class="kpis">${summary.map(([a,b])=>`<div class="kpi"><span>${fmt(a)}</span><strong>${b}</strong></div>`).join('')}</div>`+panel('Occupazione per viaggio',table(['Viaggio','Data','Passeggeri','Capienza','Percentuale','Fermate'],trps.map(t=>{const bs=state.data.bookings.filter(b=>b.viaggio_id===t.id&&!isCancelled(b)),pax=bs.reduce((a,b)=>a+num(b.posti),0);return tr([fmt(t.titolo),date(t.data_partenza),pax,num(t.posti_totali),num(t.posti_totali)?Math.round(pax/num(t.posti_totali)*100)+'%':'—',new Set(bs.map(b=>normalizeBoardingTown(b.fermata_partenza))).size])})));
-}
-function renderEconomy(){const fail=state.failedTables.some(x=>x.startsWith('economia_movimenti:'));if(fail)return panel('Dati Economia non disponibili','Impossibile accedere ai movimenti economici. Nessun totale parziale è mostrato.');
- const m=state.data.economy||[],incoming=m.filter(x=>x.tipo==='Entrata').reduce((z,x)=>z+num(x.importo),0),outgoing=m.filter(x=>x.tipo==='Uscita').reduce((z,x)=>z+num(x.importo),0);
- return section('Economia','Ripristino della consultazione economica della V1. I pagamenti automatici non vengono duplicati.',btn('+ Movimento manuale','economy-new','primary')+btn('Esporta movimenti CSV','economy-csv'))+`<div class="kpis">${[['Entrate',money(incoming)],['Uscite',money(outgoing)],['Saldo',money(incoming-outgoing)],['Movimenti',m.length]].map(([a,b])=>`<div class="kpi"><span>${fmt(a)}</span><strong>${fmt(b)}</strong></div>`).join('')}</div>`+panel('Movimenti registrati',table(['Data','Tipo','Categoria','Descrizione','Viaggio','Importo','Origine'],m.slice().sort((a,b)=>String(b.data_movimento||'').localeCompare(String(a.data_movimento||''))).map(x=>tr([date(x.data_movimento),tag(x.tipo),fmt(x.categoria),fmt(x.descrizione),fmt(tripFor(x.viaggio_id)?.titolo),money(x.importo),fmt(x.origine)],/^manuale/i.test(String(x.origine||''))&&!x.pagamento_id&&!x.noleggio_pagamento_id?btn('Modifica','economy-edit','small',`data-id="${esc(x.id)}"`):''))))+panel('Attenzione alle duplicazioni','<p class="hint">Gli incassi generati automaticamente dal vecchio gestionale restano collegati ai pagamenti originali. Questa pagina non inserisce movimenti doppi e non modifica chiusure già registrate.</p>');
-}
-function renderBackup(){return section('Esporta archivi','Download CSV dei dati operativi, senza credenziali o password',btn('Esporta viaggi','trip-csv')+btn('Esporta prenotazioni','booking-csv')+btn('Esporta pagamenti','payments-csv')+btn('Esporta clienti','clients-csv'))+panel('Esportazioni manuali',`<p>È possibile esportare da questo browser gli elenchi di viaggi, prenotazioni, pagamenti e clienti dopo l’autenticazione con Nicola o Raffaele.</p><p class="error"><b>Non è un backup integrale e ripristinabile di Supabase.</b> Per la protezione di database, Storage, utenti e PDF bisogna usare le procedure ufficiali di backup e testare il ripristino.</p><p class="hint">I file CSV contengono dati di clienti e devono essere conservati in un luogo aziendale protetto.</p>`);}
-function renderOperations(){
- const rows=state.data.bookings.filter(b=>!isCancelled(b)),checked=rows.filter(b=>b.checkin_effettuato).reduce((n,b)=>n+num(b.posti),0),total=rows.reduce((n,b)=>n+num(b.posti),0),openTasks=(state.data.activities||[]).filter(a=>!/completat/i.test(a.stato)),deadlines=(state.data.tasks||[]).filter(d=>!/completat/i.test(d.stato));
- const trips=state.data.trips.filter(t=>!t.archiviato_at&&t.data_partenza>=dateISO()).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza))).slice(0,10);
- return section('Centro operativo','Ripristinata la sintesi di attività, check-in e partenze della V1',btn('+ Nuova attività','agenda-activity-new','primary')+btn('Apri Control Room','go-control')+btn('Agenda completa','go-agenda'))+`<div class="kpis">${[['Passeggeri prenotati',total],['Passeggeri con check-in',checked],['Attività aperte',openTasks.length],['Scadenze aperte',deadlines.length]].map(([a,b])=>`<div class="kpi"><span>${fmt(a)}</span><strong>${b}</strong></div>`).join('')}</div>`+panel('Prossime partenze',table(['Viaggio','Data','Passeggeri',''],trips.map(t=>tr([fmt(t.titolo),date(t.data_partenza),bookingsCount(t.id),btn('Apri','trip-select','small',`data-id="${esc(t.id)}"`)]))))+panel('Attività aperte',table(['Titolo','Scadenza','Priorità',''],openTasks.slice(0,20).map(a=>tr([fmt(a.titolo),date(a.scadenza),tag(a.priorita),btn('Modifica','agenda-edit','small',`data-kind="attivita" data-id="${esc(a.id)}"`)]))))+panel('Scadenze da gestire',table(['Titolo','Data','Stato',''],deadlines.slice(0,20).map(a=>tr([fmt(a.titolo),date(a.data_scadenza),tag(a.stato),btn('Modifica','agenda-edit','small',`data-kind="scadenza" data-id="${esc(a.id)}"`)]))));
-}
-function renderAssistant(){
- const missing=state.failedTables.filter(x=>x.startsWith('assistente_eventi:'));
- const active=state.data.bookings.filter(b=>!isCancelled(b)),pending=active.filter(b=>num(b.totale)>num(b.pagato)),overdue=pending.filter(b=>b.scadenza_acconto && String(b.scadenza_acconto).slice(0,10)<dateISO()),events=state.data.assistantEvents||[];
- return section('Assistente operativo','Segnalazioni effettive da Supabase e controllo scadenze acconti; non vengono eseguite modifiche automatiche',btn('Aggiorna','refresh'))+`<div class="kpis">${[['Prenotazioni con saldo',pending.length],['Scadenze acconto superate',overdue.length],['Posti con quote residue',pending.reduce((s,b)=>s+num(b.posti),0)],['Eventi registrati',events.length]].map(([a,b])=>`<div class="kpi"><span>${fmt(a)}</span><strong>${b}</strong></div>`).join('')}</div>`+(missing.length?panel('Segnalazioni parziali','<p class="error">Impossibile leggere la tabella assistente_eventi: verificare i permessi.</p>'):'')+panel('Acconti / residui da verificare',table(['Cliente','Viaggio','Pax','Scadenza acconto','Residuo'],pending.slice(0,80).map(b=>tr([fmt(b.cliente),fmt(tripFor(b.viaggio_id)?.titolo),num(b.posti),date(b.scadenza_acconto),money(num(b.totale)-num(b.pagato))]))))+panel('Avvisi registrati',table(['Data','Priorità','Titolo','Stato'],events.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).slice(0,80).map(e=>tr([date(e.created_at),tag(e.priorita),fmt(e.titolo),tag(e.stato)]))))+panel('Sicurezza','<p class="hint">L’assistente mostra soltanto dati e avvisi esistenti; per incassi, prenotazioni e modifiche si utilizzano sempre i comandi autorizzati del gestionale.</p>');
+function renderAgenda(){const events=state.data.trips.filter(t=>t.data_partenza).map(t=>({date:t.data_partenza,title:t.titolo,type:'Partenza',meta:t.ora_partenza||'',id:t.id}));
+ for(const t of state.data.tasks){const dt=t.data_scadenza||t.scadenza||t.data; if(dt)events.push({date:dt,title:t.titolo||t.descrizione||'Scadenza',type:'Scadenza',meta:t.stato||'',id:t.id})}
+ events.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ const month=state.options.agendaMonth;
+ const rs=events.filter(e=>String(e.date).startsWith(month)).map(e=>tr([date(e.date),fmt(e.title),tag(e.type),fmt(e.meta)]));
+ return section('Agenda operativa','Partenze, scadenze e appuntamenti',btn('Stampa agenda','agenda-print'))+panel('Calendario delle attività',`<div class="filterbar"><label>Seleziona mese<input id="agenda-month" type="month" value="${esc(month)}"></label></div>${table(['Data','Impegno','Tipo','Orario / stato'],rs)}`);
 }
 // Supabase Storage photo sources from flotta.immagine and flotta.foto_gallery.
 // Source values are taken from authenticated database rows, never from demo data.
@@ -481,9 +397,9 @@ function renderIntegrity(){
 function renderArchive(){
  const d=state.data;
  const issues=state.failedTables.filter(e=>/^(documenti_gestionali|ricevute_versioni):/.test(e));
- return section('Archivio documenti','Gestione documenti aziendali e ricevute',btn('+ Nuovo documento','document-new','primary'))+
+ return section('Archivio documenti','Documenti e ricevute già registrati nel database')+
  (issues.length?panel('Permessi archivio',`<p class="error">${fmt(issues.join(' | '))}</p>`):'')+
- panel('Documenti gestionali',table(['Categoria','Titolo','Viaggio','Data','Archivio',''],d.documents.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).map(doc=>tr([fmt(doc.categoria),fmt(doc.titolo),fmt(tripFor(doc.viaggio_id)?.titolo),date(doc.created_at),doc.storage_path?'<span class="tag green">Archiviato</span>':'<span class="tag amber">Non presente</span>'],btn('Modifica','document-edit','small',`data-id="${esc(doc.id)}"`)+(doc.storage_path||doc.url?btn('Apri documento','archive-document','small',`data-id="${esc(doc.id)}"`):''))), 'Nessun documento gestito da questa tabella'))+
+ panel('Documenti gestionali',table(['Categoria','Titolo','Viaggio','Data','Archivio',''],d.documents.slice().sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))).map(doc=>tr([fmt(doc.categoria),fmt(doc.titolo),fmt(tripFor(doc.viaggio_id)?.titolo),date(doc.created_at),doc.storage_path?'<span class="tag green">Archiviato</span>':'<span class="tag amber">Non presente</span>'],doc.storage_path?btn('Apri PDF','archive-document','small',`data-id="${esc(doc.id)}"`):'')), 'Nessun documento gestito da questa tabella'))+
  panel('Storico versioni ricevute',table(['Numero','Tipo','Generata','Stato',''],d.receipts.slice().sort((a,b)=>String(b.generated_at).localeCompare(String(a.generated_at))).map(rec=>tr([fmt(rec.receipt_number),fmt(rec.kind),date(rec.generated_at),rec.invalidated_at?tag('Versione annullata'):tag('Registrata')],rec.storage_path?btn('Apri PDF','archive-receipt','small',`data-id="${esc(rec.id)}"`):'')),'Nessuna versione di ricevuta registrata'))+
  panel('Accesso agli allegati','<div class="helpbox">I PDF vengono richiesti a Supabase Storage utilizzando la sessione operatore, con link temporaneo. I permessi RLS restano applicati. L’apertura su iPhone e i permessi delle vecchie ricevute devono essere collaudati con gli utenti reali.</div>');
 }
@@ -493,166 +409,6 @@ function renderClosures(){
  panel('Chiusure dei viaggi',table(['Viaggio','Partenza','Stato','Passeggeri','Incassato','Residuo','Margine'],entries.map(c=>tr([fmt(c.titolo),date(c.data_partenza),tag(c.stato_chiusura),num(c.passeggeri_clienti),money(c.incassato),money(c.residuo),money(c.margine)])),'Nessun viaggio chiuso'))+
  panel('Protezione delle chiusure','<div class="helpbox">Questa sezione consulta gli snapshot storici senza sovrascriverli. Chiusure, riaperture e riconciliazioni definitive devono continuare a usare il flusso verificato sul backend prima di abilitare nuovi comandi di scrittura.</div>');
 }
-/* RESTAURO OPERATIVO V1 → V2 (9 novembre 2026).
- * Usa le tabelle Supabase già esistenti; nessuna credenziale sensibile nel frontend.
- * Non integra il blocco schermo o lo sblocco biometrico della vecchia versione. */
-function knownTableProblem(name){const x=state.failedTables.find(s=>s.startsWith(name+':'));return x?`<p class="error">Archivio ${esc(name)} non leggibile: ${fmt(x)}</p>`:''}
-function renderComms(){
- const me=state.userId,items=(state.data.operatorMessages||[]).filter(m=>m.sender_user_id===me||m.recipient_user_id===me);
- const incoming=items.filter(x=>x.recipient_user_id===me),unread=incoming.filter(x=>!x.read_at);
- const names=new Map(state.data.operators.map(x=>[x.user_id,x.nome||x.username]));
- const rs=items.slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).map(x=>{
-  const from=names.get(x.sender_user_id)||'Operatore',to=names.get(x.recipient_user_id)||'Operatore';
-  return tr([`<b>${fmt(x.subject)}</b><div class="subtle">${fmt(x.body)}</div>`,fmt(from),fmt(to),localTime(x.created_at),x.read_at?tag('Letto'):tag(x.recipient_user_id===me?'Da leggere':'Inviato')],x.recipient_user_id===me&&!x.read_at?btn('Segna letto','comms-read','small',`data-id="${esc(x.id)}"`):'');
- });
- return section('Comunicazioni operatori','Messaggi privati tra Nicola e Raffaele, salvati su Supabase',btn('+ Nuovo messaggio','comms-new','primary'))+
- `<div class="kpis"><div class="kpi"><span>Ricevuti</span><strong>${incoming.length}</strong></div><div class="kpi"><span>Da leggere</span><strong>${unread.length}</strong></div><div class="kpi"><span>Messaggi totali</span><strong>${items.length}</strong></div></div>`+
- panel('Posta interna',knownTableProblem('dg_operator_communications')+table(['Oggetto e messaggio','Da','A','Data e ora','Stato',''],rs,'Nessun messaggio. Puoi inviare il primo al collega.'));
-}
-function messageForm(){
- if(!requireWrite())return;
- const destinations=state.data.operators.filter(x=>x.user_id!==state.userId&&x.attivo!==false).map(x=>[x.user_id,x.nome||x.username]);
- if(!destinations.length)return notify('Non risulta un secondo operatore abilitato.',true);
- openForm('Nuova comunicazione interna',`<div class="formgrid">${fieldSelect('recipient_id','Destinatario',destinations,destinations[0][0])}${field('subject','Oggetto','','text',true,'maxlength="180"')}</div><label>Messaggio<textarea name="body" rows="7" maxlength="4000" required></textarea></label><p class="hint">Il messaggio è riservato agli operatori autorizzati. Nessuna comunicazione verrà inviata automaticamente ai clienti.</p>`,async f=>{
-  const recipient=val(f,'recipient_id'),subject=val(f,'subject'),body=val(f,'body');
-  if(!destinations.some(x=>x[0]===recipient)||!subject||!body)throw Error('Destinatario, oggetto e messaggio obbligatori.');
-  const out=await apiInsert('dg_operator_communications',{sender_user_id:state.userId,recipient_user_id:recipient,subject,body});
-  if(!Array.isArray(out)||out.length!==1)throw Error('Messaggio non confermato dal database');
- });
-}
-async function markCommsRead(id){
- if(!requireWrite())return;
- const m=state.data.operatorMessages.find(x=>x.id===id&&x.recipient_user_id===state.userId);
- if(!m)return notify('Messaggio non disponibile',true);
- await apiUpdate('dg_operator_communications',id,{read_at:new Date().toISOString()});await sync();notify('Messaggio segnato come letto');
-}
-function renderFleetOps(){
- const maintenance=state.data.maintenances||[],fuel=state.data.fuel||[],blocks=state.data.fleetBlocks||[];
- const busName=id=>{const f=busFor(id);return f?.titolo||[f?.marca,f?.modello].filter(Boolean).join(' ')||'—'};
- const ms=maintenance.slice().sort((a,b)=>String(b.data_intervento||b.created_at||'').localeCompare(String(a.data_intervento||a.created_at||''))).map(m=>tr([fmt(busName(m.flotta_id)),date(m.data_intervento),fmt(m.tipo),fmt(m.descrizione),tag(m.stato),money(m.costo),date(m.prossima_data)],btn('Modifica','fleet-maint-edit','small',`data-id="${esc(m.id)}"`)));
- const fs=fuel.slice().sort((a,b)=>String(b.data_rifornimento).localeCompare(String(a.data_rifornimento))).map(f=>tr([fmt(busName(f.flotta_id)),date(f.data_rifornimento),num(f.litri),money(f.importo),fmt(f.distributore),num(f.km)],btn('Modifica','fleet-fuel-edit','small',`data-id="${esc(f.id)}"`)));
- const bs=blocks.map(b=>tr([fmt(busName(b.flotta_id)),date(b.data_inizio),date(b.data_fine),fmt(b.motivo)],btn('Modifica','fleet-block-edit','small',`data-id="${esc(b.id)}"`)));
- return section('Manutenzioni, carburante e indisponibilità','Recuperate dalla Flotta V1; salvataggio reale protetto da Supabase',btn('+ Manutenzione','fleet-maint-new','primary')+btn('+ Rifornimento','fleet-fuel-new')+btn('+ Blocco mezzo','fleet-block-new'))+
- `<div class="kpis">${[['Manutenzioni',maintenance.length],['Rifornimenti',fuel.length],['Blocchi mezzi',blocks.length]].map(([x,y])=>`<div class="kpi"><span>${fmt(x)}</span><strong>${y}</strong></div>`).join('')}</div>`+
- panel('Interventi e prossime scadenze',knownTableProblem('manutenzioni_flotta')+table(['Autobus','Intervento','Tipo','Descrizione','Stato','Costo','Prossima scadenza',''],ms))+
- panel('Carburante',knownTableProblem('carburante_flotta')+table(['Autobus','Data','Litri','Importo','Distributore','Km',''],fs))+
- panel('Mezzi indisponibili',knownTableProblem('dg_blocchi_flotta')+table(['Autobus','Da','A','Motivo',''],bs));
-}
-function fleetOptions(){return state.data.fleet.map(f=>[f.id,(f.titolo||[f.marca,f.modello].filter(Boolean).join(' '))+' · '+num(f.posti)+' posti'])}
-function maintenanceForm(id=''){
- if(!requireWrite())return;
- const m=(state.data.maintenances||[]).find(x=>x.id===id)||{},models=fleetOptions();if(!models.length)return notify('Nessun mezzo in flotta',true);
- openForm(id?'Modifica manutenzione':'Registra manutenzione',`<div class="formgrid">${fieldSelect('flotta_id','Autobus',models,m.flotta_id||models[0][0])}${field('tipo','Tipo intervento',m.tipo||'Tagliando','text',true,'maxlength="120"')}${field('data_intervento','Data intervento',m.data_intervento||dateISO(),'date')}${field('km','Chilometri',m.km??'','number',false,'min="0"')}${field('costo','Costo (€)',m.costo??0,'number',true,'min="0" step="0.01"')}${fieldSelect('stato','Stato',[['Da fare','Da fare'],['Programmato','Programmato'],['Completato','Completato']],m.stato||'Da fare')}${field('prossima_data','Prossimo controllo',m.prossima_data||'','date')}${field('officina','Officina',m.officina||'')}</div><label>Descrizione<textarea name="descrizione" rows="3">${esc(m.descrizione||'')}</textarea></label><label>Note<textarea name="note" rows="2">${esc(m.note||'')}</textarea></label>`,async f=>{
-  const cost=Number(val(f,'costo'));if(!Number.isFinite(cost)||cost<0)throw Error('Costo non valido');
-  const row={flotta_id:val(f,'flotta_id'),tipo:val(f,'tipo'),data_intervento:val(f,'data_intervento')||null,km:val(f,'km')===''?null:Number(val(f,'km')),costo:cost,stato:val(f,'stato'),prossima_data:val(f,'prossima_data')||null,officina:val(f,'officina')||null,descrizione:val(f,'descrizione')||null,note:val(f,'note')||null};
-  if(!models.some(x=>x[0]===row.flotta_id)||!row.tipo||row.km!==null&&(!Number.isInteger(row.km)||row.km<0))throw Error('Dati intervento non validi');
-  if(id)await apiUpdate('manutenzioni_flotta',id,row);else await apiInsert('manutenzioni_flotta',{...row,created_by:state.userId});
- });
-}
-function fuelForm(id=''){
- if(!requireWrite())return;
- const v=(state.data.fuel||[]).find(x=>x.id===id)||{},models=fleetOptions();if(!models.length)return notify('Nessun mezzo registrato',true);
- openForm(id?'Modifica rifornimento':'Nuovo rifornimento',`<div class="formgrid">${fieldSelect('flotta_id','Autobus',models,v.flotta_id||models[0][0])}${field('data_rifornimento','Data',v.data_rifornimento||dateISO(),'date',true)}${field('litri','Litri',v.litri??'','number',false,'min="0" step="0.01"')}${field('prezzo_litro','Prezzo / litro (€)',v.prezzo_litro??'','number',false,'min="0" step="0.001"')}${field('importo','Importo totale (€)',v.importo??0,'number',true,'min="0" step="0.01"')}${field('km','Km veicolo',v.km??'','number',false,'min="0"')}${field('distributore','Distributore',v.distributore||'')}${fieldSelect('metodo','Metodo',[['Contanti','Contanti'],['Carta','Carta'],['Bonifico','Bonifico'],['Altro','Altro']],v.metodo||'Carta')}</div><label>Note<textarea name="note" rows="2">${esc(v.note||'')}</textarea></label>`,async f=>{
-  const row={flotta_id:val(f,'flotta_id'),data_rifornimento:val(f,'data_rifornimento'),litri:val(f,'litri')===''?null:Number(val(f,'litri')),prezzo_litro:val(f,'prezzo_litro')===''?null:Number(val(f,'prezzo_litro')),importo:Number(val(f,'importo')),km:val(f,'km')===''?null:Number(val(f,'km')),distributore:val(f,'distributore')||null,metodo:val(f,'metodo'),note:val(f,'note')||null};
-  if(!row.data_rifornimento||!Number.isFinite(row.importo)||row.importo<0||[row.litri,row.prezzo_litro,row.km].some(n=>n!==null&&(!Number.isFinite(n)||n<0)))throw Error('Importo, litri o chilometri non validi');
-  if(id)await apiUpdate('carburante_flotta',id,row);else await apiInsert('carburante_flotta',{...row,created_by:state.userId});
- });
-}
-function fleetBlockForm(id=''){
- if(!requireWrite())return;
- const v=(state.data.fleetBlocks||[]).find(x=>x.id===id)||{},models=fleetOptions();if(!models.length)return notify('Nessun bus disponibile',true);
- openForm(id?'Modifica indisponibilità':'Blocca mezzo per indisponibilità',`<div class="formgrid">${fieldSelect('flotta_id','Autobus',models,v.flotta_id||models[0][0])}${field('data_inizio','Dal giorno',v.data_inizio||dateISO(),'date',true)}${field('data_fine','Al giorno',v.data_fine||dateISO(),'date',true)}${field('motivo','Motivo',v.motivo||'Manutenzione','text',true)}</div><p class="hint">Un blocco mezzo può impedire l’assegnazione dell’autobus a nuove partenze. Verifica attentamente le date.</p>`,async f=>{
-  const row={flotta_id:val(f,'flotta_id'),data_inizio:val(f,'data_inizio'),data_fine:val(f,'data_fine'),motivo:val(f,'motivo')};
-  if(row.data_fine<row.data_inizio||!row.motivo)throw Error('Periodo o motivo non valido');
-  if(id)await apiUpdate('dg_blocchi_flotta',id,row);else await apiInsert('dg_blocchi_flotta',row);
- });
-}
-function manualEconomyEntry(id=''){
- if(!requireWrite())return;
- const v=(state.data.economy||[]).find(x=>x.id===id)||{};
- if(id && (v.pagamento_id||v.noleggio_pagamento_id||!/^manuale/i.test(String(v.origine||''))))return notify('Movimento automatico: modifica il pagamento originario, non la contabilità duplicata.',true);
- const trips=[['','— Nessuno —'],...state.data.trips.map(t=>[t.id,tripLabel(t)])];
- openForm(id?'Modifica movimento manuale':'Nuovo movimento economico',`<div class="formgrid">${fieldSelect('tipo','Tipo',[['Uscita','Uscita'],['Entrata','Entrata']],v.tipo||'Uscita')}${field('data_movimento','Data',v.data_movimento||dateISO(),'date',true)}${fieldSelect('categoria','Categoria',[['Pedaggi','Pedaggi'],['Carburante','Carburante'],['Manutenzione','Manutenzione'],['Parcheggi','Parcheggi'],['Fornitori','Fornitori'],['Altro','Altro'],['Incasso extra','Incasso extra']],v.categoria||'Altro')}${field('importo','Importo (€)',v.importo??0,'number',true,'min="0" step="0.01"')}${fieldSelect('metodo','Metodo',[['Contanti','Contanti'],['POS','POS'],['Bonifico','Bonifico'],['Altro','Altro']],v.metodo||'Contanti')}${fieldSelect('viaggio_id','Viaggio collegato',trips,v.viaggio_id||'')}</div><label>Descrizione<textarea name="descrizione" rows="3" required maxlength="1000">${esc(v.descrizione||'')}</textarea></label><p class="hint">Usa questa funzione per spese o incassi extracontabili non già presenti tra i pagamenti delle prenotazioni. Un incasso duplicato altera i totali.</p>`,async f=>{
-  const amount=Number(val(f,'importo'));if(!Number.isFinite(amount)||amount<=0)throw Error('Importo positivo obbligatorio.');
-  const row={tipo:val(f,'tipo'),categoria:val(f,'categoria'),descrizione:val(f,'descrizione'),importo:amount,data_movimento:val(f,'data_movimento'),metodo:val(f,'metodo'),viaggio_id:val(f,'viaggio_id')||null};
-  if(!row.descrizione||!row.data_movimento)throw Error('Descrizione e data obbligatorie.');
-  if(id)await apiUpdate('economia_movimenti',id,row);else await apiInsert('economia_movimenti',{...row,origine:'Manuale V2',created_by:state.userId,operatore_user_id:state.userId,operatore:currentOperatorName()});
- });
-}
-function renderPro(){
- const crm=state.data.crm||[],issues=state.data.anomalies||[],checks=state.data.checklists||[];
- const crmRows=crm.slice().sort((a,b)=>String(b.scadenza||b.created_at||'').localeCompare(String(a.scadenza||a.created_at||''))).map(x=>tr([fmt(x.nome_cliente||state.data.clients.find(c=>c.id===x.cliente_id)?.nome||'—'),fmt(x.oggetto),date(x.scadenza),tag(x.priorita),tag(x.stato)],btn('Modifica','pro-crm-edit','small',`data-id="${esc(x.id)}"`)));
- const issueRows=issues.map(x=>tr([date(x.data_segnalazione),fmt(x.titolo),fmt(busFor(x.flotta_id)?.titolo||tripFor(x.viaggio_id)?.titolo||'—'),tag(x.priorita),tag(x.stato)],btn('Modifica','pro-anomaly-edit','small',`data-id="${esc(x.id)}"`)));
- const checkRows=checks.slice().sort((a,b)=>String(b.data_check).localeCompare(String(a.data_check))).map(x=>tr([date(x.data_check),fmt(busFor(x.flotta_id)?.titolo||'—'),tag(x.esito),fmt(x.note)],btn('Modifica','pro-check-edit','small',`data-id="${esc(x.id)}"`)));
- return section('Centro Pro · Operativo 360°','CRM, segnalazioni e checklist mezzi recuperati dalla V1',btn('+ Attività CRM','pro-crm-new','primary')+btn('+ Anomalia','pro-anomaly-new')+btn('+ Checklist','pro-check-new'))+
- `<div class="kpis">${[['Attività CRM',crm.length],['Anomalie aperte',issues.filter(x=>!/risolt|chius/i.test(x.stato)).length],['Controlli mezzi',checks.length]].map(([l,n])=>`<div class="kpi"><span>${fmt(l)}</span><strong>${n}</strong></div>`).join('')}</div>`+
- panel('CRM e ricontatti',knownTableProblem('crm_attivita')+table(['Cliente','Oggetto','Scadenza','Priorità','Stato',''],crmRows))+
- panel('Anomalie da gestire',knownTableProblem('anomalie_gestionale')+table(['Data','Anomalia','Riferimento','Priorità','Stato',''],issueRows))+
- panel('Checklist mezzi',knownTableProblem('checklist_mezzi')+table(['Data','Bus','Esito','Note',''],checkRows));
-}
-function crmForm(id=''){
- if(!requireWrite())return;const x=(state.data.crm||[]).find(a=>a.id===id)||{};
- const customers=[['','— Cliente non presente in rubrica —'],...state.data.clients.map(c=>[c.id,[c.nome,c.cognome].filter(Boolean).join(' ')])];
- openForm(id?'Modifica attività CRM':'Nuova attività CRM',`<div class="formgrid">${fieldSelect('cliente_id','Cliente',customers,x.cliente_id||'')}${field('nome_cliente','Nominativo alternativo',x.nome_cliente||'')}${field('oggetto','Oggetto attività',x.oggetto||'','text',true)}${fieldSelect('tipo','Tipo',[['Contatto','Contatto'],['Preventivo','Preventivo'],['Ricontatto','Ricontatto'],['Reclamo','Reclamo'],['Altro','Altro']],x.tipo||'Contatto')}${fieldSelect('priorita','Priorità',[['normale','Normale'],['alta','Alta'],['bassa','Bassa']],x.priorita||'normale')}${fieldSelect('stato','Stato',[['Aperta','Aperta'],['In corso','In corso'],['Completata','Completata']],x.stato||'Aperta')}${field('scadenza','Da completare il',x.scadenza||'','date')}</div><label>Note<textarea name="note" rows="3">${esc(x.note||'')}</textarea></label>`,async f=>{
- const row={cliente_id:val(f,'cliente_id')||null,nome_cliente:val(f,'nome_cliente')||null,oggetto:val(f,'oggetto'),tipo:val(f,'tipo'),priorita:val(f,'priorita'),stato:val(f,'stato'),scadenza:val(f,'scadenza')||null,note:val(f,'note')||null};
- if(!row.oggetto)throw Error('Oggetto obbligatorio');if(id)await apiUpdate('crm_attivita',id,row);else await apiInsert('crm_attivita',{...row,created_by:state.userId});
- });
-}
-function anomalyForm(id=''){
- if(!requireWrite())return;const x=(state.data.anomalies||[]).find(a=>a.id===id)||{};
- openForm(id?'Modifica anomalia':'Nuova anomalia operativa',`<div class="formgrid">${field('titolo','Titolo',x.titolo||'','text',true)}${field('data_segnalazione','Data',x.data_segnalazione||dateISO(),'date',true)}${fieldSelect('flotta_id','Mezzo',[['','— Nessuno —'],...fleetOptions()],x.flotta_id||'')}${fieldSelect('viaggio_id','Viaggio',[['','— Nessuno —'],...state.data.trips.map(t=>[t.id,tripLabel(t)])],x.viaggio_id||'')}${fieldSelect('priorita','Priorità',[['normale','Normale'],['alta','Alta'],['urgente','Urgente']],x.priorita||'normale')}${fieldSelect('stato','Stato',[['Aperta','Aperta'],['In lavorazione','In lavorazione'],['Risolta','Risolta']],x.stato||'Aperta')}</div><label>Descrizione<textarea name="descrizione" rows="3">${esc(x.descrizione||'')}</textarea></label>`,async f=>{
- const row={titolo:val(f,'titolo'),data_segnalazione:val(f,'data_segnalazione'),flotta_id:val(f,'flotta_id')||null,viaggio_id:val(f,'viaggio_id')||null,priorita:val(f,'priorita'),stato:val(f,'stato'),descrizione:val(f,'descrizione')||null};
- if(!row.titolo)throw Error('Titolo obbligatorio');if(id)await apiUpdate('anomalie_gestionale',id,row);else await apiInsert('anomalie_gestionale',{...row,created_by:state.userId});
- });
-}
-function checkForm(id=''){
- if(!requireWrite())return;const x=(state.data.checklists||[]).find(a=>a.id===id)||{},checks=['luci','pneumatici','climatizzazione','porte','bagagliaio','estintore','documentazione','pulizia','carburante'];
- openForm(id?'Modifica checklist':'Nuova checklist mezzo',`<div class="formgrid">${fieldSelect('flotta_id','Bus',fleetOptions(),x.flotta_id||state.data.fleet[0]?.id||'')}${field('data_check','Data del controllo',x.data_check||dateISO(),'date',true)}${fieldSelect('esito','Esito',[['Conforme','Conforme'],['Da verificare','Da verificare'],['Non conforme','Non conforme']],x.esito||'Da verificare')}</div><div class="formgrid">${checks.map(key=>`<label><input type="checkbox" name="${key}" ${x[key]?'checked':''}> ${esc(key.replace('_',' '))}</label>`).join('')}</div><label>Note<textarea name="note" rows="3">${esc(x.note||'')}</textarea></label>`,async f=>{
- const data=new FormData(f),row={flotta_id:val(f,'flotta_id'),data_check:val(f,'data_check'),esito:val(f,'esito'),note:val(f,'note')||null};
- if(!row.flotta_id||!row.data_check)throw Error('Mezzo e data obbligatori');
- for(const key of checks)row[key]=data.has(key);
- if(id)await apiUpdate('checklist_mezzi',id,row);else await apiInsert('checklist_mezzi',{...row,created_by:state.userId});
- });
-}
-
-/* Documento gestionale privato: crea una scheda e carica il file in Supabase Storage.
-   La scheda è confermata solo quando l'upload e l'inserimento dei metadati hanno successo. */
-function documentForm(id=''){
- if(!requireWrite())return;
- const old=state.data.documents.find(d=>d.id===id)||{};
- const trips=[['','— Nessun viaggio —'],...state.data.trips.map(t=>[t.id,tripLabel(t)])];
- const customers=[['','— Nessun cliente —'],...state.data.clients.map(c=>[c.id,[c.nome,c.cognome].filter(Boolean).join(' ')])];
- openForm(id?'Modifica scheda documento':'Archivia nuovo documento',`<div class="formgrid">${field('titolo','Titolo documento',old.titolo||'','text',true,'maxlength="180"')}${fieldSelect('categoria','Categoria',[['contratto','Contratto'],['ricevuta','Ricevuta'],['assicurazione','Assicurazione'],['preventivo','Preventivo'],['altro','Altro']],old.categoria||'altro')}${fieldSelect('viaggio_id','Viaggio',trips,old.viaggio_id||'')}${fieldSelect('cliente_id','Cliente',customers,old.cliente_id||'')}${field('scadenza','Scadenza (facoltativa)',old.scadenza||'','date')}</div><label>Descrizione<textarea name="descrizione" rows="2">${esc(old.descrizione||'')}</textarea></label><label>Allegato PDF / immagine ${id?'(lascia vuoto per conservare quello attuale)':'(obbligatorio)'}<input type="file" name="allegato" accept="application/pdf,image/png,image/jpeg,image/webp" ${id?'':'required'}></label><label>Note<textarea name="note" rows="2">${esc(old.note||'')}</textarea></label><p class="hint">Archivio privato Supabase Storage · massimo 12 MB · Nessun link pubblico permanente. Il file originale non viene cancellato se sostituisci l'allegato.</p>`,async f=>{
-   const title=val(f,'titolo');if(!title)throw Error('Inserisci un titolo');
-   const file=f.elements.namedItem('allegato')?.files?.[0];
-   let path=old.storage_path||null,mime=old.mime_type||null,size=old.dimensione||null;
-   if(!id&&!file)throw Error('Seleziona il documento da archiviare');
-   if(file){
-    const types=['application/pdf','image/png','image/jpeg','image/webp'];
-    if(!types.includes(file.type)||file.size<1||file.size>12*1024*1024)throw Error('Allegato non consentito: usa PDF/JPG/PNG/WEBP fino a 12 MB');
-    const safe=String(file.name||'allegato').replace(/[^A-Za-z0-9._-]+/g,'_').slice(-100);
-    path='v2/documenti/'+uuid()+'/'+safe;
-    const objectPath=path.split('/').map(encodeURIComponent).join('/');
-    const resp=await withTimeout(URL_BASE+'/storage/v1/object/gestionale-documenti/'+objectPath,{
-      method:'POST',headers:{apikey:PUBLIC_KEY,Authorization:'Bearer '+state.token,'Content-Type':file.type,'x-upsert':'false'},body:file,cache:'no-store'
-    },30000);
-    if(!resp.ok){const details=await resp.json().catch(()=>({}));throw Error(details.message||details.error||'Caricamento documento non autorizzato: HTTP '+resp.status);}
-    mime=file.type;size=file.size;
-   }
-   const row={titolo:title,categoria:val(f,'categoria'),descrizione:val(f,'descrizione')||null,viaggio_id:val(f,'viaggio_id')||null,cliente_id:val(f,'cliente_id')||null,scadenza:val(f,'scadenza')||null,note:val(f,'note')||null,storage_bucket:'gestionale-documenti',storage_path:path,mime_type:mime,dimensione:size};
-   try{
-    if(id)await apiUpdate('documenti_gestionali',id,row);
-    else await apiInsert('documenti_gestionali',{...row,created_by:state.userId});
-   }catch(e){throw Error('File caricato ma scheda non confermata: '+e.message+'. Non ripetere l’upload senza verificare l’archivio.');}
- });
-}
-function openDocumentLink(id){
- const d=state.data.documents.find(x=>x.id===id);if(!d)return notify('Documento non trovato',true);
- if(d.storage_path)return openArchivedPdf(d.storage_bucket||'gestionale-documenti',d.storage_path);
- if(d.url){let url;try{url=new URL(d.url)}catch{}if(url?.protocol==='https:'){window.open(url.href,'_blank','noopener');return;}}
- return notify('Questo documento non ha un allegato accessibile',true);
-}
-
 function renderSettings(){
  return section('Impostazioni e sicurezza','Connessione al gestionale originale')+
  panel('Connessione Supabase',`<div class="helpbox"><b>Database:</b> ${esc(URL_BASE)}<br><b>Stato:</b> ${state.write?'Operativo · modifica abilitata':'Connesso · lettura'}<br><b>Operatore:</b> ${fmt(state.userId)}<br><b>Protezione:</b> Supabase Auth + Row Level Security (RLS).</div><p class="hint">Le password non vengono salvate. Le sessioni sono conservate solo nella scheda del browser (sessionStorage), eliminate al logout o alla chiusura della scheda. Viene usata soltanto la chiave publishable di Supabase.</p><div class="actions">${btn('Aggiorna da Supabase','refresh')}${btn('Controllo integrità','integrity-open')}</div>`)+
@@ -669,7 +425,7 @@ function render(){const [title,subtitle]=pageInfo[state.page];$('page-title').te
  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.page===state.page));
  if(!isConfigured()){$('content').innerHTML='<div class="panel access-gate"><img class="gate-logo" src="./assets/logo-delgrosso-cropped.webp" alt="Logo ufficiale DELGROSSO Viaggi e Limousine Bus"><div class="access-symbol">🔐</div><h2>Accesso riservato agli operatori</h2><p>Accedi con Nicola oppure Raffaele nella schermata di accesso unica. I dati aziendali vengono caricati dopo il login.</p></div>';return}
 
- const mapping={dashboard:renderDashboard,viaggi:renderTrips,prenotazioni:renderBookings,control:renderControl,piantine:renderEditor,cassa:renderCash,pagamenti:renderPayments,operativo:renderOperations,assistente:renderAssistant,agenda:renderAgenda,fermate:renderBoarding,statistiche:renderStatistics,economia:renderEconomy,backup:renderBackup,flotta:renderFleet,noleggi:renderRentals,preventivi:renderQuotes,clienti:renderClients,whatsapp:renderWhatsapp,comunicazioni:renderComms,flottaoperativa:renderFleetOps,centropro:renderPro,notifiche:renderNotifications,integrita:renderIntegrity,archivio:renderArchive,chiusure:renderClosures,impostazioni:renderSettings};
+ const mapping={dashboard:renderDashboard,viaggi:renderTrips,prenotazioni:renderBookings,control:renderControl,piantine:renderEditor,cassa:renderCash,pagamenti:renderPayments,agenda:renderAgenda,flotta:renderFleet,noleggi:renderRentals,preventivi:renderQuotes,clienti:renderClients,whatsapp:renderWhatsapp,notifiche:renderNotifications,integrita:renderIntegrity,archivio:renderArchive,chiusure:renderClosures,impostazioni:renderSettings};
  try{$('content').innerHTML=mapping[state.page]();if(state.page==='flotta')mountFleetPhotos()}catch(e){$('content').innerHTML=panel('Errore di visualizzazione',`<p class="error">${esc(e.message)}</p>`);console.error(e)}
 }
 function openForm(title,inner,handler){$('edit-dialog').classList.remove('wide');$('edit-title').textContent=title;$('edit-body').innerHTML=`<form id="edit-form">${inner}<div class="separator"></div><div class="actions"><button type="submit" class="btn primary" id="edit-submit">Salva</button><button type="button" class="btn outline" id="edit-cancel">Annulla</button></div></form>`;state.modalSubmit=handler;state.modalTripId='';$('edit-dialog').showModal()}
@@ -691,7 +447,7 @@ async function doWrite(callback){
  finally{state.writeBusy=false;if(sub){sub.disabled=false;sub.textContent='Salva'}}
 }
 async function apiUpsert(table,data,pk='id'){const method='POST';return request(table,{method,body:data,prefer:'resolution=merge-duplicates,return=representation'})}
-async function apiInsert(table,data){const out=await request(table,{method:'POST',body:data,prefer:'return=representation'});if(!Array.isArray(out)||out.length!==1)throw Error('Inserimento non confermato da Supabase');return out}
+async function apiInsert(table,data){return request(table,{method:'POST',body:data,prefer:'return=representation'})}
 async function apiUpdate(table,id,data){const out=await request(table+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:data,prefer:'return=representation'});if(!Array.isArray(out)||out.length!==1)throw Error('Modifica non confermata da Supabase (nessuna riga aggiornata)');return out}
 function stopsForTrip(t){const stops=state.data.stops.filter(s=>s.viaggio_id===t?.id&&s.attiva!==false).sort((a,b)=>num(a.ordine)-num(b.ordine)).map(x=>String(x.nome||'').trim()).filter(Boolean);return stops.length?stops:String(t?.luogo_partenza||'').split('|').map(x=>x.trim()).filter(Boolean)}
 function tripForm(id=''){
@@ -964,7 +720,7 @@ async function openArchivedPdf(bucket,untrustedPath){
  }catch(e){try{tab.close()}catch{}throw e}
 }
 async function archiveBookingPdf(b,t){
- if(!requireWrite())throw Error('Accedi come operatore per archiviare i documenti');
+ if(!requireWrite())throw Error('Abilita le modifiche per archiviare i documenti');
  if(!b?.id||!t?.id)throw Error('Prenotazione o viaggio non valido');
  if(state.failedTables.some(x=>x.startsWith('prenotazioni:')))throw Error('Elenco prenotazioni non aggiornato');
  const bytes=Pdf.makeBookingPdf(b,t,state.data.payments.filter(x=>x.prenotazione_id===b.id));
@@ -990,9 +746,7 @@ async function handleAction(action,el){const id=el.dataset.id||'';
  switch(action){
  case 'login-open':return $('auth-dialog').showModal();
  case 'archive-receipt':{const rec=state.data.receipts.find(x=>x.id===id);if(!rec?.storage_path)return notify('PDF non disponibile',true);return openArchivedPdf('ricevute-prenotazioni',rec.storage_path)}
- case 'archive-document':return openDocumentLink(id);
- case 'document-new':return documentForm();
- case 'document-edit':return documentForm(id);
+ case 'archive-document':{const doc=state.data.documents.find(x=>x.id===id);if(!doc?.storage_path)return notify('PDF non disponibile',true);return openArchivedPdf(doc.storage_bucket,doc.storage_path)}
  case 'integrity-open':state.page='integrita';return render();
  case 'integrity-csv':return exportCSV([['Gravità','Anomalia','Riferimento'],...integrityReport()],'DELGROSSO_CONTROLLI_INTEGRITA');
  case 'trip-new':return tripForm();
@@ -1069,36 +823,7 @@ async function handleAction(action,el){const id=el.dataset.id||'';
  case 'payment-new':return paymentForm();case 'payment-edit':return paymentForm(id);
  case 'payment-print':return viewOfficialPaymentReceipt(id);
  case 'payment-reissue':return viewOfficialPaymentReceipt(id,true);
- case 'go-control':state.page='control';return render();
- case 'go-agenda':state.page='agenda';return render();
- case 'comms-new':return messageForm();
- case 'comms-read':return markCommsRead(id);
- case 'fleet-maint-new':return maintenanceForm();
- case 'fleet-maint-edit':return maintenanceForm(id);
- case 'fleet-fuel-new':return fuelForm();
- case 'fleet-fuel-edit':return fuelForm(id);
- case 'fleet-block-new':return fleetBlockForm();
- case 'fleet-block-edit':return fleetBlockForm(id);
- case 'economy-new':return manualEconomyEntry();
- case 'economy-edit':return manualEconomyEntry(id);
- case 'pro-crm-new':return crmForm();
- case 'pro-crm-edit':return crmForm(id);
- case 'pro-anomaly-new':return anomalyForm();
- case 'pro-anomaly-edit':return anomalyForm(id);
- case 'pro-check-new':return checkForm();
- case 'pro-check-edit':return checkForm(id);
- case 'agenda-print':return printHtml('Agenda completa',`<h2>Agenda ${fmt(state.options.agendaMonth)}</h2>`+table(['Data','Impegno','Tipo','Dettagli'],agendaEvents().filter(x=>x.date.startsWith(state.options.agendaMonth)).map(x=>tr([date(x.date),fmt(x.title),fmt(x.kind),fmt(x.detail)]))));
- case 'agenda-day':return agendaForm('attivita','',el.dataset.date||'');
- case 'agenda-activity-new':return agendaForm('attivita');
- case 'agenda-deadline-new':return agendaForm('scadenza');
- case 'agenda-edit':return agendaForm(el.dataset.kind,id);
- case 'agenda-complete':return agendaToggle(el.dataset.kind,id,true);
- case 'agenda-reopen':return agendaToggle(el.dataset.kind,id,false);
- case 'agenda-delete':return agendaDelete(el.dataset.kind,id);
- case 'boarding-print':return printHtml('Passeggeri per paese',printableBoarding());
- case 'boarding-csv':return exportBoarding();
- case 'stats-csv':return exportCSV([['Viaggio','Data','Pax','Capienza'],...state.data.trips.map(t=>[t.titolo,t.data_partenza,bookingsCount(t.id),t.posti_totali])],'DELGROSSO_STATISTICHE');
- case 'economy-csv':return exportCSV([['Data','Tipo','Categoria','Descrizione','Importo','Viaggio','Origine'],...state.data.economy.map(x=>[x.data_movimento,x.tipo,x.categoria,x.descrizione,x.importo,tripFor(x.viaggio_id)?.titolo,x.origine])],'DELGROSSO_ECONOMIA');
+ case 'agenda-print':return printHtml('Agenda',`<h2>Agenda ${fmt(state.options.agendaMonth)}</h2>`+table(['Data','Viaggio'],state.data.trips.filter(t=>String(t.data_partenza).startsWith(state.options.agendaMonth)).map(t=>tr([date(t.data_partenza),fmt(t.titolo)]))));
  case 'fleet-new':return fleetForm();case 'fleet-edit':return fleetForm(id);
  case 'rental-new':return rentalForm();case 'rental-edit':return rentalForm(id);
  case 'quote-new':return quoteForm();case 'quote-edit':return quoteForm(id);case 'quote-print':return printHtml('Preventivo',printableQuote(id));
@@ -1198,15 +923,9 @@ async function init(){
   if(e.target.id==='layout-select'){state.layoutKey=e.target.value;state.layout=Model.clone(state.drafts[state.layoutKey]||Model.legacy[state.layoutKey]);render()}
   if(e.target.id==='layout-file'){importLayout(e.target.files?.[0]);e.target.value=''}
   if(e.target.id==='agenda-month'){state.options.agendaMonth=e.target.value;render()}
-  if(e.target.id==='agenda-kind'){state.options.agendaFilter=e.target.value;render()}
-  if(e.target.id==='agenda-status'){state.options.agendaStatus=e.target.value;render()}
-  if(e.target.id==='boarding-trip'){state.options.boardingTripId=e.target.value;render()}
   if(e.target.id==='trip-view'){state.options.tripView=e.target.value;render()}
  });
  $('content').addEventListener('input',e=>{
-  if(e.target.id==='agenda-search'){
-   const cursor=e.target.selectionStart;state.options.agendaSearch=e.target.value;render();const el=$('agenda-search');if(el){el.focus();el.setSelectionRange(cursor,cursor)}return;
-  }
   if(e.target.dataset.filter==='search'){
    const p=e.target.selectionStart;state.options.search=e.target.value;render();
    const x=$('content').querySelector('[data-filter="search"]');if(x){x.focus();try{x.setSelectionRange(p,p)}catch{}}

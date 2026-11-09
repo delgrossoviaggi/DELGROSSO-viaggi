@@ -1,0 +1,38 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS — GESTIONALE 2.0
+RELEASE 09/11/2026 — INTEGRAZIONE FUNZIONI DAL GESTIONALE V1
+
+Caricare esclusivamente questa cartella nella root del repository:
+  GESTIONALE_V2/index.html
+  GESTIONALE_V2/app.js
+  GESTIONALE_V2/app.css
+  GESTIONALE_V2/assets/...
+
+Nuovi moduli recuperati dalla V1:
+- Agenda completa: attività e scadenze con creazione, modifica, completamento,
+  riapertura ed eliminazione autenticata su Supabase.
+- Conteggio per paese/fermata e BUS BIS, nominativi, posti, CSV e stampa.
+- Centro Operativo: check-in, prossime partenze, attività e scadenze.
+- Assistente operativo: segnalazioni e acconti da controllare (consultazione).
+- Statistiche operative, Economia e Backup/Export CSV.
+
+Rimangono i moduli V2 preesistenti: prenotazioni e piantina, clienti, flotta,
+viaggi, ricevute PDF professionali, cassa Nicola/Raffaele e altro.
+
+ESCLUSO esplicitamente: il vecchio BLOCCO SCHERMO (V1).
+SCRITTURA: dopo login Nicola o Raffaele verificato, si attiva in automatico
+nel client V2; le verifiche di autorizzazione Auth/RLS rimangono obbligatorie.
+Nessun interruttore di abilitazione nelle Impostazioni, nessuna password nel codice.
+
+Le tabelle attivita_gestionale, scadenze_gestionale, economia_movimenti,
+assistente_eventi esistono già sul Supabase aziendale. Non serve una nuova
+migrazione SQL per queste funzioni. Il database non è stato modificato per
+questo rilascio.
+
+IMPORTANTE: questa è un'integrazione sottoposta a test statici e unitari;
+resta indispensabile un collaudo con i veri account su Preview Vercel e
+un backup Supabase ripristinabile prima di sostituire la produzione.
+La gestione avanzata delle comunicazioni e le routine del Centro Pro V1
+non sono ancora completamente migrate e collaudate.
+
+NON caricare GESTIONALE-v1.zip nel sito pubblico; NON cancellare GESTIONALE/
+o prenota.html. Leggere README_GITHUB.md per i passi esatti.

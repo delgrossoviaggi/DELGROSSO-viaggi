@@ -1,38 +1,39 @@
 DELGROSSO VIAGGI & LIMOUSINE BUS — GESTIONALE 2.0
-RELEASE 09/11/2026 — INTEGRAZIONE FUNZIONI DAL GESTIONALE V1
+RELEASE 09/11/2026 — PAGAMENTI / RICEVUTE PROFESSIONALI / ACCESSO
 
-Caricare esclusivamente questa cartella nella root del repository:
+Questa cartella si aggiunge alla root del repository:
   GESTIONALE_V2/index.html
   GESTIONALE_V2/app.js
-  GESTIONALE_V2/app.css
-  GESTIONALE_V2/assets/...
+  GESTIONALE_V2/pdf-report.js
+  GESTIONALE_V2/assets/*
 
-Nuovi moduli recuperati dalla V1:
-- Agenda completa: attività e scadenze con creazione, modifica, completamento,
-  riapertura ed eliminazione autenticata su Supabase.
-- Conteggio per paese/fermata e BUS BIS, nominativi, posti, CSV e stampa.
-- Centro Operativo: check-in, prossime partenze, attività e scadenze.
-- Assistente operativo: segnalazioni e acconti da controllare (consultazione).
-- Statistiche operative, Economia e Backup/Export CSV.
+NON eliminare GESTIONALE/ (vecchio gestionale), prenota.html né il sito.
+Non caricare lo ZIP come file singolo: estrai e usa un branch GitHub di prova.
 
-Rimangono i moduli V2 preesistenti: prenotazioni e piantina, clienti, flotta,
-viaggi, ricevute PDF professionali, cassa Nicola/Raffaele e altro.
+Accesso: NICOLA o RAFFAELE, con le rispettive credenziali Supabase Auth.
+Un solo login nell'applicazione V2; la sessione rimane nella stessa scheda.
+Non inserire MAI password o chiavi service_role/sb_secret nel codice.
 
-ESCLUSO esplicitamente: il vecchio BLOCCO SCHERMO (V1).
-SCRITTURA: dopo login Nicola o Raffaele verificato, si attiva in automatico
-nel client V2; le verifiche di autorizzazione Auth/RLS rimangono obbligatorie.
-Nessun interruttore di abilitazione nelle Impostazioni, nessuna password nel codice.
+Nuove funzioni: piantina completa GT53/GT63 nella nuova prenotazione;
+confronto posti occupati, scrittura atomica con RPC Supabase, ricevuta PDF
+con logo e archivio privato, pulsante di ripristino PDF, notifiche con
+cliente/viaggio/data/orario, modifica anagrafica e flotta, maggiore resistenza
+alla perdita temporanea della rete.
 
-Le tabelle attivita_gestionale, scadenze_gestionale, economia_movimenti,
-assistente_eventi esistono già sul Supabase aziendale. Non serve una nuova
-migrazione SQL per queste funzioni. Il database non è stato modificato per
-questo rilascio.
+BACKEND: dg2_save_booking_guarded_v1 e policy dg2_confirmation_insert_v1
+sono gia installati sul Supabase collegato. NON vanno eseguiti nuovamente.
 
-IMPORTANTE: questa è un'integrazione sottoposta a test statici e unitari;
-resta indispensabile un collaudo con i veri account su Preview Vercel e
-un backup Supabase ripristinabile prima di sostituire la produzione.
-La gestione avanzata delle comunicazioni e le routine del Centro Pro V1
-non sono ancora completamente migrate e collaudate.
+NOTE: dopo login Supabase Auth verificato (Nicola / Raffaele), la scrittura
+e disponibile automaticamente secondo i permessi RLS: nessun interruttore.
+Non invia e-mail o WhatsApp da solo. Prima della pubblicazione e essenziale
+avere un backup ripristinabile (database + Storage).
+La prova con account reali, scritture in produzione, stampa Safari iPhone
+e ripristino backup deve essere eseguita prima della messa online.
 
-NON caricare GESTIONALE-v1.zip nel sito pubblico; NON cancellare GESTIONALE/
-o prenota.html. Leggere README_GITHUB.md per i passi esatti.
+Pagamenti: scegliere viaggio -> cercare cliente -> selezionare prenotazione
+-> inserire quota, metodo, operatore e data.
+Ricevute: riutilizza la Edge Function Supabase storica professional-receipts
+(template DELGROSSO 7.4) invece della stampa provvisoria. Generazione e
+archiviazione dopo il pagamento; in caso di errore, il pagamento rimane
+registrato e la ricevuta si puo generare successivamente senza doppio incasso.
+Leggi README_GITHUB.md esterno per istruzioni e checklist.

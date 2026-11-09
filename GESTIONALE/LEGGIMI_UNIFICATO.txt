@@ -1,0 +1,18 @@
+DELGROSSO BUSINESS SUITE V1 + V2 (09/11/2026)
+
+PUNTO DI INGRESSO: GESTIONALE_V2/index.html
+
+Grafica, menu, moduli e dati: base V1 originale fornita dall’utente.
+Moduli moderni V2: menu «Moduli avanzati 2.0», integrati nello stesso URL, senza secondo login.
+
+Blocco schermo automatico, blocco quando si cambia app/scheda e pulsante manuale disattivati.
+NON sono disattivati l’autenticazione, i permessi RLS o la normale scadenza/revoca delle sessioni.
+
+Pubblicazione: estrarre lo ZIP e caricare solo GESTIONALE_V2/ nella root del repository, su un branch di prova.
+Non sostituire GESTIONALE/ e non cancellare il sito pubblico.
+
+Nessun dato Supabase è incorporato nello ZIP; vengono letti live con i permessi operatore.
+La funzione Edge dg2-operator-login deve essere presente nel progetto Supabase reale.
+Le funzionalità WhatsApp automatiche dipendono da configurazioni Meta/provider server-side preesistenti.
+
+IMPORTANTE: unione funzionale e test statici superati non equivalgono a un collaudo end-to-end sui dati di produzione.
