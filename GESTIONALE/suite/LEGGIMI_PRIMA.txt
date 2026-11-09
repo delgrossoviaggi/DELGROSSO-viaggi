@@ -1,38 +1,26 @@
-DELGROSSO VIAGGI & LIMOUSINE BUS — GESTIONALE 2.0
-RELEASE 09/11/2026 — INTEGRAZIONE FUNZIONI DAL GESTIONALE V1
+DELGROSSO V2 AVANZATA — INTEGRATA NELLA BUSINESS SUITE V1
 
-Caricare esclusivamente questa cartella nella root del repository:
-  GESTIONALE_V2/index.html
-  GESTIONALE_V2/app.js
-  GESTIONALE_V2/app.css
-  GESTIONALE_V2/assets/...
+La pagina principale da usare è ../index.html (Business Suite V1).
+Da qui si aprono direttamente le sezioni del gestionale V2 senza secondo login:
+- Contabilità Nicola
+- Contabilità Raffaele
+- Editor piantine
+- Agenda completa
+- Prenotazioni e pagamenti guidati
 
-Nuovi moduli recuperati dalla V1:
-- Agenda completa: attività e scadenze con creazione, modifica, completamento,
-  riapertura ed eliminazione autenticata su Supabase.
-- Conteggio per paese/fermata e BUS BIS, nominativi, posti, CSV e stampa.
-- Centro Operativo: check-in, prossime partenze, attività e scadenze.
-- Assistente operativo: segnalazioni e acconti da controllare (consultazione).
-- Statistiche operative, Economia e Backup/Export CSV.
+La pagina suite/index.html può essere aperta anche da sola per test, ma richiede il
+login Supabase operatori. Nel caricamento dalla V1 la sessione viene condivisa in
+modo riservato e la seconda schermata di login è nascosta.
 
-Rimangono i moduli V2 preesistenti: prenotazioni e piantina, clienti, flotta,
-viaggi, ricevute PDF professionali, cassa Nicola/Raffaele e altro.
+La libreria dg2_layout_library mantiene i modelli di piantina anche prima
+dell'assegnazione a un autobus. E' condivisa fra operatori autorizzati.
+Le piantine salvate non aggiornano da sole il sito pubblico e non spostano prenotati.
 
-ESCLUSO esplicitamente: il vecchio BLOCCO SCHERMO (V1).
-SCRITTURA: dopo login Nicola o Raffaele verificato, si attiva in automatico
-nel client V2; le verifiche di autorizzazione Auth/RLS rimangono obbligatorie.
-Nessun interruttore di abilitazione nelle Impostazioni, nessuna password nel codice.
+La contabilità separa i movimenti realmente attribuiti a Nicola e Raffaele,
+contanti ed elettronici, rimborsi e trasferimenti interni. Non somma due volte
+i trasferimenti come nuovi incassi. E' necessario confrontare con i movimenti reali.
 
-Le tabelle attivita_gestionale, scadenze_gestionale, economia_movimenti,
-assistente_eventi esistono già sul Supabase aziendale. Non serve una nuova
-migrazione SQL per queste funzioni. Il database non è stato modificato per
-questo rilascio.
+L'Agenda include attività e scadenze Supabase e mostra anche completati e storico.
 
-IMPORTANTE: questa è un'integrazione sottoposta a test statici e unitari;
-resta indispensabile un collaudo con i veri account su Preview Vercel e
-un backup Supabase ripristinabile prima di sostituire la produzione.
-La gestione avanzata delle comunicazioni e le routine del Centro Pro V1
-non sono ancora completamente migrate e collaudate.
-
-NON caricare GESTIONALE-v1.zip nel sito pubblico; NON cancellare GESTIONALE/
-o prenota.html. Leggere README_GITHUB.md per i passi esatti.
+Mai pubblicare chiavi sb_secret o service_role nel codice. Prima del passaggio a
+main eseguire backup verificato e collaudo con gli account reali.

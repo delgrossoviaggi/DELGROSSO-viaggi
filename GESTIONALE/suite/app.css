@@ -133,3 +133,14 @@
 .agenda-chip{display:block;font-size:10px;border-radius:5px;background:#e7edfa;color:#284876;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .agenda-chip.scadenza{background:#fff0d8;color:#8b5418}.agenda-chip.viaggio{background:#d9eff9;color:#155776}.agenda-more{font-size:10px;color:#667899}
 @media(max-width:650px){.agenda-calendar{gap:2px}.agenda-day,.agenda-blank{min-height:50px;border-radius:6px;padding:3px}.agenda-day strong{font-size:11px}.agenda-day-count{font-size:9px}.agenda-chip{display:none}.agenda-day-count{color:#234c96}}
+
+/* DELGROSSO Business Suite unified — show V1 chrome, hide V2 nested navigation. */
+body.embedded-suite{background:#f1f5fa;min-height:100%;}
+body.embedded-suite .shell{display:block;min-height:0;}
+body.embedded-suite .sidebar,body.embedded-suite .topbar,body.embedded-suite .footer{display:none!important;}
+body.embedded-suite .main{margin:0!important;padding:0!important;max-width:none!important;width:100%!important;min-height:0!important;}
+body.embedded-suite .workspace{max-width:none!important;padding:12px!important;margin:0!important;}
+.editor-palette{display:grid;grid-template-columns:minmax(160px,2fr) minmax(100px,1fr);gap:12px;align-items:end;margin:13px 0;}
+.editor-palette p{grid-column:1/-1; margin:0;}
+body.embedded-suite .editor-grid{grid-template-columns:minmax(0,2fr) minmax(260px,1fr)}
+@media(max-width:880px){.editor-palette,body.embedded-suite .editor-grid{grid-template-columns:1fr;}}

@@ -1,18 +1,24 @@
-DELGROSSO BUSINESS SUITE V1 + V2 (09/11/2026)
+DELGROSSO BUSINESS SUITE V3 — 09/11/2026
+======================================
+Interfaccia principale V1, funzionalità avanzate V2 integrate nello stesso accesso.
 
-PUNTO DI INGRESSO: GESTIONALE_V2/index.html
+ACCESSO RAPIDO DAL MENU (PC E IPHONE)
+- Crea / modifica piantine: editor GT53 / GT63 / GT63B, nuova numerazione, corridoi, porte,
+  modelli nella libreria condivisa Supabase, caricamento e archiviazione, assegnazione per bus.
+- Contabilità Nicola: movimenti attribuiti a Nicola, totali per viaggio, contanti/POS,
+  rimborsi, trasferimenti, PDF per viaggio e generale.
+- Contabilità Raffaele: le stesse funzioni, ma SOLO per Raffaele.
+- Agenda V1 e Agenda completa 2.0: tutte le note Supabase, anche storiche e completate.
+- Restano le altre funzioni V1 e V2: prenotazioni, pagamenti, viaggi, flotta, ecc.
 
-Grafica, menu, moduli e dati: base V1 originale fornita dall’utente.
-Moduli moderni V2: menu «Moduli avanzati 2.0», integrati nello stesso URL, senza secondo login.
+Il vecchio blocco schermo non è presente. La scrittura richiede esclusivamente una
+sessione Supabase autorizzata, non un interruttore nelle Impostazioni.
 
-Blocco schermo automatico, blocco quando si cambia app/scheda e pulsante manuale disattivati.
-NON sono disattivati l’autenticazione, i permessi RLS o la normale scadenza/revoca delle sessioni.
+PER GITHUB: estrai lo ZIP e carica GESTIONALE_V2/ nella root, su un branch di prova.
+NON sostituire la cartella GESTIONALE/ del vecchio gestionale prima del collaudo.
 
-Pubblicazione: estrarre lo ZIP e caricare solo GESTIONALE_V2/ nella root del repository, su un branch di prova.
-Non sostituire GESTIONALE/ e non cancellare il sito pubblico.
+ATTENZIONE: la modifica delle piantine NON rinumera automaticamente le prenotazioni
+storiche e NON modifica il sito pubblico. La libreria dg2_layout_library è già stata
+creata su Supabase senza toccare le prenotazioni esistenti.
 
-Nessun dato Supabase è incorporato nello ZIP; vengono letti live con i permessi operatore.
-La funzione Edge dg2-operator-login deve essere presente nel progetto Supabase reale.
-Le funzionalità WhatsApp automatiche dipendono da configurazioni Meta/provider server-side preesistenti.
-
-IMPORTANTE: unione funzionale e test statici superati non equivalgono a un collaudo end-to-end sui dati di produzione.
+Consultare README_GITHUB.md e COLLAUDO_E_LIMITI.md nella root dello ZIP.

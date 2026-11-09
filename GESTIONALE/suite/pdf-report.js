@@ -134,5 +134,41 @@ function saveBookingPdf(b,t,movements=[]){
  const a=document.createElement('a');a.href=href;a.download='DELGROSSO_CONFERMA_'+text(b.confirmation_number||b.codice||b.id).replace(/[^a-zA-Z0-9_-]/g,'_')+'.pdf';
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),5000);return a.download;
 }
-root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
+function makeOperatorPdf(profile,onlyTrip=''){
+ if(!profile||!['nicola','raffaele'].includes(profile.key))throw Error('Seleziona contabilità Nicola o Raffaele');
+ const doc=new Sheet('CONTABILITA '+profile.name.toUpperCase());doc.y=139;
+ doc.label('CONTABILITA DI '+profile.name.toUpperCase(),42,123,13,true);
+ doc.paragraph('DELGROSSO VIAGGI & LIMOUSINE BUS | Documento gestionale interno');
+ doc.paragraph('Data generazione: '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' · '+(onlyTrip?'Viaggio: '+onlyTrip:'Tutti i viaggi'));
+ doc.heading('RIEPILOGO MOVIMENTI REGISTRATI');
+ doc.stat('TOTALE INCASSI NETTI ATTRIBUITI',profile.net);
+ doc.stat('Contanti incassati (rimborsi detratti)',profile.cash);
+ doc.stat('POS, bonifici e pagamenti elettronici',profile.electronic);
+ doc.stat('Metodi da verificare',profile.unknown);
+ if(!onlyTrip){
+ doc.stat('Trasferimenti contanti ricevuti',profile.transferredIn);
+ doc.stat('Trasferimenti contanti consegnati',profile.transferredOut);
+ doc.stat('Contanti in carico dopo trasferimenti',profile.inHand);
+ }
+ doc.heading('DETTAGLIO PER VIAGGIO');
+ for(const g of profile.trips||[]){
+  doc.heading(String(g.trip.titolo||g.trip.destinazione||'Viaggio').slice(0,65)+' · '+date(g.trip.data_partenza));
+  doc.stat('Totale netto '+profile.name+' per questo viaggio',g.net);
+  doc.stat('Contanti',g.cash);doc.stat('POS e bonifici',g.electronic);
+  doc.stat('Metodi da verificare',g.unknown);
+  if(g.movements.length){doc.tableHead();for(let i=0;i<g.movements.length;i++){
+    const m=g.movements[i];doc.row({date:m.date,cliente:m.client,tipo:m.refund?'Rimborso':'Incasso',receipt:m.receipt,bus:m.bus,method:m.method,amount:m.amount},i);
+  }}
+ }
+ doc.heading('NOTA CONTABILE');
+ doc.paragraph('Tutti gli importi sono riportati dai movimenti registrati su Supabase. POS e bonifici non sono contanti disponibili fisicamente. I rimborsi sono sottratti. I trasferimenti non costituiscono nuovi incassi.');
+ doc.paragraph('Le somme possono differire dal denaro fisicamente disponibile se ci sono spese, prelievi o trasferimenti non registrati.');
+ return doc.finish();
+}
+function saveOperatorPdf(profile,onlyTrip=''){
+ const bytes=makeOperatorPdf(profile,onlyTrip),blob=new Blob([bytes],{type:'application/pdf'}),href=URL.createObjectURL(blob),a=document.createElement('a');
+ const t=String(onlyTrip||'TUTTI_I_VIAGGI').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60);
+ a.download='DELGROSSO_CONTABILITA_'+profile.name.toUpperCase()+'_'+t+'.pdf';a.href=href;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),30000);return a.download;
+}
+root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
 })(typeof window!=='undefined'?window:globalThis);

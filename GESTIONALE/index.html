@@ -1129,6 +1129,9 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
     <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
     <button data-page="clienti"><span class="ico">👤</span><span>Clienti</span></button>
     <button data-page="contabilitaquote"><span class="ico">▤</span><span>Quote Nicola / Raffaele</span></button>
+    <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('cassa-nicola')"><span class="ico">€</span><span>Contabilità Nicola · dettaglio</span></button>
+    <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('cassa-raffaele')"><span class="ico">€</span><span>Contabilità Raffaele · dettaglio</span></button>
+    <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('piantine')"><span class="ico">🪑</span><span>Crea / modifica piantine</span></button>
     <button data-page="pagamenti"><span class="ico">▣</span><span>Pagamenti</span></button>
     <button data-page="operativo"><span class="ico">⚙</span><span>Operativo</span></button>
     <button data-page="noleggi"><span class="ico">🚐</span><span>Noleggi</span></button>
@@ -1405,6 +1408,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 
 
 <section class="page" id="page-agenda">
+ <div class="dg-suite-entry" style="margin:12px 0 18px;padding:15px;border-radius:14px;border:1px solid #c9dbea;background:#f7fbff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><b>📅 Tutte le annotazioni conservate</b><br><small>Attività, scadenze, note anche completate e storico senza limiti del mese</small></div><button type="button" class="btn btn-primary" onclick="dgSuiteOpen('agenda')">Apri Agenda completa 2.0</button></div>
   <div class="section-title"><h2>Agenda Operativa</h2><div class="quick-actions">
     <button class="btn btn-primary" onclick="openTaskModal()">+ Attività</button>
     <button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button>
@@ -1518,6 +1522,9 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
   <button type="button" onclick="dgSuiteOpen('prenotazioni')">▣ Prenotazioni con piantina</button>
   <button type="button" onclick="dgSuiteOpen('pagamenti')">€ Pagamenti guidati</button>
   <button type="button" onclick="dgSuiteOpen('cassa')">▤ Cassa Nicola/Raffaele</button>
+  <button type="button" onclick="dgSuiteOpen('cassa-nicola')">€ Contabilità Nicola</button>
+  <button type="button" onclick="dgSuiteOpen('cassa-raffaele')">€ Contabilità Raffaele</button>
+  <button type="button" onclick="dgSuiteOpen('agenda')">📅 Agenda completa e note</button>
   <button type="button" onclick="dgSuiteOpen('piantine')">◈ Editor piantine</button>
   <button type="button" onclick="dgSuiteOpen('archivio')">▧ Archivio PDF</button>
   <button type="button" onclick="dgSuiteOpen('notifiche')">◌ Notifiche</button>
@@ -1550,6 +1557,10 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
       <button onclick="mobileGo('flotta')">🚍<span>Flotta</span></button>
       <button onclick="mobileGo('noleggi')">🚐<span>Noleggi</span></button>
       <button onclick="mobileGo('agenda')">📅<span>Agenda</span></button>
+      <button onclick="dgSuiteOpen('cassa-nicola');toggleMobileMenu(false)">€<span>Contabilità Nicola</span></button>
+      <button onclick="dgSuiteOpen('cassa-raffaele');toggleMobileMenu(false)">€<span>Contabilità Raffaele</span></button>
+      <button onclick="dgSuiteOpen('piantine');toggleMobileMenu(false)">🪑<span>Editor piantine</span></button>
+      <button onclick="dgSuiteOpen('agenda');toggleMobileMenu(false)">📅<span>Agenda note</span></button>
       <button onclick="mobileGo('comunicazioni')">🔔<span>Comunicazioni</span></button>
       <button onclick="mobileGo('assistente')">🤖<span>Assistente DELGROSSO</span></button>
       <button onclick="mobileGo('documenti')">📄<span>Documenti</span></button>
@@ -4326,6 +4337,10 @@ function injectNav(){
       <button onclick="mobileGo('preventivi')">📄<span>Preventivi</span></button>
       <button onclick="mobileGo('pagamenti')">💳<span>Pagamenti</span></button>
       <button onclick="mobileGo('agenda')">📅<span>Agenda</span></button>
+      <button onclick="dgSuiteOpen('cassa-nicola');toggleMobileMenu(false)">€<span>Contabilità Nicola</span></button>
+      <button onclick="dgSuiteOpen('cassa-raffaele');toggleMobileMenu(false)">€<span>Contabilità Raffaele</span></button>
+      <button onclick="dgSuiteOpen('piantine');toggleMobileMenu(false)">🪑<span>Editor piantine</span></button>
+      <button onclick="dgSuiteOpen('agenda');toggleMobileMenu(false)">📅<span>Agenda note</span></button>
       <button onclick="mobileGo('assistente')">🤖<span>Assistente</span></button>
       <button onclick="mobileGo('statistiche')">📊<span>Statistiche</span></button>
       <button onclick="mobileGo('sentinella')">🛡️<span>Sentinella</span></button>
@@ -7949,12 +7964,19 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
   window.dgSuiteLoad=()=>load(false);window.dgSuiteReload=()=>load(true);
   let pendingPage=null;
   const f=document.getElementById('dg-v2-iframe');
+  const allowedPages=['prenotazioni','pagamenti','cassa','cassa-nicola','cassa-raffaele','piantine','agenda','archivio','notifiche'];
   const sendPage=()=>{if(!pendingPage||!f?.contentWindow)return;
-    try{f.contentWindow.postMessage({kind:'dg-suite-nav',page:pendingPage},location.origin);pendingPage=null;}catch{}};
+    try{f.contentWindow.postMessage({kind:'dg-suite-nav',page:pendingPage},location.origin)}catch{}};
   f?.addEventListener('load',sendPage);
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin||e.source!==f?.contentWindow)return;
+    if(e.data?.kind==='dg-suite-ready')sendPage();
+    if(e.data?.kind==='dg-suite-nav-ack'&&e.data.page===pendingPage)pendingPage=null;
+  });
   window.dgSuiteOpen=function(page){
-    if(!['prenotazioni','pagamenti','cassa','piantine','archivio','notifiche'].includes(page))return;
-    pendingPage=page;load(false);if(f?.getAttribute('src'))setTimeout(sendPage,100);
+    if(!allowedPages.includes(page))return;
+    if(typeof go==='function')go('suitev2');
+    pendingPage=page;load(false);if(f?.getAttribute('src'))setTimeout(sendPage,400);
   };
   // The V1 parent is the sole refresh-token owner; V2 must not rotate it independently.
   window.dgSuiteGetSession=async function(){
