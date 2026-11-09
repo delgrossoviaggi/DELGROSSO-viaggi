@@ -1,0 +1,7 @@
+DELGROSSO V4 · 09/11/2026
+RISOLTO: il menu V1 veniva ricreato a ogni avvio e cancellava i link delle nuove sezioni.
+Il codice V4 ora ripristina 8 voci principali e 8 schede nella Dashboard anche dopo injectNav().
+Un solo login: in modalità embedded la V2 recupera la sessione verificata dalla V1.
+DATI: nessuna scrittura effettuata durante la preparazione del file.
+UPLOAD: caricare tutta la cartella GESTIONALE_V2/ nella root del branch GitHub.
+
