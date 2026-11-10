@@ -144,3 +144,16 @@ body.embedded-suite .workspace{max-width:none!important;padding:12px!important;m
 .editor-palette p{grid-column:1/-1; margin:0;}
 body.embedded-suite .editor-grid{grid-template-columns:minmax(0,2fr) minmax(260px,1fr)}
 @media(max-width:880px){.editor-palette,body.embedded-suite .editor-grid{grid-template-columns:1fr;}}
+
+/* Business Suite embedded feature parity: same controls on desktop and mobile. */
+html,body{max-width:100%;min-width:0}body.embedded-suite .workspace,body.embedded-suite .panel,body.embedded-suite .card{min-width:0;max-width:100%}
+body.embedded-suite .scroll,body.embedded-suite .table-wrap,body.embedded-suite .table-responsive{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+body.embedded-suite input,body.embedded-suite select,body.embedded-suite textarea{max-width:100%;font-size:max(16px,1em)}
+@media(max-width:850px){
+ body.embedded-suite .workspace{padding:10px!important}
+ body.embedded-suite .panel{padding:12px!important}
+ body.embedded-suite .editor-grid,body.embedded-suite .two-col,body.embedded-suite .three-col{grid-template-columns:minmax(0,1fr)!important}
+ body.embedded-suite dialog{width:calc(100vw - 16px);max-width:calc(100vw - 16px);max-height:calc(100dvh - 30px);padding:13px!important;overflow:auto}
+ body.embedded-suite .bus-plan{max-width:100%;min-width:0}
+ body.embedded-suite button,body.embedded-suite .navbtn{touch-action:manipulation}
+}
