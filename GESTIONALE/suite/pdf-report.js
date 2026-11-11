@@ -13,7 +13,7 @@ const date=x=>String(x||'').slice(0,10).replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$3/
 const text=x=>String(x??'').replace(/[\r\n\t]/g,' ').replace(/\s+/g,' ').trim();
 function cp1252(s){const special={'€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,'‡':135,'ˆ':136,'‰':137,'Š':138,'‹':139,'Œ':140,'Ž':142,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,'˜':152,'™':153,'š':154,'›':155,'œ':156,'ž':158,'Ÿ':159};const out=[];for(const c of text(s)){const code=c.codePointAt(0);out.push(code<=255?code:special[c]||63)}return out}
 const hex=s=>cp1252(s).map(n=>n.toString(16).padStart(2,'0')).join('');
-function pdfBytes(pages){
+function pdfBytes(pages,title="Riepilogo gestionale"){
  // Object 5 contains PDF metadata, the final numbered object is the logo XObject.
  // Binary JPEG streams need byte-accurate offsets: never count them as JS string chars.
  const chunks=[];let offset=0;const loc=[0];
@@ -26,7 +26,7 @@ function pdfBytes(pages){
  obj(2,'<< /Type /Pages /Kids ['+pages.map((_,i)=>(contentsStart+i*2)+' 0 R').join(' ')+'] /Count '+pages.length+' >>');
  obj(3,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
  obj(4,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
- obj(5,'<< /Producer (DELGROSSO Gestionale 2.0) /Title (Riepilogo quote per viaggio) >>');
+ obj(5,'<< /Producer (DELGROSSO Gestionale 2.0) /Title ('+text(title).replace(/[()\\]/g,'').slice(0,60)+') >>');
  pages.forEach((p,i)=>{
   const pageId=contentsStart+i*2,contentId=pageId+1;
   const commands=p.join('\n')+'\n';
@@ -67,7 +67,7 @@ class Sheet{
   this.y+=height;
  }
  note(s){this.ensure(25);this.label(text(s).slice(0,98),46,this.y,8,false,[0.49,0.34,0.15]);this.y+=17}
- finish(){this.pages.forEach((p,i)=>{const foot=new SheetFooter(p);foot.write(i+1,this.pages.length)});return pdfBytes(this.pages)}
+ finish(){this.pages.forEach((p,i)=>{const foot=new SheetFooter(p);foot.write(i+1,this.pages.length)});return pdfBytes(this.pages,this.kind)}
 }
 class SheetFooter{constructor(p){this.p=p}write(n,total){const color=[0.39,0.47,0.59].join(' ');const t='Documento operativo interno - non sostituisce una ricevuta fiscale | Pagina '+n+' / '+total;this.p.push(color+' rg BT /F1 8 Tf 1 0 0 1 42 36 Tm <'+hex(t)+'> Tj ET')}}
 function makeTripPdf(g){if(!g||!g.trip)throw Error('Seleziona un viaggio valido');const doc=new Sheet();
@@ -170,5 +170,41 @@ function saveOperatorPdf(profile,onlyTrip=''){
  const t=String(onlyTrip||'TUTTI_I_VIAGGI').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60);
  a.download='DELGROSSO_CONTABILITA_'+profile.name.toUpperCase()+'_'+t+'.pdf';a.href=href;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),30000);return a.download;
 }
-root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
+function makeLayoutPdf(layout){
+ if(!layout||!Array.isArray(layout.rows)||!layout.rows.length)throw Error('Piantina non valida');
+ const rows=layout.rows;
+ const all=rows.flat().filter(x=>Number.isInteger(x)&&x>0);
+ if(!all.length||new Set(all).size!==all.length)throw Error('Servono posti numerati senza duplicati');
+ if(rows.some(row=>!Array.isArray(row)||row.length!==5))throw Error('Le file devono avere cinque celle');
+ const doc=new Sheet('PIANTINA POSTI A SEDERE');doc.y=132;
+ doc.label('DELGROSSO - '+text(layout.name||'Autobus GT').slice(0,48),43,122,12,true);
+ doc.y=149;
+ doc.paragraph('Posti numerati: '+all.length+' | File: '+rows.length+' | Documento operativo da piantina personalizzata');
+ doc.paragraph('Schema: sedili azzurri, corridoio bianco, porta color sabbia. Il PDF riproduce la numerazione del modello salvato.');
+ doc.heading(text(layout.frontLabel||'FRONTE AUTOBUS').slice(0,65)+' - '+text(layout.driverLabel||'AUTISTA'));
+ const left=102,w=67,gap=5,step=31;
+ rows.forEach((row,i)=>{
+  doc.ensure(step+7);
+  const y=doc.y;
+  doc.label('Fila '+String(i+1).padStart(2,'0'),45,y+17,8,false,[.35,.43,.54]);
+  row.forEach((cell,c)=>{
+   const x=left+c*(w+gap),seat=Number.isInteger(cell)&&cell>0;
+   const tint=seat?[.83,.91,.99]:cell==='door'?[.98,.87,.68]:cell==='aisle'?[.96,.97,.98]:[.98,.98,.98];
+   doc.box(x,y,w,26,tint);
+   if(seat)doc.label(String(cell),x+23,y+17,12,true,[.05,.31,.54]);
+   else if(cell==='door')doc.label('PORTA',x+12,y+16,7,true,[.42,.30,.14]);
+   else if(cell==='aisle')doc.label('CORR.',x+16,y+16,7,false,[.55,.60,.66]);
+  });
+  doc.y+=step;
+ });
+ doc.y+=12;doc.paragraph('Documento generato il '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' - DELGROSSO VIAGGI & LIMOUSINE BUS');
+ return doc.finish();
+}
+function saveLayoutPdf(layout){
+ const bytes=makeLayoutPdf(layout),blob=new Blob([bytes],{type:'application/pdf'}),url=URL.createObjectURL(blob);
+ const name=text(layout.name||'PIANTINA').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60);
+ const file='DELGROSSO_PIANTINA_'+name+'.pdf',a=document.createElement('a');a.download=file;a.href=url;
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);return file;
+}
+root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf,makeLayoutPdf,saveLayoutPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
 })(typeof window!=='undefined'?window:globalThis);
