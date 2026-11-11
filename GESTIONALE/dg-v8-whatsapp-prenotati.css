@@ -1,0 +1,32 @@
+/* DELGROSSO V8: rubrica per viaggio nella pagina Prenotazioni. Layout unico PC/iOS/Android. */
+#dg8RosterPanel{margin:14px 0 22px;border:2px solid #87bcec;background:#fff;overflow:hidden}
+#dg8RosterPanel .dg8-roster-head{background:linear-gradient(100deg,#eaf4ff,#f5faff);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:17px 18px}
+#dg8RosterPanel .dg8-roster-head h3{margin:0;font-size:18px;font-weight:900;letter-spacing:.01em;color:#102e55}
+#dg8RosterPanel .dg8-roster-head p{margin:6px 0 0;font-size:13px;color:#47607e}
+#dg8RosterPanel .card-body{padding:16px;min-width:0}
+.dg8-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
+.dg8-field{min-width:0;display:flex;flex-direction:column;gap:5px;font-weight:800;color:#173b61;font-size:13px}
+.dg8-field select{width:100%;min-height:46px;padding:10px;border-radius:9px;border:1px solid #a6bfd9;background:white;color:#122e4d;max-width:100%;font-size:15px}
+.dg8-stats{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.dg8-stats span{background:#f2f8ff;border:1px solid #cde0f6;border-radius:10px;padding:8px 11px;color:#1b456d;font-size:12px}
+.dg8-stats strong{color:#052a51;font-size:16px}
+.dg8-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.dg8-toolbar button{min-height:43px;white-space:normal}
+.dg8-notice,.dg8-footnote{font-size:12px;line-height:1.65;color:#526782;margin:8px 0}
+.dg8-notice{padding:10px 12px;border-left:3px solid #4b8ccc;background:#f4f8ff;border-radius:5px}
+.dg8-feedback{font-size:13px;color:#175a3c;min-height:16px;font-weight:700;margin:8px 0}
+.dg8-phone-list{display:flex;flex-direction:column;gap:6px;max-height:560px;overflow-y:auto;overscroll-behavior:contain}
+.dg8-contact{border:1px solid #deebfa;border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+.dg8-contact>label{display:flex;gap:10px;align-items:center;cursor:pointer;min-width:0;flex:1}
+.dg8-contact input[type=checkbox]{width:23px;height:23px;min-width:23px;accent-color:#1267b3}
+.dg8-contact-main{min-width:0;display:flex;flex-direction:column;gap:3px}
+.dg8-contact-main b{font-size:13px;color:#132f4c;overflow-wrap:anywhere}
+.dg8-contact-main small{font-size:12px;color:#506882;overflow-wrap:anywhere}
+.dg8-contact-main .dg8-number{font-size:14px;color:#0758a0;font-weight:800}
+.dg8-contact-actions{display:flex;gap:6px;flex-wrap:wrap}
+.dg8-contact-actions button,.dg8-contact-actions a{min-height:38px;display:inline-flex;align-items:center;justify-content:center}
+.dg8-empty{padding:15px;color:#6b7c92;font-size:13px}
+.dg8-missing{color:#8a5b18;background:#fff9ef;border:1px solid #f4e3bb;border-radius:8px;font-size:12px;padding:9px 12px}
+.dg8-manual-copy{padding:12px;border-radius:10px;border:1px solid #cadbef;background:#f4faff;margin:10px 0}
+.dg8-manual-copy textarea{width:100%;max-width:100%;box-sizing:border-box;font:14px/1.5 monospace;min-height:100px;white-space:pre;overflow:auto;margin:8px 0}
+@media(max-width:700px){#dg8RosterPanel .card-body{padding:11px}.dg8-filters{grid-template-columns:1fr}.dg8-toolbar button{flex:1 1 46%;min-width:0;font-size:12px}.dg8-contact{align-items:flex-start;flex-wrap:wrap;gap:7px}.dg8-contact-actions{width:100%;padding-left:31px}.dg8-contact-actions button,.dg8-contact-actions a{flex:1 1 35%}#dg8RosterPanel .dg8-roster-head h3{font-size:16px}.dg8-phone-list{max-height:65vh}}

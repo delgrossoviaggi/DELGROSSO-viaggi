@@ -1284,13 +1284,27 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
  <div class="dg52-footnote">🗑 <b>Elimina definitivamente</b> i viaggi senza collegamenti. 🗄 <b>Archivia</b> quelli che vuoi togliere dalla gestione quotidiana senza perdere prenotati, ricevute e pagamenti. Nell’archivio puoi ripristinarli.</div>
 </section>
 <section class="page" id="page-viaggi">
-  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-purple" onclick="openBisTripPicker()">🚍 Apri BIS</button><button type="button" class="btn btn-secondary" onclick="openDuplicateTripPicker()">📄 Duplica viaggio</button><button type="button" class="btn btn-secondary" onclick="go('whatsapp')">👥 Elenco telefoni WhatsApp</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
+  <div class="section-title"><h2>Viaggi</h2><div class="section-actions"><button class="btn btn-primary" onclick="openTripModal()">+ Nuovo viaggio</button><button type="button" class="btn btn-purple" onclick="openBisTripPicker()">🚍 Apri BIS</button><button type="button" class="btn btn-secondary" onclick="openDuplicateTripPicker()">📄 Duplica viaggio</button><button type="button" class="btn btn-primary" onclick="window.dg8OpenWA?.()">📱 Numeri WhatsApp per viaggio</button><button type="button" class="btn btn-secondary" onclick="syncTripsNow()">↻ Sincronizza Supabase</button></div></div>
   <div class="toolbar"><input id="tripSearch" placeholder="Cerca destinazione, codice..."><select id="tripStatus"><option value="">Tutti gli stati</option><option>Programmato</option><option>Confermato</option><option>SOLD OUT</option><option>Chiuso</option><option>Annullato</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Viaggio</th><th>Partenza</th><th>Posti</th><th>Prezzo</th><th>Stato</th><th></th></tr></thead><tbody id="tripsTable"></tbody></table></div>
 </section>
 
 <section class="page" id="page-prenotazioni">
-  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-secondary" type="button" onclick="go('whatsapp')">👥 Numeri gruppo WhatsApp</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
+  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" type="button" onclick="window.dg8OpenWA?.()">📱 LISTA TELEFONI WhatsApp</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
+  <!-- V8: Rubrica WhatsApp visibile direttamente in Prenotazioni, senza moduli nascosti -->
+  <section class="card dg8-roster" id="dg8RosterPanel" aria-label="Lista numeri WhatsApp per viaggio">
+    <div class="card-head dg8-roster-head"><div><h3>📱 LISTA NUMERI WHATSAPP — PER VIAGGIO</h3><p>Trova subito tutti i recapiti registrati, scegli chi includere e prepara i contatti per il gruppo.</p></div><button type="button" class="btn btn-secondary" id="dg8Reload">↻ Aggiorna lista</button></div>
+    <div class="card-body">
+      <div class="dg8-filters"><label class="dg8-field"><span>1. Scegli il viaggio</span><select id="dg8Trip" aria-label="Viaggio della lista WhatsApp"></select></label><label class="dg8-field"><span>Autobus</span><select id="dg8Bus" aria-label="Autobus della lista WhatsApp"><option value="all">Tutti i bus</option></select></label></div>
+      <div class="dg8-stats" id="dg8Stats" aria-live="polite"></div>
+      <div class="dg8-toolbar"><button type="button" class="btn btn-secondary" id="dg8SelectAll">☑ Seleziona tutti</button><button type="button" class="btn btn-secondary" id="dg8Clear">Deseleziona</button><button type="button" class="btn btn-primary" id="dg8CopySelected">📋 Copia i numeri selezionati</button><button type="button" class="btn btn-secondary" id="dg8CopyAll">📋 Copia tutti i numeri</button><button type="button" class="btn btn-primary" id="dg8VCF">📱 Contatti iPhone / Android (VCF)</button><button type="button" class="btn btn-secondary" id="dg8Share">Condividi VCF su iPhone</button></div>
+      <p class="dg8-notice">WhatsApp non aggiunge automaticamente membri da un elenco incollato. Per selezionare più persone nell'app, importa il file <b>VCF</b> nei Contatti oppure inserisci i numeri uno per uno. L'importazione nella rubrica è facoltativa. Verifica sempre il consenso prima di includere un partecipante in un gruppo.</p>
+      <div class="dg8-feedback" role="status" id="dg8Feedback" aria-live="polite"></div>
+      <div id="dg8PhoneList" class="dg8-phone-list" aria-live="polite"><p class="dg8-empty">Apri un viaggio per visualizzare i numeri.</p></div>
+      <div id="dg8ManualCopy" class="dg8-manual-copy" hidden><label for="dg8ManualText">Se il telefono non consente la copia automatica, seleziona il testo qui sotto e premi Copia.</label><textarea id="dg8ManualText" readonly rows="5"></textarea><button type="button" id="dg8ManualSelect" class="btn btn-secondary">Seleziona il testo</button></div>
+      <p class="dg8-footnote">Sono elencati i telefoni effettivamente registrati per le prenotazioni (uno o più referenti, se presenti). Se una prenotazione è di 25 persone ma contiene un solo numero, il gestionale non dispone automaticamente degli altri 24 recapiti.</p>
+    </div>
+  </section>
   <div class="toolbar"><input id="bookSearch" placeholder="Nome, telefono, codice..."><select id="bookFilter"><option value="">Tutti</option><option>Confermata</option><option>In attesa</option><option>Pagata</option><option>Riservata DELGROSSO</option><option>Annullata</option></select><button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna</button></div>
   <div class="card table-card"><table class="table"><thead><tr><th>Codice</th><th>Cliente</th><th>Viaggio</th><th>Posti</th><th>Totale</th><th>Pagato</th><th>Residuo</th><th>Stato</th><th></th></tr></thead><tbody id="bookingsTable"></tbody></table></div>
 </section>
@@ -2018,6 +2032,7 @@ function renderTrips(){
      if(online)actions+=`<button class="btn btn-ghost btn-sm" onclick="setTripOnlineState('${v.id}','OFFLINE')">👁️ Togli online</button>`;
      else actions+=`<button class="btn btn-primary btn-sm" onclick="setTripOnlineState('${v.id}','ONLINE')">🌐 Rimetti online</button>`;
    }
+   actions+=` <button type="button" class="btn btn-primary btn-sm" onclick="window.dg8OpenWA?.('${v.id}')">📱 Telefoni WhatsApp</button>`;
    actions+=` <button type="button" class="btn btn-sm dg47-delete" onclick="openTripDeleteDialog('${v.id}')">🗑 Elimina</button>`;
    return `<tr style="${rowStyle}"><td>${dateIT(v.data_partenza)}</td><td><b>${esc(v.titolo)}</b>${bisBadge}${closeBadge}<br><small>${esc(v.id_viaggio||v.destinazione)}</small>${groupInfo}</td><td>${esc(v.luogo_partenza||'—')} ${v.ora_partenza||''}</td><td>${v.posti_occupati||0}/${v.posti_totali||0}${availability}</td><td>${money(v.prezzo)}</td><td>${status}</td><td style="min-width:560px">${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="7" class="empty">Nessun viaggio.</td></tr>';
@@ -7029,7 +7044,7 @@ const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POS
  ['suite:pagamenti','Registra pagamento','card'],
  ['suite:archivio','Ricevute e documenti','receipt'],
  ['suite:notifiche','Notifiche prenotazioni','bell'],
- ['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
+ ['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['rubrica-wa','📱 Numeri WhatsApp gruppi','users'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
 const EXTRA=[['posti','Gestione posti BUS / BIS','seat'],['preventivi','Preventivi','receipt'],['contabilitaquote','Quote Nicola / Raffaele','wallet'],['comunicazioni','Notifiche','bell'],['operativo','Operativo','check'],['statistiche','Controllo','chart'],['agenda','Agenda','calendar'],['assistente','Assistente AI','spark'],['backup','Backup e esportazione','folder'],['pro','Centro Pro','chart']];
 const data=()=>typeof state!=='undefined'?state:{};
 const array=k=>Array.isArray(data()[k])?data()[k]:[];
@@ -7052,6 +7067,7 @@ window.dg44Go=function(target){
   navUpdate();
   return;
  }
+ if(target==='rubrica-wa'){dgV5ActiveSuite='';window.dg8OpenWA?.();navUpdate();return;}
  dgV5ActiveSuite='';if(typeof go==='function')go(target);navUpdate();if(target==='dashboard')render();
 };
 window.dg44ToggleMenu=()=>{document.querySelector('.sidebar')?.classList.toggle('dg44-open');$('dg44-overlay')?.classList.toggle('dg44-on')};
@@ -7085,6 +7101,7 @@ function build(){
    <button type="button" onclick="dg44Go('suite:pagamenti')"><span class="dg-v5-ico">▧</span><strong>Registra pagamento</strong><small>Viaggio, cliente e quota</small></button>
    <button type="button" onclick="dg44Go('suite:archivio')"><span class="dg-v5-ico">≡</span><strong>Ricevute e documenti</strong><small>PDF e archivio</small></button>
    <button type="button" onclick="dg44Go('suite:notifiche')"><span class="dg-v5-ico">◉</span><strong>Notifiche prenotazioni</strong><small>Data, ora e nominativo</small></button>
+   <button type="button" onclick="window.dg8OpenWA?.()"><span class="dg-v5-ico">📱</span><strong>Numeri WhatsApp per viaggio</strong><small>Seleziona, copia e VCF iOS/Android</small></button>
   </div>
  </section>
  <div class="dg44-stats" id="dg44-stats" aria-live="polite"></div>
@@ -7985,6 +8002,8 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="dg66-email-verifica.js?v=66" defer></script>
 <script src="dg67-whatsapp-pdf.js?v=67" defer></script>
 <script src="dg68-gruppi-viaggio.js?v=20261111-v7" defer></script>
+<link rel="stylesheet" href="dg-v8-whatsapp-prenotati.css?v=20261111-v8" />
+<script src="dg-v8-whatsapp-prenotati.js?v=20261111-v8" defer></script>
 <script id="dg-v1v2-shell-bridge">
 (function(){'use strict';
   const load=function(force){
@@ -8033,6 +8052,6 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 })();
 </script><link rel="stylesheet" href="./dg-v5-visible-menu.css?v=20261109-v5-3" />
 <link rel="stylesheet" href="./dg-v6-mobile-parity.css?v=20261109-v6" />
-<script src="./dg-v6-mobile-parity.js?v=20261109-v6" defer></script>
+<script src="./dg-v6-mobile-parity.js?v=20261111-v8" defer></script>
 </body>
 </html>
