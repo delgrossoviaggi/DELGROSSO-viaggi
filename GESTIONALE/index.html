@@ -1091,6 +1091,15 @@ body{background:#f3f7fc!important;color:#102f58!important}
 .dg68-ok{color:#177d51!important;font-size:11px;font-weight:700}
 .dg68-muted{color:#956b25!important;font-size:11px}
 .dg68-empty{padding:13px;font-size:12px;color:#66778b}
+
+.dg68-selection-tools{padding:15px;border:1px solid #c8ddf5;border-radius:14px;background:linear-gradient(135deg,#eff7ff,#ffffff);margin:12px 0;display:grid;gap:10px}
+.dg68-select-title{display:flex;flex-direction:column;gap:5px;color:#123862;font-size:14px}.dg68-select-title small{font-size:12px;color:#65788c}
+.dg68-selection-count{font-size:12px;color:#26476c;padding:7px 9px;background:#e2eefb;border-radius:10px;align-self:center}
+.dg68-select-wrap{display:flex;flex:1;gap:12px;align-items:flex-start;cursor:pointer;min-width:0;user-select:none}
+.dg68-select{flex:0 0 auto;width:21px;height:21px;accent-color:#086bd0;margin-top:3px;cursor:pointer}
+.dg68-select-text{display:block;min-width:0;overflow-wrap:anywhere}.dg68-select-wrap:has(input:checked){background:#f0f8ff;border-radius:8px;outline:2px solid #d2e9ff;outline-offset:5px}
+.dg68-actions button{min-height:42px}.dg68-actions button:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:700px){.dg68-selection-tools .dg68-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.dg68-selection-tools .dg68-actions button{font-size:12px;white-space:normal}.dg68-selection-count{grid-column:1/-1}.dg68-select-wrap{flex:1 0 100%}}
 @media(max-width:700px){.dg68-filters{grid-template-columns:1fr}.dg68-line{flex-wrap:wrap}.dg68-line button{margin-top:4px}.dg68-group-head>div:last-child{width:100%}}
 </style>
 <style id="dg-v1v2-unified-css">
@@ -1446,6 +1455,10 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
 <div class="card dg68-card" id="dg68TripGroups"><div class="card-head"><h3>👥 Gruppi viaggio · BUS 1 / BUS BIS</h3></div><div class="card-body">
 <p class="dg68-note">Elenco aggiornato dalle prenotazioni: numeri unici, posti, fermate e autobus di appartenenza. Puoi copiare i numeri senza salvarli nella rubrica. <b>Il gruppo WhatsApp viene creato manualmente</b> nell'app Business; l'invito è manuale e richiede il consenso specifico del passeggero.</p>
 <div class="dg68-filters"><div class="field"><label for="dg68Root">Viaggio</label><select id="dg68Root" aria-label="Scegli il viaggio"></select></div><div class="field"><label for="dg68Bus">Autobus</label><select id="dg68Bus" aria-label="Scegli l'autobus"><option value="all">Tutti i bus</option></select></div></div>
+<div class="dg68-selection-tools" role="group" aria-label="Selezione partecipanti WhatsApp"><div class="dg68-select-title"><strong>✅ Seleziona i prenotati da inserire nel gruppo</strong><small>Solo le persone spuntate saranno incluse nelle azioni sottostanti.</small></div>
+ <div class="quick-actions dg68-actions"><button class="btn btn-secondary" id="dg68SelectAll" type="button">☐ Seleziona tutti</button><button class="btn btn-secondary" id="dg68Clear" type="button">Deseleziona</button><span id="dg68SelectionStats" class="dg68-selection-count" aria-live="polite">Nessun numero selezionato</span></div>
+ <div class="quick-actions dg68-actions"><button class="btn btn-primary" id="dg68CopySelected" type="button" disabled>📋 Copia numeri selezionati</button><button class="btn btn-secondary" id="dg68CopyNext" type="button" disabled>📲 Copia prossimo numero</button><button class="btn btn-secondary" id="dg68CopySelectedNames" type="button" disabled>📝 Copia con nominativi</button><button class="btn btn-secondary" id="dg68DownloadVcf" type="button" disabled>⬇ Contatti .VCF (facoltativo)</button><button class="btn btn-secondary" id="dg68NextInvite" type="button" disabled>✉️ Apri prossimo invito</button></div>
+ <p class="dg68-note"><strong>Come funziona su WhatsApp:</strong> una lista di numeri incollata non seleziona automaticamente tutti i membri del gruppo. Per non usare la rubrica, premi <strong>Copia prossimo numero</strong>, incollalo nella ricerca di <em>Aggiungi membri</em> e seleziona il contatto, ripetendo per gli altri. Il file VCF è facoltativo: importarlo aggiunge contatti alla rubrica. Gli inviti al gruppo richiedono consenso registrato e link valido.</p></div>
 <div class="quick-actions dg68-actions"><button class="btn btn-secondary" id="dg68CopyPhones" type="button">📋 Copia numeri</button><button class="btn btn-secondary" id="dg68CopyRoster" type="button">📄 Copia elenco completo</button><button class="btn btn-primary" id="dg68Refresh" type="button">↻ Aggiorna elenco e consensi</button></div>
 <div id="dg68Msg" class="dg68-message" role="status" aria-live="polite">Apri questa pagina con il gestionale connesso per visualizzare le prenotazioni.</div>
 <div id="dg68Stats"></div><div id="dg68Roster"></div>
@@ -7029,7 +7042,7 @@ const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POS
  ['suite:pagamenti','Registra pagamento','card'],
  ['suite:archivio','Ricevute e documenti','receipt'],
  ['suite:notifiche','Notifiche prenotazioni','bell'],
- ['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
+ ['whatsapp-roster','Lista WhatsApp prenotati','users'],['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
 const EXTRA=[['posti','Gestione posti BUS / BIS','seat'],['preventivi','Preventivi','receipt'],['contabilitaquote','Quote Nicola / Raffaele','wallet'],['comunicazioni','Notifiche','bell'],['operativo','Operativo','check'],['statistiche','Controllo','chart'],['agenda','Agenda','calendar'],['assistente','Assistente AI','spark'],['backup','Backup e esportazione','folder'],['pro','Centro Pro','chart']];
 const data=()=>typeof state!=='undefined'?state:{};
 const array=k=>Array.isArray(data()[k])?data()[k]:[];
@@ -7042,6 +7055,12 @@ let dgV5ActiveSuite='';
 function navUpdate(){document.querySelectorAll('[data-dg44-target]').forEach(e=>e.classList.toggle('active',e.dataset.dg44Target===(data().page==='suitev2'?dgV5ActiveSuite:data().page)))}
 window.dg44Go=function(target){
  closeMenu();
+ if(target==='whatsapp-roster'){
+  dgV5ActiveSuite='';if(typeof go==='function')go('whatsapp');
+  navUpdate();
+  setTimeout(()=>{try{document.getElementById('dg68TripGroups')?.scrollIntoView({behavior:'smooth',block:'start'});window.dg68RefreshTripGroups?.()}catch{}},90);
+  return;
+ }
  if(target.startsWith('suite:')){
   const section=target.slice(6);
   if(typeof window.dgSuiteOpen!=='function'){
@@ -7075,7 +7094,7 @@ function build(){
  <div class="dg54-direct"><div><strong>🎛️ Control Room · Posti e Passeggeri</strong><span>Consulta piantina, prenotati e BUS BIS per ogni partenza</span></div><button type="button" onclick="dg44Go('controlroom')">Apri Control Room →</button></div>
 
  <section class="dg-v5-shortcuts" aria-label="Funzioni operative DELGROSSO" id="dg-v5-shortcuts">
-  <div class="dg-v5-shortcuts-top"><div><span class="dg-v5-eyebrow">FUNZIONI PRINCIPALI</span><h2>Accesso rapido al gestionale</h2><p>Apri direttamente le funzioni richieste, senza un secondo menu o login.</p></div><span class="dg-v5-tag">Versione V5 · menu reale</span></div>
+  <div class="dg-v5-shortcuts-top"><div><span class="dg-v5-eyebrow">FUNZIONI PRINCIPALI</span><h2>Accesso rapido al gestionale</h2><p>Apri direttamente le funzioni richieste, senza un secondo menu o login.</p></div><span class="dg-v5-tag">Versione V7 · WhatsApp</span></div>
   <div class="dg-v5-actions">
    <button type="button" onclick="dg44Go('suite:piantine')"><span class="dg-v5-ico">▤</span><strong>Crea / Modifica piantine</strong><small>Editor GT53, GT63 e libreria</small></button>
    <button type="button" onclick="dg44Go('suite:cassa-nicola')"><span class="dg-v5-ico">€</span><strong>Contabilità Nicola</strong><small>Movimenti, saldo e PDF</small></button>
@@ -7085,6 +7104,7 @@ function build(){
    <button type="button" onclick="dg44Go('suite:pagamenti')"><span class="dg-v5-ico">▧</span><strong>Registra pagamento</strong><small>Viaggio, cliente e quota</small></button>
    <button type="button" onclick="dg44Go('suite:archivio')"><span class="dg-v5-ico">≡</span><strong>Ricevute e documenti</strong><small>PDF e archivio</small></button>
    <button type="button" onclick="dg44Go('suite:notifiche')"><span class="dg-v5-ico">◉</span><strong>Notifiche prenotazioni</strong><small>Data, ora e nominativo</small></button>
+   <button type="button" onclick="dg44Go('whatsapp-roster')"><span class="dg-v5-ico">☏</span><strong>Lista WhatsApp prenotati</strong><small>Seleziona i numeri per viaggio e BUS BIS</small></button>
   </div>
  </section>
  <div class="dg44-stats" id="dg44-stats" aria-live="polite"></div>
@@ -7984,7 +8004,7 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="dg65-comms-status.js?v=66" defer></script>
 <script src="dg66-email-verifica.js?v=66" defer></script>
 <script src="dg67-whatsapp-pdf.js?v=67" defer></script>
-<script src="dg68-gruppi-viaggio.js?v=68" defer></script>
+<script src="dg68-gruppi-viaggio.js?v=70-selected" defer></script>
 <script id="dg-v1v2-shell-bridge">
 (function(){'use strict';
   const load=function(force){

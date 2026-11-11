@@ -67,6 +67,70 @@ function perBus(v){
  return {all,people:[...withTel.values()].sort((a,b)=>a.names[0].localeCompare(b.names[0],'it')),missing};
 }
 const linkFor=v=>(getState()?.whatsappInvites||[]).find(i=>i.trip_id===v.id)?.invite_url||'';
+// Only transient in-memory selections. Never store private phone numbers in localStorage.
+const chosen=new Set();
+const invitedAttempted=new Set();
+let nextCopyIndex=0;
+const rowKey=(tripId,tel)=>tripId+'|'+tel;
+function visibleContacts(){
+ const root=$('dg68Root')?.value,bus=$('dg68Bus')?.value;
+ if(!root)return [];
+ const out=[];
+ for(const trip of groupTrips(root).filter(t=>bus==='all'||t.id===bus)){
+  for(const c of perBus(trip).people)out.push({...c,tripId:trip.id,trip,group:groupLabel(trip,groupTrips(root).indexOf(trip)),key:rowKey(trip.id,c.tel)});
+ }
+ return out;
+}
+function selectedContacts(){
+ // Never include contacts from another trip or hidden bus: the displayed selection is authoritative.
+ return visibleContacts().filter(c=>chosen.has(c.key));
+}
+function uniqueSelected(){
+ const map=new Map();for(const r of selectedContacts())if(!map.has(r.tel))map.set(r.tel,r);
+ return [...map.values()];
+}
+function refreshSelectionStats(){
+ const nodes=$('dg68SelectionStats'),rows=selectedContacts(),unique=uniqueSelected();
+ const cons=rows.filter(r=>consentsLoaded&&r.bookings.some(b=>consents.has(b.id+'|'+r.tripId))).length;
+ if(nodes)nodes.textContent=rows.length+' righe selezionate · '+unique.length+' numeri unici · '+cons+' con consenso gruppo verificato';
+ const button=$('dg68SelectAll');if(button){
+   const visible=visibleContacts();button.textContent=visible.length&&visible.every(x=>chosen.has(x.key))?'☑ Deseleziona tutti':'☐ Seleziona tutti';
+ }
+ for(const id of ['dg68CopySelected','dg68CopyNext','dg68DownloadVcf','dg68CopySelectedNames','dg68NextInvite']){
+   const b=$(id);if(b)b.disabled=!rows.length;
+ }
+}
+function resetSelection(){chosen.clear();invitedAttempted.clear();nextCopyIndex=0;refreshSelectionStats()}
+function copySelected(){
+ const entries=uniqueSelected();if(!entries.length)return show('Seleziona almeno un numero.',true);
+ // Plain E.164 +39 per line, useful for copying; WhatsApp does not bulk-add these into a group.
+ clipboard(entries.map(r=>'+'+r.tel).join('\n'));
+}
+function copySelectedWithNames(){
+ const entries=uniqueSelected();if(!entries.length)return show('Seleziona almeno un contatto.',true);
+ clipboard(entries.map(r=>r.names.join(' / ')+' | +'+r.tel+' | '+r.group+' | '+r.pax+' posti').join('\n'));
+}
+function copyNext(){
+ const entries=uniqueSelected();if(!entries.length)return show('Seleziona almeno un contatto.',true);
+ const n=nextCopyIndex%entries.length;nextCopyIndex=(n+1)%entries.length;
+ const x=entries[n];clipboard('+'+x.tel);
+ show('Numero '+(n+1)+' di '+entries.length+' pronto per la ricerca partecipanti su WhatsApp: '+x.names[0]+'. Incolla e selezionalo, poi premi nuovamente “Copia prossimo”.');
+}
+function vcardEscape(v){return String(v??'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\r/g,'')}
+function downloadVcf(){
+ const entries=uniqueSelected();if(!entries.length)return show('Seleziona almeno un numero.',true);
+ const root=getTrip($('dg68Root')?.value);const tripName=String(root?.titolo||'Viaggio').slice(0,48);
+ const body=entries.map(r=>'BEGIN:VCARD\r\nVERSION:3.0\r\nFN:'+vcardEscape('DELGROSSO '+r.names[0])+'\r\nTEL;TYPE=CELL:+'+r.tel+'\r\nNOTE:'+vcardEscape(tripName+' - '+r.group)+'\r\nEND:VCARD').join('\r\n')+'\r\n';
+ const blob=new Blob([body],{type:'text/vcard;charset=utf-8'}),url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='DELGROSSO_contatti_'+String(root?.data_partenza||'viaggio').replace(/[^0-9-]/g,'')+'.vcf';
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ show('File .vcf generato. Solo se lo importi nel telefono questi contatti entreranno in rubrica: l’esportazione da sola non li salva.');
+}
+function inviteNext(){
+ const entries=selectedContacts().filter(r=>!invitedAttempted.has(r.key)&&consentsLoaded&&r.bookings.some(b=>consents.has(b.id+'|'+r.tripId))&&/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{10,}$/.test(linkFor(r.trip)));
+ if(!entries.length)return show('Nessun altro invito disponibile: verifica consenso e link gruppo, oppure seleziona altri contatti.',true);
+ const r=entries[0];if(invite(r.tripId,r.tel)){invitedAttempted.add(r.key);show('Aperta chat per '+r.names[0]+'. Devi premere Invia manualmente su WhatsApp; poi usa “Apri prossimo invito”.');}
+}
 function renderNotifications(){
  const elem=$('dg68BookingsBox');if(!elem)return;
  const now=Date.now(),wk=now-7*86400000;
@@ -87,18 +151,20 @@ function renderRoster(){
   const persons=data.people.map(rec=>{
    const approved=consentsLoaded&&rec.bookings.some(b=>consents.has(b.id+'|'+v.id));
    const invite=approved&&validLink;
-   return '<div class="dg68-line"><div><b>'+esc(rec.names.join(' / '))+'</b><small>+'+esc(rec.tel)+' · '+rec.pax+' posti · '+esc(rec.stops.join(', ')||'Fermata da verificare')+(rec.bookings.length>1?' · '+rec.bookings.length+' prenotazioni':'')+'</small><small class="'+(approved?'dg68-ok':'dg68-muted')+'">'+(approved?'✓ Consenso gruppo registrato':'Invito non autorizzato: consenso gruppo mancante')+'</small></div><button type="button" class="btn btn-secondary btn-sm" data-dg68-invite="'+esc(v.id)+'|'+esc(rec.tel)+'" '+(invite?'':'disabled title="Serve consenso specifico al gruppo e un link WhatsApp valido"')+'>Invita</button></div>';
+   const key=rowKey(v.id,rec.tel);
+   return '<div class="dg68-line"><label class="dg68-select-wrap"><input type="checkbox" class="dg68-select" data-dg68-select="'+esc(key)+'" aria-label="Seleziona '+esc(rec.names.join(' / '))+'" '+(chosen.has(key)?'checked':'')+'><span class="dg68-select-text"><b>'+esc(rec.names.join(' / '))+'</b><small>+'+esc(rec.tel)+' · '+rec.pax+' posti · '+esc(rec.stops.join(', ')||'Fermata da verificare')+(rec.bookings.length>1?' · '+rec.bookings.length+' prenotazioni':'')+'</small><small class="'+(approved?'dg68-ok':'dg68-muted')+'">'+(approved?'✓ Consenso gruppo registrato':'Invito non autorizzato: consenso gruppo mancante')+'</small></span></label><button type="button" class="btn btn-secondary btn-sm" data-dg68-invite="'+esc(v.id)+'|'+esc(rec.tel)+'" '+(invite?'':'disabled title="Serve consenso specifico al gruppo e un link WhatsApp valido"')+'>Invita</button></div>';
   }).join('');
   return '<div class="dg68-group"><div class="dg68-group-head"><div><h4>'+esc(label)+' · '+esc(v.titolo||v.destinazione||'Viaggio')+'</h4><small>'+data.all.length+' prenotazioni · '+data.people.length+' numeri unici · '+data.missing+' senza telefono</small></div><div><span class="'+(validLink?'dg68-ok':'dg68-muted')+'">'+(validLink?'✓ Link invito salvato':'Link gruppo non inserito')+'</span><button type="button" class="btn btn-secondary btn-sm" data-dg68-link="'+esc(v.id)+'">Gestisci link</button></div></div>'+
  (persons||'<div class="dg68-empty">Nessun numero WhatsApp valido per questo bus.</div>')+'</div>';
  }).join('');
  stats.innerHTML='<div class="dg68-metrics"><span><b>'+cnt+'</b> prenotazioni</span><span><b>'+pax+'</b> posti prenotati</span><span><b>'+contacts+'</b> numeri unici</span><span><b>'+missing+'</b> prenotazioni senza telefono</span></div>';
  box.innerHTML=contents;
+ refreshSelectionStats();
 }
 function clipboard(text){
  if(!text){show('Non ci sono numeri da copiare.',true);return}
- if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).then(()=>show('Copiato. I numeri non sono stati salvati nella rubrica.')).catch(()=>window.prompt('Copia il testo',text));}
- else window.prompt('Copia il testo',text);
+ if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).catch(()=>window.prompt('Seleziona e copia il testo',text));}
+ else window.prompt('Seleziona e copia il testo',text);
 }
 function exportList(numbersOnly){
  const root=$('dg68Root')?.value,selected=$('dg68Bus')?.value;if(!root)return;
@@ -120,23 +186,36 @@ function manageLink(id){
 }
 function invite(id,tel){
  const v=getTrip(id),data=v?perBus(v):null,person=data?.people.find(p=>p.tel===tel),link=v?linkFor(v):'';
- if(!person||!consentsLoaded||!person.bookings.some(b=>consents.has(b.id+'|'+id)))return show('Invito non disponibile: verifica il consenso specifico al gruppo.',true);
- if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{10,}$/.test(link))return show('Salva prima un link di invito valido per il bus.',true);
+ if(!person||!consentsLoaded||!person.bookings.some(b=>consents.has(b.id+'|'+id))){show('Invito non disponibile: verifica il consenso specifico al gruppo.',true);return false;}
+ if(!/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{10,}$/.test(link)){show('Salva prima un link di invito valido per il bus.',true);return false;}
  const name=person.names[0];const m='DELGROSSO VIAGGI & LIMOUSINE BUS\n\nGentile '+name+', per gli aggiornamenti del viaggio '+tripLabel(v)+' ('+groupLabel(v,groupTrips(rootId(v)).indexOf(v))+') puoi scegliere di unirti al gruppo WhatsApp tramite questo link:\n'+link+'\n\nL’adesione è volontaria; gli altri membri potranno vedere il tuo numero di telefono.\n\nDELGROSSO VIAGGI';
  const a=document.createElement('a');a.href=waLink(tel,m);a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove();
  show('Chat aperta con invito pronto. Devi scegliere l’account Business e premere Invia.');
+ return true;
 }
 function attach(){
  const section=$('page-whatsapp');if(!section||section.dataset.dg68Ready)return;
  section.dataset.dg68Ready='1';
+ section.addEventListener('change',e=>{
+  const c=e.target.closest('input[data-dg68-select]');if(!c)return;
+  if(c.checked)chosen.add(c.dataset.dg68Select);else chosen.delete(c.dataset.dg68Select);
+  invitedAttempted.delete(c.dataset.dg68Select);nextCopyIndex=0;refreshSelectionStats();
+ });
  section.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.dg68Invite){const [t,p]=b.dataset.dg68Invite.split('|');invite(t,p)}
   if(b.dataset.dg68Link)manageLink(b.dataset.dg68Link);
   if(b.dataset.dg68Book){if(typeof window.go==='function')window.go('prenotazioni');const inp=$('bookSearch');if(inp){const bk=allBookings().find(x=>x.id===b.dataset.dg68Book);inp.value=bk?.cliente||'';if(typeof window.renderBookings==='function')window.renderBookings()}}
  });
- $('dg68Root')?.addEventListener('change',()=>{const el=$('dg68Bus');if(el)el.value='all';renderRoster()});
- $('dg68Bus')?.addEventListener('change',renderRoster);
+ $('dg68Root')?.addEventListener('change',()=>{const el=$('dg68Bus');if(el)el.value='all';resetSelection();renderRoster()});
+ $('dg68Bus')?.addEventListener('change',()=>{resetSelection();renderRoster()});
+ $('dg68SelectAll')?.addEventListener('click',()=>{const rows=visibleContacts();const all=rows.length&&rows.every(r=>chosen.has(r.key));rows.forEach(r=>all?chosen.delete(r.key):chosen.add(r.key));nextCopyIndex=0;renderRoster()});
+ $('dg68Clear')?.addEventListener('click',()=>{resetSelection();renderRoster()});
+ $('dg68CopySelected')?.addEventListener('click',copySelected);
+ $('dg68CopySelectedNames')?.addEventListener('click',copySelectedWithNames);
+ $('dg68CopyNext')?.addEventListener('click',copyNext);
+ $('dg68DownloadVcf')?.addEventListener('click',downloadVcf);
+ $('dg68NextInvite')?.addEventListener('click',inviteNext);
  $('dg68CopyPhones')?.addEventListener('click',()=>exportList(true));
  $('dg68CopyRoster')?.addEventListener('click',()=>exportList(false));
  $('dg68Refresh')?.addEventListener('click',async()=>{renderNotifications();renderRoster();await consentRefresh(true)});
@@ -147,4 +226,5 @@ const prior=window.dg61RenderWhatsApp;
 if(typeof prior==='function')window.dg61RenderWhatsApp=function(){const result=prior.apply(this,arguments);update();return result};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{attach();if($('page-whatsapp')?.classList.contains('active'))update()},{once:true});else{attach();if($('page-whatsapp')?.classList.contains('active'))update()}
 window.dg68RefreshTripGroups=update;
+window.dg68OpenRoster=function(){if(typeof window.dg44Go==='function')window.dg44Go('whatsapp-roster');else if(typeof window.go==='function')window.go('whatsapp');};
 })();

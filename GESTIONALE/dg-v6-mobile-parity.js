@@ -9,7 +9,8 @@
    ['suite:prenotazioni','Prenotazioni con piantina'],
    ['suite:pagamenti','Registra pagamento'],
    ['suite:archivio','Ricevute e documenti'],
-   ['suite:notifiche','Notifiche prenotazioni']
+   ['suite:notifiche','Notifiche prenotazioni'],
+   ['whatsapp-roster','Lista WhatsApp prenotati']
   ];
   const $=id=>document.getElementById(id);
   const authenticated=()=>document.body.classList.contains('dg44-authenticated') && $('app')?.classList.contains('on');
