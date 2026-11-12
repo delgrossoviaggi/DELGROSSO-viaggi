@@ -1128,6 +1128,7 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
       <button data-page="posti"><span class="ico">🪑</span><span>Gestione Posti</span></button>
     <button data-page="preventivi"><span class="ico">📄</span><span>Preventivi</span></button>
     <button data-page="clienti"><span class="ico">👤</span><span>Clienti</span></button>
+    <button data-page="scheda-cliente"><span class="ico">👤</span><span>Scheda cliente</span></button>
     <button data-page="contabilitaquote"><span class="ico">▤</span><span>Quote Nicola / Raffaele</span></button>
     <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('cassa-nicola')"><span class="ico">€</span><span>Contabilità Nicola · dettaglio</span></button>
     <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('cassa-raffaele')"><span class="ico">€</span><span>Contabilità Raffaele · dettaglio</span></button>
@@ -1331,6 +1332,12 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
     <button class="btn btn-secondary" onclick="loadAll(true)">↻ Aggiorna richieste</button>
   </div>
   <div class="card table-card"><table class="table"><thead><tr><th>Data</th><th>Codice</th><th>Richiedente</th><th>Contatti</th><th>Servizio</th><th>Viaggio</th><th>Pax</th><th>Importo</th><th>Stato</th><th></th></tr></thead><tbody id="quotesTable"></tbody></table></div>
+</section>
+
+<section class="page" id="page-scheda-cliente" aria-label="Scheda cliente e situazione pagamenti">
+  <div class="section-title dg10-title"><div><h2>👤 Scheda cliente · Viaggi e pagamenti</h2><p class="section-subtitle">Cerca un cliente e consulta prenotazioni, acconti, saldi, ricevute archiviate e prossime partenze.</p></div><div class="section-actions"><button type="button" class="btn btn-secondary" id="dg10Refresh" onclick="window.dg10Refresh?.()">↻ Aggiorna dati</button><button type="button" class="btn btn-secondary" onclick="go('clienti')">Anagrafica clienti</button></div></div>
+  <div class="card dg10-search-card"><div class="dg10-search-area"><label for="dg10Search">Cerca per nome, cognome, telefono o email</label><input type="search" id="dg10Search" autocomplete="off" placeholder="Es. Mario Rossi, 320..., email..." aria-controls="dg10Results"/><small>Seleziona il cliente corretto. Omonimi o recapiti differenti vengono distinti.</small></div><div id="dg10Status" class="dg10-status" role="status" aria-live="polite">Apri questa pagina per caricare i dati dal gestionale.</div></div>
+  <div class="dg10-grid"><div class="card dg10-search-results"><div class="card-head"><h3>Risultati ricerca</h3><small id="dg10Count">—</small></div><div class="card-body" id="dg10Results"><div class="dg10-muted">Digita un nome o un numero di telefono.</div></div></div><div class="dg10-profile" id="dg10Detail" aria-live="polite"><div class="card"><div class="card-body dg10-muted">Seleziona un nominativo per visualizzare il suo resoconto completo.</div></div></div></div>
 </section>
 
 <section class="page" id="page-clienti">
@@ -1811,7 +1818,7 @@ function startAutoSync(){
   autoSyncTimer=setInterval(async()=>{
     if(document.visibilityState!=='visible'||!authSession||syncBusy||loadAllBusy)return;
     const mobile=window.matchMedia('(max-width:768px)').matches;
-    const operational=['prenotazioni','controlroom','posti','pagamenti','noleggi','caricamento','flotta'].includes(state.page);
+    const operational=['prenotazioni','controlroom','posti','pagamenti','noleggi','caricamento','flotta','scheda-cliente'].includes(state.page);
     if(mobile&&!operational&&Date.now()-dgLastAutoMobile<90000)return;
     if(mobile)dgLastAutoMobile=Date.now();
     await loadAll(true,true);
@@ -1819,7 +1826,7 @@ function startAutoSync(){
 function stopAutoSync(){if(autoSyncTimer)clearInterval(autoSyncTimer);autoSyncTimer=null}
 
 function go(page){if(page==='suitev2')setTimeout(()=>window.dgSuiteLoad?.(),20);if(!document.getElementById('page-'+page))page='dashboard';window.scrollTo({left:0,top:0,behavior:'instant'});document.documentElement.scrollLeft=0;document.body.scrollLeft=0;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+page)?.classList.add('active');document.querySelectorAll('#sideNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));state.page=page;updatePageChrome(page);renderPage(page);history.replaceState(null,'','#'+page)}
-const PAGE_META={caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],whatsapp:['WhatsApp Business','Richieste, promemoria e gruppi di viaggio'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
+const PAGE_META={caricamento:['Caricamento viaggi','Inserimento, modifica e controllo viaggi'],dashboard:['Dashboard','Panoramica generale del gestionale'],viaggi:['Viaggi','Gestione partenze e programmazione'],prenotazioni:['Prenotazioni','Clienti, posti e conferme'],posti:['Gestione Posti BUS / BIS','Spostamento e scambio passeggeri tra autobus'],preventivi:['Preventivi','Richieste e preventivi commerciali'],clienti:['Clienti / CRM','Anagrafica e relazioni clienti'], 'scheda-cliente':['Scheda cliente','Acconti, saldi, ricevute e viaggi del cliente'],pagamenti:['Pagamenti','Incassi, acconti, saldi e rimborsi'],operativo:['Operativo','Controllo operativo e presenze'],noleggi:['Noleggi','Limousine BUS e servizi con conducente'],flotta:['Flotta','Mezzi, carburante e manutenzioni'],comunicazioni:['Comunicazioni','Avvisi e notifiche'],assistente:['Assistente DELGROSSO AI 360°','Chat AI operativa per tutto il gestionale'],documenti:['Documenti','Archivio e documentazione'],statistiche:['Statistiche','Analisi e indicatori'],agenda:['Agenda','Calendario operativo'],controlroom:['Control Room · Posti e Passeggeri','Piantina GT53/GT63, prenotazioni, BUS 1 e BUS BIS'],economia:['Economia','Entrate, uscite e controllo finanziario'],backup:['Backup & Export','Esportazione e sicurezza dati'],impostazioni:['Impostazioni','Configurazione del gestionale'],pro:['Centro Pro','Controllo 360°, KPI, sicurezza e salute del sistema'],crm:['Clienti & CRM','Clienti 360°, follow-up e lista d’attesa'],fornitori:['Fornitori & Costi','Fornitori, costi reali e redditività'],cassa:['Economia & Cassa','Incassi, cassa operatori e trasferimenti'],whatsapp:['WhatsApp Business','Richieste, promemoria e gruppi di viaggio'],sentinella:['Sentinella DELGROSSO','Salute sistema, alert, integrità e audit'],amministrazione:['Amministrazione','Ruoli, permessi e sicurezza']};
 function updatePageChrome(page){const m=PAGE_META[page]||PAGE_META.dashboard;const t=$('topPageTitle'),s=$('topPageSubtitle'),c=$('pageCrumb');if(t)t.textContent=m[0];if(s)s.textContent=m[1];if(c)c.textContent=m[0];}
 
 window.go=go; updatePageChrome(state.page||'dashboard');
@@ -1910,6 +1917,7 @@ function renderPage(p){
     if(p==='prenotazioni')renderBookings();
     if(p==='preventivi')renderQuotes();
     if(p==='clienti')renderClients();
+    if(p==='scheda-cliente'&&typeof window.dg10Render==='function')window.dg10Render();
     if(p==='pagamenti')renderPayments();
     if(p==='contabilitaquote')dgQuoteRender();
     if(p==='whatsapp'&&typeof window.dg61RenderWhatsApp==='function')window.dg61RenderWhatsApp();
@@ -2232,7 +2240,7 @@ function renderQuotes(){
 
 function renderClients(){
  const q=($('clientSearch')?.value||'').toLowerCase();const rows=state.clienti.filter(c=>!q||`${c.nome} ${c.cognome} ${c.telefono} ${c.email}`.toLowerCase().includes(q));
- $('clientsTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.codice_cliente||c.id?.slice(0,8))}</td><td><b>${esc(c.nome)} ${esc(c.cognome)}</b>${c.provenienza?`<br><small>${esc(c.provenienza)}</small>`:''}</td><td>${esc(c.telefono||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.citta||'—')}</td><td><span class="pill ok">${esc(c.stato_cliente||'Attivo')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openClientModal('${c.id}')">Modifica</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nessun cliente.</td></tr>';
+ $('clientsTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.codice_cliente||c.id?.slice(0,8))}</td><td><b>${esc(c.nome)} ${esc(c.cognome)}</b>${c.provenienza?`<br><small>${esc(c.provenienza)}</small>`:''}</td><td>${esc(c.telefono||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.citta||'—')}</td><td><span class="pill ok">${esc(c.stato_cliente||'Attivo')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openClientModal('${c.id}')">Modifica</button> <button class="btn btn-primary btn-sm" onclick="window.dg10OpenForClient?.('${c.id}')">Scheda · Viaggi e pagamenti</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">Nessun cliente.</td></tr>';
  const info=$('clientSyncStatus');if(info&&!window.__dgClientSyncLast)info.textContent=`${state.clienti.length} clienti sincronizzati da Supabase · sincronizzazione automatica attiva`;
 }
 async function syncClientsNow(){
@@ -7055,7 +7063,7 @@ const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POS
  ['suite:pagamenti','Registra pagamento','card'],
  ['suite:archivio','Ricevute e documenti','receipt'],
  ['suite:notifiche','Notifiche prenotazioni','bell'],
- ['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['rubrica-wa','📱 Numeri WhatsApp gruppi','users'],['liste-pdf','📄 Liste prenotati PDF','file'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
+ ['viaggi','Partenze','calendar'],['caricamento','Caricamento viaggi','file'],['prenotazioni','Prenotazioni','users'],['rubrica-wa','📱 Numeri WhatsApp gruppi','users'],['liste-pdf','📄 Liste prenotati PDF','file'],['flotta','Gestione flotta','bus'],['noleggi','Noleggi','briefcase'],['clienti','Clienti','users'],['scheda-cliente','Scheda cliente · Viaggi e pagamenti','users'],['pagamenti','Pagamenti','card'],['cassa','Cassa operatori','wallet'],['economia','Economia','chart'],['whatsapp','WhatsApp Business','bell'],['documenti','Documenti','file'],['impostazioni','Impostazioni','settings']];
 const EXTRA=[['posti','Gestione posti BUS / BIS','seat'],['preventivi','Preventivi','receipt'],['contabilitaquote','Quote Nicola / Raffaele','wallet'],['comunicazioni','Notifiche','bell'],['operativo','Operativo','check'],['statistiche','Controllo','chart'],['agenda','Agenda','calendar'],['assistente','Assistente AI','spark'],['backup','Backup e esportazione','folder'],['pro','Centro Pro','chart']];
 const data=()=>typeof state!=='undefined'?state:{};
 const array=k=>Array.isArray(data()[k])?data()[k]:[];
@@ -7115,6 +7123,7 @@ function build(){
    <button type="button" onclick="dg44Go('suite:notifiche')"><span class="dg-v5-ico">◉</span><strong>Notifiche prenotazioni</strong><small>Data, ora e nominativo</small></button>
    <button type="button" onclick="window.dg8OpenWA?.()"><span class="dg-v5-ico">📱</span><strong>Numeri WhatsApp per viaggio</strong><small>Seleziona, copia e VCF iOS/Android</small></button>
    <button type="button" onclick="window.dg9OpenRoster?.()"><span class="dg-v5-ico">📄</span><strong>Liste prenotati PDF</strong><small>Singolo viaggio, tutti i viaggi, salva su iPhone</small></button>
+   <button type="button" onclick="dg44Go('scheda-cliente')"><span class="dg-v5-ico">👤</span><strong>Scheda cliente</strong><small>Acconti, saldi, ricevute e prossimi viaggi</small></button>
   </div>
  </section>
  <div class="dg44-stats" id="dg44-stats" aria-live="polite"></div>
@@ -8069,5 +8078,7 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 </script><link rel="stylesheet" href="./dg-v5-visible-menu.css?v=20261109-v5-3" />
 <link rel="stylesheet" href="./dg-v6-mobile-parity.css?v=20261109-v6" />
 <script src="./dg-v6-mobile-parity.js?v=20261111-v8" defer></script>
+<link rel="stylesheet" href="./dg-v10-scheda-cliente.css?v=20261112-v10" />
+<script src="./dg-v10-scheda-cliente.js?v=20261112-v10" defer></script>
 </body>
 </html>

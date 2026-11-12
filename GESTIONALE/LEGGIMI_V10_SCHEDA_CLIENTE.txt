@@ -1,0 +1,58 @@
+DELGROSSO BUSINESS SUITE V10 — SCHEDA CLIENTE
+12 novembre 2026
+
+COME APRIRE
+1. Dopo aver effettuato il login nella Business Suite, scegli nel MENU AZIENDALE
+   «Scheda cliente · Viaggi e pagamenti» subito dopo «Clienti».
+2. Lo stesso comando appare nei riquadri della Dashboard e nel menu rapido Funzioni
+   di iPhone e Android. Nell'anagrafica, accanto al cliente, è disponibile «Scheda · Viaggi e pagamenti».
+3. Cerca per nome, cognome, telefono o email e seleziona il cliente.
+
+CONTENUTO DELLA SCHEDA
+- Tutte le prenotazioni del cliente, compresi i viaggi archiviati;
+- Sezioni distinte per prossimi viaggi e storico, con data, destinazione, fermata e posti;
+- Totale dovuto, versato, saldo residuo per prenotazione e totale generale;
+- Movimenti di acconto, saldo e rimborso, con data, tipo e operatore incassante;
+- PDF della conferma prenotazione, ricevute acconto e saldo e versioni valide precedenti,
+  quando già presenti nell'archivio privato Supabase;
+- Documenti aggiuntivi collegati direttamente all'anagrafica.
+
+REGOLE CONTABILI E DATI
+- Per ogni prenotazione, se ci sono movimenti validi collegati, il versato viene calcolato
+  da essi (i movimenti annullati non contano); altrimenti si mostra prenotazioni.pagato,
+  segnalando esplicitamente da dove proviene il dato.
+- I vecchi pagamenti senza prenotazione_id sono associati solo se cliente_id e
+  viaggio_id identificano una singola prenotazione; gli altri vengono segnalati
+  come non collegati e NON influiscono sui totali.
+- Le prenotazioni annullate rimangono consultabili ma sono escluse dai totali generali.
+- Gli omonimi con numeri differenti e i nominativi diversi che condividono un telefono
+  non sono uniti automaticamente. Le prenotazioni senza numero vengono unite a un
+  nominativo con telefono soltanto se l'identità corrispondente è univoca.
+- Non viene inventato alcun nominativo o documento mancante.
+
+PROTEZIONE E DISPOSITIVI
+- Nessun file è reso pubblico: i PDF vengono recuperati mediante link temporanei
+  autenticati con i permessi Storage Supabase.
+- Nessun dato del cliente viene memorizzato in localStorage/sessionStorage dalla V10.
+- iPhone/iPad: «Apri PDF» apre il visualizzatore; «Condividi / Salva» usa la
+  condivisione del dispositivo, quando disponibile, per «Salva su File».
+- Android: usa il menu di condivisione o il download PDF.
+- La schermata si adatta agli schermi stretti senza perdere colonne dati essenziali.
+
+INSTALLAZIONE MANUALE
+- Estrai DELGROSSO_V10.zip e aggiorna SOLTANTO la cartella GESTIONALE_V2/
+  nel repository GitHub su un BRANCH DI PROVA, NON sovrascrivere GESTIONALE/.
+- Esegui il deployment del branch, quindi apri /GESTIONALE_V2/VERIFICA_RELEASE.html.
+- Deve comparire VERSIONE V10 VERIFICATA.
+- Apri /GESTIONALE_V2/index.html?v=20261112-v10 ed effettua il login.
+- Se appare ancora il menu vecchio, controlla che il deployment punti al branch corretto.
+
+COLLAUDO / LIMITAZIONI
+- Superati test unitari delle regole contabili/identità, test di interazione Chromium con
+  dati fittizi a 1280px, 390px e 412px, sintassi di 70 script, controllo offline del
+  verificatore di release e validazione di tutti i percorsi nel pacchetto.
+- Le scritture del database NON sono state modificate e non è stato cancellato nulla.
+- Da verificare su dispositivi FISICI e account REALI: apertura dei link firmati,
+  condivisione PDF iOS e completezza dati secondo i permessi operatori.
+- Questa scheda è un riepilogo gestionale; le ricevute presenti non diventano
+  automaticamente documenti fiscali.
