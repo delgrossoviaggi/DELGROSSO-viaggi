@@ -33,6 +33,26 @@ const isCancelled=b=>/annull|cancel|cancell/i.test(String(b?.stato||''));
 const tripBookings=id=>state.data.bookings.filter(b=>b.viaggio_id===id&&!isCancelled(b));
 const occupied=id=>new Set(state.data.seats.filter(s=>s.viaggio_id===id&&!isCancelled(bookingFor(s.prenotazione_id))).map(s=>String(s.posto)));
 const bookingsCount=id=>tripBookings(id).reduce((a,b)=>a+num(b.posti),0);
+// Posti disponibili solo come proposta: l'RPC Supabase ricontrolla al salvataggio.
+function suggestBookingSeats(trip,people,bookingId='',originalSeats=[]){
+ const cap=Number(trip?.posti_totali);
+ if(!trip?.id||!Number.isSafeInteger(cap)||cap<1||cap>999)throw Error('Capienza della partenza non valida');
+ if(!Number.isSafeInteger(people)||people<1||people>99)throw Error('Numero passeggeri non valido');
+ const others=state.data.bookings.filter(b=>b.viaggio_id===trip.id&&b.id!==bookingId&&!isCancelled(b));
+ const remaining=cap-others.reduce((s,b)=>s+num(b.posti),0);
+ const taken=new Set(state.data.seats.filter(s=>s.viaggio_id===trip.id&&s.prenotazione_id!==bookingId&&!isCancelled(bookingFor(s.prenotazione_id))).map(s=>String(s.posto)));
+ const free=Array.from({length:cap},(_,i)=>i+1).filter(n=>!taken.has(String(n)));
+ if(remaining<people||free.length<people)throw Error('Non ci sono abbastanza posti liberi nella nuova partenza');
+ const old=[...new Set(originalSeats.map(s=>String(s).trim()))],freeSet=new Set(free.map(String));
+ if(old.length===people&&old.every(s=>freeSet.has(s)))return {seats:old,kept:true};
+ let bestSpan=Infinity,groups=[];
+ for(let i=0;i<=free.length-people;i++){
+  const group=free.slice(i,i+people),span=group[group.length-1]-group[0];
+  if(span<bestSpan){bestSpan=span;groups=[group]}
+  else if(span===bestSpan)groups.push(group);
+ }
+ return {seats:groups[Math.floor(Math.random()*groups.length)].map(String),kept:false};
+}
 function notify(text,bad=false){document.getElementById('toast')?.remove();const x=document.createElement('div');x.id='toast';x.textContent=text;x.setAttribute('role','status');if(bad)x.style.background='#a5314c';document.body.append(x);setTimeout(()=>x.remove(),4900)}
 function safeParse(x){try{return JSON.parse(x)}catch{return {}}}
 function getDrafts(){const result={};try{const x=safeParse(localStorage.getItem(DRAFT_KEY)||'{}');if(x&&typeof x==='object'&&!Array.isArray(x)){for(const [k,v]of Object.entries(x).slice(0,100))if(!Model.validate(v))result[k]=v}}catch(e){console.warn('Bozze locali non disponibili')}return result}
@@ -410,20 +430,36 @@ async function tripDelete(id){if(!requireWrite())return;const t=tripFor(id);if(!
 }
 function bookingForm(id=''){
  const b=bookingFor(id)||{};const currentTrip=tripFor(b.viaggio_id);const entries=state.data.trips.filter(t=>!t.archiviato_at).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza)));
- const html=`<div class="formgrid">${fieldSelect('viaggio_id','Viaggio',entries.map(t=>[t.id,tripLabel(t)]),b.viaggio_id||entries[0]?.id)}${field('cliente','Nome e cognome referente',b.cliente||'','text',true)}${field('telefono','Telefono',b.telefono||'','tel')}${field('email','Email',b.email||'','email')}${field('posti','Numero passeggeri',b.posti||1,'number',true,'min="1" max="99"')}${field('posti_selezionati','Posti (es. 1, 2, 3)',b.posti_selezionati||'','text',true)}${field('totale','Totale prenotazione (€)',b.totale??currentTrip?.prezzo??0,'number',true,'min="0" step="0.01"')}${field('fermata_partenza','Fermata di partenza',b.fermata_partenza||'','text',true)}${fieldSelect('stato','Stato',[['Confermata','Confermata'],['Da confermare','Da confermare'],['Da saldare','Da saldare'],['Annullata','Annullata']],b.stato||'Confermata')}${field('giorni_acconto','Giorni per acconto',b.giorni_acconto||2,'number',true,'min="1" max="90"')}</div><label>Note<textarea name="note">${esc(b.note||'')}</textarea></label><p class="hint">Le prenotazioni vengono salvate tramite la funzione atomica dg_save_booking_v13 presente nel database. Se la tua utenza non ha il permesso previsto, Supabase rifiuterà il salvataggio.</p>`;
+ const html=`<div class="formgrid">${fieldSelect('viaggio_id','Viaggio / nuova data',entries.map(t=>[t.id,tripLabel(t)]),b.viaggio_id||entries[0]?.id)}${field('cliente','Nome e cognome referente',b.cliente||'','text',true)}${field('telefono','Telefono',b.telefono||'','tel')}${field('email','Email',b.email||'','email')}${field('posti','Numero passeggeri',b.posti||1,'number',true,'min="1" max="99"')}${field('posti_selezionati','Posti (es. 1, 2, 3)',b.posti_selezionati||'','text',true)}${field('totale','Totale prenotazione (€)',b.totale??currentTrip?.prezzo??0,'number',true,'min="0" step="0.01"')}${field('fermata_partenza','Fermata di partenza',b.fermata_partenza||'','text',true)}${fieldSelect('stato','Stato',[['Confermata','Confermata'],['Da confermare','Da confermare'],['Da saldare','Da saldare'],['Annullata','Annullata']],b.stato||'Confermata')}${field('giorni_acconto','Giorni per acconto',b.giorni_acconto||2,'number',true,'min="1" max="90"')}</div><label>Note<textarea name="note">${esc(b.note||'')}</textarea></label><div class="helpbox"><button type="button" class="btn outline" id="booking-auto-seats">🎲 Assegna automaticamente posti liberi</button><p class="hint" id="booking-auto-note" aria-live="polite">Cambiando data, i posti originali restano se disponibili; altrimenti il sistema propone altri posti liberi, cercando una numerazione vicina. Controlla prima di salvare.</p></div><p class="hint">Il cambio partenza mantiene la prenotazione e gli incassi già registrati. Verifica prezzo e fermata; dopo il trasferimento rigenera la conferma PDF. Il server ricontrolla la disponibilità al salvataggio.</p><p class="hint">Le prenotazioni vengono salvate tramite la funzione atomica dg_save_booking_v13 presente nel database. Se la tua utenza non ha il permesso previsto, Supabase rifiuterà il salvataggio.</p>`;
  openForm(id?'Modifica prenotazione':'Nuova prenotazione',html,async f=>{
  const people=Number(val(f,'posti')),seats=val(f,'posti_selezionati').split(/[;, ]+/).map(s=>s.trim()).filter(Boolean);
  const tripId=val(f,'viaggio_id'),trip=tripFor(tripId),total=Number(val(f,'totale')),status=val(f,'stato');
  if(!trip)throw Error('Viaggio non valido');
  if(people<1||people>99||new Set(seats).size!==seats.length||(!isCancelled({stato:status})&&seats.length!==people))throw Error('Numero dei posti non coincidente con i passeggeri o duplicato');
  if(seats.some(x=>!/^[1-9]\d*$/.test(x)||Number(x)>Number(trip.posti_totali)))throw Error('Posto non valido per questo bus');
- const busy=occupied(trip.id),previous=new Set(state.data.seats.filter(s=>s.prenotazione_id===id).map(s=>s.posto));
+ const busy=occupied(trip.id),previous=new Set(state.data.seats.filter(s=>s.prenotazione_id===id&&s.viaggio_id===trip.id).map(s=>String(s.posto)));
  if(!isCancelled({stato:status})&&seats.some(s=>busy.has(s)&&!previous.has(s)))throw Error('Almeno un posto è già occupato');
  if(total<0||total<num(b.pagato))throw Error('Totale inferiore alla quota già pagata');
  const data={viaggio_id:tripId,cliente:val(f,'cliente'),telefono:val(f,'telefono'),email:val(f,'email'),posti:people,totale:total,stato:status,fermata_partenza:val(f,'fermata_partenza'),giorni_acconto:Number(val(f,'giorni_acconto'))||2,note:val(f,'note')};
  const pk=id||uuid(),assigned=isCancelled({stato:status})?[]:seats;
  await rpc('dg_save_booking_v13',{p_id:pk,p_data:data,p_seats:assigned});
  });
+ const f=$('edit-form'),tripField=f.elements.namedItem('viaggio_id'),countField=f.elements.namedItem('posti'),seatField=f.elements.namedItem('posti_selezionati'),message=f.querySelector('#booking-auto-note');
+ const originalSeats=String(b.posti_selezionati||'').split(/[;, ]+/).filter(Boolean);
+ function propose(){
+  try{
+   const result=suggestBookingSeats(tripFor(tripField.value),Number(countField.value),id,originalSeats);
+   seatField.value=result.seats.join(', ');
+   message.textContent=result.kept?'✅ Posti originali disponibili: sono stati mantenuti.':'🎲 Posti alternativi proposti: '+result.seats.join(', ')+'. Verifica la piantina e salva per confermare.';
+   message.style.color='';
+  }catch(e){
+   seatField.value='';
+   message.textContent='⚠️ '+e.message+'. Nessuno spostamento eseguito.';
+   message.style.color='#d97706';
+  }
+ }
+ tripField.addEventListener('change',propose);
+ f.querySelector('#booking-auto-seats').addEventListener('click',propose);
 }
 async function confirmAction(description,fn){$('confirm-copy').textContent=description;$('confirm-dialog').showModal();return new Promise(resolve=>{const yes=$('confirm-yes'),no=$('confirm-no'),close=$('confirm-close');const cleanup=()=>{yes.removeEventListener('click',onYes);no.removeEventListener('click',onNo);close.removeEventListener('click',onNo);$('confirm-dialog').close()};async function onYes(){cleanup();try{await fn();resolve(true)}catch(err){notify(err.message,true);resolve(false)}}function onNo(){cleanup();resolve(false)}yes.addEventListener('click',onYes);no.addEventListener('click',onNo);close.addEventListener('click',onNo)})}
 function showBooking(id){$('edit-dialog').classList.remove('wide');const b=bookingFor(id);if(!b)return notify('Prenotazione non trovata',true);
