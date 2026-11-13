@@ -1,0 +1,53 @@
+DELGROSSO VIAGGI & LIMOUSINE BUS
+GESTIONALE ATTIVO + CAMBIO DATA AUTOMATICO V12.2
+13 novembre 2026
+
+CONTENUTO DEL PACCHETTO
+- Cartella GESTIONALE/ completa, ripresa da GESTIONALE(6).zip fornito dall'azienda.
+- Correzione inserita in GESTIONALE/dg-v6-mobile-parity.js.
+- GESTIONALE/index.html aggiornato soltanto per la versione script (cache busting)
+  e tag versione diagnostica; non e' stato riscritto il programma originale.
+- GESTIONALE/sw.js: nuova chiave cache, con protezioni per accessi e API intatte.
+- SHA256_MANIFEST.txt rigenerato sulle versioni effettive dei file.
+
+COME CARICARE MANUALMENTE SU GITHUB
+1) Eseguire un backup/snapshot del repository e del database (Supabase).
+2) Estrarre lo ZIP SUL PC: NON caricare il file .zip come file su GitHub.
+3) Aprire github.com/delgrossoviaggi/DELGROSSO-viaggi, creare un branch di prova.
+4) Dalla cartella estratta GESTIONALE/, caricare i file MANTENENDO le cartelle.
+   In un repo gia' uguale all'originale basta aggiornare questi file:
+   GESTIONALE/dg-v6-mobile-parity.js
+   GESTIONALE/index.html
+   GESTIONALE/sw.js
+   GESTIONALE/SHA256_MANIFEST.txt
+   e aggiungere GESTIONALE/LEGGIMI_CAMBIO_DATA_V12_2.txt
+5) Eseguire il commit, provare il link di Preview su PC e su iPhone.
+6) Solo dopo collaudo delle scritture reali in ambiente di test, fare merge.
+
+PROVA DA ESEGUIRE
+- Accedere con un account operatore autorizzato.
+- Aprire Prenotazioni > selezionare cliente > Sposta data.
+- Selezionare un viaggio alternativo con posti originali gia' occupati.
+- Controllare che siano proposti altri posti liberi e che il numero di persone coincida.
+- Premere sposta soltanto con una prenotazione di COLLAUDO, non con un cliente reale.
+- Verificare su Supabase la coerenza di prenotazione_posti, prenotazioni e pagamenti.
+- Verificare dopo il cambio la stampa/conferma PDF, la fermata e le quote.
+
+COMPORTAMENTO
+- Se i posti originari sono ancora liberi, vengono preservati.
+- Altrimenti il sistema sceglie un gruppo di numeri di posto liberi; preferisce
+  numeri ravvicinati (non garantisce i sedili fisicamente affiancati).
+- Mantiene il medesimo ID prenotazione e non crea nuovi pagamenti.
+- Il server controlla la disponibilita' tramite dg_save_booking_v13.
+- Blocca prenotazioni senza capienza, check-in gia' effettuato e dati invalidi.
+- Spostamenti multipli vengono salvati UNO ALLA VOLTA: in caso di errore si
+  interrompono e l'interfaccia mostra quanti sono stati spostati. NON sono
+  transazioni globali all-or-nothing.
+- Dopo un cambio va rigenerato e verificato il documento di conferma.
+- Differenze prezzo e fermate non sono adeguate in automatico, vanno concordate.
+
+LIMITI IMPORTANTI
+Il pacchetto e' preparato sullo ZIP dell'utente; NON e' stato attivato su Vercel
+ne' applicato al database. Nessun movimento reale e' stato effettuato.
+La prova end-to-end richiede login e staging aziendale, con database non produttivo.
+La cache Safari potrebbe richiedere riapertura o ricaricamento forzato.
