@@ -248,7 +248,15 @@ function renderBookings(){
  return section('Prenotazioni','Piantina durante l’inserimento, salvataggio su Supabase e archivio PDF',btn('+ Prenotazione con piantina','booking-new','primary')+btn('📄 Liste prenotati PDF','roster-pdf','outline')+btn('Esporta CSV','booking-csv'))+`<div class="panel"><div class="filterbar"><input data-filter="search" value="${esc(state.options.search)}" placeholder="Cerca nome, codice, telefono o viaggio"><span class="subtle">${entries.length} prenotazioni · ${archived} conferme archiviate</span></div><p class="hint">Il salvataggio avviene prima della generazione del PDF. Se l’archiviazione fallisce, la prenotazione rimane nell’elenco e puoi riprovare dal pulsante “Archivia PDF”.</p>${table(['Cliente','Viaggio','Persone','Posti','Stato','Totale','Residuo','Conferma','Inserita il',''],rs)}</div>`;
 }
 
-function layoutForTrip(t){const custom=state.data.layoutTemplates?.find(x=>x.flotta_id===t?.autobus_id&&x.attivo!==false);if(custom?.configurazione&&!Model.validate(custom.configurazione))return Model.clone(custom.configurazione);const b=busFor(t?.autobus_id);const key=String(b?.seat_layout||'').toUpperCase();if(Model.legacy[key])return Model.fromLegacy(key);return Model.fromLegacy(num(t?.posti_totali)>53?'GT63':'GT53')}
+function layoutForTrip(t){
+ const custom=state.data.layoutTemplates?.find(x=>x.flotta_id===t?.autobus_id&&x.attivo!==false);
+ const bus=busFor(t?.autobus_id),key=String(bus?.seat_layout||'').toUpperCase();
+ const raw=custom?.configurazione&&!Model.validate(custom.configurazione)?Model.clone(custom.configurazione):
+   Model.legacy[key]?Model.fromLegacy(key):Model.fromLegacy(num(t?.posti_totali)>53?'GT63':'GT53');
+ const limit=num(t?.posti_totali),outside=[...occupied(t?.id)].some(s=>Number(s)>limit);
+ // Never hide any reserved seat: expose inconsistency until migration is completed.
+ return limit>0&&!outside?Model.limitedToCapacity(raw,limit):raw;
+}
 function seatMap(layout,tripId='',editing=false){const taken=tripId?occupied(tripId):new Set(),s=state.selectedSeats;return `<div class="bus"><div class="bus-front"><span>${esc(layout.frontLabel||'FRONTE BUS')}</span><span>◉ AUTISTA</span></div>${layout.rows.map((row,r)=>`<div class="bus-row">${row.map((cell,c)=>{const value=typeof cell==='number'?String(cell):cell,sel=typeof cell==='number'&&s.has(String(cell)),busy=typeof cell==='number'&&taken.has(String(cell));return `<button type="button" aria-label="Fila ${r+1} cella ${c+1} ${esc(value)}" title="${busy?'Posto già occupato':editing?'Modifica cella':'Seleziona posto'}" data-action="${editing?'edit-seat':'control-seat'}" data-row="${r}" data-col="${c}" data-seat="${esc(value)}" ${!editing&&!Number.isInteger(cell)?'disabled':''} class="seat ${Number.isInteger(cell)?'seat-number':esc(cell)} ${busy?'occupied':''} ${sel?'selected':''}">${Number.isInteger(cell)?cell:cell==='door'?'PORTA':cell==='aisle'?'·':'+'}</button>`}).join('')}</div>`).join('')}</div>`}
 function renderControl(){const trips=state.data.trips.filter(t=>!t.archiviato_at).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza)));
  if(!state.options.tripId||!tripFor(state.options.tripId))state.options.tripId=trips[0]?.id||'';
@@ -263,11 +271,11 @@ function renderEditor(){
  const library=(state.data.layoutLibrary||[]).filter(x=>x.attivo!==false&&x.configurazione);
  const keys=[...Object.keys(Model.legacy),...Object.keys(state.drafts)];
  if(!keys.includes(state.layoutKey)){state.layoutKey='GT53';state.layout=Model.fromLegacy('GT53')}
- const tool=state.editorTool||'manual', seatNo=state.editorSeatNumber||1;
- const palette=`<div class="editor-palette"><label>Strumento per i posti<select id="editor-tool">${asOptions([['manual','Modifica cella (chiede valore)'],['number','Disegna sedile con numero'],['empty','Rimuovi sedile / vuoto'],['aisle','Corridoio'],['door','Porta']],tool)}</select></label><label>Numero del sedile<input id="editor-seat-number" type="number" min="1" max="9999" value="${esc(seatNo)}"></label><p class="hint">Scegli uno strumento e tocca le caselle della piantina. Ogni numero deve essere unico. Salva nella libreria Supabase per condividerla senza assegnarla subito a un autobus.</p></div>`;
+ const tool=state.editorTool||'auto';
+ const palette=`<div class="editor-palette"><label>Strumento<select id="editor-tool">${asOptions([['auto','+ Sedile (numero automatico)'],['empty','Elimina sedile / vuoto'],['aisle','Corridoio'],['door','Porta']],tool)}</select></label><div class="helpbox"><b>Numerazione automatica attiva</b><p class="subtle">Tocca una casella vuota: il gestionale assegna subito il primo numero disponibile, senza chiederlo. I numeri dei sedili già presenti non cambiano da soli.</p></div></div>`;
  const libraryCards=library.length?library.map(x=>`<div class="helpbox"><b>${fmt(x.nome)}</b><p class="subtle">${Model.count(x.configurazione)} sedili · salvata sul gestionale</p>${btn('Apri / modifica','layout-library-load','small',`data-id="${esc(x.id)}"`)}${btn('Archivia modello','layout-library-archive','small',`data-id="${esc(x.id)}"`)}</div>`).join(''):'<div class="helpbox">Nessuna piantina nella libreria condivisa: puoi crearne una adesso.</div>';
  const sharedCards=shared.length?shared.map(x=>{const bus=busFor(x.flotta_id);return `<div class="helpbox"><b>${fmt(x.nome||x.configurazione?.name||'Piantina salvata')}</b><p class="subtle">${fmt(bus?.titolo||[bus?.marca,bus?.modello].filter(Boolean).join(' ')||'Autobus')} · ${Model.count(x.configurazione)} sedili</p>${btn('Apri e modifica','layout-cloud-load','small',`data-id="${esc(x.flotta_id)}"`)}</div>`}).join(''):'<div class="helpbox">Ancora nessuna piantina condivisa. Crea una bozza e assegnala a uno degli autobus attivi.</div>';
- return section('Crea e modifica le piantine','Editor completo — GT53, GT63, nuove disposizioni, corridoi, porte e sedili numerati',btn('+ Nuova piantina','layout-new')+btn('Salva bozza','layout-save')+btn('Salva nella libreria Supabase','layout-library-save','primary')+btn('Assegna a un bus','layout-publish','primary')+btn('⬇ Scarica piantina PDF','layout-pdf','primary'))+`<div class="editor-grid"><article class="panel"><div class="formgrid"><label>Modello di partenza<select id="layout-select">${asOptions(keys.map(k=>[k,(state.drafts[k]?.name||Model.legacy[k]?.name||k)+(state.drafts[k]?' · bozza':' · originale')]),state.layoutKey)}</select></label><label>Nome piantina<input id="layout-name" value="${esc(state.layout.name)}" maxlength="80"></label></div>${palette}<div class="separator"></div>${seatMap(state.layout,'',true)}<p class="hint">Schema corrente: <b>${Model.count(state.layout)} sedili</b>, ${state.layout.rows.length} file. La piantina originale resta sempre recuperabile.</p></article><div class="editor-panel">${panel('Costruisci la tua piantina',`<div class="actions">${btn('+ Aggiungi fila','layout-row-add')}${btn('− Elimina ultima fila','layout-row-remove')}${btn('Duplica','layout-copy')}${btn('Annulla modifiche','layout-reset')}</div><div class="separator"></div><div class="actions">${btn('Esporta schema JSON','layout-export','primary')}<label class="btn outline" style="cursor:pointer">Importa schema JSON<input id="layout-file" type="file" accept="application/json,.json" hidden></label></div><p class="hint">Le bozze si salvano soltanto su questo dispositivo. Per renderle disponibili a Nicola e Raffaele usa “Salva su Supabase per il bus”.</p>`)}${panel('Libreria piantine — condivisa tra Nicola e Raffaele',libraryCards)}${panel('Piantine assegnate agli autobus — Supabase',sharedCards)}${panel('Modelli originali protetti',`<div class="helpbox">GT53 · 53 posti<br>GT63 · 63 posti<br>GT63B · 63 posti<p class="subtle">L’assegnazione personalizzata è valida nella V2. Non modifica da sola il sito pubblico di prenotazione né le assegnazioni storiche. Il numero dei posti deve corrispondere alla capienza del mezzo.</p></div>`)}</div></div>`;
+ return section('Crea e modifica le piantine','Editor completo — GT53, GT63, nuove disposizioni, corridoi, porte e sedili numerati',btn('+ Nuova piantina','layout-new')+btn('⚡ Genera piantina da N posti','layout-generate','primary')+btn('Salva bozza','layout-save')+btn('Salva nella libreria Supabase','layout-library-save','primary')+btn('Assegna a un bus','layout-publish','primary')+btn('⬇ Scarica piantina PDF','layout-pdf','primary'))+`<div class="editor-grid"><article class="panel"><div class="formgrid"><label>Modello di partenza<select id="layout-select">${asOptions(keys.map(k=>[k,(state.drafts[k]?.name||Model.legacy[k]?.name||k)+(state.drafts[k]?' · bozza':' · originale')]),state.layoutKey)}</select></label><label>Nome piantina<input id="layout-name" value="${esc(state.layout.name)}" maxlength="80"></label></div>${palette}<div class="separator"></div>${seatMap(state.layout,'',true)}<p class="hint">Schema corrente: <b>${Model.count(state.layout)} sedili</b>, ${state.layout.rows.length} file. La piantina originale resta sempre recuperabile.</p></article><div class="editor-panel">${panel('Costruisci la tua piantina',`<div class="actions">${btn('+ Fila con 4 sedili numerati','layout-row-add')}${btn('− Elimina ultima fila','layout-row-remove')}${btn('Rinumera 1 → N','layout-renumber','outline')}${btn('Duplica','layout-copy')}${btn('Annulla modifiche','layout-reset')}</div><div class="separator"></div><div class="actions">${btn('Esporta schema JSON','layout-export','primary')}<label class="btn outline" style="cursor:pointer">Importa schema JSON<input id="layout-file" type="file" accept="application/json,.json" hidden></label></div><p class="hint">La numerazione si assegna automaticamente quando inserisci i sedili. “Rinumera 1 → N” riordina tutti i numeri della bozza: usalo solo prima di assegnare la piantina a viaggi con posti prenotati. Per avere le piantine su PC, iOS e Android premi “Salva nella libreria Supabase”.</p>`)}${panel('Libreria piantine — condivisa tra Nicola e Raffaele',libraryCards)}${panel('Piantine assegnate agli autobus — Supabase',sharedCards)}${panel('Modelli originali protetti',`<div class="helpbox">GT53 · 53 posti<br>GT63 · 63 posti<br>GT63B · 63 posti<p class="subtle">L’assegnazione personalizzata è valida nella V2. Non modifica da sola il sito pubblico di prenotazione né le assegnazioni storiche. Il numero dei posti deve corrispondere alla capienza del mezzo.</p></div>`)}</div></div>`;
 }
 
 function getCash(){return Cash.build({trips:state.data.trips,bookings:state.data.bookings,payments:state.data.payments,operators:state.data.operators,cashTransfers:state.data.transfers})}
@@ -1129,17 +1137,42 @@ async function handleAction(action,el){const id=el.dataset.id||'';
  case 'layout-library-copy':state.editorTemplateId='';state.layout.name+=' · nuovo modello';return render();
  case 'layout-cloud-load':{const record=state.data.layoutTemplates.find(x=>x.flotta_id===id&&x.attivo!==false);if(!record?.configurazione)return notify('Piantina condivisa non disponibile',true);const test=Model.validate(record.configurazione);if(test)return notify('Piantina archiviata non valida: '+test,true);state.layout=Model.clone(record.configurazione);state.editorBusId=id;state.editorTemplateId='';state.layoutKey='bozza-'+Date.now();state.drafts[state.layoutKey]=Model.clone(state.layout);render();notify('Piantina caricata da Supabase. Modificala e salva di nuovo sul bus per renderla condivisa.');return;}
  case 'layout-new':{
-  const name=prompt('Nome del nuovo schema autobus','Nuova piantina');if(!name?.trim())return;state.layoutKey='nuovo-'+Date.now();state.layout=Model.fresh(name.trim());state.editorTemplateId='';state.editorBusId='';return render();}
+  const name=prompt('Nome della nuova piantina','Nuovo autobus');if(!name?.trim())return;
+  state.layoutKey='nuovo-'+Date.now();state.layout=Model.fresh(name.trim());
+  state.drafts[state.layoutKey]=Model.clone(state.layout); // mantenere il modello dopo render()
+  state.editorTool='auto';state.editorTemplateId='';state.editorBusId='';return render();}
+ case 'layout-generate':{
+  openForm('Genera piantina con numerazione automatica',`<div class="formgrid">${field('nome','Nome della piantina','Nuovo autobus','text',true)}${field('totale','Numero di posti da creare',57,'number',true,'min="1" max="400" step="1"')}</div><p class="hint">Il gestionale costruisce automaticamente le file con corridoio centrale e numerazione 1, 2, 3… fino al totale richiesto. Potrai poi aggiungere porte o togliere singoli posti.</p>`,async f=>{
+   const name=val(f,'nome')?.trim(),amount=Number(val(f,'totale'));
+   if(!name||name.length>80)throw Error('Inserisci il nome della piantina');
+   const created=Model.generate(name,amount);
+   state.layoutKey='generata-'+Date.now();state.layout=created;
+   state.drafts[state.layoutKey]=Model.clone(created);
+   state.editorTool='auto';state.editorTemplateId='';state.editorBusId='';
+   // openForm uses sync() after success; keep this in memory to avoid losing unsaved changes.
+   notify('Piantina di '+amount+' posti creata con numerazione automatica. Salvala nella libreria Supabase.');
+  });return;
+ }
  case 'edit-seat':{
-  const r=Number(el.dataset.row),c=Number(el.dataset.col),old=state.layout.rows[r]?.[c];if(old===undefined)return;
-   const tool=state.editorTool||'manual',value=tool==='manual'?prompt('Numero sedile oppure empty (vuoto), aisle (corridoio), door (porta):',String(old)):(tool==='number'?String(state.editorSeatNumber||''):tool);if(value===null)return;
-   const v=value.trim().toLowerCase(),cell=v===''?'empty':(['empty','aisle','door'].includes(v)?v:/^[1-9]\d{0,3}$/.test(v)?Number(v):null);
-  if(cell===null)return notify('Valore non valido',true);
-  const clone=Model.clone(state.layout);clone.rows[r][c]=cell;
-  const error=Model.validate(clone);if(error&&error.includes('duplicato'))return notify(error,true);
-  state.layout=clone;return render();}
- case 'layout-row-add':if(state.layout.rows.length>=100)return notify('Massimo 100 file',true);state.layout.rows.push(['empty','empty','aisle','empty','empty']);return render();
- case 'layout-row-remove':if(state.layout.rows.length<=1)return notify('Deve rimanere almeno una fila',true);if(!confirm('Eliminare l’ultima fila della bozza?'))return;state.layout.rows.pop();return render();
+  const r=Number(el.dataset.row),c=Number(el.dataset.col),old=state.layout.rows[r]?.[c];
+  if(old===undefined)return;
+  try{
+   const tool=state.editorTool||'auto';
+   const draft=tool==='auto'||tool==='number'?Model.putSeat(state.layout,r,c):Model.clone(state.layout);
+   if(tool==='empty'||tool==='aisle'||tool==='door')draft.rows[r][c]=tool;
+   draft.totalSeats=Model.count(draft);
+   const error=Model.validate(draft);
+   if(error&&error.includes('duplicato'))throw Error(error);
+   state.layout=draft;return render();
+  }catch(e){notify('Impossibile modificare il sedile: '+e.message,true);return;}
+ }
+ case 'layout-row-add':try{state.layout=Model.addRow(state.layout);render()}catch(e){notify(e.message,true)}return;
+ case 'layout-row-remove':if(state.layout.rows.length<=1)return notify('Deve rimanere almeno una fila',true);if(!confirm('Eliminare l’ultima fila della bozza? I numeri delle altre file non cambieranno.'))return;state.layout.rows.pop();state.layout.totalSeats=Model.count(state.layout);return render();
+ case 'layout-renumber':{
+  if(!Model.count(state.layout))return notify('Non ci sono sedili da numerare',true);
+  if(state.editorBusId&&!confirm('Rinumerare tutti i posti? Le prenotazioni di un bus assegnato non vengono aggiornate automaticamente. Usa questa funzione solo su una piantina nuova o non ancora applicata.'))return;
+  state.layout=Model.renumber(state.layout);render();notify('Numerazione automatica completata: 1–'+Model.count(state.layout));return;
+ }
  case 'layout-copy':{state.layout=Model.clone(state.layout);state.layout.name+=' · copia';state.editorTemplateId='';state.editorBusId='';state.layoutKey='copia-'+Date.now();return saveLayout()}
  case 'layout-reset':{if(!confirm('Scartare le modifiche non salvate?'))return;state.layout=state.drafts[state.layoutKey]?Model.clone(state.drafts[state.layoutKey]):Model.fromLegacy(state.layoutKey);return render()}
  case 'layout-save':return saveLayout();

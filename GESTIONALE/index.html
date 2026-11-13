@@ -7722,11 +7722,15 @@ window.dg52ToggleFleet=async function(id){
       rows.push({seats:[31,32,null,null,null]});
       four(33,48);
       rows.push({seats:[49,50,51,52,53],rear:true});
-    }else if(layout==='GT63'&&capacity===63){
+    }else if(layout==='GT63'&&capacity>0&&capacity<=63){
+      // Keep the original GT63 geometry for reduced-capacity trips (e.g. 57 seats).
+      // The fleet bus still has 63 seats; only the selected trip is restricted.
       four(1,28);
       rows.push({seats:[29,30,null,'DOOR']});
       four(31,58);
       rows.push({seats:[59,60,61,62,63],rear:true});
+      rows=rows.map(row=>({...row,seats:row.seats.map(n=>typeof n==='number'&&n>capacity?null:n)}))
+        .filter(row=>row.seats.some(x=>typeof x==='number'||x==='DOOR'));
     }else{
       for(let n=1;n<=capacity;){const r=[];for(let k=0;k<5;k++)r.push(k===2?null:n<=capacity?n++:null);rows.push({seats:r})}
     }
