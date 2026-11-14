@@ -28,3 +28,12 @@ Nella pagina **Diagnostica integrazioni** sono previsti SELECT autenticati, veri
 - **Realtime disconnesso**: l’app riprova e legge le ultime prenotazioni ogni 15 secondi mentre è aperta.
 - **Pagina obsoleta**: forzare aggiornamento, ricaricare URL con `?v=2.5.0` negli asset.
 - **iPhone bloccato o scheda chiusa**: nessun push nativo, sincronizzazione alla riapertura.
+
+
+## Collaudo annullamenti e rimborsi 2.6
+
+- Assicurarsi che le RPC `dg26_anteprima_cancellazione_v1`, `dg26_elimina_prenotazione_v1`, `dg26_annulla_viaggio_e_prenotazioni_v1` risultino disponibili e protette (no `anon`).
+- Testare in staging: prenotazione senza pagamenti (eliminazione controllata), prenotazione con pagamento (allarme e posti liberati), pagamento di rimborso parziale, rimborso finale, annullamento intero viaggio, tentativo senza autorizzazione e doppio clic.
+- Verificare che il registro `dg3_cancellazioni_prenotazioni` e la vista `dg3_rimborsi_prenotazioni` abbiano policy/permessi per i soli operatori.
+- Verificare che la notifica di rimborso sia visibile a Nicola e Raffaele in ordine cronologico.
+- Controllare con il commercialista eventuali note di credito/rettifiche fiscali, laddove necessarie.

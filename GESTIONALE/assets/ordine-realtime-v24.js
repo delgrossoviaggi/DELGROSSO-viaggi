@@ -17,7 +17,7 @@
  let knownBookings=null,knownNotices=null,latestFetch=0,lastSuccessful=0,ongoing=null,debounce=null,realtimeState='connessione';
  let bookingRows=[],noticeRows=[],notificationReads=[];
  let bookingPage=0,noticePage=0;
- const filters={bookingSearch:'',trip:'',noticeSearch:''};
+ const filters={bookingSearch:'',trip:'',status:'active',noticeSearch:''};
  const active=()=>mode==='live'&&DGData.sessionActive;
  const canTouch=()=>active()&&!document.hidden&&!document.querySelector('#dg-modal.show');
  function setRefreshBadge(){const node=document.getElementById('dg24-live-pill');if(!node)return;
@@ -26,13 +26,13 @@
   node.title='Prenotazioni e notifiche ordinate dalla più recente. Aggiornamento automatico tramite Realtime e controllo periodico.';
  }
  function bookingList(){const q=filters.bookingSearch.trim().toLocaleLowerCase('it');
-  return sorted(bookingRows).filter(b=>(!filters.trip||b.viaggio_id===filters.trip)&&(!q||
+  return sorted(bookingRows).filter(b=>(filters.status==='all'||(filters.status==='canceled'?/annull|cancel|cancell/i.test(b.stato||''):!/annull|cancel|cancell/i.test(b.stato||'')))&&(!filters.trip||b.viaggio_id===filters.trip)&&(!q||
     [b.cliente_nome,b.cliente,b.telefono,b.fermata_partenza,(cache.trips||[]).find(t=>t.id===b.viaggio_id)?.titolo].join(' ').toLocaleLowerCase('it').includes(q)));
  }
  function bookRow(b,trips){return `<tr><td class="dg24-time"><strong>${ESC(formatInstant(b.created_at))}</strong>${isToday(b.created_at)?'<span class="dg24-today">OGGI</span>':''}</td>`+
   `<td><strong>${ESC(b.cliente_nome||b.cliente||'—')}</strong><div class="small-note">${ESC(b.telefono||'')}</div></td>`+
   `<td>${ESC(trips[b.viaggio_id]||'—')}</td><td>${ESC(b.posti)}</td><td>${ESC(b.posti_selezionati||'Da verificare')}</td><td>${ESC(b.fermata_partenza||'—')}</td><td>${euro(b.pagato)}</td><td>${status(b.stato)}</td>`+
-  `<td>${isDemo()?'—':`${callButton('edit-booking',b.id,'Modifica')} ${callButton('checkin',b.id,b.checkin_effettuato?'Check-in ✓':'Check-in')} <button class="btn-secondary" type="button" data-dg10-confirmation="${ESC(b.id)}">${b.confirmation_storage_path?'Scarica PDF':'Genera PDF'}</button>`}</td></tr>`;}
+  `<td>${isDemo()?'—':`${callButton('edit-booking',b.id,'Modifica')} ${callButton('checkin',b.id,b.checkin_effettuato?'Check-in ✓':'Check-in')} <button class="btn-secondary" type="button" data-dg10-confirmation="${ESC(b.id)}">${b.confirmation_storage_path?'Scarica PDF':'Genera PDF'}</button> ${!/annull|cancel|cancell/i.test(b.stato||'')?`<button type="button" class="btn-secondary" data-dg26-cancel-booking="${ESC(b.id)}">🗑 Elimina prenotazione</button>`:'<span class="small-note">Annullata · storico</span>'}`}</td></tr>`;}
  function bookingTable(rows){const trips=Object.fromEntries((cache.trips||[]).map(t=>[t.id,t.titolo||t.destinazione]));
   if(!rows.length)return '<div class="empty">Nessuna prenotazione con questi filtri.</div>';
   return `<div class="table-scroll"><table><thead><tr><th>DATA E ORA PRENOTAZIONE</th><th>CLIENTE</th><th>VIAGGIO</th><th>PERSONE</th><th>POSTI</th><th>FERMATA</th><th>PAGATO</th><th>STATO</th><th>AZIONI</th></tr></thead><tbody>${rows.map(b=>bookRow(b,trips)).join('')}</tbody></table></div>`;
@@ -78,7 +78,7 @@
   const todayCount=bookingRows.filter(b=>isToday(b.created_at)).length;
   const controls=`<div class="filters dg24-filters"><label class="search-box">⌕ <input id="dg24-booking-search" type="search" value="${ESC(filters.bookingSearch)}" placeholder="Cerca cliente, fermata, telefono, viaggio"></label>`+
   `<select id="dg24-booking-trip"><option value="">Tutti i viaggi</option>${filtersTrip.map(t=>`<option value="${ESC(t.id)}" ${filters.trip===t.id?'selected':''}>${ESC(t.titolo||t.destinazione)}</option>`).join('')}</select>`+
-  `<button type="button" class="btn-secondary" data-dg24-refresh="bookings">↻ Aggiorna ora</button></div>`;
+  `<select id="dg26-booking-status"><option value="active" ${filters.status==='active'?'selected':''}>Prenotazioni attive</option><option value="canceled" ${filters.status==='canceled'?'selected':''}>Annullate</option><option value="all" ${filters.status==='all'?'selected':''}>Tutte le prenotazioni</option></select><button type="button" class="btn-secondary" data-dg24-refresh="bookings">↻ Aggiorna ora</button></div>`;
   return sec('Prenotazioni · ultime ricevute','Ordinate dalla prenotazione più recente alla più vecchia, indipendentemente dalla data del viaggio.')+
    commands([['booking','＋ Nuova prenotazione']])+
    `<div class="dg24-current-status"><span id="dg24-live-pill">● Connessione Realtime</span><strong id="dg24-booking-count">${bookingRows.length} prenotazioni · ${todayCount} ricevute oggi</strong></div>`+
@@ -141,7 +141,7 @@
   if(e.target?.id==='dg24-notice-search'){filters.noticeSearch=e.target.value;noticePage=0;refreshNotificationSection();}
  });
  document.addEventListener('change',e=>{
-  if(e.target?.id==='dg24-booking-trip'){filters.trip=e.target.value;bookingPage=0;refreshBookingSection();}
+  if(e.target?.id==='dg24-booking-trip'){filters.trip=e.target.value;bookingPage=0;refreshBookingSection();}if(e.target?.id==='dg26-booking-status'){filters.status=e.target.value;bookingPage=0;refreshBookingSection();}
  });
  document.addEventListener('click',e=>{
   const btn=e.target.closest?.('[data-dg24-refresh]');if(btn){e.preventDefault();lastSuccessful=0;scheduleFetch();}

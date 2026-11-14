@@ -40,6 +40,7 @@ const FIELDS={
  suppliers:['fornitori','id,ragione_sociale,categoria,referente,telefono,email,partita_iva,codice_fiscale,indirizzo,citta,note,attivo,created_at'],
  economy:['economia_movimenti','id,tipo,categoria,descrizione,importo,data_movimento,metodo,viaggio_id,fornitore_id,origine,riferimento,operatore_user_id,operatore,created_at'],
  tripCosts:['dg11_costi_viaggio','id,viaggio_id,fornitore_id,categoria,descrizione,importo_previsto,stato,metodo,data_costo,numero_documento,note,movimento_id,created_at'],
+ refundCases:['dg3_rimborsi_prenotazioni','id,prenotazione_id,prenotazione_originale_id,viaggio_id,cliente,telefono,titolo_viaggio,data_viaggio,persone,posti_originari,importo_da_restituire,rimborsi_registrati,rimborso_residuo,stato_rimborso,motivo,ambito,eliminata_dal_database,created_by,created_at'],
  operators:['operatori_gestionale','user_id,username,nome,attivo']
 };
 let token='',refreshToken='',expiresAt=0,actor=null, pendingRefresh=null;
@@ -226,10 +227,10 @@ async function verifyCurrentOperator(){
 function health(){return Object.freeze({configured:true,authenticated:!!token&&!!actor,operator:actor?.username||null,
  realtimeStatus,lastDataOk,lastDataError,lastErrorSummary,readChecks:{...lastRowReads},
  warning:'Lettura e connessione non equivalgono a verifica delle scritture o dei pagamenti.'});}
-async function rpc(name,params){const allowed=['dg2_save_booking_guarded_v1','dg_register_payment','dg_manage_booking_seats_v1','dg3_preview_spostamento_data_v1','dg3_sposta_prenotazione_data_v1','dg_save_rental_v15','dg_archive_rental_v57','dg_archive_trip_v56','dg_register_rental_payment','dg_transfer_cash','dg11_anteprima_cassa_v1','dg11_chiudi_cassa_v1','dg11_incasso_extra_v1','dg11_salva_costo_viaggio_v1','dg3_diagnostica_backend_v1','dg3_archived_trip_check_v1','dg3_delete_archived_trip_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_aggiorna_viaggio_autobus_stato_v1'];
+async function rpc(name,params){const allowed=['dg2_save_booking_guarded_v1','dg_register_payment','dg_manage_booking_seats_v1','dg3_preview_spostamento_data_v1','dg3_sposta_prenotazione_data_v1','dg_save_rental_v15','dg_archive_rental_v57','dg_archive_trip_v56','dg_register_rental_payment','dg_transfer_cash','dg11_anteprima_cassa_v1','dg11_chiudi_cassa_v1','dg11_incasso_extra_v1','dg11_salva_costo_viaggio_v1','dg3_diagnostica_backend_v1','dg3_archived_trip_check_v1','dg3_delete_archived_trip_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_aggiorna_viaggio_autobus_stato_v1','dg26_anteprima_cancellazione_v1','dg26_elimina_prenotazione_v1','dg26_annulla_viaggio_e_prenotazioni_v1'];
  if(!allowed.includes(name))throw new Error('Operazione RPC non prevista');
  const result=await req(`/rest/v1/rpc/${name}`,{method:'POST',data:params});
- if(!['dg3_preview_spostamento_data_v1','dg11_anteprima_cassa_v1','dg3_archived_trip_check_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_diagnostica_backend_v1'].includes(name) && result?.success!==false)signalMutation();
+ if(!['dg3_preview_spostamento_data_v1','dg11_anteprima_cassa_v1','dg3_archived_trip_check_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_diagnostica_backend_v1','dg26_anteprima_cancellazione_v1'].includes(name) && result?.success!==false)signalMutation();
  return result;}
 async function insert(table,fields){const allowed=['clienti','viaggi','dg2_layout_library','noleggi_bus','scadenze_gestionale','preventivi','dg3_fatture_bozze','documenti_gestionali','notifiche','dg3_autisti','dg3_wa_manual_logs','dg3_anomalie_verifiche','dg3_impostazioni','dg3_richieste_rettifica_cassa','dg_notification_reads','fornitori','flotta'];
  if(!allowed.includes(table))throw new Error('Scrittura non autorizzata dal client');

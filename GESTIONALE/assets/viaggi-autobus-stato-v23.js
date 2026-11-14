@@ -76,6 +76,7 @@
  async function submitAssignment(form){
   requireLive();const id=form.dataset.id,old=getRow(id),values=Object.fromEntries(new FormData(form));
   const nextState=String(values.stato||'');if(!['Programmato','Confermato','Annullato','SOLD OUT'].includes(nextState))throw Error('Stato del viaggio non consentito');
+  if(nextState==='Annullato'&&(cache.bookings||[]).some(b=>b.viaggio_id===id&&!/annull|cancel|cancell/i.test(b.stato||'')))throw Error('Questo viaggio ha prenotazioni attive: usa il pulsante ⚠ Annulla viaggio e prenotazioni, così vengono creati gli allarmi di rimborso.');
   const nextBus=values.autobus_id||null;
   if(nextBus&&!UUID.test(nextBus))throw Error('Autobus non valido');
   const previousBus=form.dataset.prevBus||null,previousState=form.dataset.prevState||null;

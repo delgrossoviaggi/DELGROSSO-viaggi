@@ -70,7 +70,7 @@ function start(modeName,name){mode=modeName;me=name||'Operatore';cache={};$('#lo
  $('#top-date').textContent=today();$('#sidebar-status').textContent=isDemo()?'ANTEPRIMA GRAFICA':'SESSIONE AUTENTICATA';
  $('#sidebar-caption').textContent=isDemo()?'Tutti i dati sono simulati':'Operatore autorizzato · lettura protetta';
  $('#readonly-pill').textContent=isDemo()?'◈ DATI FITTIZI':'◉ ACCESSO OPERATORE';
- $('#footer-mode').textContent=isDemo()?'ANTEPRIMA · dati non reali':'2.5 Premium · Supabase · ultima sincronizzazione da verificare';
+ $('#footer-mode').textContent=isDemo()?'ANTEPRIMA · dati non reali':'2.6 Premium · Supabase · ultima sincronizzazione da verificare';
  $('#mode-banner').hidden=!isDemo();$('#mode-banner').textContent=isDemo()?'ANTEPRIMA GRAFICA: numeri, prenotazioni e clienti qui mostrati sono fittizi; non provengono da Supabase. Accedi con le credenziali aziendali per consultare i dati reali.':'';
  page=document.body.dataset.startPage||DGPageRoutes.resolve(location.pathname);document.body.dataset.startPage=page;loadPage();
  if(modeName==='live'){DGData.startRealtime();window.dispatchEvent(new Event('dg24:session-started'));}else DGData.stopRealtime();}
