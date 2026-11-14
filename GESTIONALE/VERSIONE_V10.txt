@@ -1,5 +1,0 @@
-DELGROSSO BUSINESS SUITE V10 — SCHEDA CLIENTE
-Data release: 12 novembre 2026
-Menu aziendale: Scheda cliente · Viaggi e pagamenti
-Pagina: GESTIONALE_V2/index.html#scheda-cliente
-Verifica: GESTIONALE_V2/VERIFICA_RELEASE.html
