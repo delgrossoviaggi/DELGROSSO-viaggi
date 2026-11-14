@@ -1,0 +1,191 @@
+/* DELGROSSO VIAGGI 3.0 ULTIMATE | Tema Enterprise Perla & Petrolio
+   Solo presentazione: nessuna modifica alle operazioni Supabase.
+   Palette: tela #edf3f2, superfici #fff, petrolio #114b5f, turchese #087f83, ambra #e59c41.
+*/
+:root {
+  color-scheme:light;
+  background:#edf3f2;
+  color:#1e3442;
+  --navy:#114355;
+  --night:#0c2d3a;
+  --deep:#164958;
+  --panel:#fff;
+  --panel2:#f2f8f7;
+  --line:#d8e5e4;
+  --accent:#087f83;
+  --aqua:#148c7e;
+  --gold:#ba761f;
+  --muted:#607785;
+  --shadow:0 14px 38px rgba(20,60,68,.085);
+}
+html,body,body{background:#edf3f2;color:#1e3442}
+a{color:#097c84}
+::selection{background:#91d7d0;color:#0a343b}
+:focus-visible{outline:3px solid #3aa9aa!important;outline-offset:2px}
+
+/* Login: pannello petrolio, modulo chiaro */
+.auth-visual{background:radial-gradient(ellipse at 75% 47%,#26869a 0%,transparent 52%),linear-gradient(140deg,#144c5b,#0b3449 75%);border-right-color:#c9e4e2}
+.auth-visual:before{opacity:.37}
+.auth-art .art-sphere{background:radial-gradient(circle at 35% 31%,#9be7ca75,transparent 47%),linear-gradient(145deg,#369ca288,#0a4a61)}
+.auth-art .art-line{border-color:#a9e2e14d}
+.auth-form-side{background:radial-gradient(circle at 87% 12%,#d2eeeb,transparent 45%),linear-gradient(145deg,#f9fbfa,#eaf3f1)}
+.auth-card{background:#fff;padding:clamp(22px,2.8vw,38px);border:1px solid #dce8e5;border-radius:25px;box-shadow:0 25px 65px #1c4a561a}
+.auth-icon{color:#0a7d83;background:#dcf2ef;border-color:#9bd4d0}
+.auth-card h2,.auth-card h2 span{color:#173b48}
+.auth-card h2 span{color:#cb772d}
+.auth-card .overline{color:#187b83}
+.auth-card .subline,.auth-card label,.auth-classic{color:#526e78}
+.auth-card input,.auth-card select[name="username"]{background:#f9fcfb;color:#142f3b;border:1px solid #bfd7d3}
+.auth-card input::placeholder{color:#738b92}
+.auth-card input:focus,.auth-card select[name="username"]:focus{border-color:#0a9395;box-shadow:0 0 0 3px #0f9a9c22}
+.auth-card .btn-outline{background:#f6fbfa;color:#0b5661;border-color:#aac9c8}
+.auth-card .btn-outline:hover{background:#e6f5f2}
+.auth-card .btn-main{background:linear-gradient(120deg,#087f87,#11576e);box-shadow:0 11px 25px #0a6a7133}
+.auth-connection{background:#f1faf8;color:#25676d;border-color:#b2dbd7}
+.auth-error{background:#fff2f2;color:#a02d32;border-color:#e8b9b9}
+.auth-separator{color:#667f88}.auth-separator span{background:white}.auth-separator:before{background:#dce7e5}
+.auth-note{color:#7a8c90}
+
+/* Shell e barra superiore */
+.sidebar{background:linear-gradient(168deg,#165b6b 0%,#0d4052 51%,#0b2c40 100%);border-right-color:#205e6688;box-shadow:6px 0 30px #244f5710}
+.sidebar .brand-badge{background:linear-gradient(145deg,#1b858f,#0b5068)}
+.sidebar-overline{color:#a9d1d6}.sidebar-overline em{color:#ffc982}
+.sidebar .nav-caption{color:#96bbc5}
+.sidebar .nav-item{color:#d3e7eb}
+.sidebar .nav-icon{color:#a1dde1}
+.sidebar .nav-item:hover{color:#fff;background:#24717c75}
+.sidebar .nav-item.active{background:linear-gradient(100deg,#2a8492,#176276);border-color:#a9e2df80;box-shadow:inset 3px 0 0 #f9bf68,0 6px 20px #071b3044}
+.sidebar .sidebar-bottom small{color:#a2c4c9}
+.app-main{background:radial-gradient(circle at 96% 2%,#d7ebee,transparent 34%),linear-gradient(135deg,#f5f8f7 0%,#eaf2f0 100%);color:#1d3643}
+.topbar{background:#ffffffed;border-bottom:1px solid #d7e5e4;box-shadow:0 5px 20px rgba(28,79,82,.035)}
+.topbar h1{color:#193d4d}
+.topbar h1 span{color:#cd8337}
+.top-kicker{color:#137a83}
+.date-pill,.operator-pill{background:#f3f8f8;color:#315a66;border-color:#d6e4e1}
+.readonly-pill{background:#eaf8f0;color:#17684a;border-color:#b5dcca}
+.icon-button{background:#ecf5f4;color:#155c67;border-color:#cde1df}
+.icon-button:hover{background:#dcefed}
+.btn-logout{background:#f7fafa;color:#255968;border-color:#d0e1df}
+.btn-logout:hover{background:#e6f2f0}
+.footer{color:#71888d;border-top-color:#dce7e4}
+.mode-banner{background:#fff7e7;color:#8d5d13;border-color:#f1d6a6}
+.loading{color:#587b84}
+
+/* Hero forte, schede luminose */
+.hero{border:1px solid #25788b;background:radial-gradient(ellipse at 86% 40%,#2d8d95,transparent 50%),linear-gradient(110deg,#14566c,#0c3f59 70%);box-shadow:0 20px 35px #204c581d}
+.hero h2,.hero .sup{color:#fff}
+.hero h2{font-weight:850}
+.hero p{color:#cce4e7}
+.hero .sup{color:#b5e6e5}
+.hero-btn{background:linear-gradient(110deg,#26a0a2,#0a6278);border-color:#8ce6d877}
+.hero-fleet .fleet-hero-card{background:linear-gradient(145deg,#327b8b,#0b4159);border-color:#aee5e1aa}
+.section-title h2,.panel-head h3{color:#1c3b48}
+.section-title p,.panel-head p,.small-note{color:#64808c}
+.kpi,.kpi:nth-child(2n){background:#fff;border:1px solid #d9e8e6;box-shadow:var(--shadow);color:#1c3744}
+.kpi{border-top:3px solid #119192}
+.kpi:nth-child(2n){border-top-color:#d2a069}
+.kpi .big{color:#183d4a}
+.kpi small{color:#627d89}
+.kpi-icon{background:#e2f4f0;color:#137c84}
+.panel,.fleet-card{background:#fff;border:1px solid #d7e6e4;box-shadow:var(--shadow);color:#213e4a}
+.control-trip,.control-seat,.detail-box{background:#f7fbfa;border-color:#d9e9e6;color:#24424e}
+.control-trip h3,.control-trip strong,.info-row strong{color:#1c3c49}
+.control-trip .destination,.control-meta,.info-row{color:#587985}
+.quick-tile{background:white;border:1px solid #d6e5e2;color:#1d3c49;box-shadow:0 3px 12px #0f46490a}
+.quick-tile:hover{background:#f0f9f7;border-color:#9acfc8}
+.quick-icon{background:#e6f4f1;color:#0e8087}
+.quick-tile small,.quick-chevron{color:#6c8790}
+.feature,.mini-metric{background:#f8fbfa;border:1px solid #d9e7e3;color:#203c47}
+.feature p,.mini-metric span{color:#657f8a}
+.fleet-body h3{color:#1d3c49}
+.fleet-body p{color:#69838e}
+.fleet-details span{color:#366978;border-color:#c9ddda;background:#f5f9f8}
+.fleet-photo{background:linear-gradient(135deg,#ddeeee,#a8d1cd)}
+
+/* Tabelle, selettori, alert e bottoni */
+.table-scroll{border-radius:10px}
+table{color:#213c48}
+th{background:#edf5f3;color:#41616b;border-bottom:1px solid #d6e4e1}
+td{color:#304d59;border-top-color:#e4eeea}
+tbody tr:hover{background:#eff8f6}
+.search-box,.filters select{background:#fff;color:#305a64;border-color:#cededb}
+.search-box input{color:#24434e}
+.search-box input::placeholder{color:#8099a0}
+.empty{background:#f8fcfa;color:#728a90;border-color:#b8d4cf}
+.btn-secondary,.action-row .btn-secondary{background:#0e7882;color:#fff;border-color:#0b727a}
+.btn-secondary:hover,.action-row .btn-secondary:hover{background:#09616f}
+.notice-dot{background:#16947a}
+.alert{background:#fff5e9;color:#905c1b;border-color:#e9cc9e}
+.alert.ok,.alert.success{background:#ebfaf3;color:#166e52;border-color:#b6e2cf}
+.chip,.trip-pill{color:#31606a}
+.seat{background:#e2f1ee;border-color:#acd2ca;color:#2d5963}
+.seat.occupied{background:#1b9481;color:#fff;border-color:#0d796e}
+.seat.legacy{outline-color:#c88b28}
+.legend{color:#64828b}
+
+/* Modali e form */
+.modal-layer{background:rgba(8,38,48,.65)}
+.modal-box{background:#fff;color:#213a46;border:1px solid #d6e5e2;box-shadow:0 32px 100px #061b273d}
+.modal-head{border-bottom-color:#dfebe7}
+.modal-head h2{color:#213e49}
+.modal-close{background:#edf7f4;color:#1b5b63;border-color:#c6dcd7}
+.field{color:#466672}
+.field input,.field select,.field textarea{background:#f9fcfb;color:#193744;border:1px solid #bbd5d0}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #0e8f91}
+.form-seats{background:#f5fbf9;border-color:#cddfda;color:#1e424c}
+.draft-seat{background:#e1f1ed;color:#1e4f57;border-color:#abd2c9}
+.draft-seat.busy{background:#187f73;color:white;opacity:.65}
+.draft-seat.selected{background:#f1b75d;color:#3a2d13;border-color:#c78c31}
+.chosen-count{color:#996524}
+.modal-content{color:#476b75}
+.dg3-preview-box{background:#eff8f7;color:#284b56;border-color:#c8e0dc}
+.dg3-placed{color:#0c8d73}
+
+/* Chiusura cassa e fornitori */
+.dg11-money-grid>div{background:#fff;border-color:#cfe2de;box-shadow:var(--shadow)}
+.dg11-money-grid strong{color:#0c7679}
+.dg11-money-grid span{color:#334e59}
+.dg11-money-grid small{color:#718c92}
+.dg11-breakdown{background:#f8fbfa;border-color:#d5e5e1;color:#284652}
+.dg11-line{border-bottom-color:#e0ebe9}
+.dg11-line strong{color:#204451}
+.dg11-plus{color:#0b9779}
+.dg11-minus{color:#bf4b45}
+.dg11-total{border-top-color:#9ac6bf}
+.dg11-total strong{color:#0d747d}
+.dg11-close-form{background:#f8fcfa;border-color:#cbdeda;color:#244651}
+.dg11-diff{color:#a76620}
+
+/* Accessibilità e modalità stampa */
+@media (max-width:780px) {
+ .topbar{background:#fff}
+ .app-main{background:#eff6f4}
+ .auth-card{padding:20px;border-radius:17px}
+}
+@media print{
+ :root,html,body{background:#fff!important;color:#111!important}
+ .sidebar,.topbar,.footer,.modal-layer,.auth-screen{display:none!important}
+}
+/* Rifiniture contrasto verificate sulle schermate reali */
+.sidebar .brand strong{color:#fff}
+.sidebar .brand small{color:#b7d8dc}
+.sidebar .auth-wordmark{color:#fff}
+.sidebar .brand .original-logo{filter:drop-shadow(0 2px 3px #092b3480)}
+.info-row{color:#527682}
+.info-row b,.info-row strong{color:#1c5061}
+.detail-box small{color:#597a84}
+.detail-box strong{color:#174451}
+.progress{background:#d4e7e2}
+.alert.info{background:#eaf7f7;border-color:#b9dada;color:#1b5d67}
+.chip{color:#235c67;border-color:#a9cfc8;background:#f1f9f7}
+.chip.ok{color:#11694f;border-color:#a4d9c8;background:#e6f8ef}
+.chip.warn{color:#865519;border-color:#edcb94;background:#fff3de}
+.trip-pill{background:#ddf3ea;color:#106d57;border-color:#a7d4c4}
+.trip-pill.warning{background:#fff4df;color:#835720;border-color:#efd2a1}
+.control-seat .legend{color:#5a7a81}
+.control-seat .seat-title{color:#224b56}
+.panel .small-note,.panel .feature p{color:#5c7983}
+/* Login: contrasto esplicito sul blocco di presentazione scuro */
+.auth-visual,.auth-wordmark,.auth-copy h1{color:#f2f9fb}
+.auth-wordmark small{color:#b9dbe0}
+.auth-copy h1 em{color:#ffc27b}

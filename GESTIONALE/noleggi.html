@@ -1,0 +1,65 @@
+<!doctype html><html lang="it"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#105363"><meta name="description" content="DELGROSSO VIAGGI 3.0 ULTIMATE · Premium Control Room">
+<title>DELGROSSO VIAGGI · Noleggi · 3.0 ULTIMATE</title>
+<meta name="referrer" content="no-referrer"><meta name="description" content="Noleggi autobus e incassi — DELGROSSO VIAGGI 3.0 ULTIMATE">
+<link rel="stylesheet" href="assets/stile.css"><link rel="stylesheet" href="assets/tema-enterprise-perla.css"><link rel="icon" href="assets/icona-192.png">
+</head><body data-start-page="rentals">
+<div id="login-view" class="auth-screen">
+  <div class="auth-visual"><div class="stars"></div>
+    <div class="auth-wordmark"><div class="auth-logo-box"><img src="assets/logo-delgrosso.png" alt="Logo DELGROSSO Viaggi &amp; Limousine Bus"></div></div>
+    <div class="auth-copy"><p class="overline">THE NEXT GENERATION OF TRAVEL MANAGEMENT</p><h1>Il tuo centro operativo.<br><em>Una nuova dimensione.</em></h1><p>Viaggi, prenotazioni, flotta, clienti e contabilità in un unico spazio. Design premium, dati aziendali protetti.</p></div>
+    <div class="auth-art" aria-hidden="true"><span class="art-line"></span><span class="art-line two"></span><span class="art-sphere"></span></div>
+    <div class="auth-meta">DELGROSSO VIAGGI · SAN SEVERO · ITALIA</div>
+  </div>
+  <div class="auth-form-side"><section class="auth-card">
+    <div class="auth-icon">✦</div><p class="overline">AREA RISERVATA OPERATORI</p><h2>Benvenuto in <span>Ultimate 3.0</span></h2>
+    <p class="subline">Seleziona il tuo profilo e inserisci la password del tuo account. Nicola e Raffaele sono utenti distinti: le operazioni vengono attribuite a chi accede. Connessione protetta a Supabase.</p>
+    <div id="connect-state" class="auth-connection">◌ Verifica connessione Supabase…</div>
+    <form id="live-login-form">
+      <label>Profilo operatore <select name="username" autocomplete="username" required><option value="" selected disabled>Seleziona operatore</option><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option></select></label>
+      <label>Password <input type="password" name="password" autocomplete="current-password" placeholder="Inserisci la password del profilo" required></label>
+      <p id="auth-error" class="auth-error" role="alert" hidden></p>
+      <button id="login-submit" type="submit" class="btn btn-main">Accedi ai dati aziendali <span>→</span></button>
+    </form>
+    <div class="auth-separator"><span>oppure</span></div>
+    <button id="demo-start" class="btn btn-outline" type="button">Esplora l'anteprima grafica (dati fittizi)</button>
+    <span class="auth-classic">Per l’accesso aziendale su Windows utilizza AVVIA_GESTIONALE_WINDOWS.bat: non richiede Python. Su iPhone usa la versione HTTPS autorizzata.</span>
+    <p class="auth-note">Accessi separati Nicola / Raffaele · Password non salvate nel codice · Protezione RLS Supabase</p>
+  </section></div>
+</div>
+<div id="app-view" class="app-shell" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-logo-shell"><img class="brand-logo-local" src="assets/logo-delgrosso.png" alt="Logo DELGROSSO Viaggi &amp; Limousine Bus"></div></div>
+    <div class="sidebar-overline">GESTIONALE <em>3.0 ULTIMATE</em></div>
+    <nav id="premium-nav" aria-label="Menu del gestionale"></nav>
+    <div class="sidebar-bottom"><div class="connection-indicator"><span class="led"></span><span id="sidebar-status">MODALITÀ CONSULTAZIONE</span></div><small id="sidebar-caption">Connessione privata e protetta</small></div>
+  </aside>
+  <div class="mobile-scrim" id="mobile-scrim" hidden></div>
+  <div class="app-main">
+    <header class="topbar"><div class="topbar-left"><button class="icon-button mobile-menu" id="menu-toggle" aria-label="Apri menu">☰</button><div><p class="top-kicker" id="breadcrumbs">CENTRO OPERATIVO / DASHBOARD</p><h1 id="page-heading">Dashboard <span>3.0</span></h1></div></div>
+    <div class="topbar-right"><span id="readonly-pill" class="readonly-pill">◉ OPERATORE AUTORIZZATO</span><span id="top-date" class="date-pill"></span><button class="icon-button" id="refresh" aria-label="Aggiorna i dati" title="Aggiorna">↻</button><span class="operator-pill" id="operator-name">Operatore</span><button class="btn-logout" id="logout" type="button">Esci</button></div>
+    </header>
+    <div id="mode-banner" class="mode-banner" hidden></div>
+    <main id="page-content" class="page-content" aria-live="polite"><div class="loading">Preparazione: Noleggi…</div></main>
+    <footer class="footer"><span>© DELGROSSO VIAGGI &amp; LIMOUSINE BUS · ULTIMATE PREMIUM</span><span id="footer-mode">Versione 2.3 · Viaggi e autobus · Perla & Petrolio</span></footer>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script defer src="assets/supabase.js"></script>
+<script defer src="assets/routing-multipagina.js"></script>
+<script defer src="assets/interfaccia.js"></script>
+<script defer src="assets/moduli.js"></script>
+<script defer src="assets/spostamenti-core.js"></script>
+<script defer src="assets/fatture-core.js"></script>
+<script defer src="assets/ultimate-extra.js"></script>
+<script defer src="assets/moduli-operativi-v08.js"></script>
+<script defer src="assets/gestionale-finale-v09.js"></script>
+<script defer src="assets/conferme-core.js"></script>
+<script defer src="assets/gestionale-rilascio-v10.js"></script>
+<script defer src="assets/cassa-math-v11.js"></script>
+<script defer src="assets/cassa-fornitori-v11.js"></script>
+<script defer src="assets/viaggi-archiviati-v22.js"></script>
+<script defer src="assets/viaggi-autobus-stato-v23.js"></script>
+<noscript>Per utilizzare il gestionale DELGROSSO VIAGGI abilita JavaScript nel browser.</noscript>
+</body></html>
