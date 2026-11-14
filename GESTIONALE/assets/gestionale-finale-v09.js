@@ -134,12 +134,16 @@
     ['dg3_sposta_prenotazione_data_v1','Cambio data con nuovi posti']
   ];
   let diagResults=null;
-  async function diagRun(){requireLive();diagResults=[];for(const [key,name] of CHECKS){try{await DGData.probe(key);diagResults.push({name,key,ok:true,info:'Endpoint disponibile; le righe dipendono dai permessi RLS'});}catch(e){diagResults.push({name,key,ok:false,info:e.status===404?'Manca migrazione / tabella':(e.status===401||e.status===403)?'Autorizzazione RLS da verificare':String(e.message||'Errore').slice(0,180)});}}
+  async function diagRun(){requireLive();diagResults=[];for(const [key,name] of CHECKS){try{const probe=await DGData.probe(key);diagResults.push({name,key,ok:true,info:probe.hasVisibleRow?'SELECT autenticata riuscita · almeno una riga visibile':'SELECT autenticata riuscita · nessuna riga visibile (o filtrata da RLS)'});}catch(e){diagResults.push({name,key,ok:false,info:e.status===404?'Manca migrazione / tabella':(e.status===401||e.status===403)?'Autorizzazione RLS da verificare':String(e.message||'Errore').slice(0,180)});}}
+    try{const me=await DGData.verifyCurrentOperator();diagResults.unshift({key:'auth',name:'Identità Supabase / RLS',ok:me.ok,info:'Accesso autorizzato: '+me.operator});}
+    catch(e){diagResults.unshift({key:'auth',name:'Identità Supabase / RLS',ok:false,info:e.message});}
+    const session=DGData.health();
+    diagResults.push({key:'realtime',name:'Postgres Realtime',ok:session.realtimeStatus==='connesso',info:session.realtimeStatus==='connesso'?'Canale WebSocket attivo; eventi non verificati con una scrittura reale':'WebSocket '+session.realtimeStatus+'; recupero periodico REST disponibile'});
     // Il controllo RPC è rigorosamente di sola lettura: non invoca funzioni che scrivono denaro o prenotazioni.
     try{
       const caps=await DGData.rpc('dg3_diagnostica_backend_v1',{});
       for(const [key,name] of BACKEND_RPC_CHECKS){
-        diagResults.push({key,name,ok:caps?.[key]===true,info:caps?.[key]===true?'Funzione SQL presente, autenticazione e permessi attivi':'Funzione SQL non rilevata'});
+        diagResults.push({key,name,ok:caps?.[key]===true,info:caps?.[key]===true?'Funzione SQL presente · scrittura NON collaudata':'Funzione SQL non rilevata'});
       }
     }catch(e){
       for(const [key,name] of BACKEND_RPC_CHECKS){
@@ -151,14 +155,14 @@
   async function diagnosticsPage(){
     const rows=diagResults||CHECKS.map(([key,name])=>({key,name,ok:null,info:'Non verificato'}));
     const passed=rows.filter(x=>x.ok).length,failed=rows.filter(x=>x.ok===false).length;
-    return sec('Centro diagnostica · attivazioni Supabase','Controlla l’accessibilità dei moduli senza leggere o modificare i contenuti sensibili')+noteForDemo()+
+    return sec('Centro diagnostica · attivazioni Supabase','Verifica SELECT autenticata, identità dell’operatore e stato Realtime; non modifica prenotazioni o contabilità')+noteForDemo()+
       `<div class="action-row">${action('run-diagnostics','','↻ Esegui diagnosi completa')}${action('download-diagnostics','','⇩ Rapporto CSV')}</div>`+
       `<div class="metric-belt"><div class="mini-metric"><strong>${passed}</strong><span>Moduli raggiungibili</span></div><div class="mini-metric"><strong>${failed}</strong><span>Moduli da verificare</span></div></div>`+
       mainPanel('Verifica archivi e funzioni Supabase',table(rows,[['MODULO',r=>t(r.name)],['ESITO',r=>status(r.ok===null?'Da verificare':r.ok?'Raggiungibile':'Non pronto')],['DETTAGLIO',r=>t(r.info)]]))+
-      cardInfo('Lettura riuscita ≠ scrittura collaudata. Per le operazioni sui dati reali servono staging, test con i ruoli Nicola/Raffaele, backup e verifica contabile.', 'warn')+
+      cardInfo('Le SELECT e la presenza delle RPC NON certificano prenotazioni, incassi o pagamenti. Per la sincronizzazione completa servono test reali, controllati e riconciliazione contabile con Nicola/Raffaele.', 'warn')+
       cardInfo('Fatture SdI: non attive senza provider e dati fiscali certificati. WhatsApp API: non attiva senza account Meta e consensi. Queste integrazioni non si possono rendere operative con un semplice file HTML.', 'info');
   }
-  async function downloadDiag(){if(!diagResults||!diagResults.length)throw Error('Esegui prima la diagnostica');DGData.downloadCSV([['MODULO','TABELLA','ESITO','NOTE'],...diagResults.map(x=>[x.name,x.key,x.ok?'OK':'DA_VERIFICARE',x.info])],'DELGROSSO_DIAGNOSTICA_MODULI.csv');}
+  async function downloadDiag(){if(!diagResults||!diagResults.length)throw Error('Esegui prima la diagnostica');DGData.downloadCSV([['MODULO','TABELLA / RPC','ESITO','NOTE'],...diagResults.map(x=>[x.name,x.key,x.ok?'OK':'DA_VERIFICARE',x.info])],'DELGROSSO_DIAGNOSTICA_MODULI.csv');}
   // Nelle versioni 0.9 le schermate aggiuntive sostituiscono solo il modulo specifico,
   // mantenendo intatti i registri cassa, RPC posti, SdI in bozza e WhatsApp ibrido v0.8.
   NAV[NAV.length-1][1].push(['diagnostics','✺','Diagnostica integrazioni']);

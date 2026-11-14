@@ -40,13 +40,14 @@ function safeImage(url){try{const u=new URL(url);return u.protocol==='https:'&&(
 const fleetSrc=f=>safeImage(f.immagine)||safeImage((Array.isArray(f.foto_gallery)?f.foto_gallery:[]).find(x=>typeof x==='string'));
 function mainPanel(title,body,detail=''){return `<section class="panel"><div class="panel-head"><div><h3>${esc(title)}</h3>${detail?`<p>${esc(detail)}</p>`:''}</div></div>${body}</section>`}
 function kpi(ico,value,label){return `<div class="kpi"><span class="kpi-icon">${ico}</span><div><span class="big">${esc(value)}</span><small>${esc(label)}</small></div></div>`}
-function sec(title,detail=''){return `<div class="section-title"><div><h2>${esc(title)}</h2><p>${esc(detail)}</p></div><span class="chip ${isDemo()?'warn':'ok'}">${isDemo()?'ANTEPRIMA / DATI FITTIZI':'SUPABASE · LIVE'}</span></div>`}
+function sec(title,detail=''){return `<div class="section-title"><div><h2>${esc(title)}</h2><p>${esc(detail)}</p></div><span class="chip ${isDemo()?'warn':'ok'}">${isDemo()?'ANTEPRIMA / DATI FITTIZI':'DATI SUPABASE · AUTENTICATO'}</span></div>`}
 function table(rows,columns){if(!rows.length)return `<div class="empty">Nessun elemento presente in questa sezione.</div>`;
  return `<div class="table-scroll"><table><thead><tr>${columns.map(c=>`<th>${esc(c[0])}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${columns.map(c=>`<td>${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
 function cardInfo(msg,level='info'){return `<div class="alert ${level}">${esc(msg)}</div>`}
 function go(route,id,{replace=false}={}){
  if(!Object.prototype.hasOwnProperty.call(DGPageRoutes.paths,route))throw Error('Pagina non riconosciuta');
  if(id)selectedTrip=id;
+ if(mode==='live'&&page!==route)cache={};
  page=route;
  if(/^https?:$/.test(window.location.protocol)){
   const target=new URL(DGPageRoutes.paths[route],window.location.href);
@@ -66,12 +67,13 @@ function menu(){let html='';for(const [group,items] of NAV){html+=`<div class="n
 function toggleMenu(open){$('#sidebar').classList.toggle('open',open);$('#mobile-scrim').hidden=!open}
 function initialView(){authToken='';if(window.DGData?.sessionActive)window.DGData.signOut();mode='';cache={};$('#app-view').hidden=true;$('#login-view').hidden=false;$('#auth-error').hidden=true}
 function start(modeName,name){mode=modeName;me=name||'Operatore';cache={};$('#login-view').hidden=true;$('#app-view').hidden=false;$('#operator-name').textContent=me;
- $('#top-date').textContent=today();$('#sidebar-status').textContent=isDemo()?'ANTEPRIMA GRAFICA':'SUPABASE CONNESSO';
+ $('#top-date').textContent=today();$('#sidebar-status').textContent=isDemo()?'ANTEPRIMA GRAFICA':'SESSIONE AUTENTICATA';
  $('#sidebar-caption').textContent=isDemo()?'Tutti i dati sono simulati':'Operatore autorizzato · lettura protetta';
  $('#readonly-pill').textContent=isDemo()?'◈ DATI FITTIZI':'◉ ACCESSO OPERATORE';
- $('#footer-mode').textContent=isDemo()?'ANTEPRIMA · dati non reali':'1.1 RC Premium Web · sincronizzazione Supabase';
+ $('#footer-mode').textContent=isDemo()?'ANTEPRIMA · dati non reali':'2.5 Premium · Supabase · ultima sincronizzazione da verificare';
  $('#mode-banner').hidden=!isDemo();$('#mode-banner').textContent=isDemo()?'ANTEPRIMA GRAFICA: numeri, prenotazioni e clienti qui mostrati sono fittizi; non provengono da Supabase. Accedi con le credenziali aziendali per consultare i dati reali.':'';
- page=document.body.dataset.startPage||DGPageRoutes.resolve(location.pathname);document.body.dataset.startPage=page;loadPage();}
+ page=document.body.dataset.startPage||DGPageRoutes.resolve(location.pathname);document.body.dataset.startPage=page;loadPage();
+ if(modeName==='live'){DGData.startRealtime();window.dispatchEvent(new Event('dg24:session-started'));}else DGData.stopRealtime();}
 async function request(path){
  if(isDemo())throw Error('Funzione non disponibile in anteprima');
  if(path==='dashboard'){
@@ -211,6 +213,7 @@ document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement)e.
 document.addEventListener('click',e=>{const item=e.target.closest('[data-page]');if(item){e.preventDefault();go(item.dataset.page);return}const g=e.target.closest('[data-go]');if(g){go(g.dataset.go,g.dataset.trip);return}const d=e.target.closest('[data-download]');if(d){csvDownload(d.dataset.download,d.dataset.kind);return}});
 window.addEventListener('popstate',()=>{
  const next=DGPageRoutes.resolve(location.pathname);
+ if(mode==='live'&&page!==next)cache={};
  page=next;
  document.body.dataset.startPage=next;
  if(mode)loadPage();
@@ -224,13 +227,23 @@ window.addEventListener('dg3:mutazione-confermata',()=>{cache={};});
 let ultimoRefreshDG3=Date.now();
 function sincronizzaDG3({force=false}={}){
  if(mode!=='live'||document.hidden||$('#dg-modal')?.classList.contains('show'))return;
- if(!force&&Date.now()-ultimoRefreshDG3<90000)return;
+ const focused=document.activeElement;if(focused?.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+ if(!force&&Date.now()-ultimoRefreshDG3<20000)return;
  ultimoRefreshDG3=Date.now();cache={};loadPage();
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sincronizzaDG3();});
 window.addEventListener('focus',()=>sincronizzaDG3());
-// Polling leggero 90 s solo se la schermata è attiva e non ci sono modali.
-setInterval(()=>sincronizzaDG3(),90000);
+// Polling di sicurezza ogni 20 s sulle pagine non coperte da Realtime, solo con tab visibile.
+setInterval(()=>sincronizzaDG3(),20000);
+
+
+// Stato della connessione esposto in modo onesto, senza dichiarare una sincronizzazione assoluta.
+window.addEventListener('dg24:realtime-status',()=>{
+ if(mode!=='live')return;
+ const status=DGData.health().realtimeStatus;
+ const el=document.querySelector('#sidebar-status');
+ if(el)el.textContent=status==='connesso'?'REALTIME CONNESSO':status==='disconnesso'?'SESSIONE · REALTIME OFF':'SINCRONIZZAZIONE DI RISERVA';
+});
 
 $('#live-login-form').addEventListener('submit',async e=>{e.preventDefault();$('#auth-error').hidden=true;
  const btn=$('#login-submit');btn.disabled=true;const loginForm=e.target;const form=new FormData(loginForm);

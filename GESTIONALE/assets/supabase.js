@@ -43,16 +43,22 @@ const FIELDS={
  operators:['operatori_gestionale','user_id,username,nome,attivo']
 };
 let token='',refreshToken='',expiresAt=0,actor=null, pendingRefresh=null;
+let sessionEpoch=0,lastDataOk=0,lastDataError=0,lastErrorSummary='',lastRowReads={};
+let realtimeSocket=null,realtimeHeartbeat=null,realtimeReconnect=null,realtimeEnabled=false,realtimeRetries=0,realtimeRef=0,realtimeStatus='disconnesso';
+const REALTIME_TOPIC='realtime:delgrosso_operator_updates';
 function headers(auth=true){const h={'apikey':KEY,'Accept':'application/json'};if(auth&&token)h.Authorization=`Bearer ${token}`;return h;}
+function recordOk(key){lastDataOk=Date.now();if(key)lastRowReads[key]=lastDataOk;lastErrorSummary='';}
+function recordError(message){lastDataError=Date.now();lastErrorSummary=String(message||'Errore').slice(0,240);}
 function parseError(code,body){const message=(typeof body?.message==='string'&&body.message)||(typeof body?.error_description==='string'&&body.error_description)||(typeof body?.error==='string'&&body.error)||(typeof body?.hint==='string'&&body.hint)||'Operazione non riuscita'; const e=new Error(message);e.status=code;return e;}
 async function req(path,{method='GET',data,auth=true,skipRefresh=false}={}){
  if(auth&&!token)throw new Error('Accedi con un operatore Supabase autorizzato');
  if(auth&&!skipRefresh)await ensureSession();
  const init={method,headers:headers(auth),cache:'no-store',mode:'cors',referrerPolicy:'no-referrer'};
  if(data!==undefined){init.headers['Content-Type']='application/json';init.body=JSON.stringify(data);}
- let r;try{r=await fetch(URL+path,init)}catch(e){throw new Error('La connessione a Supabase è stata bloccata o non è raggiungibile. Verifica che il gestionale sia aperto tramite AVVIA_GESTIONALE_WINDOWS.bat, poi riprova senza estensioni che filtrano le richieste.');}
+ let r;try{r=await fetch(URL+path,init)}catch(e){recordError(e.message);throw new Error('La connessione a Supabase è stata bloccata o non è raggiungibile. Verifica che il gestionale sia aperto tramite AVVIA_GESTIONALE_WINDOWS.bat, poi riprova senza estensioni che filtrano le richieste.');}
  const raw=await r.text();let body;try{body=raw?JSON.parse(raw):null}catch{body=raw;}
- if(!r.ok)throw parseError(r.status,body);
+ if(!r.ok){const err=parseError(r.status,body);recordError(err.message);throw err;}
+ if(auth)recordOk();
  return body;
 }
 async function ensureSession(){if(Date.now()<expiresAt-100000)return;if(!refreshToken)throw new Error('Sessione scaduta. Accedi nuovamente.');
@@ -60,12 +66,91 @@ async function ensureSession(){if(Date.now()<expiresAt-100000)return;if(!refresh
  pendingRefresh=(async()=>{const result=await req('/auth/v1/token?grant_type=refresh_token',{method:'POST',data:{refresh_token:refreshToken},auth:false,skipRefresh:true});
   if(!result?.access_token)throw new Error('Aggiornamento della sessione non riuscito');
   token=result.access_token;refreshToken=result.refresh_token||refreshToken;expiresAt=Date.now()+1000*(result.expires_in||3600);
+  realtimeSend('access_token',REALTIME_TOPIC,{access_token:token});
   // Re-verify privilege after refresh: operator can be revoked at any time.
   const allowed=await req('/rest/v1/rpc/is_gestionale_admin',{skipRefresh:true});
   if(allowed!==true){clear();throw new Error('Permessi operatore revocati o sessione non attiva');}
  })().finally(()=>{pendingRefresh=null});return pendingRefresh;
 }
-function clear(){token='';refreshToken='';expiresAt=0;actor=null;}
+function clear(){sessionEpoch++;stopRealtime();token='';refreshToken='';expiresAt=0;actor=null;lastRowReads={};}
+function realtimeSend(event,topic,payload){
+ if(realtimeSocket?.readyState!==1)return false;
+ realtimeSocket.send(JSON.stringify({topic,event,payload,ref:String(++realtimeRef),join_ref:topic===REALTIME_TOPIC?'1':null}));
+ return true;
+}
+function realtimeBroadcastStatus(state){
+ realtimeStatus=state;
+ global.dispatchEvent?.(new CustomEvent('dg24:realtime-status',{detail:{state}}));
+}
+function stopRealtime(){
+ realtimeEnabled=false;
+ if(realtimeReconnect){clearTimeout(realtimeReconnect);realtimeReconnect=null;}
+ if(realtimeHeartbeat){clearInterval(realtimeHeartbeat);realtimeHeartbeat=null;}
+ if(realtimeSocket){const old=realtimeSocket;realtimeSocket=null;try{old.onclose=old.onerror=old.onmessage=old.onopen=null;old.close(1000,'Logout');}catch{}}
+ realtimeBroadcastStatus('disconnesso');
+}
+function startRealtime(){
+ if(!token||!actor||typeof WebSocket==='undefined')return false;
+ if(realtimeEnabled&&realtimeSocket&&[0,1].includes(realtimeSocket.readyState))return true;
+ realtimeEnabled=true;
+ const connect=()=>{
+  if(!realtimeEnabled||!token)return;
+  let ws;
+  try{ws=new WebSocket(`wss://${PROJECT}.supabase.co/realtime/v1/websocket?apikey=${encodeURIComponent(KEY)}&vsn=1.0.0`)}
+  catch{realtimeBroadcastStatus('riconnessione');return scheduleReconnect();}
+  realtimeSocket=ws;
+  realtimeBroadcastStatus('connessione');
+  ws.onopen=()=>{
+   if(ws!==realtimeSocket)return;
+   // Il JWT individuale resta nel payload autorizzato, non nel link pubblico.
+   realtimeSend('phx_join',REALTIME_TOPIC,{config:{private:false,broadcast:{ack:false,self:false},presence:{enabled:false},postgres_changes:[
+    {event:'INSERT',schema:'public',table:'prenotazioni'},
+    {event:'UPDATE',schema:'public',table:'prenotazioni'},
+    {event:'INSERT',schema:'public',table:'notifiche'},
+    {event:'UPDATE',schema:'public',table:'notifiche'}
+   ]},access_token:token});
+   if(realtimeHeartbeat)clearInterval(realtimeHeartbeat);
+   realtimeHeartbeat=setInterval(()=>{if(ws===realtimeSocket&&ws.readyState===1){
+     realtimeSend('heartbeat','phoenix',{});
+     // Refresh via Supabase Auth on normal cadence, then notify Realtime of new JWT.
+     ensureSession().catch(()=>{realtimeBroadcastStatus('sessione_scaduta');});
+   }},20000);
+  };
+  ws.onmessage=event=>{
+   let data;try{data=JSON.parse(event.data)}catch{return;}
+   if(ws!==realtimeSocket)return;
+   if(data.event==='phx_reply'&&data.topic===REALTIME_TOPIC){
+    if(data.payload?.status==='ok'){realtimeRetries=0;realtimeBroadcastStatus('connesso');}
+    else {realtimeBroadcastStatus('riconnessione');try{ws.close()}catch{}}
+   }
+   if(data.event==='postgres_changes'){
+    const table=data.payload?.data?.table;
+    const action=data.payload?.data?.type;
+    if(['prenotazioni','notifiche'].includes(table)&&['INSERT','UPDATE','DELETE'].includes(action)){
+      // Nessun record personale viene esportato: il client rilegge da REST con RLS.
+      global.dispatchEvent?.(new CustomEvent('dg24:realtime-change',{detail:{table,action}}));
+    }
+   }
+   if(['phx_error','phx_close'].includes(data.event)){realtimeBroadcastStatus('riconnessione');try{ws.close()}catch{}}
+  };
+  ws.onerror=()=>{if(ws===realtimeSocket)realtimeBroadcastStatus('riconnessione');};
+  ws.onclose=()=>{
+   if(ws!==realtimeSocket)return;
+   realtimeSocket=null;
+   if(realtimeHeartbeat){clearInterval(realtimeHeartbeat);realtimeHeartbeat=null;}
+   realtimeBroadcastStatus('riconnessione');
+   if(realtimeEnabled)scheduleReconnect();
+  };
+ };
+ const scheduleReconnect=()=>{
+  if(!realtimeEnabled||realtimeReconnect)return;
+  const delays=[1200,2500,5000,10000,15000];
+  const delay=delays[Math.min(realtimeRetries++,delays.length-1)];
+  realtimeReconnect=setTimeout(()=>{realtimeReconnect=null;connect()},delay);
+ };
+ connect();return true;
+}
+
 function signalMutation(){if(global.dispatchEvent)global.dispatchEvent(new Event('dg3:mutazione-confermata'));}
 /** Accesso con username: funzione Edge già presente sul Supabase gestionale.
  * Nessuna email privata e nessuna password hardcoded nel frontend.
@@ -110,26 +195,41 @@ async function signOut(){
 }
 async function rows(key,params={}){
  const entry=FIELDS[key];if(!entry)throw new Error('Tabella non autorizzata dal client');
- const [table,select]=entry;const size=500,max=20000;const all=[];
+ const [table,select]=entry;const size=500,max=20000;const all=[];const epoch=sessionEpoch;
  for(let offset=0;offset<max;offset+=size){const query=new URLSearchParams({select,limit:String(size),offset:String(offset),...params});
-  const batch=await req(`/rest/v1/${table}?${query}`);if(!Array.isArray(batch))throw new Error('Formato record Supabase inatteso');
-  all.push(...batch);if(batch.length<size)return all;
+  const batch=await req(`/rest/v1/${table}?${query}`);if(epoch!==sessionEpoch)throw new Error('Sessione cambiata durante la lettura: ripeti l’accesso');
+  if(!Array.isArray(batch))throw new Error('Formato record Supabase inatteso');
+  all.push(...batch);if(batch.length<size){recordOk(key);return all;}
  }
  throw new Error('Troppe righe per una consultazione completa: usare filtri/paginazione');
 }
-/** Diagnostica senza leggere o esporre dati sensibili, soltanto schema accessibile. */
+/** Diagnostica in lettura reale: una SELECT autenticata, senza esportare dati personali.
+ * Importante: lettura riuscita NON implica scrittura collaudata o visibilità completa (RLS).
+ */
 async function probe(key){
  const entry=FIELDS[key];if(!entry)throw Error('Modulo diagnostico non previsto');
  const field=entry[1].split(',')[0];
- const qp=new URLSearchParams({select:field,limit:'0'});
+ const qp=new URLSearchParams({select:field,limit:'1'});
  const result=await req('/rest/v1/'+entry[0]+'?'+qp);
  if(!Array.isArray(result))throw Error('Risposta del servizio non valida');
- return {key,table:entry[0],accessible:true};
+ recordOk(key);
+ return {key,table:entry[0],accessible:true,realSelectVerified:true,hasVisibleRow:result.length>0};
 }
+async function verifyCurrentOperator(){
+ if(!actor?.id||!token)throw Error('Nessun operatore autenticato');
+ const [user,allowed]=await Promise.all([
+  req('/auth/v1/user'),req('/rest/v1/rpc/is_gestionale_admin',{method:'POST',data:{}})
+ ]);
+ if(!user?.id||user.id!==actor.id||allowed!==true){clear();throw Error('Identità o autorizzazioni Supabase non valide');}
+ return {ok:true,operator:actor.username};
+}
+function health(){return Object.freeze({configured:true,authenticated:!!token&&!!actor,operator:actor?.username||null,
+ realtimeStatus,lastDataOk,lastDataError,lastErrorSummary,readChecks:{...lastRowReads},
+ warning:'Lettura e connessione non equivalgono a verifica delle scritture o dei pagamenti.'});}
 async function rpc(name,params){const allowed=['dg2_save_booking_guarded_v1','dg_register_payment','dg_manage_booking_seats_v1','dg3_preview_spostamento_data_v1','dg3_sposta_prenotazione_data_v1','dg_save_rental_v15','dg_archive_rental_v57','dg_archive_trip_v56','dg_register_rental_payment','dg_transfer_cash','dg11_anteprima_cassa_v1','dg11_chiudi_cassa_v1','dg11_incasso_extra_v1','dg11_salva_costo_viaggio_v1','dg3_diagnostica_backend_v1','dg3_archived_trip_check_v1','dg3_delete_archived_trip_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_aggiorna_viaggio_autobus_stato_v1'];
  if(!allowed.includes(name))throw new Error('Operazione RPC non prevista');
  const result=await req(`/rest/v1/rpc/${name}`,{method:'POST',data:params});
- if(!['dg3_preview_spostamento_data_v1','dg11_anteprima_cassa_v1','dg3_archived_trip_check_v1','dg3_disponibilita_autobus_viaggio_v1'].includes(name) && result?.success!==false)signalMutation();
+ if(!['dg3_preview_spostamento_data_v1','dg11_anteprima_cassa_v1','dg3_archived_trip_check_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_diagnostica_backend_v1'].includes(name) && result?.success!==false)signalMutation();
  return result;}
 async function insert(table,fields){const allowed=['clienti','viaggi','dg2_layout_library','noleggi_bus','scadenze_gestionale','preventivi','dg3_fatture_bozze','documenti_gestionali','notifiche','dg3_autisti','dg3_wa_manual_logs','dg3_anomalie_verifiche','dg3_impostazioni','dg3_richieste_rettifica_cassa','dg_notification_reads','fornitori','flotta'];
  if(!allowed.includes(table))throw new Error('Scrittura non autorizzata dal client');
@@ -259,8 +359,8 @@ function printBookings(trip,bookings){const list=bookings.filter(b=>b.viaggio_id
 }
 async function getOverview(trip,load){const [bookings,seats]=await Promise.all([load('bookings'),load('seatrows')]);return seatOverview(trip,bookings,seats);}
 // Status conveys configuration only; actual access requires successful Supabase login.
-const adapter={probe,status:()=>({configured:true,project_ref:PROJECT,mode:'WEB_OPERATOR_USERNAME'}),signInOperator,signOut,changeOwnPassword,rows,rpc,insert,update,
- saveBooking,registerPayment,archiveBookingConfirmation,seatOverview,getOverview,calculateDashboard,downloadCSV,printBookings,printAllTrips,downloadPrivate,clear,get actor(){return actor;},get sessionActive(){return!!token;},
+const adapter={probe,verifyCurrentOperator,health,status:()=>({configured:true,project_ref:PROJECT,mode:'WEB_OPERATOR_USERNAME'}),signInOperator,signOut,changeOwnPassword,rows,rpc,insert,update,
+ startRealtime,stopRealtime,saveBooking,registerPayment,archiveBookingConfirmation,seatOverview,getOverview,calculateDashboard,downloadCSV,printBookings,printAllTrips,downloadPrivate,clear,get actor(){return actor;},get sessionActive(){return!!token;},
  csv,positiveNumber,upsertKnown,uploadPrivateFile,removePendingUpload};
 Object.freeze(adapter);
 global.DGData=adapter;
