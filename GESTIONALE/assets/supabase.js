@@ -26,6 +26,7 @@ const FIELDS={
  layouts:['dg2_layout_library','id,nome,configurazione,attivo,created_at,updated_at,updated_by'],
  officialBusLayouts:['dg28_bus_layouts','autobus_id,layout_id,configurazione,versione,pubblicata_il'],
  officialTripLayouts:['dg28_trip_layouts','viaggio_id,autobus_id,layout_id,configurazione,versione,pubblicata_il'],
+ layoutHistory:['dg29_layout_versions','id,scope,autobus_id,viaggio_id,layout_id,versione,configurazione,checksum,pubblicata_il'],
  invoices:['dg3_fatture_bozze','id,tipo_documento,stato,data_bozza,prenotazione_id,noleggio_id,emittente,destinatario,righe,aliquota_iva,natura_iva,imponibile_centesimi,iva_centesimi,totale_centesimi,note_interne,created_by,created_at'],
  waInbox:['dg_whatsapp_inbox_v61','id,sender_phone,sender_name,message_text,intent,status,booking_id,trip_id,received_at'],
  waOptins:['dg_whatsapp_optins_v61','phone,customer_name,consent_source,consent_at,revoked_at'],
