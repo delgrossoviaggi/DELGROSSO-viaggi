@@ -65,7 +65,7 @@ function ui(){
  <p class="dg28-note">La capienza non si modifica da qui. Per un viaggio da 57 posti su autobus da 63, crea una variante di 57 sedili: la pubblicazione verifica le prenotazioni già presenti e blocca gli errori.</p></section>`;
 }
 async function reload(){
- try{await fetchData();message='';if(window.page==='layouts')await loadPage()}catch(e){message=e.message;if(window.page==='layouts')await loadPage();}
+ try{await fetchData();message='';if(document.body.dataset.startPage==='layouts')await loadPage()}catch(e){message=e.message;if(document.body.dataset.startPage==='layouts')await loadPage();}
 }
 function swap(a,b){let t=draft.rows[a[0]].cells[a[1]];draft.rows[a[0]].cells[a[1]]=draft.rows[b[0]].cells[b[1]];draft.rows[b[0]].cells[b[1]]=t}
 function renumber(){let n=1;draft.rows.forEach((r,i)=>{r.rowNumber=i+1;r.label=`Fila ${i+1}`;r.cells.forEach(c=>{if(c.type==='seat'){c.id=String(n);c.label=String(n).padStart(2,'0');n++}})});draft.posti_totali=n-1}
@@ -73,12 +73,19 @@ function getCurrentName(){return document.querySelector('#dg28-name')?.value.tri
 async function run(action,id,el){
  if(busy)return;busy=true;
  try{
- const bus=selectedBus();if(!bus)throw Error('Autobus non selezionato');
+ const bus=selectedBus();if(!bus)throw Error('Autobus non selezionato');if(!['bus','fresh','load','copy-official'].includes(action)&&draft){const name=document.querySelector('#dg28-name')?.value.trim();if(name)draft.name=name;}
  if(['cell','status','row-add','row-remove','renumber','copy-official','fresh','load','save','publish-bus','publish-trip'].includes(action)&&!draft)draft=defaultConfig(bus);
  if(action==='bus'){activeBusId=id;selectedLayoutId='';draft=defaultConfig(fleet.find(x=>x.id===id));message='Schema iniziale da verificare';}
  else if(action==='fresh'){draft=defaultConfig(bus);selectedLayoutId='';message='Nuova bozza: modifiche non ancora salvate';}
  else if(action==='copy-official'){const o=busOfficial.find(x=>x.autobus_id===bus.id);if(!o)throw Error('Non esiste ancora una piantina ufficiale per questo autobus');draft=clone(o.configurazione);selectedLayoutId='';message='Copia dell’ufficiale: salvarla come nuova bozza';}
- else if(action==='load'){const id=document.querySelector('#dg28-library')?.value;const l=library.find(x=>x.id===id);if(!l)throw Error('Seleziona una bozza dalla libreria');draft=clone(l.configurazione);selectedLayoutId=id;message='Bozza caricata';}
+ else if(action==='load'){const id=document.querySelector('#dg28-library')?.value;const l=library.find(x=>x.id===id);if(!l)throw Error('Seleziona una bozza dalla libreria');draft=clone(l.configurazione);
+ if(Array.isArray(draft.rows)&&draft.rows.some(r=>Array.isArray(r))){
+  draft.rows=draft.rows.map((r,i)=>({rowNumber:i+1,label:'Fila '+(i+1),cells:r.map(c=>
+   typeof c==='number'?{type:'seat',id:String(c),label:String(c).padStart(2,'0'),status:'available'}:
+   typeof c==='string'&&/^\d+$/.test(c)?{type:'seat',id:c,label:c.padStart(2,'0'),status:'available'}:
+   {type:['aisle','door','empty','wc','table'].includes(c)?c:'empty'})}));
+ }
+ selectedLayoutId=id;message='Bozza caricata';}
  else if(action==='cell'){const r=Number(el.dataset.r),c=Number(el.dataset.c),cell=draft.rows[r]?.cells[c];if(!cell)throw Error('Cella non trovata');const seq=['seat','empty','aisle','door','wc','table'];const index=seq.indexOf(cell.type);cell.type=seq[(index+1)%seq.length];if(cell.type==='seat'){cell.id='0';cell.label='--';cell.status='available'}else{delete cell.id;delete cell.label;delete cell.status};message='Modifiche da salvare; rinumera prima della pubblicazione';}
  else if(action==='status'){const r=Number(el.dataset.r),c=Number(el.dataset.c),cell=draft.rows[r]?.cells[c];if(!cell||cell.type!=='seat')throw Error('Sedile non presente');cell.status=cell.status==='available'?'blocked':cell.status==='blocked'?'out_of_service':'available';}
  else if(action==='row-add'){if(draft.rows.length>=35)throw Error('Massimo 35 file');draft.rows.push({rowNumber:draft.rows.length+1,cells:[{type:'empty'},{type:'empty'},{type:'aisle'},{type:'empty'},{type:'empty'}]});}
@@ -106,22 +113,21 @@ async function run(action,id,el){
   await DGData.rpc('dg28_publish_trip_layout_v1',{p_viaggio_id:tripId,p_layout_id:selectedLayoutId});
   message='Variante ufficiale pubblicata per il viaggio.';tripOfficial=await DGData.rows('officialTripLayouts');
  }
- if(window.page==='layouts')await loadPage();
- }catch(e){message='Errore: '+e.message;toast(message);if(window.page==='layouts')await loadPage();}
+ if(document.body.dataset.startPage==='layouts')await loadPage();
+ }catch(e){message='Errore: '+e.message;toast(message);if(document.body.dataset.startPage==='layouts')await loadPage();}
  finally{busy=false;}
 }
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-dg28]');if(!el)return;e.preventDefault();await run(el.dataset.dg28,el.dataset.id,el)});
 let drag=null;
 document.addEventListener('dragstart',e=>{const el=e.target.closest('.dg28-cell[data-r]');if(!el)return;drag=[Number(el.dataset.r),Number(el.dataset.c)];});
 document.addEventListener('dragover',e=>{if(drag&&e.target.closest('.dg28-cell[data-r]'))e.preventDefault();});
-document.addEventListener('drop',e=>{const el=e.target.closest('.dg28-cell[data-r]');if(!el||!drag||!draft)return;e.preventDefault();swap(drag,[Number(el.dataset.r),Number(el.dataset.c)]);drag=null;if(window.page==='layouts')loadPage();});
-const before=window.renders?.layouts;
+document.addEventListener('drop',e=>{const el=e.target.closest('.dg28-cell[data-r]');if(!el||!drag||!draft)return;e.preventDefault();swap(drag,[Number(el.dataset.r),Number(el.dataset.c)]);drag=null;if(document.body.dataset.startPage==='layouts')loadPage();});
 if(typeof renders!=='undefined'){
  renders.layouts=async function(){
   if(isDemo())return sec('Piantine degli autobus','Editor disponibile dopo l’accesso Nicola/Raffaele')+cardInfo('Accedi con Supabase per modificare le piantine ufficiali. Nessuna modifica in modalità demo.','warn');
   try{await fetchData();return ui()}catch(err){return sec('Editor piantine','Verifica collegamento a Supabase')+cardInfo(err.message,'warn')}
  };
- if(window.page==='layouts'&&DGData?.sessionActive)loadPage();
+ if(document.body.dataset.startPage==='layouts'&&DGData?.sessionActive)loadPage();
 }
 window.DGPiantine28=Object.freeze({version:'2.8',makeTemplate:createTemplate,countSeats});
 })();
