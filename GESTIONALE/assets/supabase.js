@@ -16,6 +16,7 @@ const FIELDS={
  payments:['pagamenti','id,viaggio_id,prenotazione_id,importo,tipo,stato,incassato_da,incassato_da_user_id,metodo,metodo_pagamento,created_at,data_pagamento,receipt_number,receipt_storage_path'],
  notifications:['notifiche','id,titolo,messaggio,tipo,letto,created_at'],
  rentals:['noleggi_bus','id,id_noleggio,referente,azienda,telefono,email,tratta_partenza,tratta_destinazione,fermate,data_partenza,ora_partenza,data_ritorno,ora_ritorno,passeggeri,servizio_tipo,prezzo_concordato,acconto,saldo,stato_pagamento,stato_noleggio,flotta_id,note,archiviato_at'],
+ activities:['attivita_gestionale','id,titolo,descrizione,stato,priorita,scadenza,assegnata_a,created_at,updated_at,completata_at'],
  deadlines:['scadenze_gestionale','id,titolo,descrizione,tipo,stato,priorita,data_scadenza,importo,note,completata_at'],
  quotes:['preventivi','id,numero_preventivo,nome,cognome,telefono,email,azienda,servizio,servizio_richiesto,data_viaggio,data_partenza,data_ritorno,luogo_partenza,destinazione,numero_passeggeri,importo,importo_preventivo,stato,validita_preventivo,note_interne,condizioni_offerta,created_at'],
  receiptarchive:['dg_receipt_archive','kind,id,reference_id,receipt_number,tipo,importo,data_pagamento,cliente,servizio,metodo,operatore,legacy_path,professional_path,created_at'],
@@ -232,14 +233,14 @@ async function rpc(name,params){const allowed=['dg2_save_booking_guarded_v1','dg
  const result=await req(`/rest/v1/rpc/${name}`,{method:'POST',data:params});
  if(!['dg3_preview_spostamento_data_v1','dg11_anteprima_cassa_v1','dg3_archived_trip_check_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_diagnostica_backend_v1','dg26_anteprima_cancellazione_v1'].includes(name) && result?.success!==false)signalMutation();
  return result;}
-async function insert(table,fields){const allowed=['clienti','viaggi','dg2_layout_library','noleggi_bus','scadenze_gestionale','preventivi','dg3_fatture_bozze','documenti_gestionali','notifiche','dg3_autisti','dg3_wa_manual_logs','dg3_anomalie_verifiche','dg3_impostazioni','dg3_richieste_rettifica_cassa','dg_notification_reads','fornitori','flotta'];
+async function insert(table,fields){const allowed=['attivita_gestionale','clienti','viaggi','dg2_layout_library','noleggi_bus','scadenze_gestionale','preventivi','dg3_fatture_bozze','documenti_gestionali','notifiche','dg3_autisti','dg3_wa_manual_logs','dg3_anomalie_verifiche','dg3_impostazioni','dg3_richieste_rettifica_cassa','dg_notification_reads','fornitori','flotta'];
  if(!allowed.includes(table))throw new Error('Scrittura non autorizzata dal client');
  await ensureSession();const h=headers();h.Prefer='return=representation';h['Content-Type']='application/json';
  let r;try{r=await fetch(`${URL}/rest/v1/${table}`,{method:'POST',headers:h,body:JSON.stringify(fields),referrerPolicy:'no-referrer'})}catch{throw new Error('Connessione non riuscita');}
  const raw=await r.text();let body;try{body=JSON.parse(raw)}catch{body=null};if(!r.ok)throw parseError(r.status,body);
  if(!Array.isArray(body)||!body.length)throw new Error('Salvataggio non confermato dal database');signalMutation();return body[0];
 }
-async function update(table,id,fields){const allowed=['clienti','viaggi','dg2_layout_library','noleggi_bus','scadenze_gestionale','preventivi','prenotazioni','dg3_fatture_bozze','documenti_gestionali','notifiche','dg_whatsapp_inbox_v61','dg3_autisti','dg3_wa_manual_logs','dg3_anomalie_verifiche','fornitori'];
+async function update(table,id,fields){const allowed=['attivita_gestionale','clienti','viaggi','dg2_layout_library','noleggi_bus','scadenze_gestionale','preventivi','prenotazioni','dg3_fatture_bozze','documenti_gestionali','notifiche','dg_whatsapp_inbox_v61','dg3_autisti','dg3_wa_manual_logs','dg3_anomalie_verifiche','fornitori'];
  if(!allowed.includes(table))throw new Error('Modifica non autorizzata dal client');
  await ensureSession();const h=headers();h.Prefer='return=representation';h['Content-Type']='application/json';
  const url=`${URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`;
