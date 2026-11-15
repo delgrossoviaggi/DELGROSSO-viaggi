@@ -26,7 +26,7 @@
 </style>
 <link href="assets/site-features.css" rel="stylesheet"/><link href="css/dg-palette-v22.css?v=28" rel="stylesheet"/>
 <link href="css/dg-refresh-v26.css?v=28" rel="stylesheet"/>
-<link href="assets/dg-modern-2026.css?v=1" rel="stylesheet"/><link href="assets/dg-agency-global-2026.css?v=3" rel="stylesheet"/></head>
+<link href="assets/dg-modern-2026.css?v=1" rel="stylesheet"/><link href="assets/dg-agency-global-2026.css?v=3" rel="stylesheet"/><style>.seat.seat-blocked{background:#f0d4a0!important;border-color:#bb772e!important;color:#5e4119!important;opacity:1!important}.seat.seat-blocked .seat__number:after{content:" 🔒";font-size:.62em}</style></head>
 <body class="remodulated-site dg-agency-site"><div aria-hidden="true" class="page-loader"><span></span></div>
 <header class="site-header premium-header">
 <div class="wrap nav">
@@ -100,9 +100,12 @@ function normalizeLayout(bus){
 function seatButton(cell,occ){
  const id=String(cell.id??cell.number??cell.value??'').trim(), b=document.createElement('button');
  const beyondCapacity=Number(id)>Number(current?.posti_totali||0);
- b.type='button';b.className=`seat ${occ.has(id)||beyondCapacity?'occupied':'available'}`;b.dataset.seat=id;b.setAttribute('aria-label',`Posto ${id.padStart(2,'0')}`);b.title=occ.has(id)?`Posto ${id} · già occupato`:`Posto ${id} · disponibile`;
+ const blocked=cell.status==='blocked'||cell.status==='out_of_service';
+ const taken=occ.has(id)||beyondCapacity||blocked;
+ b.type='button';b.className=`seat ${taken?'occupied':'available'}${blocked?' seat-blocked':''}`;b.dataset.seat=id;b.setAttribute('aria-label',`Posto ${id.padStart(2,'0')}`);
+ b.title=blocked?`Posto ${id} · ${cell.status==='blocked'?'bloccato':'fuori servizio'}`:occ.has(id)?`Posto ${id} · già occupato`:beyondCapacity?`Posto ${id} · non prenotabile per questo viaggio`:`Posto ${id} · disponibile`;
  b.innerHTML=`<span class="seat__number">${esc(String(cell.label||id).padStart(2,'0'))}</span><span class="seat__icon">${SVG.seat}</span>`;
- if(occ.has(id)||beyondCapacity){b.disabled=true;return b}
+ if(taken){b.disabled=true;return b}
  b.onclick=()=>{const n=Number(id);if(selected.includes(n)){selected=selected.filter(x=>x!==n);b.classList.remove('selected');b.classList.add('available');b.title=`Posto ${id} · disponibile`}else{
   if(selected.length>=maxBookableSeats){
    let warning=document.querySelector('#seatLimitWarning');
@@ -212,7 +215,7 @@ async function load(){
   const layoutSeats=normalized.layout.flatMap(r=>Array.isArray(r.cells)?r.cells:[]).filter(c=>c?.type==='seat');
   const seatIds=new Set(layoutSeats.map(c=>String(c.id??c.number??c.value??'')));
   const bookedOnLayout=booked.filter(id=>seatIds.has(String(id)));
-  const mapFree=Math.max(0,layoutSeats.length-bookedOnLayout.length);
+  const mapFree=Math.max(0,layoutSeats.filter(c=>!['blocked','out_of_service'].includes(c.status)&&Number(c.id??c.number??c.value)<=Number(trip.posti_totali||0)).length-bookedOnLayout.length);
   const inventory=typeof gestTripAvailability==='function'?gestTripAvailability(trip):{known:false};
   const free=inventory.known?Math.min(mapFree,inventory.free):mapFree;
   maxBookableSeats=free;
