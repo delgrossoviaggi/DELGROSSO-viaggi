@@ -53,7 +53,7 @@ async function fetchData(){
  ]);
  fleet=(f||[]).filter(x=>x.categoria==='GT'&&[53,63].includes(Number(x.posti))&&x.attivo&&!/mercedes|v250/i.test(x.titolo||''));
  library=l||[];busOfficial=bo||[];tripOfficial=to||[];trips=t||[];
- layoutHistory=await DGData.rows('layoutHistory').catch(()=>[]);
+ layoutHistory=(busOfficial.length||tripOfficial.length)?await DGData.rows('layoutHistory').catch(()=>[]):[];
  if(!fleet.some(x=>x.id===activeBusId)){activeBusId=fleet[0]?.id||'';draft=activeBusId?defaultConfig(selectedBus()):null;selectedLayoutId='';savedDraftFingerprint='';resetHistory();}
 }
 function ui(){
