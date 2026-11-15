@@ -57,3 +57,42 @@ where v.autobus_id is not null
   and not exists(select 1 from public.dg28_trip_layouts t
                  where t.viaggio_id=v.id and t.autobus_id=v.autobus_id)
 order by v.data_partenza;
+
+
+-- 5. Cross-check the legacy text lists and the relational seat index together.
+--    Important: an index-only mismatch is not automatically a missing booking.
+with bookings as (
+ select id,viaggio_id,posti,posti_selezionati
+ from public.prenotazioni where coalesce(stato,'') !~* 'annull|cancel|cancell'
+),
+legacy_seats as (
+ select b.viaggio_id,trim(x.seat) as seat from bookings b
+ cross join lateral regexp_split_to_table(coalesce(b.posti_selezionati,''),',') x(seat)
+ where trim(x.seat) ~ '^[1-9][0-9]*$'
+),
+index_seats as (
+ select p.viaggio_id,trim(p.posto) as seat from public.prenotazione_posti p
+ join bookings b on b.id=p.prenotazione_id
+),
+unified as (
+ select viaggio_id,seat from legacy_seats
+ union
+ select viaggio_id,seat from index_seats
+),
+known as (
+ select viaggio_id,count(*) as recognized_seat_ids from unified group by viaggio_id
+),
+requested as (
+ select viaggio_id,count(*) as bookings_active,sum(posti) as seats_requested
+ from bookings group by viaggio_id
+)
+select v.id as viaggio_id,v.data_partenza,v.titolo,v.posti_occupati,
+ coalesce(r.seats_requested,0) as seats_requested,
+ coalesce(k.recognized_seat_ids,0) as recognized_seat_ids,
+ v.posti_occupati-coalesce(k.recognized_seat_ids,0) as difference
+from public.viaggi v
+left join requested r on r.viaggio_id=v.id
+left join known k on k.viaggio_id=v.id
+where v.data_partenza >= (now() at time zone 'Europe/Rome')::date
+  and v.archiviato_at is null
+order by v.data_partenza,v.titolo;
