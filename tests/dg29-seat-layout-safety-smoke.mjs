@@ -19,7 +19,7 @@ for(const capacity of [53,63]){
   const seats=draft.rows.flatMap(r=>r.cells).filter(c=>c.type==='seat');
   assert.equal(seats.length,capacity);
   assert.equal(new Set(seats.map(s=>s.id)).size,capacity);
-  assert.deepEqual(seats.map(s=>Number(s.id)).sort((a,b)=>a-b),Array.from({length:capacity},(_,i)=>i+1));
+  assert.deepEqual(Array.from(seats,s=>Number(s.id)).sort((a,b)=>a-b),Array.from({length:capacity},(_,i)=>i+1));
 }
 
 // Critical regression: never renumber upon saving a draft or publish
