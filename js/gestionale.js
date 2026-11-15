@@ -56,6 +56,26 @@ async function getBookedSeats(viaggioId){
 }
 
 async function getBusLayout(viaggioId){
+  // La piantina ufficiale usa il medesimo snapshot Supabase visto dagli operatori.
+  // Pubblica soltanto la geometria, mai nomi clienti o dati di prenotazione.
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),12000);
+    try{
+      const response=await fetch('https://chkuayhbmitdmzmmvona.supabase.co/rest/v1/rpc/dg28_public_trip_layout_v1',{
+        method:'POST',
+        headers:{apikey:'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je','Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({p_viaggio_id:String(viaggioId)}),
+        cache:'no-store',signal:controller.signal
+      });
+      if(response.ok){
+        const official=await response.json();
+        if(official && Array.isArray(official.layout) && official.layout.length){
+          return official;
+        }
+      }
+    }finally{clearTimeout(timeout)}
+  }catch(error){console.warn('Piantina ufficiale non disponibile; uso layout di riserva.',error)}
   return await gestBridge('bus-layout',{viaggioId});
 }
 
