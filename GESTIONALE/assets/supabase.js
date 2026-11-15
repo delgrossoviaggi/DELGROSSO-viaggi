@@ -24,6 +24,8 @@ const FIELDS={
  transfers:['cassa_trasferimenti','id,da_operatore_user_id,a_operatore_user_id,importo,data_trasferimento,stato,note'],
  cashoperators:['dg_cassa_operatori','user_id,username,nome,cassa_netto,contanti_netto,viaggi_incassati,noleggi_incassati,trasferimenti_uscita,trasferimenti_entrata'],
  layouts:['dg2_layout_library','id,nome,configurazione,attivo,created_at,updated_at,updated_by'],
+ officialBusLayouts:['dg28_bus_layouts','autobus_id,layout_id,configurazione,versione,pubblicata_il'],
+ officialTripLayouts:['dg28_trip_layouts','viaggio_id,autobus_id,layout_id,configurazione,versione,pubblicata_il'],
  invoices:['dg3_fatture_bozze','id,tipo_documento,stato,data_bozza,prenotazione_id,noleggio_id,emittente,destinatario,righe,aliquota_iva,natura_iva,imponibile_centesimi,iva_centesimi,totale_centesimi,note_interne,created_by,created_at'],
  waInbox:['dg_whatsapp_inbox_v61','id,sender_phone,sender_name,message_text,intent,status,booking_id,trip_id,received_at'],
  waOptins:['dg_whatsapp_optins_v61','phone,customer_name,consent_source,consent_at,revoked_at'],
@@ -228,7 +230,7 @@ async function verifyCurrentOperator(){
 function health(){return Object.freeze({configured:true,authenticated:!!token&&!!actor,operator:actor?.username||null,
  realtimeStatus,lastDataOk,lastDataError,lastErrorSummary,readChecks:{...lastRowReads},
  warning:'Lettura e connessione non equivalgono a verifica delle scritture o dei pagamenti.'});}
-async function rpc(name,params){const allowed=['dg2_save_booking_guarded_v1','dg_register_payment','dg_manage_booking_seats_v1','dg3_preview_spostamento_data_v1','dg3_sposta_prenotazione_data_v1','dg_save_rental_v15','dg_archive_rental_v57','dg_archive_trip_v56','dg_register_rental_payment','dg_transfer_cash','dg11_anteprima_cassa_v1','dg11_chiudi_cassa_v1','dg11_incasso_extra_v1','dg11_salva_costo_viaggio_v1','dg3_diagnostica_backend_v1','dg3_archived_trip_check_v1','dg3_delete_archived_trip_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_aggiorna_viaggio_autobus_stato_v1','dg26_anteprima_cancellazione_v1','dg26_elimina_prenotazione_v1','dg26_annulla_viaggio_e_prenotazioni_v1'];
+async function rpc(name,params){const allowed=['dg2_save_booking_guarded_v1','dg_register_payment','dg_manage_booking_seats_v1','dg3_preview_spostamento_data_v1','dg3_sposta_prenotazione_data_v1','dg_save_rental_v15','dg_archive_rental_v57','dg_archive_trip_v56','dg_register_rental_payment','dg_transfer_cash','dg11_anteprima_cassa_v1','dg11_chiudi_cassa_v1','dg11_incasso_extra_v1','dg11_salva_costo_viaggio_v1','dg3_diagnostica_backend_v1','dg3_archived_trip_check_v1','dg3_delete_archived_trip_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_aggiorna_viaggio_autobus_stato_v1','dg26_anteprima_cancellazione_v1','dg26_elimina_prenotazione_v1','dg26_annulla_viaggio_e_prenotazioni_v1','dg28_publish_bus_layout_v1','dg28_publish_trip_layout_v1'];
  if(!allowed.includes(name))throw new Error('Operazione RPC non prevista');
  const result=await req(`/rest/v1/rpc/${name}`,{method:'POST',data:params});
  if(!['dg3_preview_spostamento_data_v1','dg11_anteprima_cassa_v1','dg3_archived_trip_check_v1','dg3_disponibilita_autobus_viaggio_v1','dg3_diagnostica_backend_v1','dg26_anteprima_cancellazione_v1'].includes(name) && result?.success!==false)signalMutation();
