@@ -43,7 +43,7 @@ function notice(s,kind=''){lastNotice=s;const el=$('notice');el.textContent=s;el
 function errorMsg(e){return txt(e?.message||e).replace(/(Bearer\s+[A-Za-z0-9-_.]+)/g,'Bearer ***')}
 function setLoading(s='Caricamento dati Supabase…'){$('content').innerHTML='<div class="loading">'+esc(s)+'</div>'}
 function setBusy(b){document.querySelectorAll('.btn.solid').forEach(x=>x.disabled=b)}
-function clearSensitive(){sessionEpoch++;session=null;operator='';cache.clear();ongoing.clear();temp={};try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login')}catch(e){}}
+function clearSensitive(){sessionEpoch++;session=null;operator='';cache.clear();ongoing.clear();temp={};window.DG37Layouts?.clear();try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login')}catch(e){}}
 function hasSession(){return !!session?.access_token&&!!session?.user?.id}
 async function raw(path,method='GET',body=null,authenticated=true){
  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),16000);
