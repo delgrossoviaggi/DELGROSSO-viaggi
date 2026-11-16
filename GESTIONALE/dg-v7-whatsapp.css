@@ -1,0 +1,11 @@
+/* Responsive participant selector for iOS Safari / Android / desktop */
+#page-whatsapp .dg7-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+#page-whatsapp .dg7-actions button{min-height:42px;white-space:normal}
+#page-whatsapp .dg7-selection-summary{font-weight:800;color:#0c477f;background:#eaf3ff;border:1px solid #c8ddf3;padding:9px 12px;border-radius:10px;margin:6px 0 15px}
+#page-whatsapp .dg7-phone-row{display:flex;align-items:center;gap:12px}
+#page-whatsapp .dg7-contact-check{display:flex;align-items:center;gap:11px;min-width:0;flex:1;cursor:pointer}
+#page-whatsapp .dg7-contact-check input[type=checkbox]{width:23px;height:23px;min-width:23px;accent-color:#1268ba;margin:0}
+#page-whatsapp .dg7-contact-details{min-width:0;overflow-wrap:anywhere;display:block}
+#page-whatsapp .dg7-contact-details small{display:block}
+#page-whatsapp .dg7-missing{color:#785310;padding:9px 12px;background:#fff6e3;border-radius:8px;font-size:12px;margin:6px 0}
+@media(max-width:600px){#page-whatsapp .dg7-actions button{flex:1 1 44%;font-size:12px;min-height:46px}#page-whatsapp .dg7-phone-row{align-items:flex-start;flex-wrap:wrap}#page-whatsapp .dg7-phone-row>button{margin-left:34px}#page-whatsapp .dg7-contact-details b{display:block;font-size:13px}}
