@@ -262,7 +262,7 @@ async function controlDetail(t){
  (warnings.length?'<div class="notice warn">'+warnings.map(esc).join(' · ')+'</div>':'')+
  officialMap+'<h3>Elenco posti nominativi</h3><p class="sub">Ordine numerico, NON disposizione fisica certificata: la geometria dell’autobus viene mostrata soltanto dopo validazione del layout ufficiale.</p><div class="seat-list">'+cells.join('')+'</div>'+
  '<h3 style="margin-top:22px">Prenotati suddivisi per fermata</h3><p class="sub">Check-in aggiornabile solo dagli operatori autorizzati. Puoi segnare la presenza o annullarla, senza cambiare posti e pagamenti.</p>'+
- Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([stop,list])=>'<h3>'+esc(stop)+' · '+list.reduce((sum,x)=>sum+Number(x.posti||0),0)+' persone</h3>'+table(['Nominativo','Persone','Posti','Telefono','Check-in'],list.map(x=>tr([esc(nameBooking(x)),esc(x.posti),esc(seatIds(x).join(', ')||'Da verificare'),esc(x.telefono),'<button type="button" class="btn '+(x.checkin_effettuato?'quiet':'solid')+'" data-checkin="'+esc(x.id)+'">'+(x.checkin_effettuato?'✓ Presente · annulla':'Segna presente')+'</button>']))))).join('');
+ Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([stop,list])=>'<h3>'+esc(stop)+' · '+list.reduce((sum,x)=>sum+Number(x.posti||0),0)+' persone</h3>'+table(['Nominativo','Persone','Posti','Telefono','Check-in'],list.map(x=>tr([esc(nameBooking(x)),esc(x.posti),esc(seatIds(x).join(', ')||'Da verificare'),esc(x.telefono),'<button type="button" class="btn '+(x.checkin_effettuato?'quiet':'solid')+'" data-checkin="'+esc(x.id)+'">'+(x.checkin_effettuato?'✓ Presente · annulla':'Segna presente')+'</button>'])))).join('');
 }
 async function changeCheckin(id){
  if(mutation)return;
