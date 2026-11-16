@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c3d4d"><meta name="referrer" content="no-referrer"><title>DELGROSSO VIAGGI · Gestionale Operativo</title><link rel="stylesheet" href="./stile.css"></head>
+<body>
+<div id="auth" class="auth"><div class="auth-card"><div class="mark">🚌</div><p class="eyebrow">DELGROSSO VIAGGI &amp; LIMOUSINE BUS</p><h1>Gestionale operativo</h1><p class="sub">Sistema ricostruito con accesso ai dati originali Supabase. Un solo login, senza dati dimostrativi.</p><form id="login-form"><label>Operatore<select id="user" required><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option></select></label><label>Password<input type="password" id="pass" autocomplete="current-password" required></label><button class="btn solid" id="login-btn" type="submit">Accedi ai dati aziendali</button></form><p class="alert" id="auth-error" hidden></p><small>Accesso riservato agli operatori autorizzati. Nessun dato viene salvato sul dispositivo.</small></div></div>
+<div id="shell" class="shell" hidden>
+<aside class="sidebar"><div class="brand"><div class="mark">🚌</div><div><strong>DELGROSSO VIAGGI</strong><small>Centro operativo · DG36</small></div></div>
+<nav id="nav" aria-label="Menu del gestionale">
+<button data-page="dashboard" class="active">▦ Dashboard</button>
+<button data-page="trips">🚌 Viaggi e partenze</button>
+<button data-page="bookings">▤ Prenotazioni</button>
+<button data-page="control">◈ Control Room</button>
+<button data-page="accounting">€ Contabilità e cassa</button>
+<button data-page="rentals">▣ Noleggi autobus</button>
+<button data-page="customers">♙ Clienti</button>
+<button data-page="agenda">▦ Agenda</button>
+</nav>
+<div class="side-bottom"><span>Supabase · Dati aziendali</span><small>La vecchia versione resta invariata</small></div>
+</aside>
+<div class="workspace">
+<header class="bar"><div><span class="eyebrow">CENTRO OPERATIVO / <span id="crumb">DASHBOARD</span></span><h1 id="heading">Dashboard</h1></div><div class="actions"><span id="operator-label" class="pill"></span><button id="refresh" class="btn quiet">↻ Aggiorna</button><button id="logout" class="btn quiet">Esci</button></div></header>
+<div id="notice" class="notice" aria-live="polite" hidden></div>
+<main id="content" aria-live="polite"><div class="loading">Caricamento dati Supabase…</div></main>
+<footer>DELGROSSO VIAGGI &amp; LIMOUSINE BUS · Gestione aziendale riservata · DG36</footer>
+</div></div>
+<section id="modal" class="modal" hidden><div class="dialog"><div class="dialog-head"><h2 id="modal-title">Operazione</h2><button type="button" id="close-modal" class="btn quiet">✕</button></div><div id="modal-body"></div></div></section>
+<script defer src="../suite/operator-ledger.js?v=dg36"></script><script defer src="./app.js?v=dg36"></script>
+</body></html>
