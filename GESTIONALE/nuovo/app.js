@@ -12,14 +12,16 @@ seatrows:['prenotazione_posti','id,viaggio_id,prenotazione_id,posto'],
 payments:['pagamenti','id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,incassato_da,incassato_da_user_id,receipt_number,data_pagamento,created_at'],
 operators:['operatori_gestionale','user_id,username,nome,attivo'],
 transfers:['cassa_trasferimenti','id,da_operatore_user_id,a_operatore_user_id,importo,stato,data_trasferimento'],
+economy:['economia_movimenti','id,tipo,categoria,descrizione,importo,data_movimento,operatore,viaggio_id'],
+cashoperators:['dg_cassa_operatori','user_id,username,nome,cassa_netto,contanti_netto,trasferimenti_entrata,trasferimenti_uscita'],
 rentals:['noleggi_bus','id,referente,azienda,tratta_partenza,tratta_destinazione,data_partenza,prezzo_concordato,acconto,saldo,stato_pagamento,stato_noleggio'],
 rentalPayments:['noleggi_bus_pagamenti','id,noleggio_id,tipo,importo,metodo,data_pagamento,incassato_da,incassato_da_user_id,receipt_number'],
 customers:['clienti','id,nome,cognome,telefono,email'],
 agenda:['scadenze_gestionale','id,titolo,descrizione,data_scadenza,stato,priorita,tipo'],
 fleet:['flotta','id,titolo,modello,posti,categoria,attivo,stato']
 };
-const PAGE={dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',control:'Control Room',accounting:'Contabilità e cassa',rentals:'Noleggi autobus',customers:'Clienti',agenda:'Agenda'};
-let session=null,operator='',page='dashboard',fetchTicket=0,mutation=false,unsafeRetry=false;
+const PAGE={dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',control:'Control Room',accounting:'Contabilità e cassa',economy:'Economia',fleet:'Flotta GT',rentals:'Noleggi autobus',customers:'Clienti',agenda:'Agenda'};
+let session=null,operator='',page='dashboard',fetchTicket=0,mutation=false,unsafeRetry=false,sessionEpoch=0;
 let filters={trip:'',term:'',stop:''},selectedTrip='',temp={},lastNotice='';
 const cache=new Map(),ongoing=new Map();
 const $=id=>document.getElementById(id);
@@ -38,7 +40,7 @@ function notice(s,kind=''){lastNotice=s;const el=$('notice');el.textContent=s;el
 function errorMsg(e){return txt(e?.message||e).replace(/(Bearer\s+[A-Za-z0-9-_.]+)/g,'Bearer ***')}
 function setLoading(s='Caricamento dati Supabase…'){$('content').innerHTML='<div class="loading">'+esc(s)+'</div>'}
 function setBusy(b){document.querySelectorAll('.btn.solid').forEach(x=>x.disabled=b)}
-function clearSensitive(){session=null;operator='';cache.clear();ongoing.clear();temp={};try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login')}catch(e){}}
+function clearSensitive(){sessionEpoch++;session=null;operator='';cache.clear();ongoing.clear();temp={};try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login')}catch(e){}}
 function hasSession(){return !!session?.access_token&&!!session?.user?.id}
 async function raw(path,method='GET',body=null,authenticated=true){
  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),16000);
@@ -115,12 +117,12 @@ async function load(key,force=false){
  const hit=cache.get(key);if(hit&&!force&&Date.now()-hit.ts<20000)return hit.data;
  if(ongoing.has(key))return ongoing.get(key);
  const promise=(async()=>{
-  const [table,select]=COL[key],rows=[],chunk=400;
+  const [table,select]=COL[key],rows=[],chunk=400,readEpoch=sessionEpoch;
   for(let offset=0;offset<12000;offset+=chunk){
    const q=new URLSearchParams({select,limit:String(chunk),offset:String(offset),order:(key==='operators'?'user_id.asc':'id.asc')});
    const part=await raw('/rest/v1/'+table+'?'+q.toString());
    if(!Array.isArray(part))throw Error('Archivio '+table+' non leggibile.');
-   rows.push(...part);if(part.length<chunk){cache.set(key,{data:rows,ts:Date.now()});return rows}
+   if(readEpoch!==sessionEpoch)throw Error('Sessione cambiata durante la lettura.');rows.push(...part);if(part.length<chunk){cache.set(key,{data:rows,ts:Date.now()});return rows}
   }
   throw Error('Archivio troppo grande: consultare con filtri server.');
  })();
@@ -153,7 +155,7 @@ async dashboard(){
  const active=bookings.filter(validBooking);
  const upcoming=trips.filter(t=>!t.archiviato_at&&t.data_partenza>=today()).sort((a,b)=>txt(a.data_partenza).localeCompare(txt(b.data_partenza))).slice(0,8);
  const metrics=[['Viaggi presenti',trips.length],['Prenotazioni attive',active.length],['Posti prenotati',active.reduce((a,b)=>a+Number(b.posti||0),0)],['Prossime partenze',upcoming.length]].map(([t,v])=>'<div class="metric"><span>'+esc(t)+'</span><b>'+esc(v)+'</b></div>').join('');
- const actions=['trips','bookings','control','accounting','rentals','customers','agenda'].map(k=>'<button data-page="'+k+'">'+esc(PAGE[k])+'</button>').join('');
+ const actions=['trips','bookings','control','accounting','economy','rentals','fleet','customers','agenda'].map(k=>'<button data-page="'+k+'">'+esc(PAGE[k])+'</button>').join('');
  return '<div class="metrics">'+metrics+'</div><section class="card"><h2>Accessi operativi</h2><div class="quick">'+actions+'</div></section><section class="card"><h2>Prossime partenze</h2>'+table(['Data','Viaggio','Capienza','Stato','Azione'],upcoming.map(t=>tr([esc(dateIT(t.data_partenza)),esc(nameTrip(t)),esc(t.posti_occupati||0)+' / '+esc(t.posti_totali||0),tag(t.stato),'<button class="btn" data-control="'+esc(t.id)+'">Apri Control Room</button>'])) )+'</section>';
 },
 async trips(){
@@ -184,6 +186,16 @@ async accounting(){
  const transferText='<p class="sub">Trasferimenti tra operatori esclusi dagli incassi: Nicola entrata '+moneyCents(ps.nicola.transferredIn)+' / uscita '+moneyCents(ps.nicola.transferredOut)+' · Raffaele entrata '+moneyCents(ps.raffaele.transferredIn)+' / uscita '+moneyCents(ps.raffaele.transferredOut)+'.</p>';
  return '<div class="metrics">'+stats+'</div><section class="card"><div class="row"><h2>Contabilità operativa · Supabase</h2><button class="btn solid" data-action="payment-form">＋ Registra acconto / saldo</button><button class="btn" data-action="accounting-print">Stampa / PDF</button><button class="btn" data-action="accounting-csv">CSV</button></div>'+transferText+'<div class="fields"><label>Operatore<select id="account-who"><option value="">Tutti</option><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option><option value="nonAttribuiti">Da verificare</option></select></label><label>Viaggio<select id="account-trip">'+options(trips.map(t=>({id:t.id,label:dateIT(t.data_partenza)+' · '+nameTrip(t)})),'','Tutti i viaggi')+'</select></label><label>Cerca cliente o ricevuta<input type="search" id="account-search" placeholder="Nome / ricevuta"></label></div><div id="account-results"></div></section>'+
  (model.issues?.length?'<div class="notice warn">'+esc(model.issues.length)+' avvisi contabili da verificare. Non correggere i dati automaticamente.</div>':'');
+},
+async economy(){
+ const entries=await load('economy');
+ const income=entries.filter(x=>/entrata/i.test(x.tipo||'')).reduce((a,x)=>a+Number(x.importo||0),0);
+ const expense=entries.filter(x=>/uscita|rimborso/i.test(x.tipo||'')).reduce((a,x)=>a+Math.abs(Number(x.importo||0)),0);
+ const last=[...entries].sort((a,b)=>txt(b.data_movimento).localeCompare(txt(a.data_movimento)));
+ return '<div class="metrics"><div class="metric"><span>Entrate registrate</span><b>'+money(income)+'</b></div><div class="metric"><span>Uscite e rimborsi</span><b>'+money(expense)+'</b></div><div class="metric"><span>Saldo teorico movimenti</span><b>'+money(income-expense)+'</b></div><div class="metric"><span>Movimenti economia</span><b>'+entries.length+'</b></div></div><section class="card"><h2>Economia · movimenti sincronizzati</h2><p class="sub">I movimenti automatici dei pagamenti sono già inclusi in questo archivio: non sommarli una seconda volta al Registro Pagamenti. Non sostituisce la quadratura bancaria o fiscale.</p>'+table(['Data','Tipo','Categoria','Descrizione','Operatore','Importo'],last.map(x=>tr([esc(dateIT(x.data_movimento)),tag(x.tipo),esc(x.categoria),esc(x.descrizione),esc(x.operatore),money(x.importo)])))+'</section>';
+},
+async fleet(){
+ const buses=await load('fleet');return '<section class="card"><h2>Flotta DELGROSSO</h2><p class="sub">Solo lettura: mantenute targhe e configurazioni esistenti, nessuna modifica automatica alla capienza.</p>'+table(['Autobus','Categoria','Capienza','Stato','Attivo'],buses.filter(x=>!(/mercedes|v250/i.test((x.titolo||'')+' '+(x.modello||'')))).map(x=>tr([esc(x.titolo||x.modello),esc(x.categoria),esc(x.posti),tag(x.stato),x.attivo?tag('Sì'):tag('No')])))+'</section>';
 },
 async rentals(){
  const [rentals,payments]=await Promise.all([load('rentals'),load('rentalPayments')]);
