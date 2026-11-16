@@ -73,7 +73,7 @@ async function authorized(){
 async function paged(table,fields){
  var all=[],size=400;
  for(var i=0;i<10000;i+=size){
-  var q=new URLSearchParams({select:fields,limit:String(size),offset:String(i),order:'id.asc'});
+  var q=new URLSearchParams({select:fields,limit:String(size),offset:String(i),order:(table==='operatori_gestionale'?'user_id.asc':'id.asc')});
   var part=await req('/rest/v1/'+table+'?'+q.toString(),'GET');
   if(!Array.isArray(part))throw Error('Formato non valido: '+table);
   all.push.apply(all,part);if(part.length<size)return all;
@@ -173,6 +173,7 @@ function saveCSV(){
 }
 async function savePayment(e){
  e.preventDefault();if(busy||pendingUnknown)return;
+ var sent=false;
  if(!dataset){status('Sincronizza prima i dati da Supabase.',true);return}
  var typ=$('payType').value,amount,booking=currentBooking(),rental=dataset.rentals.find(function(x){return x.id===$('rentalSelect').value});
  try{amount=moneyNum($('payAmount').value);if(mode==='trip'&&!booking)throw Error('Seleziona una prenotazione.');if(mode==='rental'&&!rental)throw Error('Seleziona un noleggio.');
@@ -184,16 +185,16 @@ async function savePayment(e){
   await authorized();
   var id=mode==='trip'?booking.id:rental.id;
   var args=mode==='trip'?{p_booking_id:id,p_tipo:typ,p_importo:amount,p_metodo:$('method').value,p_data:$('date').value,p_note:$('notes').value||null}:{p_noleggio_id:id,p_tipo:typ,p_importo:amount,p_metodo:$('method').value,p_data:$('date').value,p_note:$('notes').value||null};
-  var response=await req('/rest/v1/rpc/'+(mode==='trip'?'dg_register_payment':'dg_register_rental_payment'),'POST',args);
+  sent=true;var response=await req('/rest/v1/rpc/+(mode==='trip'?'dg_register_payment':'dg_register_rental_payment'),'POST',args);
   if(!response||!response.payment_id)throw Error('Supabase non ha restituito l’identificativo del pagamento: verifica il registro.');
   var verifyUrl='/rest/v1/'+(mode==='trip'?'pagamenti':'noleggi_bus_pagamenti')+'?select=id,receipt_number,importo&id=eq.'+encodeURIComponent(response.payment_id)+'&limit=1';
   var savedRows=await req(verifyUrl,'GET');
   if(!Array.isArray(savedRows)||savedRows.length!==1)throw Error('Il pagamento può essere stato salvato: controlla il registro prima di riprovare.');
   $('saved').hidden=false;$('saved').textContent='Registrato su Supabase · Ricevuta '+(response.receipt_number||savedRows[0].receipt_number||'in generazione')+' · '+fmt(amount)+'.';
-  $('paymentForm').reset();$('date').value=todayRome();await sync();showPage(mode==='trip'?'ledger':'rentals');status('Incasso verificato sul database. Ricevuta '+(response.receipt_number||''),false);
+  $('paymentForm').reset();$('date').value=todayRome();busy=false;await sync();showPage(mode==='trip'?'ledger':'rentals');status('Incasso verificato sul database. Ricevuta '+(response.receipt_number||''),false);
  }catch(err){
   // Errori di rete dopo l'invio non autorizzano un retry automatico: potrebbe aver scritto.
-  pendingUnknown=true;status('ATTENZIONE: '+err.message+' Controlla i movimenti prima di un nuovo invio.',true);
+  pendingUnknown=sent;status('ATTENZIONE: '+err.message+' Controlla i movimenti prima di un nuovo invio.',true);
  }finally{busy=false;$('submitPayment').disabled=false;}
 }
 async function login(e){
