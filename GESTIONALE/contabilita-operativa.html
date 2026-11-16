@@ -185,7 +185,7 @@ async function savePayment(e){
   await authorized();
   var id=mode==='trip'?booking.id:rental.id;
   var args=mode==='trip'?{p_booking_id:id,p_tipo:typ,p_importo:amount,p_metodo:$('method').value,p_data:$('date').value,p_note:$('notes').value||null}:{p_noleggio_id:id,p_tipo:typ,p_importo:amount,p_metodo:$('method').value,p_data:$('date').value,p_note:$('notes').value||null};
-  sent=true;var response=await req('/rest/v1/rpc/+(mode==='trip'?'dg_register_payment':'dg_register_rental_payment'),'POST',args);
+  sent=true;var response=await req('/rest/v1/rpc/'+(mode==='trip'?'dg_register_payment':'dg_register_rental_payment'),'POST',args);
   if(!response||!response.payment_id)throw Error('Supabase non ha restituito l’identificativo del pagamento: verifica il registro.');
   var verifyUrl='/rest/v1/'+(mode==='trip'?'pagamenti':'noleggi_bus_pagamenti')+'?select=id,receipt_number,importo&id=eq.'+encodeURIComponent(response.payment_id)+'&limit=1';
   var savedRows=await req(verifyUrl,'GET');
