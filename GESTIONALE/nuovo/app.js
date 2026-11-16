@@ -47,6 +47,7 @@ async function raw(path,method='GET',body=null,authenticated=true){
   const h={'apikey':KEY,'Accept':'application/json'};if(authenticated)h.Authorization='Bearer '+session.access_token;
   const o={method,headers:h,cache:'no-store',referrerPolicy:'no-referrer',mode:'cors',signal:ctl.signal};
   if(body!==null){h['Content-Type']='application/json';o.body=JSON.stringify(body)}
+  if(method==='POST'&&path.startsWith('/rest/v1/')&&!path.startsWith('/rest/v1/rpc/'))h.Prefer='return=representation';
   const res=await fetch(URL+path,o),s=await res.text();let data;
   try{data=s?JSON.parse(s):null}catch(e){data={message:s.slice(0,180)}}
   if(!res.ok)throw Error((data&&(data.message||data.error_description||data.error||data.hint))||('Supabase HTTP '+res.status));
@@ -308,9 +309,9 @@ async function registerPayment(ev){
   const receipt=result.receipt_number||verified[0].receipt_number||'(in emissione)';
   invalidate('payments','bookings','rentalPayments','rentals');
   closeModal();
-  notice('Incasso verificato in Supabase: '+money(amount)+' · ricevuta '+receipt+'.');
   mutation=false;unsafeRetry=false;
   await navigate(source.rental?'rentals':'accounting');
+  notice('Incasso verificato in Supabase: '+money(amount)+' · ricevuta '+receipt+'.');
  }catch(e){
   if(sent){unsafeRetry=true;notice('ATTENZIONE: '+errorMsg(e)+' Il salvataggio potrebbe essere riuscito. Vai nel registro e verifica prima di un nuovo invio.','bad');closeModal();}
   else notice('Pagamento non inviato: '+errorMsg(e),'bad');
