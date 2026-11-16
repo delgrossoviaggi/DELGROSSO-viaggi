@@ -143,6 +143,3 @@
  });
  window.DGCancellazioni26=Object.freeze({version:'2.6',refundTable,filteredRefunds});
 })();
-
-/* Carica l'estensione Agenda e Control Room 2.7 su tutte le pagine. */
-(function(){const s=document.createElement('script');s.src='assets/agenda-control-v27.js?v=2.7.0';s.onload=function(){try{if(typeof mode!=='undefined'&&mode&&['agenda','control'].includes(page))loadPage()}catch(e){console.warn('Refresh 2.7:',e.message)}};document.head.append(s)})();

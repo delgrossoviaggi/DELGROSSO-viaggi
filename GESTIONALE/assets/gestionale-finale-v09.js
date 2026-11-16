@@ -196,9 +196,3 @@
   });
   window.DGFinal09=Object.freeze({layoutRows,checkInt,featureCount:CHECKS.length});
 })();
-
-/* v2.8 · Carica editor piantine ufficiali su tutte le pagine senza modificare la navigazione */
-(function(){'use strict';if(document.querySelector('script[data-dg28-loader],script[src*="piantine-ufficiali-v28.js"]'))return;
-const s=document.createElement('script');s.src='assets/piantine-ufficiali-v28.js?v=2.9.0';s.defer=true;s.dataset.dg28Loader='true';
-s.addEventListener('error',()=>console.error('Editor piantine v2.8 non disponibile'));
-document.head.appendChild(s);})();
