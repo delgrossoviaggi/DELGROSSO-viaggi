@@ -122,7 +122,7 @@ async function load(key,force=false){
  const promise=(async()=>{
   const [table,select]=COL[key],rows=[],chunk=400,readEpoch=sessionEpoch;
   for(let offset=0;offset<12000;offset+=chunk){
-   const q=new URLSearchParams({select,limit:String(chunk),offset:String(offset),order:(key==='operators'?'user_id.asc':'id.asc')});
+   const q=new URLSearchParams({select,limit:String(chunk),offset:String(offset),order:({operators:'user_id.asc',cashoperators:'user_id.asc',busOfficial:'autobus_id.asc',tripOfficial:'viaggio_id.asc'}[key]||'id.asc')});
    const part=await raw('/rest/v1/'+table+'?'+q.toString());
    if(!Array.isArray(part))throw Error('Archivio '+table+' non leggibile.');
    if(readEpoch!==sessionEpoch)throw Error('Sessione cambiata durante la lettura.');rows.push(...part);if(part.length<chunk){cache.set(key,{data:rows,ts:Date.now()});return rows}
