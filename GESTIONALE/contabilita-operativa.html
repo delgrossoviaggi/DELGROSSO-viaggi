@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer">
+<title>DELGROSSO VIAGGI · Contabilità operativa DG35</title>
+<style>
+:root{color-scheme:light;--navy:#102c43;--blue:#14637a;--aqua:#eaf5f5;--white:#fff;--ink:#18354a;--muted:#667b87;--line:#d9e7eb;--red:#ad3535}*{box-sizing:border-box}body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;background:#f4f7f9;color:var(--ink)}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}header{background:var(--navy);color:#fff;padding:18px max(18px,calc((100vw - 1220px)/2));display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}header strong{font-size:19px;letter-spacing:.025em}header small{display:block;color:#c3dce5;font-size:12px;margin-top:5px}header a{color:#fff;text-decoration:none;border:1px solid #557a91;border-radius:10px;padding:10px 13px;font-size:13px}main{max-width:1220px;margin:24px auto;padding:0 16px 50px}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;box-shadow:0 4px 22px #153c5510;margin-bottom:17px}.panel h1,.panel h2{margin:0 0 10px}.panel h1{font-size:27px}.panel h2{font-size:20px}.sub{color:var(--muted);font-size:14px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.stat{background:var(--aqua);padding:15px;border-radius:12px;border:1px solid #cee5e7}.stat small{display:block;color:var(--muted);margin-bottom:6px}.stat strong{font-size:23px}.flex{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{justify-content:space-between}label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}input,select{min-width:0;width:100%;padding:11px;border:1px solid #b8cbd4;border-radius:9px;background:#fff;color:#102d43}input:focus,select:focus{outline:2px solid #227d93;outline-offset:1px}.btn{border:0;padding:11px 15px;border-radius:9px;background:#e8eef1;color:#13394e;font-weight:700}.primary{background:#11748b;color:#fff}.danger{background:#b34040;color:#fff}.muted{font-size:12px;color:var(--muted)}.notice{border-left:4px solid #23798a;padding:11px 14px;background:#e9f5f8;border-radius:8px;margin:12px 0}.warn{border-color:#cb8c29;background:#fff7e7}.error{border-color:#c43d3d;background:#fff0f0}.scroll{overflow:auto;max-height:440px;border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #edf0f1;vertical-align:top}th{position:sticky;top:0;background:#f0f5f7;z-index:1;white-space:nowrap}td small{display:block;color:var(--muted)}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tab{border:1px solid #b7d2da;background:#fff;color:#245064;padding:11px 14px;border-radius:10px;font-weight:700}.tab[aria-selected="true"]{background:#125f76;color:#fff}.hidden,[hidden]{display:none!important}#status{position:sticky;top:0;z-index:4;margin:0 auto 10px;max-width:1220px}#status:not(:empty){padding:12px;border:1px solid #abcdd5;background:#e8f4f6;border-radius:10px}#status.bad{background:#ffeded;color:#892f2f;border-color:#efbcbc}.smallbutton{border:1px solid #bed3d9;border-radius:8px;background:white;padding:8px 10px;color:#205e72}.mainicon{font-size:25px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:16px}footer{color:var(--muted);text-align:center;font-size:12px;padding:25px}.iconbrand{width:42px;height:42px;border-radius:12px;background:#1b6f85;color:white;display:grid;place-items:center}.badge{font-size:12px;font-weight:700;border-radius:99px;padding:5px 10px;background:#d8efe6;color:#1d6a54}@media(max-width:800px){.grid,.stats,.summary{grid-template-columns:1fr 1fr}main{margin-top:12px}.panel{padding:15px}header{padding:14px}header strong{font-size:16px}}@media(max-width:540px){.grid,.stats,.summary{grid-template-columns:1fr}.stat strong{font-size:22px}.panel h1{font-size:23px}.tabs .tab{flex:1}.scroll{max-height:380px}}@media print{header,.tabs,.noprint,#login,#formZone,#status,button{display:none!important}main{margin:0;max-width:none}.panel{box-shadow:none;border:0;break-inside:avoid}.scroll{overflow:visible;max-height:none}th{position:static}@page{size:A4;margin:12mm}}
+</style></head><body>
+<header><div class="flex"><div class="iconbrand">🚌</div><div><strong>DELGROSSO VIAGGI &amp; LIMOUSINE BUS</strong><small>Contabilità operativa DG35 · collegata a Supabase</small></div></div><a href="./index.html">Apri gestionale V2</a></header>
+<main><div id="status" role="status" aria-live="polite"></div>
+<section id="login" class="panel" style="max-width:630px;margin:26px auto"><h1>Accesso alla contabilità</h1><p class="sub">Pagina alleggerita: non carica tutti i moduli del gestionale V2. Utilizza il login ufficiale di Nicola e Raffaele.</p>
+<form id="loginForm" class="grid"><label>Operatore<select id="operator" required><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option></select></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button class="btn primary" type="submit">Accedi a Supabase</button></form><p id="loginErr" class="notice error hidden"></p></section>
+<section id="workspace" hidden>
+<div class="panel noprint"><div class="flex between"><div><h1>Contabilità aziendale</h1><span class="sub" id="operatorLabel">Connessione in corso...</span></div><div class="flex"><span class="badge" id="synced">Non sincronizzato</span><button id="refresh" class="btn primary" type="button">↻ Aggiorna dati</button><button id="logout" class="btn" type="button">Esci</button></div></div>
+<p class="notice warn">I salvataggi vengono eseguiti esclusivamente attraverso le funzioni ufficiali Supabase e richiedono conferma. Nessun dato contabile viene scritto nella memoria permanente di questo browser.</p></div>
+<nav class="tabs noprint" aria-label="Sezioni contabili"><button class="tab" data-tab="overview" aria-selected="true">Riepilogo</button><button class="tab" data-tab="new" aria-selected="false">＋ Registra incasso</button><button class="tab" data-tab="ledger" aria-selected="false">Movimenti</button><button class="tab" data-tab="rentals" aria-selected="false">Noleggi</button></nav>
+<section id="page-overview" class="panel"><div class="flex between"><h2>Contabilità Nicola e Raffaele</h2><button class="btn noprint" data-action="print">Stampa / PDF</button></div><div class="stats" id="kpis"></div><div class="summary" id="operatorsCards"></div><p class="muted">Le quote dei viaggi comprendono gli incassi registrati meno i rimborsi. I trasferimenti fra Nicola e Raffaele non sono nuovi incassi.</p></section>
+<section id="page-new" class="panel" hidden><h2>Registra pagamento</h2><div class="flex noprint" style="margin:12px 0"><button class="btn primary" data-mode="trip">Viaggio / prenotazione</button><button class="btn" data-mode="rental">Noleggio BUS</button></div>
+<div id="formZone"><form id="paymentForm"><div class="grid"><label id="tripArea">Viaggio<select id="tripSelect" required></select></label><label id="bookingArea">Prenotazione / cliente<select id="bookingSelect" required></select></label><label id="rentalArea" hidden>Noleggio<select id="rentalSelect"></select></label></div>
+<div id="bookingSummary" class="notice">Seleziona il viaggio e il cliente.</div><div class="grid">
+<label>Tipo di movimento<select id="payType"><option value="Acconto">Acconto</option><option value="Saldo">Saldo</option><option value="Rimborso">Rimborso</option></select></label>
+<label>Importo (€)<input id="payAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="Es. 20,00" required></label>
+<label>Metodo<select id="method"><option value="Contanti">Contanti</option><option value="POS">POS / Carta</option><option value="Bonifico">Bonifico</option><option value="Altro">Altro</option></select></label>
+<label>Data pagamento<input id="date" type="date" required></label>
+<label>Note (facoltative)<input id="notes" maxlength="200" placeholder="Riferimento interno"></label></div>
+<div class="notice warn">Verifica cliente, viaggio e importo prima della conferma. In caso di errore di rete dopo l'invio, consulta i movimenti prima di riprovare per evitare duplicati.</div>
+<button id="submitPayment" type="submit" class="btn primary">Conferma e registra su Supabase</button></form></div>
+<div id="saved" class="notice" hidden></div></section>
+<section id="page-ledger" class="panel" hidden><div class="flex between"><h2>Registro degli incassi e rimborsi</h2><div class="flex noprint"><button class="btn" data-action="csv">Scarica CSV</button><button class="btn" data-action="print">PDF / Stampa</button></div></div>
+<div class="grid noprint"><label>Operatore<select id="filterWho"><option value="">Entrambi</option><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option><option value="nonAttribuiti">Da attribuire</option></select></label><label>Viaggio<select id="filterTrip"><option value="">Tutti i viaggi</option></select></label><label>Cerca cliente o ricevuta<input id="filterText" type="search" placeholder="Nome, ricevuta, viaggio..."></label></div>
+<p class="sub" id="count"></p><div class="scroll"><table><thead><tr><th>Data</th><th>Operatore</th><th>Cliente</th><th>Viaggio / BUS</th><th>Tipo</th><th>Metodo</th><th>Importo</th><th>Ricevuta</th></tr></thead><tbody id="ledgerBody"></tbody></table></div></section>
+<section id="page-rentals" class="panel" hidden><div class="flex between"><h2>Pagamenti dei noleggi</h2><button class="btn noprint" data-action="newRental">＋ Registra pagamento noleggio</button></div><div class="scroll"><table><thead><tr><th>Data</th><th>Noleggio</th><th>Operatore</th><th>Tipo</th><th>Metodo</th><th>Importo</th><th>Ricevuta</th></tr></thead><tbody id="rentalsBody"></tbody></table></div></section>
+</section></main><footer>DELGROSSO VIAGGI · Documento gestionale interno · Non è una fattura fiscale · DG35</footer>
+<script src="./suite/operator-ledger.js?v=dg35" defer></script>
+<script>
+(function(){
+'use strict';
+var URL='https://chkuayhbmitdmzmmvona.supabase.co';
+var KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
+var S=null, dataset=null, mode='trip', activeTab='overview', busy=false, pendingUnknown=false;
+var $=function(id){return document.getElementById(id);};
+var fmt=function(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n)||0);};
+var safe=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c];});};
+var norm=function(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();};
+var todayRome=function(){var parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());var r={};parts.forEach(function(x){r[x.type]=x.value});return r.year+'-'+r.month+'-'+r.day;};
+var status=function(msg,bad){var e=$('status');e.textContent=msg||'';e.className=bad?'bad':'';};
+var authenticated=function(){return !!(S&&S.access_token&&S.user&&S.user.id);};
+var txt=function(v){return String(v==null?'':v);};
+var escapeCsv=function(v){var s=txt(v).replace(/^[=+\-@\t\r]/,'\u0027$&');return '"'+s.replace(/"/g,'""')+'"';};
+var moneyNum=function(v){var s=String(v||'').trim().replace(/\s/g,'');if(!/^\d{1,7}([,.]\d{1,2})?$/.test(s))throw Error('Importo non valido. Usa ad esempio 20,00.');var amount=Number(s.replace(',','.'));if(!Number.isFinite(amount)||amount<=0||amount>100000)throw Error('Importo fuori limite.');return Math.round(amount*100)/100;};
+var dateIT=function(v){var s=txt(v).slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(s)?s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4):'—';};
+function req(path,method,payload,auth){
+ var ctl=new AbortController(), timer=setTimeout(function(){ctl.abort()},14000);
+ var headers={'apikey':KEY,'Accept':'application/json'};if(auth!==false&&authenticated())headers.Authorization='Bearer '+S.access_token;
+ var init={method:method||'GET',headers:headers,cache:'no-store',mode:'cors',signal:ctl.signal,referrerPolicy:'no-referrer'};
+ if(payload!==undefined&&payload!==null){headers['Content-Type']='application/json';init.body=JSON.stringify(payload);}
+ return fetch(URL+path,init).then(async function(res){var t=await res.text(),body;try{body=t?JSON.parse(t):null}catch(e){body={message:t.slice(0,180)}}if(!res.ok)throw Error((body&& (body.message||body.error_description||body.error||body.hint))||('HTTP '+res.status));return body;}).catch(function(e){if(e.name==='AbortError')throw Error('Richiesta scaduta dopo 14 secondi. Verifica la connessione.');throw e;}).finally(function(){clearTimeout(timer)});
+}
+async function refreshAuth(){
+ if(!S||!S.refresh_token)throw Error('Sessione scaduta. Esegui nuovamente il login.');
+ if(S.expires_at&&S.expires_at*1000>Date.now()+90000)return;
+ var user=S.user.id;
+ var next=await req('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:S.refresh_token},false);
+ if(!next.user||next.user.id!==user)throw Error('Sessione cambiata: effettua nuovamente il login.');
+ S=next;S.expires_at=S.expires_at||Math.floor(Date.now()/1000)+Number(S.expires_in||3600);
+}
+async function authorized(){
+ await refreshAuth();
+ var user=await req('/auth/v1/user','GET');
+ if(!user||user.id!==S.user.id)throw Error('Identità non confermata: ripeti il login.');
+ var allowed=await req('/rest/v1/rpc/is_gestionale_admin','POST',{});
+ if(allowed!==true)throw Error('Operatore non autorizzato dal gestionale.');
+ return user;
+}
+async function paged(table,fields){
+ var all=[],size=400;
+ for(var i=0;i<10000;i+=size){
+  var q=new URLSearchParams({select:fields,limit:String(size),offset:String(i),order:'id.asc'});
+  var part=await req('/rest/v1/'+table+'?'+q.toString(),'GET');
+  if(!Array.isArray(part))throw Error('Formato non valido: '+table);
+  all.push.apply(all,part);if(part.length<size)return all;
+ }
+ throw Error('Limite righe raggiunto per '+table+'.');
+}
+async function sync(){
+ if(busy)return;busy=true;$('refresh').disabled=true;
+ status('Sincronizzazione degli archivi contabili...',false);
+ try{
+  await authorized();
+  var specs=[
+   ['trips','viaggi','id,titolo,destinazione,data_partenza,bis_parent_id,bis_numero,archiviato_at'],
+   ['bookings','prenotazioni','id,viaggio_id,cliente,cliente_nome,telefono,posti,totale,pagato,saldo,stato,codice'],
+   ['operators','operatori_gestionale','user_id,username,nome,attivo'],
+   ['payments','pagamenti','id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,incassato_da,incassato_da_user_id,receipt_number,data_pagamento,created_at'],
+   ['transfers','cassa_trasferimenti','id,da_operatore_user_id,a_operatore_user_id,importo,stato,data_trasferimento'],
+   ['rentals','noleggi_bus','id,referente,azienda,tratta_partenza,data_partenza,prezzo_concordato,saldo,stato_noleggio,archiviato_at'],
+   ['rentalPayments','noleggi_bus_pagamenti','id,noleggio_id,tipo,importo,metodo,data_pagamento,incassato_da,incassato_da_user_id,receipt_number']
+  ];
+  var out={};
+  // Tre gruppi per evitare un picco di decine di richieste simultanee.
+  for(var g=0;g<specs.length;g+=3){
+   var batch=await Promise.all(specs.slice(g,g+3).map(async function(spec){return {name:spec[0],data:await paged(spec[1],spec[2])};}));
+   batch.forEach(function(x){out[x.name]=x.data});
+  }
+  if(!window.DG2OperatorLedger||!window.DG2OperatorLedger.build)throw Error('Modulo di calcolo mancante.');
+  out.model=window.DG2OperatorLedger.build({trips:out.trips,bookings:out.bookings,operators:out.operators,payments:out.payments,transfers:out.transfers});
+  var centsSum=out.payments.filter(function(p){return /^(registrato|confermato|pagato|eseguito|completato)$/i.test(p.stato||'')}).reduce(function(t,p){var amount=Math.round((Number(p.importo)||0)*100);return t+(/rimborso/i.test(p.tipo||'')?-Math.abs(amount):amount)},0);
+  var profileSum=['nicola','raffaele','nonAttribuiti'].reduce(function(t,x){return t+out.model.profiles[x].net},0);
+  if(centsSum!==profileSum)throw Error('Quadratura pagamenti fallita: contatta l’assistenza prima di registrare altri movimenti.');
+  dataset=out;pendingUnknown=false;render();$('synced').textContent='Aggiornato '+new Date().toLocaleTimeString('it-IT');
+  status('Dati sincronizzati: '+out.payments.length+' movimenti, '+out.bookings.length+' prenotazioni. Nessuna modifica automatica.',false);
+ }catch(e){dataset=null;status('ERRORE: '+e.message,true);}finally{busy=false;$('refresh').disabled=false;}
+}
+function eligible(b){return !/annull|cancel|cancell|eliminat/i.test(b.stato||'');}
+function byRoot(id){var t=dataset.trips.find(function(x){return x.id===id});return t&&t.bis_parent_id||id;}
+function fillSelect(sel,rows,label,placeholder){sel.innerHTML='<option value="">'+safe(placeholder)+'</option>'+rows.map(function(x){return '<option value="'+safe(x.id)+'">'+safe(label(x))+'</option>'}).join('');}
+function populate(){
+ var trips=dataset.trips.slice().sort(function(a,b){return (b.data_partenza||'').localeCompare(a.data_partenza||'');});
+ fillSelect($('tripSelect'),trips,function(t){return dateIT(t.data_partenza)+' · '+(t.titolo||t.destinazione||'Viaggio')+(t.bis_numero&&t.bis_numero>1?' · BUS '+t.bis_numero:'')},'Seleziona una partenza');
+ fillSelect($('filterTrip'),trips,function(t){return dateIT(t.data_partenza)+' · '+(t.titolo||'Viaggio')},'Tutti i viaggi');
+ fillSelect($('rentalSelect'),dataset.rentals,function(r){return dateIT(r.data_partenza)+' · '+(r.referente||r.azienda||'Noleggio')},'Seleziona noleggio');
+ updateBookings();
+}
+function updateBookings(){
+ var id=$('tripSelect').value,bs=dataset.bookings.filter(function(b){return b.viaggio_id===id&&eligible(b)});
+ fillSelect($('bookingSelect'),bs,function(b){return (b.cliente_nome||b.cliente||'Senza nominativo')+' · '+b.posti+' pax · saldo '+fmt(b.saldo||0)},'Seleziona prenotazione');
+ showBooking();
+}
+function currentBooking(){return dataset&&dataset.bookings.find(function(b){return b.id===$('bookingSelect').value})}
+function showBooking(){
+ var b=currentBooking(),r=dataset&&dataset.rentals.find(function(x){return x.id===$('rentalSelect').value});
+ $('bookingSummary').textContent=mode==='rental'?(r?'Noleggio: '+(r.referente||r.azienda)+' · residuo indicato '+fmt(r.saldo||0):'Seleziona un noleggio.'):
+ (b?'Cliente: '+(b.cliente_nome||b.cliente)+' · totale '+fmt(b.totale||0)+' · pagato '+fmt(b.pagato||0)+' · residuo '+fmt(b.saldo||0):'Seleziona viaggio e cliente.');
+}
+function setMode(m){
+ mode=m;var rent=m==='rental';
+ $('tripArea').hidden=rent;$('bookingArea').hidden=rent;$('rentalArea').hidden=!rent;
+ $('tripSelect').required=!rent;$('bookingSelect').required=!rent;$('rentalSelect').required=rent;
+ document.querySelectorAll('[data-mode]').forEach(function(b){b.classList.toggle('primary',b.dataset.mode===m)});
+ showBooking();
+}
+function showPage(page){
+ activeTab=page;
+ ['overview','new','ledger','rentals'].forEach(function(id){$('page-'+id).hidden=id!==page;var b=document.querySelector('[data-tab="'+id+'"]');if(b)b.setAttribute('aria-selected',id===page?'true':'false')});
+}
+function buildMovements(){
+ var out=[];['nicola','raffaele','nonAttribuiti'].forEach(function(w){dataset.model.profiles[w].movements.forEach(function(m){out.push(m)})});
+ return out.sort(function(a,b){return (b.timestamp||'').localeCompare(a.timestamp||'')});
+}
+function render(){
+ var p=dataset.model.profiles, all=buildMovements(),r=dataset.rentalPayments;
+ var net=all.reduce(function(a,x){return a+x.amount},0)/100;
+ var item=function(t,v,s){return '<div class="stat"><small>'+safe(t)+'</small><strong>'+safe(v)+'</strong><small>'+safe(s)+'</small></div>'};
+ $('kpis').innerHTML=item('Gite · netto',fmt(net),all.length+' movimenti')+item('Nicola',fmt(p.nicola.net/100),'Incassi al netto rimborsi')+item('Raffaele',fmt(p.raffaele.net/100),'Incassi al netto rimborsi')+item('Da attribuire',fmt(p.nonAttribuiti.net/100),'Da riconciliare');
+ $('operatorsCards').innerHTML=['nicola','raffaele'].map(function(w){
+  var x=p[w];return '<div class="stat"><strong>'+safe(w==='nicola'?'Nicola':'Raffaele')+'</strong><p>Contanti gite: <b>'+fmt(x.cash/100)+'</b></p><p>POS/bonifici: <b>'+fmt(x.electronic/100)+'</b></p><p>Trasferimenti ricevuti: <b>'+fmt(x.transferredIn/100)+'</b></p><p>Trasferimenti consegnati: <b>'+fmt(x.transferredOut/100)+'</b></p><p class="muted">Incassi gite: '+fmt(x.net/100)+' · Cassa contanti indicativa: '+fmt(x.inHand/100)+'</p></div>';
+ }).join('');
+ populate();filterLedger();
+ var ops=new Map(dataset.operators.map(function(o){return [o.user_id,norm(o.username||o.nome)]}));
+ var names=new Map(dataset.rentals.map(function(x){return [x.id,x.referente||x.azienda||'Noleggio']}));
+ $('rentalsBody').innerHTML=r.map(function(x){var who=ops.get(x.incassato_da_user_id)||norm(x.incassato_da)||'da attribuire',amt=/rimborso/i.test(x.tipo||'')?-Math.abs(Number(x.importo)||0):Number(x.importo)||0;return '<tr><td>'+dateIT(x.data_pagamento)+'</td><td>'+safe(names.get(x.noleggio_id)||'—')+'</td><td>'+safe(who)+'</td><td>'+safe(x.tipo)+'</td><td>'+safe(x.metodo)+'</td><td>'+fmt(amt)+'</td><td>'+safe(x.receipt_number)+'</td></tr>'}).join('');
+}
+function filterLedger(){
+ if(!dataset)return;
+ var who=$('filterWho').value,tid=$('filterTrip').value,q=norm($('filterText').value);
+ var filtered=buildMovements().filter(function(m){return (!who||m.who===who)&&(!tid||m.tripId===tid||m.rootTripId===tid||m.rootTripId===byRoot(tid))&&(!q||norm([m.client,m.trip,m.receipt,m.booking].join(' ')).includes(q))});
+ $('count').textContent=filtered.length+' movimenti visualizzati.';
+ $('ledgerBody').innerHTML=filtered.map(function(x){return '<tr><td>'+dateIT(x.date)+'</td><td>'+safe(x.who)+'</td><td>'+safe(x.client)+'</td><td>'+safe(x.trip)+'</td><td>'+safe(x.refund?'Rimborso':'Incasso')+'</td><td>'+safe(x.method)+'</td><td><b>'+fmt(x.amount/100)+'</b></td><td>'+safe(x.receipt)+'</td></tr>'}).join('');
+}
+function saveCSV(){
+ if(!dataset)return;
+ var rows=[['Data','Operatore','Cliente','Viaggio','Tipo','Metodo','Importo EUR','Ricevuta']].concat(buildMovements().map(function(m){return [m.date,m.who,m.client,m.trip,m.refund?'Rimborso':'Incasso',m.method,(m.amount/100).toFixed(2),m.receipt]}));
+ var csv='\ufeff'+rows.map(function(row){return row.map(escapeCsv).join(';')}).join('\r\n');
+ var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='DELGROSSO_CONTABILITA_'+todayRome()+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},10000);
+}
+async function savePayment(e){
+ e.preventDefault();if(busy||pendingUnknown)return;
+ if(!dataset){status('Sincronizza prima i dati da Supabase.',true);return}
+ var typ=$('payType').value,amount,booking=currentBooking(),rental=dataset.rentals.find(function(x){return x.id===$('rentalSelect').value});
+ try{amount=moneyNum($('payAmount').value);if(mode==='trip'&&!booking)throw Error('Seleziona una prenotazione.');if(mode==='rental'&&!rental)throw Error('Seleziona un noleggio.');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test($('date').value))throw Error('Data non valida.');
+  var label=mode==='trip'?(booking.cliente_nome||booking.cliente):rental.referente||rental.azienda;
+  var info=(mode==='trip'?'VIAGGIO':'NOLEGGIO')+' · '+label+' · '+typ+' · '+fmt(amount)+' · '+$('method').value+' · '+dateIT($('date').value);
+  if(!confirm('Confermi la registrazione definitiva su Supabase?\n\n'+info+'\n\nL’operazione sarà attribuita al tuo profilo.'))return;
+  busy=true;$('submitPayment').disabled=true;status('Registrazione ufficiale in corso: non ripetere l’invio.',false);
+  await authorized();
+  var id=mode==='trip'?booking.id:rental.id;
+  var args=mode==='trip'?{p_booking_id:id,p_tipo:typ,p_importo:amount,p_metodo:$('method').value,p_data:$('date').value,p_note:$('notes').value||null}:{p_noleggio_id:id,p_tipo:typ,p_importo:amount,p_metodo:$('method').value,p_data:$('date').value,p_note:$('notes').value||null};
+  var response=await req('/rest/v1/rpc/'+(mode==='trip'?'dg_register_payment':'dg_register_rental_payment'),'POST',args);
+  if(!response||!response.payment_id)throw Error('Supabase non ha restituito l’identificativo del pagamento: verifica il registro.');
+  var verifyUrl='/rest/v1/'+(mode==='trip'?'pagamenti':'noleggi_bus_pagamenti')+'?select=id,receipt_number,importo&id=eq.'+encodeURIComponent(response.payment_id)+'&limit=1';
+  var savedRows=await req(verifyUrl,'GET');
+  if(!Array.isArray(savedRows)||savedRows.length!==1)throw Error('Il pagamento può essere stato salvato: controlla il registro prima di riprovare.');
+  $('saved').hidden=false;$('saved').textContent='Registrato su Supabase · Ricevuta '+(response.receipt_number||savedRows[0].receipt_number||'in generazione')+' · '+fmt(amount)+'.';
+  $('paymentForm').reset();$('date').value=todayRome();await sync();showPage(mode==='trip'?'ledger':'rentals');status('Incasso verificato sul database. Ricevuta '+(response.receipt_number||''),false);
+ }catch(err){
+  // Errori di rete dopo l'invio non autorizzano un retry automatico: potrebbe aver scritto.
+  pendingUnknown=true;status('ATTENZIONE: '+err.message+' Controlla i movimenti prima di un nuovo invio.',true);
+ }finally{busy=false;$('submitPayment').disabled=false;}
+}
+async function login(e){
+ e.preventDefault();var btn=$('loginForm').querySelector('button');btn.disabled=true;$('loginErr').classList.add('hidden');
+ try{
+  var username=$('operator').value;
+  var ses=await req('/functions/v1/dg2-operator-login','POST',{username:username,password:$('password').value},false);
+  if(!ses||!ses.access_token||!ses.refresh_token||!ses.user||!ses.user.id)throw Error('Login non confermato.');
+  S=ses;S.expires_at=S.expires_at||Math.floor(Date.now()/1000)+Number(S.expires_in||3600);await authorized();
+  $('password').value='';$('login').hidden=true;$('workspace').hidden=false;
+  $('operatorLabel').textContent='Operatore autorizzato · '+(username==='nicola'?'Nicola':'Raffaele');
+  await sync();
+ }catch(e){S=null;$('loginErr').classList.remove('hidden');$('loginErr').textContent=e.message;}finally{btn.disabled=false;}
+}
+async function adopt(){
+ try{var raw=sessionStorage.getItem('dg_auth');if(!raw)return;var parsed=JSON.parse(raw);if(!parsed.access_token||!parsed.user?.id)return;S=parsed;await authorized();$('login').hidden=true;$('workspace').hidden=false;$('operatorLabel').textContent='Sessione V2 verificata';await sync();}catch(e){S=null;$('login').hidden=false;$('workspace').hidden=true;}
+}
+function logout(){var token=S&&S.access_token;S=null;dataset=null;pendingUnknown=false;try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login');}catch(e){}$('login').hidden=false;$('workspace').hidden=true;status('Sessione terminata.',false);if(token){fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(function(){});}}
+$('loginForm').addEventListener('submit',login);
+$('logout').addEventListener('click',logout);
+$('refresh').addEventListener('click',function(){pendingUnknown=false;sync();});
+$('paymentForm').addEventListener('submit',savePayment);
+$('tripSelect').addEventListener('change',updateBookings);
+$('bookingSelect').addEventListener('change',showBooking);
+$('rentalSelect').addEventListener('change',showBooking);
+$('filterWho').addEventListener('change',filterLedger);
+$('filterTrip').addEventListener('change',filterLedger);
+$('filterText').addEventListener('input',function(){clearTimeout(window.__dg35FilterTimer);window.__dg35FilterTimer=setTimeout(filterLedger,140);});
+document.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)});});
+document.querySelectorAll('[data-tab]').forEach(function(b){b.addEventListener('click',function(){showPage(b.dataset.tab)});});
+document.querySelectorAll('[data-action]').forEach(function(b){b.addEventListener('click',function(){if(b.dataset.action==='print')window.print();if(b.dataset.action==='csv')saveCSV();if(b.dataset.action==='newRental'){setMode('rental');showPage('new')}});});
+$('date').value=todayRome();adopt();
+})();
+</script></body></html>
