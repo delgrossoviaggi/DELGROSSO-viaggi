@@ -40,7 +40,7 @@ const off=mod.makeConfig(63);off.rows[1].cells[0].status='blocked';
 assert.equal(mod.validate(off,63).seats,63);
 const pdfFile='GESTIONALE/suite/pdf-report.js';
 const pdfSrc=fs.readFileSync(pdfFile,'utf8');
-const pdfContext={window:{},console,Blob,Uint8Array,TextEncoder};
+const pdfContext={window:{},console,Blob,Uint8Array,TextEncoder,Buffer};
 vm.createContext(pdfContext);vm.runInContext(pdfSrc,pdfContext);
 assert.equal(typeof pdfContext.window.DG2Pdf.makeOperationalPdf,'function');
 const group=[{
