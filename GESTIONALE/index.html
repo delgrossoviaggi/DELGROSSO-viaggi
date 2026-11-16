@@ -1130,8 +1130,8 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
     <button data-page="clienti"><span class="ico">👤</span><span>Clienti</span></button>
     <button data-page="scheda-cliente"><span class="ico">👤</span><span>Scheda cliente</span></button>
     <button data-page="contabilitaquote"><span class="ico">▤</span><span>Quote Nicola / Raffaele</span></button>
-    <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('cassa-nicola')"><span class="ico">€</span><span>Contabilità Nicola · dettaglio</span></button>
-    <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('cassa-raffaele')"><span class="ico">€</span><span>Contabilità Raffaele · dettaglio</span></button>
+    
+    
     <button type="button" class="dg-upgrade-link" onclick="dgSuiteOpen('piantine')"><span class="ico">🪑</span><span>Crea / modifica piantine</span></button>
     <button data-page="pagamenti"><span class="ico">▣</span><span>Pagamenti</span></button>
     <button data-page="operativo"><span class="ico">⚙</span><span>Operativo</span></button>
@@ -1553,9 +1553,9 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
  <div class="dg-suite-quick" role="group" aria-label="Apri rapidamente un modulo V2">
   <button type="button" onclick="dgSuiteOpen('prenotazioni')">▣ Prenotazioni con piantina</button>
   <button type="button" onclick="dgSuiteOpen('pagamenti')">€ Pagamenti guidati</button>
-  <button type="button" onclick="dgSuiteOpen('cassa')">▤ Cassa Nicola/Raffaele</button>
-  <button type="button" onclick="dgSuiteOpen('cassa-nicola')">€ Contabilità Nicola</button>
-  <button type="button" onclick="dgSuiteOpen('cassa-raffaele')">€ Contabilità Raffaele</button>
+  <button type="button" onclick="go('dg34-cassa')">▤ Cassa Nicola/Raffaele</button>
+  <button type="button" onclick="go('dg34-nicola')">€ Contabilità Nicola</button>
+  <button type="button" onclick="go('dg34-raffaele')">€ Contabilità Raffaele</button>
   <button type="button" onclick="dgSuiteOpen('agenda')">📅 Agenda completa e note</button>
   <button type="button" onclick="dgSuiteOpen('piantine')">◈ Editor piantine</button>
   <button type="button" onclick="dgSuiteOpen('archivio')">▧ Archivio PDF</button>
@@ -1589,8 +1589,8 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
       <button onclick="mobileGo('flotta')">🚍<span>Flotta</span></button>
       <button onclick="mobileGo('noleggi')">🚐<span>Noleggi</span></button>
       <button onclick="mobileGo('agenda')">📅<span>Agenda</span></button>
-      <button onclick="dgSuiteOpen('cassa-nicola');toggleMobileMenu(false)">€<span>Contabilità Nicola</span></button>
-      <button onclick="dgSuiteOpen('cassa-raffaele');toggleMobileMenu(false)">€<span>Contabilità Raffaele</span></button>
+      <button onclick="go('dg34-nicola');toggleMobileMenu(false)">€<span>Contabilità Nicola</span></button>
+      <button onclick="go('dg34-raffaele');toggleMobileMenu(false)">€<span>Contabilità Raffaele</span></button>
       <button onclick="dgSuiteOpen('piantine');toggleMobileMenu(false)">🪑<span>Editor piantine</span></button>
       <button onclick="dgSuiteOpen('agenda');toggleMobileMenu(false)">📅<span>Agenda note</span></button>
       <button onclick="mobileGo('comunicazioni')">🔔<span>Comunicazioni</span></button>
@@ -4371,8 +4371,8 @@ function injectNav(){
       <button onclick="mobileGo('preventivi')">📄<span>Preventivi</span></button>
       <button onclick="mobileGo('pagamenti')">💳<span>Pagamenti</span></button>
       <button onclick="mobileGo('agenda')">📅<span>Agenda</span></button>
-      <button onclick="dgSuiteOpen('cassa-nicola');toggleMobileMenu(false)">€<span>Contabilità Nicola</span></button>
-      <button onclick="dgSuiteOpen('cassa-raffaele');toggleMobileMenu(false)">€<span>Contabilità Raffaele</span></button>
+      <button onclick="go('dg34-nicola');toggleMobileMenu(false)">€<span>Contabilità Nicola</span></button>
+      <button onclick="go('dg34-raffaele');toggleMobileMenu(false)">€<span>Contabilità Raffaele</span></button>
       <button onclick="dgSuiteOpen('piantine');toggleMobileMenu(false)">🪑<span>Editor piantine</span></button>
       <button onclick="dgSuiteOpen('agenda');toggleMobileMenu(false)">📅<span>Agenda note</span></button>
       <button onclick="mobileGo('assistente')">🤖<span>Assistente</span></button>
@@ -7056,8 +7056,8 @@ const ico={
 const S=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ico[k]||ico.file}</svg>`;
 const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POSTI E PASSEGGERI','seat'],
  ['suite:piantine','Crea / Modifica piantine','seat'],
- ['suite:cassa-nicola','Contabilità Nicola','wallet'],
- ['suite:cassa-raffaele','Contabilità Raffaele','wallet'],
+ ['dg34-nicola','Contabilità Nicola','wallet'],
+ ['dg34-raffaele','Contabilità Raffaele','wallet'],
  ['suite:agenda','Agenda completa','calendar'],
  ['suite:prenotazioni','Prenotazioni con piantina','users'],
  ['suite:pagamenti','Registra pagamento','card'],
@@ -7114,8 +7114,8 @@ function build(){
   <div class="dg-v5-shortcuts-top"><div><span class="dg-v5-eyebrow">FUNZIONI PRINCIPALI</span><h2>Accesso rapido al gestionale</h2><p>Apri direttamente le funzioni richieste, senza un secondo menu o login.</p></div><span class="dg-v5-tag">Versione V5 · menu reale</span></div>
   <div class="dg-v5-actions">
    <button type="button" onclick="dg44Go('suite:piantine')"><span class="dg-v5-ico">▤</span><strong>Crea / Modifica piantine</strong><small>Editor GT53, GT63 e libreria</small></button>
-   <button type="button" onclick="dg44Go('suite:cassa-nicola')"><span class="dg-v5-ico">€</span><strong>Contabilità Nicola</strong><small>Movimenti, saldo e PDF</small></button>
-   <button type="button" onclick="dg44Go('suite:cassa-raffaele')"><span class="dg-v5-ico">€</span><strong>Contabilità Raffaele</strong><small>Movimenti, saldo e PDF</small></button>
+   <button type="button" onclick="go('dg34-nicola')"><span class="dg-v5-ico">€</span><strong>Contabilità Nicola</strong><small>Movimenti, saldo e PDF</small></button>
+   <button type="button" onclick="go('dg34-raffaele')"><span class="dg-v5-ico">€</span><strong>Contabilità Raffaele</strong><small>Movimenti, saldo e PDF</small></button>
    <button type="button" onclick="dg44Go('suite:agenda')"><span class="dg-v5-ico">▦</span><strong>Agenda completa</strong><small>Appuntamenti e storico</small></button>
    <button type="button" onclick="dg44Go('suite:prenotazioni')"><span class="dg-v5-ico">▣</span><strong>Prenotazioni con piantina</strong><small>Posti liberi e occupati</small></button>
    <button type="button" onclick="dg44Go('suite:pagamenti')"><span class="dg-v5-ico">▧</span><strong>Registra pagamento</strong><small>Viaggio, cliente e quota</small></button>
@@ -8089,5 +8089,9 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="./suite/seat-model.js?v=20261116-dg33"></script>
 <script src="./suite/pdf-report.js?v=20261116-dg33"></script>
 <script src="./dg-v2-fusion.js?v=20261116-dg33"></script>
+<!-- DG34: contabilità originale V2, integrata e verificata con Supabase -->
+<link rel="stylesheet" href="./dg34-contabilita.css?v=20261116-dg34">
+<script src="./suite/operator-ledger.js?v=20261116-dg34"></script>
+<script src="./dg34-contabilita.js?v=20261116-dg34" defer></script>
 </body>
 </html>

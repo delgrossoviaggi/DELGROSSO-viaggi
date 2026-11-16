@@ -136,6 +136,15 @@ function saveBookingPdf(b,t,movements=[]){
 }
 function makeOperatorPdf(profile,onlyTrip=''){
  if(!profile||!['nicola','raffaele'].includes(profile.key))throw Error('Seleziona contabilità Nicola o Raffaele');
+ // DG34: un PDF di singolo viaggio deve avere TOTALI E RIGHE limitati a quel viaggio.
+ // Non mostrare il totale generale insieme all'etichetta di una partenza.
+ if(onlyTrip){
+  const filtered=(profile.trips||[]).filter(g=>String(g.id)===String(onlyTrip));
+  const signed=x=>filtered.reduce((sum,g)=>sum+(Number(g[x])||0),0);
+  profile={...profile,trips:filtered,net:signed('net'),cash:signed('cash'),
+   electronic:signed('electronic'),unknown:signed('unknown'),transferredIn:0,transferredOut:0,
+   inHand:signed('cash'),rentals:null};
+ }
  const doc=new Sheet('CONTABILITA '+profile.name.toUpperCase());doc.y=139;
  doc.label('CONTABILITA DI '+profile.name.toUpperCase(),42,123,13,true);
  doc.paragraph('DELGROSSO VIAGGI & LIMOUSINE BUS | Documento gestionale interno');
@@ -159,6 +168,16 @@ function makeOperatorPdf(profile,onlyTrip=''){
   if(g.movements.length){doc.tableHead();for(let i=0;i<g.movements.length;i++){
     const m=g.movements[i];doc.row({date:m.date,cliente:m.client,tipo:m.refund?'Rimborso':'Incasso',receipt:m.receipt,bus:m.bus,method:m.method,amount:m.amount},i);
   }}
+ }
+ if(!onlyTrip&&profile.rentals){
+  const rental=profile.rentals;
+  doc.heading('REGISTRO SEPARATO NOLEGGI AUTOBUS');
+  doc.stat('Incassi noleggi netti registrati',rental.net);
+  doc.stat('Contanti noleggi',rental.cash);
+  doc.stat('Elettronici noleggi',rental.electronic);
+  doc.stat('TOTALE GITE E NOLEGGI (senza duplicare Economia)',profile.net+rental.net);
+  if(rental.items?.length){doc.tableHead();rental.items.forEach((m,i)=>doc.row({
+    date:m.date,cliente:m.rental,tipo:m.kind,receipt:m.receipt,bus:'N',method:m.method,amount:m.amount},i));}
  }
  doc.heading('NOTA CONTABILE');
  doc.paragraph('Tutti gli importi sono riportati dai movimenti registrati su Supabase. POS e bonifici non sono contanti disponibili fisicamente. I rimborsi sono sottratti. I trasferimenti non costituiscono nuovi incassi.');
@@ -275,5 +294,91 @@ function makeRosterPdf(groups,settings={}){
  doc.paragraph('Prenotazioni annullate e riserve aziendali escluse. Il numero dei referenti non coincide necessariamente con il numero dei passeggeri.');
  return doc.finish();
 }
-root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf,makeLayoutPdf,saveLayoutPdf,makeRosterPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
+
+/** DG33: report nominale di bordo con piantina ufficiale (quando disponibile),
+ * fermate per paese, BUS/BIS e riscontri sulle assegnazioni. Nessuna scrittura. */
+function makeOperationalPdf(groups,opts={}){
+ if(!Array.isArray(groups)||!groups.length)throw Error('Nessuna partenza da esportare');
+ const doc=new Sheet('CONTROL ROOM - LISTE E PIANTINE');
+ doc.y=115;
+ doc.paragraph('DELGROSSO VIAGGI - ELENCHI OPERATIVI RISERVATI - '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'}));
+ doc.paragraph('Il nome indicato su un sedile e il REFERENTE della prenotazione, non necessariamente il singolo passeggero.');
+ let totalPeople=0,totalBookings=0;
+ const slim=(v,n)=>text(String(v??'').trim()||'-').slice(0,n);
+ function header(list){
+  doc.ensure(27);doc.box(42,doc.y-10,W-84,23,[.86,.91,.97]);
+  [['Posti',47],['Referente prenotazione',105],['Pers.',287],['Fermata di salita',326],['Check-in',481]]
+   .forEach(([s,x])=>doc.label(s,x,doc.y+6,7.8,true));doc.y+=25;
+ }
+ function row(b,i){
+  const h=26; if(doc.y+h>H-65){doc.newPage();header()}
+  if(i%2===0)doc.box(42,doc.y-9,W-84,h,[.965,.973,.99]);
+  const seats=(Array.isArray(b.sedili)?b.sedili:[]).join(', ')||'-';
+  doc.label(slim(seats,13),47,doc.y+6,7.4,true);
+  doc.label(slim(b.cliente_nome||b.cliente||'Nominativo assente',34),105,doc.y+6,7.5);
+  doc.label(String(Math.max(0,Number(b.posti)||0)),290,doc.y+6,8,true);
+  doc.label(slim(b.fermata_partenza||'NON INDICATA',25),326,doc.y+6,7.5);
+  doc.label(b.checkin_effettuato?'SI':'-',484,doc.y+6,7.2);
+  doc.y+=h;
+ }
+ for(const group of groups){
+  doc.ensure(90);doc.heading(slim(group.title||group.trip?.titolo||'PARTENZA',70));
+  doc.paragraph('Data: '+slim(group.trip?.data_partenza,20)+' - BUS inclusi: '+(group.buses||[]).length);
+  for(const bus of group.buses||[]){
+   const list=(bus.bookings||[]),people=list.reduce((a,b)=>a+Math.max(0,Number(b.posti)||0),0);
+   totalPeople+=people;totalBookings+=list.length;
+   doc.ensure(66);doc.heading(slim(bus.name||bus.trip?.titolo||'AUTOBUS',64));
+   doc.paragraph('Prenotazioni: '+list.length+' - Passeggeri: '+people+' - Posti vendibili: '+(bus.trip?.posti_totali??'-'));
+   if(bus.layout?.rows?.length){
+    const rows=bus.layout.rows;
+    const tag=bus.official?'PIANTINA UFFICIALE PUBBLICATA':'SCHEMA V2 INDICATIVO - DISPOSIZIONE DA VERIFICARE';
+    doc.ensure(41);doc.label(tag,43,doc.y+4,8,true,bus.official?[.08,.43,.33]:[.63,.32,.08]);doc.y+=23;
+    // Each seat has a unique reference; occupants are only the booking holder.
+    const bySeat=new Map();for(const b of list)for(const n of b.sedili||[])if(!bySeat.has(String(n)))bySeat.set(String(n),b);
+    const width=99,cellHeight=34,colX=[44,146,248,350,452];
+    for(const arr of rows){
+     if(doc.y+cellHeight>H-67){doc.newPage();doc.label('Piantina autobus - continua',43,doc.y+5,9,true);doc.y+=24;}
+     const cells=Array.isArray(arr)?arr:(arr.cells||[]);
+     cells.slice(0,5).forEach((cell,j)=>{
+      const x=colX[j],y=doc.y-8;
+      const seat=cell&&typeof cell==='object'?cell.type==='seat'?String(cell.id||''):null:Number.isInteger(cell)?String(cell):typeof cell==='string'&&/^\d+$/.test(cell)?cell:null;
+      const type=cell&&typeof cell==='object'?cell.type:cell;
+      const b=seat?bySeat.get(seat):null,blocked=cell?.status==='blocked'||cell?.status==='out_of_service';
+      const unavailable=seat&&Number(seat)>Number(bus.trip?.posti_totali||999);
+      const tint=b?[.79,.89,.98]:blocked||unavailable?[.97,.87,.82]:seat?[.85,.96,.91]:[.95,.96,.97];
+      doc.box(x,y,width,30,tint);
+      if(seat){
+       doc.label('POSTO '+slim(seat,3)+(unavailable?' *':''),x+5,y+11,7.6,true);
+       if(b)doc.label(slim(b.cliente_nome||b.cliente,18),x+5,y+23,6.7,false);
+       else if(blocked||unavailable)doc.label('NON DISPONIBILE',x+5,y+23,6.7);
+       else doc.label('LIBERO',x+5,y+23,7);
+      }else if(type==='door')doc.label('PORTA',x+6,y+18,8,true);
+      else if(type==='aisle')doc.label('CORRIDOIO',x+5,y+18,7.5);
+      else if(type==='wc')doc.label('WC',x+5,y+18,8);
+     });
+     doc.y+=cellHeight;
+    }
+    doc.y+=10;
+   }else{
+    doc.paragraph('PIANTINA NON DISPONIBILE: nessuna geometria pubblicata e nessuno schema V2 affidabile.');
+   }
+   if((bus.warnings||[]).length){doc.heading('VERIFICHE PRIMA DELLA PARTENZA');for(const w of bus.warnings.slice(0,12))doc.note(slim(w,95));}
+   doc.heading('ELENCO POSTI ASSEGNATI');
+   header(list);list.slice().sort((a,b)=>Number((a.sedili||[])[0]||999)-Number((b.sedili||[])[0]||999)).forEach(row);
+   doc.heading('SALITA PASSEGGERI - SUDDIVISI PER PAESE/FERMATA');
+   const stops=new Map();for(const b of list){const stop=String(b.fermata_partenza||'FERMATA NON INDICATA').trim()||'FERMATA NON INDICATA';if(!stops.has(stop))stops.set(stop,[]);stops.get(stop).push(b)}
+   for(const [stop,grouped] of [...stops.entries()].sort((a,b)=>a[0].localeCompare(b[0],'it'))){
+    const count=grouped.reduce((n,b)=>n+Math.max(0,Number(b.posti)||0),0);
+    doc.ensure(52);doc.box(42,doc.y-8,W-84,24,[.90,.94,.98]);doc.label(slim(stop,52)+'  |  '+grouped.length+' prenotazioni / '+count+' passeggeri',47,doc.y+8,8.6,true);doc.y+=28;
+    header();grouped.forEach(row);
+   }
+   if(!list.length)doc.paragraph('Nessuna prenotazione attiva in questo autobus.');
+   doc.ensure(25);doc.paragraph('Totale BUS: '+people+' passeggeri | '+list.length+' prenotazioni | Documento interno riservato','bold');
+  }
+ }
+ doc.heading('TOTALI DEL DOCUMENTO');doc.paragraph('Partenze: '+groups.length+' | Prenotazioni: '+totalBookings+' | Passeggeri: '+totalPeople,'bold');
+ doc.paragraph('Il documento non registra incassi e non modifica alcuna prenotazione. Non condividere dati personali fuori dall’organizzazione.');
+ return doc.finish();
+}
+root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf,makeLayoutPdf,saveLayoutPdf,makeRosterPdf,makeOperationalPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
 })(typeof window!=='undefined'?window:globalThis);
