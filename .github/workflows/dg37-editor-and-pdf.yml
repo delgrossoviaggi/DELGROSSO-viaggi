@@ -1,0 +1,28 @@
+name: DG37 Layouts and Accounting Smoke
+on:
+  push:
+    paths:
+      - "GESTIONALE/nuovo/**"
+      - "tests/dg37-editor-and-pdf-smoke.mjs"
+      - "tests/dg37-live-views-mock.mjs"
+      - ".github/workflows/dg37-editor-and-pdf.yml"
+  pull_request:
+    paths:
+      - "GESTIONALE/nuovo/**"
+      - "tests/dg37-editor-and-pdf-smoke.mjs"
+      - "tests/dg37-live-views-mock.mjs"
+      - ".github/workflows/dg37-editor-and-pdf.yml"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test operational editor and PDF
+        run: |
+          node tests/dg37-editor-and-pdf-smoke.mjs
+          node tests/dg37-live-views-mock.mjs

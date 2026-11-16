@@ -7,7 +7,7 @@ const URL='https://chkuayhbmitdmzmmvona.supabase.co';
 const KEY='sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je'; // chiave publishable
 const COL={
 trips:['viaggi','id,titolo,destinazione,data_partenza,ora_partenza,stato,posti_totali,posti_occupati,autobus,autobus_id,bis_parent_id,bis_numero,archiviato_at'],
-bookings:['prenotazioni','id,viaggio_id,cliente,cliente_nome,telefono,email,posti,posti_selezionati,totale,pagato,saldo,stato,fermata_partenza,checkin_effettuato,codice'],
+bookings:['prenotazioni','id,viaggio_id,cliente,cliente_nome,telefono,email,posti,posti_selezionati,totale,pagato,saldo,stato,fermata_partenza,checkin_effettuato,codice,riserva_aziendale'],
 seatrows:['prenotazione_posti','id,viaggio_id,prenotazione_id,posto'],
 payments:['pagamenti','id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,incassato_da,incassato_da_user_id,receipt_number,data_pagamento,created_at'],
 operators:['operatori_gestionale','user_id,username,nome,attivo'],
@@ -18,9 +18,12 @@ rentals:['noleggi_bus','id,referente,azienda,tratta_partenza,tratta_destinazione
 rentalPayments:['noleggi_bus_pagamenti','id,noleggio_id,tipo,importo,metodo,data_pagamento,incassato_da,incassato_da_user_id,receipt_number'],
 customers:['clienti','id,nome,cognome,telefono,email'],
 agenda:['scadenze_gestionale','id,titolo,descrizione,data_scadenza,stato,priorita,tipo'],
-fleet:['flotta','id,titolo,modello,posti,categoria,attivo,stato']
+fleet:['flotta','id,titolo,modello,posti,categoria,attivo,stato'],
+layoutDrafts:['dg2_layout_library','id,nome,configurazione,attivo,updated_at'],
+busOfficial:['dg28_bus_layouts','autobus_id,layout_id,configurazione,versione,pubblicata_il'],
+tripOfficial:['dg28_trip_layouts','viaggio_id,autobus_id,layout_id,configurazione,versione,pubblicata_il']
 };
-const PAGE={dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',control:'Control Room',accounting:'Contabilità e cassa',economy:'Economia',fleet:'Flotta GT',rentals:'Noleggi autobus',customers:'Clienti',agenda:'Agenda'};
+const PAGE={dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',control:'Control Room',layouts:'Piantine GT',accounting:'Contabilità e cassa',economy:'Economia',fleet:'Flotta GT',rentals:'Noleggi autobus',customers:'Clienti',agenda:'Agenda'};
 let session=null,operator='',page='dashboard',fetchTicket=0,mutation=false,unsafeRetry=false,sessionEpoch=0;
 let filters={trip:'',term:'',stop:''},selectedTrip='',temp={},lastNotice='';
 const cache=new Map(),ongoing=new Map();
@@ -40,7 +43,7 @@ function notice(s,kind=''){lastNotice=s;const el=$('notice');el.textContent=s;el
 function errorMsg(e){return txt(e?.message||e).replace(/(Bearer\s+[A-Za-z0-9-_.]+)/g,'Bearer ***')}
 function setLoading(s='Caricamento dati Supabase…'){$('content').innerHTML='<div class="loading">'+esc(s)+'</div>'}
 function setBusy(b){document.querySelectorAll('.btn.solid').forEach(x=>x.disabled=b)}
-function clearSensitive(){sessionEpoch++;session=null;operator='';cache.clear();ongoing.clear();temp={};try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login')}catch(e){}}
+function clearSensitive(){sessionEpoch++;session=null;operator='';cache.clear();ongoing.clear();temp={};window.DG37Layouts?.clear();try{sessionStorage.removeItem('dg_auth');sessionStorage.removeItem('dg_login')}catch(e){}}
 function hasSession(){return !!session?.access_token&&!!session?.user?.id}
 async function raw(path,method='GET',body=null,authenticated=true){
  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),16000);
@@ -49,7 +52,7 @@ async function raw(path,method='GET',body=null,authenticated=true){
   const h={'apikey':KEY,'Accept':'application/json'};if(authenticated)h.Authorization='Bearer '+session.access_token;
   const o={method,headers:h,cache:'no-store',referrerPolicy:'no-referrer',mode:'cors',signal:ctl.signal};
   if(body!==null){h['Content-Type']='application/json';o.body=JSON.stringify(body)}
-  if(method==='POST'&&path.startsWith('/rest/v1/')&&!path.startsWith('/rest/v1/rpc/'))h.Prefer='return=representation';
+  if(['POST','PATCH'].includes(method)&&path.startsWith('/rest/v1/')&&!path.startsWith('/rest/v1/rpc/'))h.Prefer='return=representation';
   const res=await fetch(URL+path,o),s=await res.text();let data;
   try{data=s?JSON.parse(s):null}catch(e){data={message:s.slice(0,180)}}
   if(!res.ok)throw Error((data&&(data.message||data.error_description||data.error||data.hint))||('Supabase HTTP '+res.status));
@@ -119,7 +122,7 @@ async function load(key,force=false){
  const promise=(async()=>{
   const [table,select]=COL[key],rows=[],chunk=400,readEpoch=sessionEpoch;
   for(let offset=0;offset<12000;offset+=chunk){
-   const q=new URLSearchParams({select,limit:String(chunk),offset:String(offset),order:(key==='operators'?'user_id.asc':'id.asc')});
+   const q=new URLSearchParams({select,limit:String(chunk),offset:String(offset),order:({operators:'user_id.asc',cashoperators:'user_id.asc',busOfficial:'autobus_id.asc',tripOfficial:'viaggio_id.asc'}[key]||'id.asc')});
    const part=await raw('/rest/v1/'+table+'?'+q.toString());
    if(!Array.isArray(part))throw Error('Archivio '+table+' non leggibile.');
    if(readEpoch!==sessionEpoch)throw Error('Sessione cambiata durante la lettura.');rows.push(...part);if(part.length<chunk){cache.set(key,{data:rows,ts:Date.now()});return rows}
@@ -155,9 +158,10 @@ async dashboard(){
  const active=bookings.filter(validBooking);
  const upcoming=trips.filter(t=>!t.archiviato_at&&t.data_partenza>=today()).sort((a,b)=>txt(a.data_partenza).localeCompare(txt(b.data_partenza))).slice(0,8);
  const metrics=[['Viaggi presenti',trips.length],['Prenotazioni attive',active.length],['Posti prenotati',active.reduce((a,b)=>a+Number(b.posti||0),0)],['Prossime partenze',upcoming.length]].map(([t,v])=>'<div class="metric"><span>'+esc(t)+'</span><b>'+esc(v)+'</b></div>').join('');
- const actions=['trips','bookings','control','accounting','economy','rentals','fleet','customers','agenda'].map(k=>'<button data-page="'+k+'">'+esc(PAGE[k])+'</button>').join('');
+ const actions=['trips','bookings','control','layouts','accounting','economy','rentals','fleet','customers','agenda'].map(k=>'<button data-page="'+k+'">'+esc(PAGE[k])+'</button>').join('');
  return '<div class="metrics">'+metrics+'</div><section class="card"><h2>Accessi operativi</h2><div class="quick">'+actions+'</div></section><section class="card"><h2>Prossime partenze</h2>'+table(['Data','Viaggio','Capienza','Stato','Azione'],upcoming.map(t=>tr([esc(dateIT(t.data_partenza)),esc(nameTrip(t)),esc(t.posti_occupati||0)+' / '+esc(t.posti_totali||0),tag(t.stato),'<button class="btn" data-control="'+esc(t.id)+'">Apri Control Room</button>'])) )+'</section>';
 },
+async layouts(){return window.DG37Layouts.render()},
 async trips(){
  const trips=await load('trips');
  const list=[...trips].sort((a,b)=>txt(b.data_partenza).localeCompare(txt(a.data_partenza)));
@@ -173,7 +177,7 @@ async control(){
  const t=trips.find(x=>x.id===selectedTrip)||trips.find(x=>x.data_partenza>=today()&&!x.archiviato_at)||trips[0];
  if(!t)return headerCard('Control Room','Non ci sono viaggi presenti.');
  selectedTrip=t.id;
- return '<section class="card"><div class="row"><h2>Control Room · prenotazioni e fermate</h2><button class="btn" data-action="control-print">Stampa / PDF</button><button class="btn" data-action="control-csv">Esporta CSV</button></div><div class="fields"><label>Seleziona viaggio<select id="control-trip">'+options(trips.map(x=>({id:x.id,label:dateIT(x.data_partenza)+' · '+nameTrip(x)})),t.id)+'</select></label></div><div id="control-detail">'+await controlDetail(t)+'</div></section>';
+ return '<section class="card"><div class="row"><h2>Control Room · prenotazioni e fermate</h2><button class="btn solid" data-action="control-pdf">⇩ PDF nominativi e piantina</button><button class="btn" data-action="control-pdf-sunday">PDF domenica 22/11</button><button class="btn" data-action="control-csv">Esporta CSV</button></div><div class="fields"><label>Seleziona viaggio<select id="control-trip">'+options(trips.map(x=>({id:x.id,label:dateIT(x.data_partenza)+' · '+nameTrip(x)})),t.id)+'</select></label></div><div id="control-detail">'+await controlDetail(t)+'</div></section>';
 },
 async accounting(){
  if(!window.DG2OperatorLedger?.build)throw Error('Modulo di contabilità non disponibile. Ricarica la pagina.');
@@ -184,7 +188,7 @@ async accounting(){
  const m=[['Incassi gite netti',moneyCents(all.reduce((a,m)=>a+m.amount,0))],['Nicola',moneyCents(ps.nicola.net)],['Raffaele',moneyCents(ps.raffaele.net)],['Da attribuire',moneyCents(ps.nonAttribuiti.net)]];
  const stats=m.map(x=>'<div class="metric"><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('');
  const transferText='<p class="sub">Trasferimenti tra operatori esclusi dagli incassi: Nicola entrata '+moneyCents(ps.nicola.transferredIn)+' / uscita '+moneyCents(ps.nicola.transferredOut)+' · Raffaele entrata '+moneyCents(ps.raffaele.transferredIn)+' / uscita '+moneyCents(ps.raffaele.transferredOut)+'.</p>';
- return '<div class="metrics">'+stats+'</div><section class="card"><div class="row"><h2>Contabilità operativa · Supabase</h2><button class="btn solid" data-action="payment-form">＋ Registra acconto / saldo</button><button class="btn" data-action="accounting-print">Stampa / PDF</button><button class="btn" data-action="accounting-csv">CSV</button></div>'+transferText+'<div class="fields"><label>Operatore<select id="account-who"><option value="">Tutti</option><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option><option value="nonAttribuiti">Da verificare</option></select></label><label>Viaggio<select id="account-trip">'+options(trips.map(t=>({id:t.id,label:dateIT(t.data_partenza)+' · '+nameTrip(t)})),'','Tutti i viaggi')+'</select></label><label>Cerca cliente o ricevuta<input type="search" id="account-search" placeholder="Nome / ricevuta"></label></div><div id="account-results"></div></section>'+
+ return '<div class="metrics">'+stats+'</div><section class="card"><div class="row"><h2>Contabilità operativa · Supabase</h2><button class="btn solid" data-action="payment-form">＋ Registra acconto / saldo</button><button class="btn" data-action="accounting-pdf-nicola">⇩ PDF Nicola</button><button class="btn" data-action="accounting-pdf-raffaele">⇩ PDF Raffaele</button><button class="btn" data-action="accounting-csv">CSV</button></div>'+transferText+'<div class="fields"><label>Operatore<select id="account-who"><option value="">Tutti</option><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option><option value="nonAttribuiti">Da verificare</option></select></label><label>Viaggio<select id="account-trip">'+options(trips.map(t=>({id:t.id,label:dateIT(t.data_partenza)+' · '+nameTrip(t)})),'','Tutti i viaggi')+'</select></label><label>Cerca cliente o ricevuta<input type="search" id="account-search" placeholder="Nome / ricevuta"></label></div><div id="account-results"></div></section>'+
  (model.issues?.length?'<div class="notice warn">'+esc(model.issues.length)+' avvisi contabili da verificare. Non correggere i dati automaticamente.</div>':'');
 },
 async economy(){
@@ -252,12 +256,40 @@ async function controlDetail(t){
  if(seats.size!==total)warnings.push('Nominativi/posti da riconciliare: '+seats.size+' posti numerati, '+total+' persone registrate.');
  const capacity=Math.max(0,Math.min(100,Number(t.posti_totali)||0));
  const cells=[];for(let i=1;i<=capacity;i++){let booking=seats.get(String(i));cells.push('<div class="seat '+(booking?'occupied':'')+'"><strong>Posto '+i+'</strong><small>'+esc(booking?nameBooking(booking):'Libero')+'</small></div>')}
+ const officialMap=await window.DG37Layouts.renderControlMap(t,b,seats);
  temp.control={trip:t,bookings:b,seats,groups};
  return '<div class="metrics"><div class="metric"><span>Capienza vendibile</span><b>'+capacity+'</b></div><div class="metric"><span>Passeggeri registrati</span><b>'+total+'</b></div><div class="metric"><span>Posti numerati</span><b>'+seats.size+'</b></div><div class="metric"><span>Check-in completati</span><b>'+b.filter(x=>x.checkin_effettuato).length+' / '+b.length+'</b></div></div>'+
  (warnings.length?'<div class="notice warn">'+warnings.map(esc).join(' · ')+'</div>':'')+
- '<h3>Elenco posti nominativi</h3><p class="sub">Ordine numerico, NON disposizione fisica certificata: la geometria dell’autobus viene mostrata soltanto dopo validazione del layout ufficiale.</p><div class="seat-list">'+cells.join('')+'</div>'+
- '<h3 style="margin-top:22px">Prenotati suddivisi per fermata</h3>'+
- Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([stop,list])=>'<h3>'+esc(stop)+' · '+list.reduce((sum,x)=>sum+Number(x.posti||0),0)+' persone</h3>'+table(['Nominativo','Persone','Posti','Telefono','Check-in'],list.map(x=>tr([esc(nameBooking(x)),esc(x.posti),esc(seatIds(x).join(', ')||'Da verificare'),esc(x.telefono),esc(x.checkin_effettuato?'Sì':'No')])))).join('');
+ officialMap+'<h3>Elenco posti nominativi</h3><p class="sub">Ordine numerico, NON disposizione fisica certificata: la geometria dell’autobus viene mostrata soltanto dopo validazione del layout ufficiale.</p><div class="seat-list">'+cells.join('')+'</div>'+
+ '<h3 style="margin-top:22px">Prenotati suddivisi per fermata</h3><p class="sub">Check-in aggiornabile solo dagli operatori autorizzati. Puoi segnare la presenza o annullarla, senza cambiare posti e pagamenti.</p>'+
+ Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([stop,list])=>'<h3>'+esc(stop)+' · '+list.reduce((sum,x)=>sum+Number(x.posti||0),0)+' persone</h3>'+table(['Nominativo','Persone','Posti','Telefono','Check-in'],list.map(x=>tr([esc(nameBooking(x)),esc(x.posti),esc(seatIds(x).join(', ')||'Da verificare'),esc(x.telefono),'<button type="button" class="btn '+(x.checkin_effettuato?'quiet':'solid')+'" data-checkin="'+esc(x.id)+'">'+(x.checkin_effettuato?'✓ Presente · annulla':'Segna presente')+'</button>'])))).join('');
+}
+async function changeCheckin(id){
+ if(mutation)return;
+ const t=temp.control?.trip,b=temp.control?.bookings?.find(x=>x.id===id);
+ if(!t||!b)throw Error('Prenotazione non più disponibile. Ricarica la Control Room.');
+ const next=!b.checkin_effettuato;
+ if(!confirm((next?'Confermi il check-in':'Vuoi annullare il check-in')+' per '+nameBooking(b)+'?'+
+ '\nViaggio: '+nameTrip(t)+'\nFermata: '+(b.fermata_partenza||'non indicata')+
+ '\nNon saranno modificati posti o quote.'))return;
+ mutation=true;
+ try{
+  await authorize();
+  const fields={checkin_effettuato:next,checkin_stato:next?'Presente':'Da effettuare',
+    checked_in_at:next?new Date().toISOString():null,checkin_fermata:next?(b.fermata_partenza||null):null,
+    checkin_operatore:next?operator:null};
+  const q=new URLSearchParams({id:'eq.'+b.id,viaggio_id:'eq.'+t.id,select:'id,checkin_effettuato'});
+  const rows=await raw('/rest/v1/prenotazioni?'+q.toString(),'PATCH',fields);
+  if(!Array.isArray(rows)||rows.length!==1||rows[0].checkin_effettuato!==next)
+    throw Error('La modifica potrebbe essere stata eseguita: verifica lo stato prima di riprovare.');
+  invalidate('bookings');
+  const fresh=await load('bookings',true);
+  const current=await load('trips').then(ts=>ts.find(x=>x.id===t.id));
+  if(!current)throw Error('Viaggio non trovato dopo il salvataggio.');
+  $('control-detail').innerHTML=await controlDetail(current);
+  notice('Check-in '+(next?'registrato':'annullato')+' per '+nameBooking(b)+'.');
+ }catch(e){notice('Check-in da verificare: '+errorMsg(e),'bad')}
+ finally{mutation=false}
 }
 function modal(title,html){$('modal-title').textContent=title;$('modal-body').innerHTML=html;$('modal').hidden=false}
 function closeModal(){$('modal').hidden=true;$('modal-body').innerHTML=''}
@@ -362,6 +394,16 @@ function csv(rows,name){
 function printCurrent(){window.print()}
 function handleAction(action){
  if(action==='retry')return navigate(page);
+ if(action==='control-pdf'||action==='control-pdf-sunday'){
+  if(!window.DG37Layouts)return notice('Modulo PDF non caricato.','bad');
+  if(action==='control-pdf')window.DG37Layouts.selectedTrip=selectedTrip;
+  return window.DG37Layouts.pdf(action==='control-pdf'?'trip':'sunday').then(f=>notice('Scaricato '+f)).catch(e=>notice('Errore PDF: '+errorMsg(e),'bad'));
+ }
+ if(action==='accounting-pdf-nicola'||action==='accounting-pdf-raffaele'){
+  const key=action.endsWith('nicola')?'nicola':'raffaele',profile=temp.accounting?.model?.profiles?.[key];
+  if(!profile||!window.DG2Pdf?.saveOperatorPdf)return notice('Ricarica la contabilità e il generatore PDF.','bad');
+  try{const file=window.DG2Pdf.saveOperatorPdf(profile,$('account-trip')?.value||'');notice('PDF generato: '+file)}catch(e){notice('PDF: '+errorMsg(e),'bad')}return;
+ }
  if(action==='payment-form')return cashPayForm(false);
  if(action==='rental-payment-form')return cashPayForm(true);
  if(action==='accounting-print'||action==='bookings-print'||action==='control-print')return printCurrent();
@@ -375,6 +417,8 @@ document.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.dataset.page){navigate(b.dataset.page);return}
  if(b.dataset.control){selectedTrip=b.dataset.control;navigate('control');return}
+ if(b.dataset.tripLayout){window.DG37Layouts.selectedTrip=b.dataset.tripLayout;navigate('layouts');return}
+ if(b.dataset.checkin){changeCheckin(b.dataset.checkin).catch(e=>notice(errorMsg(e),'bad'));return}
  if(b.dataset.action){try{handleAction(b.dataset.action)}catch(err){notice(errorMsg(err),'bad')}}
 });
 document.addEventListener('change',e=>{
@@ -401,6 +445,7 @@ $('refresh').addEventListener('click',()=>{invalidate(...Object.keys(COL));navig
 $('logout').addEventListener('click',logout);
 $('close-modal').addEventListener('click',closeModal);
 $('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal()});
+window.DG37Layouts.init({raw,load,authorize,invalidate,notice,esc,get currentDrafts(){return temp.currentDrafts||[]},set currentDrafts(v){temp.currentDrafts=v}});
 adopt();
-window.DG36=Object.freeze({version:'36.0',get page(){return page}});
+window.DG36=Object.freeze({version:'37.0',get page(){return page}});
 })();

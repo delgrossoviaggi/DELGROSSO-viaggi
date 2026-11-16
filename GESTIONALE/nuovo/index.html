@@ -3,12 +3,13 @@
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="mark">🚌</div><p class="eyebrow">DELGROSSO VIAGGI &amp; LIMOUSINE BUS</p><h1>Gestionale operativo</h1><p class="sub">Sistema ricostruito con accesso ai dati originali Supabase. Un solo login, senza dati dimostrativi.</p><form id="login-form"><label>Operatore<select id="user" required><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option></select></label><label>Password<input type="password" id="pass" autocomplete="current-password" required></label><button class="btn solid" id="login-btn" type="submit">Accedi ai dati aziendali</button></form><p class="alert" id="auth-error" hidden></p><small>Accesso riservato agli operatori autorizzati. Nessun dato viene salvato sul dispositivo.</small></div></div>
 <div id="shell" class="shell" hidden>
-<aside class="sidebar"><div class="brand"><div class="mark">🚌</div><div><strong>DELGROSSO VIAGGI</strong><small>Centro operativo · DG36</small></div></div>
+<aside class="sidebar"><div class="brand"><div class="mark">🚌</div><div><strong>DELGROSSO VIAGGI</strong><small>Centro operativo · DG37</small></div></div>
 <nav id="nav" aria-label="Menu del gestionale">
 <button data-page="dashboard" class="active">▦ Dashboard</button>
 <button data-page="trips">🚌 Viaggi e partenze</button>
 <button data-page="bookings">▤ Prenotazioni</button>
 <button data-page="control">◈ Control Room</button>
+<button data-page="layouts">▦ Piantine GT</button>
 <button data-page="accounting">€ Contabilità e cassa</button>
 <button data-page="economy">€ Economia</button>
 <button data-page="fleet">🚌 Flotta GT</button>
@@ -22,8 +23,8 @@
 <header class="bar"><div><span class="eyebrow">CENTRO OPERATIVO / <span id="crumb">DASHBOARD</span></span><h1 id="heading">Dashboard</h1></div><div class="actions"><span id="operator-label" class="pill"></span><button id="refresh" class="btn quiet">↻ Aggiorna</button><button id="logout" class="btn quiet">Esci</button></div></header>
 <div id="notice" class="notice" aria-live="polite" hidden></div>
 <main id="content" aria-live="polite"><div class="loading">Caricamento dati Supabase…</div></main>
-<footer>DELGROSSO VIAGGI &amp; LIMOUSINE BUS · Gestione aziendale riservata · DG36</footer>
+<footer>DELGROSSO VIAGGI &amp; LIMOUSINE BUS · Gestione aziendale riservata · DG37</footer>
 </div></div>
 <section id="modal" class="modal" hidden><div class="dialog"><div class="dialog-head"><h2 id="modal-title">Operazione</h2><button type="button" id="close-modal" class="btn quiet">✕</button></div><div id="modal-body"></div></div></section>
-<script defer src="../suite/operator-ledger.js?v=dg36"></script><script defer src="./app.js?v=dg36"></script>
+<script defer src="../suite/operator-ledger.js?v=dg37"></script><script defer src="../suite/pdf-report.js?v=dg37"></script><script defer src="./piantine-v37.js?v=dg37"></script><script defer src="./app.js?v=dg37"></script>
 </body></html>
