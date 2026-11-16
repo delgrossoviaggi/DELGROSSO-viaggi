@@ -120,7 +120,7 @@ async function render(){
  }
  if(!chosenBus)chosenBus=buses.find(x=>x.posti===63)?.id||buses[0]?.id||'';
  return '<div class="notice warn">DELGROSSO · piantine operative DG37. Verifica la posizione fisica dei sedili: una bozza non diventa ufficiale automaticamente. Le prenotazioni e i pagamenti non vengono modificati dall’editor.</div>'+
- editorHtml()+assignmentHtml(trips,buses,tripOfficial,busOfficial);
+ '<div id="dg37-editor-container">'+editorHtml()+'</div><div id="dg37-assignment">'+assignmentHtml(trips,buses,tripOfficial,busOfficial)+'</div>';
 }
 function paint(){
  const el=$('dg37-editor-container');if(el)el.innerHTML=editorHtml();
@@ -343,10 +343,11 @@ function change(e){
  if(k==='dg37-trip'){chosenTrip=e.target.value;available=null;const el=$('dg37-availability');if(el)el.innerHTML=''}
  if(k==='dg37-bus')chosenBus=e.target.value;
 }
+function clear(){editor=null;source='';chosenTrip='';chosenBus='';busy=false;available=null;}
 function init(deps){
  api=deps;
  document.addEventListener('click',click);
  document.addEventListener('change',change);
 }
-global.DG37Layouts=Object.freeze({init,render,renderControlMap,makeConfig,normalize,validate,get selectedTrip(){return chosenTrip},set selectedTrip(x){chosenTrip=x},pdf});
+global.DG37Layouts=Object.freeze({init,clear,render,renderControlMap,makeConfig,normalize,validate,get selectedTrip(){return chosenTrip},set selectedTrip(x){chosenTrip=x},pdf});
 })(window);
