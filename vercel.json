@@ -21,5 +21,17 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/GESTIONALE",
+      "destination": "/GESTIONALE/index.html",
+      "permanent": false
+    },
+    {
+      "source": "/GESTIONALE/",
+      "destination": "/GESTIONALE/index.html",
+      "permanent": false
+    }
   ]
 }

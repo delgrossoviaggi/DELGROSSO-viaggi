@@ -1,0 +1,25 @@
+name: DG38 V2 relative-path regression
+on:
+  push:
+    paths:
+      - "GESTIONALE/index.html"
+      - "vercel.json"
+      - "tests/dg38-v2-paths-smoke.mjs"
+      - ".github/workflows/dg38-v2-paths-smoke.yml"
+  pull_request:
+    paths:
+      - "GESTIONALE/index.html"
+      - "vercel.json"
+      - "tests/dg38-v2-paths-smoke.mjs"
+      - ".github/workflows/dg38-v2-paths-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  test-paths:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node tests/dg38-v2-paths-smoke.mjs
