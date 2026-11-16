@@ -261,8 +261,35 @@ async function controlDetail(t){
  return '<div class="metrics"><div class="metric"><span>Capienza vendibile</span><b>'+capacity+'</b></div><div class="metric"><span>Passeggeri registrati</span><b>'+total+'</b></div><div class="metric"><span>Posti numerati</span><b>'+seats.size+'</b></div><div class="metric"><span>Check-in completati</span><b>'+b.filter(x=>x.checkin_effettuato).length+' / '+b.length+'</b></div></div>'+
  (warnings.length?'<div class="notice warn">'+warnings.map(esc).join(' · ')+'</div>':'')+
  officialMap+'<h3>Elenco posti nominativi</h3><p class="sub">Ordine numerico, NON disposizione fisica certificata: la geometria dell’autobus viene mostrata soltanto dopo validazione del layout ufficiale.</p><div class="seat-list">'+cells.join('')+'</div>'+
- '<h3 style="margin-top:22px">Prenotati suddivisi per fermata</h3>'+
- Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([stop,list])=>'<h3>'+esc(stop)+' · '+list.reduce((sum,x)=>sum+Number(x.posti||0),0)+' persone</h3>'+table(['Nominativo','Persone','Posti','Telefono','Check-in'],list.map(x=>tr([esc(nameBooking(x)),esc(x.posti),esc(seatIds(x).join(', ')||'Da verificare'),esc(x.telefono),esc(x.checkin_effettuato?'Sì':'No')])))).join('');
+ '<h3 style="margin-top:22px">Prenotati suddivisi per fermata</h3><p class="sub">Check-in aggiornabile solo dagli operatori autorizzati. Puoi segnare la presenza o annullarla, senza cambiare posti e pagamenti.</p>'+
+ Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([stop,list])=>'<h3>'+esc(stop)+' · '+list.reduce((sum,x)=>sum+Number(x.posti||0),0)+' persone</h3>'+table(['Nominativo','Persone','Posti','Telefono','Check-in'],list.map(x=>tr([esc(nameBooking(x)),esc(x.posti),esc(seatIds(x).join(', ')||'Da verificare'),esc(x.telefono),'<button type="button" class="btn '+(x.checkin_effettuato?'quiet':'solid')+'" data-checkin="'+esc(x.id)+'">'+(x.checkin_effettuato?'✓ Presente · annulla':'Segna presente')+'</button>']))))).join('');
+}
+async function changeCheckin(id){
+ if(mutation)return;
+ const t=temp.control?.trip,b=temp.control?.bookings?.find(x=>x.id===id);
+ if(!t||!b)throw Error('Prenotazione non più disponibile. Ricarica la Control Room.');
+ const next=!b.checkin_effettuato;
+ if(!confirm((next?'Confermi il check-in':'Vuoi annullare il check-in')+' per '+nameBooking(b)+'?'+
+ '\nViaggio: '+nameTrip(t)+'\nFermata: '+(b.fermata_partenza||'non indicata')+
+ '\nNon saranno modificati posti o quote.'))return;
+ mutation=true;
+ try{
+  await authorize();
+  const fields={checkin_effettuato:next,checkin_stato:next?'Presente':'Da effettuare',
+    checked_in_at:next?new Date().toISOString():null,checkin_fermata:next?(b.fermata_partenza||null):null,
+    checkin_operatore:next?operator:null};
+  const q=new URLSearchParams({id:'eq.'+b.id,viaggio_id:'eq.'+t.id,select:'id,checkin_effettuato'});
+  const rows=await raw('/rest/v1/prenotazioni?'+q.toString(),'PATCH',fields);
+  if(!Array.isArray(rows)||rows.length!==1||rows[0].checkin_effettuato!==next)
+    throw Error('La modifica potrebbe essere stata eseguita: verifica lo stato prima di riprovare.');
+  invalidate('bookings');
+  const fresh=await load('bookings',true);
+  const current=await load('trips').then(ts=>ts.find(x=>x.id===t.id));
+  if(!current)throw Error('Viaggio non trovato dopo il salvataggio.');
+  $('control-detail').innerHTML=await controlDetail(current);
+  notice('Check-in '+(next?'registrato':'annullato')+' per '+nameBooking(b)+'.');
+ }catch(e){notice('Check-in da verificare: '+errorMsg(e),'bad')}
+ finally{mutation=false}
 }
 function modal(title,html){$('modal-title').textContent=title;$('modal-body').innerHTML=html;$('modal').hidden=false}
 function closeModal(){$('modal').hidden=true;$('modal-body').innerHTML=''}
@@ -391,6 +418,7 @@ document.addEventListener('click',e=>{
  if(b.dataset.page){navigate(b.dataset.page);return}
  if(b.dataset.control){selectedTrip=b.dataset.control;navigate('control');return}
  if(b.dataset.tripLayout){window.DG37Layouts.selectedTrip=b.dataset.tripLayout;navigate('layouts');return}
+ if(b.dataset.checkin){changeCheckin(b.dataset.checkin).catch(e=>notice(errorMsg(e),'bad'));return}
  if(b.dataset.action){try{handleAction(b.dataset.action)}catch(err){notice(errorMsg(err),'bad')}}
 });
 document.addEventListener('change',e=>{
