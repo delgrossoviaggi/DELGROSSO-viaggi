@@ -9,7 +9,7 @@ assert.equal(inline.length,1,'one inline app script');
 new vm.Script(inline[0],{filename:'contabilita-operativa.html'});
 for(const required of ['dg2-operator-login','dg_register_payment','dg_register_rental_payment',
 'operatori_gestionale','pagamenti','cassa_trasferimenti','suite/operator-ledger.js',
-'Auth','Contabilità Nicola','Contabilità Raffaele','pendingUnknown=sent']){
+'Auth','Nicola','Raffaele','Contabilità aziendale','pendingUnknown=sent']){
  assert(html.includes(required),'Missing '+required);
 }
 assert(!html.includes('service_role'),'never embed privileged keys');
