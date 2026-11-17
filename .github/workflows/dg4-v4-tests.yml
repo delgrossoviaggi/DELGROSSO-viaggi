@@ -35,7 +35,7 @@ jobs:
           node --check GESTIONALE/v4/agenda-model.js
           node --check GESTIONALE/v4/layout-operations.js
       - name: Unit and rendering tests (offline)
-        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs tests/dg4-v4-pdf.test.mjs tests/dg4-v4-booking-operations.test.mjs tests/dg4-v4-confirmations.test.mjs tests/dg4-v4-live-sync.test.mjs tests/dg4-v4-bis-manual.test.mjs tests/dg4-v4-credit-transfers.test.mjs
+        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs tests/dg4-v4-pdf.test.mjs tests/dg4-v4-booking-operations.test.mjs tests/dg4-v4-confirmations.test.mjs tests/dg4-v4-live-sync.test.mjs tests/dg4-v4-bis-manual.test.mjs tests/dg4-v4-credit-transfers.test.mjs tests/dg4-v4-agenda-layout-crud.test.mjs
       - name: Forbid privileged credentials and accidental write unlock
         run: |
           if grep -E '^export const WRITES_ENABLED[[:space:]]*=[[:space:]]*true' GESTIONALE/v4/core.js; then echo 'ERROR: protected booking/accounting writes unlocked!'; exit 1; fi
