@@ -195,13 +195,22 @@ Deno.serve(async(req)=>{
       const today=todayRome();
       if(latestTrips && latestTrips.today===today && Date.now()-latestTrips.at<12000)return response(latestTrips.items);
       const params=new URLSearchParams({select:"*",pubblicato:"eq.SI",data_partenza:"gte."+today,order:"data_partenza.asc,ora_partenza.asc,bis_numero.asc"});
-      const trips=await callGestionale(`/rest/v1/viaggi?${params.toString()}`,undefined,12000);
+      const [trips,manualAvailability]=await Promise.all([
+        callGestionale(`/rest/v1/viaggi?${params.toString()}`,undefined,12000),
+        // Optional while staging is not deployed. When dg4_open_trip_bis_manual_v1
+        // exists, this aggregate RPC supplies only allowed seat counts, never PII.
+        callGestionale('/rest/v1/rpc/dg4_public_manual_bis_availability_v1',{},12000)
+          .catch(()=>[])
+      ]);
       if(!Array.isArray(trips))throw new Error("Lettura pubblica dei viaggi non verificata.");
+      const manualCounts=new Map<string,any>((Array.isArray(manualAvailability)?manualAvailability:[]).map((x:any)=>[String(x.viaggio_id),x]));
       const enriched=trips.filter((trip:any)=>String(trip?.data_partenza||"")>=today&&!trip?.archiviato_at).map((trip:any)=>{
         const total=Math.max(0,Number(trip?.posti_totali)||0);
         const occupied=Math.max(0,Number(trip?.posti_occupati)||0);
-        const free=Math.max(0,total-occupied);
-        return {...trip,posti_totali:total,posti_occupati:occupied,
+        const manual=manualCounts.get(String(trip.id));
+        const saleCapacity=manual?Math.max(0,Number(manual.posti_prenotabili)||0):total;
+        const free=manual?Math.max(0,Number(manual.posti_liberi)||0):Math.max(0,total-occupied);
+        return {...trip,posti_totali:total,posti_prenotabili:saleCapacity,posti_occupati:occupied,
           posti_liberi:free,sold_out:trip.sold_out_manual===true||explicitSoldOut(trip)||free<=0};
       });
       const output=fillPosterFallback(groupCommercialTrips(enriched));
