@@ -25,8 +25,10 @@ jobs:
           node --check GESTIONALE/v4/core.js
           node --check GESTIONALE/v4/app.js
           node --check GESTIONALE/v4/layout-editor.js
+          node --check GESTIONALE/v4/pdf-engine.js
+          node --check GESTIONALE/v4/pdf-reports.js
       - name: Unit and rendering tests (offline)
-        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs
+        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs tests/dg4-v4-pdf.test.mjs
       - name: Forbid privileged credentials and accidental write unlock
         run: |
           if grep -E 'WRITES_ENABLED[[:space:]]*=[[:space:]]*true' GESTIONALE/v4/core.js; then echo 'ERROR: V4 writes unlocked!'; exit 1; fi
