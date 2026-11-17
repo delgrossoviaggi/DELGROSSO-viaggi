@@ -62,7 +62,7 @@ test('Combined confirmation is a complete A4 PDF with logo, two departure sectio
   ]
  };
  const content=validPDF(pdf.makeCombinedBookingPdf(summary));
- assert.ok(content.includes('/MediaBox [0 0 595 842]'),'Expected A4 portrait pages');
+ assert.ok(content.includes('/MediaBox [0 0 595.28 841.89]'),'Expected A4 portrait pages');
 });
 test('Combined confirmation refuses totals that do not match the individual bookings',()=>{
  const summary={title:'Test',date:'2026-12-08',reference:'Test',phone:'3331234567',
