@@ -1,0 +1,36 @@
+CORREZIONE ERRORE GITHUB DELGROSSO DG37
+17 novembre 2026
+
+CAUSA ACCERTATA
+GitHub Actions DG37 fallisce nel test della generazione PDF con errore:
+"Modulo colori e geometrie piantine non caricato. Aggiorna il gestionale."
+Il file GESTIONALE/seatmap-groups.js e' gia' presente nel pacchetto e viene
+caricato nella pagina, ma il test tests/dg37-editor-and-pdf-smoke.mjs
+non lo caricava nel proprio ambiente isolato.
+
+CORREZIONE
+Il nuovo tests/dg37-editor-and-pdf-smoke.mjs carica il modulo in memoria
+prima del generatore PDF, come avviene gia' nella pagina del gestionale,
+e verifica che gli script siano in ordine.
+
+INSTALLAZIONE
+1. Apri il repository del sito su GitHub.
+2. Entra nella cartella tests (NON GESTIONALE/tests).
+3. Sostituisci il file dg37-editor-and-pdf-smoke.mjs con quello allegato.
+4. Fai Commit changes sul tuo ramo di prova.
+5. Apri Actions e controlla il workflow DG37 Layouts and Accounting Smoke.
+
+In alternativa: estrai questo ZIP e copia la cartella tests nella
+cartella principale del repository mantenendo lo stesso percorso.
+
+NON eseguire SQL, non modificare Supabase, non cancellare le prenotazioni.
+Questa patch aggiorna soltanto un test automatico: non modifica
+i layout, i dati, la piantina PDF ne' le prenotazioni.
+Per caricare l'intero gestionale da browser GitHub usa al massimo 100
+file per operazione oppure GitHub Desktop.
+
+TEST LOCALE PRIMA DEL PACCHETTO
+node tests/dg37-editor-and-pdf-smoke.mjs: PASS
+node tests/dg37-live-views-mock.mjs: PASS
+
+Eventuali altri errori di GitHub richiedono il messaggio esatto/screenshot.
