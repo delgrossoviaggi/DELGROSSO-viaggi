@@ -9,7 +9,7 @@ const $=id=>document.getElementById(id);
 const NAV={
  dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',
  control:'Control Room',layouts:'Piantine autobus',cash:'Contabilità e casse',
- economy:'Economia e costi',customers:'Clienti',rentals:'Noleggi bus',
+ economy:'Economia e costi',customers:'Clienti',rentals:'Noleggi bus',quotes:'Preventivi',invoices:'Fatturazione / bozze',waitlist:'Lista d’attesa',whatsapp:'WhatsApp Business',reports:'Centro PDF e report',
  agenda:'Agenda e scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
@@ -67,6 +67,9 @@ async function navigate(next,force=false){
  economy:['economy','profit','trips'],
  customers:['customers','bookings','payments','trips'],
  rentals:['rentals','rentalPayments'],
+ quotes:['quotes'],invoices:['invoices'],waitlist:['waitlist','trips'],
+ whatsapp:['whatsAppInbox','whatsAppOutbound','whatsAppOptins'],
+ reports:['trips','bookings','seats','tripLayouts','payments','cash','agenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
  agenda:['agenda','trips'],
  fleet:['fleet'],
  documents:['documents','trips','receipts','docsMetadata'],
@@ -78,7 +81,7 @@ async function navigate(next,force=false){
   if(mine!==ticket)return;
   const views={dashboard:drawDashboard,trips:drawTrips,bookings:drawBookings,
    control:drawControl,layouts:drawLayouts,cash:drawCash,economy:drawEconomy,
-   customers:drawCustomers,rentals:drawRentals,agenda:drawAgenda,
+   customers:drawCustomers,rentals:drawRentals,quotes:drawQuotes,invoices:drawInvoices,waitlist:drawWaitlist,whatsapp:drawWhatsApp,reports:drawReports,agenda:drawAgenda,
    fleet:drawFleet,documents:drawDocuments,notifications:drawNotifications,diagnostics:drawDiagnostics};
   $('main').innerHTML=views[next]();
   document.title='DELGROSSO 4.0 · '+NAV[next];
@@ -294,6 +297,88 @@ function drawNotifications(){
  return intro('Notifiche','Nuove prenotazioni, attività aziendali e messaggi operativi.','<button class="secondary" data-action="refresh">↻ Aggiorna</button>')+
  panel('Notifiche registrate','Consultazione manuale per ridurre il carico dell’API','<div class="panel-body">'+(notes.map(n=>'<div class="notice-card"><strong>'+esc(n.titolo)+'</strong><p>'+esc(n.messaggio)+'</p><span class="small muted">'+dateTimeIT(n.created_at)+' · '+esc(n.tipo||'Notifica')+'</span></div>').join('')||'<div class="empty">Nessuna notifica.</div>')+'</div>');
 }
+
+function drawQuotes(){
+ const items=get('quotes').filter(q=>filterTerm(q.numero_preventivo,q.nome,q.cognome,q.destinazione,q.azienda));
+ const rows=items.map(q=>[
+  '<strong>'+esc(q.numero_preventivo||short(q.id))+'</strong>',
+  esc([q.nome,q.cognome].filter(Boolean).join(' ')||q.azienda||'-'),
+  dateIT(q.data_partenza||q.data_viaggio),
+  esc(q.destinazione||'—'),
+  num(q.numero_passeggeri),money(q.importo_preventivo??q.importo),
+  badge(q.stato),safeLink('PDF',q.id,'pdf-quote')
+ ]);
+ return intro('Preventivi','Richieste e offerte già registrate in Supabase.','<button class="secondary" data-action="export-quotes">↓ CSV preventivi</button>'+writeButton('+ Nuovo preventivo','create-quote'))+
+ '<div class="filters">'+searchField('Numero, cliente o destinazione')+'</div>'+
+ panel('Registro preventivi','Nessun preventivo viene automaticamente accettato o emesso',table(['Numero','Richiedente','Data','Destinazione','Pax','Importo','Stato','Report'],rows));
+}
+function drawInvoices(){
+ const items=get('invoices'),rows=items.map(i=>[
+  '<strong>'+short(i.id)+'</strong>',dateIT(i.data_bozza),badge(i.tipo_documento),
+  money(num(i.imponibile_centesimi)/100),money(num(i.iva_centesimi)/100),
+  money(num(i.totale_centesimi)/100),badge(i.stato),
+  safeLink('Bozza PDF',i.id,'pdf-invoice')
+ ]);
+ return intro('Fatturazione e bozze','Documenti preparatori collegati al sistema aziendale; nessuna fattura elettronica è emessa da questa schermata.')+
+ '<div class="cards">'+card('Bozze presenti',String(items.length),'Rilevate da dg3_fatture_bozze')+
+ card('Valore bozze',money(items.reduce((n,x)=>n+num(x.totale_centesimi)/100,0)),'Non equivalente a fatturato emesso')+
+ card('Emissioni', 'Da integrare','Serve processo SDI certificato')+
+ card('Stato',WRITES_ENABLED?'Verifica in corso':'Consultazione','Modifiche sospese')+'</div>'+
+ panel('Elenco bozze fattura','Non utilizzare il PDF bozza come fattura fiscale',table(['ID bozza','Data','Tipo','Imponibile','IVA','Totale','Stato','PDF'],rows));
+}
+function drawWaitlist(){
+ const trips=get('trips');
+ const items=get('waitlist').filter(w=>filterTerm(w.nome,w.cognome,w.telefono,tripName(tripBy(w.viaggio_id))));
+ const rows=items.map(w=>[
+  '<strong>'+esc([w.nome,w.cognome].filter(Boolean).join(' '))+'</strong>',
+  esc(w.telefono||'—'),
+  esc(tripName(tripBy(w.viaggio_id))),num(w.posti),
+  badge(w.stato),badge(w.priorita),dateTimeIT(w.created_at)
+ ]);
+ return intro('Lista d’attesa','Richieste in attesa di posti e opzioni BUS BIS, senza prenotazioni fittizie.',writeButton('+ Aggiungi richiesta','create-waitlist'))+
+ '<div class="filters">'+searchField('Cerca cliente o viaggio')+'</div>'+
+ '<div class="cards">'+card('Contatti in lista',String(get('waitlist').length),'Tabella lista_attesa')+
+ card('Richieste in vista',String(items.length),'Filtri attivi')+
+ card('Passeggeri richiesti',String(items.reduce((n,x)=>n+num(x.posti),0)),'Da confermare')+
+ card('Conferme automatiche','Disattivate','Mai assegnare posti senza controllo')+'</div>'+
+ panel('Richieste in attesa','Non vengono scalati posti dai viaggi',table(['Cliente','Telefono','Viaggio','Pax','Stato','Priorità','Inserimento'],rows));
+}
+function drawWhatsApp(){
+ const inbox=get('whatsAppInbox'),outbound=get('whatsAppOutbound'),optins=get('whatsAppOptins');
+ const valid=optins.filter(x=>x.consent_at&&!x.revoked_at),pending=outbound.filter(x=>!/inviat|deliver|success/i.test(x.status||''));
+ const list=inbox.slice().sort((a,b)=>String(b.received_at).localeCompare(String(a.received_at))).slice(0,100);
+ return intro('WhatsApp Business','Archivio integrazione ibrida: consenso, richieste e messaggi in uscita. Nessun invio automatico dalla V4 di collaudo.')+
+ '<div class="cards">'+card('Messaggi ricevuti',String(inbox.length),'Integrazione presente in DB')+
+ card('Consensi attivi',String(valid.length),'Contatti autorizzati')+
+ card('Messaggi in uscita',String(outbound.length),'Registro di invio')+
+ card('Da verificare',String(pending.length),'Non presumere che siano stati recapitati')+'</div>'+
+ panel('Richieste WhatsApp','Dati riservati del canale business',table(['Data','Contatto','Richiesta','Stato'],list.map(x=>[
+ dateTimeIT(x.received_at),esc(x.sender_name||x.sender_phone),esc(x.message_text||'').slice(0,220),badge(x.status)])))+
+ '<div class="alert">Gli inviti a gruppi WhatsApp richiedono consenso effettivo. Non aggiungere automaticamente i clienti e non inviare comunicazioni non autorizzate.</div>';
+}
+function drawReports(){
+ const buttons=[
+ ['Elenco prenotati tutti i viaggi','pdf-all-roster'],
+ ['Liste + piantine Control Room','pdf-all-operational'],
+ ['Contabilità Nicola / Raffaele','pdf-cash'],
+ ['Economia e marginalità','pdf-economy'],
+ ['Agenda e scadenze','pdf-agenda'],
+ ['Anagrafica clienti','pdf-customers'],
+ ['Noleggi autobus','pdf-rentals'],
+ ['Flotta GT / Limousine','pdf-fleet'],
+ ['Indice documenti e ricevute','pdf-document-inventory']
+ ];
+ return intro('Centro documentale e PDF','Generazione diretta di PDF A4 con logo aziendale, scaricabili anche da iPhone.')+
+ '<div class="cards">'+card('Tipologie PDF',String(buttons.length),'Senza generatori esterni')+
+ card('Sistema','Locale','PDF costruiti nel browser')+
+ card('Formato','A4','Paginazione automatica')+
+ card('Storage','Non modificato','Download privato sul dispositivo')+'</div>'+
+ panel('Genera un documento','I dati sono letti dalle sezioni e non sono salvati sul server',
+ '<div class="panel-body"><div class="section-grid">'+buttons.map(([text,action])=>
+ '<button class="secondary" data-action="'+action+'" style="justify-content:space-between;white-space:normal;min-height:56px;text-align:left">'+esc(text)+' <span aria-hidden="true">↓ PDF</span></button>').join('')+'</div></div>')+
+ '<div class="alert">Per i singoli viaggi, le prenotazioni e le singole ricevute usa anche i pulsanti PDF nelle rispettive pagine. Una copia locale non aggiorna automaticamente il registro dei documenti ufficiali.</div>';
+}
+
 function drawDiagnostics(){
  const health=get('system')[0]||{};
  const t=get('trips'),b=get('bookings'),p=get('payments'),s=get('seats');
@@ -403,6 +488,25 @@ async function handleAction(action,id,button){
  }
 
  if(action==='pdf-economy')return done(Pdf.pdfEconomy(get('economy'),get('profit')));
+
+ if(action==='pdf-all-operational')return done(Pdf.pdfOperational(get('trips'),get('bookings'),get('seats'),get('tripLayouts')));
+ if(action==='pdf-quote'){
+  const q=get('quotes').find(x=>x.id===id);
+  if(!q)throw new Error('Preventivo non trovato.');
+  return done(Pdf.pdfQuote(q));
+ }
+ if(action==='pdf-invoice'){
+  const i=get('invoices').find(x=>x.id===id);
+  if(!i)throw new Error('Bozza non trovata.');
+  return done(Pdf.pdfInvoiceDraft(i));
+ }
+ if(action==='export-quotes'){
+  const q=get('quotes');
+  return csvExport(['Numero','Nome','Cognome','Destinazione','Data','Importo','Stato'],
+   q.map(x=>[x.numero_preventivo,x.nome,x.cognome,x.destinazione,x.data_partenza,x.importo_preventivo,x.stato]),
+   'delgrosso-preventivi.csv');
+ }
+
  if(action==='pdf-fleet')return done(Pdf.pdfFleet(get('fleet').filter(x=>num(x.posti)>7)));
  if(action==='pdf-customers')return done(Pdf.pdfCustomers(get('customers')));
  if(action==='pdf-rentals')return done(Pdf.pdfRentals(get('rentals')));
