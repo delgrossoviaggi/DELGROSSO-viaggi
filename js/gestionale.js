@@ -46,22 +46,34 @@ function dgEmergencyBanner(show){
   panel.innerHTML='<strong>⚠ Aggiornamento temporaneo delle partenze</strong><div>Il collegamento live con il Gestionale è momentaneamente indisponibile. Le date e i prezzi sono quelli dell’ultimo elenco verificato il 17 novembre; posti disponibili e prenotazioni online non sono confermati. <a href="https://wa.me/393208815899" target="_blank" rel="noopener" style="font-weight:800;color:#664000;text-decoration:underline">Chiedi disponibilità su WhatsApp 320 881 5899</a>.</div>';
   host.prepend(panel);
 }
+// Non cancellare mai viaggi storici nel DB. Questa regola controlla soltanto il catalogo pubblico.
+function dgTodayRome(now=new Date()){
+  return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+}
+function dgPublicTripIsCurrent(trip,today=dgTodayRome()){
+  if(!trip || !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(trip.data_partenza||'')))return false;
+  if(String(trip.data_partenza)<today)return false;
+  if(trip.archiviato_at || trip.online_hidden_at || trip.bis_auto_hidden)return false;
+  if(trip.pubblicato!=null&&!['SI','TRUE','1','SÌ'].includes(String(trip.pubblicato).toUpperCase()))return false;
+  if(/annullat|rinviat/i.test(String(trip.stato||'')))return false;
+  return true;
+}
 async function getGestionaleTrips(){
   try{
     const data=await gestBridge('trips');
     if(!Array.isArray(data))throw new Error('Catalogo live non valido.');
     window.__dgOfflineCatalog=false;
     dgEmergencyBanner(false);
-    return data;
+    return data.filter(t=>dgPublicTripIsCurrent(t));
   }catch(error){
     const res=await fetch(DG_EMERGENCY_CATALOG,{cache:'no-store'});
     if(!res.ok)throw error;
     const copy=await res.json();
     if(!copy||copy.source!=='supabase-gestionale-public-trips-readonly'||!Array.isArray(copy.trips)||copy.trips.length<1)throw error;
-    const now=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    const now=dgTodayRome();
     window.__dgOfflineCatalog=true;
     dgEmergencyBanner(true);
-    return copy.trips.filter(t=>String(t.data_partenza||'')>=now).map(t=>({...t,offline_catalog:true}));
+    return copy.trips.filter(t=>dgPublicTripIsCurrent(t,now)).map(t=>({...t,offline_catalog:true}));
   }
 }
 
