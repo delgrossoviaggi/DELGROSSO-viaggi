@@ -1,8 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
-<!-- DG38: canonical base for /GESTIONALE, /GESTIONALE/ and /GESTIONALE/index.html -->
-<base href="/GESTIONALE/">
+<!-- DG40: V2 loads only confirmed absolute module and logo paths; no global base override -->
 <meta name="dg-build" content="DELGROSSO-GITHUB-V60-MOBILE-SINGLE-HEADER">
 <meta name="dg-mobile-fix" content="DIRECT-HTML-SAFE-STORAGE-NO-BASE64-BOOTLOADER">
 <!-- Frontend completo incorporato. Privacy & Resilience 7.4: nessun dato cliente persistente nel browser. -->
@@ -1564,7 +1563,7 @@ Oppure: Mario Rossi mi ha dato 20 € di acconto per Napoli, contanti."></textar
   <button type="button" onclick="dgSuiteOpen('notifiche')">◌ Notifiche</button>
  </div>
  <div id="dg-suite-status" role="status" style="font-size:12px;margin:8px 0;color:#536a82">Il modulo verrà caricato quando lo apri.</div>
- <iframe id="dg-v2-iframe" title="DELGROSSO 2.0 · Moduli avanzati" allow="clipboard-write" referrerpolicy="same-origin" loading="lazy" style="display:block;width:100%;height:min(82vh,1100px);min-height:650px;border:1px solid #d7e4f0;border-radius:15px;background:#f8fbff" data-src="./suite/index.html"></iframe>
+ <iframe id="dg-v2-iframe" title="DELGROSSO 2.0 · Moduli avanzati" allow="clipboard-write" referrerpolicy="same-origin" loading="lazy" style="display:block;width:100%;height:min(82vh,1100px);min-height:650px;border:1px solid #d7e4f0;border-radius:15px;background:#f8fbff" data-src="/GESTIONALE/suite/index.html"></iframe>
 </section>
 
 </div>
@@ -7104,7 +7103,7 @@ function build(){
  // Remove escaped newline artifacts left outside the app by previous builds.
  [...document.body.childNodes].filter(n=>n.nodeType===3&&/^(?:\s|\\n)+$/.test(n.nodeValue||'')).forEach(n=>n.remove());
  const top=document.createElement('header');top.id='dg44-header';
- top.innerHTML=`<button type="button" id="dg44-mobile-toggle" onclick="dg44ToggleMenu()" aria-label="Apri o chiudi il menu">☰</button><button id="dg44-logo-btn" onclick="dg44Go('dashboard')" aria-label="Torna alla scrivania"><img id="dg44-logo" src="delgrosso-logo-originale-bianco.png" alt="Logo originale DELGROSSO Viaggi Limousine Bus"></button><div class="dg44-slogan">La strada è la stessa. Noi no.<span>DELGROSSO. La differenza si riconosce.</span></div><div class="dg44-head-right"><div class="dg44-date">${S('calendar')}<span><strong id="dg44-date-day"></strong><br><span id="dg44-date-full"></span></span></div><button type="button" class="dg44-icon-btn" onclick="dg48OpenNotifications()" title="Apri e aggiorna le notifiche" aria-label="Notifiche">${S('bell')}<span class="dg44-badge" id="dg44-bell-count" hidden>0</span></button><button type="button" class="dg44-user" onclick="dg44ToggleProfile()" aria-label="Profilo e impostazioni"><span class="dg44-avatar">${S('person')}</span><span><b id="dg51-account-name">Operatore</b><small id="dg44-operator">Amministratore</small></span>${S('down')}</button></div><div class="dg44-drop" id="dg44-user-menu"><button type="button" onclick="dg44ToggleProfile();dg44Go('impostazioni')">${S('settings')} &nbsp; Impostazioni</button><button type="button" onclick="dg44ToggleProfile();dg44SignOut()">${S('person')} &nbsp; Esci dal gestionale</button></div>`;
+ top.innerHTML=`<button type="button" id="dg44-mobile-toggle" onclick="dg44ToggleMenu()" aria-label="Apri o chiudi il menu">☰</button><button id="dg44-logo-btn" onclick="dg44Go('dashboard')" aria-label="Torna alla scrivania"><img id="dg44-logo" src="/GESTIONALE/delgrosso-logo-originale-bianco.png" alt="Logo originale DELGROSSO Viaggi Limousine Bus"></button><div class="dg44-slogan">La strada è la stessa. Noi no.<span>DELGROSSO. La differenza si riconosce.</span></div><div class="dg44-head-right"><div class="dg44-date">${S('calendar')}<span><strong id="dg44-date-day"></strong><br><span id="dg44-date-full"></span></span></div><button type="button" class="dg44-icon-btn" onclick="dg48OpenNotifications()" title="Apri e aggiorna le notifiche" aria-label="Notifiche">${S('bell')}<span class="dg44-badge" id="dg44-bell-count" hidden>0</span></button><button type="button" class="dg44-user" onclick="dg44ToggleProfile()" aria-label="Profilo e impostazioni"><span class="dg44-avatar">${S('person')}</span><span><b id="dg51-account-name">Operatore</b><small id="dg44-operator">Amministratore</small></span>${S('down')}</button></div><div class="dg44-drop" id="dg44-user-menu"><button type="button" onclick="dg44ToggleProfile();dg44Go('impostazioni')">${S('settings')} &nbsp; Impostazioni</button><button type="button" onclick="dg44ToggleProfile();dg44SignOut()">${S('person')} &nbsp; Esci dal gestionale</button></div>`;
  document.body.appendChild(top);
  const nav=document.createElement('div');nav.id='dg44-sidebar-menu';nav.innerHTML=`<div class="dg44-menu-title">MENU AZIENDALE</div>${MAIN.map(navLink).join('')}<div class="dg44-more-toggle"><button type="button" class="dg44-nav-button" id="dg44-more-toggle" onclick="dg44ToggleMore()" aria-expanded="false"><span class="dg44-nav-icon">${S('dots')}</span><span>Tutte le funzioni ▾</span></button></div><div class="dg44-more-panel" id="dg44-more">${EXTRA.map(navLink).join('')}</div>`;sidebar.prepend(nav);
  const overlay=document.createElement('div');overlay.id='dg44-overlay';overlay.addEventListener('click',closeMenu);document.body.appendChild(overlay);
