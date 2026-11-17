@@ -5,6 +5,8 @@
 export const API_URL = 'https://chkuayhbmitdmzmmvona.supabase.co';
 export const PUBLISHABLE_KEY = 'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je';
 export const WRITES_ENABLED = false; // NON ABILITARE SENZA BACKUP, RESTORE SU STAGING E TEST
+// Eccezione circoscritta a scadenze_gestionale: CREATE/UPDATE/Cestino, mai DELETE fisico, protetta da RLS.
+export const AGENDA_WRITES_ENABLED = true;
 export const CHANNEL = 'dg4-session';
 export const SELECTS = Object.freeze({
   trips: ['viaggi','id,id_viaggio,titolo,destinazione,luogo_partenza,data_partenza,ora_partenza,prezzo,stato,pubblicato,posti_totali,posti_occupati,posti_liberi,autobus,autobus_id,bis_parent_id,bis_numero,sold_out_manual,archiviato_at,minimo_partecipanti,locandina'],
@@ -31,7 +33,7 @@ export const SELECTS = Object.freeze({
   whatsAppOptins:['dg_whatsapp_optins_v61','phone,customer_name,consent_source,consent_at,revoked_at'],
 
   customers:['clienti','id,nome,cognome,telefono,email,citta,codice_cliente,stato_cliente'],
-  agenda:['scadenze_gestionale','id,titolo,descrizione,tipo,stato,priorita,data_scadenza,note,importo,viaggio_id,prenotazione_id,created_at'],
+  agenda:['scadenze_gestionale','id,titolo,descrizione,tipo,stato,priorita,data_scadenza,note,importo,viaggio_id,prenotazione_id,created_at,updated_at,completata_at'],
   layoutLibrary:['dg2_layout_library','id,nome,configurazione,attivo,updated_at'],
   busLayouts:['dg28_bus_layouts','autobus_id,layout_id,configurazione,versione,pubblicata_il'],
   tripLayouts:['dg28_trip_layouts','viaggio_id,autobus_id,layout_id,configurazione,versione,pubblicata_il'],
@@ -220,6 +222,39 @@ export async function writeRpc(name,payload){
  const result=await jsonFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},true,0);
  clearCache();return result;
 }
+
+/**
+ * Scoped, reversible Agenda/Scadenze edit path.
+ * Does not enable any mutation on journeys, bookings, payments or Storage.
+ * An elimination only sets stato='eliminata', with Ripristina available.
+ * All requests use the operator's Supabase JWT and existing RLS privileges.
+ */
+export async function mutateAgenda(method,payload,{id=null,expectedUpdatedAt=null}={}){
+ if(!AGENDA_WRITES_ENABLED)throw new Error('Agenda in sola lettura.');
+ if(!activeSession())throw new Error('Sessione scaduta. Accedi di nuovo.');
+ if(method!=='POST'&&method!=='PATCH')throw new Error('Operazione agenda non autorizzata.');
+ const insert=['titolo','descrizione','note','tipo','stato','priorita','data_scadenza'];
+ const update=['titolo','descrizione','note','tipo','stato','priorita','data_scadenza'];
+ if(!payload||typeof payload!=='object'||Array.isArray(payload)||
+  Object.keys(payload).length===0||Object.keys(payload).some(key=>
+   !(method==='POST'?insert:update).includes(key)))throw new Error('Campi agenda non autorizzati.');
+ let target='/rest/v1/scadenze_gestionale';
+ if(method==='PATCH'){
+  if(!/^[a-f0-9]{8}-[a-f0-9-]{27,36}$/i.test(String(id||''))||!expectedUpdatedAt)
+   throw new Error('Scadenza non verificata: ricarica la pagina.');
+  const q=new URLSearchParams({id:'eq.'+id,updated_at:'eq.'+expectedUpdatedAt});
+  target+='?'+q.toString();
+ }else if(id||expectedUpdatedAt)throw new Error('La creazione non accetta un ID esistente.');
+ const result=await jsonFetch(target,{
+  method,
+  headers:{'Content-Type':'application/json',Prefer:'return=representation'},
+  body:JSON.stringify(payload)
+ },true,0);
+ if(!Array.isArray(result)||result.length!==1||!result[0]?.id)
+  throw new Error('Modifica non confermata. Il record potrebbe essere stato modificato da un altro operatore. Aggiorna i dati prima di riprovare.');
+ clearCache();return result[0];
+}
+
 export async function mutate(resource,method,payload,id=null,{expectedUpdatedAt=null}={}){
  if(!WRITES_ENABLED)throw new Error('Scritture bloccate: backup completo e collaudo non ancora certificati.');
  const permitted={
