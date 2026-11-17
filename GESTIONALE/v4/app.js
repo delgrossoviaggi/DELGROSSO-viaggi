@@ -195,7 +195,7 @@ function drawLayouts(){
   safeLink('Esamina',l.id,'detail-layout')
  ]);
  const pub=official.map(l=>[esc(tripName(tripBy(l.viaggio_id))),num(l.configurazione?.posti_totali||0),num(l.versione),dateTimeIT(l.pubblicata_il)]);
- return intro('Piantine autobus','Schemi importati dal database aziendale: GT 53, GT 63 e configurazioni dedicate.','<button class="secondary" data-page="control">Apri Control Room</button>'+writeButton('+ Crea piantina','create-layout'))+
+ return intro('Piantine autobus','Schemi importati dal database aziendale: GT 53, GT 63 e configurazioni dedicate.','<button class="secondary" data-page="control">Apri Control Room</button>'+'<button class="primary" data-action="create-layout">+ Crea bozza locale</button>')+
  '<div class="cards">'+card('Layout in libreria',String(lib.length),'Schemi salvati')+card('Applicati ai viaggi',String(official.length),'Configurazioni pubblicate')+card('Bus GT',String(fleet.length),'Senza van aziendale')+card('Disponibilità',WRITES_ENABLED?'Operativa':'Protetta','Pubblicazione bloccata in collaudo')+'</div>'+
  panel('Libreria piantine','Nessuna modifica alla geometria salvata',table(['Nome','Sedili','File','Stato','Aggiornata','Azioni'],rows))+
  panel('Piantine già applicate','Rilevate da dg28_trip_layouts',table(['Viaggio','Posti','Versione','Pubblicata'],pub))+
@@ -346,7 +346,8 @@ function layoutDetail(id){
  '<div><small>Posti dichiarati</small><strong>'+num(l.configurazione?.posti_totali)+'</strong></div>'+
  '<div><small>File</small><strong>'+num(l.configurazione?.rows?.length)+'</strong></div>'+
  '<div><small>Modifica</small><strong>Protetta fino al backup</strong></div></div>'+
- '<div class="layout-panel">'+(Array.isArray(l.configurazione?.rows)?rowForSeats(l.configurazione.rows,{map:new Map()}):'<div class="alert">Layout senza matrice valida.</div>')+'</div>');
+ '<div class="layout-panel">'+(Array.isArray(l.configurazione?.rows)?rowForSeats(l.configurazione.rows,{map:new Map()}):'<div class="alert">Layout senza matrice valida.</div>')+'</div>'+
+ '<div class="action-row"><button class="secondary" data-action="draft-layout" data-id="'+esc(l.id)+'">✎ Modifica una copia locale</button></div>');
 }
 function csvExport(headers,rows,file){
  const quote=x=>'"'+String(x??'').replaceAll('"','""').replace(/^[=+\-@]/,'\u0027$&')+'"';
@@ -382,6 +383,14 @@ async function handleAction(action,id,button){
  if(action==='export-payments'){csvExport(['Data','Cliente','Viaggio','Tipo','Importo','Operatore','Ricevuta'],get('payments').map(p=>[p.data_pagamento,p.cliente,tripName(tripBy(p.viaggio_id)),p.tipo,p.importo,p.incassato_da,p.receipt_number]),'delgrosso-pagamenti.csv');return;}
  if(action==='export-customers'){csvExport(['Nome','Cognome','Telefono','Email','Città'],get('customers').map(c=>[c.nome,c.cognome,c.telefono,c.email,c.citta]),'delgrosso-clienti.csv');return;}
  if(action==='export-agenda'){csvExport(['Titolo','Scadenza','Priorità','Stato','Descrizione'],get('agenda').map(a=>[a.titolo,a.data_scadenza,a.priorita,a.stato,a.descrizione]),'delgrosso-agenda.csv');return;}
+ if(action==='create-layout' || action==='draft-layout'){
+  const saved=action==='draft-layout'?get('layoutLibrary').find(l=>l.id===id):null;
+  if(!window.DG4LayoutEditor)return showMessage('Editor piantine non caricato.',true);
+  displayModal(saved?'Bozza da '+saved.nome:'Editor piantina GT — bozza locale',
+    '<div id="dg4-layout-editor"></div>');
+  window.DG4LayoutEditor.mount(document.getElementById('dg4-layout-editor'), saved?.configurazione||null);
+  return;
+ }
  if(!WRITES_ENABLED){
   return showMessage('Operazione bloccata: prima occorrono backup completo e restore di prova. Nessun dato è stato modificato.',true);
  }
