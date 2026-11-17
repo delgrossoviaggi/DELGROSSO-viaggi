@@ -1,0 +1,26 @@
+name: DG4 backup safety checks (offline)
+on:
+  push:
+    branches:
+      - audit/delgrosso-4-0-ultimate-20261117
+    paths:
+      - scripts/dg4-export-storage.mjs
+      - tests/dg4-storage-export-offline.test.mjs
+      - .github/workflows/dg4-backup-tests.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out audit branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Show Node version
+        run: node --version
+      - name: Syntax check
+        run: node --check scripts/dg4-export-storage.mjs
+      - name: Run self-contained storage export tests
+        run: node --test tests/dg4-storage-export-offline.test.mjs
