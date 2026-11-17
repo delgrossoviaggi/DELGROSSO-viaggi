@@ -34,7 +34,7 @@ vm.runInContext(core+'\n'+operations+'\n'+bis+'\n'+credits+'\n'+agenda+'\n'+layo
 const appTest=context.v4tests;
 const trip={id:'T1',titolo:'Napoli & Spaccanapoli',data_partenza:'2026-12-20',destinazione:'Napoli',posti_totali:53,prezzo:20,stato:'Aperto'};
 const booking={id:'B1',viaggio_id:'T1',cliente:'Nome prova',telefono:'3330000000',posti:2,totale:40,pagato:20,stato:'Acconto Ricevuto',posti_selezionati:'1,2',fermata_partenza:'San Severo'};
-appTest.state.all={trips:[trip],bookings:[booking],payments:[],agenda:[],notifications:[],seats:[{viaggio_id:'T1',prenotazione_id:'B1',posto:'1'}],tripLayouts:[{viaggio_id:'T1',versione:1,configurazione:{rows:[{cells:[{type:'seat',label:'1'},{type:'aisle'},{type:'seat',label:'2'}]}]}}],stops:[],layoutLibrary:[],busLayouts:[],cash:[],operators:[],transfers:[],economy:[],profit:[],customers:[],rentals:[],fleet:[],documents:[],system:[],alerts:[],rentalPayments:[],quotes:[],invoices:[],waitlist:[],whatsAppInbox:[],whatsAppOutbound:[],whatsAppOptins:[]};
+appTest.state.all={legacyAgenda:[],trips:[trip],bookings:[booking],payments:[],agenda:[],notifications:[],seats:[{viaggio_id:'T1',prenotazione_id:'B1',posto:'1'}],tripLayouts:[{viaggio_id:'T1',versione:1,configurazione:{rows:[{cells:[{type:'seat',label:'1'},{type:'aisle'},{type:'seat',label:'2'}]}]}}],stops:[],layoutLibrary:[],busLayouts:[],cash:[],operators:[],transfers:[],economy:[],profit:[],customers:[],rentals:[],fleet:[],documents:[],system:[],alerts:[],rentalPayments:[],quotes:[],invoices:[],waitlist:[],whatsAppInbox:[],whatsAppOutbound:[],whatsAppOptins:[]};
 test('All twenty-two V4 pages render with original-schema fixtures',()=>{
  const views=['drawDashboard','drawTrips','drawBookings','drawMovements','drawControl','drawLayouts','drawCash','drawCredits','drawEconomy','drawCustomers','drawRentals','drawAgenda','drawDeadlines','drawFleet','drawDocuments','drawNotifications','drawDiagnostics','drawQuotes','drawInvoices','drawWaitlist','drawWhatsApp','drawReports'];
  for(const name of views){const html=appTest[name]();assert.ok(typeof html==='string'&&html.length>75, name);}
@@ -102,4 +102,21 @@ test('Piantine can be edited and associated with GTs; write operations still obe
  assert.ok(html.includes('data-action="create-layout"'));
  assert.ok(html.includes('Piantine autobus'));
  assert.equal(appTest.WRITES_ENABLED,false);
+});
+
+test('Agenda V4 really renders original V2 appointments from the attivita_gestionale archive',()=>{
+ const old=[
+  {id:'historical-1',titolo:'LIMOUSINE BUS 21/11',scadenza:'2026-11-21',
+   stato:'completata',priorita:'alta',assegnata_a:'Raffaele',updated_at:'2026-10-13T10:00:00Z'},
+  {id:'historical-2',titolo:'BUS GT 13/12',scadenza:'2026-12-13',
+   stato:'aperta',priorita:'normale',assegnata_a:'Nicola',updated_at:'2026-11-12T10:00:00Z'}
+ ];
+ appTest.state.all.legacyAgenda=old;
+ const calendar=appTest.drawAgenda(),deadlines=appTest.drawDeadlines();
+ assert.ok(calendar.includes('LIMOUSINE BUS 21/11'));
+ assert.ok(calendar.includes('BUS GT 13/12'));
+ assert.ok(calendar.includes('Assegnato a: Raffaele'));
+ assert.ok(calendar.includes('data-action="edit-agenda"'));
+ assert.ok(!deadlines.includes('BUS GT 13/12'));
+ appTest.state.all.legacyAgenda=[];
 });
