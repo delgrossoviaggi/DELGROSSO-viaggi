@@ -1254,6 +1254,13 @@ async function handleSubmit(form){
  const type=form.dataset.save;
  // Il sopralluogo ai posti e l'anteprima del cambio data sono letture; restano disponibili
  // anche quando il gestionale è bloccato per le scritture.
+
+ if(type==='bis-preview'){
+  if(!bisWizard)throw new Error('Selezione BUS BIS non disponibile.');
+  if(String(new FormData(form).get('sourceTripId'))!==bisWizard.sourceId)
+   throw new Error('Viaggio non coerente con il modulo.');
+  reviewBisWizard();return;
+ }
  if(type==='transfer-preview'){
   const plan=reviewTransferForSubmission(form);
   if(plan.kind==='date'){
@@ -1461,6 +1468,15 @@ function startListeners(){
  document.addEventListener('click',e=>{
   const nav=e.target.closest('[data-page]');if(nav){e.preventDefault();state.search='';state.stop='';state.trip='';navigate(nav.dataset.page);return;}
 
+
+  const seat=e.target.closest('[data-bis-seat]');
+  if(seat){
+   e.preventDefault();if(seat.disabled||!bisWizard)return;
+   const n=String(seat.dataset.bisSeat);
+   bisWizard.selected=bisWizard.selected.includes(n)?bisWizard.selected.filter(x=>x!==n):[...bisWizard.selected,n];
+   bisWizard.selected.sort((a,b)=>Number(a)-Number(b));
+   renderBisWizard();return;
+  }
   const choice=e.target.closest('[data-move-seat]');
   if(choice){
    e.preventDefault();
@@ -1500,6 +1516,31 @@ function startListeners(){
   if(e.target.id==='filter-bookings-state'){state.bookingsState=e.target.value;$('main').innerHTML=drawBookings();}
  });
  $('modal-content').addEventListener('change',e=>{
+  if(bisWizard){
+   if(e.target.id==='bis-bus'){
+    bisWizard.busId=e.target.value;bisWizard.layoutId='';bisWizard.selected=[];
+    renderBisWizard();return;
+   }
+   if(e.target.id==='bis-layout'){
+    bisWizard.layoutId=e.target.value;bisWizard.selected=[];
+    renderBisWizard();return;
+   }
+   if(e.target.id==='bis-publish'){
+    bisWizard.publish=e.target.checked;return;
+   }
+   if(e.target.id==='bis-seat-input'){
+    const bus=get('fleet').find(x=>x.id===bisWizard.busId);
+    const layout=get('layoutLibrary').find(x=>x.id===bisWizard.layoutId);
+    try{
+     const selected=normalizeManualSeats(e.target.value,bus?.posti);
+     const report=inspectLayout(layout?.configurazione,bus?.posti);
+     if(!report.valid||selected.some(n=>report.unusable.has(n)))
+      throw new Error('Numero posto bloccato o piantina incompatibile.');
+     bisWizard.selected=selected;renderBisWizard();
+    }catch(err){showMessage(String(err.message||err),true);}
+    return;
+   }
+  }
   if(!transferWizard)return;
   if(e.target.id==='move-mode'){
    transferWizard.mode=e.target.value==='date'?'date':'bus';
