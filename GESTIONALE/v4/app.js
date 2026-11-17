@@ -180,6 +180,92 @@ function drawDashboard(){
  panel('Centro notifiche','Ultimi eventi registrati','<div class="panel-body">'+recent+'</div>','<button class="soft smallbtn" data-page="notifications">Tutte</button>')+
  '</div>'+panel('Agenda e impegni','Scadenze ancora aperte',table(['Scadenza','Attività','Priorità'],due.map(a=>[dateIT(a.data_scadenza),esc(a.titolo),badge(a.priorita)])),'<button class="soft smallbtn" data-page="agenda">Apri agenda</button>');
 }
+
+/* BUS BIS manual seat wizard: requires a real, already saved full bus layout. */
+function openBisWizard(id){
+ const source=tripBy(id);
+ if(!source||source.bis_parent_id)throw new Error('Seleziona il viaggio principale per aprire un BUS BIS.');
+ if(source.archiviato_at||source.data_partenza<todayItaly())throw new Error('Un viaggio concluso non può aprire BUS BIS.');
+ bisWizard={sourceId:id,busId:'',layoutId:'',selected:[],publish:false};
+ pendingBis=null;renderBisWizard();
+}
+function bisChoices(){
+ const source=tripBy(bisWizard?.sourceId);
+ return get('fleet').filter(b=>b.attivo!==false&&/GT/i.test(String(b.categoria||''))&&Number(b.posti)>0).map(bus=>({
+  bus,templates:usableTemplates(get('layoutLibrary'),bus),
+  busy:get('trips').some(t=>t.id!==source?.id&&t.autobus_id===bus.id&&
+   t.data_partenza===source?.data_partenza&&!t.archiviato_at&&!/annull|cancel/i.test(String(t.stato||'')))
+ }));
+}
+function renderBisWizard(){
+ if(!bisWizard)return;
+ const source=tripBy(bisWizard.sourceId),choices=bisChoices();
+ if(!source)return;
+ const entry=choices.find(x=>x.bus.id===bisWizard.busId);
+ const layout=entry?.templates.find(l=>l.id===bisWizard.layoutId);
+ const report=layout?inspectLayout(layout.configurazione,Number(entry.bus.posti)):null;
+ const allowed=report?.valid?report.seats.filter(x=>!report.unusable.has(x)):[];
+ bisWizard.selected=(bisWizard.selected||[]).filter(x=>allowed.includes(x));
+ const selected=bisWizard.selected,capacity=Number(entry?.bus.posti||0);
+ const buses='<option value="">Seleziona autobus GT…</option>'+choices.map(x=>
+  '<option value="'+esc(x.bus.id)+'" '+(x.bus.id===bisWizard.busId?'selected':'')+
+  (x.busy||!x.templates.length?' disabled':'')+'>'+
+  esc((x.bus.titolo||x.bus.modello||'GT')+' · '+x.bus.posti+' posti')+
+  (x.busy?' · IMPEGNATO':'')+(!x.templates.length?' · manca piantina':'')+'</option>').join('');
+ const templates='<option value="">Seleziona piantina ufficiale…</option>'+(entry?.templates||[]).map(t=>
+  '<option value="'+esc(t.id)+'" '+(t.id===bisWizard.layoutId?'selected':'')+'>'+esc(t.nome||t.configurazione?.name)+'</option>').join('');
+ const map=report?.valid?report.seats.map(n=>{
+  const disabled=report.unusable.has(n),active=selected.includes(n);
+  return '<button type="button" data-bis-seat="'+esc(n)+'" class="seat '+(disabled?'booked':active?'selected':'')+
+   '" aria-pressed="'+active+'" '+(disabled?'disabled':'')+' title="'+esc(disabled?'Posto non disponibile':'Posto '+n)+'">'+esc(n)+'</button>';
+ }).join(''):'';
+ const summary=layout?'<div class="cards">'+card('Posti fisici',String(capacity),'Capienza reale bus')+
+  card('Da aprire',String(selected.length),'Scelti manualmente')+
+  card('Chiusi',String(capacity-selected.length),'Non prenotabili')+'</div>':'';
+ const picker=layout?summary+
+  '<div class="action-row"><button type="button" class="secondary" data-action="bis-select-all">Seleziona tutti</button>'+
+  '<button type="button" class="secondary" data-action="bis-select-none">Azzera</button></div>'+
+  '<div class="seat-pick-grid" aria-label="Posti selezionabili BUS BIS">'+map+'</div>'+
+  '<label>Apri i primi N posti disponibili<input type="number" id="bis-first-count" min="1" max="'+allowed.length+
+  '" value="'+(selected.length||Math.min(20,allowed.length))+'"></label>'+
+  '<button type="button" class="secondary" data-action="bis-select-first">Seleziona N</button>'+
+  '<label class="span-2">Oppure digita i numeri separati da virgola<input id="bis-seat-input" value="'+esc(selected.join(', '))+'" placeholder="1, 2, 7, 8"></label>'+
+  '<p class="help span-2">I sedili non scelti saranno bloccati. Nessun posto fuori servizio può essere aperto.</p>':
+  '<div class="alert span-2">Seleziona un autobus con piantina ufficiale di '+(capacity||'53 / 63')+' posti. Prima di creare un BIS serve una piantina reale nella libreria.</div>';
+ displayModal('Apri BUS BIS · scegli manualmente i posti',
+  '<p class="help"><strong>'+esc(tripName(source))+'</strong> · '+dateIT(source.data_partenza)+
+  '. Il BIS conserva la capienza fisica del mezzo; scegli quali sedili vendere.</p>'+
+  '<form data-save="bis-preview" class="form-grid"><input name="sourceTripId" type="hidden" value="'+esc(source.id)+'">'+
+  '<label class="span-2">Autobus<select id="bis-bus" required>'+buses+'</select></label>'+
+  '<label class="span-2">Piantina ufficiale<select id="bis-layout" '+(!entry?'disabled':'')+' required>'+templates+'</select></label>'+
+  picker+
+  '<label class="span-2"><input id="bis-publish" type="checkbox" '+(bisWizard.publish?'checked':'')+
+  '> Pubblica sul sito dopo l’apertura definitiva</label>'+
+  '<button class="primary span-2" type="submit" '+(!layout||!selected.length?'disabled':'')+'>Anteprima BUS BIS e posti selezionati</button></form>');
+}
+function reviewBisWizard(){
+ if(!bisWizard)throw new Error('Selezione BUS BIS non disponibile.');
+ const source=tripBy(bisWizard.sourceId);
+ const bus=get('fleet').find(x=>x.id===bisWizard.busId);
+ const template=get('layoutLibrary').find(x=>x.id===bisWizard.layoutId);
+ const p=prepareBisSeatOpening({source,bus,template,selected:bisWizard.selected,
+  alreadyBooked:[],today:todayItaly(),allTrips:get('trips')});
+ previewManualLayout(template.configurazione,p.physicalSeats,p.bookableSeats);
+ p.publish=!!bisWizard.publish;pendingBis=p;
+ const html='<div class="cards">'+card('Capienza GT',String(p.physicalSeats),'Posti fisici')+
+  card('Posti aperti',String(p.bookableCount),'Scelti da te')+
+  card('Posti chiusi',String(p.closedSeats.length),'Bloccati alla vendita')+'</div>'+
+  '<p><strong>Partenza:</strong> '+esc(tripName(source))+' · '+dateIT(source.data_partenza)+'</p>'+
+  '<p><strong>Bus:</strong> '+esc(bus.titolo||bus.modello||'GT')+'</p>'+
+  '<p><strong>Posti prenotabili:</strong> '+esc(p.bookableSeats.join(', '))+'</p>'+
+  '<p><strong>Visibilità:</strong> '+(p.publish?'Da pubblicare sul sito':'Solo gestionale')+'</p>'+
+  '<div class="alert">La selezione sarà salvata con i posti non scelti bloccati. Una verifica sul server impedirà prenotazioni dirette di sedili chiusi.</div>'+
+  '<div class="action-row"><button class="secondary" data-action="open-bis" data-id="'+esc(p.sourceTripId)+'">← Modifica selezione</button>'+
+  writeButton('Conferma apertura BUS BIS','commit-bis-manual')+'</div>'+
+  (!WRITES_ENABLED?'<p class="help">Conferma disattivata fino a backup/restore e collaudo dell’RPC protetta.</p>':'');
+ displayModal('Anteprima BUS BIS · '+p.bookableCount+' sedili aperti',html);
+}
+
 function drawTrips(){
  const trips=get('trips').filter(t=>filterTerm(t.titolo,t.destinazione,t.id_viaggio)).sort(sortTrip);
  const books=get('bookings');
