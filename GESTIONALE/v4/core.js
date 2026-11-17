@@ -173,6 +173,11 @@ export async function logout(){
  if(token){fetch(API_URL+'/auth/v1/logout',{method:'POST',headers:{apikey:PUBLISHABLE_KEY,Authorization:'Bearer '+token},cache:'no-store'}).catch(()=>{});}
 }
 export function clearCache(){cache.clear()}
+export async function liveAccessToken(){
+ if(!activeSession())return null;
+ await ensureToken();
+ return session?.access_token||null;
+}
 export async function records(resource,{filters={},order=null,limit=1000,force=false}={}){
  if(!SELECTS[resource])throw new Error('Archivio non consentito: '+resource);
  if(!activeSession())throw new Error('Accesso non autorizzato.');
@@ -186,14 +191,18 @@ export async function records(resource,{filters={},order=null,limit=1000,force=f
  const key=resource+'?'+params.toString()+'#'+limit;
  const cached=cache.get(key);
  if(!force&&cached&&Date.now()-cached.at<25000)return cached.rows;
- const all=[],pageSize=Math.min(500,Math.max(1,limit));
- for(let offset=0;offset<Math.min(limit,20000);offset+=pageSize){
-   const query=new URLSearchParams(params);
-   query.set('limit',String(Math.min(pageSize,limit-offset)));query.set('offset',String(offset));
-   const res=await jsonFetch('/rest/v1/'+table+'?'+query.toString(),{},true,1);
-   if(!Array.isArray(res))throw new Error('La risposta di '+table+' non è una lista.');
-   all.push(...res);
-   if(res.length<pageSize)break;
+ // Fetch one additional record to DETECT truncation, never silently show an incomplete ledger.
+ const cap=Math.min(20000,Math.max(1,Math.floor(Number(limit)||1000)));
+ const all=[],pageSize=Math.min(500,cap+1);
+ for(let offset=0;offset<=cap;offset+=pageSize){
+  const query=new URLSearchParams(params);
+  const requested=Math.min(pageSize,cap+1-offset);
+  query.set('limit',String(requested));query.set('offset',String(offset));
+  const res=await jsonFetch('/rest/v1/'+table+'?'+query.toString(),{},true,1);
+  if(!Array.isArray(res))throw new Error('La risposta di '+table+' non è una lista.');
+  all.push(...res);
+  if(all.length>cap)throw new Error('Archivio '+table+' oltre '+cap+' righe. Non mostrare dati incompleti: applica un filtro.');
+  if(res.length<requested)break;
  }
  cache.set(key,{rows:all,at:Date.now()});
  return all;
