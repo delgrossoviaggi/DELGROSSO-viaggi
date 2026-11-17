@@ -51,7 +51,7 @@ function dgTodayRome(now=new Date()){
   return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
 }
 function dgPublicTripIsCurrent(trip,today=dgTodayRome()){
-  if(!trip || !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(trip.data_partenza||'')))return false;
+  if(!trip || !/^\d{4}-\d{2}-\d{2}$/.test(String(trip.data_partenza||'')))return false;
   if(String(trip.data_partenza)<today)return false;
   if(trip.archiviato_at || trip.online_hidden_at || trip.bis_auto_hidden)return false;
   if(trip.pubblicato!=null&&!['SI','TRUE','1','SÌ'].includes(String(trip.pubblicato).toUpperCase()))return false;
