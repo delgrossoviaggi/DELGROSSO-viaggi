@@ -48,6 +48,16 @@ Data tecnica: 17 novembre 2026.
 - La conferma singola e le ricevute già archiviate rimangono disponibili e non vengono sovrascritte.
 - Test regressione: `tests/dg4-v4-confirmations.test.mjs`, `tests/dg4-v4-pdf.test.mjs`.
 
+## BUS BIS: apertura con selezione MANUALE dei posti (DG4)
+- Dalla pagina **Viaggi e partenze**, per una partenza attiva, premi **+ Apri BUS BIS**. La stessa azione è nella scheda viaggio.
+- Seleziona un autobus GT libero, una **piantina ufficiale già salvata** della stessa capienza fisica, poi i singoli numeri da mettere in vendita con la griglia. Sono disponibili anche «Seleziona tutti», «Azzera» e «Apri i primi N»; puoi scrivere una lista libera (es. \`1,2,9,10\`). La capienza del mezzo rimane 53/63; **solo i numeri autorizzati sono prenotabili**, gli altri sono segnati \`blocked\` in configurazione.
+- La selezione non modifica né cancella posti, prenotazioni, quote, ricevute o piantine già pubblicate sul viaggio principale.
+- Il sistema non inventa una piantina: se un GT da 53 o 63 posti non ha una geometria ufficiale verificata in libreria, quel mezzo resta disabilitato nel wizard finché l'operatore non crea la piantina.
+- La conferma di apertura server è definita nella patch **NON ESEGUITA** \`supabase/patches/dg4_manual_bus_bis_seats_review_only.sql\`. La nuova RPC \`dg4_open_trip_bis_manual_v1\` combina apertura BIS inizialmente nascosto, layout derivato con flag dei posti, pubblicazione opzionale, controlli sul mezzo, audit e rollback automatico in un'unica transazione. Per evitare prenotazioni a posti chiusi bypassando il browser, include un vincolo trigger su \`prenotazioni\`.
+- Il backend deve pubblicare la disponibilità **manuale** invece di dichiarare disponibili tutti i sedili fisici. Il bridge relativo è predisposto in \`supabase/functions/gestionale-bridge/index.ts\`, ma non distribuito in produzione prima che la RPC e il trigger esistano.
+- **Stato attuale:** wizard e anteprima operativi nella V4 di test. \`WRITES_ENABLED=false\`; SQL non eseguito sul database reale, quindi apertura/salvataggio BIS non attivi finché non siano certificati backup completo, Storage, ripristino isolato e test autenticato. Non abilitare semplicemente il flag di scrittura prima di questi passaggi.
+- Test automatizzati: \`tests/dg4-v4-bis-manual.test.mjs\` e \`tests/dg4-v4-core.test.mjs\`.
+
 ## Trasferimento partecipanti, numerazione sedili e BUS BIS
 - La procedura `Gestisci` è raggiungibile da **Prenotazioni** e dalla pagina dedicata **Spostamenti posti / BUS BIS / date**.
 - **Stessa data**: solo autobus che appartengono alla stessa partenza logica (stesso `bis_parent_id`/ID capofila), con scelta manuale di sedili liberi e capienza verificata. Il server rifiuta le sovrapposizioni tramite `dg_manage_booking_seats_v1`. Il client esclude posti aziendali riservati, posti fuori servizio e altre prenotazioni.
