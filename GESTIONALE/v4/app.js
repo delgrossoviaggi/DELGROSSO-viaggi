@@ -564,6 +564,81 @@ function drawCash(){
  panel('Giroconti tra casse · Nicola ↔ Raffaele','Movimenti di denaro tra operatori · gestione contabile tracciata',table(['Data','Da','A','Importo','Stato'],trans.map(t=>[dateIT(t.data_trasferimento),esc(ops.find(o=>o.user_id===t.da_operatore_user_id)?.nome||'—'),esc(ops.find(o=>o.user_id===t.a_operatore_user_id)?.nome||'—'),money(t.importo),badge(t.stato)])),writeButton('+ Giroconto','new-transfer'));
 }
 
+
+/** Prenotazioni di origine e destinazione restano separate; solo le quote
+ * finanziariamente attribuite cambiano. Nessun "pagamento" viene creato. */
+function openCreditWizard(id){
+ const source=get('bookings').find(b=>b.id===id);
+ if(!source)throw new Error('Prenotazione del viaggio di origine non trovata.');
+ const balance=creditBalance(source);
+ if(!balance||balance.mismatch)throw new Error('La quota non coincide con gli incassi originali: riconciliare prima di predisporre il giroconto.');
+ if(balance.availableCredit<=0)throw new Error('Non risulta un credito disponibile per la prenotazione.');
+ const candidates=destinationsForCredit(source,get('bookings'),get('trips'),todayItaly());
+ if(!candidates.length)throw new Error('Per questo nominativo non esiste un’altra prenotazione futura con nome, cognome e telefono corrispondenti.');
+ creditWizard={sourceId:id,targetId:candidates[0].id,amount:'',reason:''};
+ pendingCredit=null;renderCreditWizard();
+}
+function renderCreditWizard(){
+ if(!creditWizard)return;
+ const source=get('bookings').find(b=>b.id===creditWizard.sourceId);
+ if(!source)throw new Error('Prenotazione non trovata.');
+ const eligible=destinationsForCredit(source,get('bookings'),get('trips'),todayItaly());
+ const target=eligible.find(b=>b.id===creditWizard.targetId)||eligible[0];
+ if(!target)throw new Error('Non risultano prenotazioni attive compatibili per lo stesso cliente.');
+ creditWizard.targetId=target.id;
+ const a=creditBalance(source),b=creditBalance(target);
+ const max=Math.min(a.availableCredit,b.remaining)/100;
+ const amount=creditWizard.amount||String(Math.max(0,max).toFixed(2));
+ const options=eligible.map(x=>{
+  const trip=tripBy(x.viaggio_id),balance=creditBalance(x);
+  return '<option value="'+esc(x.id)+'" '+(x.id===creditWizard.targetId?'selected':'')+'>'+
+   esc(tripName(trip)+' · '+dateIT(trip?.data_partenza)+' · '+(x.codice||short(x.id))+' · saldo '+money(balance.remaining/100))+'</option>';
+ }).join('');
+ displayModal('Giroconto quote tra viaggi · '+bookingName(source),
+  '<p class="help">Cliente: <strong>'+esc(bookingName(source))+'</strong> · '+esc(source.telefono||'')+
+  '. Questo NON è un nuovo incasso né un giroconto tra le casse degli operatori.</p>'+
+  '<div class="cards">'+card('Viaggio di origine',esc(tripName(tripBy(source.viaggio_id))),'Somma già versata')+
+   card('Credito disponibile',money(a.availableCredit/100),'Al netto dei giroconti già registrati')+
+   card('Saldo destinazione',money(b.remaining/100),'Prima del nuovo giroconto')+'</div>'+
+  (!creditAvailable()?'<div class="alert">Anteprima in modalità di collaudo: il registro giroconti Supabase non è ancora disponibile. Nessun importo verrà trasferito né salvato.</div>':'')+
+  '<form class="form-grid" data-save="credit-preview">'+
+   '<input type="hidden" name="sourceId" value="'+esc(source.id)+'">'+
+   '<label class="span-2">Prenotazione di destinazione<select id="credit-target" name="target" required>'+options+'</select></label>'+
+   '<label class="span-2">Quota da trasferire € (massimo '+esc(money(max))+')'+
+    '<input name="amount" inputmode="decimal" type="number" min=".01" max="'+max.toFixed(2)+'" step=".01" required value="'+esc(amount)+'"></label>'+
+   '<label class="span-2">Motivo del giroconto<textarea name="reason" rows="3" required minlength="8" maxlength="800" placeholder="Viaggio non formato, autorizzazione del cliente...">'+esc(creditWizard.reason)+'</textarea></label>'+
+   '<div class="alert span-2">Il viaggio di origine deve risultare non formato/annullato oppure la sua prenotazione annullata. Il giroconto non libera automaticamente i posti: prima va gestita la prenotazione nel rispetto di eventuali rimborsi.</div>'+
+   '<button type="submit" class="primary span-2">Verifica importo e visualizza anteprima</button></form>');
+}
+function previewCreditWizard(form){
+ if(!creditWizard)throw new Error('Il modulo giroconto non è più attivo.');
+ const data=new FormData(form);
+ const source=get('bookings').find(b=>b.id===creditWizard.sourceId);
+ if(!source||String(data.get('sourceId'))!==source.id)throw new Error('La prenotazione di origine è cambiata.');
+ const target=get('bookings').find(b=>b.id===String(data.get('target')||''));
+ const amount=String(data.get('amount')||'').trim(),reason=String(data.get('reason')||'').trim();
+ const plan=reviewCreditTransfer({source,target,trips:get('trips'),bookings:get('bookings'),
+  payments:get('payments'),transfers:creditAvailable()?get('creditTransfers'):[],amount,reason,today:todayItaly()});
+ creditWizard.targetId=target.id;creditWizard.amount=amount;creditWizard.reason=reason;
+ pendingCredit={...plan,requestId:crypto.randomUUID(),canCommit:creditAvailable()};
+ const sourceTrip=tripBy(plan.originTripId),targetTrip=tripBy(plan.targetTripId);
+ displayModal('Anteprima giroconto · nessun incasso aggiuntivo',
+  '<div class="cards">'+card('Credito di origine',money(plan.availableCents/100),'Viaggio '+esc(tripName(sourceTrip)))+
+   card('Quota da trasferire',money(plan.transferCents/100),'Giroconto interno')+
+   card('Nuovo saldo',money(plan.newTargetDueCents/100),'Viaggio '+esc(tripName(targetTrip)))+'</div>'+
+  '<div class="detail-grid">'+[
+    ['Cliente',plan.customer],['Origine',tripName(sourceTrip)+' · '+dateIT(sourceTrip?.data_partenza)],
+    ['Destinazione',tripName(targetTrip)+' · '+dateIT(targetTrip?.data_partenza)],
+    ['Resta nel viaggio di origine',money(plan.afterSourceCents/100)],
+    ['Totale attribuito alla destinazione',money(plan.afterTargetCents/100)],
+    ['Motivo',plan.reason]
+  ].map(([name,value])=>'<div><small>'+esc(name)+'</small><strong>'+esc(value)+'</strong></div>').join('')+'</div>'+
+  '<p class="help">Le vecchie ricevute restano immutate. Il registro del giroconto riporterà entrambe le prenotazioni e chi ha autorizzato il trasferimento.</p>'+
+  (!pendingCredit.canCommit?'<div class="alert">SOLO SIMULAZIONE. Lo schema contabile del giroconto non è ancora attivo in Supabase; nessuna registrazione è possibile.</div>':'')+
+  '<div class="action-row"><button class="secondary" data-action="back-credit">← Modifica</button>'+
+  writeButton('Conferma giroconto quote','commit-credit')+'</div>');
+}
+
 function drawCredits(){
  const available=creditAvailable();
  const transfers=available?get('creditTransfers'):[];
