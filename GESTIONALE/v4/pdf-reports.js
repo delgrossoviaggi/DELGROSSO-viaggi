@@ -64,7 +64,8 @@ export function savePdf(bytes,filename){
  const blob=new Blob([bytes],{type:'application/pdf'});
  const href=URL.createObjectURL(blob);
  const a=document.createElement('a');a.href=href;
- a.download=safePdfFilename('REPORT',filename).replace(/^DELGROSSO_REPORT_/,'');
+ const basename=String(filename||'REPORT').replace(/\.pdf$/i,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9_-]/gi,'_').replace(/_{2,}/g,'_').slice(0,90)||'REPORT';
+ a.download=basename+'.pdf';
  a.rel='noopener noreferrer';a.style.display='none';
  document.body.append(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(href),90_000);
