@@ -1,0 +1,30 @@
+name: DELGROSSO — Viaggi scaduti invisibili sul sito
+on:
+  push:
+    branches:
+      - build/dg4-rebuild-20261117
+      - main
+    paths:
+      - 'js/future-v4.js'
+      - 'js/gestionale.js'
+      - 'tests/dg4-public-trip-visibility.test.mjs'
+      - '.github/workflows/dg4-public-trips.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Parse public trip scripts
+        run: |
+          node --check js/gestionale.js
+          node --check js/future-v4.js
+      - name: Verify that passed departures disappear from site only
+        run: node --test tests/dg4-public-trip-visibility.test.mjs
+      - name: Confirm public scripts contain no role service secret
+        run: |
+          if grep -E 'sb_secret_|SUPABASE_SERVICE_ROLE_KEY|service_role[[:space:]]*:' js/gestionale.js js/future-v4.js; then echo 'Privileged keys are forbidden in public JS'; exit 1; fi

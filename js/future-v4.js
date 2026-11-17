@@ -12,7 +12,7 @@ const num=v=>v===undefined||v===null||String(v).trim()===''?NaN:Number(v);
 const euro=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(Number(v)||0);
 const niceDate=d=>{try{return new Date(`${d}T12:00:00`).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});}catch{return d||'—';}};
 const shortDate=d=>{try{return new Date(`${d}T12:00:00`).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}catch{return d||'—';}};
-const future=d=>{const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');return /^\d{4}-\d{2}-\d{2}$/.test(String(d||''))&&String(d)>=today;};
+const future=d=>{const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());return /^\d{4}-\d{2}-\d{2}$/.test(String(d||''))&&String(d)>=today;};
 const category=x=>{let s=String([x.titolo,x.destinazione,x.name].join(' ')).toLowerCase();return /napoli|spaccanapoli/.test(s)?'napoli':/alberobello|locorotondo/.test(s)?'alberobello':/larino/.test(s)?'larino':/san.marino|gradara|granada/.test(s)?'san-marino':'altri'};
 const categoryName={napoli:'NAPOLI',alberobello:'BORGHI DI PUGLIA',larino:'MERCATINI DI NATALE','san-marino':'SAN MARINO & GRADARA',altri:'NUOVA DESTINAZIONE'};
 const introText={napoli:'Una giornata nel cuore di Napoli, tra vicoli, sapori e tradizioni.',alberobello:'Scopri l’atmosfera dei borghi pugliesi e le luci delle feste.',larino:'Vivi la magia dei mercatini di Natale e delle loro tradizioni.','san-marino':'Scopri borghi medievali e panorami suggestivi.',altri:'La prossima esperienza da vivere insieme.'};
