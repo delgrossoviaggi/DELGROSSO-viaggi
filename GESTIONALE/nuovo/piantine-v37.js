@@ -252,9 +252,11 @@ function parseSeats(b){
  return String(b.posti_selezionati||'').split(/[,;\s]+/).map(x=>x.trim()).filter(x=>/^[1-9]\d{0,2}$/.test(x));
 }
 function ticket(b,seatrows){
- const seats=new Set(parseSeats(b));
- for(const x of seatrows)if(x.prenotazione_id===b.id&&/^[1-9]\d{0,2}$/.test(String(x.posto)))seats.add(String(x.posto));
- return {...b,sedili:[...seats].sort((a,b)=>Number(a)-Number(b))};
+ // Registro ufficiale prenotazione_posti prioritario: mai unire fonti discordanti.
+ const resolver=global.DGSeatGroups;
+ if(!resolver?.sourceBookingSeats)throw Error('Modulo piantine ufficiali non caricato.');
+ const assignment=resolver.sourceBookingSeats(b,seatrows);
+ return {...b,sedili:assignment.seats,disallineamento_posti:assignment.mismatch};
 }
 function active(b){return !/annull|cancel|cancell|eliminat/i.test(b.stato||'')&&!b.riserva_aziendale;}
 function root(t){return t.bis_parent_id||t.id}
@@ -266,13 +268,15 @@ async function pdfGroups(selected){
  for(const t of eligible.sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza)))){
   const rid=root(t);if(!groups.has(rid)){const parent=trips.find(x=>x.id===rid)||t;groups.set(rid,{title:nameTrip(parent),trip:parent,buses:[]})}
   const list=bookings.filter(b=>b.viaggio_id===t.id&&active(b)).map(b=>ticket(b,seatrows.filter(x=>x.viaggio_id===t.id)));
-  const mapping=tripOfficial.find(x=>x.viaggio_id===t.id)||busOfficial.find(x=>x.autobus_id===t.autobus_id);
+  const resolved=global.DGSeatGroups?.resolveLayout(t,tripOfficial,busOfficial);
+  const mapping=resolved?{configurazione:resolved.config,versione:resolved.versione,source:resolved.source}:null;
   const count=list.reduce((n,b)=>n+(Number(b.posti)||0),0);
   const counted=new Set(list.flatMap(b=>b.sedili));
   const warnings=[];
   if(count!==Number(t.posti_occupati||0))warnings.push('Contatore '+t.posti_occupati+' diverso da somma prenotati '+count);
   if(count!==counted.size)warnings.push('Posti nominativi '+counted.size+' diversi da persone '+count);
-  groups.get(rid).buses.push({name:nameTrip(t),trip:t,bookings:list,layout:mapping?.configurazione||null,official:!!mapping,warnings});
+  groups.get(rid).buses.push({name:nameTrip(t),trip:t,bookings:list,seatRows:seatrows.filter(x=>String(x.viaggio_id)===String(t.id)),
+   layout:mapping?.configurazione||null,official:!!mapping,layoutVersion:mapping?.versione||null,layoutSource:mapping?.source||null,warnings});
  }
  return [...groups.values()];
 }
@@ -288,7 +292,8 @@ async function pdf(kind){
  if(kind==='trip'&&!trips.some(t=>t.id===chosenTrip))throw Error('Seleziona un viaggio.');
  const groups=await pdfGroups(kind==='all'?'all':kind==='sunday'?'sunday':chosenTrip);
  if(!groups.length)throw Error('Nessun viaggio disponibile per il documento.');
- const bytes=global.DG2Pdf.makeOperationalPdf(groups);
+ // La stampa della piantina non deve mai degradare a uno schema non ufficiale.
+ const bytes=global.DG2Pdf.makeOperationalPdf(groups,{requireOfficial:true});
  return downloadPdf(bytes,'DELGROSSO_CONTROL_ROOM_'+(kind==='sunday'?'22_11_2026':kind==='all'?'TUTTI_I_VIAGGI':'VIAGGIO')+'.pdf');
 }
 async function renderControlMap(trip,bookings,occupiedBySeat){
