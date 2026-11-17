@@ -6,7 +6,8 @@ const root=new URL('../',import.meta.url);
 const client=readFileSync(new URL('js/gestionale.js',root),'utf8');
 const publicPage=readFileSync(new URL('js/future-v4.js',root),'utf8');
 function getSandbox(fetch){
- const ctx={Intl,Date,Number,String,Math,Array,Object,RegExp,JSON,Promise,URLSearchParams,AbortController,
+ class FixedDate extends Date {constructor(...args){super(...(args.length?args:['2026-11-17T12:00:00Z']))}}
+ const ctx={Intl,Date:FixedDate,Number,String,Math,Array,Object,RegExp,JSON,Promise,URLSearchParams,AbortController,
  setTimeout,clearTimeout,fetch,window:{}};
  vm.runInNewContext(client+';globalThis.tripTest={dgTodayRome,dgPublicTripIsCurrent,getGestionaleTrips}',ctx);
  return ctx.tripTest;
@@ -33,7 +34,7 @@ test('Older trips disappear only from public listings; cancelled/unpublished/arc
 test('The LIVE Supabase bridge response always filters past, hidden and unpublished dates',async()=>{
  const fn=getSandbox(async()=>({ok:true,status:200,text:async()=>JSON.stringify(trips)}));
  const items=await fn.getGestionaleTrips();
- assert.deepEqual([...items.map(t=>t.id)],['FUTURE']); // Nov 17 runtime? use static date? See below.
+ assert.deepEqual([...items.map(t=>t.id)],['TODAY','FUTURE']);
 });
 test('The emergency catalog has exactly the same public expiry policy',async()=>{
  let calls=0;
