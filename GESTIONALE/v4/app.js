@@ -906,8 +906,28 @@ function pdfBytesAsBase64(bytes){
  return btoa(sections.join(''));
 }
 async function handleSubmit(form){
+ const type=form.dataset.save;
+ // Il sopralluogo ai posti e l'anteprima del cambio data sono letture; restano disponibili
+ // anche quando il gestionale è bloccato per le scritture.
+ if(type==='transfer-preview'){
+  const plan=reviewTransferForSubmission(form);
+  if(plan.kind==='date'){
+   const preview=await rpcRead('dg3_preview_spostamento_data_v1',{
+    p_booking_id:plan.id,p_target_trip_id:plan.targetTripId
+   });
+   if(!preview?.success || preview.source_trip_id!==plan.sourceTripId ||
+     preview.target_trip_id!==plan.targetTripId || Number(preview.passengers)!==plan.persons)
+    throw new Error('L’anteprima del server non coincide con il viaggio scelto.');
+   if(Number(preview.amount_paid)!==plan.paid || Number(preview.amount_total)!==plan.total)
+    throw new Error('Gli importi sono stati aggiornati: ricontrollare la prenotazione.');
+   showTransferPreview(plan,preview);
+   return;
+  }
+  showTransferPreview(plan);
+  return;
+ }
  if(!WRITES_ENABLED)throw new Error('Scritture sospese fino a backup completo verificato.');
- const f=new FormData(form),type=form.dataset.save;
+ const f=new FormData(form);
  const s=n=>String(f.get(n)||'').trim();
  const numeric=(key,{min=0,max=1000000}={})=>{
   const x=Number(s(key));
