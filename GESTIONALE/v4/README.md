@@ -1,44 +1,67 @@
-# DELGROSSO VIAGGI 4.0 ULTIMATE — Staging di ricostruzione
+# DELGROSSO VIAGGI 4.0 ULTIMATE — collaudo separato da produzione
+Data tecnica: 17 novembre 2026.
 
-**Ramo:** `build/dg4-rebuild-20261117` (separato dalla produzione). **Entrata:** `GESTIONALE/v4/index.html`.
+**Ramo di sviluppo:** `build/dg4-rebuild-20261117`. **Percorso web:** `/GESTIONALE/v4/`. **Database operativo originale:** Supabase `chkuayhbmitdmzmmvona`. **Sito prenotazioni:** progetto Supabase `bhsanrbadsqcpbtxupmr`.
 
-## Cosa esiste realmente in questa build
-- **Login operatore Nicola/Raffaele**: Edge Function `dg2-operator-login` + verifica Supabase Auth `/auth/v1/user` + `is_gestionale_admin` + operatore attivo. Non si memorizzano password; JWT in `sessionStorage` per scheda, logout con revoca best effort.
-- **Dashboard**: prossime partenze, posti occupati dai registri, pagamenti, saldo stimato, agenda e notifiche.
-- **Viaggi**: elenco e dettaglio, BUS BIS indipendente, stato pubblicazione e capienza ricostruita dal registro prenotazioni.
-- **Prenotazioni**: ricerche, filtro viaggio, esclusione cancellate, fermate, check-in, estratto CSV e pagamento collegato.
-- **Control Room**: legge `dg28_trip_layouts.configurazione.rows[].cells`, non inventa sedili quando manca una piantina; sovrappone i posti di `prenotazione_posti` e `prenotazioni.posti_selezionati`. Lista autista stampabile/PDF da browser, numeri contatto per uso interno.
-- **Piantine**: lettura schemi ufficiali e libreria. Editor **di bozza locale** per GT53/GT57/GT63 con numerazione automatica, modifica celle, esportazione file JSON. Non salva sul database o sul sito finché il backup non è verificato.
-- **Cassa Nicola/Raffaele**: vista `dg_cassa_operatori`, registro pagamenti e trasferimenti, CSV.
-- **Economia**: `economia_movimenti` e vista redditività viaggi, non ricalcola entrate e uscite con dati inventati.
-- **Clienti, noleggi autobus, agenda, flotta GT, documenti, notifiche, diagnostica**: consultazione reale tramite sessione autorizzata.
-- **Prestazioni**: caricamento per modulo, cache 25s solo memoria, paginazione REST, GET retry limitato per 502/503/504/429, NO polling in background delle notifiche; POST e modifiche non ripetute automaticamente per evitare duplicazioni.
+> ATTENZIONE: questa versione è una **build V4 di collaudo read-only**. Tutte le chiamate di modifica sono bloccate in `core.js` mediante `WRITES_ENABLED=false`. I flussi di scrittura sono implementati ma **non certificati su DB di staging né autorizzati in produzione**. NON sostituire la versione usata dall'azienda.
 
-## Sicurezza e limitazioni esplicite
-`core.js` mantiene `WRITES_ENABLED=false`. Le funzioni di scrittura sono predisposte (RPC protette per pagamento, trasferimenti, spostamento posti e CRUD), **ma non sono abilitate**, non provate con dati reali e non vanno considerate operative. Questa è una V4 **alpha read-only**, non un gestionale 4.0 completato al 100%. L'editor piantine produce bozze locali ma **non modifica le piantine Supabase**.
+## 19 pagine implementate
 
-Rilascio vietato senza:
-1. Snapshot gestito Supabase verificato con restore possibile, database e Auth.
-2. Export fisico di tutti i file Storage (censiti: 493 oggetti tra i due progetti) e verifica SHA256.
-3. Restore di prova su staging separato e senza notifiche/invii ai clienti.
-4. Test con operatori autorizzati su login, RLS, viaggi, controllo posti, pagamenti, ricevute, contabilità e PDF iOS.
-5. Test di creazione/modifica/pubblicazione piantine, inclusa sincronizzazione del sito e verifica di rollback.
-6. Revisione delle RPC che aggiornano il database (idempotenza, vincoli, permessi).
-7. Analisi dei bug già noti (28 prenotazioni senza seat rows, informazioni di pagamento non riconciliate, PGRST003).
-8. Approvazione esplicita dell'uso produttivo.
+| Pagina | Tabelle / viste principali | Consultazione | Operazioni di modifica |
+|---|---|---|---|
+| Dashboard | viaggi, prenotazioni, pagamenti, scadenze, notifiche | sì | non previste |
+| Viaggi | viaggi, prenotazioni, posti | sì, dettaglio e bus BIS | creazione, modifica e archiviazione implementate, non abilitate |
+| Prenotazioni | prenotazioni, prenotazione_posti, pagamenti | sì, ricerca/filtro e conferme | RPC atomica, annullamento/rimborso da verificare, non abilitate |
+| Control Room | viaggi, prenotazioni, dg28_trip_layouts, fermate | sì, numeri e check-in | scritture non abilitate |
+| Piantine | dg2_layout_library, dg28_trip_layouts, dg28_bus_layouts | sì, editor bozza in memoria, JSON | salvataggio/validazione/pubblicazione tramite RPC implementati ma bloccati |
+| Contabilità e casse | dg_cassa_operatori, pagamenti, noleggi_bus_pagamenti, trasferimenti | sì, operatori separati, incassi e ricevute | registrazione gite/noleggi via RPC, trasferimenti, bloccate |
+| Economia e costi | economia_movimenti, dg_viaggi_redditivita | sì | scritture non abilitate |
+| Clienti | clienti, prenotazioni, pagamenti | sì, fascicolo PDF con correlazione esatta nome+telefono | nuova anagrafica preparata, bloccata |
+| Noleggi bus | noleggi_bus, noleggi_bus_pagamenti | sì, scheda e pagamenti | registrazione noleggio/incassi implementata ma bloccata |
+| Preventivi | preventivi | sì, scheda PDF | nuovo preventivo e PDF professionale predisposti, bloccati |
+| Fatturazione / bozze | dg3_fatture_bozze | sì | **nessuna emissione FE/SDI**, solo lettura PDF bozza |
+| Lista d'attesa | lista_attesa | sì | inserimento senza occupazione sedili predisposto, bloccato |
+| Agenda e scadenze | scadenze_gestionale | sì, CSV e PDF | creazione/aggiornamento predisposti, bloccati |
+| Flotta GT | flotta | sì, senza pubblicizzare van | modifiche non abilitate |
+| Documenti | archivio_documenti, dg_receipt_archive, Supabase Storage | sì, indici e accesso JWT agli originali | no archiviazioni automatiche in safe mode |
+| Notifiche | notifiche | sì | nessun polling aggressivo |
+| WhatsApp Business | dg_whatsapp_inbox_v61, outbound, optins | sì, consensi e storico | **nessun invio automatico ai clienti** |
+| Centro PDF e report | viste autorizzate | sì, pulsanti aggregati | file scaricati localmente |
+| Diagnostica | dg_system_health, dg_data_quality_issues | sì | nessun SQL di modifica |
 
-## Prove già svolte
-- Parsing sintattico della build `core.js` / `app.js` e delle viste.
-- Rendering mock **14/14** moduli con schema fake di viaggio/prenotazione.
-- Controllo posti annullati esclusi dall'occupazione.
-- Verifica editor automatico GT53, GT57, GT63 e rigenerazione numerazione.
-- Conferma scritture bloccate e nessuna credenziale privilegiata nel codice.
-- Vercel ha creato una preview `READY`, **non certificata con login end-to-end reale**. Preview eventualmente soggetta a protezione SSO.
+## Motore PDF aziendale incorporato
+- `pdf-engine.js`: generatore PDF autonomo con logo aziendale embedded, A4, intestazioni/paginazione/xref; offline nel browser, senza CDN e senza usare chiavi server.
+- `pdf-reports.js`: conversione dati letti da Supabase in report, download PDF via Blob adatto anche a Safari iOS.
+- Documenti supportati e testati con fixture: conferma prenotazione, elenco prenotati per viaggio / tutti i viaggi / BUS BIS, report operativi con piantina e fermate, riepilogo singolo pagamento, contabilità casse, agenda, fascicolo cliente, scheda noleggio, economia, flotta, anagrafica, registro noleggi, indice archivio, preventivo, **bozza** fattura, piantina 53/57/63.
+- **Originali Storage:** il browser apre soltanto URL firmati dallo Storage aziendale per utenti Auth autorizzati. La presenza degli oggetti è stata ricontrollata (89/89 ricevute professionali, 88/88 standard e 47/47 conferme referenziate).
+- **Funzioni server esistenti** verificate: `dg2-booking-pdf`, `professional-receipts`, `professional-quotes`; creazione PDF+archiviazione predisposta dopo salvataggio transazionale. Il fallimento del documento non provoca una seconda registrazione pagamento/prenotazione. In safe mode anche questo salvataggio documenti è bloccato.
+- Non qualificare i PDF riepilogativi come ricevute fiscali/fatture elettroniche e non inviare bozze FE come documenti emessi.
 
-## Come accedere
-Su una preview Vercel del ramo `build/dg4-rebuild-20261117`, raggiungere `/GESTIONALE/v4/`. Se Vercel richiede autenticazione SSO, accedere al proprio team Vercel. In seguito utilizzare **l'utente aziendale esistente**. Non scrivere password in chat e non utilizzare un account di terzi.
+## Impostazioni e sicurezza
+- Login: `dg2-operator-login`, validazione JWT `/auth/v1/user`, `is_gestionale_admin`, operatore attivo. Nessuna password memorizzata nel codice, nessuna service role nel browser.
+- Letture con RLS, token in `sessionStorage`, niente salvataggio permanente sul dispositivo; cache dati 25 s solo in memoria, niente N+1 indiscriminati.
+- GET riprovati solo per errori temporanei della Data API; POST/RPC di scrittura mai ripetute automaticamente; lato server verifiche di posti/capienza.
+- In V4 `WRITES_ENABLED=false`: nessuna operazione salva/modifica/elimina viaggi, clienti, posti, pagamenti o documenti.
+- Tutte le nuove richieste SQL osservate nei 30 SELECT configurati sono state verificate contro `information_schema.columns`: **nessuna colonna mancante**.
+- Nessun link WhatsApp viene inviato automaticamente; consensi prima di qualunque invito a gruppi.
 
-## Destinazione produzione
-Non modificare `main`, Supabase e sito pubblico prima del ripristino di prova e dei test. Il sito continua a utilizzare il proprio bridge Supabase esistente.
+## Prove effettuate
+- **GitHub Actions** `.github/workflows/dg4-v4-tests.yml`: parsing sintattico, fixture di 19 schermate, numerazione GT53/GT57/GT63, vincoli safe-mode e test di 16 formati PDF con logo, struttura xref e paginazione. Run `https://github.com/delgrossoviaggi/DELGROSSO-viaggi/actions/runs/44059118088` con esito success sul commit `495531b78723372fc7cc162ea28be0fbe0c989f7`.
+- Vercel integra automaticamente il ramo e segnala `READY` per la preview. **READY non equivale a un login reale o a funzionamento scritture**.
+- Ultima baseline letta senza mutazioni: 16 viaggi, 139 prenotazioni, 96 pagamenti, 642 posti.
 
-Riferimento diagnostico e backup: `docs/DELGROSSO-4.0-BACKUP-INVENTARIO-20261117.md`.
+## Mancano prima di una V4 realmente operativa al 100%
+1. Verifica snapshot gestito Supabase Pro e backup cifrato del DB, Auth e **tutti i 493 oggetti Storage** dei due progetti.
+2. Prova di restore su Supabase staging isolato e senza inviare email o WhatsApp reali.
+3. Test delle RPC e scritture su staging con account operatori di test, anticollisione sedili, annullamenti e rimborsi, receipt generation e idempotenza sui timeout.
+4. Collaudo reale del login Nicola/Raffaele su PC + iPhone, controllo RLS, apertura PDF Storage privati, download e condivisione Safari, gestione gruppi.
+5. Verifica end-to-end sito → ponte `gestionale-bridge` → prenotazione → sedile → pagamento → archiviazione; nessuna disponibilità inventata.
+6. Validazione delle 28 prenotazioni con possibili differenze fra `posti` e `prenotazione_posti`; non risolverle con UPDATE indiscriminati.
+7. Stress/monitoring PostgREST per precedente incidente `PGRST003`, gestione pool senza down del sito.
+8. Approvazione esplicita del deploy e piano rollback prima di sostituire `main`.
+
+## Come aprire il collaudo
+Aprire l'URL preview Vercel del ramo e aggiungere `/GESTIONALE/v4/`. Se Vercel richiede accesso SSO, usare il proprio account del team; quindi accesso al gestionale con credenziali già esistenti. **Non inviare password, chiavi o dump in chat**.
+
+## Data safety
+Nessun deploy su `main`, nessun SQL mutativo, nessuna modifica a prenotazioni o pagamenti durante la realizzazione della V4. L'attuale sito pubblico rimane sul suo branch/deploy di produzione.
