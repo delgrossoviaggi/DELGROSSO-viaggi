@@ -34,6 +34,7 @@ export const SELECTS = Object.freeze({
 
   customers:['clienti','id,nome,cognome,telefono,email,citta,codice_cliente,stato_cliente'],
   agenda:['scadenze_gestionale','id,titolo,descrizione,tipo,stato,priorita,data_scadenza,note,importo,viaggio_id,prenotazione_id,created_at,updated_at,completata_at'],
+  legacyAgenda:['attivita_gestionale','id,titolo,descrizione,stato,priorita,scadenza,assegnata_a,created_at,updated_at,completata_at'],
   layoutLibrary:['dg2_layout_library','id,nome,configurazione,attivo,updated_at'],
   busLayouts:['dg28_bus_layouts','autobus_id,layout_id,configurazione,versione,pubblicata_il'],
   tripLayouts:['dg28_trip_layouts','viaggio_id,autobus_id,layout_id,configurazione,versione,pubblicata_il'],
@@ -229,19 +230,27 @@ export async function writeRpc(name,payload){
  * An elimination only sets stato='eliminata', with Ripristina available.
  * All requests use the operator's Supabase JWT and existing RLS privileges.
  */
-export async function mutateAgenda(method,payload,{id=null,expectedUpdatedAt=null}={}){
+export async function mutateAgenda(method,payload,{id=null,expectedUpdatedAt=null,source='scadenze_gestionale'}={}){
  if(!AGENDA_WRITES_ENABLED)throw new Error('Agenda in sola lettura.');
  if(!activeSession())throw new Error('Sessione scaduta. Accedi di nuovo.');
  if(method!=='POST'&&method!=='PATCH')throw new Error('Operazione agenda non autorizzata.');
- const insert=['titolo','descrizione','note','tipo','stato','priorita','data_scadenza'];
- const update=['titolo','descrizione','note','tipo','stato','priorita','data_scadenza'];
+ if(!['scadenze_gestionale','attivita_gestionale'].includes(source))
+  throw new Error('Archivio agenda non riconosciuto. Nessuna modifica effettuata.');
+ const legacy=source==='attivita_gestionale';
+ // Existing V1/V2 activities lack tipo, note, data_scadenza. Never attempt
+ // to write those fields and never move a historical row to another table.
+ const allowed=legacy?
+  ['titolo','descrizione','stato','priorita','scadenza','assegnata_a']:
+  ['titolo','descrizione','note','tipo','stato','priorita','data_scadenza'];
  if(!payload||typeof payload!=='object'||Array.isArray(payload)||
-  Object.keys(payload).length===0||Object.keys(payload).some(key=>
-   !(method==='POST'?insert:update).includes(key)))throw new Error('Campi agenda non autorizzati.');
- let target='/rest/v1/scadenze_gestionale';
+  Object.keys(payload).length===0||Object.keys(payload).some(key=>!allowed.includes(key)))
+   throw new Error('Campi agenda non autorizzati per '+source+'.');
+ if(legacy&&method==='POST')
+  throw new Error('I nuovi appuntamenti vengono creati nella nuova Agenda: la tabella storica resta compatibile con la V2.');
+ let target='/rest/v1/'+source;
  if(method==='PATCH'){
   if(!/^[a-f0-9]{8}-[a-f0-9-]{27,36}$/i.test(String(id||''))||!expectedUpdatedAt)
-   throw new Error('Scadenza non verificata: ricarica la pagina.');
+   throw new Error('Appuntamento non verificato: ricarica la pagina.');
   const q=new URLSearchParams({id:'eq.'+id,updated_at:'eq.'+expectedUpdatedAt});
   target+='?'+q.toString();
  }else if(id||expectedUpdatedAt)throw new Error('La creazione non accetta un ID esistente.');
@@ -251,7 +260,7 @@ export async function mutateAgenda(method,payload,{id=null,expectedUpdatedAt=nul
   body:JSON.stringify(payload)
  },true,0);
  if(!Array.isArray(result)||result.length!==1||!result[0]?.id)
-  throw new Error('Modifica non confermata. Il record potrebbe essere stato modificato da un altro operatore. Aggiorna i dati prima di riprovare.');
+  throw new Error('Modifica non confermata. La voce potrebbe essere stata aggiornata da un altro operatore: ricarica e verifica prima di riprovare.');
  clearCache();return result[0];
 }
 
