@@ -47,6 +47,31 @@ const generators=[
 for(const [kind,generate] of generators) {
  test(kind+' renders a complete, logo-embedded PDF',()=>validPDF(generate()));
 }
+
+test('Combined confirmation is a complete A4 PDF with logo, two departure sections and grand total',()=>{
+ const summary={
+  title:'Napoli e Spaccanapoli',date:'2026-12-08',reference:'Mario Rossi',phone:'3331234567',
+  bookingCount:3,passengers:6,totalCents:12000,paidCents:4000,dueCents:8000,
+  surplusCents:0,warnings:[],
+  sections:[
+   {stop:'Apricena',passengers:1,totalCents:2000,paidCents:2000,
+    bookings:[{code:'A',bus:'BUS principale',passengers:1,seats:'3',totalCents:2000,paidCents:2000}]},
+   {stop:'San Severo',passengers:5,totalCents:10000,paidCents:2000,
+    bookings:[{code:'B',bus:'BUS principale',passengers:2,seats:'1, 2',totalCents:4000,paidCents:2000},
+     {code:'C',bus:'BUS BIS 2',passengers:3,seats:'6, 7, 8',totalCents:6000,paidCents:0}]}
+  ]
+ };
+ const content=validPDF(pdf.makeCombinedBookingPdf(summary));
+ assert.ok(content.includes('/MediaBox [0 0 595 842]'),'Expected A4 portrait pages');
+});
+test('Combined confirmation refuses totals that do not match the individual bookings',()=>{
+ const summary={title:'Test',date:'2026-12-08',reference:'Test',phone:'3331234567',
+  bookingCount:1,passengers:2,totalCents:5000,paidCents:0,dueCents:5000,
+  sections:[{stop:'San Severo',passengers:1,totalCents:3000,paidCents:0,
+   bookings:[{code:'T',bus:'BUS 1',passengers:1,seats:'1',totalCents:3000,paidCents:0}]}]};
+ assert.throws(()=>pdf.makeCombinedBookingPdf(summary),/totali del PDF cumulativo/);
+});
+
 test('Multi-page rosters have correct page count and xref',()=>{
  const passengers=Array.from({length:95},(_,i)=>({...booking,id:'B'+i,cliente:'Cliente '+i,posti:1,codice:'C'+i,posti_selezionati:String(i+1),telefono:'3331234567'}));
  const doc=validPDF(pdf.makeRosterPdf([{trip,buses:[{name:'GT53',trip,bookings:passengers}]}]));
