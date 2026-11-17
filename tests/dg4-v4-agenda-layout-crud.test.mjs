@@ -7,7 +7,7 @@ const rawA=readFileSync(new URL('agenda-model.js',dir),'utf8').replace(/^export 
 const rawL=readFileSync(new URL('layout-operations.js',dir),'utf8').replace(/^export /gm,'');
 const ctx=vm.createContext({Date,String,Number,Math,Set,Map,Array,Object,JSON,Error,RegExp});
 vm.runInContext(rawA+'\n'+rawL+
- '\n;globalThis.models={agendaEntries,isDiaryEntry,isDeadlineEntry,deadlineStats,calendarMonth,shiftCalendarMonth,validateAgendaEntry,agendaDeleted,seatCount,isCompleteLayout,eligibleGtBuses,layoutAssociations,archivePlan,compatibleTrips};',ctx);
+ '\n;globalThis.models={agendaEntries,isDiaryEntry,isDeadlineEntry,deadlineStats,calendarMonth,shiftCalendarMonth,validateAgendaEntry,agendaDeleted,mergeAgendaSources,seatCount,isCompleteLayout,eligibleGtBuses,layoutAssociations,archivePlan,compatibleTrips};',ctx);
 const m=ctx.models;
 const agenda=[
  {id:'A',tipo:'Appuntamento',titolo:'Incontro clienti',data_scadenza:'2026-11-20',stato:'aperta',priorita:'normale'},
@@ -75,4 +75,32 @@ test('Matching custom trip seat map never uses unrelated bus or mismatched seat 
   {id:'T3',autobus_id:'GT53',posti_totali:53,archiviato_at:'2026-11-01'}
  ];
  assert.equal(m.compatibleTrips(l,trips,buses).map(x=>x.id).join(','),'T1');
+});
+
+test('Existing V2 Supabase activities reappear by their original dates without table migration or duplication',()=>{
+ const oldActivities=[
+  {id:'legacy-21a',titolo:'Limo bus',scadenza:'2026-11-21',stato:'completata',assegnata_a:'Raffaele'},
+  {id:'legacy-21b',titolo:'Limo bus',scadenza:'2026-11-21',stato:'aperta',assegnata_a:'Nicola'},
+  ...Array.from({length:3},(_,i)=>({id:'legacy-06'+i,titolo:'Noleggio '+i,scadenza:'2026-12-06',stato:'aperta'})),
+  ...Array.from({length:4},(_,i)=>({id:'legacy-13'+i,titolo:'Viaggio '+i,scadenza:'2026-12-13',stato:'aperta'}))
+ ];
+ const original={...oldActivities[0]},merged=m.mergeAgendaSources(agenda,oldActivities);
+ assert.equal(merged.length,13);
+ assert.equal(m.agendaEntries(merged,'agenda').length,10); // 9 legacy + 1 typed
+ assert.equal(m.agendaEntries(merged,'scadenze').length,2);
+ assert.equal(m.agendaEntries(merged,'agenda').filter(x=>x.data_scadenza==='2026-11-21').length,2);
+ assert.equal(m.agendaEntries(merged,'agenda').filter(x=>x.data_scadenza==='2026-12-06').length,3);
+ assert.equal(m.agendaEntries(merged,'agenda').filter(x=>x.data_scadenza==='2026-12-13').length,4);
+ assert.equal(m.agendaEntries(merged,'agenda').find(x=>x.id==='legacy-21a').stato,'completata');
+ assert.equal(m.agendaEntries(merged,'agenda').find(x=>x.id==='legacy-21a').__source,'attivita_gestionale');
+ assert.deepEqual(oldActivities[0],original); // never mutate the Supabase record
+});
+test('Archived historical Supabase activities are shown only in agenda trash and can be restored by source ID',()=>{
+ const snapshot=m.mergeAgendaSources([],[
+  {id:'old',titolo:'Impegno annullato',scadenza:'2026-12-01',stato:'eliminata'}
+ ]);
+ assert.equal(m.agendaEntries(snapshot,'agenda').length,0);
+ const deleted=m.agendaEntries(snapshot,'agenda',{includeDeleted:true});
+ assert.equal(deleted.length,1);
+ assert.equal(deleted[0].__source,'attivita_gestionale');
 });
