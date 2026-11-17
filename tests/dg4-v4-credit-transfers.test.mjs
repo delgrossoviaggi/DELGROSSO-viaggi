@@ -35,8 +35,12 @@ test('Source must have a genuine payment ledger, not merely a stored summary bal
 });
 test('Duplicate or overstated credits and overpayments cannot pass preflight',()=>{
  assert.throws(()=>c.reviewCreditTransfer({...base,amount:'40.01'}),/supera il credito/);
- assert.throws(()=>c.reviewCreditTransfer({...base,target:{...target,totale:20},amount:'40'}),/supera il saldo/);
+ const cheaper={...target,totale:20};
+ assert.throws(()=>c.reviewCreditTransfer({...base,target:cheaper,bookings:[source,cheaper],amount:'40'}),/supera il saldo/);
  assert.throws(()=>c.reviewCreditTransfer({...base,amount:'0'}),/positiva/);
+});
+test('Outdated target snapshot is refused instead of accepting stale balances',()=>{
+ assert.throws(()=>c.reviewCreditTransfer({...base,target:{...target,totale:20},amount:20}),/prenotazione attiva/);
 });
 test('Previous partial giroconti reduce available credit and destination due using append-only ledger',()=>{
  const prior=[{id:'G1',source_booking_id:'A',target_booking_id:'B',importo:10,stato:'Confermato'}];
