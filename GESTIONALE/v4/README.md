@@ -1,0 +1,133 @@
+# DELGROSSO VIAGGI 4.0 ULTIMATE — collaudo separato da produzione
+Data tecnica: 17 novembre 2026.
+
+**Ramo di sviluppo:** `build/dg4-rebuild-20261117`. **Percorso web:** `/GESTIONALE/v4/`. **Database operativo originale:** Supabase `chkuayhbmitdmzmmvona`. **Sito prenotazioni:** progetto Supabase `bhsanrbadsqcpbtxupmr`.
+
+> ATTENZIONE: questa versione è una **build V4 di collaudo read-only**. Tutte le chiamate di modifica sono bloccate in `core.js` mediante `WRITES_ENABLED=false`. I flussi di scrittura sono implementati ma **non certificati su DB di staging né autorizzati in produzione**. NON sostituire la versione usata dall'azienda.
+
+## 22 pagine V4 implementate in collaudo
+
+| Pagina | Tabelle / viste principali | Consultazione | Operazioni di modifica |
+|---|---|---|---|
+| Dashboard | viaggi, prenotazioni, pagamenti, scadenze, notifiche | sì | non previste |
+| Viaggi | viaggi, prenotazioni, posti | sì, dettaglio e bus BIS | creazione, modifica e archiviazione implementate, non abilitate |
+| Prenotazioni | prenotazioni, prenotazione_posti, pagamenti | sì, ricerca/filtro e conferme | RPC atomica, annullamento/rimborso da verificare, non abilitate |
+| **Spostamenti posti/BUS BIS/date** | prenotazioni, viaggi, posti, pagamenti, layout | sì, scelta sedili, BUS principale/BIS, anteprima cambio data | RPC `dg_manage_booking_seats_v1` e `dg3_sposta_prenotazione_data_v1` con anteprima `dg3_preview_spostamento_data_v1`, conferma bloccata fino a backup certificato |
+| Control Room | viaggi, prenotazioni, dg28_trip_layouts, fermate | sì, numeri e check-in | scritture non abilitate |
+| Piantine | dg2_layout_library, dg28_trip_layouts, dg28_bus_layouts | sì, editor bozza in memoria, JSON | salvataggio/validazione/pubblicazione tramite RPC implementati ma bloccati |
+| Contabilità e casse | dg_cassa_operatori, pagamenti, noleggi_bus_pagamenti, trasferimenti | sì, operatori separati, incassi e ricevute | registrazione gite/noleggi via RPC, trasferimenti, bloccate |
+| Economia e costi | economia_movimenti, dg_viaggi_redditivita | sì | scritture non abilitate |
+| Clienti | clienti, prenotazioni, pagamenti | sì, fascicolo PDF con correlazione esatta nome+telefono | nuova anagrafica preparata, bloccata |
+| Noleggi bus | noleggi_bus, noleggi_bus_pagamenti | sì, scheda e pagamenti | registrazione noleggio/incassi implementata ma bloccata |
+| Preventivi | preventivi | sì, scheda PDF | nuovo preventivo e PDF professionale predisposti, bloccati |
+| Fatturazione / bozze | dg3_fatture_bozze | sì | **nessuna emissione FE/SDI**, solo lettura PDF bozza |
+| Lista d'attesa | lista_attesa | sì | inserimento senza occupazione sedili predisposto, bloccato |
+| Agenda completa | **attivita_gestionale** (storico V1/V2) + scadenze_gestionale (nuove voci tipizzate Agenda) | sì, calendario mensile, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
+| Scadenze | scadenze_gestionale (Scadenza, operativa, Estintori, ecc.) | sì, filtri dedicate per data/stato, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
+| Flotta GT | flotta | sì, senza pubblicizzare van | modifiche non abilitate |
+| Documenti | archivio_documenti, dg_receipt_archive, Supabase Storage | sì, indici e accesso JWT agli originali | no archiviazioni automatiche in safe mode |
+| Notifiche | notifiche | sì | nessun polling aggressivo |
+| WhatsApp Business | dg_whatsapp_inbox_v61, outbound, optins | sì, consensi e storico | **nessun invio automatico ai clienti** |
+| Centro PDF e report | viste autorizzate | sì, pulsanti aggregati | file scaricati localmente |
+| Diagnostica | dg_system_health, dg_data_quality_issues | sì | nessun SQL di modifica |
+
+## Ripristino Agenda storica V1/V2 — 17 novembre 2026
+- **Problema accertato:** la V4 leggeva solo \`scadenze_gestionale\`. Le nove attività realmente inserite nel vecchio gestionale erano invece in **\`public.attivita_gestionale\`**, pertanto l'Agenda sembrava vuota. Non risultano cancellate: sono ancora sul progetto Supabase gestionale originale.
+- **Dati controllati in sola lettura:** \`attivita_gestionale\` = 9 impegni, con 2 voci il **21/11/2026**, 3 voci il **06/12/2026** e 4 voci il **13/12/2026**, inclusi due record completati. \`scadenze_gestionale\` = 4 record categoria \`Estintori\`, tutti in data 01/07/2027. Entrambi gli archivi restano distinti nel database.
+- **Correzione:** risorsa \`legacyAgenda\` ora legge \`attivita_gestionale\` con RLS e JWT dell'operatore; \`mergeAgendaSources\` mappa solo nella presentazione \`scadenza → data_scadenza\` e \`tipo → Impegno\`, annotando \`__source\` senza modificare alcun record. V4 mostra i nove eventi storici nel calendario e nell'elenco dell'Agenda, insieme ai nuovi appuntamenti \`scadenze_gestionale\` contrassegnati come Agenda. Scadenze mostra solo i record pertinenti.
+- **Modifica e cestino:** per ogni attività vecchia il PATCH aggiorna **\`attivita_gestionale\` originale** usando \`updated_at\` e i campi reali della tabella (\`scadenza\`, \`assegnata_a\`, ecc.); il form non propone campi \`tipo\` e \`note\` non previsti sul vecchio schema. Per gli appuntamenti nuovi continua a salvare sulla struttura tipizzata di \`scadenze_gestionale\`. L'eliminazione è logica: \`stato='eliminata'\` e ripristino da cestino, senza \`DELETE\`.
+- La correzione è disponibile solo nella V4 del **ramo di collaudo**; nessuna migrazione SQL e nessuna scrittura sui dati reali sono state eseguite durante il fix. La scrittura con privilegi dell'operatore rimane un percorso da verificare dal vivo; gli altri moduli finanziari e prenotazioni restano bloccati.
+- Regressioni automatiche \`tests/dg4-v4-agenda-layout-crud.test.mjs\` e \`tests/dg4-v4-core.test.mjs\`: nove eventi, data originale, sorgente, stato completata e distinzione dai quattro termini.
+
+## Agenda completa e Scadenze — sezioni separate
+- **Agenda completa:** calendario mensile navigabile (mesi/giorni) per appuntamenti, impegni, note e promemoria. Gli eventi con \`tipo\` riconosciuto di agenda non compaiono nel registro delle scadenze.
+- **Scadenze:** registro autonomo, con filtri "Da completare", "Scadute", "Oggi", "Future", "Completate" e "Tutte". **I 4 vecchi record con tipo \`Estintori\` sono preservati**: rimangono nella sezione Scadenze; nessuna migrazione distruttiva è stata eseguita.
+- Entrambe le pagine hanno **Crea / Modifica / Completa-Riapri / Elimina / Cestino / Ripristina**. Eliminazione reversibile via stato \`eliminata\`, senza \`DELETE\` fisico. Data, titolo, tipo, priorità, descrizione, note e stato sono controllati. Confronto \`updated_at\` per evitare di sovrascrivere un aggiornamento di un altro operatore.
+- Archivio originario: \`public.scadenze_gestionale\`. Le nuove voci agenda usano \`tipo='Appuntamento'\` / \`Impegno\` / \`Nota\`, le scadenze \`tipo='Scadenza'\`; il filtro riconosce anche le tipologie storiche.
+- **Stato della scrittura agenda:** il ramo di collaudo contiene \`AGENDA_WRITES_ENABLED=true\` solo per \`mutateAgenda\`, che richiede Auth Supabase e privilegi RLS di \`operazioni/write\`. Le altre scritture continuano a essere protette. La modifica non è stata rilasciata sulla \`main\` pubblica. Non sono stati modificati record reali durante i test offline.
+
+## Piantine autobus — editor grafico e associazioni ufficiali
+- L'editor consente di creare piantine **53, 57, 63 posti**, ma il collegamento ufficiale è vincolato alla capienza reale del mezzo (**GT 53 / GT 63**) verificata su \`public.flotta\`; un layout da 57 non può essere assegnato a un GT da 63 come se avesse 57 posti fisici.
+- Strumenti: **sedile, corridoio, vuoto, porta, WC, autista, tavolino**; stato sedile **disponibile/bloccato/fuori servizio**; aggiungi/elimina fila o colonna, seleziona fila, **numerazione automatica**, annulla/ripristina, ritorna all'originale, import/export **JSON** senza servizio esterno. L'editor lavora su una **copia**: non altera l'originale fino a salvataggio esplicito.
+- Libreria: **Crea**, **Modifica** il documento Supabase (non crea sempre una copia), **Elimina** in modo reversibile via \`attivo=false\`, **Ripristina**. Gli snapshot già pubblicati in \`dg28_bus_layouts\` o \`dg28_trip_layouts\` non vengono cancellati quando una bozza viene archiviata. Per utilizzare una versione modificata su un bus o viaggio, occorre ripubblicarla esplicitamente.
+- **Associa al bus:** dalla pagina \`Piantine autobus\` oppure dalla \`Flotta GT\`, individua la bozza completa della medesima capienza, quindi pubblica con la RPC autorizzata \`dg28_publish_bus_layout_v1\`. La piantina diventa predefinita per il mezzo: i viaggi già dotati di una piantina personalizzata mantengono quest'ultima. \`dg28_publish_trip_layout_v1\` resta il percorso per le eccezioni di viaggio.
+- **Sicurezza:** le RPC validano numerazione 1..capienza, categorie GT e sedili già prenotati. Il POST libreria invia ora \`created_by\` e \`updated_by\` per rispettare le RLS attuali; la modifica/archiviazione usa controllo concorrenza \`updated_at\`.
+- **Stato attuale:** il toolbox, i dialoghi e i controlli sono sviluppati sul ramo di test; i salvataggi/archiviazioni e la pubblicazione delle piantine restano protetti da \`WRITES_ENABLED=false\`, fino a backup DB+Storage, ripristino isolato e test reali di concorrenza, prenotazioni e disponibilità. Non è stata modificata alcuna associazione reale.
+- **Test:** \`tests/dg4-v4-core.test.mjs\`, \`tests/dg4-v4-layouts.test.mjs\`, \`tests/dg4-v4-agenda-layout-crud.test.mjs\`.
+
+## Motore PDF aziendale incorporato
+- `pdf-engine.js`: generatore PDF autonomo con logo aziendale embedded, A4, intestazioni/paginazione/xref; offline nel browser, senza CDN e senza usare chiavi server.
+- `pdf-reports.js`: conversione dati letti da Supabase in report, download PDF via Blob adatto anche a Safari iOS.
+- Documenti supportati e testati con fixture: conferma prenotazione, elenco prenotati per viaggio / tutti i viaggi / BUS BIS, report operativi con piantina e fermate, riepilogo singolo pagamento, contabilità casse, agenda, fascicolo cliente, scheda noleggio, economia, flotta, anagrafica, registro noleggi, indice archivio, preventivo, **bozza** fattura, piantina 53/57/63.
+- **Originali Storage:** il browser apre soltanto URL firmati dallo Storage aziendale per utenti Auth autorizzati. La presenza degli oggetti è stata ricontrollata (89/89 ricevute professionali, 88/88 standard e 47/47 conferme referenziate).
+- **Funzioni server esistenti** verificate: `dg2-booking-pdf`, `professional-receipts`, `professional-quotes`; creazione PDF+archiviazione predisposta dopo salvataggio transazionale. Il fallimento del documento non provoca una seconda registrazione pagamento/prenotazione. In safe mode anche questo salvataggio documenti è bloccato.
+- Non qualificare i PDF riepilogativi come ricevute fiscali/fatture elettroniche e non inviare bozze FE come documenti emessi.
+
+## Conferme cumulative dello stesso referente per fermata di partenza
+- Dalla scheda della prenotazione, quando sono presenti **due o più prenotazioni attive** con **nome e cognome completi uguali**, **numero di telefono uguale** (anche con/senza prefisso internazionale italiano) e **lo stesso viaggio logico nella stessa data**, compare `Conferma unica (N prenotazioni)`.
+- Riconosce gli autobus principale/BIS soltanto se collegati tramite `bis_parent_id`; non accorpa semplici viaggi distinti che hanno lo stesso titolo o la stessa data.
+- PDF A4 con logo in `makeCombinedBookingPdf` e adattatore `pdfCombinedBooking`: intestazione unica, sezioni separate per `fermata_partenza`, dettaglio per prenotazione, codici, posti, autobus, passeggeri, subtotali per fermata, totale complessivo, netto incassato e saldo.
+- Somma le quote delle prenotazioni distinte e usa `pagamenti` per ciascun ID, deduplicando i movimenti e sottraendo i rimborsi negativi. Se il registro incassi non coincide con `prenotazioni.pagato`, il PDF **evidenzia la differenza** invece di certificarne falsamente la riconciliazione.
+- Non include prenotazioni annullate o riserve aziendali. Se manca l'identità completa, non effettua accorpamenti automatici.
+- Il PDF è **generato localmente nel browser**, anche su iPhone, ed è scaricabile dalla scheda. **Non viene ancora emesso automaticamente dal sito, inviato per email o salvato come nuovo originale nello Storage**: richiede una successiva estensione dei workflow server, da provare dopo backup/restore.
+- La conferma singola e le ricevute già archiviate rimangono disponibili e non vengono sovrascritte.
+- Test regressione: `tests/dg4-v4-confirmations.test.mjs`, `tests/dg4-v4-pdf.test.mjs`.
+
+## BUS BIS: apertura con selezione MANUALE dei posti (DG4)
+- Dalla pagina **Viaggi e partenze**, per una partenza attiva, premi **+ Apri BUS BIS**. La stessa azione è nella scheda viaggio.
+- Seleziona un autobus GT libero, una **piantina ufficiale già salvata** della stessa capienza fisica, poi i singoli numeri da mettere in vendita con la griglia. Sono disponibili anche «Seleziona tutti», «Azzera» e «Apri i primi N»; puoi scrivere una lista libera (es. \`1,2,9,10\`). La capienza del mezzo rimane 53/63; **solo i numeri autorizzati sono prenotabili**, gli altri sono segnati \`blocked\` in configurazione.
+- La selezione non modifica né cancella posti, prenotazioni, quote, ricevute o piantine già pubblicate sul viaggio principale.
+- Il sistema non inventa una piantina: se un GT da 53 o 63 posti non ha una geometria ufficiale verificata in libreria, quel mezzo resta disabilitato nel wizard finché l'operatore non crea la piantina.
+- La conferma di apertura server è definita nella patch **NON ESEGUITA** \`supabase/patches/dg4_manual_bus_bis_seats_review_only.sql\`. La nuova RPC \`dg4_open_trip_bis_manual_v1\` combina apertura BIS inizialmente nascosto, layout derivato con flag dei posti, pubblicazione opzionale, controlli sul mezzo, audit e rollback automatico in un'unica transazione. Per evitare prenotazioni a posti chiusi bypassando il browser, include un vincolo trigger su \`prenotazioni\`.
+- Il backend deve pubblicare la disponibilità **manuale** invece di dichiarare disponibili tutti i sedili fisici. Il bridge relativo è predisposto in \`supabase/functions/gestionale-bridge/index.ts\`, ma non distribuito in produzione prima che la RPC e il trigger esistano.
+- **Stato attuale:** wizard e anteprima operativi nella V4 di test. \`WRITES_ENABLED=false\`; SQL non eseguito sul database reale, quindi apertura/salvataggio BIS non attivi finché non siano certificati backup completo, Storage, ripristino isolato e test autenticato. Non abilitare semplicemente il flag di scrittura prima di questi passaggi.
+- Test automatizzati: \`tests/dg4-v4-bis-manual.test.mjs\` e \`tests/dg4-v4-core.test.mjs\`.
+
+## Giroconto quote tra viaggi · 17 novembre 2026
+- La **V4** include la nuova sezione `Giroconto quote tra viaggi`, distinta da `Giroconto tra casse` per Nicola ↔ Raffaele.
+- Dal dettaglio di una prenotazione o dalla sezione amministrativa puoi selezionare una prenotazione di origine, scegliere una prenotazione futura **già registrata** dello stesso cliente (nome, cognome e telefono), indicare la quota e motivarla.
+- La procedura verifica il registro pagamenti originale, gli eventuali rimborsi, la quota ancora disponibile e il saldo della nuova prenotazione. Il viaggio di origine deve essere annullato/non formato oppure la prenotazione di origine annullata.
+- L'anteprima rende visibili la quota da trasferire, il credito che resta sul viaggio di origine e il nuovo saldo destinazione. **Il giroconto non costituisce nuovo incasso.**
+- La futura scrittura consiste in una sola transazione con `request_id` idempotente, blocco delle due prenotazioni, protezioni contro doppi giroconti e registro audit. La bozza SQL per la migrazione è `supabase/patches/dg4_giroconto_quote_viaggi_STAGING_ONLY.sql` e NON È STATA ESEGUITA IN PRODUZIONE.
+- Il registro non è installato nel database aziendale: la schermata lo segnala e permette solo una simulazione locale. La V4 conserva `WRITES_ENABLED=false`. Non modificare manualmente `prenotazioni.pagato` o registrare un nuovo pagamento per simulare il giroconto: farebbe risultare falso il totale degli incassi.
+- Test offline: `tests/dg4-v4-credit-transfers.test.mjs` e controlli di rendering della V4; non equivalgono a una certificazione operativa con gli account reali.
+- **Prima dell'attivazione:** verificare backup DB e file Storage, ripristino isolato, transazioni con due operatori concorrenti, permessi RLS, rimborso successivo a un giroconto, PDF del nuovo credito e riconciliazione economica per viaggio. Solo dopo eseguire una migrazione revisionata e pubblicare il gestionale.
+
+## Trasferimento partecipanti, numerazione sedili e BUS BIS
+- La procedura `Gestisci` è raggiungibile da **Prenotazioni** e dalla pagina dedicata **Spostamenti posti / BUS BIS / date**.
+- **Stessa data**: solo autobus che appartengono alla stessa partenza logica (stesso `bis_parent_id`/ID capofila), con scelta manuale di sedili liberi e capienza verificata. Il server rifiuta le sovrapposizioni tramite `dg_manage_booking_seats_v1`. Il client esclude posti aziendali riservati, posti fuori servizio e altre prenotazioni.
+- **Data differente**: stessa destinazione, partenza non archiviata e futura, anche **anteriore** alla data originaria se ancora nel futuro. L'anteprima server `dg3_preview_spostamento_data_v1` conserva ove possibile i numeri originali, altrimenti propone altri posti; la conferma usa `dg3_sposta_prenotazione_data_v1` e verifica che i posti previsti non siano cambiati.
+- **Importi**: nessun incasso automatico; acconto/saldo/totale e ricevute storiche restano collegati. La conferma prenotazione si rigenera dopo lo spostamento solo se il server lo ha realmente eseguito. Qualunque guasto PDF non provoca un secondo spostamento.
+- **Dati partecipanti**: aggiornamento separato dei recapiti, nominativo, fermata e note, con confronto `updated_at` per non sovrascrivere le modifiche di un altro operatore. Il cambio del numero persone/quote resta nel modulo prenotazione completo e richiede la selezione di tutti i sedili.
+- **Limite del modello dati**: ogni prenotazione registra un **referente + numero passeggeri**, non un'anagrafica personale distinta per ciascun sedile. Gli spostamenti riguardano per ora **l'intera prenotazione**; dividere uno solo dei partecipanti richiede una procedura separata e riconciliazione degli incassi, non è operativo.
+- **Integrità storica**: 28 prenotazioni potrebbero avere differenze fra posti dichiarati e righe `prenotazione_posti`. In caso di anomalia la schermata blocca le assegnazioni manuali invece di creare collisioni.
+- **Sicurezza**: tutte le azioni definitive mantengono `WRITES_ENABLED=false` finché manca il backup/restore verificato; il wizard può generare anteprime in sola lettura. Non confondere "READY" di Vercel con l'autorizzazione alle scritture.
+
+## Impostazioni e sicurezza
+- Login: `dg2-operator-login`, validazione JWT `/auth/v1/user`, `is_gestionale_admin`, operatore attivo. Nessuna password memorizzata nel codice, nessuna service role nel browser.
+- Letture con RLS, token in `sessionStorage`, niente salvataggio permanente sul dispositivo; cache dati 25 s solo in memoria, niente N+1 indiscriminati.
+- GET riprovati solo per errori temporanei della Data API; POST/RPC di scrittura mai ripetute automaticamente; lato server verifiche di posti/capienza.
+- In V4 `WRITES_ENABLED=false`: nessuna operazione salva/modifica/elimina viaggi, clienti, posti, pagamenti o documenti.
+- Tutte le nuove richieste SQL osservate nei 30 SELECT configurati sono state verificate contro `information_schema.columns`: **nessuna colonna mancante**.
+- Nessun link WhatsApp viene inviato automaticamente; consensi prima di qualunque invito a gruppi.
+
+## Prove effettuate
+- **GitHub Actions** `.github/workflows/dg4-v4-tests.yml`: parsing sintattico, fixture di 20 schermate, numerazione GT53/GT57/GT63, vincoli safe-mode e test di 16 formati PDF con logo, struttura xref e paginazione. Run `https://github.com/delgrossoviaggi/DELGROSSO-viaggi/actions/runs/44059118088` con esito success sul commit `495531b78723372fc7cc162ea28be0fbe0c989f7`.
+- Vercel integra automaticamente il ramo e segnala `READY` per la preview. **READY non equivale a un login reale o a funzionamento scritture**.
+- Ultima baseline letta senza mutazioni: 16 viaggi, 139 prenotazioni, 96 pagamenti, 642 posti.
+
+## Mancano prima di una V4 realmente operativa al 100%
+1. Verifica snapshot gestito Supabase Pro e backup cifrato del DB, Auth e **tutti i 493 oggetti Storage** dei due progetti.
+2. Prova di restore su Supabase staging isolato e senza inviare email o WhatsApp reali.
+3. Test delle RPC e scritture su staging con account operatori di test, anticollisione sedili, annullamenti e rimborsi, receipt generation e idempotenza sui timeout.
+4. Collaudo reale del login Nicola/Raffaele su PC + iPhone, controllo RLS, apertura PDF Storage privati, download e condivisione Safari, gestione gruppi.
+5. Verifica end-to-end sito → ponte `gestionale-bridge` → prenotazione → sedile → pagamento → archiviazione; nessuna disponibilità inventata.
+6. Validazione delle 28 prenotazioni con possibili differenze fra `posti` e `prenotazione_posti`; non risolverle con UPDATE indiscriminati.
+7. Stress/monitoring PostgREST per precedente incidente `PGRST003`, gestione pool senza down del sito.
+8. Approvazione esplicita del deploy e piano rollback prima di sostituire `main`.
+
+## Come aprire il collaudo
+Aprire l'URL preview Vercel del ramo e aggiungere `/GESTIONALE/v4/`. Se Vercel richiede accesso SSO, usare il proprio account del team; quindi accesso al gestionale con credenziali già esistenti. **Non inviare password, chiavi o dump in chat**.
+
+## Data safety
+Nessun deploy su `main`, nessun SQL mutativo, nessuna modifica a prenotazioni o pagamenti durante la realizzazione della V4. L'attuale sito pubblico rimane sul suo branch/deploy di produzione.

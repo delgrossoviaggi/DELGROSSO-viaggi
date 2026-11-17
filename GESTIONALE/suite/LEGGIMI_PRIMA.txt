@@ -1,0 +1,26 @@
+DELGROSSO V2 AVANZATA — INTEGRATA NELLA BUSINESS SUITE V1
+
+La pagina principale da usare è ../index.html (Business Suite V1).
+Da qui si aprono direttamente le sezioni del gestionale V2 senza secondo login:
+- Contabilità Nicola
+- Contabilità Raffaele
+- Editor piantine
+- Agenda completa
+- Prenotazioni e pagamenti guidati
+
+La pagina suite/index.html può essere aperta anche da sola per test, ma richiede il
+login Supabase operatori. Nel caricamento dalla V1 la sessione viene condivisa in
+modo riservato e la seconda schermata di login è nascosta.
+
+La libreria dg2_layout_library mantiene i modelli di piantina anche prima
+dell'assegnazione a un autobus. E' condivisa fra operatori autorizzati.
+Le piantine salvate non aggiornano da sole il sito pubblico e non spostano prenotati.
+
+La contabilità separa i movimenti realmente attribuiti a Nicola e Raffaele,
+contanti ed elettronici, rimborsi e trasferimenti interni. Non somma due volte
+i trasferimenti come nuovi incassi. E' necessario confrontare con i movimenti reali.
+
+L'Agenda include attività e scadenze Supabase e mostra anche completati e storico.
+
+Mai pubblicare chiavi sb_secret o service_role nel codice. Prima del passaggio a
+main eseguire backup verificato e collaudo con gli account reali.

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#101b2e"/>
+<meta name="referrer" content="no-referrer"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/>
+<title>DELGROSSO VIAGGI · Gestionale 4.0</title>
+<link rel="icon" href="/favicon.png"/>
+<link rel="stylesheet" href="./style.css"/>
+</head>
+<body>
+<div id="login" class="login-screen">
+  <div class="login-visual"><img src="/logo.JPEG" alt="DELGROSSO VIAGGI" class="logo-big"/><span class="eyebrow">OPERATIONS CLOUD 4.0</span><h1>Ogni viaggio.<br><em>Un'unica regia.</em></h1><p>Un ambiente operativo per la flotta GT, le prenotazioni e la contabilità aziendale.</p><div class="visual-foot">Dati originali Supabase · Accesso riservato</div></div>
+  <div class="login-panel"><div class="login-form-wrap"><div class="eyebrow">ACCESSO OPERATORE</div><h2>Benvenuto a bordo</h2><p class="muted">Autenticazione aziendale tramite Supabase Auth. Non sono utilizzati account dimostrativi.</p>
+    <form id="login-form"><label>Operatore<select id="login-user" required><option value="nicola">Nicola</option><option value="raffaele">Raffaele</option></select></label><label>Password<input type="password" id="login-password" autocomplete="current-password" required minlength="1"/></label><button class="primary wide" id="login-submit" type="submit">Entra nel gestionale <span aria-hidden="true">→</span></button></form>
+    <p class="error-message" id="login-error" role="alert" hidden></p><p class="footnote">Versione 4.0 in collaudo. Nessuna modifica ai dati in produzione finché non è certificato il backup.</p>
+  </div></div>
+</div>
+<div id="app" class="layout" hidden>
+  <aside class="sidebar" id="sidebar">
+   <div class="brand"><img src="/logo.JPEG" alt="Logo DELGROSSO"/><span><strong>DELGROSSO</strong><small>VIAGGI & LIMOUSINE BUS</small></span></div>
+   <div class="side-label">CENTRO DI CONTROLLO</div>
+   <nav class="side-nav" id="nav" aria-label="Sezioni gestionali">
+    <button data-page="dashboard" class="active"><span>◫</span> Dashboard</button>
+    <button data-page="trips"><span>◈</span> Viaggi e partenze</button>
+    <button data-page="bookings"><span>▤</span> Prenotazioni</button>
+    <button data-page="movements"><span>⇄</span> Cambio posti · BUS BIS · date</button>
+    <button data-page="control"><span>▦</span> Control Room</button>
+    <button data-page="layouts"><span>▧</span> Piantine autobus</button>
+    <div class="side-label mid">AMMINISTRAZIONE</div>
+    <button data-page="cash"><span>€</span> Contabilità e casse</button>
+    <button data-page="credits"><span>↪</span> Giroconto quote tra viaggi</button>
+    <button data-page="economy"><span>◷</span> Economia e costi</button>
+    <button data-page="customers"><span>♙</span> Clienti</button>
+    <button data-page="rentals"><span>▣</span> Noleggi bus</button>
+    <button data-page="quotes"><span>✎</span> Preventivi</button>
+    <button data-page="invoices"><span>▤</span> Fatturazione / bozze</button>
+    <button data-page="waitlist"><span>◷</span> Lista d'attesa</button>
+    <div class="side-label mid">OPERATIVITÀ</div>
+    <button data-page="agenda"><span>▦</span> Agenda completa</button>
+    <button data-page="deadlines"><span>◷</span> Scadenze</button>
+    <button data-page="fleet"><span>▰</span> Flotta GT</button>
+    <button data-page="documents"><span>▱</span> Documenti</button>
+    <button data-page="notifications"><span>◉</span> Notifiche</button>
+    <button data-page="whatsapp"><span>☏</span> WhatsApp Business</button>
+    <button data-page="reports"><span>▥</span> Centro PDF e report</button>
+    <button data-page="diagnostics"><span>⌁</span> Diagnostica</button>
+   </nav>
+   <div class="sidebar-bottom"><div class="live-dot"></div><div><strong>Supabase collegato</strong><small id="sidebar-state">Verifica sessione…</small></div></div>
+  </aside>
+  <div class="main-layout">
+   <header class="topbar"><div class="topbar-left"><button id="menu-toggle" class="icon-button mobile" aria-label="Apri menu">☰</button><div><span class="eyebrow">GESTIONALE 4.0 / <span id="breadcrumb">DASHBOARD</span></span><h1 id="page-title">Dashboard</h1></div></div><div class="top-actions"><span id="mode-pill" class="safe-pill">SOLO LETTURA</span><span id="operator-name" class="operator-pill">Operatore</span><button id="refresh" class="icon-button" title="Aggiorna i dati" aria-label="Aggiorna dati">↻</button><button id="logout" class="exit">Esci</button></div></header>
+   <div class="safe-banner" id="safe-banner"><span>🛡</span><div><strong>Ambiente 4.0 in verifica.</strong> Visualizzazione dei dati aziendali reali; le scritture rimangono disabilitate finché il backup completo non sarà validato.</div></div>
+   <div id="feedback" class="feedback" aria-live="polite" hidden></div>
+   <main id="main" tabindex="-1"><div class="loading-state"><span class="spinner"></span>Caricamento dati dal database aziendale…</div></main>
+   <footer class="footer">DELGROSSO VIAGGI &amp; LIMOUSINE BUS <span>·</span> Gestionale 4.0 Ultimate <span>·</span> Dati protetti con RLS</footer>
+  </div>
+</div>
+<div class="modal-backdrop" id="modal" hidden><div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-heading"><header><h2 id="modal-heading">Dettagli</h2><button id="modal-close" aria-label="Chiudi" class="icon-button">✕</button></header><div id="modal-content"></div></div></div>
+<script defer src="./pdf-engine.js"></script>
+<script defer src="./layout-editor.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
