@@ -921,6 +921,63 @@ function printRoster(){
 async function handleAction(action,id,button){
  if(action==='refresh'){clearCache();showMessage('Aggiornamento in corso.');await navigate(page,true);return;}
 
+
+ if(action==='open-credit'){
+  openCreditWizard(id);return;
+ }
+ if(action==='back-credit'){
+  pendingCredit=null;renderCreditWizard();return;
+ }
+ if(action==='commit-credit'){
+  // Never enable the financial RPC without verified backup/restore and RLS tests.
+  if(!WRITES_ENABLED||!creditAvailable()||!pendingCredit?.canCommit)
+   throw new Error('Giroconto in sola anteprima: prima collaudare il registro contabile e il ripristino Supabase.');
+  if(creditBusy)throw new Error('Giroconto già in elaborazione. Verifica il registro prima di riprovare.');
+  const plan=pendingCredit;
+  if(!plan.requestId||!plan.sourceId||!plan.targetId)throw new Error('Anteprima giroconto scaduta.');
+  if(!confirm('Confermare il GIROCONTO di '+money(plan.amountEUR)+' da '+plan.customer+
+    ' tra due viaggi? NON sarà registrato un nuovo incasso.'))return;
+  creditBusy=true;
+  try{
+   // Force fresh server state and validate the same customer, trip and money.
+   const [bookings,trips,payments,transfers]=await Promise.all([
+    records('bookings',{force:true,limit:12000}),
+    records('trips',{force:true,limit:12000}),
+    records('payments',{force:true,limit:12000}),
+    records('creditTransfers',{force:true,limit:12000})
+   ]);
+   const source=bookings.find(b=>b.id===plan.sourceId);
+   const target=bookings.find(b=>b.id===plan.targetId);
+   const fresh=reviewCreditTransfer({source,target,trips,bookings,payments,transfers,
+    amount:plan.amountEUR,reason:plan.reason,today:todayItaly()});
+   if(fresh.sourcePaidCents!==plan.sourcePaidCents||
+      fresh.targetPaidCents!==plan.targetPaidCents||
+      fresh.availableCents!==plan.availableCents||
+      fresh.dueCents!==plan.dueCents||
+      fresh.originTripId!==plan.originTripId||
+      fresh.targetTripId!==plan.targetTripId)
+    throw new Error('Una prenotazione o una quota è cambiata. Riapri l’anteprima prima di effettuare il giroconto.');
+   const result=await writeRpc('dg4_transfer_booking_credit_v1',{
+    p_source_booking_id:plan.sourceId,
+    p_target_booking_id:plan.targetId,
+    p_importo:plan.amountEUR,
+    p_motivo:plan.reason,
+    p_request_id:plan.requestId,
+    p_expected_source_credit:plan.sourcePaidCents/100,
+    p_expected_target_credit:plan.targetPaidCents/100
+   });
+   if(result?.success!==true||!result?.transfer_id)
+    throw new Error('Risposta server non confermata: verificare lo storico giroconti prima di ripetere.');
+   creditWizard=null;pendingCredit=null;closeModal();
+   await navigate('credits',true);
+   showMessage('Giroconto registrato: '+money(plan.amountEUR)+'. Incassi di cassa e ricevute originali non modificati.');
+  }catch(error){
+   // Keep request id for audit/replay handling. Never auto-repeat a financial RPC.
+   throw new Error(String(error.message||error)+' Non ritentare automaticamente: verifica lo storico giroconti.');
+  }finally{creditBusy=false}
+  return;
+ }
+
  if(action==='open-bis'){openBisWizard(id);return;}
  if(action==='back-bis'){pendingBis=null;renderBisWizard();return;}
  if(action==='bis-select-all'||action==='bis-select-none'||action==='bis-select-first'){
@@ -1404,6 +1461,9 @@ async function handleSubmit(form){
  // Il sopralluogo ai posti e l'anteprima del cambio data sono letture; restano disponibili
  // anche quando il gestionale è bloccato per le scritture.
 
+ if(type==='credit-preview'){
+  previewCreditWizard(form);return;
+ }
  if(type==='bis-preview'){
   if(!bisWizard)throw new Error('Selezione BUS BIS non disponibile.');
   if(String(new FormData(form).get('sourceTripId'))!==bisWizard.sourceId)
@@ -1665,6 +1725,11 @@ function startListeners(){
   if(e.target.id==='filter-bookings-state'){state.bookingsState=e.target.value;$('main').innerHTML=drawBookings();}
  });
  $('modal-content').addEventListener('change',e=>{
+  if(creditWizard&&e.target.id==='credit-target'){
+   creditWizard.targetId=e.target.value;
+   creditWizard.amount='';
+   renderCreditWizard();return;
+  }
   if(bisWizard){
    if(e.target.id==='bis-bus'){
     bisWizard.busId=e.target.value;bisWizard.layoutId='';bisWizard.selected=[];
