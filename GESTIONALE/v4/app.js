@@ -1,7 +1,7 @@
 import {
  API_URL,WRITES_ENABLED,esc,eur,num,dateIT,dateTimeIT,todayItaly,bookingActive,bookingName,tripName,
  seatsOf,uniquePhones,occupancy,breakdown,login,resume,logout,records,rpcRead,writeRpc,mutate,
- currentUser,clearCache,signedReceiptPath
+ currentUser,clearCache,signedReceiptPath,edgeAction,normalizeSignedStorageUrl
 } from './core.js';
 import * as Pdf from './pdf-reports.js';
 
@@ -13,7 +13,7 @@ const NAV={
  agenda:'Agenda e scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
-let operator=null, page='dashboard', ticket=0;
+let operator=null, page='dashboard', ticket=0, localEditor=null;
 const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{}};
 const money=eur;
 const safeText=s=>esc(s||'—');
@@ -196,7 +196,7 @@ function drawLayouts(){
   num(l.configurazione?.posti_totali||0),
   Array.isArray(l.configurazione?.rows)?l.configurazione.rows.length:'—',
   badge(l.attivo?'Attiva':'Bozza'),dateTimeIT(l.updated_at),
-  safeLink('Esamina',l.id,'detail-layout')
+  safeLink('Esamina',l.id,'detail-layout')+' '+writeButton('Applica a viaggio','publish-trip-layout','data-id="'+esc(l.id)+'"')
  ]);
  const pub=official.map(l=>[esc(tripName(tripBy(l.viaggio_id))),num(l.configurazione?.posti_totali||0),num(l.versione),dateTimeIT(l.pubblicata_il)]);
  return intro('Piantine autobus','Schemi importati dal database aziendale: GT 53, GT 63 e configurazioni dedicate.','<button class="secondary" data-action="pdf-selected-layout" title="Scarica la piantina selezionata in PDF">↓ PDF piantina</button><button class="secondary" data-page="control">Apri Control Room</button>'+'<button class="primary" data-action="create-layout">+ Crea bozza locale</button>')+
@@ -404,7 +404,7 @@ function tripDetail(id){
  '<div><small>Quota</small><strong>'+money(t.prezzo)+'</strong></div>'+
  '<div><small>Visibilità</small><strong>'+esc(t.pubblicato==='SI'?'Pubblicato sul sito':'Non pubblicato')+'</strong></div>'+
  '</div><p class="help">ID viaggio: '+esc(t.id)+' · Il BUS BIS mantiene il proprio ID, i propri posti e le prenotazioni separate.</p>'+
- '<div class="action-row"><button class="secondary" data-action="pdf-roster" data-id="'+esc(id)+'">↓ Elenco PDF</button><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+'</div>');
+ '<div class="action-row"><button class="secondary" data-action="pdf-roster" data-id="'+esc(id)+'">↓ Elenco PDF</button><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Archivia viaggio','archive-trip','data-id="'+esc(id)+'"')+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+'</div>');
 }
 function bookingDetail(id){
  const b=get('bookings').find(x=>x.id===id);if(!b)return showMessage('Prenotazione non trovata',true);
@@ -419,7 +419,7 @@ function bookingDetail(id){
  ].map(([k,v])=>'<div><small>'+esc(k)+'</small><strong>'+esc(v||'—')+'</strong></div>').join('')+
  '</div><h3 class="section-title">Pagamenti collegati</h3>'+
  table(['Data','Tipo','Importo','N. ricevuta'],pays.map(p=>[dateIT(p.data_pagamento),badge(p.tipo),money(p.importo),esc(p.receipt_number||'—')]))+
- '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
+ '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
  writeButton('Sposta su altro viaggio','move-booking','data-id="'+esc(b.id)+'"')+
  writeButton('Aggiorna check-in','checkin-booking','data-id="'+esc(b.id)+'"')+'</div>'+
  '<p class="help">Le quote pagate non devono essere cancellate senza procedura di rimborso. Le prenotazioni esistenti non vengono modificate in questa fase.</p>');
@@ -518,6 +518,15 @@ async function handleAction(action,id,button){
    if(!b)throw new Error('Questo movimento non è collegato a una prenotazione viaggio; usa la scheda noleggio.');
    return done(Pdf.pdfReceipt(p,b,tripBy(p.viaggio_id||b.viaggio_id)));
  }
+
+ if(action==='open-booking-confirmation'){
+   const b=get('bookings').find(x=>x.id===id);
+   if(!b?.confirmation_storage_path)throw new Error('Nessuna conferma ufficiale archiviata.');
+   const result=await edgeAction('dg2-booking-pdf',{action:'signed_url',bookingId:id});
+   const signed=normalizeSignedStorageUrl(result.signedUrl);
+   displayModal('Conferma originale','<p class="help">File già archiviato in Supabase: non viene rigenerato.</p><div class="action-row"><a href="'+esc(signed)+'" target="_blank" rel="noopener noreferrer" class="primary">Apri PDF originale ↗</a></div>');
+   return;
+ }
  if(action==='open-payment-receipt'||action==='open-stored-document'){
    const p=action==='open-payment-receipt'?get('payments').find(x=>x.id===id):null;
    const storagePath=p?(p.receipt_professional_path||p.receipt_storage_path):id;
@@ -549,8 +558,8 @@ async function handleAction(action,id,button){
   const saved=action==='draft-layout'?get('layoutLibrary').find(l=>l.id===id):null;
   if(!window.DG4LayoutEditor)return showMessage('Editor piantine non caricato.',true);
   displayModal(saved?'Bozza da '+saved.nome:'Editor piantina GT — bozza locale',
-    '<div id="dg4-layout-editor"></div>');
-  window.DG4LayoutEditor.mount(document.getElementById('dg4-layout-editor'), saved?.configurazione||null);
+    '<label>Nome piantina<input id="dg4-draft-name" maxlength="100" value="'+esc(saved?.nome||'Piantina personalizzata DELGROSSO')+'"></label><div id="dg4-layout-editor"></div><div class="action-row">'+writeButton('Salva bozza Supabase','save-layout-draft')+'</div>');
+  localEditor=window.DG4LayoutEditor.mount(document.getElementById('dg4-layout-editor'), saved?.configurazione||null);
   return;
  }
  if(!WRITES_ENABLED){
