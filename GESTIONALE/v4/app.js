@@ -595,7 +595,7 @@ async function handleAction(action,id,button){
    '<label>Numero passeggeri<input name="posti" type="number" min="1" max="99" required value="'+num(prior?.posti||1)+'"></label>'+
    '<label>Numeri sedili (es. 1, 2)<input name="sedili" required maxlength="350" value="'+esc(prior?.posti_selezionati||'')+'"></label>'+
    '<label>Importo totale €<input name="totale" type="number" min="0" step=".01" required value="'+num(prior?.totale||0)+'"></label>'+
-   '<label>Stato<select name="stato"><option value="In attesa acconto">In attesa acconto</option><option value="Acconto Ricevuto" '+(/acconto ricevuto/i.test(prior?.stato||'')?'selected':'')+'>Acconto Ricevuto</option><option value="Saldo Ricevuto" '+(/saldo ricevuto/i.test(prior?.stato||'')?'selected':'')+'>Saldo Ricevuto</option></select></label>'+
+   '<p class="help span-2">Stato: '+esc(prior?.stato||'In attesa acconto')+'. I pagamenti e lo stato economico vengono aggiornati dal registro incassi, non modificando manualmente la prenotazione.</p>'+
    '<label class="span-2">Note<textarea name="note">'+esc(prior?.note||'')+'</textarea></label>'+
    '<button type="submit" class="primary span-2">Verifica disponibilità e salva in Supabase</button></form>');
  }
