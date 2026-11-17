@@ -1,9 +1,10 @@
 import {
  API_URL,WRITES_ENABLED,esc,eur,num,dateIT,dateTimeIT,todayItaly,bookingActive,bookingName,tripName,
  seatsOf,uniquePhones,occupancy,breakdown,login,resume,logout,records,rpcRead,writeRpc,mutate,
- currentUser,clearCache,signedReceiptPath,edgeAction,normalizeSignedStorageUrl
+ currentUser,clearCache,signedReceiptPath,edgeAction,normalizeSignedStorageUrl,liveAccessToken
 } from './core.js';
 import * as Pdf from './pdf-reports.js';
+import {createLiveSync} from './live-sync.js';
 import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewBusTransfer} from './booking-operations.js';
 
 const $=id=>document.getElementById(id);
@@ -15,7 +16,8 @@ const NAV={
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
 let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false;
-const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{}};
+const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{},lastSyncAt:0,lastSyncError:null};
+let liveSync=null,backgroundInterval=null,backgroundDebounce=null,backgroundBusy=false,backgroundPending=false,syncMode='offline';
 const money=eur;
 const safeText=s=>esc(s||'—');
 const short=id=>id?String(id).slice(0,8):'—';
@@ -43,21 +45,83 @@ function showMessage(msg,error=false) {
 }
 function errorPanel(resource,e){return '<div class="error-panel"><strong>Connessione non verificata: '+esc(resource)+'</strong><p>'+esc(e.message||e)+'</p><p>Non effettuare operazioni ripetute se il database segnala errori.</p></div>';}
 function displayModal(title,body){$('modal-heading').textContent=title;$('modal-content').innerHTML=body;$('modal').hidden=false;$('modal-close').focus();}
-function closeModal(){$('modal').hidden=true;$('modal-content').innerHTML='';}
+function closeModal(){$('modal').hidden=true;$('modal-content').innerHTML='';if(backgroundPending)queueRefresh(200);}
+/** Fail closed: an unreachable Supabase endpoint must NEVER appear as an empty cash/booking ledger. */
 async function fetchResources(names,force=false){
  const uniq=[...new Set(names)];
- const results=await Promise.allSettled(uniq.map(n=>records(n,{force,limit: n==='notifications'?250:1200,order:(n==='trips'?'data_partenza.asc':n==='notifications'?'created_at.desc':n==='agenda'?'data_scadenza.asc':undefined)})));
+ const results=await Promise.allSettled(uniq.map(n=>records(n,{
+  force,limit:n==='notifications'?3000:12000,
+  order:n==='trips'?'data_partenza.asc':n==='notifications'?'created_at.desc':n==='agenda'?'data_scadenza.asc':undefined
+ })));
  const errors=[];
- results.forEach((r,i)=>{if(r.status==='fulfilled')state.all[uniq[i]]=r.value;else{state.all[uniq[i]]=[];errors.push({name:uniq[i],error:r.reason});}});
- if(errors.length)showMessage(errors.map(x=>x.name+': '+String(x.error?.message||x.error)).join(' · '),true);
- return errors;
+ results.forEach((r,i)=>{if(r.status!=='fulfilled')errors.push({name:uniq[i],error:r.reason})});
+ if(errors.length){
+  const message=errors.map(x=>x.name+': '+String(x.error?.message||x.error)).join(' · ').slice(0,700);
+  state.lastSyncError=message;
+  showMessage('Lettura Supabase non completata — '+message,true);
+  throw new Error('Dati non aggiornati. '+message);
+ }
+ // Commit all successful responses atomically, not one at a time.
+ results.forEach((r,i)=>{state.all[uniq[i]]=r.value});
+ state.lastSyncAt=Date.now();state.lastSyncError=null;
+ if(operator)$('sidebar-state').textContent=(syncMode==='realtime'?'Realtime · ':'Sincronizzato · ')+
+   new Date(state.lastSyncAt).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'});
+ return [];
 }
-async function navigate(next,force=false){
+function stopBackgroundSync(){
+ liveSync?.stop();liveSync=null;
+ if(backgroundInterval!==null){clearInterval(backgroundInterval);backgroundInterval=null}
+ if(backgroundDebounce!==null){clearTimeout(backgroundDebounce);backgroundDebounce=null}
+ backgroundBusy=false;backgroundPending=false;syncMode='offline';
+}
+function queueRefresh(delay=400){
+ if(!operator)return;
+ backgroundPending=true;
+ if(backgroundDebounce!==null)return;
+ backgroundDebounce=setTimeout(()=>{
+  backgroundDebounce=null;
+  void refreshBackground();
+ },delay);
+}
+async function refreshBackground(){
+ if(!operator||backgroundBusy||!backgroundPending)return;
+ // Do not overwrite forms/seat choices while an operator is editing.
+ if(document.visibilityState==='hidden'||navigator.onLine===false||
+    !$('modal').hidden||document.activeElement?.matches?.('input,textarea,select,[contenteditable="true"]'))return;
+ backgroundPending=false;backgroundBusy=true;
+ try{
+  clearCache();
+  await navigate(page,true,{silent:true});
+ }finally{
+  backgroundBusy=false;
+  if(backgroundPending)queueRefresh(1250);
+ }
+}
+function startBackgroundSync(){
+ stopBackgroundSync();
+ if(!operator)return;
+ liveSync=createLiveSync({
+  apiUrl:API_URL,key:'sb_publishable_H29K1BV5ZE1rT8xo0PIzVA_wF6zC7je',
+  getToken:liveAccessToken,
+  onChange:()=>{clearCache();queueRefresh(400)},
+  onStatus:value=>{
+   syncMode=value;
+   if(!operator)return;
+   const phrase=value==='realtime'?'Supabase Realtime collegato':
+    value==='connecting'?'Collegamento Realtime in corso':
+    value==='polling'?'Sincronizzazione periodica attiva':'Supabase non collegato';
+   $('sidebar-state').textContent=phrase;
+  }
+ });
+ liveSync.start();
+ backgroundInterval=setInterval(()=>{if(operator){queueRefresh(0)}},60000);
+}
+async function navigate(next,force=false,{silent=false}={}){
  if(!NAV[next])next='dashboard';
  page=next;const mine=++ticket;
  $('page-title').textContent=NAV[next];$('breadcrumb').textContent=NAV[next].toUpperCase();
  document.querySelectorAll('#nav [data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===next));
- $('sidebar').classList.remove('open');$('main').innerHTML='<div class="loading-state"><span class="spinner"></span>Consultazione dati Supabase…</div>';
+ $('sidebar').classList.remove('open');if(!silent)$('main').innerHTML='<div class="loading-state"><span class="spinner"></span>Consultazione dati Supabase…</div>';
  const needs={
  dashboard:['trips','bookings','payments','agenda','notifications'],
  trips:['trips','bookings','seats','tripLayouts'],
@@ -1211,14 +1275,19 @@ function startListeners(){
    $('operator-name').textContent=operator.nome||operator.username;
    $('login').hidden=true;$('app').hidden=false;$('sidebar-state').textContent='Sessione verificata';
    await navigate('dashboard');
+    startBackgroundSync();
   }catch(err){$('login-error').textContent=String(err.message||err);$('login-error').hidden=false;}
   finally{btn.disabled=false;}
  });
  $('logout').addEventListener('click',async()=>{
-  await logout();operator=null;state.all={};ticket++;$('app').hidden=true;$('login').hidden=false;
+  stopBackgroundSync();await logout();operator=null;state.all={};ticket++;$('app').hidden=true;$('login').hidden=false;
   showMessage('Sessione terminata.');history.replaceState(null,'',location.pathname);
  });
  $('refresh').addEventListener('click',()=>navigate(page,true));
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&operator){liveSync?.reconnect();queueRefresh(0)}});
+  window.addEventListener('online',()=>{if(operator){liveSync?.reconnect();queueRefresh(0)}});
+  window.addEventListener('focus',()=>{if(operator&&backgroundPending)queueRefresh(0)});
+
  $('menu-toggle').addEventListener('click',()=>$('sidebar').classList.toggle('open'));
  $('modal-close').addEventListener('click',closeModal);
  $('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal();});
@@ -1296,6 +1365,7 @@ async function bootstrap(){
   operator=existing;$('operator-name').textContent=operator.nome||operator.username;
   $('login').hidden=true;$('app').hidden=false;$('sidebar-state').textContent='Sessione verificata';
   await navigate(decodeURIComponent(location.hash.slice(1))||'dashboard');
+   startBackgroundSync();
  }
 }
 bootstrap().catch(err=>{const node=$('login-error');node.hidden=false;node.textContent='Inizializzazione non riuscita: '+String(err.message||err);});
