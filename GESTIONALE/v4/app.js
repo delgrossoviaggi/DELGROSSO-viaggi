@@ -335,7 +335,7 @@ function drawBookings(){
    esc(b.fermata_partenza||'—'),
    money(b.totale)+'<small class="row-sub">Registrati: '+money(paid)+'</small>',
    badge(b.stato),b.checkin_effettuato?badge('Presente'):badge('Da verificare'),
-   safeLink('Apri',b.id)+' '+writeButton('Modifica dati','edit-booking-info','data-id="'+esc(b.id)+'"')+' <button class="inline-link" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Posti / BUS / data</button>'
+   safeLink('Apri',b.id)+' '+writeButton('Modifica dati','edit-booking-info','data-id="'+esc(b.id)+'"')+' <button class="inline-link" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Posti / BUS / data</button>'+' <button class="inline-link" data-action="open-credit" data-id="'+esc(b.id)+'">↪ Giroconto quote</button>'
   ];
  });
  const sum=data.filter(bookingActive).reduce((n,b)=>n+num(b.posti),0);
@@ -557,7 +557,7 @@ function drawCash(){
   esc(p.incassato_da||ops.find(x=>x.user_id===p.incassato_da_user_id)?.nome||'—'),
   '<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_storage_path?safeLink('Apri originale',p.id,'open-payment-receipt'):'')+' · '+safeLink('Riepilogo PDF',p.id,'pdf-payment')+'</small>'
  ]);
- return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="pdf-cash">↓ PDF contabilità</button><button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+writeButton('+ Incasso viaggio','new-payment')+writeButton('+ Incasso noleggio','new-rental-payment'))+
+ return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="pdf-cash">↓ PDF contabilità</button><button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+'<button class="secondary" data-page="credits">↪ Giroconto quote tra viaggi</button>'+writeButton('+ Incasso viaggio','new-payment')+writeButton('+ Incasso noleggio','new-rental-payment'))+
  cards+'<div class="section-grid">'+cardOperators+'</div>'+
  panel('Registro incassi viaggi','Dati originali da pagamenti · ultime 80 righe',table(['Data','Cliente','Viaggio','Tipo','Importo','Incassato da','Ricevuta'],rows))+
  panel('Pagamenti noleggi','Dati originali da noleggi_bus_pagamenti · non inclusi nel registro delle gite',table(['Data','Servizio','Tipo','Importo','Metodo','Ricevuta'],rentals.slice().sort((a,b)=>String(b.data_pagamento).localeCompare(String(a.data_pagamento))).slice(0,100).map(p=>[dateIT(p.data_pagamento),esc(get('rentals').find(n=>n.id===p.noleggio_id)?.referente||short(p.noleggio_id)),badge(p.tipo),money(p.importo),esc(p.metodo||'—'),'<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_path?safeLink('Apri originale',p.id,'open-rental-receipt'):'')+'</small>'])))+
@@ -574,6 +574,18 @@ function drawCredits(){
   return [dateTimeIT(t.created_at),esc(a?.cliente||'—'),
    esc(tripName(x)),esc(tripName(y)),money(t.importo),badge(t.stato),esc(t.motivo||'')];
  });
+ const candidates=books.filter(b=>{
+  if(!b||b.riserva_aziendale)return false;
+  const trip=tripBy(b.viaggio_id);
+  const failed=/non\\s?format|annull|cancel|rinviat|soppres/i.test(String(trip?.stato||''))||
+   /annull|cancel|cancell/i.test(String(b.stato||''));
+  return failed&&creditBalance(b)?.availableCredit>0;
+ });
+ const candidatesRows=candidates.map(b=>{
+  const t=tripBy(b.viaggio_id),balance=creditBalance(b);
+  return [esc(bookingName(b)),esc(tripName(t))+' · '+dateIT(t?.data_partenza),
+   money(balance.availableCredit/100),'<button class="secondary" data-action="open-credit" data-id="'+esc(b.id)+'">↪ Prepara giroconto</button>'];
+ });
  return intro('Giroconto quote tra viaggi','Riassegnazione di acconti già incassati quando un viaggio non si forma. È distinto dal Giroconto tra casse Nicola ↔ Raffaele.',
   '<button class="secondary" data-page="cash">Contabilità e casse</button>')+
   '<div class="cards">'+card('Giroconti registrati',available?String(transfers.length):'—',
@@ -581,6 +593,8 @@ function drawCredits(){
   card('Incassi aggiuntivi','0','Un giroconto non è un nuovo pagamento')+
   card('Archivio ricevute','Invariato','Le ricevute originali restano nel viaggio di origine')+'</div>'+
   (!available?'<div class="alert">Il registro Supabase per i giroconti tra viaggi non è ancora installato. Le operazioni rimangono protette: nessun credito verrà trasferito finché la procedura non sarà collaudata.</div>':'')+
+  panel('Prenotazioni con quote riutilizzabili','Seleziona il cliente del viaggio non formato o annullato. Per ciascuna prenotazione vengono cercate soltanto altre prenotazioni attive dello stesso referente.',
+    table(['Cliente','Viaggio di origine','Credito disponibile','Operazione'],candidatesRows))+
   panel('Storico giroconti tra viaggi','Per ogni movimento rimangono identificati la prenotazione e il viaggio di origine e destinazione',
    table(['Data','Cliente','Da viaggio','A viaggio','Importo','Stato','Motivo'],rows));
 }
@@ -797,6 +811,7 @@ function bookingDetail(id){
  table(['Data','Tipo','Importo','N. ricevuta'],pays.map(p=>[dateIT(p.data_pagamento),badge(p.tipo),money(p.importo),esc(p.receipt_number||'—')]))+
  '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma singola PDF</button>'+(consolidated?.bookingCount>1?'<button class="primary" data-action="pdf-combined-booking" data-id="'+esc(b.id)+'">↓ Conferma unica ('+consolidated.bookingCount+' prenotazioni)</button>':'')+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica nominativo e fermata','edit-booking-info','data-id="'+esc(b.id)+'"')+writeButton('Modifica posti e quota','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
  '<button class="secondary" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Cambia posto / BUS / data</button>'+
+ '<button class="secondary" data-action="open-credit" data-id="'+esc(b.id)+'">↪ Giroconto quote fra viaggi</button>'+
  writeButton('Aggiorna check-in','checkin-booking','data-id="'+esc(b.id)+'"')+'</div>'+
  (consolidated?.bookingCount>1?'<p class="help">Le '+consolidated.bookingCount+' prenotazioni collegate sono suddivise per fermata nel PDF cumulativo. Nessuna ricevuta originale viene sostituita.</p>':'')+
  '<p class="help">Le quote pagate non devono essere cancellate senza procedura di rimborso. Le prenotazioni esistenti non vengono modificate in questa fase.</p>');
