@@ -9,7 +9,7 @@ const gestEsc = s => String(s ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 
 async function gestBridge(action, payload={}){
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),action==='archive-booking'?55000:18000);
+  const timeout=setTimeout(()=>controller.abort(),action==='archive-booking'?55000:action==='trips'?6500:18000);
   let res;
   try{
     res = await fetch(GESTIONALE_BRIDGE, {
@@ -32,9 +32,37 @@ async function gestBridge(action, payload={}){
   return data;
 }
 
+const DG_EMERGENCY_CATALOG = '/assets/viaggi-fallback-20261117.json';
+function dgEmergencyBanner(show){
+  if(typeof document==='undefined')return;
+  const old=document.getElementById('dg-emergency-banner');
+  if(!show){old?.remove();return}
+  if(old)return;
+  const host=document.querySelector('main')||document.body;
+  const panel=document.createElement('div');
+  panel.id='dg-emergency-banner';
+  panel.setAttribute('role','status');
+  panel.style.cssText='margin:18px auto;max-width:1160px;padding:15px 18px;border:2px solid #e8aa53;background:#fff7e8;color:#513b1e;border-radius:12px;line-height:1.6;font-size:14px';
+  panel.innerHTML='<strong>⚠ Aggiornamento temporaneo delle partenze</strong><div>Il collegamento live con il Gestionale è momentaneamente indisponibile. Le date e i prezzi sono quelli dell’ultimo elenco verificato il 17 novembre; posti disponibili e prenotazioni online non sono confermati. <a href="https://wa.me/393208815899" target="_blank" rel="noopener" style="font-weight:800;color:#664000;text-decoration:underline">Chiedi disponibilità su WhatsApp 320 881 5899</a>.</div>';
+  host.prepend(panel);
+}
 async function getGestionaleTrips(){
-  const data = await gestBridge('trips');
-  return Array.isArray(data) ? data : [];
+  try{
+    const data=await gestBridge('trips');
+    if(!Array.isArray(data))throw new Error('Catalogo live non valido.');
+    window.__dgOfflineCatalog=false;
+    dgEmergencyBanner(false);
+    return data;
+  }catch(error){
+    const res=await fetch(DG_EMERGENCY_CATALOG,{cache:'no-store'});
+    if(!res.ok)throw error;
+    const copy=await res.json();
+    if(!copy||copy.source!=='supabase-gestionale-public-trips-readonly'||!Array.isArray(copy.trips)||copy.trips.length<1)throw error;
+    const now=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    window.__dgOfflineCatalog=true;
+    dgEmergencyBanner(true);
+    return copy.trips.filter(t=>String(t.data_partenza||'')>=now).map(t=>({...t,offline_catalog:true}));
+  }
 }
 
 // Disponibilità ufficiale ricevuta dal Gestionale.
@@ -46,7 +74,7 @@ function gestTripAvailability(trip={}){
   const explicitSold=/sold\s*out|esaurit|complet|chius[oa]|full/.test(state);
   const soldByNumbers=(Number.isFinite(freeRaw)&&freeRaw<=0&&(Number.isFinite(total)?total>0:true))||(Number.isFinite(total)&&total>0&&Number.isFinite(occupied)&&occupied>=total);
   const free=Number.isFinite(freeRaw)?Math.max(0,freeRaw):Number.isFinite(total)&&Number.isFinite(occupied)?Math.max(0,total-occupied):0;
-  return {soldOut:bridgeSold||explicitSold||soldByNumbers,known:Number.isFinite(freeRaw)||(Number.isFinite(total)&&Number.isFinite(occupied))||bridgeSold||explicitSold,total:Number.isFinite(total)?Math.max(0,total):0,occupied:Number.isFinite(occupied)?Math.max(0,occupied):0,free};
+  return {soldOut:bridgeSold||explicitSold||soldByNumbers,known:trip.offline_catalog===true?false:(Number.isFinite(freeRaw)||(Number.isFinite(total)&&Number.isFinite(occupied))||bridgeSold||explicitSold),total:Number.isFinite(total)?Math.max(0,total):0,occupied:Number.isFinite(occupied)?Math.max(0,occupied):0,free};
 }
 function gestTripIsSoldOut(trip){return gestTripAvailability(trip).soldOut;}
 
