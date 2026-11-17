@@ -1,0 +1,21 @@
+name: DG4 — Live bridge health (read only)
+on:
+  push:
+    branches:
+      - build/dg4-rebuild-20261117
+    paths:
+      - 'scripts/dg4-verify-live-bridge.mjs'
+      - '.github/workflows/dg4-bridge-live-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Smoke test public Supabase bridge with no writes
+        run: node scripts/dg4-verify-live-bridge.mjs
