@@ -560,6 +560,7 @@ function bookingDetail(id){
  const b=get('bookings').find(x=>x.id===id);if(!b)return showMessage('Prenotazione non trovata',true);
  const t=tripBy(b.viaggio_id);
  const pays=get('payments').filter(x=>x.prenotazione_id===b.id);
+ const consolidated=bookingActive(b)&&!b.riserva_aziendale?Pdf.combinedBookingSummary(b.id,get('trips'),get('bookings'),get('payments')):null;
  displayModal('Prenotazione · '+bookingName(b),
  '<div class="detail-grid">'+[
   ['Viaggio',tripName(t)+' · '+dateIT(t?.data_partenza)],['Codice',b.codice||short(b.id)],
@@ -569,9 +570,10 @@ function bookingDetail(id){
  ].map(([k,v])=>'<div><small>'+esc(k)+'</small><strong>'+esc(v||'—')+'</strong></div>').join('')+
  '</div><h3 class="section-title">Pagamenti collegati</h3>'+
  table(['Data','Tipo','Importo','N. ricevuta'],pays.map(p=>[dateIT(p.data_pagamento),badge(p.tipo),money(p.importo),esc(p.receipt_number||'—')]))+
- '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica nominativo e fermata','edit-booking-info','data-id="'+esc(b.id)+'"')+writeButton('Modifica posti e quota','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
+ '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma singola PDF</button>'+(consolidated?.bookingCount>1?'<button class="primary" data-action="pdf-combined-booking" data-id="'+esc(b.id)+'">↓ Conferma unica ('+consolidated.bookingCount+' prenotazioni)</button>':'')+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica nominativo e fermata','edit-booking-info','data-id="'+esc(b.id)+'"')+writeButton('Modifica posti e quota','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
  '<button class="secondary" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Cambia posto / BUS / data</button>'+
  writeButton('Aggiorna check-in','checkin-booking','data-id="'+esc(b.id)+'"')+'</div>'+
+ (consolidated?.bookingCount>1?'<p class="help">Le '+consolidated.bookingCount+' prenotazioni collegate sono suddivise per fermata nel PDF cumulativo. Nessuna ricevuta originale viene sostituita.</p>':'')+
  '<p class="help">Le quote pagate non devono essere cancellate senza procedura di rimborso. Le prenotazioni esistenti non vengono modificate in questa fase.</p>');
 }
 function layoutDetail(id){
@@ -706,6 +708,14 @@ async function handleAction(action,id,button){
    const item=get('layoutLibrary').find(x=>x.id===(id||get('layoutLibrary')[0]?.id));
    if(!item)throw new Error('Nessuna piantina nella libreria.');
    return done(Pdf.pdfSeatMap(item.configurazione,item.nome));
+ }
+
+ if(action==='pdf-combined-booking'){
+   const sum=Pdf.combinedBookingSummary(id,get('trips'),get('bookings'),get('payments'));
+   if(sum.bookingCount<2)throw new Error('Non sono state trovate altre prenotazioni dello stesso referente per questo viaggio.');
+   const saved=Pdf.pdfCombinedBooking(id,get('trips'),get('bookings'),get('payments'));
+   showMessage('Conferma cumulativa creata per '+sum.bookingCount+' prenotazioni, '+sum.sections.length+' fermate e '+sum.passengers+' partecipanti. Totale '+money(sum.totalCents/100)+', pagato netto '+money(sum.paidCents/100)+'.'+(sum.warnings.length?' ATTENZIONE: '+sum.warnings.join(' · '):''));
+   return saved;
  }
  if(action==='pdf-booking'){
    const b=get('bookings').find(x=>x.id===id);
