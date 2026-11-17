@@ -54,11 +54,15 @@ export function destinationsForCredit(source,bookings,trips,today){
    t && t.data_partenza>=today&&!t.archiviato_at&&!/annull|cancel|rinviat/i.test(String(t.stato||''));
  }).sort((a,b)=>String(byTrip.get(a.viaggio_id)?.data_partenza).localeCompare(String(byTrip.get(b.viaggio_id)?.data_partenza)));
 }
+const centsNotEqual=(a,b)=>centesimi(a||0)!==centesimi(b||0);
 export function reviewCreditTransfer({source,target,trips,bookings,payments,transfers,amount,reason,today,allowIncomplete=false}){
  if(!validBooking(source)||!validBooking(target))throw new Error('Prenotazioni non valide.');
  const id1=identityKey(source),id2=identityKey(target);
  if(!id1||id1!==id2)throw new Error('Nome e cognome e telefono devono corrispondere fra le due prenotazioni.');
- if(!destinationsForCredit(source,bookings,trips,today).some(x=>x.id===target.id))
+ const verified=destinationsForCredit(source,bookings,trips,today).find(x=>x.id===target.id);
+ if(canceled(target)||!verified||verified.viaggio_id!==target.viaggio_id ||
+    identityKey(verified)!==identityKey(target)||
+    centsNotEqual(verified.totale,target.totale)||centsNotEqual(verified.pagato,target.pagato))
   throw new Error('Il cliente deve avere un’altra prenotazione attiva su un viaggio futuro diverso.');
  const s=bookingCreditBalance(source,payments,transfers),d=bookingCreditBalance(target,payments,transfers);
  if(s.mismatch||d.mismatch)throw new Error('Quote non riconciliate: controllare prima registro incassi e prenotazione.');
