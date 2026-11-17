@@ -192,7 +192,7 @@ function drawTrips(){
    esc(t.autobus||'Da assegnare')+'<small class="row-sub">'+(num(t.bis_numero)>1?'BUS BIS '+num(t.bis_numero):'BUS principale')+'</small>',
    '<b>'+assigned+' / '+num(t.posti_totali)+'</b><small class="row-sub">'+available+' disponibili da registro prenotazioni</small>',
    money(t.prezzo),
-   badge(t.archiviato_at?'Archiviato':t.stato)+' '+badge(t.pubblicato==='SI'?'Online':'Non pubblicato'),
+   badge(t.archiviato_at?'Archiviato':t.data_partenza<todayItaly()?'Viaggio concluso':t.stato)+' '+badge(t.data_partenza<todayItaly()?'Storico — non sul sito':(t.pubblicato==='SI'&&!t.archiviato_at)?'Online':'Non pubblicato'),
    '<div class="row-actions">'+safeLink('Dettagli',t.id,'detail-trip')+'</div>'
   ];
  });
@@ -597,12 +597,27 @@ function drawDiagnostics(){
  const health=get('system')[0]||{};
  const t=get('trips'),b=get('bookings'),p=get('payments'),s=get('seats');
  const errs=get('alerts');
+ const allAssignments=new Map();
+ for(const item of s){
+  const set=allAssignments.get(item.prenotazione_id)||new Set();
+  if(item.posto!=null)set.add(String(item.posto).trim());
+  allAssignments.set(item.prenotazione_id,set);
+ }
+ const seatAlerts=b.filter(x=>bookingActive(x)&&!x.riserva_aziendale).map(x=>({
+  booking:x,registro:allAssignments.get(x.id)?.size||0,
+  dichiarati:num(x.posti),testuali:[...new Set(seatsOf(x))].length
+ })).filter(x=>x.registro!==x.dichiarati);
  return intro('Diagnostica e integrità','Controlli non distruttivi, stato dati e anomalie da riconciliare.','<button class="secondary" data-action="refresh">↻ Ripeti letture</button>')+
  '<div class="cards">'+card('Viaggi',String(t.length),'Vista dal database')+card('Prenotazioni',String(b.length),'Dati originali')+card('Pagamenti',String(p.length),'Registro importi')+card('Sedili assegnati',String(s.length),'Registro posti')+'</div>'+
  panel('Stato del sistema','Ultima verifica interna in Supabase','<div class="panel-body"><div class="detail-grid">'+
  '<div><small>Controllo database</small><strong>'+dateTimeIT(health.checked_at)+'</strong></div><div><small>Operatori autorizzati</small><strong>Accesso confermato con Supabase Auth</strong></div>'+
  '<div><small>Scritture gestionale V4</small><strong>'+esc(WRITES_ENABLED?'Abilitate':'Bloccate in attesa del backup')+'</strong></div>'+
  '<div><small>Endpoint progetto</small><strong>'+esc(API_URL)+'</strong></div></div><p class="help">L’assenza di un errore API in questo momento non certifica la continuità del servizio. Non riavviare PostgREST né apportare modifiche al database senza un ripristino verificato.</p></div>')+
+ panel('Prenotazioni con sedili da riconciliare',seatAlerts.length+' difformità tra righe prenotazione_posti e numero persone registrate',
+ table(['Viaggio','Prenotazione','Pax','Righe posti','Numeri nel testo','Scheda'],seatAlerts.map(x=>[
+ esc(tripName(tripBy(x.booking.viaggio_id))),esc(bookingName(x.booking)),
+ String(x.dichiarati),String(x.registro),String(x.testuali),safeLink('Apri',x.booking.id)
+ ])))+
  panel('Anomalie segnalate dal database','Vista dg_data_quality_issues',table(['Priorità','Categoria','Anomalia','Dettaglio'],errs.map(x=>[badge(x.priorita),esc(x.categoria),esc(x.titolo),esc(x.dettaglio)])))+
  '<div class="alert">⚠️ Il backup gestito Supabase, i 493 file Storage e il ripristino isolato non sono ancora certificati. Le operazioni che modificano dati rimangono bloccate.</div>';
 }
@@ -616,7 +631,7 @@ function tripDetail(id){
  '<div><small>Autobus</small><strong>'+esc(t.autobus||'Da assegnare')+'</strong></div>'+
  '<div><small>Capienza e prenotati</small><strong>'+num(t.posti_totali)+' / '+bookings.reduce((a,b)=>a+num(b.posti),0)+'</strong></div>'+
  '<div><small>Quota</small><strong>'+money(t.prezzo)+'</strong></div>'+
- '<div><small>Visibilità</small><strong>'+esc(t.pubblicato==='SI'?'Pubblicato sul sito':'Non pubblicato')+'</strong></div>'+
+ '<div><small>Visibilità</small><strong>'+esc(t.data_partenza<todayItaly()?'Viaggio concluso: resta nel gestionale, non appare sul sito':(t.pubblicato==='SI'&&!t.archiviato_at)?'Pubblicato sul sito':'Non pubblicato')+'</strong></div>'+
  '</div><p class="help">ID viaggio: '+esc(t.id)+' · Il BUS BIS mantiene il proprio ID, i propri posti e le prenotazioni separate.</p>'+
  '<div class="action-row"><button class="secondary" data-action="pdf-roster" data-id="'+esc(id)+'">↓ Elenco PDF</button><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Archivia viaggio','archive-trip','data-id="'+esc(id)+'"')+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+'</div>');
 }
