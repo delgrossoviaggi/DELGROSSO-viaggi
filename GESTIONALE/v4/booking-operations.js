@@ -20,7 +20,7 @@ export function eligibleDateTargets(origin,trips,today){
  if(!origin?.id)return [];
  const dest=normalizeDestination(origin.destinazione);
  return (trips||[]).filter(t=>
-  t.id!==origin.id && t.data_partenza>origin.data_partenza &&
+  t.id!==origin.id && t.data_partenza!==origin.data_partenza &&
   t.data_partenza>=today && !t.archiviato_at &&
   dest && normalizeDestination(t.destinazione)===dest &&
   !/annull|cancel|chius|sold\s*out/i.test(String(t.stato||'')))
