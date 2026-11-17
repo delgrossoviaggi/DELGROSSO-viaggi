@@ -563,6 +563,28 @@ function drawCash(){
  panel('Pagamenti noleggi','Dati originali da noleggi_bus_pagamenti · non inclusi nel registro delle gite',table(['Data','Servizio','Tipo','Importo','Metodo','Ricevuta'],rentals.slice().sort((a,b)=>String(b.data_pagamento).localeCompare(String(a.data_pagamento))).slice(0,100).map(p=>[dateIT(p.data_pagamento),esc(get('rentals').find(n=>n.id===p.noleggio_id)?.referente||short(p.noleggio_id)),badge(p.tipo),money(p.importo),esc(p.metodo||'—'),'<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_path?safeLink('Apri originale',p.id,'open-rental-receipt'):'')+'</small>'])))+
  panel('Giroconti tra casse · Nicola ↔ Raffaele','Movimenti di denaro tra operatori · gestione contabile tracciata',table(['Data','Da','A','Importo','Stato'],trans.map(t=>[dateIT(t.data_trasferimento),esc(ops.find(o=>o.user_id===t.da_operatore_user_id)?.nome||'—'),esc(ops.find(o=>o.user_id===t.a_operatore_user_id)?.nome||'—'),money(t.importo),badge(t.stato)])),writeButton('+ Giroconto','new-transfer'));
 }
+
+function drawCredits(){
+ const available=creditAvailable();
+ const transfers=available?get('creditTransfers'):[];
+ const books=get('bookings'),trips=get('trips');
+ const rows=transfers.slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).map(t=>{
+  const a=books.find(b=>b.id===t.source_booking_id),b=books.find(b=>b.id===t.target_booking_id);
+  const x=trips.find(v=>v.id===t.source_trip_id),y=trips.find(v=>v.id===t.target_trip_id);
+  return [dateTimeIT(t.created_at),esc(a?.cliente||'—'),
+   esc(tripName(x)),esc(tripName(y)),money(t.importo),badge(t.stato),esc(t.motivo||'')];
+ });
+ return intro('Giroconto quote tra viaggi','Riassegnazione di acconti già incassati quando un viaggio non si forma. È distinto dal Giroconto tra casse Nicola ↔ Raffaele.',
+  '<button class="secondary" data-page="cash">Contabilità e casse</button>')+
+  '<div class="cards">'+card('Giroconti registrati',available?String(transfers.length):'—',
+    available?'Movimenti del registro Supabase':'Registro in corso di predisposizione')+
+  card('Incassi aggiuntivi','0','Un giroconto non è un nuovo pagamento')+
+  card('Archivio ricevute','Invariato','Le ricevute originali restano nel viaggio di origine')+'</div>'+
+  (!available?'<div class="alert">Il registro Supabase per i giroconti tra viaggi non è ancora installato. Le operazioni rimangono protette: nessun credito verrà trasferito finché la procedura non sarà collaudata.</div>':'')+
+  panel('Storico giroconti tra viaggi','Per ogni movimento rimangono identificati la prenotazione e il viaggio di origine e destinazione',
+   table(['Data','Cliente','Da viaggio','A viaggio','Importo','Stato','Motivo'],rows));
+}
+
 function drawEconomy(){
  const movements=get('economy'),profit=get('profit').sort((a,b)=>String(b.data_partenza).localeCompare(String(a.data_partenza)));
  const income=movements.filter(m=>/entrata|incass/i.test(m.tipo||'')).reduce((a,m)=>a+num(m.importo),0);
