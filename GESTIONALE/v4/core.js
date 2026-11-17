@@ -8,7 +8,7 @@ export const WRITES_ENABLED = false; // NON ABILITARE SENZA BACKUP, RESTORE SU S
 export const CHANNEL = 'dg4-session';
 export const SELECTS = Object.freeze({
   trips: ['viaggi','id,id_viaggio,titolo,destinazione,luogo_partenza,data_partenza,ora_partenza,prezzo,stato,pubblicato,posti_totali,posti_occupati,posti_liberi,autobus,autobus_id,bis_parent_id,bis_numero,sold_out_manual,archiviato_at,minimo_partecipanti,locandina'],
-  bookings: ['prenotazioni','id,viaggio_id,cliente,cliente_nome,telefono,email,posti,totale,acconto,saldo,pagato,stato,note,posti_selezionati,fermata_partenza,checkin_effettuato,checkin_fermata,checked_in_at,codice,created_at,riserva_aziendale,confirmation_storage_path'],
+  bookings: ['prenotazioni','id,viaggio_id,cliente,cliente_nome,telefono,email,posti,totale,acconto,saldo,pagato,stato,note,posti_selezionati,fermata_partenza,checkin_effettuato,checkin_fermata,checked_in_at,codice,created_at,updated_at,riserva_aziendale,confirmation_storage_path'],
   seats: ['prenotazione_posti','id,viaggio_id,prenotazione_id,posto'],
   payments: ['pagamenti','id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,incassato_da,incassato_da_user_id,receipt_number,data_pagamento,created_at,receipt_professional_path,receipt_storage_path'],
   operators:['operatori_gestionale','user_id,username,nome,ruolo,attivo'],
