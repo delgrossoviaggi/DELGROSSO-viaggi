@@ -3,6 +3,21 @@
  * Restano nella tabella storica scadenze_gestionale; non viene modificato
  * nessun record esistente con la sola visualizzazione.
  */
+/** Load both real Supabase archives without migrating or duplicating any row.
+ * Historical appointments (V1/V2) are stored in attivita_gestionale; new
+ * typed events and regulatory deadlines live in scadenze_gestionale.
+ * __source is UI-only provenance; never persisted as a DB column.
+ */
+export function mergeAgendaSources(deadlines=[],legacyActivities=[]){
+ const typed=(Array.isArray(deadlines)?deadlines:[]).map(x=>({...x,__source:'scadenze_gestionale'}));
+ const legacy=(Array.isArray(legacyActivities)?legacyActivities:[]).map(x=>({
+  ...x,__source:'attivita_gestionale',
+  tipo:'Impegno',data_scadenza:x.scadenza,
+  note:''
+ }));
+ return [...typed,...legacy];
+}
+
 export const agendaCategories=Object.freeze(['Agenda','Appuntamento','Impegno','Nota','Promemoria']);
 export const deadlineCategories=Object.freeze(['Scadenza','operativa','Estintori']);
 export const agendaKinds=Object.freeze([...agendaCategories,...deadlineCategories]);
@@ -14,7 +29,7 @@ export function agendaEntries(items,section,{includeDeleted=false,search=''}={})
  return (items||[]).filter(x=>x&&
   (includeDeleted?agendaDeleted(x):!agendaDeleted(x))&&
   (section==='all'||(section==='agenda'?isDiaryEntry(x):isDeadlineEntry(x)))&&
-  (!q||[x.titolo,x.descrizione,x.note,x.tipo,x.stato].some(v=>String(v||'').toLocaleLowerCase('it').includes(q))))
+  (!q||[x.titolo,x.descrizione,x.note,x.tipo,x.stato,x.assegnata_a].some(v=>String(v||'').toLocaleLowerCase('it').includes(q))))
   .slice().sort((a,b)=>String(a.data_scadenza||'').localeCompare(String(b.data_scadenza||''))||String(a.titolo||'').localeCompare(String(b.titolo||'')));
 }
 export function deadlineStats(items,today){
