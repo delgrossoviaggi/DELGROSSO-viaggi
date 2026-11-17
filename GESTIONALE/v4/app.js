@@ -19,6 +19,7 @@ const NAV={
  agenda:'Agenda completa',deadlines:'Scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
+let layoutEditorId=null;
 let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false, bisWizard=null, pendingBis=null, bisBusy=false, creditWizard=null, pendingCredit=null, creditBusy=false, creditLedgerState='not-checked';
 const state={trip:'',stop:'',search:'',bookingsState:'active',agendaMonth:todayItaly().slice(0,7),agendaDay:todayItaly(),agendaTrash:false,deadlineTrash:false,deadlineScope:'open',pendingAction:'',all:{},lastSyncAt:0,lastSyncError:null};
 let liveSync=null,backgroundInterval=null,backgroundDebounce=null,backgroundBusy=false,backgroundPending=false,syncMode='offline';
@@ -530,6 +531,46 @@ function drawControl(){
  '<div class="two-col">'+panel('Piantina ufficiale',official?'Versione '+num(official.versione)+' · '+esc(config?.name||'Layout ufficiale'):'Layout non disponibile','<div class="layout-panel">'+seatMarkup+'<div class="legend"><span><i style="background:#eff7f4"></i>Libero</span><span><i style="background:#e9f1ff"></i>Occupato</span></div></div>')+
  panel('Lista passeggeri',''+visible.length+' prenotazioni per i filtri selezionati',table(['Cliente','N.','Posti','Fermata','Stato'],roster))+'</div>';
 }
+
+function openBusLayoutDialog(layoutId='',busId=''){
+ const fleet=get('fleet').filter(b=>b.attivo!==false&&b.categoria==='GT'&&[53,63].includes(Number(b.posti)));
+ const library=get('layoutLibrary').filter(x=>x.attivo!==false);
+ const chosenBus=fleet.find(x=>x.id===busId);
+ const chosenLayout=library.find(x=>x.id===layoutId);
+ if(layoutId&&!chosenLayout)throw new Error('Piantina non disponibile o archiviata.');
+ if(busId&&!chosenBus)throw new Error('Autobus GT non disponibile.');
+ const eligible=chosenLayout?eligibleGtBuses(chosenLayout,fleet):fleet;
+ const compatible=chosenBus?library.filter(l=>eligibleGtBuses(l,[chosenBus]).length):library;
+ const busOpts=(chosenLayout?eligible:fleet).map(b=>'<option value="'+esc(b.id)+'" '+(b.id===busId?'selected':'')+'>'+
+   esc((b.titolo||b.modello||'Autobus GT')+' · '+b.targa+' · '+b.posti+' posti')+'</option>').join('');
+ const layoutOpts=(chosenBus?compatible:library).map(l=>'<option value="'+esc(l.id)+'" '+(l.id===layoutId?'selected':'')+'>'+
+   esc((l.nome||'Piantina')+' · '+seatCount(l.configurazione)+' sedili')+'</option>').join('');
+ const pairs=chosenBus||chosenLayout?busOpts&&layoutOpts:(fleet.length&&library.length?'':'');
+ displayModal('Associa piantina ufficiale all’autobus',
+  '<p class="help">La piantina deve avere tutti i posti numerati del mezzo (53 o 63). La nuova associazione viene resa disponibile ai viaggi senza una piantina specifica, senza sostituire quelle personalizzate già pubblicate.</p>'+
+  '<form class="form-grid" data-save="assign-bus-layout">'+
+  '<label class="span-2">Autobus GT<select name="bus" required>'+busOpts+'</select></label>'+
+  '<label class="span-2">Piantina compatibile<select name="layout" required>'+layoutOpts+'</select></label>'+
+  (!pairs?'<div class="alert span-2">Non esiste una piantina completa compatibile con questo mezzo. Creala o correggila dalla libreria prima di associarla.</div>':'')+
+  '<div class="alert span-2">Supabase verificherà anche eventuali prenotazioni che utilizzano la piantina predefinita, impedendo di bloccare sedili occupati.</div>'+
+  '<button type="submit" class="primary span-2" '+(!WRITES_ENABLED||!pairs?'disabled title="Backup e collaudo richiesti"':'')+'>Conferma associazione ufficiale al bus</button></form>');
+}
+function openTripLayoutDialog(id){
+ const layout=get('layoutLibrary').find(l=>l.id===id);
+ if(!layout?.attivo)throw new Error('Piantina mancante o archiviata.');
+ const eligible=compatibleTrips(layout,get('trips'),get('fleet'));
+ const opts=eligible.map(t=>'<option value="'+esc(t.id)+'">'+
+  esc(tripName(t)+' · '+dateIT(t.data_partenza)+' · '+num(t.posti_totali)+' posti')+'</option>').join('');
+ displayModal('Applica piantina al viaggio · '+layout.nome,
+  '<p class="help">La configurazione del viaggio viene pubblicata separatamente da quella del bus e sarà utilizzata dal sito delle prenotazioni.</p>'+
+  '<form data-save="publish-layout" class="form-grid">'+
+  '<input type="hidden" name="layout" value="'+esc(layout.id)+'">'+
+  '<label class="span-2">Viaggio compatibile<select name="viaggio" required>'+opts+'</select></label>'+
+  (!eligible.length?'<div class="alert span-2">Non esistono viaggi con autobus e capienza compatibili con questa piantina.</div>':'')+
+  '<div class="alert span-2">I sedili già occupati saranno protetti da un controllo server: non puoi disabilitarli con la nuova piantina.</div>'+
+  '<button type="submit" class="primary span-2" '+(!WRITES_ENABLED||!eligible.length?'disabled':'')+'>Verifica e pubblica sul viaggio</button></form>');
+}
+
 function drawLayouts(){
  const library=get('layoutLibrary'),buses=get('fleet').filter(b=>b.categoria==='GT'&&b.attivo!==false),
   official=get('tripLayouts'),assigned=get('busLayouts');
@@ -546,8 +587,8 @@ function drawLayouts(){
    '<div class="row-actions">'+
     safeLink('Apri',l.id,'detail-layout')+
     (l.attivo?'<button class="secondary" data-action="edit-layout" data-id="'+esc(l.id)+'">✎ Modifica</button>':'')+
-    (l.attivo?writeButton('Associa a bus','assign-bus-layout','data-id="'+esc(l.id)+'"'):'')+
-    (l.attivo?writeButton('Applica a viaggio','publish-trip-layout','data-id="'+esc(l.id)+'"'):'')+
+    (l.attivo?'<button class="secondary" data-action="assign-bus-layout" data-id="'+esc(l.id)+'">Associa a bus</button>':'')+
+    (l.attivo?'<button class="secondary" data-action="publish-trip-layout" data-id="'+esc(l.id)+'">Applica a viaggio</button>':'')+
     (l.attivo?writeButton('Elimina','archive-layout','data-id="'+esc(l.id)+'"'):
       writeButton('Ripristina','restore-layout','data-id="'+esc(l.id)+'"'))+
    '</div>'+
@@ -559,7 +600,7 @@ function drawLayouts(){
   return [esc(bus.titolo||bus.modello),esc(bus.targa||'—'),String(bus.posti),
    link?'<strong>'+esc(lib?.nome||'Piantina già pubblicata')+'</strong> · v'+num(link.versione):
     badge('Nessuna piantina ufficiale associata'),
-   writeButton(link?'Cambia piantina':'Associa piantina','choose-bus-layout','data-id="'+esc(bus.id)+'"')];
+   '<button class="secondary" data-action="choose-bus-layout" data-id="'+esc(bus.id)+'">'+(link?'Cambia piantina':'Associa piantina')+'</button>'];
  });
  const pub=official.map(l=>[esc(tripName(tripBy(l.viaggio_id))),String(seatCount(l.configurazione)),num(l.versione),dateTimeIT(l.pubblicata_il)]);
  return intro('Piantine autobus','Crea e modifica le geometrie dei GT. Salva ogni piantina, associala al mezzo corretto e applicala a un viaggio quando necessario.',
@@ -920,7 +961,7 @@ function drawFleet(){
    '<strong>'+esc(f.titolo||f.modello)+'</strong><small class="row-sub">'+esc(f.marca||'')+' '+esc(f.modello)+'</small>',
    esc(f.targa||'—'),num(f.posti),badge(f.stato),badge(f.attivo?'Attivo':'Non attivo'),
    f.categoria==='GT'?(active?esc(draft?.nome||'Layout pubblicato')+' · v'+num(active.versione):badge('Da associare')):'—',
-   f.categoria==='GT'?writeButton('Gestisci piantina','choose-bus-layout','data-id="'+esc(f.id)+'"'):'—'
+   f.categoria==='GT'?'<button class="secondary" data-action="choose-bus-layout" data-id="'+esc(f.id)+'">Gestisci piantina</button>':'—'
   ];
  });
  return intro('Flotta aziendale','Autobus GT e Limousine Bus: le piantine ufficiali vengono associate ai tre GT con verifica della capienza.',
@@ -1480,14 +1521,23 @@ async function handleAction(action,id,button){
  if(action==='export-payments'){csvExport(['Data','Cliente','Viaggio','Tipo','Importo','Operatore','Ricevuta'],get('payments').map(p=>[p.data_pagamento,p.cliente,tripName(tripBy(p.viaggio_id)),p.tipo,p.importo,p.incassato_da,p.receipt_number]),'delgrosso-pagamenti.csv');return;}
  if(action==='export-customers'){csvExport(['Nome','Cognome','Telefono','Email','Città'],get('customers').map(c=>[c.nome,c.cognome,c.telefono,c.email,c.citta]),'delgrosso-clienti.csv');return;}
  if(action==='export-agenda'){csvExport(['Titolo','Data','Priorità','Stato','Descrizione'],agendaEntries(get('agenda'),'agenda').map(a=>[a.titolo,a.data_scadenza,a.priorita,a.stato,a.descrizione]),'delgrosso-agenda.csv');return;}
- if(action==='create-layout' || action==='draft-layout'){
-  const saved=action==='draft-layout'?get('layoutLibrary').find(l=>l.id===id):null;
+ if(action==='create-layout'||action==='draft-layout'||action==='edit-layout'){
+  const saved=action==='create-layout'?null:get('layoutLibrary').find(l=>l.id===id);
+  if(action!=='create-layout'&&!saved)throw new Error('La piantina non è stata trovata.');
   if(!window.DG4LayoutEditor)return showMessage('Editor piantine non caricato.',true);
-  displayModal(saved?'Bozza da '+saved.nome:'Editor piantina GT — bozza locale',
-    '<label>Nome piantina<input id="dg4-draft-name" maxlength="100" value="'+esc(saved?.nome||'Piantina personalizzata DELGROSSO')+'"></label><div id="dg4-layout-editor"></div><div class="action-row">'+writeButton('Salva bozza Supabase','save-layout-draft')+'</div>');
-  localEditor=window.DG4LayoutEditor.mount(document.getElementById('dg4-layout-editor'), saved?.configurazione||null);
+  layoutEditorId=saved?.id||null;
+  const linked=saved?layoutAssociations(saved.id,get('busLayouts'),get('tripLayouts')):null;
+  displayModal(saved?'Modifica piantina · '+saved.nome:'Crea piantina GT',
+    '<label>Nome piantina<input id="dg4-draft-name" maxlength="100" value="'+esc(saved?.nome||'Piantina personalizzata DELGROSSO')+'"></label>'+
+    '<p class="help">Gli strumenti sono disponibili anche in sola lettura per preparare ed esportare una bozza. Il salvataggio su Supabase è autorizzato solo dopo il collaudo delle scritture.</p>'+
+    (linked&&(linked.buses.length||linked.trips.length)?'<div class="alert">Questa piantina è utilizzata da '+linked.buses.length+' autobus e '+linked.trips.length+' viaggi. Le modifiche alla libreria NON sovrascrivono le configurazioni già pubblicate: per applicarle dovrai ripubblicare esplicitamente la nuova versione.</div>':'')+
+    '<div id="dg4-layout-editor"></div><div class="action-row">'+writeButton(saved?'Salva modifiche Supabase':'Crea piantina su Supabase','save-layout-draft')+'</div>');
+  localEditor=window.DG4LayoutEditor.mount(document.getElementById('dg4-layout-editor'),saved?.configurazione||null);
   return;
  }
+ if(action==='choose-bus-layout'){openBusLayoutDialog('',id);return;}
+ if(action==='assign-bus-layout'){openBusLayoutDialog(id,'');return;}
+ if(action==='publish-trip-layout'){openTripLayoutDialog(id);return;}
  if(!WRITES_ENABLED){
   return showMessage('Operazione bloccata: prima occorrono backup completo e restore di prova. Nessun dato è stato modificato.',true);
  }
@@ -1597,16 +1647,7 @@ async function handleAction(action,id,button){
   closeModal();showMessage('Bozza piantina salvata: '+name+'. Per applicarla al viaggio usare la funzione dedicata.');
   return navigate('layouts',true);
  }
- if(action==='publish-trip-layout'){
-  const layout=get('layoutLibrary').find(l=>l.id===id);
-  if(!layout)throw new Error('Piantina non trovata.');
-  const options=get('trips').filter(t=>!t.archiviato_at&&t.autobus_id).map(t=>'<option value="'+esc(t.id)+'">'+esc(tripName(t)+' · '+dateIT(t.data_partenza)+' · '+num(t.posti_totali)+' posti')+'</option>').join('');
-  return displayModal('Pubblica piantina ufficiale: '+layout.nome,
-   '<div class="alert">Attenzione: la pubblicazione aggiornerà la piantina usata anche dal sito delle prenotazioni. Verificare posti già prenotati e capienza prima di confermare.</div>'+
-   '<form data-save="publish-layout" class="form-grid"><input type="hidden" name="layout" value="'+esc(id)+'">'+
-   '<label class="span-2">Viaggio da aggiornare<select name="viaggio" required>'+options+'</select></label>'+
-   '<button type="submit" class="primary span-2">Verifica e pubblica in Supabase</button></form>');
- }
+
  if(action==='cancel-booking'){
   const b=get('bookings').find(x=>x.id===id);
   if(!b)throw new Error('Prenotazione non disponibile.');
