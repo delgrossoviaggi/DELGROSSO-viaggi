@@ -9,6 +9,8 @@ const core=readFileSync(new URL('core.js',dir),'utf8').replace(/^export /gm,'');
 const operations=readFileSync(new URL('booking-operations.js',dir),'utf8').replace(/^export /gm,'');
 const bis=readFileSync(new URL('bis-manual.js',dir),'utf8').replace(/^export /gm,'');
 const credits=readFileSync(new URL('credit-transfers.js',dir),'utf8').replace(/^export /gm,'');
+const agenda=readFileSync(new URL('agenda-model.js',dir),'utf8').replace(/^export /gm,'');
+const layoutOps=readFileSync(new URL('layout-operations.js',dir),'utf8').replace(/^export /gm,'');
 const app=readFileSync(new URL('app.js',dir),'utf8')
   .replace(/^import \{[\s\S]*?\} from '\.\/core\.js';/,'')
   .replace(/^\s*import \* as Pdf from '\.\/pdf-reports\.js';/m,'')
@@ -16,6 +18,8 @@ const app=readFileSync(new URL('app.js',dir),'utf8')
   .replace(/^\s*import \{[^\n]+\} from '\.\/booking-operations\.js';/m,'')
   .replace(/^\s*import \{[^\n]+\} from '\.\/bis-manual\.js';/m,'')
   .replace(/^\s*import \{[^\n]+\} from '\.\/credit-transfers\.js';/m,'')
+  .replace(/^\s*import \{[^\n]+\} from '\.\/agenda-model\.js';/m,'')
+  .replace(/^\s*import \{[^\n]+\} from '\.\/layout-operations\.js';/m,'')
   .replace(/bootstrap\(\)\.catch\([\s\S]*?;\s*$/,'');
 const context=vm.createContext({
  console,Intl,Date,Map,Set,Number,String,JSON,Math,Object,Array,RegExp,
@@ -25,14 +29,14 @@ const context=vm.createContext({
  sessionStorage:{getItem(){return null},setItem(){throw Error('no store')},removeItem(){}},
  fetch(){throw Error('Offline test forbids network')}
 });
-const getTests=';globalThis.v4tests={state,occupancy,breakdown,esc,WRITES_ENABLED,mutate,writeRpc,drawDashboard,drawTrips,drawBookings,drawMovements,drawControl,drawLayouts,drawCash,drawCredits,drawEconomy,drawCustomers,drawRentals,drawAgenda,drawFleet,drawDocuments,drawNotifications,drawDiagnostics,drawQuotes,drawInvoices,drawWaitlist,drawWhatsApp,drawReports,normalizeSignedStorageUrl,edgeAction};';
-vm.runInContext(core+'\n'+operations+'\n'+bis+'\n'+credits+'\n'+app+'\n'+getTests,context,{timeout:3000});
+const getTests=';globalThis.v4tests={state,occupancy,breakdown,esc,WRITES_ENABLED,mutate,writeRpc,drawDashboard,drawTrips,drawBookings,drawMovements,drawControl,drawLayouts,drawCash,drawCredits,drawEconomy,drawCustomers,drawRentals,drawAgenda,drawDeadlines,drawFleet,drawDocuments,drawNotifications,drawDiagnostics,drawQuotes,drawInvoices,drawWaitlist,drawWhatsApp,drawReports,normalizeSignedStorageUrl,edgeAction};';
+vm.runInContext(core+'\n'+operations+'\n'+bis+'\n'+credits+'\n'+agenda+'\n'+layoutOps+'\n'+app+'\n'+getTests,context,{timeout:3000});
 const appTest=context.v4tests;
 const trip={id:'T1',titolo:'Napoli & Spaccanapoli',data_partenza:'2026-12-20',destinazione:'Napoli',posti_totali:53,prezzo:20,stato:'Aperto'};
 const booking={id:'B1',viaggio_id:'T1',cliente:'Nome prova',telefono:'3330000000',posti:2,totale:40,pagato:20,stato:'Acconto Ricevuto',posti_selezionati:'1,2',fermata_partenza:'San Severo'};
 appTest.state.all={trips:[trip],bookings:[booking],payments:[],agenda:[],notifications:[],seats:[{viaggio_id:'T1',prenotazione_id:'B1',posto:'1'}],tripLayouts:[{viaggio_id:'T1',versione:1,configurazione:{rows:[{cells:[{type:'seat',label:'1'},{type:'aisle'},{type:'seat',label:'2'}]}]}}],stops:[],layoutLibrary:[],busLayouts:[],cash:[],operators:[],transfers:[],economy:[],profit:[],customers:[],rentals:[],fleet:[],documents:[],system:[],alerts:[],rentalPayments:[],quotes:[],invoices:[],waitlist:[],whatsAppInbox:[],whatsAppOutbound:[],whatsAppOptins:[]};
-test('All twenty-one V4 pages render with original-schema fixtures',()=>{
- const views=['drawDashboard','drawTrips','drawBookings','drawMovements','drawControl','drawLayouts','drawCash','drawCredits','drawEconomy','drawCustomers','drawRentals','drawAgenda','drawFleet','drawDocuments','drawNotifications','drawDiagnostics','drawQuotes','drawInvoices','drawWaitlist','drawWhatsApp','drawReports'];
+test('All twenty-two V4 pages render with original-schema fixtures',()=>{
+ const views=['drawDashboard','drawTrips','drawBookings','drawMovements','drawControl','drawLayouts','drawCash','drawCredits','drawEconomy','drawCustomers','drawRentals','drawAgenda','drawDeadlines','drawFleet','drawDocuments','drawNotifications','drawDiagnostics','drawQuotes','drawInvoices','drawWaitlist','drawWhatsApp','drawReports'];
  for(const name of views){const html=appTest[name]();assert.ok(typeof html==='string'&&html.length>75, name);}
 });
 test('Seat occupancy excludes cancelled and merges seat rows with booking details',()=>{
@@ -76,5 +80,26 @@ test('Operator cash transfer is labeled Giroconto and remains distinct from book
  assert.ok(cash.includes('Giroconto'));
  assert.ok(cash.includes('Nicola'));
  assert.ok(cash.includes('data-action="new-transfer"'));
+ assert.equal(appTest.WRITES_ENABLED,false);
+});
+
+test('Agenda and scadenze have separate views, calendars and individual edit/delete/restore controls',()=>{
+ const list=appTest.state.all.agenda;
+ list.push({id:'A',titolo:'Riunione clienti',tipo:'Appuntamento',stato:'aperta',priorita:'normale',data_scadenza:'2026-11-17',updated_at:'2026-11-17T10:00:00Z'});
+ list.push({id:'B',titolo:'Revisione estintori',tipo:'Estintori',stato:'aperta',priorita:'alta',data_scadenza:'2026-11-17',updated_at:'2026-11-17T10:00:00Z'});
+ const agendaHTML=appTest.drawAgenda(),deadlineHTML=appTest.drawDeadlines();
+ assert.ok(agendaHTML.includes('Riunione clienti'));
+ assert.ok(!agendaHTML.includes('Revisione estintori'));
+ assert.ok(deadlineHTML.includes('Revisione estintori'));
+ assert.ok(!deadlineHTML.includes('Riunione clienti'));
+ assert.ok(agendaHTML.includes('data-action="edit-agenda"'));
+ assert.ok(agendaHTML.includes('data-action="delete-agenda"'));
+ assert.ok(deadlineHTML.includes('data-action="create-deadline"'));
+ list.length=0;
+});
+test('Piantine can be edited and associated with GTs; write operations still obey the staging gate',()=>{
+ const html=appTest.drawLayouts();
+ assert.ok(html.includes('data-action="create-layout"'));
+ assert.ok(html.includes('Piantine autobus'));
  assert.equal(appTest.WRITES_ENABLED,false);
 });
