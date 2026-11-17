@@ -28,7 +28,7 @@ test('Cancelled booking seats are not treated as occupied',()=>{
  const inv=logic.seatInventory(bis,[someone,{...someone,id:'D',posti_selezionati:'5',stato:'Annullata'}],[]);
  assert.equal(inv.taken.size,2);
  assert.equal(inv.taken.has('5'),false);
- assert.deepEqual(inv.problems,[]);
+ assert.deepEqual([...inv.problems],[]);
 });
 test('Booking transfer from main bus to BIS preserves amounts and capacity',()=>{
  const r=logic.reviewBusTransfer({booking,origin:main,target:bis,bookings:[booking,someone],seatRows:[],chosen:'6, 7'});
@@ -47,6 +47,10 @@ test('Check-in and ambiguous seat registries prevent seat move',()=>{
  assert.throws(()=>logic.reviewBusTransfer({booking:{...booking,checkin_effettuato:true},origin:main,target:bis,bookings:[someone],seatRows:[],chosen:'5,6'}),/Check-in/);
  const odd={...someone,id:'E',posti:3,posti_selezionati:'8'};
  assert.throws(()=>logic.reviewBusTransfer({booking,origin:main,target:bis,bookings:[someone,odd],seatRows:[],chosen:'5,6'}),/riconciliare/);
+});
+test('Company-reserved seats cannot be assigned to a regular passenger',()=>{
+ const reserved={id:'RES',viaggio_id:'B',posti:1,posti_selezionati:'9',stato:'Riservata',riserva_aziendale:true};
+ assert.throws(()=>logic.reviewBusTransfer({booking,origin:main,target:bis,bookings:[reserved],seatRows:[],chosen:'9,10'}),/occupati/);
 });
 test('Same-bus seat change only allows free seats and excludes its own current seats',()=>{
  const r=logic.reviewBusTransfer({booking,origin:main,target:main,bookings:[booking],seatRows:[{viaggio_id:'M',prenotazione_id:'A',posto:'1'}],chosen:'1, 3'});
