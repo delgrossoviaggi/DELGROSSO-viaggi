@@ -209,14 +209,14 @@ export async function writeRpc(name,payload){
  const result=await jsonFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},true,0);
  clearCache();return result;
 }
-export async function mutate(resource,method,payload,id=null){
+export async function mutate(resource,method,payload,id=null,{expectedUpdatedAt=null}={}){
  if(!WRITES_ENABLED)throw new Error('Scritture bloccate: backup completo e collaudo non ancora certificati.');
  const permitted={
   agenda:{POST:['titolo','descrizione','data_scadenza','priorita','tipo','stato'],PATCH:['stato','priorita','data_scadenza','titolo','descrizione']},
   trips:{POST:['titolo','destinazione','data_partenza','prezzo','posti_totali','minimo_partecipanti','pubblicato','stato','autobus_id'],PATCH:['titolo','destinazione','data_partenza','prezzo','posti_totali','minimo_partecipanti','pubblicato','stato','archiviato_at','sold_out_manual']},
   rentals:{POST:['referente','azienda','telefono','email','tratta_partenza','tratta_destinazione','data_partenza','ora_partenza','passeggeri','prezzo_concordato','acconto','saldo'],PATCH:['stato_noleggio','data_ritorno','ora_ritorno','archiviato_at']},
   customers:{POST:['nome','cognome','telefono','email','citta'],PATCH:['telefono','email','citta']},
-  bookings:{PATCH:['checkin_effettuato','checkin_stato','checked_in_at','checkin_operatore']},
+  bookings:{PATCH:['cliente','telefono','email','fermata_partenza','note','checkin_effettuato','checkin_stato','checked_in_at','checkin_operatore']},
   quotes:{POST:['nome','cognome','telefono','email','origine','stato','destinazione','data_partenza','numero_passeggeri','passeggeri','importo','importo_preventivo','servizio','luogo_partenza'],PATCH:['stato','importo_preventivo','note_interne']},
   waitlist:{POST:['viaggio_id','nome','cognome','telefono','email','posti','stato','fermata_partenza','priorita','note'],PATCH:['stato','note']},
   layoutLibrary:{POST:['nome','configurazione','attivo','created_by'],PATCH:['nome','configurazione','attivo','updated_by']}
@@ -226,7 +226,8 @@ export async function mutate(resource,method,payload,id=null){
  Object.keys(payload).some(k=>!ok.includes(k))||(method==='PATCH'&&!id)||(method==='POST'&&id))
    throw new Error('Operazione o campi non autorizzati per la tabella '+resource);
  const [table]=SELECTS[resource];
- const target=id?('?id=eq.'+encodeURIComponent(id)):'';
+ const precondition=expectedUpdatedAt ? '&updated_at=eq.'+encodeURIComponent(expectedUpdatedAt) : '';
+ const target=id?('?id=eq.'+encodeURIComponent(id)+precondition):'';
  const result=await jsonFetch('/rest/v1/'+table+target,{
   method,headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(payload)
  },true,0);
