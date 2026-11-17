@@ -1,6 +1,6 @@
 import {
- API_URL,WRITES_ENABLED,esc,eur,num,dateIT,dateTimeIT,todayItaly,bookingActive,bookingName,tripName,
- seatsOf,uniquePhones,occupancy,breakdown,login,resume,logout,records,rpcRead,writeRpc,mutate,
+ API_URL,WRITES_ENABLED,AGENDA_WRITES_ENABLED,esc,eur,num,dateIT,dateTimeIT,todayItaly,bookingActive,bookingName,tripName,
+ seatsOf,uniquePhones,occupancy,breakdown,login,resume,logout,records,rpcRead,writeRpc,mutate,mutateAgenda,
  currentUser,clearCache,signedReceiptPath,edgeAction,normalizeSignedStorageUrl,liveAccessToken
 } from './core.js';
 import * as Pdf from './pdf-reports.js';
@@ -8,17 +8,18 @@ import {createLiveSync} from './live-sync.js';
 import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewBusTransfer} from './booking-operations.js';
 import {usableTemplates,inspectLayout,normalizeManualSeats,prepareBisSeatOpening,previewManualLayout} from './bis-manual.js';
 import {bookingCreditBalance,destinationsForCredit,reviewCreditTransfer,centesimi} from './credit-transfers.js';
+import {agendaCategories,deadlineCategories,agendaDeleted,isDiaryEntry,isDeadlineEntry,agendaEntries,deadlineStats,calendarMonth,shiftCalendarMonth,validateAgendaEntry} from './agenda-model.js';
 
 const $=id=>document.getElementById(id);
 const NAV={
  dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',movements:'Spostamenti posti / BUS BIS / date',credits:'Giroconto quote fra viaggi',
  control:'Control Room',layouts:'Piantine autobus',cash:'Contabilità e casse',
  economy:'Economia e costi',customers:'Clienti',rentals:'Noleggi bus',quotes:'Preventivi',invoices:'Fatturazione / bozze',waitlist:'Lista d’attesa',whatsapp:'WhatsApp Business',reports:'Centro PDF e report',
- agenda:'Agenda e scadenze',fleet:'Flotta GT',documents:'Documenti',
+ agenda:'Agenda completa',deadlines:'Scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
 let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false, bisWizard=null, pendingBis=null, bisBusy=false, creditWizard=null, pendingCredit=null, creditBusy=false, creditLedgerState='not-checked';
-const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{},lastSyncAt:0,lastSyncError:null};
+const state={trip:'',stop:'',search:'',bookingsState:'active',agendaMonth:todayItaly().slice(0,7),agendaDay:todayItaly(),agendaTrash:false,deadlineTrash:false,deadlineScope:'open',pendingAction:'',all:{},lastSyncAt:0,lastSyncError:null};
 let liveSync=null,backgroundInterval=null,backgroundDebounce=null,backgroundBusy=false,backgroundPending=false,syncMode='offline';
 const money=eur;
 const safeText=s=>esc(s||'—');
@@ -37,6 +38,7 @@ const selectTrip=(trips,selected,empty='Tutti i viaggi')=>'<select id="filter-tr
 const searchField=(placeholder='Cerca cliente, viaggio, codice…')=>'<input type="search" id="filter-search" aria-label="Cerca" placeholder="'+esc(placeholder)+'" value="'+esc(state.search)+'"/>';
 const writeBadge=()=>WRITES_ENABLED?'':'<span class="badge warn">Modifiche bloccate fino al backup verificato</span>';
 const writeButton=(text,action,attrs='')=>'<button class="primary" data-action="'+action+'" '+attrs+(WRITES_ENABLED?'':' disabled title="Sblocco dopo backup e collaudo"')+'>'+esc(text)+'</button>';
+const agendaButton=(text,action,attrs='',kind='primary')=>'<button class="'+kind+'" data-action="'+action+'" '+attrs+(AGENDA_WRITES_ENABLED?'':' disabled title="Agenda in sola lettura"')+'>'+esc(text)+'</button>';
 const get=t=>state.all[t]||[];
 
 /** The new giroconto ledger is an optional STAGING schema until backup/restore.
@@ -174,6 +176,7 @@ async function navigate(next,force=false,{silent=false}={}){
  whatsapp:['whatsAppInbox','whatsAppOutbound','whatsAppOptins'],
  reports:['trips','bookings','seats','tripLayouts','payments','cash','agenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
  agenda:['agenda','trips'],
+ deadlines:['agenda','trips'],
  fleet:['fleet'],
  documents:['documents','trips','receipts','docsMetadata'],
  notifications:['notifications'],
@@ -185,7 +188,7 @@ async function navigate(next,force=false,{silent=false}={}){
   if(mine!==ticket)return;
   const views={dashboard:drawDashboard,trips:drawTrips,bookings:drawBookings,movements:drawMovements,
    control:drawControl,layouts:drawLayouts,cash:drawCash,credits:drawCredits,economy:drawEconomy,
-   customers:drawCustomers,rentals:drawRentals,quotes:drawQuotes,invoices:drawInvoices,waitlist:drawWaitlist,whatsapp:drawWhatsApp,reports:drawReports,agenda:drawAgenda,
+   customers:drawCustomers,rentals:drawRentals,quotes:drawQuotes,invoices:drawInvoices,waitlist:drawWaitlist,whatsapp:drawWhatsApp,reports:drawReports,agenda:drawAgenda,deadlines:drawDeadlines,
    fleet:drawFleet,documents:drawDocuments,notifications:drawNotifications,diagnostics:drawDiagnostics};
   $('main').innerHTML=views[next]();
   document.title='DELGROSSO 4.0 · '+NAV[next];
@@ -210,12 +213,12 @@ function drawDashboard(){
   const cap=num(t.posti_totali);const pc=cap?Math.min(100,allocated/cap*100):0;
   return '<div class="trip-card"><div class="trip-date"><b>'+esc(String(t.data_partenza||'').slice(8,10))+'</b><small>'+esc(String(t.data_partenza||'').slice(5,7))+'</small></div><div class="trip-body"><strong>'+esc(tripName(t))+'</strong><p>'+esc(t.destinazione||'')+' · '+esc(String(t.ora_partenza||'').slice(0,5))+'</p>'+badge(t.stato)+'</div><div class="trip-end"><div class="progress-track"><div class="progress-fill" style="width:'+pc+'%"></div></div><small>'+allocated+' / '+cap+' posti</small></div></div>';
  }).join(''):'<div class="empty">Nessuna partenza futura.</div>';
- const due=get('agenda').filter(a=>a.data_scadenza>=today && a.stato!=='completata').slice(0,7);
+ const due=agendaEntries(get('agenda'),'scadenze').filter(a=>a.data_scadenza>=today && a.stato!=='completata').slice(0,7);
  return intro('Buongiorno, '+(operator?.nome||operator?.username||'Operatore')+' 👋','La tua centrale operativa: dati letti dal progetto Supabase aziendale.','<button class="secondary" data-action="refresh">↻ Ricarica</button>')+
  cards+'<div class="two-col">'+
  panel('Prossime partenze','Viaggi futuri, ordinati per data','<div>'+journeys+'</div>','<button class="soft smallbtn" data-page="trips">Apri viaggi</button>')+
  panel('Centro notifiche','Ultimi eventi registrati','<div class="panel-body">'+recent+'</div>','<button class="soft smallbtn" data-page="notifications">Tutte</button>')+
- '</div>'+panel('Agenda e impegni','Scadenze ancora aperte',table(['Scadenza','Attività','Priorità'],due.map(a=>[dateIT(a.data_scadenza),esc(a.titolo),badge(a.priorita)])),'<button class="soft smallbtn" data-page="agenda">Apri agenda</button>');
+ '</div>'+panel('Scadenze da seguire','Scadenze ancora aperte',table(['Scadenza','Attività','Priorità'],due.map(a=>[dateIT(a.data_scadenza),esc(a.titolo),badge(a.priorita)])),'<button class="soft smallbtn" data-page="deadlines">Apri scadenze</button>');
 }
 
 /* BUS BIS manual seat wizard: requires a real, already saved full bus layout. */
