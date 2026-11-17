@@ -1,0 +1,31 @@
+name: DG40 Emergency Catalog and V2 Login Routes
+on:
+  push:
+    paths:
+      - "js/gestionale.js"
+      - "js/site.js"
+      - "assets/viaggi-fallback-20261117.json"
+      - "GESTIONALE/index.html"
+      - "vercel.json"
+      - "tests/dg40-emergency-catalog.mjs"
+      - ".github/workflows/dg40-emergency-catalog.yml"
+  pull_request:
+    paths:
+      - "js/gestionale.js"
+      - "js/site.js"
+      - "assets/viaggi-fallback-20261117.json"
+      - "GESTIONALE/index.html"
+      - "vercel.json"
+      - "tests/dg40-emergency-catalog.mjs"
+      - ".github/workflows/dg40-emergency-catalog.yml"
+permissions:
+  contents: read
+jobs:
+  test-emergency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node tests/dg40-emergency-catalog.mjs
