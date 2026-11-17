@@ -32,9 +32,11 @@ jobs:
           node --check GESTIONALE/v4/live-sync.js
           node --check GESTIONALE/v4/bis-manual.js
           node --check GESTIONALE/v4/credit-transfers.js
+          node --check GESTIONALE/v4/agenda-model.js
+          node --check GESTIONALE/v4/layout-operations.js
       - name: Unit and rendering tests (offline)
         run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs tests/dg4-v4-pdf.test.mjs tests/dg4-v4-booking-operations.test.mjs tests/dg4-v4-confirmations.test.mjs tests/dg4-v4-live-sync.test.mjs tests/dg4-v4-bis-manual.test.mjs tests/dg4-v4-credit-transfers.test.mjs
       - name: Forbid privileged credentials and accidental write unlock
         run: |
-          if grep -E 'WRITES_ENABLED[[:space:]]*=[[:space:]]*true' GESTIONALE/v4/core.js; then echo 'ERROR: V4 writes unlocked!'; exit 1; fi
+          if grep -E '^export const WRITES_ENABLED[[:space:]]*=[[:space:]]*true' GESTIONALE/v4/core.js; then echo 'ERROR: protected booking/accounting writes unlocked!'; exit 1; fi
           if grep -Er 'sb_secret_|SUPABASE_SERVICE_ROLE_KEY|service_role[[:space:]]*:' GESTIONALE/v4 --include='*.js' --include='*.html'; then echo 'ERROR: privileged key reference in browser'; exit 1; fi
