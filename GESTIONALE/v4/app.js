@@ -7,6 +7,7 @@ import * as Pdf from './pdf-reports.js';
 import {createLiveSync} from './live-sync.js';
 import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewBusTransfer} from './booking-operations.js';
 import {usableTemplates,inspectLayout,normalizeManualSeats,prepareBisSeatOpening,previewManualLayout} from './bis-manual.js';
+import {seatCount,isCompleteLayout,eligibleGtBuses,layoutAssociations,archivePlan,compatibleTrips} from './layout-operations.js';
 import {bookingCreditBalance,destinationsForCredit,reviewCreditTransfer,centesimi} from './credit-transfers.js';
 import {agendaCategories,deadlineCategories,agendaDeleted,isDiaryEntry,isDeadlineEntry,agendaEntries,deadlineStats,calendarMonth,shiftCalendarMonth,validateAgendaEntry} from './agenda-model.js';
 
@@ -177,7 +178,7 @@ async function navigate(next,force=false,{silent=false}={}){
  reports:['trips','bookings','seats','tripLayouts','payments','cash','agenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
  agenda:['agenda','trips'],
  deadlines:['agenda','trips'],
- fleet:['fleet'],
+ fleet:['fleet','layoutLibrary','busLayouts'],
  documents:['documents','trips','receipts','docsMetadata'],
  notifications:['notifications'],
  diagnostics:['system','alerts','trips','bookings','payments','seats']
@@ -530,20 +531,53 @@ function drawControl(){
  panel('Lista passeggeri',''+visible.length+' prenotazioni per i filtri selezionati',table(['Cliente','N.','Posti','Fermata','Stato'],roster))+'</div>';
 }
 function drawLayouts(){
- const lib=get('layoutLibrary'),official=get('tripLayouts'),fleet=get('fleet').filter(x=>num(x.posti)>30);
- const rows=lib.map(l=>[
-  '<strong>'+esc(l.nome)+'</strong>',
-  num(l.configurazione?.posti_totali||0),
-  Array.isArray(l.configurazione?.rows)?l.configurazione.rows.length:'—',
-  badge(l.attivo?'Attiva':'Bozza'),dateTimeIT(l.updated_at),
-  safeLink('Esamina',l.id,'detail-layout')+' '+writeButton('Applica a viaggio','publish-trip-layout','data-id="'+esc(l.id)+'"')
- ]);
- const pub=official.map(l=>[esc(tripName(tripBy(l.viaggio_id))),num(l.configurazione?.posti_totali||0),num(l.versione),dateTimeIT(l.pubblicata_il)]);
- return intro('Piantine autobus','Schemi importati dal database aziendale: GT 53, GT 63 e configurazioni dedicate.','<button class="secondary" data-action="pdf-selected-layout" title="Scarica la piantina selezionata in PDF">↓ PDF piantina</button><button class="secondary" data-page="control">Apri Control Room</button>'+'<button class="primary" data-action="create-layout">+ Crea bozza locale</button>')+
- '<div class="cards">'+card('Layout in libreria',String(lib.length),'Schemi salvati')+card('Applicati ai viaggi',String(official.length),'Configurazioni pubblicate')+card('Bus GT',String(fleet.length),'Senza van aziendale')+card('Disponibilità',WRITES_ENABLED?'Operativa':'Protetta','Pubblicazione bloccata in collaudo')+'</div>'+
- panel('Libreria piantine','Nessuna modifica alla geometria salvata',table(['Nome','Sedili','File','Stato','Aggiornata','Azioni'],rows))+
- panel('Piantine già applicate','Rilevate da dg28_trip_layouts',table(['Viaggio','Posti','Versione','Pubblicata'],pub))+
- '<div class="alert">L’editor grafico e la pubblicazione richiedono verifiche transazionali. Non eseguire modifiche ai layout dei viaggi fino al ripristino verificato del backup.</div>';
+ const library=get('layoutLibrary'),buses=get('fleet').filter(b=>b.categoria==='GT'&&b.attivo!==false),
+  official=get('tripLayouts'),assigned=get('busLayouts');
+ const rows=library.map(l=>{
+  const refs=layoutAssociations(l.id,assigned,official),seats=seatCount(l.configurazione);
+  const compatible=eligibleGtBuses(l,buses);
+  const warn=refs.buses.length+refs.trips.length;
+  return [
+   '<strong>'+esc(l.nome||l.configurazione?.name||'Senza nome')+'</strong>'+
+    '<small class="row-sub">'+(l.attivo?'Attiva':'Archiviata')+'</small>',
+   String(seats),String(l.configurazione?.rows?.length||0),
+   refs.buses.length+' autobus · '+refs.trips.length+' viaggi',
+   badge(l.attivo?'Attiva':'Cestino'),dateTimeIT(l.updated_at),
+   '<div class="row-actions">'+
+    safeLink('Apri',l.id,'detail-layout')+
+    (l.attivo?'<button class="secondary" data-action="edit-layout" data-id="'+esc(l.id)+'">✎ Modifica</button>':'')+
+    (l.attivo?writeButton('Associa a bus','assign-bus-layout','data-id="'+esc(l.id)+'"'):'')+
+    (l.attivo?writeButton('Applica a viaggio','publish-trip-layout','data-id="'+esc(l.id)+'"'):'')+
+    (l.attivo?writeButton('Elimina','archive-layout','data-id="'+esc(l.id)+'"'):
+      writeButton('Ripristina','restore-layout','data-id="'+esc(l.id)+'"'))+
+   '</div>'+
+   (warn>0?'<small class="row-sub">La libreria è separata dai layout già pubblicati: eventuali modifiche richiedono una nuova associazione.</small>':'')
+  ];
+ });
+ const busRows=buses.map(bus=>{
+  const link=assigned.find(x=>x.autobus_id===bus.id),lib=library.find(x=>x.id===link?.layout_id);
+  return [esc(bus.titolo||bus.modello),esc(bus.targa||'—'),String(bus.posti),
+   link?'<strong>'+esc(lib?.nome||'Piantina già pubblicata')+'</strong> · v'+num(link.versione):
+    badge('Nessuna piantina ufficiale associata'),
+   writeButton(link?'Cambia piantina':'Associa piantina','choose-bus-layout','data-id="'+esc(bus.id)+'"')];
+ });
+ const pub=official.map(l=>[esc(tripName(tripBy(l.viaggio_id))),String(seatCount(l.configurazione)),num(l.versione),dateTimeIT(l.pubblicata_il)]);
+ return intro('Piantine autobus','Crea e modifica le geometrie dei GT. Salva ogni piantina, associala al mezzo corretto e applicala a un viaggio quando necessario.',
+  '<button class="secondary" data-action="pdf-selected-layout">↓ PDF piantina</button>'+
+  '<button class="secondary" data-page="control">Control Room</button>'+
+  '<button class="primary" data-action="create-layout">+ Crea nuova piantina</button>')+
+  '<div class="cards">'+card('Piantine in libreria',String(library.filter(x=>x.attivo).length),'Più '+library.filter(x=>!x.attivo).length+' archiviate')+
+  card('Piantine associate ai bus',String(assigned.length),'Predefinite sui mezzi')+
+  card('Piantine specifiche viaggio',String(official.length),'Conservate sui viaggi')+
+  card('Autobus GT',String(buses.length),'Capienza reale 53/63')+'</div>'+
+  panel('Autobus e piantine predefinite','Quando associ un layout al GT, viene utilizzato sui viaggi compatibili che non hanno una piantina specifica.',
+    table(['Autobus','Targa','Posti fisici','Piantina ufficiale','Azioni'],busRows))+
+  panel('Libreria piantine · creazione / modifica / cestino',
+   'Solo le piantine numerate correttamente e compatibili con la capienza del GT possono essere associate e pubblicate.',
+   table(['Nome','Posti','File','Associata a','Stato','Aggiornata','Azioni'],rows))+
+  panel('Piantine personalizzate dei viaggi','Le piantine dei viaggi restano autonome anche se aggiorni la configurazione di base del bus.',
+   table(['Viaggio','Posti','Versione','Ultima pubblicazione'],pub))+
+  '<div class="alert">Sicurezza: la cancellazione non distrugge piantine già in uso; le archivia. Modificare una bozza non sostituisce automaticamente i posti dei clienti. L’associazione a bus/viaggio viene convalidata da Supabase per proteggere capienza e prenotazioni.</div>';
 }
 function drawCash(){
  const cash=get('cash'),ops=get('operators'),payments=get('payments'),rentals=get('rentalPayments'),trans=get('transfers');
@@ -878,14 +912,22 @@ function drawDeadlines(){
    table(['Attività','Data','Tipo','Priorità','Stato','Azioni'],filtered.map(x=>agendaLine(x,'deadlines',trash))));
 }
 function drawFleet(){
- const fleet=get('fleet').filter(f=>num(f.posti)>7);
- const rows=fleet.map(f=>[
-  '<strong>'+esc(f.titolo||f.modello)+'</strong><small class="row-sub">'+esc(f.marca||'')+' '+esc(f.modello)+'</small>',
-  esc(f.targa||'—'),num(f.posti),badge(f.stato),badge(f.attivo?'Attivo':'Non attivo')
- ]);
- return intro('Flotta aziendale','Tre autobus Gran Turismo e il Limousine Bus; il van non è promosso nella V4.','<button class="secondary" data-action="pdf-fleet">↓ PDF flotta</button>')+
+ const fleet=get('fleet').filter(f=>num(f.posti)>7),busLayouts=get('busLayouts'),lib=get('layoutLibrary');
+ const rows=fleet.map(f=>{
+  const active=busLayouts.find(x=>x.autobus_id===f.id);
+  const draft=lib.find(x=>x.id===active?.layout_id);
+  return [
+   '<strong>'+esc(f.titolo||f.modello)+'</strong><small class="row-sub">'+esc(f.marca||'')+' '+esc(f.modello)+'</small>',
+   esc(f.targa||'—'),num(f.posti),badge(f.stato),badge(f.attivo?'Attivo':'Non attivo'),
+   f.categoria==='GT'?(active?esc(draft?.nome||'Layout pubblicato')+' · v'+num(active.versione):badge('Da associare')):'—',
+   f.categoria==='GT'?writeButton('Gestisci piantina','choose-bus-layout','data-id="'+esc(f.id)+'"'):'—'
+  ];
+ });
+ return intro('Flotta aziendale','Autobus GT e Limousine Bus: le piantine ufficiali vengono associate ai tre GT con verifica della capienza.',
+ '<button class="secondary" data-action="pdf-fleet">↓ PDF flotta</button><button class="secondary" data-page="layouts">Gestione piantine</button>')+
  '<div class="cards">'+card('Autobus ed eventi',String(fleet.length),'Escluso il van')+card('GT 53 posti',String(fleet.filter(x=>num(x.posti)===53).length),'Irizar Scania Century')+card('GT 63 posti',String(fleet.filter(x=>num(x.posti)===63).length),'Irizar Scania PB')+card('Limousine Bus',String(fleet.filter(x=>/limousine/i.test(x.titolo||'')).length),'Servizi party ed eventi')+'</div>'+
- panel('Mezzi', 'Le schede corrispondono a quelle presenti nel database',table(['Autobus','Targa','Posti','Condizione','Attività'],rows));
+ panel('Mezzi e piantine','Le schede e le associazioni corrispondono ai dati Supabase.',
+  table(['Autobus','Targa','Posti','Condizione','Attività','Piantina','Azioni'],rows));
 }
 function drawDocuments(){
  const docs=get('documents');
