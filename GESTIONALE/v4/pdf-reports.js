@@ -3,6 +3,7 @@
  * Report da snapshot già autorizzati nel browser; nessuna API di scrittura.
  */
 import {bookingActive,bookingName,num,occupancy,seatsOf,tripName} from './core.js';
+import {collectCombinedConfirmation} from './confirmation-groups.js';
 
 export const buildPdfGroups=(trips,bookings,seatRows,layouts,{tripId='',includeArchived=false}={})=>{
  const ts=(trips||[]).filter(t=>(includeArchived || !t.archiviato_at) && (!tripId || t.id===tripId));
@@ -93,6 +94,20 @@ export function pdfBooking(b,t,movements=[]){
  if(!b?.id||!t?.id)throw new Error('Prenotazione o viaggio non disponibile.');
  return savePdf(pdfEngine().makeBookingPdf(b,t,movements),safePdfFilename('CONFERMA',b.codice||b.id.slice(0,8)));
 }
+/** Consolidate matching name+surname+phone within the SAME trip/date, main and BUS BIS.
+ * Group by each boarding stop, count each booking/payment exactly once. */
+export function combinedBookingSummary(bookingId,trips,bookings,payments){
+ const source=(bookings||[]).find(b=>b.id===bookingId);
+ if(!source)throw new Error('Prenotazione non presente in archivio.');
+ return collectCombinedConfirmation(source,bookings,trips,payments);
+}
+export function pdfCombinedBooking(bookingId,trips,bookings,payments){
+ const sum=combinedBookingSummary(bookingId,trips,bookings,payments);
+ const bytes=pdfEngine().makeCombinedBookingPdf(sum);
+ return savePdf(bytes,safePdfFilename('CONFERMA_CUMULATIVA',
+  sum.date+'_'+sum.reference.replace(/\s+/g,'_')+'_'+sum.selectedId.slice(0,8)));
+}
+
 export function pdfReceipt(p,b,t){
  if(!p?.id||!b?.id||!t?.id)throw new Error('Pagamento non associato a una prenotazione valida.');
  return savePdf(pdfEngine().makeReceiptPdf(p,b,t),safePdfFilename('RIEPILOGO_PAGAMENTO',p.receipt_number||p.id.slice(0,8)));
