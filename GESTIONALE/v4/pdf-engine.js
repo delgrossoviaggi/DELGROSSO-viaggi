@@ -489,8 +489,104 @@ function toV4LayoutPdf(v4){
  if(rows.some(r=>r.length!==5||r.some(n=>typeof n==='number'&&(!Number.isInteger(n)||n<1))))throw Error('Geometria non compatibile: richieste cinque celle e sedili numerati');
  return {name:text(v4.name||'Piantina DELGROSSO'),rows,frontLabel:'FRONTE AUTOBUS',driverLabel:'AUTISTA'};
 }
+
+function makeRegisterPdf(title,entries,{subtitle='Registro operativo',emptyText='Nessun elemento registrato'}={}){
+ if(!Array.isArray(entries))throw Error('Elenco non valido');
+ const doc=new Sheet(text(title).toUpperCase().slice(0,58));doc.y=131;
+ doc.heading(text(title).toUpperCase().slice(0,70));
+ doc.paragraph(text(subtitle).slice(0,180));
+ doc.paragraph('Totale righe: '+entries.length+' | Generato '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'}));
+ if(!entries.length)doc.paragraph(emptyText);
+ entries.forEach((entry,index)=>{
+  const cols=Array.isArray(entry)?entry:[entry];
+  doc.ensure(45);
+  doc.box(42,doc.y-9,W-84,24,[.93,.95,.98]);
+  doc.label('N. '+(index+1),47,doc.y+7,8,true);
+  doc.y+=29;
+  for(const [label,value] of cols){
+   const line=text(label)+': '+text(value==null?'-':value);
+   doc.paragraph(line.length>700?line.slice(0,700):line);
+  }
+  doc.y+=5;
+ });
+ doc.ensure(32);doc.heading('NOTE');
+ doc.paragraph('Documento gestionale riservato. I valori riportati derivano dai dati consultati e non sostituiscono documenti fiscali o contabili.');
+ return doc.finish();
+}
+function makeEconomyPdf(movements,profits){
+ const entries=[];
+ for(const x of profits||[]){
+  entries.push([
+   ['Viaggio',text(x.titolo||x.destinazione)],['Partenza',date(x.data_partenza)],
+   ['Entrate',euro(Math.round((Number(x.entrate)||0)*100))],
+   ['Uscite',euro(Math.round((Number(x.uscite)||0)*100))],
+   ['Margine',euro(Math.round((Number(x.margine)||0)*100))]
+  ]);
+ }
+ for(const x of movements||[]){
+  entries.push([['Registrazione',text(x.id||'')],['Data',date(x.data_movimento)],['Categoria',text(x.categoria||'')],
+   ['Descrizione',text(x.descrizione||'')],['Tipo',text(x.tipo||'')],
+   ['Importo',euro(Math.round((Number(x.importo)||0)*100))]]);
+ }
+ return makeRegisterPdf('ECONOMIA E COSTI',entries,{subtitle:'Report redditivita dei viaggi e movimenti economici registrati'});
+}
+function makeFleetPdf(vehicles){
+ const rows=(vehicles||[]).map(v=>[
+  ['Mezzo',text(v.titolo||v.modello)],['Marca e modello',text(v.marca||'')+' '+text(v.modello||'')],
+  ['Targa',text(v.targa||'-')],['Posti',text(v.posti||'')],
+  ['Stato',text(v.stato||'')],['Attivo',v.attivo?'SI':'NO']
+ ]);
+ return makeRegisterPdf('FLOTTA AUTOBUS',rows,{subtitle:'Elenco interno dei mezzi GT e Limousine Bus'});
+}
+function makeCustomerListPdf(clients){
+ const rows=(clients||[]).map(c=>[
+  ['Cliente',text(c.nome||'')+' '+text(c.cognome||'')],
+  ['Telefono',text(c.telefono||'-')],['Email',text(c.email||'-')],
+  ['Localita',text(c.citta||'-')],['Codice',text(c.codice_cliente||'')]
+ ]);
+ return makeRegisterPdf('ANAGRAFICA CLIENTI',rows,{subtitle:'Elenco riservato: non divulgare fuori dall azienda'});
+}
+function makeRentalsPdf(rentals){
+ const rows=(rentals||[]).map(r=>[
+  ['Referente',text(r.azienda||r.referente||'-')],
+  ['Tratta',text(r.tratta_partenza||'')+' - '+text(r.tratta_destinazione||'')],
+  ['Partenza',date(r.data_partenza)],['Prezzo',euro(Math.round((Number(r.prezzo_concordato)||0)*100))],
+  ['Stato',text(r.stato_noleggio||'')]
+ ]);
+ return makeRegisterPdf('NOLEGGI AUTOBUS',rows,{subtitle:'Servizi di noleggio autobus GT'});
+}
+function makeDocumentIndexPdf(documents){
+ const rows=(documents||[]).map(d=>[
+  ['Tipo',text(d.tipo_documento||d.categoria||'Documento')],
+  ['Numero',text(d.numero_documento||d.documento_id||'-')],
+  ['Cliente',text(d.cliente||'-')],['Data',date(d.data_documento||d.created_at)],
+  ['Percorso Storage',text(d.storage_path||'-')]
+ ]);
+ return makeRegisterPdf('ARCHIVIO DOCUMENTI',rows,{subtitle:'Indice dei documenti registrati; non include copia dei file allegati'});
+}
+function makeQuotePdf(q){
+ if(!q?.id)throw Error('Preventivo non valido');
+ return makeRegisterPdf('PREVENTIVO - RIEPILOGO INTERNO',[
+  [['Numero',q.numero_preventivo||q.id],['Richiedente',text(q.nome||'')+' '+text(q.cognome||'')],
+   ['Azienda',q.azienda||'-'],['Destinazione',q.destinazione||'-'],
+   ['Data',date(q.data_partenza||q.data_viaggio)],
+   ['Passeggeri',q.numero_passeggeri||'-'],
+   ['Importo',euro(Math.round((Number(q.importo_preventivo||q.importo)||0)*100))],
+   ['Stato',q.stato||'-']]
+ ],{subtitle:'Riepilogo gestionale, non inviare come offerta contrattuale senza verifica'});
+}
+function makeInvoiceDraftPdf(i){
+ if(!i?.id)throw Error('Bozza fattura non valida');
+ return makeRegisterPdf('BOZZA CONTABILE - NON EMESSA',[
+  [['Identificativo bozza',i.id],['Tipo',i.tipo_documento||'-'],['Stato',i.stato||'-'],
+   ['Data',date(i.data_bozza)],['Imponibile',euro(Number(i.imponibile_centesimi||0))],
+   ['IVA',euro(Number(i.iva_centesimi||0))],['Totale',euro(Number(i.totale_centesimi||0))]]
+ ],{subtitle:'ATTENZIONE: bozza interna, non rappresenta una fattura elettronica o emessa'});
+}
+
 root.DG4Pdf={makeReceiptPdf,makeAgendaPdf,makeCustomerLedgerPdf,makeRentalSummaryPdf,makeCashSummaryPdf,
  makeTripPdf,makeBookingPdf,makeOperatorPdf,makeRosterPdf,makeOperationalPdf,makeLayoutPdf,
+ makeRegisterPdf,makeEconomyPdf,makeFleetPdf,makeCustomerListPdf,makeRentalsPdf,makeDocumentIndexPdf,makeQuotePdf,makeInvoiceDraftPdf,
  makeV4LayoutPdf:(config)=>makeLayoutPdf(toV4LayoutPdf(config)),toV4LayoutPdf};
 
 root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf,makeLayoutPdf,saveLayoutPdf,makeRosterPdf,makeOperationalPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
