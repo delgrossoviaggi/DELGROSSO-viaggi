@@ -1,0 +1,33 @@
+name: DG4 Rebuild — Offline Quality Gate
+on:
+  push:
+    branches:
+      - build/dg4-rebuild-20261117
+    paths:
+      - 'GESTIONALE/v4/**'
+      - 'tests/dg4-v4*.test.mjs'
+      - '.github/workflows/dg4-v4-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check Node version
+        run: node --version
+      - name: Parse core and app
+        run: |
+          node --check GESTIONALE/v4/core.js
+          node --check GESTIONALE/v4/app.js
+          node --check GESTIONALE/v4/layout-editor.js
+      - name: Unit and rendering tests (offline)
+        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs
+      - name: Forbid privileged credentials and accidental write unlock
+        run: |
+          if grep -E 'WRITES_ENABLED[[:space:]]*=[[:space:]]*true' GESTIONALE/v4/core.js; then echo 'ERROR: V4 writes unlocked!'; exit 1; fi
+          if grep -Er 'sb_secret_|SUPABASE_SERVICE_ROLE_KEY|service_role[[:space:]]*:' GESTIONALE/v4 --include='*.js' --include='*.html'; then echo 'ERROR: privileged key reference in browser'; exit 1; fi
