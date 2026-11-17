@@ -58,6 +58,16 @@ Data tecnica: 17 novembre 2026.
 - **Stato attuale:** wizard e anteprima operativi nella V4 di test. \`WRITES_ENABLED=false\`; SQL non eseguito sul database reale, quindi apertura/salvataggio BIS non attivi finché non siano certificati backup completo, Storage, ripristino isolato e test autenticato. Non abilitare semplicemente il flag di scrittura prima di questi passaggi.
 - Test automatizzati: \`tests/dg4-v4-bis-manual.test.mjs\` e \`tests/dg4-v4-core.test.mjs\`.
 
+## Giroconto quote tra viaggi · 17 novembre 2026
+- La **V4** include la nuova sezione `Giroconto quote tra viaggi`, distinta da `Giroconto tra casse` per Nicola ↔ Raffaele.
+- Dal dettaglio di una prenotazione o dalla sezione amministrativa puoi selezionare una prenotazione di origine, scegliere una prenotazione futura **già registrata** dello stesso cliente (nome, cognome e telefono), indicare la quota e motivarla.
+- La procedura verifica il registro pagamenti originale, gli eventuali rimborsi, la quota ancora disponibile e il saldo della nuova prenotazione. Il viaggio di origine deve essere annullato/non formato oppure la prenotazione di origine annullata.
+- L'anteprima rende visibili la quota da trasferire, il credito che resta sul viaggio di origine e il nuovo saldo destinazione. **Il giroconto non costituisce nuovo incasso.**
+- La futura scrittura consiste in una sola transazione con `request_id` idempotente, blocco delle due prenotazioni, protezioni contro doppi giroconti e registro audit. La bozza SQL per la migrazione è `supabase/patches/dg4_giroconto_quote_viaggi_STAGING_ONLY.sql` e NON È STATA ESEGUITA IN PRODUZIONE.
+- Il registro non è installato nel database aziendale: la schermata lo segnala e permette solo una simulazione locale. La V4 conserva `WRITES_ENABLED=false`. Non modificare manualmente `prenotazioni.pagato` o registrare un nuovo pagamento per simulare il giroconto: farebbe risultare falso il totale degli incassi.
+- Test offline: `tests/dg4-v4-credit-transfers.test.mjs` e controlli di rendering della V4; non equivalgono a una certificazione operativa con gli account reali.
+- **Prima dell'attivazione:** verificare backup DB e file Storage, ripristino isolato, transazioni con due operatori concorrenti, permessi RLS, rimborso successivo a un giroconto, PDF del nuovo credito e riconciliazione economica per viaggio. Solo dopo eseguire una migrazione revisionata e pubblicare il gestionale.
+
 ## Trasferimento partecipanti, numerazione sedili e BUS BIS
 - La procedura `Gestisci` è raggiungibile da **Prenotazioni** e dalla pagina dedicata **Spostamenti posti / BUS BIS / date**.
 - **Stessa data**: solo autobus che appartengono alla stessa partenza logica (stesso `bis_parent_id`/ID capofila), con scelta manuale di sedili liberi e capienza verificata. Il server rifiuta le sovrapposizioni tramite `dg_manage_booking_seats_v1`. Il client esclude posti aziendali riservati, posti fuori servizio e altre prenotazioni.
