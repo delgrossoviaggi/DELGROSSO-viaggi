@@ -38,6 +38,40 @@ const searchField=(placeholder='Cerca cliente, viaggio, codice…')=>'<input typ
 const writeBadge=()=>WRITES_ENABLED?'':'<span class="badge warn">Modifiche bloccate fino al backup verificato</span>';
 const writeButton=(text,action,attrs='')=>'<button class="primary" data-action="'+action+'" '+attrs+(WRITES_ENABLED?'':' disabled title="Sblocco dopo backup e collaudo"')+'>'+esc(text)+'</button>';
 const get=t=>state.all[t]||[];
+
+/** The new giroconto ledger is an optional STAGING schema until backup/restore.
+ * Never represent a failed/unavailable ledger as zero transfers. */
+async function refreshCreditState(){
+ try{
+  const [transfers,balances]=await Promise.all([
+   records('creditTransfers',{force:true,limit:10000}),
+   records('creditBalances',{force:true,limit:10000})
+  ]);
+  state.all.creditTransfers=transfers;state.all.creditBalances=balances;
+  creditLedgerState='ready';
+ }catch(error){
+  state.all.creditTransfers=null;state.all.creditBalances=null;
+  creditLedgerState='schema-unavailable';
+ }
+}
+const creditAvailable=()=>creditLedgerState==='ready';
+function creditBalance(b){
+ if(!b)return null;
+ if(creditAvailable()){
+  const row=get('creditBalances').find(x=>x.prenotazione_id===b.id);
+  if(!row)throw new Error('Prenotazione assente dal registro crediti Supabase.');
+  return {
+   effective:centesimi(row.pagato_effettivo||0),
+   incoming:centesimi(row.quote_ricevute||0),
+   outgoing:centesimi(row.quote_trasferite||0),
+   remaining:centesimi(row.saldo_effettivo||0),
+   mismatch:row.incassi_da_riconciliare===true,
+   availableCredit:Math.max(0,centesimi(row.pagato_effettivo||0))
+  };
+ }
+ return bookingCreditBalance(b,get('payments'),[]);
+}
+
 const filterTerm = (...values) => !state.search || values.some(v=>String(v||'').toLocaleLowerCase('it').includes(state.search.toLocaleLowerCase('it')));
 const activeTrip=t=>!t.archiviato_at;
 const sortTrip=(a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza))||String(a.ora_partenza).localeCompare(String(b.ora_partenza))||num(a.bis_numero)-num(b.bis_numero);
