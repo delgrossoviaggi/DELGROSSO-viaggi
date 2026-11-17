@@ -1,0 +1,38 @@
+name: DG39 Emergency Public Read-only Health
+on:
+  push:
+    paths:
+      - ".github/workflows/dg39-emergency-health.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Inspect published trip API (no credentials, no writes)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --retry 2 --retry-all-errors --max-time 30 \
+            -H 'Content-Type: application/json' \
+            -X POST 'https://bhsanrbadsqcpbtxupmr.supabase.co/functions/v1/gestionale-bridge' \
+            --data '{"action":"trips"}' > /tmp/dg39-public-trips.json
+          node -e "
+            const fs=require('fs');
+            const a=JSON.parse(fs.readFileSync('/tmp/dg39-public-trips.json','utf8'));
+            if(!Array.isArray(a)||a.length<5)throw Error('Non risultano visibili almeno 5 viaggi pubblicati: '+JSON.stringify(a).slice(0,150));
+            const future=a.filter(x=>x.data_partenza>='2026-11-17');
+            if(!future.length)throw Error('Nessuna partenza futura visibile');
+            console.log('PASS: '+a.length+' viaggi pubblici, '+future.length+' futuri. Nominativi non visualizzati.');
+          "
+      - name: Inspect web site and V2 static login/suite routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in /viaggi.html /GESTIONALE/index.html /GESTIONALE/suite/index.html /GESTIONALE/delgrosso-logo-originale-bianco.png; do
+            status="$(curl -Ls --output /dev/null --write-out '%{http_code}' --max-time 18 "https://www.delgrossoviaggi.it$path")"
+            printf '%s %s\n' "$status" "$path"
+            test "$status" = 200
+          done
