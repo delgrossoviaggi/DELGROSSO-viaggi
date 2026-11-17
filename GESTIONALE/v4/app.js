@@ -3,6 +3,7 @@ import {
  seatsOf,uniquePhones,occupancy,breakdown,login,resume,logout,records,rpcRead,writeRpc,mutate,
  currentUser,clearCache,signedReceiptPath
 } from './core.js';
+import * as Pdf from './pdf-reports.js';
 
 const $=id=>document.getElementById(id);
 const NAV={
@@ -64,8 +65,8 @@ async function navigate(next,force=false){
  layouts:['trips','fleet','layoutLibrary','tripLayouts','busLayouts'],
  cash:['cash','operators','payments','transfers','trips','bookings'],
  economy:['economy','profit','trips'],
- customers:['customers','bookings','payments'],
- rentals:['rentals'],
+ customers:['customers','bookings','payments','trips'],
+ rentals:['rentals','rentalPayments'],
  agenda:['agenda','trips'],
  fleet:['fleet'],
  documents:['documents','trips'],
@@ -126,7 +127,7 @@ function drawTrips(){
    '<div class="row-actions">'+safeLink('Dettagli',t.id,'detail-trip')+'</div>'
   ];
  });
- return intro('Viaggi e partenze','Archivio originale e programmazione della flotta.','<button class="secondary" data-action="refresh">↻ Aggiorna</button>'+writeButton('+ Nuovo viaggio','create-trip'))+
+ return intro('Viaggi e partenze','Archivio originale e programmazione della flotta.','<button class="secondary" data-action="pdf-all-roster">↓ PDF prenotati</button><button class="secondary" data-action="refresh">↻ Aggiorna</button>'+writeButton('+ Nuovo viaggio','create-trip'))+
  '<div class="filters">'+searchField('Filtra viaggi, destinazioni o codici')+writeBadge()+'</div>'+
  panel('Tutti i viaggi','Non sono stati creati viaggi dimostrativi',table(['Viaggio','Data','Mezzo','Prenotati','Quota','Stato','Azioni'],rows));
 }
@@ -145,7 +146,7 @@ function drawBookings(){
   ];
  });
  const sum=data.filter(bookingActive).reduce((n,b)=>n+num(b.posti),0);
- return intro('Prenotazioni','Anagrafica, posti, fermate, pagamenti e check-in.','<button class="secondary" data-action="export-bookings">↓ CSV</button>'+writeButton('+ Prenotazione','create-booking'))+
+ return intro('Prenotazioni','Anagrafica, posti, fermate, pagamenti e check-in.','<button class="secondary" data-action="pdf-all-roster">↓ PDF tutti i viaggi</button><button class="secondary" data-action="export-bookings">↓ CSV</button>'+writeButton('+ Prenotazione','create-booking'))+
  '<div class="filters">'+selectTrip(trips,state.trip)+searchField()+'<select id="filter-bookings-state"><option value="active" '+(state.bookingsState==='active'?'selected':'')+'>Attive</option><option value="all" '+(state.bookingsState==='all'?'selected':'')+'>Tutte</option><option value="cancelled" '+(state.bookingsState==='cancelled'?'selected':'')+'>Annullate</option></select></div>'+
  '<div class="cards">'+card('Prenotazioni trovate',String(data.length),'Con filtri selezionati')+card('Persone',String(sum),'Solo prenotazioni attive')+card('Pagamenti',String(pay.length),'Movimenti nel database')+card('Archivio originale',String(get('bookings').length),'Nessun dato sostitutivo')+'</div>'+
  panel('Elenco prenotazioni','Premi sul nominativo per i dettagli',table(['Cliente','Viaggio','Posti','Fermata','Importi','Stato','Check-in','Scheda'],rows));
@@ -178,7 +179,7 @@ function drawControl(){
   b.checkin_effettuato?badge('Check-in fatto'):badge('Da effettuare')
  ]);
  const seatMarkup=rows.length ? rowForSeats(rows,occu) : '<div class="alert">Questo viaggio non ha ancora una piantina ufficiale pubblicata nel database. Non viene mostrata una disposizione inventata. Puoi consultare l’elenco posti assegnati.</div>';
- return intro('Control Room','Piantina ufficiale, passeggeri, fermate e preparazione della lista autista.','<button class="secondary" data-action="print-roster">▤ Lista posti PDF</button><button class="secondary" data-action="copy-phones">Copia numeri</button>')+
+ return intro('Control Room','Piantina ufficiale, passeggeri, fermate e preparazione della lista autista.','<button class="secondary" data-action="pdf-operational">↓ PDF Control Room</button><button class="secondary" data-action="pdf-roster">↓ Elenco prenotati PDF</button><button class="secondary" data-action="pdf-layout">↓ Piantina PDF</button><button class="secondary" data-action="copy-phones">Copia numeri</button>')+
  '<div class="filters">'+selectTrip(trips,state.trip,'Seleziona viaggio')+'<select id="filter-stop"><option value="">Tutte le fermate</option>'+stops.map(s=>'<option value="'+esc(s)+'" '+(s===state.stop?'selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+searchField('Cerca nome o posto')+'</div>'+
  (trip?'<div class="cards">'+card('Viaggio',dateIT(trip.data_partenza),tripName(trip))+card('Passeggeri attivi',String(active.reduce((n,b)=>n+num(b.posti),0)),active.length+' prenotazioni')+card('Posti nel registro',String(occu.map.size),num(trip.posti_totali)+' capienza')+card('Check-in',String(active.filter(b=>b.checkin_effettuato).length),active.length+' prenotazioni')+'</div>':'')+
  (occu.warnings.length?'<div class="error-panel">'+esc(occu.warnings.join(' · '))+'</div>':'')+
@@ -195,7 +196,7 @@ function drawLayouts(){
   safeLink('Esamina',l.id,'detail-layout')
  ]);
  const pub=official.map(l=>[esc(tripName(tripBy(l.viaggio_id))),num(l.configurazione?.posti_totali||0),num(l.versione),dateTimeIT(l.pubblicata_il)]);
- return intro('Piantine autobus','Schemi importati dal database aziendale: GT 53, GT 63 e configurazioni dedicate.','<button class="secondary" data-page="control">Apri Control Room</button>'+'<button class="primary" data-action="create-layout">+ Crea bozza locale</button>')+
+ return intro('Piantine autobus','Schemi importati dal database aziendale: GT 53, GT 63 e configurazioni dedicate.','<button class="secondary" data-action="pdf-selected-layout" title="Scarica la piantina selezionata in PDF">↓ PDF piantina</button><button class="secondary" data-page="control">Apri Control Room</button>'+'<button class="primary" data-action="create-layout">+ Crea bozza locale</button>')+
  '<div class="cards">'+card('Layout in libreria',String(lib.length),'Schemi salvati')+card('Applicati ai viaggi',String(official.length),'Configurazioni pubblicate')+card('Bus GT',String(fleet.length),'Senza van aziendale')+card('Disponibilità',WRITES_ENABLED?'Operativa':'Protetta','Pubblicazione bloccata in collaudo')+'</div>'+
  panel('Libreria piantine','Nessuna modifica alla geometria salvata',table(['Nome','Sedili','File','Stato','Aggiornata','Azioni'],rows))+
  panel('Piantine già applicate','Rilevate da dg28_trip_layouts',table(['Viaggio','Posti','Versione','Pubblicata'],pub))+
@@ -216,7 +217,7 @@ function drawCash(){
   esc(p.incassato_da||ops.find(x=>x.user_id===p.incassato_da_user_id)?.nome||'—'),
   esc(p.receipt_number||'—')
  ]);
- return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+writeButton('+ Registra incasso','new-payment'))+
+ return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="pdf-cash">↓ PDF contabilità</button><button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+writeButton('+ Registra incasso','new-payment'))+
  cards+'<div class="section-grid">'+cardOperators+'</div>'+
  panel('Registro incassi e ricevute','Dati originali da pagamenti · ultime 80 righe',table(['Data','Cliente','Viaggio','Tipo','Importo','Incassato da','Ricevuta'],rows))+
  panel('Trasferimenti tra operatori','Lo spostamento quote utilizza una RPC transazionale',table(['Data','Da','A','Importo','Stato'],trans.map(t=>[dateIT(t.data_trasferimento),esc(ops.find(o=>o.user_id===t.da_operatore_user_id)?.nome||'—'),esc(ops.find(o=>o.user_id===t.a_operatore_user_id)?.nome||'—'),money(t.importo),badge(t.stato)])),writeButton('+ Trasferimento','new-transfer'));
@@ -226,7 +227,7 @@ function drawEconomy(){
  const income=movements.filter(m=>/entrata|incass/i.test(m.tipo||'')).reduce((a,m)=>a+num(m.importo),0);
  const out=movements.filter(m=>/uscita|costo|spesa/i.test(m.tipo||'')).reduce((a,m)=>a+num(m.importo),0);
  const rows=profit.map(t=>[esc(t.titolo||t.destinazione),dateIT(t.data_partenza),money(t.entrate),money(t.uscite),'<b>'+money(t.margine)+'</b>']);
- return intro('Economia e costi','Marginalità dei viaggi e registro dei movimenti contabili.')+
+ return intro('Economia e costi','Marginalità dei viaggi e registro dei movimenti contabili.','<button class="secondary" data-action="pdf-economy">↓ PDF economia</button>')+
  '<div class="cards">'+card('Movimenti economici',String(movements.length),'Da economia_movimenti')+card('Entrate da movimenti',money(income),'Secondo campo tipo')+card('Uscite da movimenti',money(out),'Secondo campo tipo')+card('Bilancio movimenti',money(income-out),'Entrate meno uscite')+'</div>'+
  panel('Redditività per viaggio','Vista ufficiale dg_viaggi_redditivita',table(['Viaggio','Partenza','Entrate','Uscite','Margine'],rows))+
  panel('Registro movimenti','Registrazioni originali, senza alterare l’origine',table(['Data','Categoria','Descrizione','Tipo','Importo','Operatore'],movements.slice().sort((a,b)=>String(b.data_movimento).localeCompare(String(a.data_movimento))).slice(0,150).map(m=>[dateIT(m.data_movimento),esc(m.categoria),esc(m.descrizione),badge(m.tipo),money(m.importo),esc(m.operatore)])));
@@ -235,9 +236,9 @@ function drawCustomers(){
  const customers=get('customers').filter(c=>filterTerm(c.nome,c.cognome,c.telefono,c.email,c.codice_cliente));
  const books=get('bookings'),rows=customers.map(c=>[
   '<b>'+esc([c.nome,c.cognome].filter(Boolean).join(' '))+'</b>',
-  esc(c.telefono||'—'),esc(c.email||'—'),esc(c.citta||'—'),badge(c.stato_cliente),esc(c.codice_cliente||short(c.id))
+  esc(c.telefono||'—'),esc(c.email||'—'),esc(c.citta||'—'),badge(c.stato_cliente),'<span>'+esc(c.codice_cliente||short(c.id))+'</span><small class="row-sub">'+safeLink('Fascicolo PDF',c.id,'pdf-customer')+'</small>'
  ]);
- return intro('Anagrafica clienti','Storico aziendale originale e collegamento ai pagamenti.','<button class="secondary" data-action="export-customers">↓ CSV</button>'+writeButton('+ Nuovo cliente','create-customer'))+
+ return intro('Anagrafica clienti','Storico aziendale originale e collegamento ai pagamenti.','<button class="secondary" data-action="pdf-customers">↓ PDF elenco clienti</button><button class="secondary" data-action="export-customers">↓ CSV</button>'+writeButton('+ Nuovo cliente','create-customer'))+
  '<div class="filters">'+searchField('Cerca per nome, telefono, email o codice')+'</div>'+
  '<div class="cards">'+card('Clienti a sistema',String(get('customers').length),'Anagrafiche Supabase')+card('Clienti in vista',String(customers.length),'Dopo ricerca')+card('Prenotazioni',String(books.length),'Storico collegabile')+card('Fascicoli',WRITES_ENABLED?'Attivi':'Consultabili','Fase di collaudo')+'</div>'+
  panel('Elenco clienti','Informazioni riservate agli operatori autorizzati',table(['Nominativo','Telefono','Email','Città','Stato','Codice'],rows));
@@ -248,11 +249,11 @@ function drawRentals(){
   '<strong>'+esc(n.azienda||n.referente||'Noleggio')+'</strong><small class="row-sub">'+esc(n.telefono||'')+'</small>',
   dateIT(n.data_partenza)+' <span class="small muted">'+esc(String(n.ora_partenza||'').slice(0,5))+'</span>',
   esc(n.tratta_partenza)+' → '+esc(n.tratta_destinazione),
-  num(n.passeggeri),money(n.prezzo_concordato),money(n.acconto),badge(n.stato_noleggio),badge(n.stato_pagamento)
+  num(n.passeggeri),money(n.prezzo_concordato),money(n.acconto),badge(n.stato_noleggio),badge(n.stato_pagamento),safeLink('PDF',n.id,'pdf-rental')
  ]);
- return intro('Noleggi autobus','Gestione noleggi GT, servizi privati ed eventi.','<button class="secondary" data-action="refresh">↻ Aggiorna</button>'+writeButton('+ Noleggio','create-rental'))+
+ return intro('Noleggi autobus','Gestione noleggi GT, servizi privati ed eventi.','<button class="secondary" data-action="pdf-rentals">↓ PDF noleggi</button><button class="secondary" data-action="refresh">↻ Aggiorna</button>'+writeButton('+ Noleggio','create-rental'))+
  '<div class="filters">'+searchField('Cerca azienda, referente o destinazione')+'</div>'+
- panel('Servizi e contratti','Dati da noleggi_bus',table(['Cliente','Partenza','Tratta','Pax','Prezzo','Acconto','Stato','Pagamento'],rows));
+ panel('Servizi e contratti','Dati da noleggi_bus',table(['Cliente','Partenza','Tratta','Pax','Prezzo','Acconto','Stato','Pagamento','Scheda'],rows));
 }
 function drawAgenda(){
  const items=get('agenda').filter(a=>filterTerm(a.titolo,a.descrizione,a.tipo)).sort((a,b)=>String(a.data_scadenza).localeCompare(String(b.data_scadenza)));
@@ -261,7 +262,7 @@ function drawAgenda(){
   dateIT(a.data_scadenza),badge(a.priorita),badge(a.stato),esc(a.tipo),
   writeButton('✓ Completa','complete-agenda','data-id="'+esc(a.id)+'"')
  ]);
- return intro('Agenda e scadenze','Ripristino della vera agenda presente su Supabase.','<button class="secondary" data-action="export-agenda">↓ Esporta</button>'+writeButton('+ Nuovo impegno','create-agenda'))+
+ return intro('Agenda e scadenze','Ripristino della vera agenda presente su Supabase.','<button class="secondary" data-action="pdf-agenda">↓ PDF agenda</button><button class="secondary" data-action="export-agenda">↓ CSV</button>'+writeButton('+ Nuovo impegno','create-agenda'))+
  '<div class="filters">'+searchField('Cerca un impegno')+'</div>'+
  '<div class="cards">'+card('Scadenze archiviate',String(get('agenda').length),'Impegni reali')+card('In vista',String(items.length),'Secondo ricerca')+card('In ritardo',String(items.filter(a=>a.data_scadenza<todayItaly()&&!/complet/i.test(a.stato)).length),'Richiedono verifica')+card('Priorità alta',String(items.filter(a=>/alta|urgente/i.test(a.priorita)).length),'Da seguire')+'</div>'+
  panel('Registro agenda','Scadenze ordinate dalla più vicina',table(['Attività','Scadenza','Priorità','Stato','Tipo','Azioni'],rows));
@@ -272,7 +273,7 @@ function drawFleet(){
   '<strong>'+esc(f.titolo||f.modello)+'</strong><small class="row-sub">'+esc(f.marca||'')+' '+esc(f.modello)+'</small>',
   esc(f.targa||'—'),num(f.posti),badge(f.stato),badge(f.attivo?'Attivo':'Non attivo')
  ]);
- return intro('Flotta aziendale','Tre autobus Gran Turismo e il Limousine Bus; il van non è promosso nella V4.')+
+ return intro('Flotta aziendale','Tre autobus Gran Turismo e il Limousine Bus; il van non è promosso nella V4.','<button class="secondary" data-action="pdf-fleet">↓ PDF flotta</button>')+
  '<div class="cards">'+card('Autobus ed eventi',String(fleet.length),'Escluso il van')+card('GT 53 posti',String(fleet.filter(x=>num(x.posti)===53).length),'Irizar Scania Century')+card('GT 63 posti',String(fleet.filter(x=>num(x.posti)===63).length),'Irizar Scania PB')+card('Limousine Bus',String(fleet.filter(x=>/limousine/i.test(x.titolo||'')).length),'Servizi party ed eventi')+'</div>'+
  panel('Mezzi', 'Le schede corrispondono a quelle presenti nel database',table(['Autobus','Targa','Posti','Condizione','Attività'],rows));
 }
@@ -282,9 +283,9 @@ function drawDocuments(){
   badge(d.tipo_documento),esc(d.numero_documento||short(d.documento_id)),
   esc(d.cliente||'—'),esc(d.viaggio||tripName(tripBy(d.viaggio_id))),
   dateIT(d.data_documento),money(d.importo),
-  '<span class="muted small">'+esc(d.storage_path?'Archiviato in Storage':'Nessun file')+'</span>'
+  (d.storage_path?safeLink('Apri PDF',d.documento_id,'open-stored-document'):'<span class="muted small">Non archiviato</span>')
  ]);
- return intro('Documenti e ricevute','Inventario PDF e conferme dei clienti; i file privati sono protetti da Supabase Storage.')+
+ return intro('Documenti e ricevute','Inventario PDF e conferme dei clienti; i file privati sono protetti da Supabase Storage.','<button class="secondary" data-action="pdf-document-inventory">↓ PDF archivio</button>')+
  '<div class="cards">'+card('Voci documentali',String(docs.length),'Vista archivio_documenti')+card('Ricevute private','237','Inventario Storage precedente')+card('Locandine','56','Inventario Storage precedente')+card('Backup','Da verificare','Non sono copie certificate')+'</div>'+
  panel('Archivio documenti','Lettura dal database; i file privati non sono resi pubblici',table(['Tipo','Numero','Cliente','Viaggio','Data','Importo','Documento'],rows));
 }
@@ -318,7 +319,7 @@ function tripDetail(id){
  '<div><small>Quota</small><strong>'+money(t.prezzo)+'</strong></div>'+
  '<div><small>Visibilità</small><strong>'+esc(t.pubblicato==='SI'?'Pubblicato sul sito':'Non pubblicato')+'</strong></div>'+
  '</div><p class="help">ID viaggio: '+esc(t.id)+' · Il BUS BIS mantiene il proprio ID, i propri posti e le prenotazioni separate.</p>'+
- '<div class="action-row"><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+'</div>');
+ '<div class="action-row"><button class="secondary" data-action="pdf-roster" data-id="'+esc(id)+'">↓ Elenco PDF</button><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+'</div>');
 }
 function bookingDetail(id){
  const b=get('bookings').find(x=>x.id===id);if(!b)return showMessage('Prenotazione non trovata',true);
@@ -333,7 +334,7 @@ function bookingDetail(id){
  ].map(([k,v])=>'<div><small>'+esc(k)+'</small><strong>'+esc(v||'—')+'</strong></div>').join('')+
  '</div><h3 class="section-title">Pagamenti collegati</h3>'+
  table(['Data','Tipo','Importo','N. ricevuta'],pays.map(p=>[dateIT(p.data_pagamento),badge(p.tipo),money(p.importo),esc(p.receipt_number||'—')]))+
- '<div class="action-row">'+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
+ '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
  writeButton('Sposta su altro viaggio','move-booking','data-id="'+esc(b.id)+'"')+
  writeButton('Aggiorna check-in','checkin-booking','data-id="'+esc(b.id)+'"')+'</div>'+
  '<p class="help">Le quote pagate non devono essere cancellate senza procedura di rimborso. Le prenotazioni esistenti non vengono modificate in questa fase.</p>');
@@ -347,7 +348,7 @@ function layoutDetail(id){
  '<div><small>File</small><strong>'+num(l.configurazione?.rows?.length)+'</strong></div>'+
  '<div><small>Modifica</small><strong>Protetta fino al backup</strong></div></div>'+
  '<div class="layout-panel">'+(Array.isArray(l.configurazione?.rows)?rowForSeats(l.configurazione.rows,{map:new Map()}):'<div class="alert">Layout senza matrice valida.</div>')+'</div>'+
- '<div class="action-row"><button class="secondary" data-action="draft-layout" data-id="'+esc(l.id)+'">✎ Modifica una copia locale</button></div>');
+ '<div class="action-row"><button class="secondary" data-action="pdf-library-layout" data-id="'+esc(l.id)+'">↓ PDF piantina</button><button class="secondary" data-action="draft-layout" data-id="'+esc(l.id)+'">✎ Modifica una copia locale</button></div>');
 }
 function csvExport(headers,rows,file){
  const quote=x=>'"'+String(x??'').replaceAll('"','""').replace(/^[=+\-@]/,'\u0027$&')+'"';
@@ -367,6 +368,40 @@ function printRoster(){
 }
 async function handleAction(action,id,button){
  if(action==='refresh'){clearCache();showMessage('Aggiornamento in corso.');await navigate(page,true);return;}
+
+ // Tutte le operazioni PDF sono READ ONLY: i dati usati sono già stati letti con JWT e RLS.
+ const tripID=id||state.trip||'';
+ const done=report=>showMessage('PDF creato: '+report.filename+' ('+Math.round(report.bytes/1024)+' KB). Puoi salvarlo in File anche da iPhone.');
+ if(action==='pdf-roster')return done(Pdf.pdfRoster(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),tripID));
+ if(action==='pdf-all-roster')return done(Pdf.pdfRoster(get('trips'),get('bookings'),get('seats'),get('tripLayouts')));
+ if(action==='pdf-operational')return done(Pdf.pdfOperational(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),tripID));
+ if(action==='pdf-layout'){
+   const l=get('tripLayouts').find(x=>x.viaggio_id===tripID);
+   if(!l?.configurazione)throw new Error('Piantina ufficiale non presente: nessun PDF inventato.');
+   return done(Pdf.pdfSeatMap(l.configurazione,tripName(tripBy(tripID))));
+ }
+ if(action==='pdf-library-layout'||action==='pdf-selected-layout'){
+   const item=get('layoutLibrary').find(x=>x.id===(id||get('layoutLibrary')[0]?.id));
+   if(!item)throw new Error('Nessuna piantina nella libreria.');
+   return done(Pdf.pdfSeatMap(item.configurazione,item.nome));
+ }
+ if(action==='pdf-booking'){
+   const b=get('bookings').find(x=>x.id===id);
+   if(!b)throw new Error('Prenotazione non trovata.');
+   return done(Pdf.pdfBooking(b,tripBy(b.viaggio_id),get('payments').filter(p=>p.prenotazione_id===id)));
+ }
+ if(action==='pdf-cash')return done(Pdf.pdfCash(get('cash'),get('payments')));
+ if(action==='pdf-agenda')return done(Pdf.pdfAgenda(get('agenda')));
+ if(action==='pdf-customer'){
+   const c=get('customers').find(x=>x.id===id);
+   if(!c)throw new Error('Cliente non trovato.');
+   return done(Pdf.pdfCustomer(c,get('bookings'),get('payments'),get('trips')));
+ }
+ if(action==='pdf-rental'){
+   const n=get('rentals').find(x=>x.id===id);if(!n)throw new Error('Noleggio non trovato.');
+   return done(Pdf.pdfRental(n,get('rentalPayments')));
+ }
+
  if(action==='detail-trip'){tripDetail(id);return;}
  if(action==='detail-booking'){bookingDetail(id);return;}
  if(action==='detail-layout'){layoutDetail(id);return;}
