@@ -1634,18 +1634,54 @@ async function handleAction(action,id,button){
    '<button type="submit" class="primary span-2">Salva richiesta senza assegnare posti</button></form>');
  }
  if(action==='save-layout-draft'){
-  if(!localEditor?.snapshot)throw new Error('Bozza piantina non disponibile.');
-  const cfg=localEditor.snapshot();
-  const input=document.getElementById('dg4-draft-name');
-  const name=String(input?.value||cfg.name||'').trim();
-  if(!name||name.length>100)throw new Error('Nome piantina obbligatorio.');
+  if(!localEditor?.snapshot)throw new Error('Editor piantina non disponibile.');
+  const cfg=localEditor.snapshot(),name=String(document.getElementById('dg4-draft-name')?.value||cfg.name||'').trim();
+  if(!name||name.length>100)throw new Error('Il nome della piantina è obbligatorio (max 100 caratteri).');
   cfg.name=name;
-  const validated=await rpcRead('dg28_validate_layout_v1',{p_config:cfg,p_capacity:num(cfg.posti_totali)});
-  if(!validated?.valid)throw new Error('Numerazione sedili non valida.');
-  const created=await mutate('layoutLibrary','POST',{nome:name,configurazione:cfg,attivo:true,created_by:currentUser()});
-  if(!Array.isArray(created)||!created[0]?.id)throw new Error('Salvataggio non confermato, verificare la libreria prima di riprovare.');
-  closeModal();showMessage('Bozza piantina salvata: '+name+'. Per applicarla al viaggio usare la funzione dedicata.');
-  return navigate('layouts',true);
+  const capacity=seatCount(cfg);
+  if(!isCompleteLayout(cfg,capacity)||capacity<1||capacity>100)
+   throw new Error('La piantina ha una numerazione incompleta o duplicata. Rinumera e completa i posti prima di salvare su Supabase.');
+  const validated=await rpcRead('dg28_validate_layout_v1',{p_config:cfg,p_capacity:capacity});
+  if(!validated?.valid)throw new Error('La disposizione non supera il controllo Supabase.');
+  const original=layoutEditorId?get('layoutLibrary').find(l=>l.id===layoutEditorId):null;
+  let changed;
+  if(layoutEditorId){
+   if(!original?.attivo||!original.updated_at)throw new Error('Piantina archiviata o versione non aggiornata: ricarica la libreria.');
+   changed=await mutate('layoutLibrary','PATCH',{
+    nome:name,configurazione:cfg,updated_by:currentUser(),updated_at:new Date().toISOString()
+   },layoutEditorId,{expectedUpdatedAt:original.updated_at});
+  }else{
+   changed=await mutate('layoutLibrary','POST',{
+    nome:name,configurazione:cfg,attivo:true,created_by:currentUser(),updated_by:currentUser()
+   });
+  }
+  if(!Array.isArray(changed)||changed.length!==1||!changed[0]?.id)
+   throw new Error('Salvataggio non confermato: verificare il database prima di ripetere.');
+  layoutEditorId=null;localEditor=null;closeModal();
+  await navigate('layouts',true);
+  showMessage('Piantina '+(original?'modificata':'creata')+' nella libreria Supabase: '+name+
+    '. Per renderla ufficiale sul sito, associala al bus o al viaggio desiderato.');
+  return;
+ }
+ if(action==='archive-layout'||action==='restore-layout'){
+  const selected=get('layoutLibrary').find(l=>l.id===id);
+  if(!selected?.updated_at)throw new Error('Piantina non aggiornata: ricarica la libreria.');
+  const restore=action==='restore-layout';
+  if(restore&&selected.attivo)throw new Error('La piantina è già attiva.');
+  if(!restore&&!selected.attivo)throw new Error('La piantina è già nel cestino.');
+  const impact=archivePlan(selected,get('busLayouts'),get('tripLayouts'));
+  const message=restore?'Ripristinare "'+selected.nome+'" nella libreria attiva?':
+   'Eliminare "'+selected.nome+'" dalla libreria attiva?\n'+impact.message+
+   '\nLe eventuali piantine ufficiali già usate da bus e viaggi saranno conservate.';
+  if(!confirm(message))return;
+  const updated=await mutate('layoutLibrary','PATCH',{
+   attivo:restore,updated_by:currentUser(),updated_at:new Date().toISOString()
+  },id,{expectedUpdatedAt:selected.updated_at});
+  if(!Array.isArray(updated)||updated.length!==1||updated[0].id!==id)
+   throw new Error('Archiviazione non confermata. Verifica il registro prima di riprovare.');
+  await navigate('layouts',true);
+  showMessage(restore?'Piantina ripristinata.':'Piantina spostata nel cestino: i layout già pubblicati non sono stati rimossi.');
+  return;
  }
 
  if(action==='cancel-booking'){
@@ -1886,6 +1922,23 @@ async function handleSubmit(form){
   });
   if(!Array.isArray(result)||!result[0]?.id)throw new Error('Richiesta in lista d attesa non confermata.');
   success='Richiesta salvata in lista d attesa, senza assegnare sedili.';
+ } else if(type==='assign-bus-layout'){
+  const bus=get('fleet').find(x=>x.id===s('bus'));
+  const layout=get('layoutLibrary').find(x=>x.id===s('layout'));
+  if(!bus||!layout||!eligibleGtBuses(layout,[bus]).length)
+   throw new Error('Autobus o piantina non compatibili: il GT deve avere esattamente i posti fisici numerati.');
+  const verified=await rpcRead('dg28_validate_layout_v1',{
+   p_config:layout.configurazione,p_capacity:num(bus.posti)
+  });
+  if(!verified?.valid)throw new Error('Validazione ufficiale della piantina non superata.');
+  if(!confirm('Associare la piantina "'+layout.nome+'" al mezzo '+(bus.titolo||bus.modello)+
+   ' ('+bus.posti+' posti)? I viaggi con una propria piantina non saranno modificati.'))return;
+  const outcome=await writeRpc('dg28_publish_bus_layout_v1',{
+   p_autobus_id:bus.id,p_layout_id:layout.id
+  });
+  if(!outcome?.success||outcome?.autobus_id!==bus.id||outcome?.layout_id!==layout.id)
+   throw new Error('Associazione non confermata: controllare i layout pubblicati prima di ritentare.');
+  success='Piantina associata al mezzo '+(bus.titolo||bus.modello)+' e sincronizzata con Supabase.';
  } else if(type==='publish-layout'){
   const l=get('layoutLibrary').find(x=>x.id===s('layout')),t=tripBy(s('viaggio'));
   if(!l||!t)throw new Error('Viaggio o piantina non trovati.');
