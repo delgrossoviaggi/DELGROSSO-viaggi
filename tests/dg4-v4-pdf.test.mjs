@@ -53,6 +53,22 @@ test('Multi-page rosters have correct page count and xref',()=>{
  const count=doc.match(/\/Count (\d+)/);
  assert.ok(count && Number(count[1])>=2,'Roster pagination failed');
 });
+
+test('All GT 53/57/63 seat schemes produce real, valid full-layout PDFs',()=>{
+ for(const seats of [53,57,63]){
+  let counter=0;
+  const rows=Array.from({length:Math.ceil(seats/4)},(_,i)=>({
+    rowNumber:i+1,cells:Array.from({length:5},(_,pos)=>{
+      if(pos===2)return {type:'aisle'};
+      counter++;
+      return counter<=seats?{type:'seat',id:String(counter),label:String(counter)}:{type:'empty'};
+    })
+  }));
+  const file=validPDF(pdf.makeV4LayoutPdf({name:'Autobus GT '+seats,posti_totali:seats,rows}));
+  assert.ok(file.includes('/Type /Pages'));
+ }
+});
+
 test('Seat layout does not silently accept a non-5-column model',()=>{
  assert.throws(()=>pdf.makeV4LayoutPdf({rows:[{cells:[{type:'seat',id:'1'}]}]}),/Geometria non compatibile/);
 });
