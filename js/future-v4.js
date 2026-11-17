@@ -16,23 +16,196 @@ const future=d=>{const now=new Date();const today=[now.getFullYear(),String(now.
 const category=x=>{let s=String([x.titolo,x.destinazione,x.name].join(' ')).toLowerCase();return /napoli|spaccanapoli/.test(s)?'napoli':/alberobello|locorotondo/.test(s)?'alberobello':/larino/.test(s)?'larino':/san.marino|gradara|granada/.test(s)?'san-marino':'altri'};
 const categoryName={napoli:'NAPOLI',alberobello:'BORGHI DI PUGLIA',larino:'MERCATINI DI NATALE','san-marino':'SAN MARINO & GRADARA',altri:'NUOVA DESTINAZIONE'};
 const introText={napoli:'Una giornata nel cuore di Napoli, tra vicoli, sapori e tradizioni.',alberobello:'Scopri l’atmosfera dei borghi pugliesi e le luci delle feste.',larino:'Vivi la magia dei mercatini di Natale e delle loro tradizioni.','san-marino':'Scopri borghi medievali e panorami suggestivi.',altri:'La prossima esperienza da vivere insieme.'};
-// Snapshot pubblicitario di fallback: non viene usato per confermare posti o accettare prenotazioni.
-// Ricavato esclusivamente da viaggi pubblicati e non nascosti il 19/10/2026.
+// DG41: elenco pubblico verificato il 17/11/2026. Non contiene disponibilita numeriche o dati clienti.
 const SNAPSHOT=[
- ['ed6881e1-e693-4f5e-b068-6ac976e7a813','NAPOLI - SPACCANAPOLI 22/11/2026','NAPOLI (NA)','2026-11-22',20,0,63,'SOLD OUT','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg',null],
- ['2b3b83b1-0f4b-4f04-aae9-d29ea5d7800f','NAPOLI - SPACCANAPOLI 22/11/2026 — BIS · BUS 2','NAPOLI (NA)','2026-11-22',20,43,53,'Programmato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg','ed6881e1-e693-4f5e-b068-6ac976e7a813'],
- ['120e9e74-345b-4a85-b259-aa08e8953530','ALBEROBELLO & LOCOROTONDO 29/11/2026','ALBEROBELLO E LOCOROTONDO','2026-11-29',28,34,63,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1787989924564-5acbtzbm.jpg',null],
- ['6b420176-e5b5-4195-81b8-beb83f7bdc47','NAPOLI & SPACCANAPOLI 29/11/2026','NAPOLI (NA)','2026-11-29',20,2,63,'Confermato','',null],
- ['dd054201-cb1e-4bdd-8298-f3f7317fd04e','MERCATINI DI LARINO 06/12/2026','LARINO (CB)','2026-12-06',15,15,53,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788034988722-e5xuipof.jpg',null],
- ['154664dd-7c46-47c6-a749-33f032f396d7','NAPOLI - SPACCANAPOLI 06/12/2026','NAPOLI (NA)','2026-12-06',20,36,53,'Programmato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg',null],
- ['c0f4a663-17b0-4d05-af99-e646b2727e28','MERCATINI DI LARINO 08/12/2026','LARINO (CB)','2026-12-08',15,30,53,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1787990660779-v40q3woy.jpg',null],
- ['0d4bab06-c92b-4f9e-afe8-204bf31a86b1','NAPOLI & SPACCANAPOLI - 08-12-2026','NAPOLI (NA)','2026-12-08',20,51,63,'Programmato','',null],
- ['080eb81d-9767-45b1-9c97-3dbf33c3b203','ALBEROBELLO & LOCOROTONDO 13/12/2026','ALBEROBELLO E LOCOROTONDO','2026-12-13',28,63,63,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1787989924564-5acbtzbm.jpg',null],
- ['a3c3f1bb-ace2-458e-9ee9-910013030377','NAPOLI - SPACCANAPOLI 13/12/2026','NAPOLI (NA)','2026-12-13',20,37,63,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg',null],
- ['52ed65ef-77c1-44e7-b20d-f90fd2c1bba0','SAN MARINO & GRANADA 13/12/2026','SAN MARINO & GRADARA','2026-12-13',40,57,63,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1789625809831-a799gwn2.jpg',null],
- ['5f86d867-77a6-4e16-9864-a09d39af0bcb','ALBEROBELLO & LOCOROTONDO 20/12/2026','ALBEROBELLO E LOCOROTONDO','2026-12-20',28,61,63,'Confermato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1787989924564-5acbtzbm.jpg',null],
- ['b65a688e-6b2f-4491-950b-4c03229274e9','NAPOLI & SPACCANAPOLI 20/12/2026','NAPOLI (NA)','2026-12-20',20,43,63,'Programmato','https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/b65a688e-6b2f-4491-950b-4c03229274e9/1791384433330.png',null]
-].map(([id,titolo,destinazione,data_partenza,prezzo,posti_liberi,posti_totali,stato,locandina,bis_parent_id])=>({id,titolo,destinazione,data_partenza,prezzo,posti_liberi,posti_totali,stato,locandina,bis_parent_id,pubblicato:'SI'}));
+  {
+    "id": "ed6881e1-e693-4f5e-b068-6ac976e7a813",
+    "titolo": "NAPOLI - SPACCANAPOLI 22/11/2026",
+    "destinazione": "NAPOLI (NA)",
+    "data_partenza": "2026-11-22",
+    "prezzo": "20.00",
+    "stato": "SOLD OUT",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg",
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO - APRICENA  - SAN NICANDRO G.co - LESINA & POGGIO IMPERIALE - FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": true,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "120e9e74-345b-4a85-b259-aa08e8953530",
+    "titolo": "ALBEROBELLO & LOCOROTONDO 29/11/2026",
+    "destinazione": "ALBEROBELLO E LOCOROTONDO",
+    "data_partenza": "2026-11-29",
+    "prezzo": "28.00",
+    "stato": "SOLD OUT",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1787989924564-5acbtzbm.jpg",
+    "immagine": null,
+    "descrizione": "Costo € 28 a persona Adulti e Bambini",
+    "luogo_partenza": "SAN SEVERO - APRICENA - SAN NICANDRO G.co - LESINA & POGGIO IMPERIALE-FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": true,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "6b420176-e5b5-4195-81b8-beb83f7bdc47",
+    "titolo": "NAPOLI & SPACCANAPOLI 29/11/2026 — BIS · BUS 2",
+    "destinazione": "NAPOLI ( NA)",
+    "data_partenza": "2026-11-29",
+    "prezzo": "20.00",
+    "stato": "SOLD OUT",
+    "locandina": null,
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO - APRICENA - SAN NICANDRO G.co - LESINA & POGGIO IMPERIALE - FOGGIA",
+    "bis_parent_id": "6b420176-e5b5-4195-81b8-beb83f7bdc47",
+    "sold_out": true,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "dd054201-cb1e-4bdd-8298-f3f7317fd04e",
+    "titolo": "MERCATINI DI LARINO 06/12/2026",
+    "destinazione": "LARINO (CB)",
+    "data_partenza": "2026-12-06",
+    "prezzo": "15.00",
+    "stato": "SOLD OUT",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788034988722-e5xuipof.jpg",
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO - APRICENA - SAN NICANDRO G.co -LESINA & POGGIO IMPERIALE",
+    "bis_parent_id": null,
+    "sold_out": true,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "154664dd-7c46-47c6-a749-33f032f396d7",
+    "titolo": "NAPOLI - SPACCANAPOLI 06/12/2026",
+    "destinazione": "NAPOLI (NA)",
+    "data_partenza": "2026-12-06",
+    "prezzo": "20.00",
+    "stato": "SOLD OUT",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg",
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO - APRICENA  - SAN NICANDRO G.co - LESINA & POGGIO IMPERIALE - FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": true,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "c0f4a663-17b0-4d05-af99-e646b2727e28",
+    "titolo": "MERCATINI DI LARINO 08/12/2026",
+    "destinazione": "Larino (CB)",
+    "data_partenza": "2026-12-08",
+    "prezzo": "15.00",
+    "stato": "Confermato",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1787990660779-v40q3woy.jpg",
+    "immagine": null,
+    "descrizione": "",
+    "luogo_partenza": "SAN SEVERO -APRICENA - SAN NICANDRO G.co - LESINA & POGGIO IMPERIALE",
+    "bis_parent_id": null,
+    "sold_out": false,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "0d4bab06-c92b-4f9e-afe8-204bf31a86b1",
+    "titolo": "NAPOLI & SPACCANAPOLI - 08-12-2026",
+    "destinazione": "NAPOLI (NA)",
+    "data_partenza": "2026-12-08",
+    "prezzo": "20.00",
+    "stato": "Programmato",
+    "locandina": null,
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO | APRICENA | SAN NICANDRO G.co | FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": false,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "779a7ea2-baa4-4b9d-a581-a2ca8c59b0bd",
+    "titolo": "MERCATINI DI LARINO 13/12/2026",
+    "destinazione": "LARINO (CB)",
+    "data_partenza": "2026-12-13",
+    "prezzo": "15.00",
+    "stato": "Confermato",
+    "locandina": null,
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO | APRICENA | SAN NICANDRO GARGANICO | LESINA & POGGIO IMPERIALE | TERMOLI",
+    "bis_parent_id": null,
+    "sold_out": false,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "a3c3f1bb-ace2-458e-9ee9-910013030377",
+    "titolo": "NAPOLI - SPACCANAPOLI 13/12/2026",
+    "destinazione": "NAPOLI (NA)",
+    "data_partenza": "2026-12-13",
+    "prezzo": "20.00",
+    "stato": "Programmato",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/1788429610641-3snpeu9w.jpg",
+    "immagine": null,
+    "descrizione": "Costo €20 VIAGGIO A/R\n\nORARI PREVISTI PER LA PARTENZA DA:\nSAN NICANDRO GARGANICO:ore 5:25/5:30 circa\nAPRICENA 5:40/5:45 circa\nSAN SEVERO 5:50",
+    "luogo_partenza": "SAN SEVERO - APRICENA - SAN NICANDRO G.co  - FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": false,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "c724ea4a-f08c-4371-8c61-c869e5832c92",
+    "titolo": "ALBEROBELLO & LOCOROTONDO - 20/12/2026",
+    "destinazione": "ALBEROBELLO - LOCOROTONRDO(BA)",
+    "data_partenza": "2026-12-20",
+    "prezzo": "28.00",
+    "stato": "Programmato",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/c724ea4a-f08c-4371-8c61-c869e5832c92/1794611818186.jpeg",
+    "immagine": null,
+    "descrizione": "# 🎄 ALBEROBELLO & LOCOROTONDO – LA MAGIA DEL NATALE IN PUGLIA! ✨\n\n📅 **DOMENICA 20 DICEMBRE 2026**\n\n🚌 **DELGROSSO VIAGGI & LIMOUSINE BUS** vi porta alla scoperta di due dei borghi più affascinanti della Puglia, dove le tradizioni natalizie, le luminarie e le atmosfere da fiaba rendono ogni angolo speciale!\n\n✨ **ALBEROBELLO**, con i suoi caratteristici trulli patrimonio UNESCO, vi accoglierà tra vicoli suggestivi, decorazioni natalizie e scorci indimenticabili.\n\n🎅 **LOCOROTONDO**, uno dei borghi più belli d'Italia, vi conquisterà con le sue stradine addobbate a festa, le luci scintillanti e l'incantevole atmosfera natalizia.\n\n❤️ Una giornata perfetta da trascorrere in famiglia, con gli amici o con chi ami, tra passeggiate, fotografie, shopping natalizio e momenti di relax!\n\n## 💰 QUOTA DI PARTECIPAZIONE: €28 A PERSONA\n\n✅ Viaggio in autobus Gran Turismo, andata e ritorno\n\n✅ Giornata libera alla scoperta dei due borghi\n\n✅ Bambini e adulti pagano la stessa quota\n\n✅ Acconto obbligatorio alla prenotazione per bloccare i posti\n\n✅ Partenza confermata al raggiungimento di almeno 40 partecipanti\n\n## 📍 LOCALITÀ DI PARTENZA\n\n🚌 SAN SEVERO\n\n🚌 APRICENA\n\n🚌 SAN NICANDRO GARGANICO\n\n🚌 FOGGIA\n\n*Gli orari e i punti di ritrovo saranno comunicati dall'organizzazione.*\n\n## 📲 INFORMAZIONI E PRENOTAZIONI\n\n**WhatsApp: 320 881 5899**\n\n📱 Prenotazioni esclusivamente tramite WhatsApp e sul sito WWW.DELGROSSOVIAGGI.IT\n\n🎄 **IL NATALE È ANCORA PIÙ BELLO QUANDO SI VIAGGIA INSIEME!**\n\n✨ Regalati una giornata speciale tra i borghi più suggestivi della Puglia!\n\n🚌 **DELGROSSO VIAGGI & LIMOUSINE BUS – Viaggia con noi, vivi nuove emozioni!**\n\n⚠️ **POSTI LIMITATI – PRENOTA IL TUO POSTO!**",
+    "luogo_partenza": "SAN SEVERO | APRICENA | SAN NICANDRO G.co | FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": false,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  },
+  {
+    "id": "b65a688e-6b2f-4491-950b-4c03229274e9",
+    "titolo": "NAPOLI & SPACCANAPOLI 20/12/2026",
+    "destinazione": "NAPOLI ( NA)",
+    "data_partenza": "2026-12-20",
+    "prezzo": "20.00",
+    "stato": "SOLD OUT",
+    "locandina": "https://chkuayhbmitdmzmmvona.supabase.co/storage/v1/object/public/locandine/viaggi/b65a688e-6b2f-4491-950b-4c03229274e9/1791384433330.png",
+    "immagine": null,
+    "descrizione": null,
+    "luogo_partenza": "SAN SEVERO | SAN NICANDRO G.co | APRICENA | FOGGIA",
+    "bis_parent_id": null,
+    "sold_out": true,
+    "sold_out_manual": false,
+    "pubblicato": "SI",
+    "offline_catalog": true
+  }
+];
 const FLEET_FALLBACK=[
  {id:'gt-a',title:'IRIZAR SCANIA PB A',seats:63,cover_url:BASE+'72831195-8671-4b2e-9e61-482c5dcb206e-1.JPEG',gallery_urls:[BASE+'72831195-8671-4b2e-9e61-482c5dcb206e-1.JPEG',BASE+'IMG_4320.jpeg',BASE+'IMG_3227.JPEG'],description:'Bus Gran Turismo per viaggi organizzati e gruppi.'},
  {id:'gt-b',title:'IRIZAR SCANIA PB B',seats:63,cover_url:BASE+'IMG_0797.jpeg',gallery_urls:[BASE+'IMG_0797.jpeg',BASE+'72831195-8671-4b2e-9e61-482c5dcb206e.JPEG',BASE+'ea5082b6-a292-42fa-a979-5c0c00cfa267.jpg'],description:'Bus Gran Turismo per viaggi organizzati e gruppi.'},
@@ -44,11 +217,11 @@ async function requestJson(url,options={}){const ctrl=new AbortController();cons
 async function bridge(action,payload={}){const result=await requestJson(BRIDGE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...payload})});if(result?.error)throw Error(String(result.error));return result;}
 async function publicRows(table,params){const data=await requestJson(`${SITE}/rest/v1/${table}?${params}`,{headers:{apikey:SITE_KEY,Accept:'application/json'}});if(!Array.isArray(data))throw Error('Formato di risposta non valido');return data;}
 function avail(t){const status=String(t.stato||'').toLowerCase(),total=num(t.posti_totali),free=num(t.posti_liberi),occupied=num(t.posti_occupati),sold= t.sold_out===true||t.sold_out_manual===true||/sold\s*out|esaurit|complet|chius[oa]|annullat/.test(status)|| (Number.isFinite(free)&&free<=0&&total>0)||(Number.isFinite(occupied)&&total>0&&occupied>=total);return {known:Number.isFinite(free),free:Number.isFinite(free)?Math.max(0,free):0,sold};}
-function isVisible(t){if(!t||!future(String(t.data_partenza||'')))return false;if(t.online_hidden_at||t.bis_auto_hidden)return false;if(t.pubblicato&&String(t.pubblicato).toUpperCase()!=='SI')return false;if(/annullat|rinviat/i.test(String(t.stato||'')))return false;return true;}
+function isVisible(t){if(!t||!future(String(t.data_partenza||'')))return false;if(t.online_hidden_at||t.bis_auto_hidden)return false;if(t.pubblicato!=null&&!['SI','TRUE','1','SÌ'].includes(String(t.pubblicato).toUpperCase()))return false;if(/annullat|rinviat/i.test(String(t.stato||'')))return false;return true;}
 function tripLabel(t){const n=String(t.titolo||t.destinazione||'Viaggio organizzato').replace(/\s*\d{1,2}[\/\-.]\d{1,2}[\/\-.]20\d{2}.*/,'').trim();if(category(t)==='san-marino')return 'San Marino & Gradara';if(category(t)==='napoli')return 'Napoli & Spaccanapoli'+(t.bis_parent_id?' · BUS BIS':'');if(category(t)==='alberobello')return 'Alberobello & Locorotondo';if(category(t)==='larino')return 'Mercatini di Larino';return n||t.destinazione||'Viaggio DELGROSSO';}
 function mediaForTrip(t){const candidate=String(t.locandina||t.immagine||t.cover_url||'');return /^https:\/\/[^\s]+$/i.test(candidate)?candidate:'';}
 function badge(t){const a=avail(t);return a.sold?['SOLD OUT','sold']:t.bis_parent_id?['BUS BIS','bis']:S.live&&a.known&&a.free<=5?['ULTIMI POSTI','limited']:['PARTENZA',''];}
-function statusText(){return S.live?'Disponibilità lette dal gestionale. La conferma dei posti avviene durante la prenotazione.':'Anteprima del catalogo pubblicato il 19/10/2026. Per posti e prenotazioni verifica con noi su WhatsApp.';}
+function statusText(){return S.live?'Disponibilità lette dal gestionale. La conferma dei posti avviene durante la prenotazione.':'Anteprima del catalogo pubblicato il 17/11/2026. Per posti e prenotazioni verifica con noi su WhatsApp.';}
 function card(t,i){const c=category(t),n=tripLabel(t),a=avail(t),[tag,klass]=badge(t),image=mediaForTrip(t);const tagFallback=`<div class="trip-graphic city-${safe(c)}"><span class="card-diagonal"></span><span class="card-diagonal two"></span><strong>${safe(categoryName[c])}</strong><small>DELGROSSO EXPERIENCE</small></div>`;return `<article class="trip-card"><a href="viaggio.html?id=${encodeURIComponent(t.id)}" class="trip-img" aria-label="Dettagli ${safe(n)}">${tagFallback}${image?`<img class="trip-poster-remote" loading="lazy" src="${safe(image)}" alt="Locandina originale del viaggio ${safe(n)}">`:''}<div class="trip-topline"><span class="trip-badge ${klass}">${tag}</span><span class="trip-position">${String(i+1).padStart(2,'0')}</span></div></a><div class="trip-content"><div class="trip-date">${safe(shortDate(t.data_partenza))} · ANDATA/RITORNO</div><h3><a href="viaggio.html?id=${encodeURIComponent(t.id)}">${safe(n)}</a></h3><p class="trip-short">${safe(introText[c])}</p><div class="trip-bottom"><div class="trip-price">${safe(euro(t.prezzo))}<small>a persona · A/R</small></div><a class="trip-open" href="viaggio.html?id=${encodeURIComponent(t.id)}">SCOPRI ↗</a></div></div></article>`;}
 function setCards(container,items){container.innerHTML=items.length?items.map(card).join(''):'<div class="empty-state">Non ci sono partenze disponibili per questi filtri. <a href="contatti.html">Contattaci ↗</a></div>';container.querySelectorAll('.trip-poster-remote').forEach(img=>{const onload=()=>img.parentElement.classList.add('poster-loaded');img.addEventListener('load',onload);img.addEventListener('error',()=>img.remove());if(img.complete&&img.naturalWidth)onload();});}
 function renderMonthOptions(){const months=[...new Set(S.trips.map(t=>String(t.data_partenza||'').slice(0,7)).filter(m=>/^\d{4}-\d{2}$/.test(m)))].sort();for(const id of ['#homeMonth','#tripMonth']){const select=$(id);if(!select)continue;const previous=select.value||((id==='#tripMonth')?S.filters.month:'');select.innerHTML=`<option value="">Tutte le date</option>`+months.map(m=>{const label=new Date(m+'-01T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'});return `<option value="${safe(m)}">${safe(label[0].toUpperCase()+label.slice(1))}</option>`}).join('');if(months.includes(previous))select.value=previous;}}
@@ -59,7 +232,7 @@ function renderTripDetail(){const id=new URLSearchParams(location.search).get('i
  const action=S.live&&!a.sold?`<a class="button button-primary full" href="prenota.html?viaggio=${encodeURIComponent(t.id)}">SCEGLI POSTI E PRENOTA ↗</a>`:`<a class="button button-primary full" target="_blank" rel="noopener" href="${WA}?text=${message}">${a.sold?'CHIEDI ALTERNATIVE':'VERIFICA DISPONIBILITÀ'} ↗</a>`;
  const status=S.live?(a.sold?'SOLD OUT':a.known?`${a.free} posti liberi al momento della verifica`:'Disponibilità in verifica'):'Posti da verificare con il nostro staff';
  const stops=String(t.luogo_partenza||'').trim();const description=String(t.descrizione||introText[cat]);
- host.innerHTML=`<div><div class="detail-photo">${img?`<img src="${safe(img)}" alt="Locandina originale ${safe(n)}">`:`<div class="trip-graphic city-${safe(cat)}"><strong>${safe(categoryName[cat])}</strong></div>`}</div><div class="glass-info" style="margin-top:18px"><span class="kicker small">PROGRAMMA E INFORMAZIONI</span><h2>${safe(n)}</h2><p class="preserve-lines">${safe(description)}</p>${stops?`<h3>FERMATE DI PARTENZA</h3><p>${safe(stops)}</p>`:'<p>Le fermate saranno confermate dall’organizzazione.</p>'}<p class="muted-small">Condizioni: l’acconto è richiesto per bloccare la prenotazione. In caso di mancato raggiungimento del minimo organizzativo, l’acconto viene restituito secondo le condizioni comunicate al cliente.</p></div></div><aside class="detail-aside"><div class="kicker small">LA TUA PARTENZA</div><h2>${safe(n)}</h2><div class="detail-facts"><div><small>DATA</small><strong>${safe(niceDate(t.data_partenza))}</strong></div><div><small>QUOTA A PERSONA</small><strong>${safe(euro(t.prezzo))}</strong></div><div><small>VIAGGIO</small><strong>Andata / ritorno</strong></div><div><small>DISPONIBILITÀ</small><strong>${safe(status)}</strong></div></div>${action}<p class="muted-small">${S.live?'Il sistema verifica nuovamente i posti prima di registrare la prenotazione.':'I dati mostrati sono una fotografia del 19/10/2026, non una disponibilità confermata.'}</p><a class="text-link" href="viaggi.html">← TORNA A TUTTE LE PARTENZE</a></aside>`;
+ host.innerHTML=`<div><div class="detail-photo">${img?`<img src="${safe(img)}" alt="Locandina originale ${safe(n)}">`:`<div class="trip-graphic city-${safe(cat)}"><strong>${safe(categoryName[cat])}</strong></div>`}</div><div class="glass-info" style="margin-top:18px"><span class="kicker small">PROGRAMMA E INFORMAZIONI</span><h2>${safe(n)}</h2><p class="preserve-lines">${safe(description)}</p>${stops?`<h3>FERMATE DI PARTENZA</h3><p>${safe(stops)}</p>`:'<p>Le fermate saranno confermate dall’organizzazione.</p>'}<p class="muted-small">Condizioni: l’acconto è richiesto per bloccare la prenotazione. In caso di mancato raggiungimento del minimo organizzativo, l’acconto viene restituito secondo le condizioni comunicate al cliente.</p></div></div><aside class="detail-aside"><div class="kicker small">LA TUA PARTENZA</div><h2>${safe(n)}</h2><div class="detail-facts"><div><small>DATA</small><strong>${safe(niceDate(t.data_partenza))}</strong></div><div><small>QUOTA A PERSONA</small><strong>${safe(euro(t.prezzo))}</strong></div><div><small>VIAGGIO</small><strong>Andata / ritorno</strong></div><div><small>DISPONIBILITÀ</small><strong>${safe(status)}</strong></div></div>${action}<p class="muted-small">${S.live?'Il sistema verifica nuovamente i posti prima di registrare la prenotazione.':'I dati mostrati sono una fotografia del 17/11/2026, non una disponibilità confermata.'}</p><a class="text-link" href="viaggi.html">← TORNA A TUTTE LE PARTENZE</a></aside>`;
 }
 async function loadTrips(){S.trips=SNAPSHOT.filter(isVisible).sort((a,b)=>a.data_partenza.localeCompare(b.data_partenza));renderMonthOptions();renderHomeTrips();renderCatalog();renderTripDetail();try{const data=await bridge('trips');if(!Array.isArray(data))throw Error('Formato partenze non valido');S.trips=data.filter(isVisible).sort((a,b)=>a.data_partenza.localeCompare(b.data_partenza));S.live=true;renderMonthOptions();renderHomeTrips();renderCatalog();renderTripDetail();}catch(e){console.warn('DELGROSSO: dati gestionali non raggiungibili; mostra solo dati storici, prenotazione disabilitata.',String(e.message||e));}}
 function fleetIsLimo(x){return /limousine|party/i.test([x.title,x.category,x.tipo].join(' '));}
