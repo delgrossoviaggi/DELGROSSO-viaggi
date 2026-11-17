@@ -10,6 +10,7 @@ const operations=readFileSync(new URL('booking-operations.js',dir),'utf8').repla
 const app=readFileSync(new URL('app.js',dir),'utf8')
   .replace(/^import \{[\s\S]*?\} from '\.\/core\.js';/,'')
   .replace(/^\s*import \* as Pdf from '\.\/pdf-reports\.js';/m,'')
+  .replace(/^\s*import \{createLiveSync\} from '\.\/live-sync\.js';/m,'')
   .replace(/^\s*import \{[^\n]+\} from '\.\/booking-operations\.js';/m,'')
   .replace(/bootstrap\(\)\.catch\([\s\S]*?;\s*$/,'');
 const context=vm.createContext({
