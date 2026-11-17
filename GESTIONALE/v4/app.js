@@ -59,8 +59,8 @@ async function navigate(next,force=false){
  $('sidebar').classList.remove('open');$('main').innerHTML='<div class="loading-state"><span class="spinner"></span>Consultazione dati Supabase…</div>';
  const needs={
  dashboard:['trips','bookings','payments','agenda','notifications'],
- trips:['trips','bookings'],
- bookings:['trips','bookings','payments','seats'],
+ trips:['trips','bookings','seats','tripLayouts'],
+ bookings:['trips','bookings','payments','seats','tripLayouts'],
  control:['trips','bookings','seats','tripLayouts','stops'],
  layouts:['trips','fleet','layoutLibrary','tripLayouts','busLayouts'],
  cash:['cash','operators','payments','transfers','trips','bookings'],
@@ -69,7 +69,7 @@ async function navigate(next,force=false){
  rentals:['rentals','rentalPayments'],
  agenda:['agenda','trips'],
  fleet:['fleet'],
- documents:['documents','trips'],
+ documents:['documents','trips','receipts','docsMetadata'],
  notifications:['notifications'],
  diagnostics:['system','alerts','trips','bookings','payments','seats']
  };
@@ -215,7 +215,7 @@ function drawCash(){
   dateIT(p.data_pagamento)||dateTimeIT(p.created_at),esc(p.cliente||'—'),
   esc(tripName(tripBy(p.viaggio_id))),badge(p.tipo),money(p.importo),
   esc(p.incassato_da||ops.find(x=>x.user_id===p.incassato_da_user_id)?.nome||'—'),
-  esc(p.receipt_number||'—')
+  '<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_storage_path?safeLink('Apri originale',p.id,'open-payment-receipt'):'')+' · '+safeLink('Riepilogo PDF',p.id,'pdf-payment')+'</small>'
  ]);
  return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="pdf-cash">↓ PDF contabilità</button><button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+writeButton('+ Registra incasso','new-payment'))+
  cards+'<div class="section-grid">'+cardOperators+'</div>'+
@@ -283,7 +283,7 @@ function drawDocuments(){
   badge(d.tipo_documento),esc(d.numero_documento||short(d.documento_id)),
   esc(d.cliente||'—'),esc(d.viaggio||tripName(tripBy(d.viaggio_id))),
   dateIT(d.data_documento),money(d.importo),
-  (d.storage_path?safeLink('Apri PDF',d.documento_id,'open-stored-document'):'<span class="muted small">Non archiviato</span>')
+  (d.storage_path?safeLink('Apri PDF',d.storage_path,'open-stored-document'):'<span class="muted small">Non archiviato</span>')
  ]);
  return intro('Documenti e ricevute','Inventario PDF e conferme dei clienti; i file privati sono protetti da Supabase Storage.','<button class="secondary" data-action="pdf-document-inventory">↓ PDF archivio</button>')+
  '<div class="cards">'+card('Voci documentali',String(docs.length),'Vista archivio_documenti')+card('Ricevute private','237','Inventario Storage precedente')+card('Locandine','56','Inventario Storage precedente')+card('Backup','Da verificare','Non sono copie certificate')+'</div>'+
@@ -401,6 +401,29 @@ async function handleAction(action,id,button){
    const n=get('rentals').find(x=>x.id===id);if(!n)throw new Error('Noleggio non trovato.');
    return done(Pdf.pdfRental(n,get('rentalPayments')));
  }
+
+ if(action==='pdf-economy')return done(Pdf.pdfEconomy(get('economy'),get('profit')));
+ if(action==='pdf-fleet')return done(Pdf.pdfFleet(get('fleet').filter(x=>num(x.posti)>7)));
+ if(action==='pdf-customers')return done(Pdf.pdfCustomers(get('customers')));
+ if(action==='pdf-rentals')return done(Pdf.pdfRentals(get('rentals')));
+ if(action==='pdf-document-inventory')return done(Pdf.pdfDocuments(get('documents')));
+ if(action==='pdf-payment'){
+   const p=get('payments').find(x=>x.id===id);
+   if(!p)throw new Error('Movimento di pagamento non trovato.');
+   const b=get('bookings').find(b=>b.id===p.prenotazione_id);
+   if(!b)throw new Error('Questo movimento non è collegato a una prenotazione viaggio; usa la scheda noleggio.');
+   return done(Pdf.pdfReceipt(p,b,tripBy(p.viaggio_id||b.viaggio_id)));
+ }
+ if(action==='open-payment-receipt'||action==='open-stored-document'){
+   const p=action==='open-payment-receipt'?get('payments').find(x=>x.id===id):null;
+   const storagePath=p?(p.receipt_professional_path||p.receipt_storage_path):id;
+   if(!storagePath)throw new Error('Nessun documento originale è archiviato per questa voce.');
+   const signed=await signedReceiptPath('ricevute-prenotazioni',storagePath);
+   // Richiede un secondo click in iOS: aprire un popup dopo una richiesta asincrona è bloccato.
+   displayModal('Documento originale Supabase','<p class="help">Il collegamento sicuro è valido per 60 secondi e utilizza i permessi dell’operatore. Il file non viene reso pubblico.</p><div class="action-row"><a href="'+esc(signed)+'" target="_blank" rel="noopener noreferrer" class="primary">Apri documento originale ↗</a></div>');
+   return;
+ }
+
 
  if(action==='detail-trip'){tripDetail(id);return;}
  if(action==='detail-booking'){bookingDetail(id);return;}
