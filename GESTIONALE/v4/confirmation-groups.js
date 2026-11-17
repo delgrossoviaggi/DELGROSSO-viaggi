@@ -14,7 +14,7 @@ export function normalizeFullName(name){
 export function normalizeTelephone(phone){
  let digits=txt(phone).replace(/[^0-9]/g,'');
  if(digits.startsWith('0039')&&digits.length>=12)digits=digits.slice(4);
- else if(digits.startsWith('39')&&digits.length>=10&&digits.length<=13)digits=digits.slice(2);
+ else if(digits.startsWith('39')&&digits.length>=11&&digits.length<=13)digits=digits.slice(2);
  return digits.length>=8&&digits.length<=11?digits:'';
 }
 export function fullIdentity(booking){
