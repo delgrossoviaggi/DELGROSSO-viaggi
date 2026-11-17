@@ -31,8 +31,9 @@ jobs:
           node --check GESTIONALE/v4/confirmation-groups.js
           node --check GESTIONALE/v4/live-sync.js
           node --check GESTIONALE/v4/bis-manual.js
+          node --check GESTIONALE/v4/credit-transfers.js
       - name: Unit and rendering tests (offline)
-        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs tests/dg4-v4-pdf.test.mjs tests/dg4-v4-booking-operations.test.mjs tests/dg4-v4-confirmations.test.mjs tests/dg4-v4-live-sync.test.mjs tests/dg4-v4-bis-manual.test.mjs
+        run: node --test tests/dg4-v4-core.test.mjs tests/dg4-v4-layouts.test.mjs tests/dg4-v4-pdf.test.mjs tests/dg4-v4-booking-operations.test.mjs tests/dg4-v4-confirmations.test.mjs tests/dg4-v4-live-sync.test.mjs tests/dg4-v4-bis-manual.test.mjs tests/dg4-v4-credit-transfers.test.mjs
       - name: Forbid privileged credentials and accidental write unlock
         run: |
           if grep -E 'WRITES_ENABLED[[:space:]]*=[[:space:]]*true' GESTIONALE/v4/core.js; then echo 'ERROR: V4 writes unlocked!'; exit 1; fi
