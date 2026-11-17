@@ -9,7 +9,7 @@ import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewB
 import {usableTemplates,inspectLayout,normalizeManualSeats,prepareBisSeatOpening,previewManualLayout} from './bis-manual.js';
 import {seatCount,isCompleteLayout,eligibleGtBuses,layoutAssociations,archivePlan,compatibleTrips} from './layout-operations.js';
 import {bookingCreditBalance,destinationsForCredit,reviewCreditTransfer,centesimi} from './credit-transfers.js';
-import {agendaCategories,deadlineCategories,agendaDeleted,isDiaryEntry,isDeadlineEntry,agendaEntries,deadlineStats,calendarMonth,shiftCalendarMonth,validateAgendaEntry} from './agenda-model.js';
+import {agendaCategories,deadlineCategories,agendaDeleted,isDiaryEntry,isDeadlineEntry,agendaEntries,deadlineStats,calendarMonth,shiftCalendarMonth,validateAgendaEntry,mergeAgendaSources} from './agenda-model.js';
 
 const $=id=>document.getElementById(id);
 const NAV={
@@ -42,6 +42,8 @@ const writeBadge=()=>WRITES_ENABLED?'':'<span class="badge warn">Modifiche blocc
 const writeButton=(text,action,attrs='')=>'<button class="primary" data-action="'+action+'" '+attrs+(WRITES_ENABLED?'':' disabled title="Sblocco dopo backup e collaudo"')+'>'+esc(text)+'</button>';
 const agendaButton=(text,action,attrs='',kind='primary')=>'<button class="'+kind+'" data-action="'+action+'" '+attrs+(AGENDA_WRITES_ENABLED?'':' disabled title="Agenda in sola lettura"')+'>'+esc(text)+'</button>';
 const get=t=>state.all[t]||[];
+const fullAgenda=()=>mergeAgendaSources(get('agenda'),get('legacyAgenda'));
+const findAgenda=id=>fullAgenda().find(x=>x.id===id);
 
 /** The new giroconto ledger is an optional STAGING schema until backup/restore.
  * Never represent a failed/unavailable ledger as zero transfers. */
@@ -163,7 +165,7 @@ async function navigate(next,force=false,{silent=false}={}){
  document.querySelectorAll('#nav [data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===next));
  $('sidebar').classList.remove('open');if(!silent)$('main').innerHTML='<div class="loading-state"><span class="spinner"></span>Consultazione dati Supabase…</div>';
  const needs={
- dashboard:['trips','bookings','payments','agenda','notifications'],
+ dashboard:['trips','bookings','payments','agenda','legacyAgenda','notifications'],
  trips:['trips','bookings','seats','tripLayouts','fleet','layoutLibrary'],
  bookings:['trips','bookings','payments','seats','tripLayouts'],
   movements:['trips','bookings','payments','seats','tripLayouts'],
@@ -176,9 +178,9 @@ async function navigate(next,force=false,{silent=false}={}){
  rentals:['rentals','rentalPayments'],
  quotes:['quotes'],invoices:['invoices'],waitlist:['waitlist','trips'],
  whatsapp:['whatsAppInbox','whatsAppOutbound','whatsAppOptins'],
- reports:['trips','bookings','seats','tripLayouts','payments','cash','agenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
- agenda:['agenda','trips'],
- deadlines:['agenda','trips'],
+ reports:['trips','bookings','seats','tripLayouts','payments','cash','agenda','legacyAgenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
+ agenda:['agenda','legacyAgenda','trips'],
+ deadlines:['agenda','legacyAgenda','trips'],
  fleet:['fleet','layoutLibrary','busLayouts'],
  documents:['documents','trips','receipts','docsMetadata'],
  notifications:['notifications'],
@@ -789,7 +791,7 @@ function drawRentals(){
 /** Due ambienti distinti sopra la tabella scadenze_gestionale: eventi/agenda e scadenze.
  * Mai cancellazione fisica: i record vengono spostati nel cestino reversibile. */
 function openAgendaEditor(id='',section=page==='deadlines'?'scadenze':'agenda',date=''){
- const existing=id?get('agenda').find(x=>x.id===id):null;
+ const existing=id?findAgenda(id):null;
  if(id&&!existing)throw new Error('Impegno o scadenza non trovato.');
  if(existing)section=isDiaryEntry(existing)?'agenda':'scadenze';
  if(existing&&agendaDeleted(existing))throw new Error('Prima ripristina la voce dal cestino.');
@@ -819,7 +821,7 @@ function openAgendaEditor(id='',section=page==='deadlines'?'scadenze':'agenda',d
 async function submitAgendaEditor(form){
  if(!AGENDA_WRITES_ENABLED)throw new Error('Modifica agenda non abilitata.');
  const data=new FormData(form),str=k=>String(data.get(k)||'').trim();
- const id=str('entryId'),original=id?get('agenda').find(x=>x.id===id):null,section=str('section');
+ const id=str('entryId'),original=id?findAgenda(id):null,section=str('section');
  if(id&&!original)throw new Error('La voce è stata modificata: aggiorna prima di salvare.');
  const fields=validateAgendaEntry({
   titolo:str('titolo'),data_scadenza:str('data_scadenza'),
@@ -839,7 +841,7 @@ async function submitAgendaEditor(form){
 }
 async function changeAgendaEntry(id,kind){
  if(!AGENDA_WRITES_ENABLED)throw new Error('Agenda non scrivibile.');
- const item=get('agenda').find(x=>x.id===id);
+ const item=findAgenda(id);
  if(!item||!item.updated_at)throw new Error('Voce non verificata: aggiorna la pagina.');
  const previous=agendaDeleted(item),section=isDiaryEntry(item)?'agenda':'deadlines';
  const status=kind==='delete'?'eliminata':kind==='restore'?'aperta':
@@ -870,7 +872,7 @@ function agendaLine(item,section='agenda',isTrash=false){
  ];
 }
 function drawAgenda(){
- const all=agendaEntries(get('agenda'),'agenda',{includeDeleted:state.agendaTrash,search:state.search});
+ const all=agendaEntries(fullAgenda(),'agenda',{includeDeleted:state.agendaTrash,search:state.search});
  const month=state.agendaMonth||todayItaly().slice(0,7);
  const visible=all.filter(x=>String(x.data_scadenza||'').slice(0,7)===month);
  const isTrash=state.agendaTrash;
@@ -899,7 +901,7 @@ function drawAgenda(){
    (hits.length>3?'<span class="dg4-calendar-overflow">+'+(hits.length-3)+' altre voci</span>':'')+'</button>';
  }).join('');
  const dayEntries=all.filter(x=>x.data_scadenza===selected);
- const agendaCount=agendaEntries(get('agenda'),'agenda').length,deadlineCount=agendaEntries(get('agenda'),'scadenze').length;
+ const agendaCount=agendaEntries(fullAgenda(),'agenda').length,deadlineCount=agendaEntries(fullAgenda(),'scadenze').length;
  return intro('Agenda completa','Calendario mensile per appuntamenti, impegni e note. Le scadenze hanno un elenco separato, senza confonderle con gli appuntamenti.',
   '<button class="secondary" data-page="deadlines">Vai alle Scadenze</button>'+
   '<button class="secondary" data-action="pdf-agenda">↓ PDF agenda</button>'+
@@ -924,7 +926,7 @@ function drawAgenda(){
 }
 function drawDeadlines(){
  const trash=state.deadlineTrash,today=todayItaly();
- const all=agendaEntries(get('agenda'),'scadenze',{includeDeleted:trash,search:state.search});
+ const all=agendaEntries(fullAgenda(),'scadenze',{includeDeleted:trash,search:state.search});
  const scope=state.deadlineScope;
  const filtered=trash?all:all.filter(x=>
   scope==='all'||(scope==='late'&&x.data_scadenza<today&&!/completat/i.test(x.stato))||
@@ -932,7 +934,7 @@ function drawDeadlines(){
   (scope==='upcoming'&&x.data_scadenza>today&&!/completat/i.test(x.stato))||
   (scope==='done'&&/completat/i.test(x.stato))||
   (scope==='open'&&!/completat/i.test(x.stato)));
- const totals=deadlineStats(get('agenda'),today);
+ const totals=deadlineStats(fullAgenda(),today);
  const opts=[['open','Da completare'],['late','Scadute'],['today','Oggi'],['upcoming','Future'],['done','Completate'],['all','Tutte']]
   .map(([key,name])=>'<option value="'+key+'" '+(scope===key?'selected':'')+'>'+esc(name)+'</option>').join('');
  return intro('Scadenze','Registro separato delle attività con termine: manutenzione flotta, documenti, pagamenti da seguire e obblighi aziendali.',
@@ -1188,11 +1190,11 @@ async function handleAction(action,id,button){
  }
  if(action==='export-deadlines'){
   csvExport(['Titolo','Data scadenza','Priorità','Stato','Descrizione','Note'],
-   agendaEntries(get('agenda'),'scadenze').map(x=>[x.titolo,x.data_scadenza,x.priorita,x.stato,x.descrizione,x.note]),
+   agendaEntries(fullAgenda(),'scadenze').map(x=>[x.titolo,x.data_scadenza,x.priorita,x.stato,x.descrizione,x.note]),
    'delgrosso-scadenze.csv');return;
  }
  if(action==='pdf-deadlines'){
-  const entries=agendaEntries(get('agenda'),'scadenze');
+  const entries=agendaEntries(fullAgenda(),'scadenze');
   return done(Pdf.pdfAgenda(entries));
  }
 
@@ -1435,7 +1437,7 @@ async function handleAction(action,id,button){
    return done(Pdf.pdfBooking(b,tripBy(b.viaggio_id),get('payments').filter(p=>p.prenotazione_id===id)));
  }
  if(action==='pdf-cash')return done(Pdf.pdfCash(get('cash'),get('payments')));
- if(action==='pdf-agenda')return done(Pdf.pdfAgenda(agendaEntries(get('agenda'),'agenda')));
+ if(action==='pdf-agenda')return done(Pdf.pdfAgenda(agendaEntries(fullAgenda(),'agenda')));
  if(action==='pdf-customer'){
    const c=get('customers').find(x=>x.id===id);
    if(!c)throw new Error('Cliente non trovato.');
@@ -1520,7 +1522,7 @@ async function handleAction(action,id,button){
  if(action==='export-bookings'){csvExport(['Cliente','Telefono','Viaggio','Pax','Posti','Fermata','Totale','Pagato','Stato','Check-in'],get('bookings').filter(b=>(!state.trip||b.viaggio_id===state.trip) && bookingActive(b)).map(b=>[bookingName(b),b.telefono,tripName(tripBy(b.viaggio_id)),b.posti,b.posti_selezionati,b.fermata_partenza,b.totale,b.pagato,b.stato,b.checkin_effettuato?'Sì':'No']),'delgrosso-prenotazioni.csv');return;}
  if(action==='export-payments'){csvExport(['Data','Cliente','Viaggio','Tipo','Importo','Operatore','Ricevuta'],get('payments').map(p=>[p.data_pagamento,p.cliente,tripName(tripBy(p.viaggio_id)),p.tipo,p.importo,p.incassato_da,p.receipt_number]),'delgrosso-pagamenti.csv');return;}
  if(action==='export-customers'){csvExport(['Nome','Cognome','Telefono','Email','Città'],get('customers').map(c=>[c.nome,c.cognome,c.telefono,c.email,c.citta]),'delgrosso-clienti.csv');return;}
- if(action==='export-agenda'){csvExport(['Titolo','Data','Priorità','Stato','Descrizione'],agendaEntries(get('agenda'),'agenda').map(a=>[a.titolo,a.data_scadenza,a.priorita,a.stato,a.descrizione]),'delgrosso-agenda.csv');return;}
+ if(action==='export-agenda'){csvExport(['Titolo','Data','Priorità','Stato','Descrizione'],agendaEntries(fullAgenda(),'agenda').map(a=>[a.titolo,a.data_scadenza,a.priorita,a.stato,a.descrizione]),'delgrosso-agenda.csv');return;}
  if(action==='create-layout'||action==='draft-layout'||action==='edit-layout'){
   const saved=action==='create-layout'?null:get('layoutLibrary').find(l=>l.id===id);
   if(action!=='create-layout'&&!saved)throw new Error('La piantina non è stata trovata.');
