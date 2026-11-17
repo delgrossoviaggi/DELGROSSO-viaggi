@@ -63,7 +63,7 @@ async function navigate(next,force=false){
  bookings:['trips','bookings','payments','seats','tripLayouts'],
  control:['trips','bookings','seats','tripLayouts','stops'],
  layouts:['trips','fleet','layoutLibrary','tripLayouts','busLayouts'],
- cash:['cash','operators','payments','transfers','trips','bookings'],
+ cash:['cash','operators','payments','rentalPayments','rentals','transfers','trips','bookings'],
  economy:['economy','profit','trips'],
  customers:['customers','bookings','payments','trips'],
  rentals:['rentals','rentalPayments'],
@@ -206,9 +206,9 @@ function drawLayouts(){
  '<div class="alert">L’editor grafico e la pubblicazione richiedono verifiche transazionali. Non eseguire modifiche ai layout dei viaggi fino al ripristino verificato del backup.</div>';
 }
 function drawCash(){
- const cash=get('cash'),ops=get('operators'),payments=get('payments'),trans=get('transfers');
+ const cash=get('cash'),ops=get('operators'),payments=get('payments'),rentals=get('rentalPayments'),trans=get('transfers');
  const cards='<div class="cards">'+card('Casse operatori',String(cash.length),'Valori calcolati dalla vista ufficiale')+
- card('Pagamenti viaggio',String(payments.length),'Movimenti originali')+
+ card('Pagamenti viaggi e noleggi',String(payments.length+rentals.length),'Movimenti originali')+
  card('Trasferimenti cassa',String(trans.length),'Movimenti contabilizzati')+
  card('Contabilità',WRITES_ENABLED?'Attiva':'Protetta','Solo lettura durante il collaudo')+'</div>';
  const cardOperators=cash.map(c=>'<div class="panel"><div class="panel-head"><div><h3>Contabilità '+esc(c.nome||c.username||'Operatore')+'</h3><p>Riconciliata con la vista Supabase</p></div>'+badge('Operatore')+'</div><div class="panel-body"><div class="cards" style="grid-template-columns:1fr 1fr">'+
@@ -220,9 +220,10 @@ function drawCash(){
   esc(p.incassato_da||ops.find(x=>x.user_id===p.incassato_da_user_id)?.nome||'—'),
   '<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_storage_path?safeLink('Apri originale',p.id,'open-payment-receipt'):'')+' · '+safeLink('Riepilogo PDF',p.id,'pdf-payment')+'</small>'
  ]);
- return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="pdf-cash">↓ PDF contabilità</button><button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+writeButton('+ Registra incasso','new-payment'))+
+ return intro('Contabilità e casse','Incassi, ripartizione Nicola / Raffaele, ricevute e movimenti.','<button class="secondary" data-action="pdf-cash">↓ PDF contabilità</button><button class="secondary" data-action="export-payments">↓ CSV pagamenti</button>'+writeButton('+ Incasso viaggio','new-payment')+writeButton('+ Incasso noleggio','new-rental-payment'))+
  cards+'<div class="section-grid">'+cardOperators+'</div>'+
- panel('Registro incassi e ricevute','Dati originali da pagamenti · ultime 80 righe',table(['Data','Cliente','Viaggio','Tipo','Importo','Incassato da','Ricevuta'],rows))+
+ panel('Registro incassi viaggi','Dati originali da pagamenti · ultime 80 righe',table(['Data','Cliente','Viaggio','Tipo','Importo','Incassato da','Ricevuta'],rows))+
+ panel('Pagamenti noleggi','Dati originali da noleggi_bus_pagamenti · non inclusi nel registro delle gite',table(['Data','Servizio','Tipo','Importo','Metodo','Ricevuta'],rentals.slice().sort((a,b)=>String(b.data_pagamento).localeCompare(String(a.data_pagamento))).slice(0,100).map(p=>[dateIT(p.data_pagamento),esc(get('rentals').find(n=>n.id===p.noleggio_id)?.referente||short(p.noleggio_id)),badge(p.tipo),money(p.importo),esc(p.metodo||'—'),'<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_path?safeLink('Apri originale',p.id,'open-rental-receipt'):'')+'</small>']))+
  panel('Trasferimenti tra operatori','Lo spostamento quote utilizza una RPC transazionale',table(['Data','Da','A','Importo','Stato'],trans.map(t=>[dateIT(t.data_trasferimento),esc(ops.find(o=>o.user_id===t.da_operatore_user_id)?.nome||'—'),esc(ops.find(o=>o.user_id===t.a_operatore_user_id)?.nome||'—'),money(t.importo),badge(t.stato)])),writeButton('+ Trasferimento','new-transfer'));
 }
 function drawEconomy(){
@@ -252,7 +253,7 @@ function drawRentals(){
   '<strong>'+esc(n.azienda||n.referente||'Noleggio')+'</strong><small class="row-sub">'+esc(n.telefono||'')+'</small>',
   dateIT(n.data_partenza)+' <span class="small muted">'+esc(String(n.ora_partenza||'').slice(0,5))+'</span>',
   esc(n.tratta_partenza)+' → '+esc(n.tratta_destinazione),
-  num(n.passeggeri),money(n.prezzo_concordato),money(n.acconto),badge(n.stato_noleggio),badge(n.stato_pagamento),safeLink('PDF',n.id,'pdf-rental')
+  num(n.passeggeri),money(n.prezzo_concordato),money(n.acconto),badge(n.stato_noleggio),badge(n.stato_pagamento),safeLink('PDF',n.id,'pdf-rental')+' '+writeButton('Incasso','new-rental-payment','data-id="'+esc(n.id)+'"')
  ]);
  return intro('Noleggi autobus','Gestione noleggi GT, servizi privati ed eventi.','<button class="secondary" data-action="pdf-rentals">↓ PDF noleggi</button><button class="secondary" data-action="refresh">↻ Aggiorna</button>'+writeButton('+ Noleggio','create-rental'))+
  '<div class="filters">'+searchField('Cerca azienda, referente o destinazione')+'</div>'+
@@ -527,6 +528,14 @@ async function handleAction(action,id,button){
    displayModal('Conferma originale','<p class="help">File già archiviato in Supabase: non viene rigenerato.</p><div class="action-row"><a href="'+esc(signed)+'" target="_blank" rel="noopener noreferrer" class="primary">Apri PDF originale ↗</a></div>');
    return;
  }
+
+ if(action==='open-rental-receipt'){
+  const p=get('rentalPayments').find(x=>x.id===id);
+  if(!p?.receipt_professional_path && !p?.receipt_path)throw new Error('Ricevuta noleggio non archiviata.');
+  const signed=await signedReceiptPath('ricevute-prenotazioni',p.receipt_professional_path||p.receipt_path);
+  displayModal('Ricevuta originale noleggio','<p class="help">Documento storico dell’archivio aziendale.</p><div class="action-row"><a href="'+esc(signed)+'" target="_blank" rel="noopener noreferrer" class="primary">Apri PDF originale ↗</a></div>');
+  return;
+ }
  if(action==='open-payment-receipt'||action==='open-stored-document'){
    const p=action==='open-payment-receipt'?get('payments').find(x=>x.id===id):null;
    const storagePath=p?(p.receipt_professional_path||p.receipt_storage_path):id;
@@ -699,6 +708,19 @@ async function handleAction(action,id,button){
    '<button type="submit" class="primary span-2">Salva modifiche</button></form>');
  }
 
+
+ if(action==='new-rental-payment'){
+  const options=get('rentals').filter(n=>!n.archiviato_at).map(n=>'<option value="'+esc(n.id)+'" '+(id===n.id?'selected':'')+'>'+esc((n.azienda||n.referente||'Noleggio')+' · '+dateIT(n.data_partenza)+' · saldo '+money(n.saldo))+'</option>').join('');
+  if(!options)throw new Error('Nessun noleggio attivo disponibile per il pagamento.');
+  return displayModal('Registra incasso noleggio','<form data-save="rental-payment" class="form-grid">'+
+   '<label class="span-2">Noleggio<select name="noleggio" required>'+options+'</select></label>'+
+   '<label>Tipo<select name="tipo"><option>Acconto</option><option>Saldo</option></select></label>'+
+   '<label>Importo €<input name="importo" type="number" required min=".01" step=".01"></label>'+
+   '<label>Metodo<select name="metodo"><option>Contanti</option><option>Bonifico</option><option>POS</option></select></label>'+
+   '<label>Data<input name="data" type="date" value="'+todayItaly()+'" required></label>'+
+   '<label class="span-2">Note<textarea name="note"></textarea></label>'+
+   '<button type="submit" class="primary span-2">Registra su Supabase e genera ricevuta</button></form>');
+ }
  if(action==='new-payment'){
   const opts=get('bookings').filter(bookingActive).map(b=>'<option value="'+esc(b.id)+'" '+(id===b.id?'selected':'')+'>'+esc(bookingName(b)+' · '+tripName(tripBy(b.viaggio_id)))+'</option>').join('');
   return displayModal('Registra pagamento','<form data-save="payment" class="form-grid"><label class="span-2">Prenotazione<select name="booking" required>'+opts+'</select></label><label>Tipo<select name="tipo"><option>Acconto</option><option>Saldo</option></select></label><label>Importo €<input name="importo" type="number" min=".01" step=".01" required /></label><label>Metodo<select name="metodo"><option>Contanti</option><option>Bonifico</option><option>POS</option></select></label><label>Data<input name="data" type="date" value="'+todayItaly()+'" required /></label><label class="span-2">Note<textarea name="note"></textarea></label><button class="primary span-2" type="submit">Registra in Supabase</button></form>');
@@ -758,6 +780,20 @@ async function handleSubmit(form){
    const receipt=await edgeAction('professional-receipts',{action:'generate',kind:'trip',id:saved.payment_id,reissue:false});
    success+=' Ricevuta professionale archiviata'+(receipt.receiptNumber?' · '+receipt.receiptNumber:'')+'.';
   }catch(e){success+=' ATTENZIONE: incasso registrato ma PDF non confermato ('+String(e.message||e)+'). NON registrare di nuovo il pagamento.';}
+
+ } else if(type==='rental-payment'){
+  const amount=numeric('importo',{min:.01});
+  if(!confirm('Confermare il pagamento noleggio di '+money(amount)+'? Non ripetere l invio in caso di timeout.'))return;
+  const saved=await writeRpc('dg_register_rental_payment',{
+   p_noleggio_id:s('noleggio'),p_tipo:s('tipo'),p_importo:amount,
+   p_metodo:s('metodo'),p_data:s('data'),p_note:s('note')
+  });
+  if(!saved?.payment_id)throw new Error('Pagamento noleggio non confermato: verificare il registro prima di ritentare.');
+  success='Incasso noleggio '+money(amount)+' registrato · N. '+String(saved.receipt_number||saved.payment_id)+'.';
+  try{
+   const receipt=await edgeAction('professional-receipts',{action:'generate',kind:'rental',id:saved.payment_id,reissue:false});
+   success+=' Ricevuta professionale archiviata'+(receipt.receiptNumber?' · '+receipt.receiptNumber:'')+'.';
+  }catch(e){success+=' ATTENZIONE: pagamento registrato ma ricevuta non archiviata ('+String(e.message||e)+'). NON ripetere l incasso.';}
  } else if(type==='booking'){
   const prior=s('bookingId')?get('bookings').find(x=>x.id===s('bookingId')):null;
   const t=tripBy(s('viaggio'));
