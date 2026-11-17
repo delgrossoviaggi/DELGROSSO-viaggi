@@ -546,7 +546,7 @@ function drawCash(){
  const cash=get('cash'),ops=get('operators'),payments=get('payments'),rentals=get('rentalPayments'),trans=get('transfers');
  const cards='<div class="cards">'+card('Casse operatori',String(cash.length),'Valori calcolati dalla vista ufficiale')+
  card('Pagamenti viaggi e noleggi',String(payments.length+rentals.length),'Movimenti originali')+
- card('Trasferimenti cassa',String(trans.length),'Movimenti contabilizzati')+
+ card('Giroconti tra casse',String(trans.length),'Nicola ↔ Raffaele · movimenti contabilizzati')+
  card('Contabilità',WRITES_ENABLED?'Attiva':'Protetta','Solo lettura durante il collaudo')+'</div>';
  const cardOperators=cash.map(c=>'<div class="panel"><div class="panel-head"><div><h3>Contabilità '+esc(c.nome||c.username||'Operatore')+'</h3><p>Riconciliata con la vista Supabase</p></div>'+badge('Operatore')+'</div><div class="panel-body"><div class="cards" style="grid-template-columns:1fr 1fr">'+
   card('Cassa netta',money(c.cassa_netto),'')+card('Incassi viaggi',money(c.viaggi_incassati),'')+
@@ -561,7 +561,7 @@ function drawCash(){
  cards+'<div class="section-grid">'+cardOperators+'</div>'+
  panel('Registro incassi viaggi','Dati originali da pagamenti · ultime 80 righe',table(['Data','Cliente','Viaggio','Tipo','Importo','Incassato da','Ricevuta'],rows))+
  panel('Pagamenti noleggi','Dati originali da noleggi_bus_pagamenti · non inclusi nel registro delle gite',table(['Data','Servizio','Tipo','Importo','Metodo','Ricevuta'],rentals.slice().sort((a,b)=>String(b.data_pagamento).localeCompare(String(a.data_pagamento))).slice(0,100).map(p=>[dateIT(p.data_pagamento),esc(get('rentals').find(n=>n.id===p.noleggio_id)?.referente||short(p.noleggio_id)),badge(p.tipo),money(p.importo),esc(p.metodo||'—'),'<span>'+esc(p.receipt_number||'—')+'</span><small class="row-sub">'+(p.receipt_professional_path||p.receipt_path?safeLink('Apri originale',p.id,'open-rental-receipt'):'')+'</small>'])))+
- panel('Trasferimenti tra operatori','Lo spostamento quote utilizza una RPC transazionale',table(['Data','Da','A','Importo','Stato'],trans.map(t=>[dateIT(t.data_trasferimento),esc(ops.find(o=>o.user_id===t.da_operatore_user_id)?.nome||'—'),esc(ops.find(o=>o.user_id===t.a_operatore_user_id)?.nome||'—'),money(t.importo),badge(t.stato)])),writeButton('+ Trasferimento','new-transfer'));
+ panel('Giroconti tra casse · Nicola ↔ Raffaele','Movimenti di denaro tra operatori · gestione contabile tracciata',table(['Data','Da','A','Importo','Stato'],trans.map(t=>[dateIT(t.data_trasferimento),esc(ops.find(o=>o.user_id===t.da_operatore_user_id)?.nome||'—'),esc(ops.find(o=>o.user_id===t.a_operatore_user_id)?.nome||'—'),money(t.importo),badge(t.stato)])),writeButton('+ Giroconto','new-transfer'));
 }
 function drawEconomy(){
  const movements=get('economy'),profit=get('profit').sort((a,b)=>String(b.data_partenza).localeCompare(String(a.data_partenza)));
@@ -1268,7 +1268,7 @@ async function handleAction(action,id,button){
  }
  if(action==='new-transfer'){
   const opts=get('operators').filter(o=>o.user_id!==currentUser()&&o.attivo).map(o=>'<option value="'+esc(o.user_id)+'">'+esc(o.nome||o.username)+'</option>').join('');
-  return displayModal('Trasferimento casse','<form class="form-grid" data-save="transfer"><label class="span-2">Destinatario<select name="recipient" required>'+opts+'</select></label><label>Importo €<input name="importo" required type="number" min=".01" step=".01"></label><label>Note<input name="note"></label><button class="primary span-2" type="submit">Conferma trasferimento</button></form>');
+  return displayModal('Giroconto tra casse · Nicola ↔ Raffaele','<form class="form-grid" data-save="transfer"><label class="span-2">Destinatario<select name="recipient" required>'+opts+'</select></label><label>Importo €<input name="importo" required type="number" min=".01" step=".01"></label><label>Note<input name="note"></label><button class="primary span-2" type="submit">Conferma giroconto</button></form>');
  }
  if(action==='checkin-booking'){
   if(!confirm('Registrare il check-in per questa prenotazione?'))return;
@@ -1460,9 +1460,9 @@ async function handleSubmit(form){
   success='Piantina ufficiale pubblicata nel database per '+tripName(t)+'.';
  } else if(type==='transfer'){
   const amount=numeric('importo',{min:.01,max:100000});
-  if(!confirm('Trasferire '+money(amount)+' al destinatario selezionato?'))return;
+  if(!confirm('Confermare il giroconto di '+money(amount)+' al destinatario selezionato?'))return;
   const saved=await writeRpc('dg_transfer_cash',{p_to_user_id:s('recipient'),p_amount:amount,p_note:s('note')});
-  if(!saved?.success)throw new Error('Trasferimento non confermato; controllare il registro prima di riprovare.');
+  if(!saved?.success)throw new Error('Giroconto non confermato; controllare il registro prima di riprovare.');
  } else if(type==='move'){
   const args={p_booking_ids:[s('bookingId')],p_target_trip_id:s('targetTrip'),p_target_stop:s('stop')||null,p_preview:true};
   const preview=await writeRpc('dg_move_bookings_auto_seats_v1',args);
