@@ -260,7 +260,7 @@ function reviewBisWizard(){
   '<p><strong>Posti prenotabili:</strong> '+esc(p.bookableSeats.join(', '))+'</p>'+
   '<p><strong>Visibilità:</strong> '+(p.publish?'Da pubblicare sul sito':'Solo gestionale')+'</p>'+
   '<div class="alert">La selezione sarà salvata con i posti non scelti bloccati. Una verifica sul server impedirà prenotazioni dirette di sedili chiusi.</div>'+
-  '<div class="action-row"><button class="secondary" data-action="open-bis" data-id="'+esc(p.sourceTripId)+'">← Modifica selezione</button>'+
+  '<div class="action-row"><button class="secondary" data-action="back-bis">← Modifica selezione</button>'+
   writeButton('Conferma apertura BUS BIS','commit-bis-manual')+'</div>'+
   (!WRITES_ENABLED?'<p class="help">Conferma disattivata fino a backup/restore e collaudo dell’RPC protetta.</p>':'');
  displayModal('Anteprima BUS BIS · '+p.bookableCount+' sedili aperti',html);
@@ -771,6 +771,70 @@ function printRoster(){
 }
 async function handleAction(action,id,button){
  if(action==='refresh'){clearCache();showMessage('Aggiornamento in corso.');await navigate(page,true);return;}
+
+ if(action==='open-bis'){openBisWizard(id);return;}
+ if(action==='back-bis'){pendingBis=null;renderBisWizard();return;}
+ if(action==='bis-select-all'||action==='bis-select-none'||action==='bis-select-first'){
+  if(!bisWizard)throw new Error('Seleziona prima un viaggio.');
+  const bus=get('fleet').find(x=>x.id===bisWizard.busId);
+  const lib=get('layoutLibrary').find(x=>x.id===bisWizard.layoutId);
+  const info=inspectLayout(lib?.configurazione,Number(bus?.posti||0));
+  if(!info.valid)throw new Error('Piantina non compatibile.');
+  const usable=info.seats.filter(x=>!info.unusable.has(x));
+  let select=action==='bis-select-none'?[]:usable;
+  if(action==='bis-select-first'){
+   const n=Number($('bis-first-count')?.value||0);
+   if(!Number.isInteger(n)||n<1||n>usable.length)throw new Error('Numero posti da aprire non valido.');
+   select=usable.slice(0,n);
+  }
+  bisWizard.selected=select;renderBisWizard();return;
+ }
+ if(action==='commit-bis-manual'){
+  if(!WRITES_ENABLED)throw new Error('Il BUS BIS non può ancora essere creato: backup/ripristino e blocco server dei posti chiusi devono essere collaudati.');
+  if(bisBusy)throw new Error('Operazione già in corso. Controlla i viaggi prima di riprovare.');
+  const plan=pendingBis;
+  if(!plan?.sourceTripId||!plan.bookableSeats?.length)throw new Error('Anteprima BUS BIS scaduta.');
+  if(!confirm('Aprire il BUS BIS con '+plan.bookableCount+' posti selezionati su '+plan.physicalSeats+
+   ' fisici, '+(plan.publish?'pubblicato':'NON pubblicato')+' sul sito?'))return;
+  bisBusy=true;
+  try{
+   const [trips,fleet,library]=await Promise.all([
+    records('trips',{force:true,limit:2500}),
+    records('fleet',{force:true,limit:150}),
+    records('layoutLibrary',{force:true,limit:500})
+   ]);
+   const verified=prepareBisSeatOpening({
+    source:trips.find(x=>x.id===plan.sourceTripId),
+    bus:fleet.find(x=>x.id===plan.busId),
+    template:library.find(x=>x.id===plan.layoutId),
+    selected:plan.bookableSeats,allTrips:trips,today:todayItaly()
+   });
+   if(verified.bookableSeats.join(',')!==plan.bookableSeats.join(','))
+    throw new Error('Le opzioni di apertura sono cambiate.');
+   const result=await writeRpc('dg4_open_trip_bis_manual_v1',{
+    p_source_trip_id:plan.sourceTripId,
+    p_bus_id:plan.busId,
+    p_layout_id:plan.layoutId,
+    p_bookable_seats:plan.bookableSeats.map(Number),
+    p_publish:plan.publish
+   });
+   if(result?.success!==true || !result?.trip_id ||
+      Number(result.bookable_seats)!==plan.bookableCount)
+    throw new Error('La risposta del server non è confermata. Verifica l’elenco viaggi senza ripetere il comando.');
+   const newTrips=await records('trips',{force:true,limit:2500});
+   const created=newTrips.find(x=>x.id===result.trip_id);
+   if(!created||String(created.bis_parent_id)!==String(result.root_trip_id))
+    throw new Error('Il server ha risposto ma il nuovo BIS non è ancora riconciliato; controlla prima di riprovare.');
+   pendingBis=null;bisWizard=null;closeModal();
+   await navigate('trips',true);
+   showMessage('BUS BIS aperto: '+plan.bookableCount+' posti manualmente disponibili. Posti non selezionati chiusi nel layout ufficiale.');
+  }catch(e){
+   pendingBis=null;
+   throw new Error(String(e.message||e)+' — NON ripetere l’apertura senza verificare prima se il BUS BIS è stato creato.');
+  }finally{bisBusy=false}
+  return;
+ }
+
 
  if(action==='transfer-booking'||action==='move-booking'){
   openTransferWizard(id);return;
