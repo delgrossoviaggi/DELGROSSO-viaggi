@@ -147,7 +147,7 @@ function drawBookings(){
    esc(b.fermata_partenza||'—'),
    money(b.totale)+'<small class="row-sub">Registrati: '+money(paid)+'</small>',
    badge(b.stato),b.checkin_effettuato?badge('Presente'):badge('Da verificare'),
-   safeLink('Apri',b.id)+' <button class="inline-link" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Posti / BUS / data</button>'
+   safeLink('Apri',b.id)+' '+writeButton('Modifica dati','edit-booking-info','data-id="'+esc(b.id)+'"')+' <button class="inline-link" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Posti / BUS / data</button>'
   ];
  });
  const sum=data.filter(bookingActive).reduce((n,b)=>n+num(b.posti),0);
@@ -168,7 +168,7 @@ function drawMovements(){
    '<strong>'+num(x.posti)+' persone</strong><small class="row-sub">'+esc(x.posti_selezionati||'Non riconciliati')+'</small>',
    money(x.pagato)+' / '+money(x.totale),
    '<span>'+Math.max(0,related.length-1)+' autobus alternativi · '+dates.length+' partenze future</span>',
-   '<button class="secondary" data-action="transfer-booking" data-id="'+esc(x.id)+'">⇄ Gestisci</button>'
+   '<div class="row-actions">'+writeButton('Modifica dati','edit-booking-info','data-id="'+esc(x.id)+'"')+'<button class="secondary" data-action="transfer-booking" data-id="'+esc(x.id)+'">⇄ Posti / BUS / data</button></div>'
   ];
  });
  return intro('Spostamenti posti e partecipanti','Cambio sedili sullo stesso bus, trasferimento BUS/BIS o nuova data con anteprima e conservazione dei pagamenti.',
