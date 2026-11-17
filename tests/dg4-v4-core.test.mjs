@@ -7,11 +7,13 @@ import {fileURLToPath} from 'node:url';
 const dir=new URL('../GESTIONALE/v4/',import.meta.url);
 const core=readFileSync(new URL('core.js',dir),'utf8').replace(/^export /gm,'');
 const operations=readFileSync(new URL('booking-operations.js',dir),'utf8').replace(/^export /gm,'');
+const bis=readFileSync(new URL('bis-manual.js',dir),'utf8').replace(/^export /gm,'');
 const app=readFileSync(new URL('app.js',dir),'utf8')
   .replace(/^import \{[\s\S]*?\} from '\.\/core\.js';/,'')
   .replace(/^\s*import \* as Pdf from '\.\/pdf-reports\.js';/m,'')
   .replace(/^\s*import \{createLiveSync\} from '\.\/live-sync\.js';/m,'')
   .replace(/^\s*import \{[^\n]+\} from '\.\/booking-operations\.js';/m,'')
+  .replace(/^\s*import \{[^\n]+\} from '\.\/bis-manual\.js';/m,'')
   .replace(/bootstrap\(\)\.catch\([\s\S]*?;\s*$/,'');
 const context=vm.createContext({
  console,Intl,Date,Map,Set,Number,String,JSON,Math,Object,Array,RegExp,
@@ -22,7 +24,7 @@ const context=vm.createContext({
  fetch(){throw Error('Offline test forbids network')}
 });
 const getTests=';globalThis.v4tests={state,occupancy,breakdown,esc,WRITES_ENABLED,mutate,writeRpc,drawDashboard,drawTrips,drawBookings,drawMovements,drawControl,drawLayouts,drawCash,drawEconomy,drawCustomers,drawRentals,drawAgenda,drawFleet,drawDocuments,drawNotifications,drawDiagnostics,drawQuotes,drawInvoices,drawWaitlist,drawWhatsApp,drawReports,normalizeSignedStorageUrl,edgeAction};';
-vm.runInContext(core+'\n'+operations+'\n'+app+'\n'+getTests,context,{timeout:3000});
+vm.runInContext(core+'\n'+operations+'\n'+bis+'\n'+app+'\n'+getTests,context,{timeout:3000});
 const appTest=context.v4tests;
 const trip={id:'T1',titolo:'Napoli & Spaccanapoli',data_partenza:'2026-12-20',destinazione:'Napoli',posti_totali:53,prezzo:20,stato:'Aperto'};
 const booking={id:'B1',viaggio_id:'T1',cliente:'Nome prova',telefono:'3330000000',posti:2,totale:40,pagato:20,stato:'Acconto Ricevuto',posti_selezionati:'1,2',fermata_partenza:'San Severo'};
@@ -57,6 +59,11 @@ test('The PDF Edge Function cannot archive invoices, confirmations or receipts d
  await assert.rejects(appTest.edgeAction('dg2-booking-pdf',{action:'generate',bookingId:'B1'}),/sospesa/);
 });
 
+test('BUS BIS action is accessible from journey list and requires safe write mode for commit',()=>{
+ const html=appTest.drawTrips();
+ assert.ok(html.includes('data-action="open-bis"'),'Journey list must offer manual BIS entry');
+ assert.equal(appTest.WRITES_ENABLED,false);
+});
 test('Transfer preview handler renders read-only with safe mode on',()=>{
  assert.ok(appTest.drawMovements().includes('transfer-booking'));
  assert.equal(appTest.WRITES_ENABLED,false);
