@@ -22,7 +22,7 @@ Data tecnica: 17 novembre 2026.
 | Preventivi | preventivi | sì, scheda PDF | nuovo preventivo e PDF professionale predisposti, bloccati |
 | Fatturazione / bozze | dg3_fatture_bozze | sì | **nessuna emissione FE/SDI**, solo lettura PDF bozza |
 | Lista d'attesa | lista_attesa | sì | inserimento senza occupazione sedili predisposto, bloccato |
-| Agenda completa | scadenze_gestionale (tipi Appuntamento, Impegno, Nota, Promemoria) | sì, calendario mensile, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
+| Agenda completa | **attivita_gestionale** (storico V1/V2) + scadenze_gestionale (nuove voci tipizzate Agenda) | sì, calendario mensile, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
 | Scadenze | scadenze_gestionale (Scadenza, operativa, Estintori, ecc.) | sì, filtri dedicate per data/stato, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
 | Flotta GT | flotta | sì, senza pubblicizzare van | modifiche non abilitate |
 | Documenti | archivio_documenti, dg_receipt_archive, Supabase Storage | sì, indici e accesso JWT agli originali | no archiviazioni automatiche in safe mode |
@@ -30,6 +30,14 @@ Data tecnica: 17 novembre 2026.
 | WhatsApp Business | dg_whatsapp_inbox_v61, outbound, optins | sì, consensi e storico | **nessun invio automatico ai clienti** |
 | Centro PDF e report | viste autorizzate | sì, pulsanti aggregati | file scaricati localmente |
 | Diagnostica | dg_system_health, dg_data_quality_issues | sì | nessun SQL di modifica |
+
+## Ripristino Agenda storica V1/V2 — 17 novembre 2026
+- **Problema accertato:** la V4 leggeva solo \`scadenze_gestionale\`. Le nove attività realmente inserite nel vecchio gestionale erano invece in **\`public.attivita_gestionale\`**, pertanto l'Agenda sembrava vuota. Non risultano cancellate: sono ancora sul progetto Supabase gestionale originale.
+- **Dati controllati in sola lettura:** \`attivita_gestionale\` = 9 impegni, con 2 voci il **21/11/2026**, 3 voci il **06/12/2026** e 4 voci il **13/12/2026**, inclusi due record completati. \`scadenze_gestionale\` = 4 record categoria \`Estintori\`, tutti in data 01/07/2027. Entrambi gli archivi restano distinti nel database.
+- **Correzione:** risorsa \`legacyAgenda\` ora legge \`attivita_gestionale\` con RLS e JWT dell'operatore; \`mergeAgendaSources\` mappa solo nella presentazione \`scadenza → data_scadenza\` e \`tipo → Impegno\`, annotando \`__source\` senza modificare alcun record. V4 mostra i nove eventi storici nel calendario e nell'elenco dell'Agenda, insieme ai nuovi appuntamenti \`scadenze_gestionale\` contrassegnati come Agenda. Scadenze mostra solo i record pertinenti.
+- **Modifica e cestino:** per ogni attività vecchia il PATCH aggiorna **\`attivita_gestionale\` originale** usando \`updated_at\` e i campi reali della tabella (\`scadenza\`, \`assegnata_a\`, ecc.); il form non propone campi \`tipo\` e \`note\` non previsti sul vecchio schema. Per gli appuntamenti nuovi continua a salvare sulla struttura tipizzata di \`scadenze_gestionale\`. L'eliminazione è logica: \`stato='eliminata'\` e ripristino da cestino, senza \`DELETE\`.
+- La correzione è disponibile solo nella V4 del **ramo di collaudo**; nessuna migrazione SQL e nessuna scrittura sui dati reali sono state eseguite durante il fix. La scrittura con privilegi dell'operatore rimane un percorso da verificare dal vivo; gli altri moduli finanziari e prenotazioni restano bloccati.
+- Regressioni automatiche \`tests/dg4-v4-agenda-layout-crud.test.mjs\` e \`tests/dg4-v4-core.test.mjs\`: nove eventi, data originale, sorgente, stato completata e distinzione dai quattro termini.
 
 ## Agenda completa e Scadenze — sezioni separate
 - **Agenda completa:** calendario mensile navigabile (mesi/giorni) per appuntamenti, impegni, note e promemoria. Gli eventi con \`tipo\` riconosciuto di agenda non compaiono nel registro delle scadenze.
