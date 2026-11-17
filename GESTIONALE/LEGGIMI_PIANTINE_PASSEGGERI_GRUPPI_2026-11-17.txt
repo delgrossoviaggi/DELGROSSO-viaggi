@@ -1,0 +1,59 @@
+DELGROSSO VIAGGI — PIANTINE PASSEGGERI A COLORI — AGGIORNAMENTO 17/11/2026
+
+CONTENUTO DELLO ZIP
+Pacchetto completo della sola cartella GESTIONALE, inclusi gestionale storico,
+suite e V4, con nuovo generatore condiviso di piantine e gruppi.
+Le pagine pubbliche del sito NON sono incluse e NON vengono modificate.
+
+MODIFICHE
+1) Piantina reale: legge le configurazioni ufficiali Supabase del singolo
+   viaggio, altrimenti quella ufficiale del bus. Non rinumera i sedili.
+   Mantiene le file esistenti, i corridoi, le porte e le colonne (anche 6-8).
+2) Passeggeri: un colore diverso per ogni PRENOTAZIONE, uguale per tutti
+   i sedili di quel gruppo, con codice G01, G02, G03... e legenda nome/posti.
+   Nomi mostrati = referenti delle prenotazioni; non si inventano i nomi di
+   altri passeggeri.
+3) V4 > Control Room > "Piantina passeggeri a colori" genera il PDF con
+   gruppo-colore e legenda, separato dall'Elenco prenotati PDF.
+4) La precedente Control Room V2+ > "PDF piantina + fermate" utilizza
+   il medesimo generatore dei gruppi a colori.
+5) Correzione anche della piantina vuota di libreria V4: la geometria
+   originale può avere da 1 a 8 caselle per fila e non viene più ridotta
+   artificialmente a 5 colonne.
+6) Se i dati dei posti risultano incoerenti (duplicati, posti inesistenti,
+   più o meno posti dei passeggeri, conflitto tra prenotazione e registro),
+   il PDF ufficiale viene bloccato con un avviso per evitare errori.
+
+VERIFICA SUPABASE AL MOMENTO DELLO SVILUPPO — LETTURA SOLTANTO
+- Piantine specifiche dei viaggi (dg28_trip_layouts): 7
+- Piantine ufficiali predefinite dei mezzi (dg28_bus_layouts): 0
+- Le altre partenze possono usare uno schema storico/indicativo nel vecchio
+  sito. Il report di imbarco non dichiara ufficiale uno schema indicativo.
+- Per usare piantine personalizzate identiche al sito per tutti i viaggi,
+  occorre associare e pubblicare la piantina effettiva sul mezzo/viaggio,
+  previo controllo dei sedili gia' prenotati e backup Supabase.
+- NON sono state effettuate scritture su Supabase, trasferimenti di posti,
+  prenotazioni o incassi, e nessuna migrazione SQL e' stata eseguita.
+
+COME CARICARE IL GESTIONALE SU GITHUB
+1) Esegui un backup del repository attuale su GitHub (ramo separato).
+2) Estrai lo ZIP sul PC e copia la cartella GESTIONALE nel repository
+   delgrossoviaggi/DELGROSSO-viaggi mantenendo tutti i percorsi.
+3) Carica i file con GitHub Desktop (Commit / Push) su un RAMO DI TEST.
+4) Verifica la preview del gestionale dal tuo account PC/iPhone.
+5) In Control Room scegli un viaggio con piantina ufficiale pubblicata;
+   scarica la Piantina passeggeri a colori e confronta riga per riga con
+   la stessa partenza nel sito, verificando numeri, porta e corridoio.
+6) Solo dopo la prova con dati reali, pubblica su main.
+
+NOTA TECNICA
+- Tutto il colore/nome dei gruppi viene generato nel browser autenticato.
+  Nessun dato personale e' memorizzato dal modulo colori.
+- I vecchi blocchi delle scritture gestionali e contabili restano attivi;
+  il codice non equivale al collaudo definitivo delle operazioni di
+  pagamento, prenotazione o associazione piantine su Supabase.
+- Usa un PDF con nomi dei clienti solo per finalita' operative interne,
+  evitando la diffusione pubblica dei dati personali.
+
+VERIFICA SENZA INTERNET:
+  node --test GESTIONALE/tests/piantine-gruppi.test.cjs

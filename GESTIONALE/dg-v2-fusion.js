@@ -83,7 +83,7 @@ function normaliseConfig(config,name='Piantina'){
  if(rows.length>35)throw Error('Massimo 35 file nella piantina ufficiale.');
  const arr=rows.map((r,i)=>{
   const cells=Array.isArray(r)?r:r.cells;
-  if(!Array.isArray(cells)||cells.length!==5)throw Error('La fila '+(i+1)+' deve avere esattamente cinque caselle.');
+  if(!Array.isArray(cells)||cells.length<1||cells.length>8)throw Error('La fila '+(i+1)+' deve avere da 1 a 8 caselle.');
   return {rowNumber:i+1,label:'Fila '+(i+1),cells:cells.map(cell=>{
    if(cell&&typeof cell==='object'&&!Array.isArray(cell)){
     if(cell.type==='seat')return {type:'seat',id:String(cell.id??''),label:String(cell.id??''),status:['available','blocked','out_of_service'].includes(cell.status)?cell.status:'available'};
@@ -100,7 +100,7 @@ function validate(layout,expected){
  if(!Number.isInteger(expected)||expected<1||expected>100)throw Error('Capienza fuori range.');
  const ids=(layout.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c.type==='seat').map(c=>String(c.id||''));
  if(ids.length!==expected||new Set(ids).size!==expected||ids.some(v=>!/^\d+$/.test(v)||Number(v)<1||Number(v)>expected))throw Error('La piantina deve contenere esattamente i posti numerati da 1 a '+expected+', senza duplicati. Usa Rinumerazione.');
- if(layout.rows.length>35||layout.rows.some(r=>r.cells.length!==5))throw Error('Schema non compatibile con la pubblicazione.');
+ if(layout.rows.length>35||layout.rows.some(r=>r.cells.length<1||r.cells.length>8))throw Error('Schema non compatibile con la pubblicazione.');
  return true;
 }
 function template(n,name){
@@ -122,7 +122,7 @@ function groups(data,{id='',includeArchived=false}={}){
     const both=[...new Set([...seatNumbers(b.posti_selezionati),...(byBooking.get(String(b.id))||[])])].sort((x,y)=>Number(x)-Number(y));
     return {...b,sedili:both};
    });
-   const officialTrip=data.tripOfficial.find(x=>String(x.viaggio_id)===String(t.id));
+   const officialTrip=data.tripOfficial.find(x=>String(x.viaggio_id)===String(t.id)&&(!x.autobus_id||String(x.autobus_id)===String(t.autobus_id)));
    const officialBus=data.busOfficial.find(x=>String(x.autobus_id)===String(t.autobus_id));
    const saved=officialTrip||officialBus;
    let layout=null,official=false;const warnings=[];
@@ -142,7 +142,7 @@ function groups(data,{id='',includeArchived=false}={}){
    const missingStops=rows.filter(b=>!String(b.fermata_partenza||'').trim()).length;if(missingStops)warnings.push(missingStops+' prenotazioni senza fermata di salita.');
    const seatMap=new Map(layout?.rows.flatMap(r=>r.cells||[]).filter(c=>c.type==='seat').map(c=>[String(c.id),c])||[]);
    for(const [seat,b] of expected){if(!seatMap.has(seat))warnings.push('Posto '+seat+' prenotato ma assente dalla geometria disponibile.');else if(seatMap.get(seat).status!=='available')warnings.push('Posto '+seat+' prenotato ma segnalato come bloccato.');}
-   return {trip:t,name:(t.bis_parent_id?'BUS BIS '+(t.bis_numero||i+1):'BUS 1')+' · '+busName(data.fleet.find(f=>String(f.id)===String(t.autobus_id))||{titolo:t.autobus}),bookings:rows,layout,official,warnings};
+   return {trip:t,seatRows:data.seatrows.filter(x=>String(x.viaggio_id)===String(t.id)),layoutSource:officialTrip?'viaggio':officialBus?'autobus':null,layoutVersion:saved?.versione||null,name:(t.bis_parent_id?'BUS BIS '+(t.bis_numero||i+1):'BUS 1')+' · '+busName(data.fleet.find(f=>String(f.id)===String(t.autobus_id))||{titolo:t.autobus}),bookings:rows,layout,official,warnings};
   });
   answer.push({trip:main,title:(main.titolo||main.destinazione||'Viaggio')+' · '+date(main.data_partenza),buses});
  }
