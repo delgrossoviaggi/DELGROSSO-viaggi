@@ -710,17 +710,104 @@ function drawRentals(){
  '<div class="filters">'+searchField('Cerca azienda, referente o destinazione')+'</div>'+
  panel('Servizi e contratti','Dati da noleggi_bus',table(['Cliente','Partenza','Tratta','Pax','Prezzo','Acconto','Stato','Pagamento','Scheda'],rows));
 }
+function agendaActions(item,section='agenda',isTrash=false){
+ const key='data-id="'+esc(item.id)+'"';
+ if(isTrash)return agendaButton('↶ Ripristina','restore-agenda',key,'secondary');
+ return agendaButton('Modifica','edit-agenda',key,'secondary')+
+  (item.stato==='completata'?agendaButton('Riapri','toggle-agenda',key,'secondary'):agendaButton('✓ Completa','toggle-agenda',key,'secondary'))+
+  agendaButton('Elimina','delete-agenda',key,'secondary');
+}
+function agendaLine(item,section='agenda',isTrash=false){
+ return [
+  '<strong>'+esc(item.titolo||'Senza titolo')+'</strong>'+
+    (item.descrizione?'<small class="row-sub">'+esc(item.descrizione)+'</small>':'')+
+    (item.note?'<small class="row-sub">Note: '+esc(item.note)+'</small>':''),
+  dateIT(item.data_scadenza),badge(item.tipo),badge(item.priorita),badge(item.stato),
+  agendaActions(item,section,isTrash)
+ ];
+}
 function drawAgenda(){
- const items=get('agenda').filter(a=>filterTerm(a.titolo,a.descrizione,a.tipo)).sort((a,b)=>String(a.data_scadenza).localeCompare(String(b.data_scadenza)));
- const rows=items.map(a=>[
-  '<strong>'+esc(a.titolo)+'</strong><small class="row-sub">'+esc(a.descrizione||'')+'</small>',
-  dateIT(a.data_scadenza),badge(a.priorita),badge(a.stato),esc(a.tipo),
-  writeButton('✓ Completa','complete-agenda','data-id="'+esc(a.id)+'"')
- ]);
- return intro('Agenda e scadenze','Ripristino della vera agenda presente su Supabase.','<button class="secondary" data-action="pdf-agenda">↓ PDF agenda</button><button class="secondary" data-action="export-agenda">↓ CSV</button>'+writeButton('+ Nuovo impegno','create-agenda'))+
- '<div class="filters">'+searchField('Cerca un impegno')+'</div>'+
- '<div class="cards">'+card('Scadenze archiviate',String(get('agenda').length),'Impegni reali')+card('In vista',String(items.length),'Secondo ricerca')+card('In ritardo',String(items.filter(a=>a.data_scadenza<todayItaly()&&!/complet/i.test(a.stato)).length),'Richiedono verifica')+card('Priorità alta',String(items.filter(a=>/alta|urgente/i.test(a.priorita)).length),'Da seguire')+'</div>'+
- panel('Registro agenda','Scadenze ordinate dalla più vicina',table(['Attività','Scadenza','Priorità','Stato','Tipo','Azioni'],rows));
+ const all=agendaEntries(get('agenda'),'all',{includeDeleted:state.agendaTrash,search:state.search});
+ const month=state.agendaMonth||todayItaly().slice(0,7);
+ const visible=all.filter(x=>String(x.data_scadenza||'').slice(0,7)===month);
+ const isTrash=state.agendaTrash;
+ const today=todayItaly();
+ const days=calendarMonth(month);
+ const selected=state.agendaDay;
+ const byDay=new Map();
+ for(const item of visible){
+  if(!byDay.has(item.data_scadenza))byDay.set(item.data_scadenza,[]);
+  byDay.get(item.data_scadenza).push(item);
+ }
+ const dateTitle=new Date(month+'-01T12:00:00Z').toLocaleDateString('it-IT',{month:'long',year:'numeric',timeZone:'UTC'});
+ const header='<div class="dg4-calendar-bar">'+
+   '<button class="secondary" type="button" data-action="calendar-prev" aria-label="Mese precedente">‹</button>'+
+   '<strong>'+esc(dateTitle)+'</strong>'+
+   '<button class="secondary" type="button" data-action="calendar-next" aria-label="Mese successivo">›</button>'+
+   '<button class="secondary" type="button" data-action="calendar-today">Oggi</button></div>';
+ const daysHeader=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].map(n=>'<div class="dg4-calendar-weekday">'+esc(n)+'</div>').join('');
+ const tiles=days.map(day=>{
+  const hits=byDay.get(day.date)||[];
+  const cls=['dg4-calendar-day',day.within?'':'muted',day.date===today?'today':'',selected===day.date?'selected':''].filter(Boolean).join(' ');
+  const chips=hits.slice(0,3).map(x=>'<span class="dg4-calendar-chip '+(isDeadlineEntry(x)?'deadline':'')+'">'+esc(x.titolo)+'</span>').join('');
+  return '<button class="'+cls+'" type="button" data-action="calendar-day" data-date="'+esc(day.date)+
+   '" aria-label="'+esc(dateIT(day.date)+', '+hits.length+' impegni')+'">'+
+   '<span class="dg4-calendar-num">'+day.day+'</span>'+chips+
+   (hits.length>3?'<span class="dg4-calendar-overflow">+'+(hits.length-3)+' altre voci</span>':'')+'</button>';
+ }).join('');
+ const dayEntries=all.filter(x=>x.data_scadenza===selected);
+ const agendaCount=agendaEntries(get('agenda'),'agenda').length,deadlineCount=agendaEntries(get('agenda'),'scadenze').length;
+ return intro('Agenda completa','Calendario mensile per appuntamenti, impegni e note. Le scadenze sono visibili anche sul calendario, ma hanno una sezione operativa distinta.',
+  '<button class="secondary" data-page="deadlines">Vai alle Scadenze</button>'+
+  '<button class="secondary" data-action="pdf-agenda">↓ PDF agenda</button>'+
+  agendaButton('+ Nuovo impegno','create-agenda'))+
+  '<div class="cards">'+card('Voci agenda',String(agendaCount),'Appuntamenti, note e impegni')+
+  card('Scadenze collegate',String(deadlineCount),'Gestite separatamente')+
+  card('Nel mese',String(visible.length),'Attività visualizzate')+
+  card('Oggi',String(all.filter(x=>x.data_scadenza===today).length),'Voci del giorno')+'</div>'+
+  '<div class="filters">'+searchField('Cerca in tutta l’agenda…')+
+   '<button class="secondary" type="button" data-action="agenda-trash">'+(isTrash?'← Torna all’agenda':'Cestino')+'</button>'+
+   '<button class="secondary" type="button" data-action="export-agenda">↓ CSV</button></div>'+
+  (isTrash?'<p class="help">Visualizzi gli elementi eliminati. Per non rischiare perdite, l’eliminazione è reversibile: puoi ripristinarli.</p>':'')+
+  panel('Calendario mensile','Seleziona un giorno per vedere e modificare gli impegni',
+   header+'<div class="dg4-calendar-grid">'+daysHeader+tiles+'</div>')+
+  panel('Dettaglio del giorno · '+dateIT(selected),
+   'Appuntamenti, note e scadenze del giorno scelto',
+   table(['Attività','Data','Tipo','Priorità','Stato','Azioni'],dayEntries.map(x=>agendaLine(x,'agenda',isTrash))),
+   !isTrash?agendaButton('+ Aggiungi in questa data','create-agenda','data-date="'+esc(selected)+'"'):'')+
+  panel('Elenco '+(isTrash?'cestino':'impegni e scadenze'),
+   'Vista completa delle voci della sezione calendario',
+   table(['Attività','Data','Tipo','Priorità','Stato','Azioni'],all.map(x=>agendaLine(x,'agenda',isTrash))));
+}
+function drawDeadlines(){
+ const trash=state.deadlineTrash,today=todayItaly();
+ const all=agendaEntries(get('agenda'),'scadenze',{includeDeleted:trash,search:state.search});
+ const scope=state.deadlineScope;
+ const filtered=trash?all:all.filter(x=>
+  scope==='all'||(scope==='late'&&x.data_scadenza<today&&!/completat/i.test(x.stato))||
+  (scope==='today'&&x.data_scadenza===today&&!/completat/i.test(x.stato))||
+  (scope==='upcoming'&&x.data_scadenza>today&&!/completat/i.test(x.stato))||
+  (scope==='done'&&/completat/i.test(x.stato))||
+  (scope==='open'&&!/completat/i.test(x.stato)));
+ const totals=deadlineStats(get('agenda'),today);
+ const opts=[['open','Da completare'],['late','Scadute'],['today','Oggi'],['upcoming','Future'],['done','Completate'],['all','Tutte']]
+  .map(([key,name])=>'<option value="'+key+'" '+(scope===key?'selected':'')+'>'+esc(name)+'</option>').join('');
+ return intro('Scadenze','Registro separato delle attività con termine: manutenzione flotta, documenti, pagamenti da seguire e obblighi aziendali.',
+  '<button class="secondary" data-page="agenda">Vai all’Agenda completa</button>'+
+  '<button class="secondary" data-action="pdf-deadlines">↓ PDF scadenze</button>'+
+  agendaButton('+ Nuova scadenza','create-deadline'))+
+  '<div class="cards">'+card('Scadenze registrate',String(totals.total),'Senza cancellazioni')+
+    card('Scadute',String(totals.late),'Da seguire')+
+    card('Oggi',String(totals.dueToday),'Termine odierno')+
+    card('Completate',String(totals.done),'Archiviate come completate')+'</div>'+
+  '<div class="filters">'+searchField('Cerca una scadenza…')+
+    '<select id="filter-deadline-scope" aria-label="Filtra scadenze" '+(trash?'disabled':'')+'>'+opts+'</select>'+
+    '<button class="secondary" type="button" data-action="deadline-trash">'+(trash?'← Torna alle scadenze':'Cestino')+'</button>'+
+    '<button class="secondary" data-action="export-deadlines">↓ CSV</button></div>'+
+  (trash?'<p class="help">Le scadenze nel cestino non vengono cancellate dal database e possono essere ripristinate.</p>':'')+
+  panel('Registro '+(trash?'cestino':'scadenze'),
+   'Ordine cronologico, con evidenza delle scadenze in ritardo',
+   table(['Attività','Data','Tipo','Priorità','Stato','Azioni'],filtered.map(x=>agendaLine(x,'deadlines',trash))));
 }
 function drawFleet(){
  const fleet=get('fleet').filter(f=>num(f.posti)>7);
