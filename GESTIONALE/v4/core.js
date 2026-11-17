@@ -199,20 +199,32 @@ export async function records(resource,{filters={},order=null,limit=1000,force=f
  return all;
 }
 export async function rpcRead(name,args={}){
- if(!['is_gestionale_admin','dg_cash_preview_v2'].includes(name))throw new Error('RPC non autorizzata per la lettura.');
+ if(!['is_gestionale_admin','dg_cash_preview_v2','dg28_validate_layout_v1'].includes(name))throw new Error('RPC non autorizzata per la lettura.');
  return jsonFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(args)},true,0);
 }
 export async function writeRpc(name,payload){
  if(!WRITES_ENABLED)throw new Error('Scritture bloccate: backup completo e collaudo non ancora certificati.');
- const whitelist=new Set(['dg2_save_booking_guarded_v1','dg_register_payment','dg_move_bookings_auto_seats_v1','dg_transfer_cash','dg_manage_booking_seats_v1']);
+ const whitelist=new Set(['dg2_save_booking_guarded_v1','dg_register_payment','dg_move_bookings_auto_seats_v1','dg_transfer_cash','dg_manage_booking_seats_v1','dg28_publish_trip_layout_v1','dg28_publish_bus_layout_v1','dg_delete_booking']);
  if(!whitelist.has(name))throw new Error('Operazione non autorizzata.');
  const result=await jsonFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},true,0);
  clearCache();return result;
 }
 export async function mutate(resource,method,payload,id=null){
  if(!WRITES_ENABLED)throw new Error('Scritture bloccate: backup completo e collaudo non ancora certificati.');
- const allowed=new Set(['agenda','trips','rentals','customers']);
- if(!allowed.has(resource)||!['POST','PATCH'].includes(method))throw new Error('Operazione vietata.');
+ const permitted={
+  agenda:{POST:['titolo','descrizione','data_scadenza','priorita','tipo','stato'],PATCH:['stato','priorita','data_scadenza','titolo','descrizione']},
+  trips:{POST:['titolo','destinazione','data_partenza','prezzo','posti_totali','minimo_partecipanti','pubblicato','stato','autobus_id'],PATCH:['titolo','destinazione','data_partenza','prezzo','posti_totali','minimo_partecipanti','pubblicato','stato','archiviato_at','sold_out_manual']},
+  rentals:{POST:['referente','azienda','telefono','email','tratta_partenza','tratta_destinazione','data_partenza','ora_partenza','passeggeri','prezzo_concordato','acconto','saldo'],PATCH:['stato_noleggio','data_ritorno','ora_ritorno','archiviato_at']},
+  customers:{POST:['nome','cognome','telefono','email','citta'],PATCH:['telefono','email','citta']},
+  bookings:{PATCH:['checkin_effettuato','checkin_stato','checked_in_at','checkin_operatore']},
+  quotes:{POST:['nome','cognome','telefono','email','origine','stato','destinazione','data_partenza','numero_passeggeri','passeggeri','importo','importo_preventivo','servizio','luogo_partenza'],PATCH:['stato','importo_preventivo','note_interne']},
+  waitlist:{POST:['viaggio_id','nome','cognome','telefono','email','posti','stato','fermata_partenza','priorita','note'],PATCH:['stato','note']},
+  layoutLibrary:{POST:['nome','configurazione','attivo','created_by'],PATCH:['nome','configurazione','attivo','updated_by']}
+ };
+ const ok=permitted[resource]?.[method];
+ if(!Array.isArray(ok)||!payload||typeof payload!=='object'||
+ Object.keys(payload).some(k=>!ok.includes(k))||(method==='PATCH'&&!id)||(method==='POST'&&id))
+   throw new Error('Operazione o campi non autorizzati per la tabella '+resource);
  const [table]=SELECTS[resource];
  const target=id?('?id=eq.'+encodeURIComponent(id)):'';
  const result=await jsonFetch('/rest/v1/'+table+target,{
