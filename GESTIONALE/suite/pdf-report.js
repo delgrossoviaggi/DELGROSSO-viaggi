@@ -345,11 +345,15 @@ function makeOperationalPdf(groups,opts={}){
      for(const warning of plan.warnings.slice(0,14))doc.note(slim(warning,108));
     }
     const source=bus.layoutSource==='autobus'?'AUTOBUS':bus.layoutSource==='viaggio'?'VIAGGIO':'PUBBLICATA';
-    doc.ensure(50);doc.label('PIANTINA UFFICIALE - '+source+' - VERSIONE '+(bus.layoutVersion||'?'),43,doc.y+4,8,true,[.08,.43,.33]);doc.y+=22;
+    // Ogni piantina apre un foglio dedicato: mai spezzare la geometria 53/57/63 posti.
+    doc.newPage();
+    doc.label('PIANTINA UFFICIALE - '+source+' - VERSIONE '+(bus.layoutVersion||'?'),43,doc.y+4,8,true,[.08,.43,.33]);doc.y+=22;
     doc.label('FRONTE AUTOBUS  |  AUTISTA',44,doc.y+6,9,true);doc.y+=22;
     groupByBooking=new Map(plan.groups.map(g=>[g.id,g]));
     const cols=plan.geometry.columns;
-    const cellH=39,rowStep=45;
+    const rowCount=plan.geometry.rows.length;
+    const rowStep=Math.min(36,(H-doc.y-70)/rowCount);
+    const cellH=rowStep-3;
     for(const [rowIndex,row] of plan.geometry.rows.entries()){
      if(doc.y+rowStep>H-66){doc.newPage();doc.label('PIANTINA - SEGUE | FRONTE AUTOBUS SOPRA',43,doc.y+9,8,true);doc.y+=28;}
      const y=doc.y-8;
@@ -362,11 +366,12 @@ function makeOperationalPdf(groups,opts={}){
        cell.type==='seat'?[.87,.95,.90]:cell.type==='door'?[.99,.89,.73]:[.95,.96,.98];
       doc.box(x,y,boxWidth,cellH,tint);
       if(seat){
-       doc.label('POSTO '+slim(seat,3),x+3,y+11,rowCols>=7?6.5:7.8,true,[.09,.19,.30]);
+       const compact=cellH<28;
+       doc.label('POSTO '+slim(seat,3),x+3,y+(compact?10:11),rowCols>=7?6.5:7.8,true,[.09,.19,.30]);
        if(occ){
-        doc.label(occ.number,x+3,y+23,rowCols>=7?7:8.8,true,[.06,.15,.24]);
-        doc.label(slim(occ.name,labelMax),x+3,y+34,rowCols>=7?5.3:6.4,false,[.07,.14,.20]);
-       }else doc.label(cell.status==='available'?'LIBERO':'BLOCCATO',x+3,y+29,rowCols>=7?5.6:7);
+        doc.label(occ.number,x+3,y+(compact?22:21),rowCols>=7?7:8.8,true,[.06,.15,.24]);
+        if(!compact)doc.label(slim(occ.name,labelMax),x+3,y+31,rowCols>=7?5.3:6.4,false,[.07,.14,.20]);
+       }else doc.label(cell.status==='available'?'LIBERO':'BLOCCATO',x+3,y+(compact?22:25),rowCols>=7?5.6:7);
       }else{
        const labels={aisle:'CORRIDOIO',door:'PORTA',wc:'WC',table:'TAVOLO',driver:'AUTISTA',empty:''};
        if(labels[cell.type])doc.label(slim(labels[cell.type],rowCols>=7?7:10),x+3,y+22,rowCols>=7?5.5:7.4,true);
