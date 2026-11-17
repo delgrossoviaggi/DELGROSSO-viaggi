@@ -1,0 +1,36 @@
+DELGROSSO VIAGGI — PATCH PIANTINA PDF CON NOMI E COLORI
+
+Contenuto:
+  GESTIONALE/nuovo/pdf-piantine-nominativi.js = nuovo generatore PDF A3 vettoriale
+  INSTALLA_PATCH.py = integrazione senza sostituire l'intero gestionale
+  tests/test-pdf-nominativi.cjs = test automatico sui tre schemi originali
+
+ISTRUZIONI (Windows / GitHub Desktop):
+  1. Scaricare o clonare il repository DELGROSSO-viaggi sul PC.
+  2. Estrarre questo ZIP in una cartella qualsiasi.
+  3. Aprire un terminale nella cartella estratta.
+  4. Eseguire: python INSTALLA_PATCH.py "C:\\percorso\\DELGROSSO-viaggi"
+  5. Entrare nella cartella del repository ed eseguire:
+     node tests/test-pdf-nominativi.cjs
+     (copiare prima il test tests/test-pdf-nominativi.cjs nella cartella tests del repository)
+  6. Esaminare le modifiche in GitHub Desktop; caricare SOLO i file:
+     GESTIONALE/nuovo/index.html
+     GESTIONALE/nuovo/piantine-v37.js
+     GESTIONALE/nuovo/pdf-piantine-nominativi.js
+     tests/test-pdf-nominativi.cjs (facoltativo, consigliato)
+  7. NON caricare i file .backup-prima-pdf-nominativi.
+
+NOVITA': menu Piantine GT -> 'Scarica piantina con NOMI e COLORI (PDF A3)'.
+Il vecchio PDF Control Room continua a funzionare.
+L'esportazione richiede una piantina UFFICIALE gia' pubblicata in Supabase.
+E' vietato inventare sedili o modificare prenotazioni, pagamenti e tabelle.
+I nomi stampati sono i REFERENTI, ripetuti sui posti della stessa prenotazione.
+
+TEST: controllare visivamente prima dell'uso operativo la stampa della
+piantina di PB FW, PB GS, Century, oltre ai nomi e posti dei clienti reali.
+Se la configurazione pubblicata e' errata, questa patch non la modifica:
+va corretta separatamente in Supabase con le funzioni ufficiali.
+
+LIMITAZIONE: PDF A3 con testi vettoriali e marchio DELGROSSO tipografico,
+non include l'immagine del logo aziendale; il logo grafico originale e'
+previsto come successivo adattamento previo reperimento del relativo asset.
