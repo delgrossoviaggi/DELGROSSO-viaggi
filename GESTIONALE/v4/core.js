@@ -14,6 +14,8 @@ export const SELECTS = Object.freeze({
   operators:['operatori_gestionale','user_id,username,nome,ruolo,attivo'],
   cash:['dg_cassa_operatori','user_id,username,nome,cassa_netto,viaggi_incassati,noleggi_incassati,viaggi_rimborsi,noleggi_rimborsi,trasferimenti_uscita,trasferimenti_entrata,contanti_netto'],
   transfers:['cassa_trasferimenti','id,da_operatore_user_id,a_operatore_user_id,importo,data_trasferimento,stato,note,created_at'],
+  creditTransfers:['dg4_booking_credit_transfers','id,request_id,source_booking_id,target_booking_id,source_trip_id,target_trip_id,importo,motivo,stato,created_by,created_at'],
+  creditBalances:['dg4_booking_credit_balances','prenotazione_id,viaggio_id,cliente,telefono,totale,pagato_registro,incassi_originari_netti,quote_ricevute,quote_trasferite,pagato_effettivo,saldo_effettivo,incassi_da_riconciliare'],
   economy:['economia_movimenti','id,tipo,categoria,descrizione,importo,data_movimento,viaggio_id,noleggio_id,operatore,metodo,origine'],
   profit:['dg_viaggi_redditivita','viaggio_id,titolo,destinazione,data_partenza,posti_totali,posti_occupati,entrate,uscite,margine,minimo_partecipanti'],
   fleet:['flotta','id,titolo,marca,modello,posti,categoria,stato,attivo,targa,immagine,foto_gallery'],
@@ -213,7 +215,7 @@ export async function rpcRead(name,args={}){
 }
 export async function writeRpc(name,payload){
  if(!WRITES_ENABLED)throw new Error('Scritture bloccate: backup completo e collaudo non ancora certificati.');
- const whitelist=new Set(['dg2_save_booking_guarded_v1','dg_register_payment','dg_register_rental_payment','dg_move_bookings_auto_seats_v1','dg3_sposta_prenotazione_data_v1','dg_transfer_cash','dg_manage_booking_seats_v1','dg4_open_trip_bis_manual_v1','dg28_publish_trip_layout_v1','dg28_publish_bus_layout_v1','dg_delete_booking']);
+ const whitelist=new Set(['dg2_save_booking_guarded_v1','dg_register_payment','dg_register_rental_payment','dg_move_bookings_auto_seats_v1','dg3_sposta_prenotazione_data_v1','dg_transfer_cash','dg_manage_booking_seats_v1','dg4_open_trip_bis_manual_v1','dg4_transfer_booking_credit_v1','dg28_publish_trip_layout_v1','dg28_publish_bus_layout_v1','dg_delete_booking']);
  if(!whitelist.has(name))throw new Error('Operazione non autorizzata.');
  const result=await jsonFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},true,0);
  clearCache();return result;
