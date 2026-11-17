@@ -5,43 +5,36 @@
 import {bookingActive,bookingName,num,occupancy,seatsOf,tripName} from './core.js';
 import {collectCombinedConfirmation} from './confirmation-groups.js';
 
-export const buildPdfGroups=(trips,bookings,seatRows,layouts,{tripId='',includeArchived=false}={})=>{
- const ts=(trips||[]).filter(t=>(includeArchived || !t.archiviato_at) && (!tripId || t.id===tripId));
+export const buildPdfGroups=(trips,bookings,seatRows,layouts,{tripId='',includeArchived=false,busLayouts=[]}={})=>{
  const byId=new Map((trips||[]).map(t=>[t.id,t]));
+ const rootId=t=>t?.bis_parent_id||t?.id;
+ const chosen=tripId?byId.get(tripId):null;
+ const chosenRoot=chosen?rootId(chosen):tripId;
+ const ts=(trips||[]).filter(t=>(includeArchived || !t.archiviato_at)&&
+  (!chosenRoot||rootId(t)===chosenRoot));
  const grouped=new Map();
- for(const t of ts){
-  const rootId=tripId?t.id:(t.bis_parent_id||t.id);
-  if(!grouped.has(rootId))grouped.set(rootId,[]);
-  grouped.get(rootId).push(t);
- }
+ for(const t of ts){const root=rootId(t);if(!grouped.has(root))grouped.set(root,[]);grouped.get(root).push(t);}
  const groups=[];
- for(const [rootId,buses] of grouped){
-  const root=byId.get(rootId)||buses[0];
-  const sorted=buses.slice().sort((a,b)=>num(a.bis_numero)-num(b.bis_numero));
+ for(const [root,buses] of grouped){
   const data=[];
-  for(const t of sorted){
-   const list=(bookings||[]).filter(b=>b.viaggio_id===t.id && bookingActive(b) && !b.riserva_aziendale);
-   const seatMap=new Map();
-   for(const seat of seatRows||[]){
-    if(seat.viaggio_id!==t.id)continue;
-    const ids=seatMap.get(seat.prenotazione_id)||[];
-    ids.push(String(seat.posto));seatMap.set(seat.prenotazione_id,ids);
-   }
+  for(const t of buses.slice().sort((a,b)=>num(a.bis_numero)-num(b.bis_numero))){
+   const list=(bookings||[]).filter(b=>b.viaggio_id===t.id&&bookingActive(b)&&!b.riserva_aziendale);
+   const actualSeatRows=(seatRows||[]).filter(x=>x.viaggio_id===t.id);
    const assigned=list.map(b=>{
-     const ids=[...new Set([...seatsOf(b),...(seatMap.get(b.id)||[])])];
-     ids.sort((a,b)=>num(a)-num(b));
-     return {...b,sedili:ids};
+    const rows=actualSeatRows.filter(x=>x.prenotazione_id===b.id);
+    // Registry seats win over stale text. The reconciliation checker displays any disagreement.
+    const ids=rows.length?rows.map(x=>String(x.posto)):seatsOf(b);
+    return {...b,sedili:[...new Set(ids)].sort((a,b)=>num(a)-num(b))};
    });
-   const official=(layouts||[]).find(l=>l.viaggio_id===t.id);
+   const selection=window.DGSeatGroups?.resolveLayout(t,layouts,busLayouts)||null;
    const oc=occupancy(t,list,seatRows||[]);
-   data.push({
-      trip:t,name:tripName(t)+(num(t.bis_numero)>1?' - BUS BIS '+t.bis_numero:' - BUS principale'),
-      bookings:assigned,
-      layout:official?.configurazione||null,official:!!official,
-      warnings:oc.warnings
-   });
+   data.push({trip:t,name:tripName(t)+(num(t.bis_numero)>1?' - BUS BIS '+t.bis_numero:' - BUS principale'),
+     bookings:assigned,seatRows:actualSeatRows,
+     layout:selection?.config||null,official:!!selection,layoutSource:selection?.source||null,
+     layoutVersion:selection?.version||null,warnings:oc.warnings});
   }
-  groups.push({trip:root,title:tripName(root),buses:data});
+  const parent=byId.get(root)||buses[0];
+  groups.push({trip:parent,title:tripName(parent),buses:data});
  }
  return groups.sort((a,b)=>String(a.trip.data_partenza||'').localeCompare(String(b.trip.data_partenza||'')));
 };
@@ -84,11 +77,21 @@ export function pdfRoster(trips,bookings,seatRows,layouts,tripId=''){
  const bytes=pdfEngine().makeRosterPdf(groups,{includeArchived:false});
  return savePdf(bytes,safePdfFilename('PRENOTATI',tripId?tripId.slice(0,8):'TUTTI_I_VIAGGI'));
 }
-export function pdfOperational(trips,bookings,seatRows,layouts,tripId=''){
- const groups=buildPdfGroups(trips,bookings,seatRows,layouts,{tripId});
+export function pdfOperational(trips,bookings,seatRows,layouts,tripId='',busLayouts=[]){
+ const groups=buildPdfGroups(trips,bookings,seatRows,layouts,{tripId,busLayouts});
  if(!groups.length)throw new Error('Seleziona un viaggio per la Control Room.');
  const bytes=pdfEngine().makeOperationalPdf(groups,{});
  return savePdf(bytes,safePdfFilename('CONTROL_ROOM',tripId?tripId.slice(0,8):'TUTTI_I_VIAGGI'));
+}
+/** Print the exact official journey/bus layout, coloured by customer booking group. */
+export function pdfColouredSeatMap(trips,bookings,seatRows,layouts,busLayouts,tripId){
+ if(!tripId)throw new Error('Seleziona prima il viaggio nella Control Room.');
+ const groups=buildPdfGroups(trips,bookings,seatRows,layouts,{tripId,busLayouts});
+ if(!groups.length)throw new Error('Viaggio non trovato.');
+ const missing=groups.flatMap(g=>g.buses).filter(b=>!b.official||!b.layout?.rows?.length);
+ if(missing.length)throw new Error('Piantina non ancora pubblicata per '+missing.map(x=>x.name).join(', ')+'. Non stampo uno schema di fantasia: pubblica la stessa piantina del sito nella sezione Piantine.');
+ return savePdf(pdfEngine().makeOperationalPdf(groups,{onlyMaps:true,requireOfficial:true}),
+  safePdfFilename('PIANTINA_POSTI_E_GRUPPI',tripId.slice(0,8)));
 }
 export function pdfBooking(b,t,movements=[]){
  if(!b?.id||!t?.id)throw new Error('Prenotazione o viaggio non disponibile.');

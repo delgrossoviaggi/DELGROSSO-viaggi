@@ -170,7 +170,7 @@ async function navigate(next,force=false,{silent=false}={}){
  bookings:['trips','bookings','payments','seats','tripLayouts'],
   movements:['trips','bookings','payments','seats','tripLayouts'],
   credits:['trips','bookings','payments','operators'],
- control:['trips','bookings','seats','tripLayouts','stops'],
+ control:['trips','bookings','seats','tripLayouts','busLayouts','stops'],
  layouts:['trips','fleet','layoutLibrary','tripLayouts','busLayouts'],
  cash:['cash','operators','payments','rentalPayments','rentals','transfers','trips','bookings'],
  economy:['economy','profit','trips'],
@@ -178,7 +178,7 @@ async function navigate(next,force=false,{silent=false}={}){
  rentals:['rentals','rentalPayments'],
  quotes:['quotes'],invoices:['invoices'],waitlist:['waitlist','trips'],
  whatsapp:['whatsAppInbox','whatsAppOutbound','whatsAppOptins'],
- reports:['trips','bookings','seats','tripLayouts','payments','cash','agenda','legacyAgenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
+ reports:['trips','bookings','seats','tripLayouts','busLayouts','payments','cash','agenda','legacyAgenda','economy','profit','fleet','rentals','customers','documents','quotes','invoices'],
  agenda:['agenda','legacyAgenda','trips'],
  deadlines:['agenda','legacyAgenda','trips'],
  fleet:['fleet','layoutLibrary','busLayouts'],
@@ -498,15 +498,20 @@ function showTransferPreview(plan,serverPreview=null){
  displayModal('Anteprima spostamento · '+bookingName(b),html);
 }
 
-function rowForSeats(rows,occu){
+function rowForSeats(rows,occu,plan=null){
  return rows.map((row,i)=>{
   const cells=Array.isArray(row)?row:(row?.cells||[]);
   return '<div class="seat-grid" role="group" aria-label="Fila '+(i+1)+'">'+cells.map(c=>{
    const x=typeof c==='object'&&c!==null?c:{type:(typeof c==='number'?'seat':'aisle'),label:String(c||'')};
-   if(x.type!=='seat')return '<div class="seat aisle" aria-label="Corridoio">'+(x.type==='driver'?'Autista':'')+'</div>';
-   const n=String(x.label||x.id||'');
-   const b=occu.map.get(n);
-   return '<button class="seat '+(b?'booked':'')+'" data-action="'+(b?'detail-booking':'seat-empty')+'" data-id="'+esc(b?.id||'')+'" title="'+esc(b?bookingName(b)+' · Posto '+n:'Posto '+n+' libero')+'">'+esc(n)+'</button>';
+   if(x.type!=='seat'){
+    const label={aisle:'CORR.',door:'PORTA',wc:'WC',table:'TAVOLO',driver:'AUTISTA',empty:'·'}[x.type]||'·';
+    return '<div class="seat aisle" aria-label="'+esc(label)+'">'+esc(label)+'</div>';
+   }
+   const n=String(x.id||x.label||'');
+   const b=occu.map.get(n),g=plan?.bySeat?.get(n);
+   const style=g?' style="background:'+g.css+';color:#182237;border-color:#54657b"':'';
+   const title=(b?bookingName(b):g?.name||'Posto libero')+' · Posto '+n+(g?' · Gruppo '+g.number:'');
+   return '<button class="seat '+(b?'booked':'')+'"'+style+' data-action="'+(b?'detail-booking':'seat-empty')+'" data-id="'+esc(b?.id||'')+'" title="'+esc(title)+'">'+esc(n)+(g?'<span>'+esc(g.number)+'</span>':'')+'</button>';
   }).join('')+'</div>';
  }).join('');
 }
@@ -517,7 +522,8 @@ function drawControl(){
  const books=get('bookings').filter(b=>b.viaggio_id===trip?.id);
  const seats=get('seats'),occu=occupancy(trip,books,seats);
  const official=get('tripLayouts').find(l=>l.viaggio_id===trip?.id);
- const config=official?.configurazione;
+ const layout=window.DGSeatGroups?.resolveLayout(trip,get('tripLayouts'),get('busLayouts'));
+ const config=layout?.config||null;
  const rows=Array.isArray(config?.rows)?config.rows:[];
  const active=books.filter(bookingActive),stops=[...new Set(active.map(b=>b.fermata_partenza||'Non specificata'))].sort();
  const visible=active.filter(b=>(!state.stop || (b.fermata_partenza||'Non specificata')===state.stop)&&filterTerm(bookingName(b),b.telefono,b.posti_selezionati));
@@ -525,12 +531,14 @@ function drawControl(){
   safeLink(bookingName(b),b.id),num(b.posti),esc(seatsOf(b).join(', ')||'Da verificare'),esc(b.fermata_partenza||'—'),
   b.checkin_effettuato?badge('Check-in fatto'):badge('Da effettuare')
  ]);
- const seatMarkup=rows.length ? rowForSeats(rows,occu) : '<div class="alert">Questo viaggio non ha ancora una piantina ufficiale pubblicata nel database. Non viene mostrata una disposizione inventata. Puoi consultare l’elenco posti assegnati.</div>';
+ const seatPlan=rows.length&&window.DGSeatGroups?window.DGSeatGroups.buildPlan({layout:config,bookings:active,seatRows:seats.filter(x=>x.viaggio_id===trip.id),capacity:trip.posti_totali}):null;
+ const groupLegend=seatPlan?.groups.length?'<div class="dg4-group-legend">'+seatPlan.groups.map(g=>'<div class="dg4-group-card"><span style="background:'+g.css+'">'+esc(g.number)+'</span><b>'+esc(g.name)+'</b><small>Posti '+esc(g.seats.join(', ')||'da assegnare')+'</small></div>').join('')+'</div>':'';
+ const seatMarkup=rows.length ? rowForSeats(rows,occu,seatPlan) : '<div class="alert">Questo viaggio non ha ancora una piantina ufficiale pubblicata nel database. Non viene mostrata una disposizione inventata. Puoi consultare l’elenco posti assegnati.</div>';
  return intro('Control Room','Piantina ufficiale, passeggeri, fermate e preparazione della lista autista.','<button class="secondary" data-action="pdf-operational">↓ PDF Control Room</button><button class="secondary" data-action="pdf-roster">↓ Elenco prenotati PDF</button><button class="secondary" data-action="pdf-layout">↓ Piantina PDF</button><button class="secondary" data-action="copy-phones">Copia numeri</button>')+
  '<div class="filters">'+selectTrip(trips,state.trip,'Seleziona viaggio')+'<select id="filter-stop"><option value="">Tutte le fermate</option>'+stops.map(s=>'<option value="'+esc(s)+'" '+(s===state.stop?'selected':'')+'>'+esc(s)+'</option>').join('')+'</select>'+searchField('Cerca nome o posto')+'</div>'+
  (trip?'<div class="cards">'+card('Viaggio',dateIT(trip.data_partenza),tripName(trip))+card('Passeggeri attivi',String(active.reduce((n,b)=>n+num(b.posti),0)),active.length+' prenotazioni')+card('Posti nel registro',String(occu.map.size),num(trip.posti_totali)+' capienza')+card('Check-in',String(active.filter(b=>b.checkin_effettuato).length),active.length+' prenotazioni')+'</div>':'')+
- (occu.warnings.length?'<div class="error-panel">'+esc(occu.warnings.join(' · '))+'</div>':'')+
- '<div class="two-col">'+panel('Piantina ufficiale',official?'Versione '+num(official.versione)+' · '+esc(config?.name||'Layout ufficiale'):'Layout non disponibile','<div class="layout-panel">'+seatMarkup+'<div class="legend"><span><i style="background:#eff7f4"></i>Libero</span><span><i style="background:#e9f1ff"></i>Occupato</span></div></div>')+
+ (occu.warnings.length||seatPlan?.warnings?.length?'<div class="error-panel">'+esc([...occu.warnings,...(seatPlan?.warnings||[])].join(' · '))+'</div>':'')+
+ '<div class="two-col">'+panel('Piantina ufficiale',layout?'Versione '+num(layout.version)+' · Fonte '+esc(layout.source)+' · '+esc(config?.name||'Piantina ufficiale'):'Layout non pubblicato','<div class="layout-panel">'+seatMarkup+groupLegend+'<div class="legend"><span><i style="background:#eff7f4"></i>Libero</span><span><i style="background:#e9f1ff"></i>Occupato</span></div></div>')+
  panel('Lista passeggeri',''+visible.length+' prenotazioni per i filtri selezionati',table(['Cliente','N.','Posti','Fermata','Stato'],roster))+'</div>';
 }
 
@@ -1422,12 +1430,8 @@ async function handleAction(action,id,button){
  const done=report=>showMessage('PDF creato: '+report.filename+' ('+Math.round(report.bytes/1024)+' KB). Puoi salvarlo in File anche da iPhone.');
  if(action==='pdf-roster')return done(Pdf.pdfRoster(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),tripID));
  if(action==='pdf-all-roster')return done(Pdf.pdfRoster(get('trips'),get('bookings'),get('seats'),get('tripLayouts')));
- if(action==='pdf-operational')return done(Pdf.pdfOperational(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),tripID));
- if(action==='pdf-layout'){
-   const l=get('tripLayouts').find(x=>x.viaggio_id===tripID);
-   if(!l?.configurazione)throw new Error('Piantina ufficiale non presente: nessun PDF inventato.');
-   return done(Pdf.pdfSeatMap(l.configurazione,tripName(tripBy(tripID))));
- }
+ if(action==='pdf-operational')return done(Pdf.pdfOperational(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),tripID,get('busLayouts')));
+ if(action==='pdf-layout')return done(Pdf.pdfColouredSeatMap(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),get('busLayouts'),tripID));
  if(action==='pdf-library-layout'||action==='pdf-selected-layout'){
    const item=get('layoutLibrary').find(x=>x.id===(id||get('layoutLibrary')[0]?.id));
    if(!item)throw new Error('Nessuna piantina nella libreria.');
@@ -1460,7 +1464,7 @@ async function handleAction(action,id,button){
 
  if(action==='pdf-economy')return done(Pdf.pdfEconomy(get('economy'),get('profit')));
 
- if(action==='pdf-all-operational')return done(Pdf.pdfOperational(get('trips'),get('bookings'),get('seats'),get('tripLayouts')));
+ if(action==='pdf-all-operational')return done(Pdf.pdfOperational(get('trips'),get('bookings'),get('seats'),get('tripLayouts'),'',get('busLayouts')));
  if(action==='pdf-quote'){
   const q=get('quotes').find(x=>x.id===id);
   if(!q)throw new Error('Preventivo non trovato.');

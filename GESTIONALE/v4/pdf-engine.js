@@ -366,88 +366,121 @@ function makeRosterPdf(groups,settings={}){
  * fermate per paese, BUS/BIS e riscontri sulle assegnazioni. Nessuna scrittura. */
 function makeOperationalPdf(groups,opts={}){
  if(!Array.isArray(groups)||!groups.length)throw Error('Nessuna partenza da esportare');
- const doc=new Sheet('CONTROL ROOM - LISTE E PIANTINE');
+ const resolver=root.DGSeatGroups;
+ if(!resolver?.buildPlan)throw Error('Modulo colori e geometrie piantine non caricato. Aggiorna il gestionale.');
+ const doc=new Sheet(opts.onlyMaps?'PIANTINA PASSEGGERI - GRUPPI':'CONTROL ROOM - LISTE E PIANTINE');
  doc.y=115;
- doc.paragraph('DELGROSSO VIAGGI - ELENCHI OPERATIVI RISERVATI - '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'}));
- doc.paragraph('Il nome indicato su un sedile e il REFERENTE della prenotazione, non necessariamente il singolo passeggero.');
- let totalPeople=0,totalBookings=0;
+ doc.paragraph('DELGROSSO VIAGGI & LIMOUSINE BUS | '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'}));
+ doc.paragraph('Un colore e un codice G per ciascuna prenotazione. Le persone nella stessa prenotazione condividono lo stesso colore.');
+ doc.paragraph('I nominativi sono i REFERENTI della prenotazione, non i nomi dei singoli passeggeri. Documento aziendale riservato.');
  const slim=(v,n)=>text(String(v??'').trim()||'-').slice(0,n);
- function header(list){
-  doc.ensure(27);doc.box(42,doc.y-10,W-84,23,[.86,.91,.97]);
-  [['Posti',47],['Referente prenotazione',105],['Pers.',287],['Fermata di salita',326],['Check-in',481]]
-   .forEach(([s,x])=>doc.label(s,x,doc.y+6,7.8,true));doc.y+=25;
+ let totalPeople=0,totalBookings=0;
+ let groupByBooking=new Map();
+ function lineHeader(){
+  doc.ensure(28);doc.box(42,doc.y-10,W-84,23,[.86,.91,.97]);
+  [['Posti',47],['Gruppo / referente',105],['Pers.',290],['Fermata di salita',330],['Check-in',486]]
+   .forEach(([name,x])=>doc.label(name,x,doc.y+6,7.6,true));doc.y+=25;
  }
- function row(b,i){
-  const h=26; if(doc.y+h>H-65){doc.newPage();header()}
+ function listRow(b,i){
+  const h=27;if(doc.y+h>H-64){doc.newPage();lineHeader()}
   if(i%2===0)doc.box(42,doc.y-9,W-84,h,[.965,.973,.99]);
   const seats=(Array.isArray(b.sedili)?b.sedili:[]).join(', ')||'-';
-  doc.label(slim(seats,13),47,doc.y+6,7.4,true);
-  doc.label(slim(b.cliente_nome||b.cliente||'Nominativo assente',34),105,doc.y+6,7.5);
-  doc.label(String(Math.max(0,Number(b.posti)||0)),290,doc.y+6,8,true);
-  doc.label(slim(b.fermata_partenza||'NON INDICATA',25),326,doc.y+6,7.5);
-  doc.label(b.checkin_effettuato?'SI':'-',484,doc.y+6,7.2);
+  const g=groupByBooking.get(String(b.id||b.codice));
+  doc.label(slim(seats,12),47,doc.y+7,7.6,true);
+  if(g){doc.box(104,doc.y-6,28,18,g.pdf);doc.label(g.number,107,doc.y+7,8,true);}
+  doc.label(slim(b.cliente_nome||b.cliente||'Nominativo assente',28),g?137:105,doc.y+7,7.5);
+  doc.label(String(Math.max(0,Number(b.posti)||0)),293,doc.y+7,8,true);
+  doc.label(slim(b.fermata_partenza||'NON INDICATA',24),330,doc.y+7,7.4);
+  doc.label(b.checkin_effettuato?'SI':'-',489,doc.y+7,7.4);
   doc.y+=h;
  }
  for(const group of groups){
-  doc.ensure(90);doc.heading(slim(group.title||group.trip?.titolo||'PARTENZA',70));
-  doc.paragraph('Data: '+slim(group.trip?.data_partenza,20)+' - BUS inclusi: '+(group.buses||[]).length);
+  doc.ensure(84);doc.heading(slim(group.title||group.trip?.titolo||'PARTENZA',70));
+  doc.paragraph('Data: '+slim(group.trip?.data_partenza,20)+' - Autobus: '+(group.buses||[]).length);
   for(const bus of group.buses||[]){
-   const list=(bus.bookings||[]),people=list.reduce((a,b)=>a+Math.max(0,Number(b.posti)||0),0);
+   const list=bus.bookings||[],people=list.reduce((a,b)=>a+Math.max(0,Number(b.posti)||0),0);
    totalPeople+=people;totalBookings+=list.length;
-   doc.ensure(66);doc.heading(slim(bus.name||bus.trip?.titolo||'AUTOBUS',64));
-   doc.paragraph('Prenotazioni: '+list.length+' - Passeggeri: '+people+' - Posti vendibili: '+(bus.trip?.posti_totali??'-'));
-   if(bus.layout?.rows?.length){
-    const rows=bus.layout.rows;
-    const tag=bus.official?'PIANTINA UFFICIALE PUBBLICATA':'SCHEMA V2 INDICATIVO - DISPOSIZIONE DA VERIFICARE';
-    doc.ensure(41);doc.label(tag,43,doc.y+4,8,true,bus.official?[.08,.43,.33]:[.63,.32,.08]);doc.y+=23;
-    // Each seat has a unique reference; occupants are only the booking holder.
-    const bySeat=new Map();for(const b of list)for(const n of b.sedili||[])if(!bySeat.has(String(n)))bySeat.set(String(n),b);
-    const width=99,cellHeight=34,colX=[44,146,248,350,452];
-    for(const arr of rows){
-     if(doc.y+cellHeight>H-67){doc.newPage();doc.label('Piantina autobus - continua',43,doc.y+5,9,true);doc.y+=24;}
-     const cells=Array.isArray(arr)?arr:(arr.cells||[]);
-     cells.slice(0,5).forEach((cell,j)=>{
-      const x=colX[j],y=doc.y-8;
-      const seat=cell&&typeof cell==='object'?cell.type==='seat'?String(cell.id||''):null:Number.isInteger(cell)?String(cell):typeof cell==='string'&&/^\d+$/.test(cell)?cell:null;
-      const type=cell&&typeof cell==='object'?cell.type:cell;
-      const b=seat?bySeat.get(seat):null,blocked=cell?.status==='blocked'||cell?.status==='out_of_service';
-      const unavailable=seat&&Number(seat)>Number(bus.trip?.posti_totali||999);
-      const tint=b?[.79,.89,.98]:blocked||unavailable?[.97,.87,.82]:seat?[.85,.96,.91]:[.95,.96,.97];
-      doc.box(x,y,width,30,tint);
+   doc.ensure(67);doc.heading(slim(bus.name||bus.trip?.titolo||'AUTOBUS',62));
+   doc.paragraph('Prenotazioni: '+list.length+' | Passeggeri: '+people+' | Capienza viaggio: '+(bus.trip?.posti_totali??'-'));
+   let plan=null;
+   if(bus.layout?.rows?.length && bus.official){
+    // Never fabricate or renumber a seat: identical layout snapshot used on the booking site.
+    plan=resolver.buildPlan({layout:bus.layout,bookings:list,seatRows:bus.seatRows||[],
+      capacity:bus.trip?.posti_totali,strict:true});
+    if(plan.warnings.length){
+     doc.heading('ATTENZIONE - ASSEGNAZIONI DA RICONCILIARE');
+     for(const warning of plan.warnings.slice(0,14))doc.note(slim(warning,108));
+    }
+    const source=bus.layoutSource==='autobus'?'AUTOBUS':bus.layoutSource==='viaggio'?'VIAGGIO':'PUBBLICATA';
+    doc.ensure(50);doc.label('PIANTINA UFFICIALE - '+source+' - VERSIONE '+(bus.layoutVersion||'?'),43,doc.y+4,8,true,[.08,.43,.33]);doc.y+=22;
+    doc.label('FRONTE AUTOBUS  |  AUTISTA',44,doc.y+6,9,true);doc.y+=22;
+    groupByBooking=new Map(plan.groups.map(g=>[g.id,g]));
+    const cols=plan.geometry.columns;
+    const pitch=(W-84)/cols,boxWidth=pitch-3,cellH=39,rowStep=45;
+    const labelMax=cols<=5?18:cols<=7?11:8;
+    for(const [rowIndex,row] of plan.geometry.rows.entries()){
+     if(doc.y+rowStep>H-66){doc.newPage();doc.label('PIANTINA - SEGUE | FRONTE AUTOBUS SOPRA',43,doc.y+9,8,true);doc.y+=28;}
+     const y=doc.y-8;
+     row.cells.forEach((cell,column)=>{
+      const x=42+column*pitch,seat=cell.type==='seat'?cell.id:null;
+      const occ=seat?plan.bySeat.get(seat):null;
+      const tint=occ?occ.pdf:cell.type==='seat'&&cell.status!=='available'?[.98,.87,.82]:
+       cell.type==='seat'?[.87,.95,.90]:cell.type==='door'?[.99,.89,.73]:[.95,.96,.98];
+      doc.box(x,y,boxWidth,cellH,tint);
       if(seat){
-       doc.label('POSTO '+slim(seat,3)+(unavailable?' *':''),x+5,y+11,7.6,true);
-       if(b)doc.label(slim(b.cliente_nome||b.cliente,18),x+5,y+23,6.7,false);
-       else if(blocked||unavailable)doc.label('NON DISPONIBILE',x+5,y+23,6.7);
-       else doc.label('LIBERO',x+5,y+23,7);
-      }else if(type==='door')doc.label('PORTA',x+6,y+18,8,true);
-      else if(type==='aisle')doc.label('CORRIDOIO',x+5,y+18,7.5);
-      else if(type==='wc')doc.label('WC',x+5,y+18,8);
+       doc.label('POSTO '+slim(seat,3),x+3,y+11,cols>=7?6.5:7.8,true,[.09,.19,.30]);
+       if(occ){
+        doc.label(occ.number,x+3,y+23,cols>=7?7:8.8,true,[.06,.15,.24]);
+        doc.label(slim(occ.name,labelMax),x+3,y+34,cols>=7?5.3:6.4,false,[.07,.14,.20]);
+       }else doc.label(cell.status==='available'?'LIBERO':'BLOCCATO',x+3,y+29,cols>=7?5.6:7);
+      }else{
+       const labels={aisle:'CORRIDOIO',door:'PORTA',wc:'WC',table:'TAVOLO',driver:'AUTISTA',empty:''};
+       if(labels[cell.type])doc.label(slim(labels[cell.type],cols>=7?7:10),x+3,y+22,cols>=7?5.5:7.4,true);
+      }
      });
-     doc.y+=cellHeight;
+     doc.y+=rowStep;
     }
     doc.y+=10;
+    doc.heading('LEGENDA COLORI E POSTI - '+plan.groups.length+' GRUPPI');
+    if(!plan.groups.length)doc.paragraph('Nessuna prenotazione attiva con sedili assegnati.');
+    for(const [i,g] of plan.groups.entries()){
+     doc.ensure(24);
+     if(i%2===0)doc.box(42,doc.y-8,W-84,23,[.97,.98,.99]);
+     doc.box(47,doc.y-5,25,17,g.pdf);
+     doc.label(g.number,49,doc.y+7,8,true);
+     doc.label(slim(g.name,31),79,doc.y+7,8,true);
+     doc.label(slim('POSTI '+(g.seats.join(', ')||'DA ASSEGNARE'),38),294,doc.y+7,7.4);
+     doc.y+=24;
+    }
+    doc.y+=9;
    }else{
-    doc.paragraph('PIANTINA NON DISPONIBILE: nessuna geometria pubblicata e nessuno schema V2 affidabile.');
+    if(opts.requireOfficial)throw Error('Piantina ufficiale non pubblicata per '+(bus.name||'BUS')+'. Associa e pubblica la stessa piantina del sito prima di stampare.');
+    doc.ensure(50);doc.box(42,doc.y-8,W-84,38,[.99,.90,.84]);
+    doc.label('PIANTINA UFFICIALE NON DISPONIBILE',47,doc.y+7,9,true,[.55,.23,.08]);
+    doc.y+=24;
+    doc.paragraph('Schema non stampato per evitare una disposizione diversa da quella del sito.');
    }
-   if((bus.warnings||[]).length){doc.heading('VERIFICHE PRIMA DELLA PARTENZA');for(const w of bus.warnings.slice(0,12))doc.note(slim(w,95));}
-   doc.heading('ELENCO POSTI ASSEGNATI');
-   header(list);list.slice().sort((a,b)=>Number((a.sedili||[])[0]||999)-Number((b.sedili||[])[0]||999)).forEach(row);
-   doc.heading('SALITA PASSEGGERI - SUDDIVISI PER PAESE/FERMATA');
-   const stops=new Map();for(const b of list){const stop=String(b.fermata_partenza||'FERMATA NON INDICATA').trim()||'FERMATA NON INDICATA';if(!stops.has(stop))stops.set(stop,[]);stops.get(stop).push(b)}
-   for(const [stop,grouped] of [...stops.entries()].sort((a,b)=>a[0].localeCompare(b[0],'it'))){
-    const count=grouped.reduce((n,b)=>n+Math.max(0,Number(b.posti)||0),0);
-    doc.ensure(52);doc.box(42,doc.y-8,W-84,24,[.90,.94,.98]);doc.label(slim(stop,52)+'  |  '+grouped.length+' prenotazioni / '+count+' passeggeri',47,doc.y+8,8.6,true);doc.y+=28;
-    header();grouped.forEach(row);
+   if((bus.warnings||[]).length){doc.heading('VERIFICHE PRIMA DELLA PARTENZA');for(const w of bus.warnings.slice(0,12))doc.note(slim(w,105));}
+   if(!opts.onlyMaps){
+    doc.heading('ELENCO POSTI ASSEGNATI');
+    lineHeader();list.slice().sort((a,b)=>Number((a.sedili||[])[0]||999)-Number((b.sedili||[])[0]||999)).forEach(listRow);
+    doc.heading('SALITA PASSEGGERI - PER FERMATA');
+    const stops=new Map();for(const b of list){const stop=String(b.fermata_partenza||'FERMATA NON INDICATA').trim()||'FERMATA NON INDICATA';if(!stops.has(stop))stops.set(stop,[]);stops.get(stop).push(b)}
+    for(const [stop,selected] of [...stops.entries()].sort((a,b)=>a[0].localeCompare(b[0],'it'))){
+     const count=selected.reduce((n,b)=>n+Math.max(0,Number(b.posti)||0),0);
+     doc.ensure(52);doc.box(42,doc.y-8,W-84,24,[.90,.94,.98]);
+     doc.label(slim(stop,48)+' | '+selected.length+' prenotazioni / '+count+' persone',47,doc.y+8,8.2,true);doc.y+=28;
+     lineHeader();selected.forEach(listRow);
+    }
    }
-   if(!list.length)doc.paragraph('Nessuna prenotazione attiva in questo autobus.');
-   doc.ensure(25);doc.paragraph('Totale BUS: '+people+' passeggeri | '+list.length+' prenotazioni | Documento interno riservato','bold');
+   if(!list.length)doc.paragraph('Nessun passeggero registrato su questo autobus.');
+   doc.ensure(25);doc.paragraph('Totale BUS: '+people+' persone | '+list.length+' prenotazioni','bold');
   }
  }
- doc.heading('TOTALI DEL DOCUMENTO');doc.paragraph('Partenze: '+groups.length+' | Prenotazioni: '+totalBookings+' | Passeggeri: '+totalPeople,'bold');
- doc.paragraph('Il documento non registra incassi e non modifica alcuna prenotazione. Non condividere dati personali fuori dall’organizzazione.');
+ doc.heading('TOTALI');doc.paragraph('Partenze: '+groups.length+' | Prenotazioni: '+totalBookings+' | Passeggeri: '+totalPeople,'bold');
+ doc.paragraph('Documento operativo riservato, generato dai dati autenticati. Non modifica prenotazioni né pagamenti.');
  return doc.finish();
 }
-
 /* DG4 PDF engine — deterministic byte generation, no remote requests and no writes. */
 function makeReceiptPdf(payment,booking,trip){
  if(!payment?.id||!booking?.id||!trip?.id)throw Error('Pagamento, prenotazione o viaggio non verificati');
@@ -545,16 +578,35 @@ function makeCashSummaryPdf(profiles, payments=[]){
  doc.paragraph('Valori della vista ufficiale Supabase, non calcolo fiscale.');
  return doc.finish();
 }
+function makeExactV4LayoutPdf(input){
+ const engine=root.DGSeatGroups;
+ if(!engine?.normalizeGeometry)throw Error('Modulo geometria ufficiale non caricato.');
+ const layout=engine.normalizeGeometry(input);
+ const doc=new Sheet('PIANTINA UFFICIALE AUTOBUS');doc.y=130;
+ doc.heading('DELGROSSO - '+text(layout.name).slice(0,60));
+ doc.paragraph('Schema originale Supabase: '+layout.capacity+' sedili | '+layout.rows.length+' file. Numerazione e posizione inalterate.');
+ doc.heading(layout.frontLabel+' | '+layout.driverLabel);
+ const step=34;
+ for(const [i,row] of layout.rows.entries()){
+  doc.ensure(step+12);
+  const pitch=(W-125)/row.cells.length,width=pitch-3,left=98,y=doc.y-7;
+  doc.label('FILA '+(i+1),43,y+19,8,true);
+  for(const [j,cell] of row.cells.entries()){
+   const x=left+j*pitch;
+   const tint=cell.type==='seat'?(cell.status==='available'?[.84,.94,.99]:[.98,.87,.82]):
+    cell.type==='door'?[.99,.89,.73]:[.95,.96,.98];
+   doc.box(x,y,width,29,tint);
+   const label=cell.type==='seat'?cell.id:({aisle:'CORR.',door:'PORTA',wc:'WC',table:'TAVOLO',driver:'AUTISTA',empty:''}[cell.type]||'');
+   if(label)doc.label(text(label).slice(0,row.cells.length>6?8:12),x+4,y+19,cell.type==='seat'?11:row.cells.length>6?6:8,cell.type==='seat');
+  }
+  doc.y+=step;
+ }
+ doc.y+=8;doc.paragraph('Documento senza nominativi. Per la piantina con i passeggeri e i colori usa la Control Room.');
+ return doc.finish();
+}
 function toV4LayoutPdf(v4){
- if(!Array.isArray(v4?.rows))throw Error('Manca la piantina originale');
- const rows=v4.rows.map(r=>(Array.isArray(r)?r:r?.cells||[]).map(c=>{
-  if(typeof c==='number')return c;
-  if(c?.type==='seat')return Number(c.id||c.label);
-  if(c?.type==='door'||c?.type==='aisle'||c?.type==='wc')return c.type;
-  return null;
- }));
- if(rows.some(r=>r.length!==5||r.some(n=>typeof n==='number'&&(!Number.isInteger(n)||n<1))))throw Error('Geometria non compatibile: richieste cinque celle e sedili numerati');
- return {name:text(v4.name||'Piantina DELGROSSO'),rows,frontLabel:'FRONTE AUTOBUS',driverLabel:'AUTISTA'};
+ // Compatibility shim for developer utilities; the printed snapshot no longer truncates columns.
+ return root.DGSeatGroups?.normalizeGeometry(v4)||null;
 }
 
 function makeRegisterPdf(title,entries,{subtitle='Registro operativo',emptyText='Nessun elemento registrato'}={}){
@@ -654,7 +706,7 @@ function makeInvoiceDraftPdf(i){
 root.DG4Pdf={makeReceiptPdf,makeAgendaPdf,makeCustomerLedgerPdf,makeRentalSummaryPdf,makeCashSummaryPdf,
  makeTripPdf,makeBookingPdf,makeCombinedBookingPdf,makeOperatorPdf,makeRosterPdf,makeOperationalPdf,makeLayoutPdf,
  makeRegisterPdf,makeEconomyPdf,makeFleetPdf,makeCustomerListPdf,makeRentalsPdf,makeDocumentIndexPdf,makeQuotePdf,makeInvoiceDraftPdf,
- makeV4LayoutPdf:(config)=>makeLayoutPdf(toV4LayoutPdf(config)),toV4LayoutPdf};
+ makeV4LayoutPdf:makeExactV4LayoutPdf,toV4LayoutPdf};
 
 root.DG2Pdf={makeTripPdf,saveTripPdf,makeBookingPdf,saveBookingPdf,makeOperatorPdf,saveOperatorPdf,makeLayoutPdf,saveLayoutPdf,makeRosterPdf,makeOperationalPdf};if(typeof module!=='undefined'&&module.exports)module.exports=root.DG2Pdf;
 })(typeof window!=='undefined'?window:globalThis);
