@@ -603,6 +603,92 @@ function printRoster(){
 async function handleAction(action,id,button){
  if(action==='refresh'){clearCache();showMessage('Aggiornamento in corso.');await navigate(page,true);return;}
 
+ if(action==='transfer-booking'||action==='move-booking'){
+  openTransferWizard(id);return;
+ }
+ if(action==='commit-transfer'){
+  if(!WRITES_ENABLED)throw new Error('Lo spostamento definitivo è sospeso: prima certificare il backup e il ripristino dello staging.');
+  if(transferBusy)throw new Error('Spostamento già in elaborazione: controllare il registro prima di riprovare.');
+  const plan=pendingTransfer;
+  if(!plan?.id || !plan.targetTripId || !plan.seats)throw new Error('L’anteprima è scaduta: ricontrollare i posti.');
+  const dest=tripBy(plan.targetTripId);
+  if(!dest)throw new Error('Viaggio di destinazione non disponibile.');
+  if(!confirm('Confermare lo spostamento di '+plan.persons+' persone verso '+busTargetLabel(dest)+' sui posti '+plan.seats.join(', ')+
+     '? I pagamenti saranno conservati. Questa operazione non registra nuovi incassi.'))return;
+  transferBusy=true;
+  try{
+   // Prima di qualsiasi modifica, rileggere il server senza cache per intercettare
+   // prenotazioni o sedili aggiornati contemporaneamente da altri operatori.
+   const [freshBookings,freshSeats]=await Promise.all([
+    records('bookings',{force:true,limit:2500}),records('seats',{force:true,limit:4000})
+   ]);
+   const booking=freshBookings.find(x=>x.id===plan.id);
+   if(!booking || booking.viaggio_id!==plan.sourceTripId ||
+      Number(booking.posti)!==plan.persons || booking.checkin_effettuato ||
+      Number(booking.pagato)!==plan.paid || Number(booking.totale)!==plan.total ||
+      booking.updated_at!==plan.bookingUpdatedAt)
+    throw new Error('I dati della prenotazione sono cambiati durante l’anteprima: nessuno spostamento eseguito. Ricarica prima di procedere.');
+   let result;
+   if(plan.kind==='bus'){
+    const review=reviewBusTransfer({
+     booking,origin:tripBy(plan.sourceTripId),target:dest,
+     bookings:freshBookings,seatRows:freshSeats,chosen:plan.seats
+    });
+    if(review.seats.join(',')!==plan.seats.join(','))
+     throw new Error('La selezione dei posti è cambiata: aggiorna l’anteprima.');
+    result=await writeRpc('dg_manage_booking_seats_v1',{
+     p_booking_id:plan.id,p_target_trip_id:plan.targetTripId,p_target_seats:plan.seats
+    });
+   }else if(plan.kind==='date'){
+    const latest=await rpcRead('dg3_preview_spostamento_data_v1',{
+     p_booking_id:plan.id,p_target_trip_id:plan.targetTripId
+    });
+    if(!latest?.success || latest.source_trip_id!==plan.sourceTripId ||
+       latest.target_trip_id!==plan.targetTripId ||
+       (latest.new_seats||[]).join(',')!==plan.seats.join(','))
+     throw new Error('La disponibilità sulla nuova data è cambiata: nessuno spostamento eseguito, ricalcola l’anteprima.');
+    result=await writeRpc('dg3_sposta_prenotazione_data_v1',{
+     p_booking_id:plan.id,p_target_trip_id:plan.targetTripId,
+     p_expected_source_trip_id:plan.sourceTripId,p_expected_seats:plan.seats,p_target_stop:null
+    });
+   }else throw new Error('Modalità spostamento non supportata.');
+   if(result?.success!==true)throw new Error('Risposta del server non confermata. Verificare i viaggi prima di ripetere il comando.');
+   // Leggere il risultato del server PRIMA di generare la nuova conferma;
+   // un eventuale guasto PDF non deve ripetere la movimentazione dei posti.
+   let message='Spostamento confermato dal server. Pagamenti originari conservati. ';
+   try{
+    const newBookings=await records('bookings',{force:true,limit:2500});
+    const updated=newBookings.find(x=>x.id===plan.id);
+    if(!updated||updated.viaggio_id!==plan.targetTripId)throw new Error('Rilettura prenotazione non conclusa.');
+    if(Math.abs(Number(updated.pagato)-plan.paid)>0.005 ||
+       Math.abs(Number(updated.totale)-plan.total)>0.005)
+     throw new Error('Importi non riconciliati: verificare il registro pagamenti.');
+    try{
+     const bytes=Pdf.pdfEngine().makeBookingPdf(updated,dest,[]);
+     await edgeAction('dg2-booking-pdf',{
+      bookingId:updated.id,action:'generate',pdfBase64:pdfBytesAsBase64(bytes)
+     });
+     message+='Nuova conferma PDF archiviata.';
+    }catch(pdfError){
+     message+='ATTENZIONE: la nuova conferma PDF NON è stata archiviata ('+String(pdfError.message||pdfError)+'). Non ripetere lo spostamento: genera soltanto la conferma dalla prenotazione aggiornata.';
+    }
+   }catch(checkError){
+    message+='ATTENZIONE: rilettura di controllo non completata ('+String(checkError.message||checkError)+'). Verifica i dati senza ripetere lo spostamento.';
+   }
+   pendingTransfer=null;transferWizard=null;
+   closeModal();state.trip=plan.targetTripId;state.search='';
+   await navigate(page==='movements'?'movements':'bookings',true);
+   showMessage(message);
+  }catch(error){
+   // Anche dopo un timeout non sappiamo se il server abbia già applicato lo spostamento.
+   // Eliminare il piano per obbligare una nuova lettura e impedire retry automatici.
+   pendingTransfer=null;
+   throw new Error(String(error.message||error)+' — NON ripetere il comando senza aver verificato i posti sul server.');
+  }finally{transferBusy=false;}
+  return;
+ }
+
+
  // Tutte le operazioni PDF sono READ ONLY: i dati usati sono già stati letti con JWT e RLS.
  const tripID=id||state.trip||'';
  const done=report=>showMessage('PDF creato: '+report.filename+' ('+Math.round(report.bytes/1024)+' KB). Puoi salvarlo in File anche da iPhone.');
