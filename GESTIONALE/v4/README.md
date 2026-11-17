@@ -30,6 +30,22 @@ Data tecnica: 17 novembre 2026.
 | Centro PDF e report | viste autorizzate | sì, pulsanti aggregati | file scaricati localmente |
 | Diagnostica | dg_system_health, dg_data_quality_issues | sì | nessun SQL di modifica |
 
+## Agenda completa e Scadenze — sezioni separate
+- **Agenda completa:** calendario mensile navigabile (mesi/giorni) per appuntamenti, impegni, note e promemoria. Gli eventi con \`tipo\` riconosciuto di agenda non compaiono nel registro delle scadenze.
+- **Scadenze:** registro autonomo, con filtri "Da completare", "Scadute", "Oggi", "Future", "Completate" e "Tutte". **I 4 vecchi record con tipo \`Estintori\` sono preservati**: rimangono nella sezione Scadenze; nessuna migrazione distruttiva è stata eseguita.
+- Entrambe le pagine hanno **Crea / Modifica / Completa-Riapri / Elimina / Cestino / Ripristina**. Eliminazione reversibile via stato \`eliminata\`, senza \`DELETE\` fisico. Data, titolo, tipo, priorità, descrizione, note e stato sono controllati. Confronto \`updated_at\` per evitare di sovrascrivere un aggiornamento di un altro operatore.
+- Archivio originario: \`public.scadenze_gestionale\`. Le nuove voci agenda usano \`tipo='Appuntamento'\` / \`Impegno\` / \`Nota\`, le scadenze \`tipo='Scadenza'\`; il filtro riconosce anche le tipologie storiche.
+- **Stato della scrittura agenda:** il ramo di collaudo contiene \`AGENDA_WRITES_ENABLED=true\` solo per \`mutateAgenda\`, che richiede Auth Supabase e privilegi RLS di \`operazioni/write\`. Le altre scritture continuano a essere protette. La modifica non è stata rilasciata sulla \`main\` pubblica. Non sono stati modificati record reali durante i test offline.
+
+## Piantine autobus — editor grafico e associazioni ufficiali
+- L'editor consente di creare piantine **53, 57, 63 posti**, ma il collegamento ufficiale è vincolato alla capienza reale del mezzo (**GT 53 / GT 63**) verificata su \`public.flotta\`; un layout da 57 non può essere assegnato a un GT da 63 come se avesse 57 posti fisici.
+- Strumenti: **sedile, corridoio, vuoto, porta, WC, autista, tavolino**; stato sedile **disponibile/bloccato/fuori servizio**; aggiungi/elimina fila o colonna, seleziona fila, **numerazione automatica**, annulla/ripristina, ritorna all'originale, import/export **JSON** senza servizio esterno. L'editor lavora su una **copia**: non altera l'originale fino a salvataggio esplicito.
+- Libreria: **Crea**, **Modifica** il documento Supabase (non crea sempre una copia), **Elimina** in modo reversibile via \`attivo=false\`, **Ripristina**. Gli snapshot già pubblicati in \`dg28_bus_layouts\` o \`dg28_trip_layouts\` non vengono cancellati quando una bozza viene archiviata. Per utilizzare una versione modificata su un bus o viaggio, occorre ripubblicarla esplicitamente.
+- **Associa al bus:** dalla pagina \`Piantine autobus\` oppure dalla \`Flotta GT\`, individua la bozza completa della medesima capienza, quindi pubblica con la RPC autorizzata \`dg28_publish_bus_layout_v1\`. La piantina diventa predefinita per il mezzo: i viaggi già dotati di una piantina personalizzata mantengono quest'ultima. \`dg28_publish_trip_layout_v1\` resta il percorso per le eccezioni di viaggio.
+- **Sicurezza:** le RPC validano numerazione 1..capienza, categorie GT e sedili già prenotati. Il POST libreria invia ora \`created_by\` e \`updated_by\` per rispettare le RLS attuali; la modifica/archiviazione usa controllo concorrenza \`updated_at\`.
+- **Stato attuale:** il toolbox, i dialoghi e i controlli sono sviluppati sul ramo di test; i salvataggi/archiviazioni e la pubblicazione delle piantine restano protetti da \`WRITES_ENABLED=false\`, fino a backup DB+Storage, ripristino isolato e test reali di concorrenza, prenotazioni e disponibilità. Non è stata modificata alcuna associazione reale.
+- **Test:** \`tests/dg4-v4-core.test.mjs\`, \`tests/dg4-v4-layouts.test.mjs\`, \`tests/dg4-v4-agenda-layout-crud.test.mjs\`.
+
 ## Motore PDF aziendale incorporato
 - `pdf-engine.js`: generatore PDF autonomo con logo aziendale embedded, A4, intestazioni/paginazione/xref; offline nel browser, senza CDN e senza usare chiavi server.
 - `pdf-reports.js`: conversione dati letti da Supabase in report, download PDF via Blob adatto anche a Safari iOS.
