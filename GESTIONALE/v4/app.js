@@ -156,6 +156,152 @@ function drawBookings(){
  '<div class="cards">'+card('Prenotazioni trovate',String(data.length),'Con filtri selezionati')+card('Persone',String(sum),'Solo prenotazioni attive')+card('Pagamenti',String(pay.length),'Movimenti nel database')+card('Archivio originale',String(get('bookings').length),'Nessun dato sostitutivo')+'</div>'+
  panel('Elenco prenotazioni','Premi sul nominativo per i dettagli',table(['Cliente','Viaggio','Posti','Fermata','Importi','Stato','Check-in','Scheda'],rows));
 }
+
+function drawMovements(){
+ const trips=get('trips'),b=get('bookings').filter(bookingActive).filter(x=>
+   filterTerm(bookingName(x),x.telefono,x.codice,tripName(tripBy(x.viaggio_id))));
+ const rows=b.slice().sort((a,b)=>String(tripBy(a.viaggio_id)?.data_partenza||'').localeCompare(String(tripBy(b.viaggio_id)?.data_partenza||''))).map(x=>{
+  const t=tripBy(x.viaggio_id),related=eligibleBusTargets(t,trips),dates=eligibleDateTargets(t,trips,todayItaly());
+  return [
+   '<strong>'+safeLink(bookingName(x),x.id)+'</strong><small class="row-sub">'+esc(x.codice||short(x.id))+'</small>',
+   '<span>'+esc(tripName(t))+'</span><small class="row-sub">'+dateIT(t?.data_partenza)+(Number(t?.bis_numero||1)>1?' · BUS BIS '+Number(t.bis_numero):' · BUS principale')+'</small>',
+   '<strong>'+num(x.posti)+' persone</strong><small class="row-sub">'+esc(x.posti_selezionati||'Non riconciliati')+'</small>',
+   money(x.pagato)+' / '+money(x.totale),
+   '<span>'+Math.max(0,related.length-1)+' autobus alternativi · '+dates.length+' partenze future</span>',
+   '<button class="secondary" data-action="transfer-booking" data-id="'+esc(x.id)+'">⇄ Gestisci</button>'
+  ];
+ });
+ return intro('Spostamenti posti e partecipanti','Cambio sedili sullo stesso bus, trasferimento BUS/BIS o nuova data con anteprima e conservazione dei pagamenti.',
+  '<button class="secondary" data-page="bookings">Apri prenotazioni</button>')+
+ '<div class="filters">'+searchField('Cerca un partecipante, telefono, codice o viaggio')+'</div>'+
+ '<div class="cards">'+card('Prenotazioni attive',String(b.length),'Nessuna prenotazione viene duplicata')+
+ card('Tipi di spostamento','3','Stesso bus · BUS BIS · Nuova data')+
+ card('Pagamenti','Conservati','Quote già versate non azzerate')+
+ card('Modalità',WRITES_ENABLED?'Attiva':'Anteprima','Conferma protetta fino al collaudo')+'</div>'+
+ panel('Prenotazioni e spostamenti','Clicca Gestisci per selezionare il bus e verificare i posti liberi',
+ table(['Partecipante / codice','Partenza e autobus','Posti','Versato / totale','Alternative','Gestione'],rows));
+}
+function busTargetLabel(t){
+ return tripName(t)+' · '+dateIT(t?.data_partenza)+' · '+(Number(t?.bis_numero||1)>1?'BUS BIS '+t.bis_numero:'BUS principale')+' · '+Number(t?.posti_totali||0)+' posti';
+}
+function transferSeatChoices(target,inventory,selected){
+ const official=get('tripLayouts').find(x=>x.viaggio_id===target.id);
+ const rows=Array.isArray(official?.configurazione?.rows)?official.configurazione.rows:[];
+ const blocked=new Set(),mapped=[];
+ if(rows.length){
+  for(const r of rows)for(const c of (Array.isArray(r)?r:r.cells||[])){
+   if(c?.type!=='seat')continue;
+   const n=String(Number(c.id||c.label));
+   if(/^[1-9]\d{0,2}$/.test(n)){
+    mapped.push(n);
+    if(['blocked','out_of_service'].includes(c.status))blocked.add(n);
+   }
+  }
+ }
+ const seats=rows.length?[...new Set(mapped)].sort((a,b)=>Number(a)-Number(b)):Array.from({length:Number(target.posti_totali||0)},(_,i)=>String(i+1));
+ const html=seats.map(n=>{
+  const occupied=inventory.taken.has(n),notAvailable=blocked.has(n),checked=selected.includes(n);
+  const cls=occupied?'booked':checked?'selected':notAvailable?'booked':'';
+  return '<button type="button" class="seat '+cls+'" data-move-seat="'+esc(n)+'" '+(occupied||notAvailable?'disabled aria-disabled="true"':'')+
+   ' aria-pressed="'+(checked?'true':'false')+'" title="'+esc(occupied?'Posto già occupato':notAvailable?'Posto fuori servizio':'Posto '+n)+'">'+esc(n)+'</button>';
+ }).join('');
+ const explanation=rows.length?
+  'Posti numerati ricavati dalla piantina ufficiale pubblicata per il BUS scelto.':
+  'Elenco numerico dei sedili dal database: la geometria fisica del bus non è pubblicata, quindi non viene inventata.';
+ return '<div class="help">'+esc(explanation)+'</div><div class="seat-pick-grid" aria-label="Selezione sedili disponibili">'+html+'</div>';
+}
+function openTransferWizard(id){
+ const b=get('bookings').find(x=>x.id===id);
+ if(!b||!bookingActive(b))throw new Error('Prenotazione assente oppure annullata.');
+ if(b.checkin_effettuato)throw new Error('Il check-in risulta già effettuato: modificare le presenze prima del trasferimento.');
+ const src=tripBy(b.viaggio_id);if(!src)throw new Error('Viaggio origine non disponibile.');
+ transferWizard={id,mode:'bus',targetId:src.id,chosen:seatsOf(b)};
+ pendingTransfer=null;
+ renderTransferWizard();
+}
+function renderTransferWizard(){
+ if(!transferWizard)return;
+ const b=get('bookings').find(x=>x.id===transferWizard.id);
+ const src=tripBy(b?.viaggio_id);if(!b||!src)return;
+ const busOptions=eligibleBusTargets(src,get('trips'));
+ const dateOptions=eligibleDateTargets(src,get('trips'),todayItaly());
+ const mode=transferWizard.mode==='date'?'date':'bus';
+ const choices=mode==='date'?dateOptions:busOptions;
+ let target=choices.find(x=>x.id===transferWizard.targetId);
+ if(!target){target=choices[0];transferWizard.targetId=target?.id||'';transferWizard.chosen=target?.id===src.id?seatsOf(b):[];}
+ const inv=target&&mode==='bus'?seatInventory(target,get('bookings'),get('seats'),{ignoreBookingId:target.id===src.id?b.id:null}):null;
+ const selected=(transferWizard.chosen||[]).filter(n=>inv?.free.includes(n));
+ transferWizard.chosen=selected;
+ const options=choices.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===target?.id?'selected':'')+'>'+esc(busTargetLabel(t))+'</option>').join('');
+ const payment=get('payments').filter(p=>p.prenotazione_id===b.id).reduce((sum,p)=>sum+num(p.importo),0);
+ const available=mode==='bus'&&target?
+  '<div class="cards">'+card('Posti numerati liberi',String(inv.free.length),target.id===src.id?'Comprende i posti della prenotazione selezionata':'Disponibilità sul bus scelto')+
+  card('Persone da spostare',String(b.posti),'L’intero gruppo della prenotazione')+'</div>'+
+  (inv.problems.length?'<div class="error-panel"><strong>Riconciliazione necessaria</strong><p>'+esc(inv.problems.join('; '))+'</p></div>':'')+
+  transferSeatChoices(target,inv,selected)+
+  '<label class="span-2">Posti richiesti, separati da virgola<input name="targetSeats" id="move-seat-input" value="'+esc(selected.join(', '))+'" placeholder="Es. 5, 6" required></label>'+
+  '<p class="help span-2">Clicca i numeri liberi per selezionarli. Se altri operatori occupano quei posti, la conferma sul server deve essere rifiutata.</p>':
+  '<p class="help span-2">Nella nuova data il server propone sedili alternativi, cercando prima di mantenere i numeri originali. L’anteprima precisa compare prima della conferma. Potrai poi modificarli dalla nuova piantina.</p>';
+ const html='<p class="help">Cliente: <strong>'+esc(bookingName(b))+'</strong> · '+num(b.posti)+' persone · '+esc(tripName(src))+' del '+dateIT(src.data_partenza)+
+  ' · '+(Number(src.bis_numero||1)>1?'BUS BIS '+src.bis_numero:'BUS principale')+'</p>'+
+  '<div class="cards">'+card('Totale prenotazione',money(b.totale),'Il prezzo non viene modificato automaticamente')+
+  card('Versato a database',money(b.pagato),payment===num(b.pagato)?'Movimenti riconciliati':'Verificare: movimenti '+money(payment))+'</div>'+
+  '<form data-save="transfer-preview" class="form-grid"><input name="bookingId" type="hidden" value="'+esc(b.id)+'">'+
+  '<label class="span-2">Tipo di spostamento<select name="transferMode" id="move-mode">'+
+  '<option value="bus" '+(mode==='bus'?'selected':'')+'>Cambio posto / BUS principale / BUS BIS, stessa data</option>'+
+  '<option value="date" '+(mode==='date'?'selected':'')+'>Cambio data, stessa destinazione</option></select></label>'+
+  '<label class="span-2">Destinazione<select name="targetTrip" id="move-target" '+(target?'required':'disabled')+'>'+options+'</select></label>'+
+  (!choices.length?'<div class="alert span-2">Nessuna destinazione compatibile disponibile per questa modalità.</div>':'')+
+  available+
+  '<button type="submit" class="primary span-2" '+(!target||!!inv?.problems.length?'disabled':'')+'>Verifica e visualizza anteprima</button></form>'+
+  '<p class="help">La conferma finale richiede controllo della capienza e approvazione esplicita. Le ricevute dei pagamenti pregressi restano nell’archivio.</p>';
+ displayModal('Gestione partecipanti e posti · '+bookingName(b),html);
+}
+function reviewTransferForSubmission(form){
+ if(!transferWizard)throw new Error('Procedura di spostamento non aperta.');
+ const data=new FormData(form);
+ const b=get('bookings').find(x=>x.id===String(data.get('bookingId')));
+ const source=tripBy(b?.viaggio_id);
+ const target=tripBy(String(data.get('targetTrip')||''));
+ const mode=String(data.get('transferMode')||'');
+ if(!b||!source||!target)throw new Error('Verificare prenotazione e autobus di destinazione.');
+ if(b.checkin_effettuato)throw new Error('Check-in già registrato; non si può spostare la prenotazione.');
+ if(mode==='bus'){
+  const result=reviewBusTransfer({booking:b,origin:source,target,bookings:get('bookings'),seatRows:get('seats'),chosen:String(data.get('targetSeats')||'')});
+  if(result.sourceTripId===result.targetTripId&&result.oldSeats.join(',')===result.seats.join(','))throw new Error('I posti selezionati coincidono con quelli già assegnati.');
+  return {kind:'bus',id:b.id,sourceTripId:source.id,targetTripId:target.id,seats:result.seats,
+   oldSeats:result.oldSeats,paid:result.paid,total:result.total,bookingUpdatedAt:b.updated_at,persons:Number(b.posti)};
+ }
+ if(mode==='date'){
+  const candidates=eligibleDateTargets(source,get('trips'),todayItaly());
+  if(!candidates.find(t=>t.id===target.id))throw new Error('La data selezionata non è idonea: serve la stessa destinazione in una data futura.');
+  return {kind:'date',id:b.id,sourceTripId:source.id,targetTripId:target.id,
+   oldSeats:seatsOf(b),paid:Number(b.pagato),total:Number(b.totale),bookingUpdatedAt:b.updated_at,persons:Number(b.posti)};
+ }
+ throw new Error('Modalità di trasferimento non riconosciuta.');
+}
+function showTransferPreview(plan,serverPreview=null){
+ const source=tripBy(plan.sourceTripId),target=tripBy(plan.targetTripId);
+ const b=get('bookings').find(x=>x.id===plan.id);
+ const chosen=serverPreview?.new_seats||plan.seats||[];
+ if(!Array.isArray(chosen)||chosen.length!==plan.persons)throw new Error('L’anteprima del numero di sedili non è coerente.');
+ pendingTransfer={...plan,seats:chosen,sourceAmount:plan.paid};
+ const priceWarn=serverPreview?.price_review_required?
+  '<div class="alert">La quota della nuova partenza differisce dal totale prenotato: verificare eventuale differenza prima di riscuotere un saldo. Nessun addebito viene creato automaticamente.</div>':'';
+ const html='<div class="detail-grid">'+
+  [['Cliente',bookingName(b)],['Da',busTargetLabel(source)],['A',busTargetLabel(target)],
+   ['Passeggeri',plan.persons],['Posti prima',(plan.oldSeats||[]).join(', ')||'—'],
+   ['Posti dopo',chosen.join(', ')],['Pagato conservato',money(plan.paid)],
+   ['Totale conservato',money(plan.total)]
+  ].map(([key,val])=>'<div><small>'+esc(key)+'</small><strong>'+esc(val)+'</strong></div>').join('')+'</div>'+
+  priceWarn+
+  '<div class="alert">Il cambio aggiorna i posti e il collegamento del viaggio; non crea un secondo pagamento. La conferma PDF aggiornata dovrà sostituire quella precedente per la nuova disposizione.</div>'+
+  '<div class="action-row"><button class="secondary" data-action="transfer-booking" data-id="'+esc(plan.id)+'">← Modifica scelta</button>'+
+  writeButton('Conferma spostamento definitivo','commit-transfer')+'</div>'+
+  (!WRITES_ENABLED?'<p class="help">Anteprima verificabile. La conferma definitiva è attualmente disabilitata perché il backup/restore aziendale non è stato certificato.</p>':'');
+ displayModal('Anteprima spostamento · '+bookingName(b),html);
+}
+
 function rowForSeats(rows,occu){
  return rows.map((row,i)=>{
   const cells=Array.isArray(row)?row:(row?.cells||[]);
