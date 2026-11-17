@@ -27,8 +27,8 @@ export function eligibleDateTargets(origin,trips,today){
   .sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza)) || Number(a.bis_numero||1)-Number(b.bis_numero||1));
 }
 export function seatNumbers(raw){
- const list=Array.isArray(raw)?raw:String(raw||'').split(/[;,\s]+/);
- if(list.some(s=>!(/^[1-9]\d{0,2}$/.test(String(s).trim()))))throw new Error('Posti non validi: usare numeri da 1 a 999 separati da virgola.');
+ const list=(Array.isArray(raw)?raw:String(raw||'').trim().split(/[;,\s]+/)).map(s=>String(s).trim()).filter(Boolean);
+ if(list.some(s=>!(/^\d{1,4}$/.test(s))||Number(s)<1||Number(s)>999))throw new Error('Posti non validi: usare numeri da 1 a 999 separati da virgola.');
  const numbers=list.map(s=>String(Number(s)));
  if(new Set(numbers).size!==numbers.length)throw new Error('Non scegliere due volte lo stesso sedile.');
  return numbers.sort((a,b)=>Number(a)-Number(b));
