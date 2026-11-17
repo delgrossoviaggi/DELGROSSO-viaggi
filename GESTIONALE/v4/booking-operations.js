@@ -65,7 +65,7 @@ export function seatInventory(trip,bookings,seatRows,{ignoreBookingId=null}={}){
  for(let n=1;n<=Number(trip.posti_totali||0);n++)if(!owner.has(String(n)))free.push(String(n));
  return {taken:owner,free,passengers,problems:[...new Set(problems)],capacity:Number(trip.posti_totali||0)};
 }
-export function reviewBusTransfer({booking,origin,target,bookings,seatRows,chosen}){
+export function reviewBusTransfer({booking,origin,target,bookings,seatRows,chosen,layout=null}){
  if(!booking||!origin||!target)throw new Error('Prenotazione e autobus obbligatori.');
  if(!activeBooking(booking)||booking.riserva_aziendale)throw new Error('Non si possono spostare prenotazioni annullate o riserve.');
  if(booking.checkin_effettuato)throw new Error('Check-in già registrato: controllare prima le presenze.');
@@ -78,6 +78,18 @@ export function reviewBusTransfer({booking,origin,target,bookings,seatRows,chose
  const inventory=seatInventory(target,bookings,seatRows,{ignoreBookingId:origin.id===target.id?booking.id:null});
  if(inventory.problems.length)throw new Error('Posti da riconciliare prima dello spostamento: '+inventory.problems.join('; '));
  if(seats.some(s=>Number(s)>inventory.capacity))throw new Error('Posto fuori capienza.');
+
+ if(Array.isArray(layout?.rows)&&layout.rows.length){
+  const usable=new Set();
+  for(const row of layout.rows)for(const cell of (Array.isArray(row)?row:row.cells||[])){
+   if(cell?.type!=='seat'||['blocked','out_of_service'].includes(cell.status))continue;
+   if(/^[1-9]\d{0,2}$/.test(String(cell.id||cell.label)))
+    usable.add(String(Number(cell.id||cell.label)));
+  }
+  if(seats.some(n=>!usable.has(n)))
+   throw new Error('Uno o più posti non sono presenti o sono fuori servizio nella piantina ufficiale.');
+ }
+
  const conflicts=seats.filter(s=>inventory.taken.has(s));
  if(conflicts.length)throw new Error('Sedili occupati: '+conflicts.join(', '));
  if(inventory.free.length<expected)throw new Error('Posti liberi insufficienti.');
