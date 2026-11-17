@@ -11,6 +11,11 @@ new vm.Script(moduleText,{filename:'piantine-v37.js'});
 assert(html.includes('data-page="layouts"'),'Piantine in sidebar');
 assert(html.includes('pdf-report.js?v=dg37'),'offline PDF generator included');
 assert(html.includes('piantine-v37.js?v=dg37'),'editor script included');
+assert(html.includes('../seatmap-groups.js'),'official geometry and group-colour resolver included');
+assert(
+ html.indexOf('../seatmap-groups.js') < html.indexOf('../suite/pdf-report.js'),
+ 'group-colour resolver must load before the PDF report script'
+);
 assert(css.includes('.dg37-editor'),'touch friendly editor');
 assert(app.includes('dg28_publish_trip_layout_v1')===false,'layouts RPC isolated in module');
 assert(app.includes('layoutDrafts:')&&app.includes('tripOfficial:')&&app.includes('busOfficial:'),'all Supabase tables bound');
@@ -41,7 +46,14 @@ assert.equal(mod.validate(off,63).seats,63);
 const pdfFile='GESTIONALE/suite/pdf-report.js';
 const pdfSrc=fs.readFileSync(pdfFile,'utf8');
 const pdfContext={window:{},console,Blob,Uint8Array,TextEncoder,Buffer};
-vm.createContext(pdfContext);vm.runInContext(pdfSrc,pdfContext);
+vm.createContext(pdfContext);
+// Load the same resolver the browser includes ahead of the PDF module.
+// Without it, this standalone VM test is missing a browser dependency.
+const seatmapSrc=fs.readFileSync('GESTIONALE/seatmap-groups.js','utf8');
+new vm.Script(seatmapSrc,{filename:'seatmap-groups.js'});
+vm.runInContext(seatmapSrc,pdfContext);
+assert.equal(typeof pdfContext.window.DGSeatGroups.buildPlan,'function','group colours and seat geometry resolver loaded');
+vm.runInContext(pdfSrc,pdfContext);
 assert.equal(typeof pdfContext.window.DG2Pdf.makeOperationalPdf,'function');
 const group=[{
  title:'Napoli 22 novembre',
