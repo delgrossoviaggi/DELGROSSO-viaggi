@@ -1,4 +1,0 @@
-DELGROSSO Business Suite V5 — 09/11/2026
-Correzione strutturale: menu realmente visibile #dg44-sidebar-menu, Dashboard #dg44-workspace.
-Non sono state modificate le tabelle Supabase e non è stata eseguita alcuna prenotazione.
-Caricare la cartella GESTIONALE_V2/ completa nel repository, branch di prova, e verificare VERIFICA_RELEASE.html.

@@ -1,5 +1,0 @@
-DELGROSSO BUSINESS SUITE V11 — 13 novembre 2026
-Piantine: nuova/automatica, 1–N, aggiungi file, rinumera, PDF e libreria condivisa.
-Larino 13/12/2026: capienza aggiornata direttamente su Supabase a 57 posti (48 occupati, 9 liberi).
-Attenzione: i posti prenotati 58–63 sono stati assegnati ai liberi 11–16.
-La pubblicazione V11 su GitHub/Vercel NON è stata effettuata.
