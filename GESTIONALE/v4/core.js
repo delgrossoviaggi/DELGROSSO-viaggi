@@ -229,5 +229,14 @@ export async function signedReceiptPath(bucket,pathValue){
   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expiresIn:60})
  },true,0);
  if(!res?.signedURL)throw new Error('Documento non disponibile per questo operatore.');
- return API_URL+(res.signedURL.startsWith('/')?'':'/')+res.signedURL;
+ const relative=String(res.signedURL);
+ // Supabase Storage REST ritorna spesso /object/sign/... e NON /storage/v1/object/sign/...
+ // Normalizza senza mai accettare host esterni o schema javascript:.
+ const link=relative.startsWith('/storage/v1/object/sign/') ? API_URL+relative :
+  relative.startsWith('/object/sign/') ? API_URL+'/storage/v1'+relative :
+  relative.startsWith('https://') ? relative : '';
+ const parsed=new URL(link);
+ if(parsed.origin!==API_URL || !parsed.pathname.startsWith('/storage/v1/object/sign/'))
+   throw new Error('URL firmato del documento non valido.');
+ return parsed.href;
 }
