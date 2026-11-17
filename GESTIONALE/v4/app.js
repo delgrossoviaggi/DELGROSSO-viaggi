@@ -1184,12 +1184,37 @@ function startListeners(){
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
  document.addEventListener('click',e=>{
   const nav=e.target.closest('[data-page]');if(nav){e.preventDefault();state.search='';state.stop='';state.trip='';navigate(nav.dataset.page);return;}
+
+  const choice=e.target.closest('[data-move-seat]');
+  if(choice){
+   e.preventDefault();
+   if(choice.disabled||!transferWizard||transferWizard.mode!=='bus')return;
+   const input=$('move-seat-input');if(!input)return;
+   const b=get('bookings').find(x=>x.id===transferWizard.id);
+   const max=Number(b?.posti||0),seat=String(choice.dataset.moveSeat);
+   let selected;
+   try{selected=input.value.trim()?seatNumbers(input.value):[];}
+   catch{showMessage('Controlla i numeri scritti nel campo dei sedili.',true);return;}
+   if(selected.includes(seat))selected=selected.filter(x=>x!==seat);
+   else {
+    if(selected.length>=max){showMessage('La prenotazione richiede '+max+' posti: deselezionane prima uno.',true);return;}
+    selected.push(seat);
+   }
+   selected.sort((a,b)=>Number(a)-Number(b));
+   transferWizard.chosen=selected;
+   input.value=selected.join(', ');
+   $('modal-content').querySelectorAll('[data-move-seat]').forEach(btn=>{
+    const picked=selected.includes(btn.dataset.moveSeat);
+    btn.classList.toggle('selected',picked);btn.setAttribute('aria-pressed',String(picked));
+   });
+   return;
+  }
   const action=e.target.closest('[data-action]');if(!action)return;
   e.preventDefault();handleAction(action.dataset.action,action.dataset.id,action).catch(err=>showMessage(String(err.message||err),true));
  });
  $('main').addEventListener('input',e=>{
   if(e.target.id==='filter-search'){state.search=e.target.value;const focus=e.target;const start=focus.selectionStart;const end=focus.selectionEnd; // no network request for local filtering
-   const renderers={trips:drawTrips,bookings:drawBookings,control:drawControl,customers:drawCustomers,rentals:drawRentals,agenda:drawAgenda};
+   const renderers={trips:drawTrips,bookings:drawBookings,movements:drawMovements,control:drawControl,customers:drawCustomers,rentals:drawRentals,agenda:drawAgenda};
    if(renderers[page]){$('main').innerHTML=renderers[page]();const replacement=$('filter-search');replacement?.focus();replacement?.setSelectionRange(start,end);}
   }
  });
@@ -1197,6 +1222,23 @@ function startListeners(){
   if(e.target.id==='filter-trip'){state.trip=e.target.value;state.stop='';const renderers={bookings:drawBookings,control:drawControl};if(renderers[page])$('main').innerHTML=renderers[page]();}
   if(e.target.id==='filter-stop'){state.stop=e.target.value;$('main').innerHTML=drawControl();}
   if(e.target.id==='filter-bookings-state'){state.bookingsState=e.target.value;$('main').innerHTML=drawBookings();}
+ });
+ $('modal-content').addEventListener('change',e=>{
+  if(!transferWizard)return;
+  if(e.target.id==='move-mode'){
+   transferWizard.mode=e.target.value==='date'?'date':'bus';
+   transferWizard.targetId='';transferWizard.chosen=[];
+   renderTransferWizard();return;
+  }
+  if(e.target.id==='move-target'){
+   transferWizard.targetId=e.target.value;
+   const current=get('bookings').find(x=>x.id===transferWizard.id);
+   transferWizard.chosen=e.target.value===current?.viaggio_id?seatsOf(current):[];
+   renderTransferWizard();return;
+  }
+  if(e.target.id==='move-seat-input'){
+   try{transferWizard.chosen=e.target.value.trim()?seatNumbers(e.target.value):[];}catch{}
+  }
  });
  $('modal-content').addEventListener('submit',async e=>{
   e.preventDefault();const form=e.target;if(!form.dataset.save)return;
