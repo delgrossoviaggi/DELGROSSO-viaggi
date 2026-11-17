@@ -795,7 +795,8 @@ function openAgendaEditor(id='',section=page==='deadlines'?'scadenze':'agenda',d
  if(id&&!existing)throw new Error('Impegno o scadenza non trovato.');
  if(existing)section=isDiaryEntry(existing)?'agenda':'scadenze';
  if(existing&&agendaDeleted(existing))throw new Error('Prima ripristina la voce dal cestino.');
- const isDeadline=section==='scadenze',types=isDeadline?deadlineCategories:agendaCategories;
+ const isLegacy=existing?.__source==='attivita_gestionale';
+ const isDeadline=section==='scadenze',types=isLegacy?['Impegno']:isDeadline?deadlineCategories:agendaCategories;
  const selected=existing?.tipo|| (isDeadline?'Scadenza':'Appuntamento');
  const categoryOptions=[...new Set([selected,...types])].map(t=>
   '<option value="'+esc(t)+'"'+(t===selected?' selected':'')+'>'+esc(t)+'</option>').join('');
@@ -807,14 +808,16 @@ function openAgendaEditor(id='',section=page==='deadlines'?'scadenze':'agenda',d
   '<form data-save="agenda-entry" class="form-grid">'+
   '<input type="hidden" name="entryId" value="'+esc(existing?.id||'')+'">'+
   '<input type="hidden" name="section" value="'+esc(section)+'">'+
+  '<input type="hidden" name="source" value="'+esc(existing?.__source||'scadenze_gestionale')+'">'+
   '<input type="hidden" name="expectedUpdatedAt" value="'+esc(existing?.updated_at||'')+'">'+
   '<label class="span-2">Titolo<input name="titolo" maxlength="180" required value="'+esc(existing?.titolo||'')+'"></label>'+
   '<label>Data '+(isDeadline?'scadenza':'appuntamento')+'<input type="date" name="data_scadenza" required value="'+esc(existing?.data_scadenza||proposed)+'"></label>'+
-  '<label>Tipo<select name="tipo">'+categoryOptions+'</select></label>'+
+  '<label>Tipo<select name="tipo" '+(isLegacy?'disabled':'')+'>'+categoryOptions+'</select></label>'+ (isLegacy?'<input type="hidden" name="tipo" value="Impegno">':'')+
   '<label>Priorità<select name="priorita">'+selectField('priorita',['bassa','normale','alta','urgente'],priority)+'</select></label>'+
   '<label>Stato<select name="stato">'+selectField('stato',['aperta','in corso','completata'],status)+'</select></label>'+
   '<label class="span-2">Descrizione<textarea name="descrizione" maxlength="5000" rows="3">'+esc(existing?.descrizione||'')+'</textarea></label>'+
-  '<label class="span-2">Note e dettagli<textarea name="note" maxlength="3000" rows="3">'+esc(existing?.note||'')+'</textarea></label>'+
+  (isLegacy?'<label class="span-2">Operatore incaricato<input name="assegnata_a" maxlength="120" value="'+esc(existing?.assegnata_a||'')+'"></label>':
+   '<label class="span-2">Note e dettagli<textarea name="note" maxlength="3000" rows="3">'+esc(existing?.note||'')+'</textarea></label>')+
   '<div class="span-2 alert">Creazione e modifica sono tracciate su Supabase con l’accesso dell’operatore. L’eliminazione usa il cestino, senza distruggere i dati storici.</div>'+
   '<button class="primary span-2" type="submit">'+(existing?'Salva modifiche':'Crea '+(isDeadline?'scadenza':'impegno'))+'</button></form>');
 }
@@ -823,6 +826,8 @@ async function submitAgendaEditor(form){
  const data=new FormData(form),str=k=>String(data.get(k)||'').trim();
  const id=str('entryId'),original=id?findAgenda(id):null,section=str('section');
  if(id&&!original)throw new Error('La voce è stata modificata: aggiorna prima di salvare.');
+ const source=original?.__source||'scadenze_gestionale';
+ if(str('source')!==source)throw new Error('La fonte Supabase dell’attività è cambiata. Riapri la scheda.');
  const fields=validateAgendaEntry({
   titolo:str('titolo'),data_scadenza:str('data_scadenza'),
   tipo:str('tipo'),priorita:str('priorita'),stato:str('stato'),
@@ -832,7 +837,11 @@ async function submitAgendaEditor(form){
   throw new Error('Non puoi cambiare tipo di archivio senza una migrazione esplicita.');
  if(original){
   if(!str('expectedUpdatedAt'))throw new Error('Versione della scadenza mancante: ricarica la pagina.');
-  await mutateAgenda('PATCH',fields,{id,expectedUpdatedAt:str('expectedUpdatedAt')});
+  const payload=source==='attivita_gestionale'?{
+   titolo:fields.titolo,descrizione:fields.descrizione,scadenza:fields.data_scadenza,
+   priorita:fields.priorita,stato:fields.stato,assegnata_a:str('assegnata_a')
+  }:fields;
+  await mutateAgenda('PATCH',payload,{id,expectedUpdatedAt:str('expectedUpdatedAt'),source});
  }else await mutateAgenda('POST',fields);
  if(section==='agenda'){state.agendaDay=fields.data_scadenza;state.agendaMonth=fields.data_scadenza.slice(0,7);}
  closeModal();state.search='';
@@ -850,7 +859,7 @@ async function changeAgendaEntry(id,kind){
  if(kind==='delete'&&!confirm('Spostare "'+item.titolo+'" nel cestino? Potrai ripristinarla.'))return;
  if(kind==='restore'&&!previous)throw new Error('La voce non si trova nel cestino.');
  if(kind==='toggle'&&previous)throw new Error('Ripristina prima la voce.');
- await mutateAgenda('PATCH',{stato:status},{id:item.id,expectedUpdatedAt:item.updated_at});
+ await mutateAgenda('PATCH',{stato:status},{id:item.id,expectedUpdatedAt:item.updated_at,source:item.__source});
  await navigate(section,true);
  showMessage(kind==='delete'?'Voce spostata nel cestino.':kind==='restore'?'Voce ripristinata.':'Stato aggiornato.');
 }
@@ -866,7 +875,8 @@ function agendaLine(item,section='agenda',isTrash=false){
  return [
   '<strong>'+esc(item.titolo||'Senza titolo')+'</strong>'+
     (item.descrizione?'<small class="row-sub">'+esc(item.descrizione)+'</small>':'')+
-    (item.note?'<small class="row-sub">Note: '+esc(item.note)+'</small>':''),
+    (item.note?'<small class="row-sub">Note: '+esc(item.note)+'</small>':'')+
+    (item.assegnata_a?'<small class="row-sub">Assegnato a: '+esc(item.assegnata_a)+'</small>':''),
   dateIT(item.data_scadenza),badge(item.tipo),badge(item.priorita),badge(item.stato),
   agendaActions(item,section,isTrash)
  ];
