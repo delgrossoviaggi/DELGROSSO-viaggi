@@ -1,0 +1,27 @@
+DELGROSSO VIAGGI — GESTIONALE (pacchetto completo, solo cartella GESTIONALE)
+Data pacchetto: 17 novembre 2026
+
+CONTENUTO
+- GESTIONALE/index.html: gestionale storico ancora presente
+- GESTIONALE/suite/: moduli del gestionale precedente
+- GESTIONALE/v4/: nuova V4, inclusi Agenda, Scadenze, piantine, BUS BIS, contabilità e documenti
+- Altri file interni alla cartella GESTIONALE necessari alle versioni esistenti
+
+ISTRUZIONI PER GITHUB
+1. Conserva una copia del repository attuale su un ramo di backup.
+2. Estrai il file ZIP sul computer (NON caricare il file ZIP come singolo file sul sito GitHub).
+3. Nella cartella del tuo repository, copia la cartella GESTIONALE estratta.
+4. Mantieni lo stesso percorso GESTIONALE/ e sostituisci i file omonimi quando desiderato.
+5. Fai commit e push su un ramo di prova, poi verifica le schermate e la sincronizzazione.
+6. Solo dopo i controlli, valuta il passaggio su main.
+
+AVVERTENZE IMPORTANTI
+- Il pacchetto non contiene il sito pubblico, non contiene i dati Supabase o backup del database.
+- I collegamenti Supabase nel codice continuano a usare il progetto aziendale: caricare i file non cancella i dati.
+- La V4 include la correzione dell'Agenda: legge attivita_gestionale (eventi storici) e
+  scadenze_gestionale (scadenze e nuove voci), senza migrazioni automatiche.
+- La V4 e' ancora in collaudo: WRITES_ENABLED=false per prenotazioni, incassi e piantine ufficiali.
+  NON abilitare la scrittura senza backup completo, ripristino di prova e test autorizzati.
+- Le funzioni di agenda richiedono l'accesso e i permessi Supabase previsti dal progetto.
+- Per usare i percorsi condivisi (ad esempio /assets) mantieni il gestionale nel repository
+  originale, che contiene il resto del sito. Il pacchetto non sostituisce quei file condivisi.
