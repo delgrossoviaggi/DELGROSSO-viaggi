@@ -1,0 +1,51 @@
+DELGROSSO VIAGGI — PACCHETTO COMPLETO PER AGGIORNAMENTO MANUALE GITHUB
+Data: 17 novembre 2026
+Sorgente: delgrossoviaggi/DELGROSSO-viaggi
+Ramo di sviluppo: build/dg4-rebuild-20261117
+
+CONTENUTO
+Questo ZIP contiene tutti i file versionati del repository, inclusi:
+- sito pubblico (HTML, CSS, JS, immagini e configurazioni);
+- gestionale esistente e nuova anteprima /GESTIONALE/v4/;
+- agenda storica e scadenze separate, recupero dati dalle 2 tabelle Supabase;
+- editor piantine GT, BUS BIS e funzioni di contabilità progettate;
+- script, test, documentazione e workflow.
+Non include .git, credenziali private, dati dei clienti o un dump del database.
+
+ATTENZIONE
+- NON caricare il file ZIP come singolo file nel repository aspettandoti che GitHub o Vercel lo eseguano.
+  Occorre PRIMA ESTRARLO e caricare i file e le cartelle nelle stesse posizioni.
+- Il caricamento del codice NON sostituisce né cancella i dati di Supabase.
+- La V4 è un ambiente di collaudo: WRITES_ENABLED=false. Le operazioni su
+  prenotazioni, incassi, piantine ufficiali e giroconti sono protette fino a backup
+  verificato, ripristino di prova e test con operatori reali.
+- La scrittura dell'Agenda usa RLS e sessione Supabase; anche questa funzione
+  richiede prova pratica con l'accesso del gestionale.
+- Il sito e il gestionale storico rimangono nel pacchetto per continuità.
+- Alcune funzioni previste per la V4 richiedono patch SQL non attivate in produzione.
+  Le patch sono incluse soltanto a fini di revisione; NON eseguirle automaticamente.
+- Prima di aggiornare la branch main, SALVARE UNA COPIA DELL'ATTUALE MAIN;
+  verificare che non ci siano modifiche di altri operatori non presenti in questo archivio.
+
+CARICAMENTO RACCOMANDATO CON GITHUB DESKTOP
+1. Estrai questo ZIP in una cartella del computer.
+2. In GitHub Desktop clona delgrossoviaggi/DELGROSSO-viaggi.
+3. Crea un ramo di sicurezza dalla branch main (es. backup-prima-v4).
+4. Crea un ramo di lavoro dedicato (es. upload-manuale-v4).
+5. Copia TUTTI I FILE E LE CARTELLE ESTRATTI nella cartella del repository
+   mantenendo i nomi/percorso; non copiare la cartella contenitore esterna.
+6. Controlla l'elenco dei file modificati con GitHub Desktop.
+7. Esegui Commit sul ramo di lavoro e poi Push.
+8. Apri la Pull Request verso main dopo aver verificato le funzioni.
+9. In anteprima controlla /GESTIONALE/v4/ e i test automatici.
+10. Solo dopo una verifica completa, unisci su main.
+
+VERIFICHE IMPORTANTI
+- Agenda V4: visibilità delle attività storiche conservate in attivita_gestionale
+  e delle scadenze separate in scadenze_gestionale, inclusi eventi completati.
+- Gestione piantine: verifica capienza del mezzo 53/63 e posti prenotati.
+- Backup di Supabase: database + allegati Storage, PRIMA di attivare scritture sensibili.
+- Non cambiare la variabile WRITES_ENABLED per aggirare il blocco.
+
+Questo archivio rappresenta un'istantanea del codice versionato; non costituisce
+certificazione del funzionamento operativo completo del gestionale in produzione.
