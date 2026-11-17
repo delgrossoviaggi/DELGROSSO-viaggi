@@ -38,6 +38,16 @@ Data tecnica: 17 novembre 2026.
 - **Funzioni server esistenti** verificate: `dg2-booking-pdf`, `professional-receipts`, `professional-quotes`; creazione PDF+archiviazione predisposta dopo salvataggio transazionale. Il fallimento del documento non provoca una seconda registrazione pagamento/prenotazione. In safe mode anche questo salvataggio documenti è bloccato.
 - Non qualificare i PDF riepilogativi come ricevute fiscali/fatture elettroniche e non inviare bozze FE come documenti emessi.
 
+## Conferme cumulative dello stesso referente per fermata di partenza
+- Dalla scheda della prenotazione, quando sono presenti **due o più prenotazioni attive** con **nome e cognome completi uguali**, **numero di telefono uguale** (anche con/senza prefisso internazionale italiano) e **lo stesso viaggio logico nella stessa data**, compare `Conferma unica (N prenotazioni)`.
+- Riconosce gli autobus principale/BIS soltanto se collegati tramite `bis_parent_id`; non accorpa semplici viaggi distinti che hanno lo stesso titolo o la stessa data.
+- PDF A4 con logo in `makeCombinedBookingPdf` e adattatore `pdfCombinedBooking`: intestazione unica, sezioni separate per `fermata_partenza`, dettaglio per prenotazione, codici, posti, autobus, passeggeri, subtotali per fermata, totale complessivo, netto incassato e saldo.
+- Somma le quote delle prenotazioni distinte e usa `pagamenti` per ciascun ID, deduplicando i movimenti e sottraendo i rimborsi negativi. Se il registro incassi non coincide con `prenotazioni.pagato`, il PDF **evidenzia la differenza** invece di certificarne falsamente la riconciliazione.
+- Non include prenotazioni annullate o riserve aziendali. Se manca l'identità completa, non effettua accorpamenti automatici.
+- Il PDF è **generato localmente nel browser**, anche su iPhone, ed è scaricabile dalla scheda. **Non viene ancora emesso automaticamente dal sito, inviato per email o salvato come nuovo originale nello Storage**: richiede una successiva estensione dei workflow server, da provare dopo backup/restore.
+- La conferma singola e le ricevute già archiviate rimangono disponibili e non vengono sovrascritte.
+- Test regressione: `tests/dg4-v4-confirmations.test.mjs`, `tests/dg4-v4-pdf.test.mjs`.
+
 ## Trasferimento partecipanti, numerazione sedili e BUS BIS
 - La procedura `Gestisci` è raggiungibile da **Prenotazioni** e dalla pagina dedicata **Spostamenti posti / BUS BIS / date**.
 - **Stessa data**: solo autobus che appartengono alla stessa partenza logica (stesso `bis_parent_id`/ID capofila), con scelta manuale di sedili liberi e capienza verificata. Il server rifiuta le sovrapposizioni tramite `dg_manage_booking_seats_v1`. Il client esclude posti aziendali riservati, posti fuori servizio e altre prenotazioni.
