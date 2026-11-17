@@ -2,7 +2,7 @@
  * Nessuna funzione modifica il database. La conferma vera è una RPC transazionale Supabase.
  */
 export function activeBooking(b){
- return b && !/annull|cancel|cancell|eliminat/i.test(String(b.stato||'')) && !b.riserva_aziendale;
+ return b && !/annull|cancel|cancell|eliminat/i.test(String(b.stato||''));
 }
 export function busRoot(t){return String(t?.bis_parent_id||t?.id||'');}
 export function normalizeDestination(value){
@@ -67,7 +67,7 @@ export function seatInventory(trip,bookings,seatRows,{ignoreBookingId=null}={}){
 }
 export function reviewBusTransfer({booking,origin,target,bookings,seatRows,chosen}){
  if(!booking||!origin||!target)throw new Error('Prenotazione e autobus obbligatori.');
- if(!activeBooking(booking))throw new Error('Non si possono spostare prenotazioni annullate o riserve.');
+ if(!activeBooking(booking)||booking.riserva_aziendale)throw new Error('Non si possono spostare prenotazioni annullate o riserve.');
  if(booking.checkin_effettuato)throw new Error('Check-in già registrato: controllare prima le presenze.');
  const buses=eligibleBusTargets(origin,[target]);
  if(!buses.length)throw new Error('Il bus di destinazione non appartiene alla stessa partenza.');
