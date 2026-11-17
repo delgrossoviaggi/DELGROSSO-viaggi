@@ -54,7 +54,8 @@ export function createLiveSync({apiUrl,key,getToken,onChange,onStatus,
    status('connecting');ready=false;
    ws.onopen=()=>{
     if(stopped||my!==connectionId)return;
-    joinRef=String(++seq);
+    // The join reply echoes the push ref, which must equal the current channel join ref.
+    joinRef=String(seq+1);
     send('phx_join',{
      config:{
       private:false,
