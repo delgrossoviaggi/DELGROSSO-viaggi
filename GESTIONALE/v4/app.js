@@ -710,6 +710,74 @@ function drawRentals(){
  '<div class="filters">'+searchField('Cerca azienda, referente o destinazione')+'</div>'+
  panel('Servizi e contratti','Dati da noleggi_bus',table(['Cliente','Partenza','Tratta','Pax','Prezzo','Acconto','Stato','Pagamento','Scheda'],rows));
 }
+
+/** Due ambienti distinti sopra la tabella scadenze_gestionale: eventi/agenda e scadenze.
+ * Mai cancellazione fisica: i record vengono spostati nel cestino reversibile. */
+function openAgendaEditor(id='',section=page==='deadlines'?'scadenze':'agenda',date=''){
+ const existing=id?get('agenda').find(x=>x.id===id):null;
+ if(id&&!existing)throw new Error('Impegno o scadenza non trovato.');
+ if(existing)section=isDiaryEntry(existing)?'agenda':'scadenze';
+ if(existing&&agendaDeleted(existing))throw new Error('Prima ripristina la voce dal cestino.');
+ const isDeadline=section==='scadenze',types=isDeadline?deadlineCategories:agendaCategories;
+ const selected=existing?.tipo|| (isDeadline?'Scadenza':'Appuntamento');
+ const categoryOptions=[...new Set([selected,...types])].map(t=>
+  '<option value="'+esc(t)+'"'+(t===selected?' selected':'')+'>'+esc(t)+'</option>').join('');
+ const status=existing?.stato||'aperta',priority=existing?.priorita||'normale';
+ const selectField=(name,values,chosen)=>values.map(v=>'<option value="'+esc(v)+'"'+(v===chosen?' selected':'')+'>'+esc(v)+'</option>').join('');
+ const proposed=/^\d{4}-\d{2}-\d{2}$/.test(date)?date:state.agendaDay||todayItaly();
+ displayModal((existing?'Modifica':'Nuova')+' '+(isDeadline?'scadenza':'voce agenda'),
+  '<p class="help">'+(isDeadline?'Le scadenze hanno una data limite, uno stato e una priorità.':'Gli appuntamenti, promemoria e note vengono mostrati nel calendario completo.')+'</p>'+
+  '<form data-save="agenda-entry" class="form-grid">'+
+  '<input type="hidden" name="entryId" value="'+esc(existing?.id||'')+'">'+
+  '<input type="hidden" name="section" value="'+esc(section)+'">'+
+  '<input type="hidden" name="expectedUpdatedAt" value="'+esc(existing?.updated_at||'')+'">'+
+  '<label class="span-2">Titolo<input name="titolo" maxlength="180" required value="'+esc(existing?.titolo||'')+'"></label>'+
+  '<label>Data '+(isDeadline?'scadenza':'appuntamento')+'<input type="date" name="data_scadenza" required value="'+esc(existing?.data_scadenza||proposed)+'"></label>'+
+  '<label>Tipo<select name="tipo">'+categoryOptions+'</select></label>'+
+  '<label>Priorità<select name="priorita">'+selectField('priorita',['bassa','normale','alta','urgente'],priority)+'</select></label>'+
+  '<label>Stato<select name="stato">'+selectField('stato',['aperta','in corso','completata'],status)+'</select></label>'+
+  '<label class="span-2">Descrizione<textarea name="descrizione" maxlength="5000" rows="3">'+esc(existing?.descrizione||'')+'</textarea></label>'+
+  '<label class="span-2">Note e dettagli<textarea name="note" maxlength="3000" rows="3">'+esc(existing?.note||'')+'</textarea></label>'+
+  '<div class="span-2 alert">Creazione e modifica sono tracciate su Supabase con l’accesso dell’operatore. L’eliminazione usa il cestino, senza distruggere i dati storici.</div>'+
+  '<button class="primary span-2" type="submit">'+(existing?'Salva modifiche':'Crea '+(isDeadline?'scadenza':'impegno'))+'</button></form>');
+}
+async function submitAgendaEditor(form){
+ if(!AGENDA_WRITES_ENABLED)throw new Error('Modifica agenda non abilitata.');
+ const data=new FormData(form),str=k=>String(data.get(k)||'').trim();
+ const id=str('entryId'),original=id?get('agenda').find(x=>x.id===id):null,section=str('section');
+ if(id&&!original)throw new Error('La voce è stata modificata: aggiorna prima di salvare.');
+ const fields=validateAgendaEntry({
+  titolo:str('titolo'),data_scadenza:str('data_scadenza'),
+  tipo:str('tipo'),priorita:str('priorita'),stato:str('stato'),
+  descrizione:str('descrizione'),note:str('note')
+ },{section,original});
+ if(original&&Boolean(isDiaryEntry(original))!==(section==='agenda'))
+  throw new Error('Non puoi cambiare tipo di archivio senza una migrazione esplicita.');
+ if(original){
+  if(!str('expectedUpdatedAt'))throw new Error('Versione della scadenza mancante: ricarica la pagina.');
+  await mutateAgenda('PATCH',fields,{id,expectedUpdatedAt:str('expectedUpdatedAt')});
+ }else await mutateAgenda('POST',fields);
+ if(section==='agenda'){state.agendaDay=fields.data_scadenza;state.agendaMonth=fields.data_scadenza.slice(0,7);}
+ closeModal();state.search='';
+ await navigate(section==='scadenze'?'deadlines':'agenda',true);
+ showMessage((original?'Modifica salvata':'Voce creata')+' su Supabase. Il calendario e l’elenco sono aggiornati.');
+}
+async function changeAgendaEntry(id,kind){
+ if(!AGENDA_WRITES_ENABLED)throw new Error('Agenda non scrivibile.');
+ const item=get('agenda').find(x=>x.id===id);
+ if(!item||!item.updated_at)throw new Error('Voce non verificata: aggiorna la pagina.');
+ const previous=agendaDeleted(item),section=isDiaryEntry(item)?'agenda':'deadlines';
+ const status=kind==='delete'?'eliminata':kind==='restore'?'aperta':
+  kind==='toggle'&&item.stato==='completata'?'aperta':'completata';
+ if(!['delete','restore','toggle'].includes(kind))throw new Error('Azione non consentita.');
+ if(kind==='delete'&&!confirm('Spostare "'+item.titolo+'" nel cestino? Potrai ripristinarla.'))return;
+ if(kind==='restore'&&!previous)throw new Error('La voce non si trova nel cestino.');
+ if(kind==='toggle'&&previous)throw new Error('Ripristina prima la voce.');
+ await mutateAgenda('PATCH',{stato:status},{id:item.id,expectedUpdatedAt:item.updated_at});
+ await navigate(section,true);
+ showMessage(kind==='delete'?'Voce spostata nel cestino.':kind==='restore'?'Voce ripristinata.':'Stato aggiornato.');
+}
+
 function agendaActions(item,section='agenda',isTrash=false){
  const key='data-id="'+esc(item.id)+'"';
  if(isTrash)return agendaButton('↶ Ripristina','restore-agenda',key,'secondary');
@@ -727,7 +795,7 @@ function agendaLine(item,section='agenda',isTrash=false){
  ];
 }
 function drawAgenda(){
- const all=agendaEntries(get('agenda'),'all',{includeDeleted:state.agendaTrash,search:state.search});
+ const all=agendaEntries(get('agenda'),'agenda',{includeDeleted:state.agendaTrash,search:state.search});
  const month=state.agendaMonth||todayItaly().slice(0,7);
  const visible=all.filter(x=>String(x.data_scadenza||'').slice(0,7)===month);
  const isTrash=state.agendaTrash;
@@ -757,7 +825,7 @@ function drawAgenda(){
  }).join('');
  const dayEntries=all.filter(x=>x.data_scadenza===selected);
  const agendaCount=agendaEntries(get('agenda'),'agenda').length,deadlineCount=agendaEntries(get('agenda'),'scadenze').length;
- return intro('Agenda completa','Calendario mensile per appuntamenti, impegni e note. Le scadenze sono visibili anche sul calendario, ma hanno una sezione operativa distinta.',
+ return intro('Agenda completa','Calendario mensile per appuntamenti, impegni e note. Le scadenze hanno un elenco separato, senza confonderle con gli appuntamenti.',
   '<button class="secondary" data-page="deadlines">Vai alle Scadenze</button>'+
   '<button class="secondary" data-action="pdf-agenda">↓ PDF agenda</button>'+
   agendaButton('+ Nuovo impegno','create-agenda'))+
