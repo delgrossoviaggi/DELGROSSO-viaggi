@@ -1079,6 +1079,41 @@ function printRoster(){
 async function handleAction(action,id,button){
  if(action==='refresh'){clearCache();showMessage('Aggiornamento in corso.');await navigate(page,true);return;}
 
+ if(action==='calendar-prev'||action==='calendar-next'||action==='calendar-today'){
+  state.agendaMonth=action==='calendar-today'?todayItaly().slice(0,7):
+    shiftCalendarMonth(state.agendaMonth,action==='calendar-prev'?-1:1);
+  state.agendaDay=action==='calendar-today'?todayItaly():state.agendaMonth+'-01';
+  $('main').innerHTML=drawAgenda();return;
+ }
+ if(action==='calendar-day'){
+  const date=String(button?.dataset.date||'');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('Giorno calendario non valido.');
+  state.agendaDay=date;state.agendaMonth=date.slice(0,7);
+  $('main').innerHTML=drawAgenda();return;
+ }
+ if(action==='agenda-trash'||action==='deadline-trash'){
+  if(action==='agenda-trash'){state.agendaTrash=!state.agendaTrash;$('main').innerHTML=drawAgenda();}
+  else{state.deadlineTrash=!state.deadlineTrash;$('main').innerHTML=drawDeadlines();}
+  return;
+ }
+ if(action==='create-agenda'||action==='create-deadline'){
+  openAgendaEditor('',action==='create-deadline'?'scadenze':'agenda',button?.dataset.date||'');return;
+ }
+ if(action==='edit-agenda'){openAgendaEditor(id);return;}
+ if(action==='delete-agenda'||action==='restore-agenda'||action==='toggle-agenda'){
+  await changeAgendaEntry(id,action==='delete-agenda'?'delete':action==='restore-agenda'?'restore':'toggle');return;
+ }
+ if(action==='export-deadlines'){
+  csvExport(['Titolo','Data scadenza','Priorità','Stato','Descrizione','Note'],
+   agendaEntries(get('agenda'),'scadenze').map(x=>[x.titolo,x.data_scadenza,x.priorita,x.stato,x.descrizione,x.note]),
+   'delgrosso-scadenze.csv');return;
+ }
+ if(action==='pdf-deadlines'){
+  const entries=agendaEntries(get('agenda'),'scadenze');
+  return done(Pdf.pdfAgenda(entries));
+ }
+
+
 
  if(action==='open-credit'){
   openCreditWizard(id);return;
@@ -1317,7 +1352,7 @@ async function handleAction(action,id,button){
    return done(Pdf.pdfBooking(b,tripBy(b.viaggio_id),get('payments').filter(p=>p.prenotazione_id===id)));
  }
  if(action==='pdf-cash')return done(Pdf.pdfCash(get('cash'),get('payments')));
- if(action==='pdf-agenda')return done(Pdf.pdfAgenda(get('agenda')));
+ if(action==='pdf-agenda')return done(Pdf.pdfAgenda(agendaEntries(get('agenda'),'agenda')));
  if(action==='pdf-customer'){
    const c=get('customers').find(x=>x.id===id);
    if(!c)throw new Error('Cliente non trovato.');
@@ -1402,7 +1437,7 @@ async function handleAction(action,id,button){
  if(action==='export-bookings'){csvExport(['Cliente','Telefono','Viaggio','Pax','Posti','Fermata','Totale','Pagato','Stato','Check-in'],get('bookings').filter(b=>(!state.trip||b.viaggio_id===state.trip) && bookingActive(b)).map(b=>[bookingName(b),b.telefono,tripName(tripBy(b.viaggio_id)),b.posti,b.posti_selezionati,b.fermata_partenza,b.totale,b.pagato,b.stato,b.checkin_effettuato?'Sì':'No']),'delgrosso-prenotazioni.csv');return;}
  if(action==='export-payments'){csvExport(['Data','Cliente','Viaggio','Tipo','Importo','Operatore','Ricevuta'],get('payments').map(p=>[p.data_pagamento,p.cliente,tripName(tripBy(p.viaggio_id)),p.tipo,p.importo,p.incassato_da,p.receipt_number]),'delgrosso-pagamenti.csv');return;}
  if(action==='export-customers'){csvExport(['Nome','Cognome','Telefono','Email','Città'],get('customers').map(c=>[c.nome,c.cognome,c.telefono,c.email,c.citta]),'delgrosso-clienti.csv');return;}
- if(action==='export-agenda'){csvExport(['Titolo','Scadenza','Priorità','Stato','Descrizione'],get('agenda').map(a=>[a.titolo,a.data_scadenza,a.priorita,a.stato,a.descrizione]),'delgrosso-agenda.csv');return;}
+ if(action==='export-agenda'){csvExport(['Titolo','Data','Priorità','Stato','Descrizione'],agendaEntries(get('agenda'),'agenda').map(a=>[a.titolo,a.data_scadenza,a.priorita,a.stato,a.descrizione]),'delgrosso-agenda.csv');return;}
  if(action==='create-layout' || action==='draft-layout'){
   const saved=action==='draft-layout'?get('layoutLibrary').find(l=>l.id===id):null;
   if(!window.DG4LayoutEditor)return showMessage('Editor piantine non caricato.',true);
@@ -1582,14 +1617,7 @@ async function handleAction(action,id,button){
   const opts=get('bookings').filter(bookingActive).map(b=>'<option value="'+esc(b.id)+'" '+(id===b.id?'selected':'')+'>'+esc(bookingName(b)+' · '+tripName(tripBy(b.viaggio_id)))+'</option>').join('');
   return displayModal('Registra pagamento','<form data-save="payment" class="form-grid"><label class="span-2">Prenotazione<select name="booking" required>'+opts+'</select></label><label>Tipo<select name="tipo"><option>Acconto</option><option>Saldo</option></select></label><label>Importo €<input name="importo" type="number" min=".01" step=".01" required /></label><label>Metodo<select name="metodo"><option>Contanti</option><option>Bonifico</option><option>POS</option></select></label><label>Data<input name="data" type="date" value="'+todayItaly()+'" required /></label><label class="span-2">Note<textarea name="note"></textarea></label><button class="primary span-2" type="submit">Registra in Supabase</button></form>');
  }
- if(action==='create-agenda'){
-  return displayModal('Nuova scadenza','<form class="form-grid" data-save="agenda"><label class="span-2">Titolo<input name="titolo" required maxlength="180"></label><label>Data<input name="data_scadenza" type="date" required></label><label>Priorità<select name="priorita"><option>normale</option><option>alta</option><option>bassa</option></select></label><label class="span-2">Descrizione<textarea name="descrizione"></textarea></label><button class="primary span-2" type="submit">Salva in agenda</button></form>');
- }
- if(action==='complete-agenda'){
-  if(!confirm('Segnare questa scadenza come completata?'))return;
-  await mutate('agenda','PATCH',{stato:'completata'},id);
-  closeModal();return navigate('agenda',true);
- }
+
  if(action==='create-trip'){
   return displayModal('Nuovo viaggio','<form class="form-grid" data-save="trip"><label>Nome viaggio<input name="titolo" required></label><label>Destinazione<input name="destinazione" required></label><label>Data partenza<input name="data_partenza" type="date" required></label><label>Quota €<input name="prezzo" type="number" min="0" step=".01" required></label><label>Capienza posti<input name="posti_totali" type="number" min="1" max="100" required></label><label>Minimo partecipanti<input name="minimo_partecipanti" type="number" min="1" value="40" required></label><button class="primary span-2" type="submit">Crea viaggio NON pubblicato</button></form>');
  }
@@ -1616,6 +1644,7 @@ function pdfBytesAsBase64(bytes){
 }
 async function handleSubmit(form){
  const type=form.dataset.save;
+ if(type==='agenda-entry'){await submitAgendaEditor(form);return;}
  // Il sopralluogo ai posti e l'anteprima del cambio data sono letture; restano disponibili
  // anche quando il gestionale è bloccato per le scritture.
 
@@ -1721,11 +1750,7 @@ async function handleSubmit(form){
    const doc=await edgeAction('dg2-booking-pdf',{action:'generate',bookingId:bookingId,pdfBase64:pdfBytesAsBase64(bytes)});
    if(doc?.success)success+=' Conferma PDF archiviata in Supabase.';
   }catch(e){success+=' ATTENZIONE: prenotazione registrata ma conferma PDF non archiviata ('+String(e.message||e)+'). NON duplicare la prenotazione.';}
- } else if(type==='agenda'){
-  const result=await mutate('agenda','POST',{titolo:s('titolo'),data_scadenza:s('data_scadenza'),
-   priorita:s('priorita'),descrizione:s('descrizione'),tipo:'operativa',stato:'aperta'});
-  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Salvataggio scadenza non confermato.');
- } else if(type==='trip'){
+  } else if(type==='trip'){
   const result=await mutate('trips','POST',{titolo:s('titolo'),destinazione:s('destinazione'),
    data_partenza:s('data_partenza'),prezzo:numeric('prezzo'),posti_totali:numeric('posti_totali',{min:1,max:100}),
    minimo_partecipanti:numeric('minimo_partecipanti',{min:1,max:100}),pubblicato:'NO',stato:'PROGRAMMATO'});
@@ -1873,7 +1898,7 @@ function startListeners(){
  });
  $('main').addEventListener('input',e=>{
   if(e.target.id==='filter-search'){state.search=e.target.value;const focus=e.target;const start=focus.selectionStart;const end=focus.selectionEnd; // no network request for local filtering
-   const renderers={trips:drawTrips,bookings:drawBookings,movements:drawMovements,control:drawControl,customers:drawCustomers,rentals:drawRentals,agenda:drawAgenda};
+   const renderers={trips:drawTrips,bookings:drawBookings,movements:drawMovements,control:drawControl,customers:drawCustomers,rentals:drawRentals,agenda:drawAgenda,deadlines:drawDeadlines};
    if(renderers[page]){$('main').innerHTML=renderers[page]();const replacement=$('filter-search');replacement?.focus();replacement?.setSelectionRange(start,end);}
   }
  });
@@ -1881,6 +1906,7 @@ function startListeners(){
   if(e.target.id==='filter-trip'){state.trip=e.target.value;state.stop='';const renderers={bookings:drawBookings,control:drawControl};if(renderers[page])$('main').innerHTML=renderers[page]();}
   if(e.target.id==='filter-stop'){state.stop=e.target.value;$('main').innerHTML=drawControl();}
   if(e.target.id==='filter-bookings-state'){state.bookingsState=e.target.value;$('main').innerHTML=drawBookings();}
+  if(e.target.id==='filter-deadline-scope'){state.deadlineScope=e.target.value;$('main').innerHTML=drawDeadlines();}
  });
  $('modal-content').addEventListener('change',e=>{
   if(creditWizard&&e.target.id==='credit-target'){
