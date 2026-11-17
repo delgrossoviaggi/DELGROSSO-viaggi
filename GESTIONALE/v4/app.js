@@ -267,7 +267,8 @@ function reviewTransferForSubmission(form){
  if(!b||!source||!target)throw new Error('Verificare prenotazione e autobus di destinazione.');
  if(b.checkin_effettuato)throw new Error('Check-in già registrato; non si può spostare la prenotazione.');
  if(mode==='bus'){
-  const result=reviewBusTransfer({booking:b,origin:source,target,bookings:get('bookings'),seatRows:get('seats'),chosen:String(data.get('targetSeats')||'')});
+  const result=reviewBusTransfer({booking:b,origin:source,target,bookings:get('bookings'),seatRows:get('seats'),chosen:String(data.get('targetSeats')||''),
+   layout:get('tripLayouts').find(l=>l.viaggio_id===target.id)?.configurazione||null});
   if(result.sourceTripId===result.targetTripId&&result.oldSeats.join(',')===result.seats.join(','))throw new Error('I posti selezionati coincidono con quelli già assegnati.');
   return {kind:'bus',id:b.id,sourceTripId:source.id,targetTripId:target.id,seats:result.seats,
    oldSeats:result.oldSeats,paid:result.paid,total:result.total,bookingUpdatedAt:b.updated_at,persons:Number(b.posti)};
@@ -568,7 +569,7 @@ function bookingDetail(id){
  ].map(([k,v])=>'<div><small>'+esc(k)+'</small><strong>'+esc(v||'—')+'</strong></div>').join('')+
  '</div><h3 class="section-title">Pagamenti collegati</h3>'+
  table(['Data','Tipo','Importo','N. ricevuta'],pays.map(p=>[dateIT(p.data_pagamento),badge(p.tipo),money(p.importo),esc(p.receipt_number||'—')]))+
- '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
+ '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica nominativo e fermata','edit-booking-info','data-id="'+esc(b.id)+'"')+writeButton('Modifica posti e quota','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
  '<button class="secondary" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Cambia posto / BUS / data</button>'+
  writeButton('Aggiorna check-in','checkin-booking','data-id="'+esc(b.id)+'"')+'</div>'+
  '<p class="help">Le quote pagate non devono essere cancellate senza procedura di rimborso. Le prenotazioni esistenti non vengono modificate in questa fase.</p>');
@@ -632,7 +633,8 @@ async function handleAction(action,id,button){
    if(plan.kind==='bus'){
     const review=reviewBusTransfer({
      booking,origin:tripBy(plan.sourceTripId),target:dest,
-     bookings:freshBookings,seatRows:freshSeats,chosen:plan.seats
+     bookings:freshBookings,seatRows:freshSeats,chosen:plan.seats,
+     layout:get('tripLayouts').find(l=>l.viaggio_id===dest.id)?.configurazione||null
     });
     if(review.seats.join(',')!==plan.seats.join(','))
      throw new Error('La selezione dei posti è cambiata: aggiorna l’anteprima.');
@@ -807,6 +809,23 @@ async function handleAction(action,id,button){
  }
  if(!WRITES_ENABLED){
   return showMessage('Operazione bloccata: prima occorrono backup completo e restore di prova. Nessun dato è stato modificato.',true);
+ }
+
+
+ if(action==='edit-booking-info'){
+  const b=get('bookings').find(x=>x.id===id);
+  if(!b)throw new Error('Prenotazione non trovata.');
+  if(!bookingActive(b))throw new Error('Non si possono modificare le prenotazioni annullate.');
+  return displayModal('Modifica dati partecipanti · '+bookingName(b),
+   '<p class="help">Questa modifica aggiorna i dati della prenotazione senza cambiare i sedili, la data, la quota o i pagamenti.</p>'+
+   '<form data-save="booking-info" class="form-grid"><input name="bookingId" type="hidden" value="'+esc(b.id)+'">'+
+   '<input name="expectedUpdatedAt" type="hidden" value="'+esc(b.updated_at||'')+'">'+
+   '<label class="span-2">Referente / nominativo<input name="cliente" maxlength="180" required value="'+esc(b.cliente||b.cliente_nome||'')+'"></label>'+
+   '<label>Telefono<input name="telefono" type="tel" maxlength="60" value="'+esc(b.telefono||'')+'"></label>'+
+   '<label>Email<input name="email" type="email" maxlength="180" value="'+esc(b.email||'')+'"></label>'+
+   '<label class="span-2">Fermata di salita<input name="fermata" maxlength="140" required value="'+esc(b.fermata_partenza||'')+'"></label>'+
+   '<label class="span-2">Note<textarea name="note" maxlength="2000">'+esc(b.note||'')+'</textarea></label>'+
+   '<button type="submit" class="primary span-2">Salva dati partecipanti</button></form>');
  }
 
  if(action==='create-booking'||action==='edit-booking'){
@@ -1048,6 +1067,18 @@ async function handleSubmit(form){
    const receipt=await edgeAction('professional-receipts',{action:'generate',kind:'rental',id:saved.payment_id,reissue:false});
    success+=' Ricevuta professionale archiviata'+(receipt.receiptNumber?' · '+receipt.receiptNumber:'')+'.';
   }catch(e){success+=' ATTENZIONE: pagamento registrato ma ricevuta non archiviata ('+String(e.message||e)+'). NON ripetere l incasso.';}
+
+ } else if(type==='booking-info'){
+  const bookingId=s('bookingId'),before=get('bookings').find(b=>b.id===bookingId);
+  if(!before||!bookingActive(before))throw new Error('Prenotazione non valida.');
+  if(!s('cliente')||!s('fermata'))throw new Error('Nominativo e fermata obbligatori.');
+  if(!s('expectedUpdatedAt'))throw new Error('Versione prenotazione non disponibile: aggiorna la pagina.');
+  const updated=await mutate('bookings','PATCH',{
+   cliente:s('cliente'),telefono:s('telefono'),email:s('email'),fermata_partenza:s('fermata'),note:s('note')
+  },bookingId,{expectedUpdatedAt:s('expectedUpdatedAt')});
+  if(!Array.isArray(updated)||updated.length!==1||updated[0].id!==bookingId)
+   throw new Error('Un altro operatore ha aggiornato la prenotazione: nessun dato sovrascritto. Riapri la scheda aggiornata.');
+  success='Dati partecipanti aggiornati. Posti, incassi e date invariati.';
  } else if(type==='booking'){
   const prior=s('bookingId')?get('bookings').find(x=>x.id===s('bookingId')):null;
   const t=tripBy(s('viaggio'));
