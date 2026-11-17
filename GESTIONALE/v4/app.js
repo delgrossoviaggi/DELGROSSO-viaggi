@@ -4,16 +4,17 @@ import {
  currentUser,clearCache,signedReceiptPath,edgeAction,normalizeSignedStorageUrl
 } from './core.js';
 import * as Pdf from './pdf-reports.js';
+import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewBusTransfer} from './booking-operations.js';
 
 const $=id=>document.getElementById(id);
 const NAV={
- dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',
+ dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',movements:'Spostamenti posti / BUS BIS / date',
  control:'Control Room',layouts:'Piantine autobus',cash:'Contabilità e casse',
  economy:'Economia e costi',customers:'Clienti',rentals:'Noleggi bus',quotes:'Preventivi',invoices:'Fatturazione / bozze',waitlist:'Lista d’attesa',whatsapp:'WhatsApp Business',reports:'Centro PDF e report',
  agenda:'Agenda e scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
-let operator=null, page='dashboard', ticket=0, localEditor=null;
+let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false;
 const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{}};
 const money=eur;
 const safeText=s=>esc(s||'—');
@@ -61,6 +62,7 @@ async function navigate(next,force=false){
  dashboard:['trips','bookings','payments','agenda','notifications'],
  trips:['trips','bookings','seats','tripLayouts'],
  bookings:['trips','bookings','payments','seats','tripLayouts'],
+  movements:['trips','bookings','payments','seats','tripLayouts'],
  control:['trips','bookings','seats','tripLayouts','stops'],
  layouts:['trips','fleet','layoutLibrary','tripLayouts','busLayouts'],
  cash:['cash','operators','payments','rentalPayments','rentals','transfers','trips','bookings'],
@@ -79,7 +81,7 @@ async function navigate(next,force=false){
  try {
   await fetchResources(needs[next],force);
   if(mine!==ticket)return;
-  const views={dashboard:drawDashboard,trips:drawTrips,bookings:drawBookings,
+  const views={dashboard:drawDashboard,trips:drawTrips,bookings:drawBookings,movements:drawMovements,
    control:drawControl,layouts:drawLayouts,cash:drawCash,economy:drawEconomy,
    customers:drawCustomers,rentals:drawRentals,quotes:drawQuotes,invoices:drawInvoices,waitlist:drawWaitlist,whatsapp:drawWhatsApp,reports:drawReports,agenda:drawAgenda,
    fleet:drawFleet,documents:drawDocuments,notifications:drawNotifications,diagnostics:drawDiagnostics};
@@ -145,11 +147,11 @@ function drawBookings(){
    esc(b.fermata_partenza||'—'),
    money(b.totale)+'<small class="row-sub">Registrati: '+money(paid)+'</small>',
    badge(b.stato),b.checkin_effettuato?badge('Presente'):badge('Da verificare'),
-   safeLink('Apri',b.id)
+   safeLink('Apri',b.id)+' <button class="inline-link" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Posti / BUS / data</button>'
   ];
  });
  const sum=data.filter(bookingActive).reduce((n,b)=>n+num(b.posti),0);
- return intro('Prenotazioni','Anagrafica, posti, fermate, pagamenti e check-in.','<button class="secondary" data-action="pdf-all-roster">↓ PDF tutti i viaggi</button><button class="secondary" data-action="export-bookings">↓ CSV</button>'+writeButton('+ Prenotazione','create-booking'))+
+ return intro('Prenotazioni','Anagrafica, posti, fermate, pagamenti e check-in.','<button class="secondary" data-action="pdf-all-roster">↓ PDF tutti i viaggi</button><button class="secondary" data-action="export-bookings">↓ CSV</button><button class="secondary" data-page="movements">⇄ Spostamenti</button>'+writeButton('+ Prenotazione','create-booking'))+
  '<div class="filters">'+selectTrip(trips,state.trip)+searchField()+'<select id="filter-bookings-state"><option value="active" '+(state.bookingsState==='active'?'selected':'')+'>Attive</option><option value="all" '+(state.bookingsState==='all'?'selected':'')+'>Tutte</option><option value="cancelled" '+(state.bookingsState==='cancelled'?'selected':'')+'>Annullate</option></select></div>'+
  '<div class="cards">'+card('Prenotazioni trovate',String(data.length),'Con filtri selezionati')+card('Persone',String(sum),'Solo prenotazioni attive')+card('Pagamenti',String(pay.length),'Movimenti nel database')+card('Archivio originale',String(get('bookings').length),'Nessun dato sostitutivo')+'</div>'+
  panel('Elenco prenotazioni','Premi sul nominativo per i dettagli',table(['Cliente','Viaggio','Posti','Fermata','Importi','Stato','Check-in','Scheda'],rows));
@@ -421,7 +423,7 @@ function bookingDetail(id){
  '</div><h3 class="section-title">Pagamenti collegati</h3>'+
  table(['Data','Tipo','Importo','N. ricevuta'],pays.map(p=>[dateIT(p.data_pagamento),badge(p.tipo),money(p.importo),esc(p.receipt_number||'—')]))+
  '<div class="action-row"><button class="secondary" data-action="pdf-booking" data-id="'+esc(b.id)+'">↓ Conferma PDF</button>'+(b.confirmation_storage_path?'<button class="secondary" data-action="open-booking-confirmation" data-id="'+esc(b.id)+'">Apri conferma originale</button>':'')+writeButton('Modifica','edit-booking','data-id="'+esc(b.id)+'"')+writeButton('Annulla','cancel-booking','data-id="'+esc(b.id)+'"')+writeButton('Registra pagamento','new-payment','data-id="'+esc(b.id)+'"')+
- writeButton('Sposta su altro viaggio','move-booking','data-id="'+esc(b.id)+'"')+
+ '<button class="secondary" data-action="transfer-booking" data-id="'+esc(b.id)+'">⇄ Cambia posto / BUS / data</button>'+
  writeButton('Aggiorna check-in','checkin-booking','data-id="'+esc(b.id)+'"')+'</div>'+
  '<p class="help">Le quote pagate non devono essere cancellate senza procedura di rimborso. Le prenotazioni esistenti non vengono modificate in questa fase.</p>');
 }
