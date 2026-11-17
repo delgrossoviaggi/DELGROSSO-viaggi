@@ -5,7 +5,7 @@ Data tecnica: 17 novembre 2026.
 
 > ATTENZIONE: questa versione è una **build V4 di collaudo read-only**. Tutte le chiamate di modifica sono bloccate in `core.js` mediante `WRITES_ENABLED=false`. I flussi di scrittura sono implementati ma **non certificati su DB di staging né autorizzati in produzione**. NON sostituire la versione usata dall'azienda.
 
-## 20 pagine implementate
+## 22 pagine V4 implementate in collaudo
 
 | Pagina | Tabelle / viste principali | Consultazione | Operazioni di modifica |
 |---|---|---|---|
@@ -22,7 +22,8 @@ Data tecnica: 17 novembre 2026.
 | Preventivi | preventivi | sì, scheda PDF | nuovo preventivo e PDF professionale predisposti, bloccati |
 | Fatturazione / bozze | dg3_fatture_bozze | sì | **nessuna emissione FE/SDI**, solo lettura PDF bozza |
 | Lista d'attesa | lista_attesa | sì | inserimento senza occupazione sedili predisposto, bloccato |
-| Agenda e scadenze | scadenze_gestionale | sì, CSV e PDF | creazione/aggiornamento predisposti, bloccati |
+| Agenda completa | scadenze_gestionale (tipi Appuntamento, Impegno, Nota, Promemoria) | sì, calendario mensile, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
+| Scadenze | scadenze_gestionale (Scadenza, operativa, Estintori, ecc.) | sì, filtri dedicate per data/stato, CSV e PDF | crea/modifica/completa/cestino/ripristina via Auth + RLS, in collaudo |
 | Flotta GT | flotta | sì, senza pubblicizzare van | modifiche non abilitate |
 | Documenti | archivio_documenti, dg_receipt_archive, Supabase Storage | sì, indici e accesso JWT agli originali | no archiviazioni automatiche in safe mode |
 | Notifiche | notifiche | sì | nessun polling aggressivo |
