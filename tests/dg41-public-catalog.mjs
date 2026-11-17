@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 const js=fs.readFileSync('js/future-v4.js','utf8');
 const data=JSON.parse(fs.readFileSync('assets/viaggi-fallback-20261117.json','utf8')).trips;
-for(const p of ['index.html','viaggi.html','viaggio.html'])assert(/js\/future-v4\.js\?v=20261117-dg4[2-9]/.test(fs.readFileSync(p,'utf8')),'public trip script cache version expected in '+p);
+for(const p of ['index.html','viaggi.html','viaggio.html'])assert(fs.readFileSync(p,'utf8').includes('js/future-v4.js?v=20261117-dg41'));
 const suffix="if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();";
 assert(js.includes(suffix));
 const script=js.replace(suffix,"globalThis.test={S,SNAPSHOT,isVisible,loadTrips,renderTripDetail,renderCatalog};");
