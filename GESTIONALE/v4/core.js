@@ -265,7 +265,7 @@ export async function mutate(resource,method,payload,id=null,{expectedUpdatedAt=
   bookings:{PATCH:['cliente','telefono','email','fermata_partenza','note','checkin_effettuato','checkin_stato','checked_in_at','checkin_operatore']},
   quotes:{POST:['nome','cognome','telefono','email','origine','stato','destinazione','data_partenza','numero_passeggeri','passeggeri','importo','importo_preventivo','servizio','luogo_partenza'],PATCH:['stato','importo_preventivo','note_interne']},
   waitlist:{POST:['viaggio_id','nome','cognome','telefono','email','posti','stato','fermata_partenza','priorita','note'],PATCH:['stato','note']},
-  layoutLibrary:{POST:['nome','configurazione','attivo','created_by'],PATCH:['nome','configurazione','attivo','updated_by']}
+  layoutLibrary:{POST:['nome','configurazione','attivo','created_by','updated_by'],PATCH:['nome','configurazione','attivo','updated_by','updated_at']}
  };
  const ok=permitted[resource]?.[method];
  if(!Array.isArray(ok)||!payload||typeof payload!=='object'||
