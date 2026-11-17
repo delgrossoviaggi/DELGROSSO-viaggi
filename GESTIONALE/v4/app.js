@@ -565,6 +565,140 @@ async function handleAction(action,id,button){
  if(!WRITES_ENABLED){
   return showMessage('Operazione bloccata: prima occorrono backup completo e restore di prova. Nessun dato è stato modificato.',true);
  }
+
+ if(action==='create-booking'||action==='edit-booking'){
+  const prior=action==='edit-booking'?get('bookings').find(b=>b.id===id):null;
+  const trips=get('trips').filter(t=>!t.archiviato_at);
+  const selected=prior?.viaggio_id||state.trip||trips[0]?.id||'';
+  const options=trips.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===selected?'selected':'')+'>'+esc(tripName(t)+' · '+dateIT(t.data_partenza)+' · '+num(t.posti_totali)+' posti')+'</option>').join('');
+  const occupied=trips.map(t=>{
+    const reserved=occupancy(t,get('bookings'),get('seats'));
+    return t.id===selected?reserved.map.size:0;
+  });
+  return displayModal(prior?'Modifica prenotazione':'Nuova prenotazione con posti',
+   '<form data-save="booking" class="form-grid"><input type="hidden" name="bookingId" value="'+esc(prior?.id||'')+'">'+
+   '<label class="span-2">Viaggio<select name="viaggio" required>'+options+'</select></label>'+
+   '<p class="help span-2">Le selezioni sono validate dal server e rispettano i posti già occupati. Indicare la stessa quantità di numeri e passeggeri.</p>'+
+   '<label class="span-2">Cliente / referente<input name="cliente" maxlength="180" required value="'+esc(prior?.cliente_nome||prior?.cliente||'')+'"></label>'+
+   '<label>Telefono<input name="telefono" type="tel" maxlength="60" value="'+esc(prior?.telefono||'')+'"></label>'+
+   '<label>Email<input name="email" type="email" maxlength="180" value="'+esc(prior?.email||'')+'"></label>'+
+   '<label>Fermata di partenza<input name="fermata" maxlength="140" required value="'+esc(prior?.fermata_partenza||'')+'"></label>'+
+   '<label>Numero passeggeri<input name="posti" type="number" min="1" max="99" required value="'+num(prior?.posti||1)+'"></label>'+
+   '<label>Numeri sedili (es. 1, 2)<input name="sedili" required maxlength="350" value="'+esc(prior?.posti_selezionati||'')+'"></label>'+
+   '<label>Importo totale €<input name="totale" type="number" min="0" step=".01" required value="'+num(prior?.totale||0)+'"></label>'+
+   '<label>Stato<select name="stato"><option value="In attesa acconto">In attesa acconto</option><option value="Acconto Ricevuto" '+(/acconto ricevuto/i.test(prior?.stato||'')?'selected':'')+'>Acconto Ricevuto</option><option value="Saldo Ricevuto" '+(/saldo ricevuto/i.test(prior?.stato||'')?'selected':'')+'>Saldo Ricevuto</option></select></label>'+
+   '<label class="span-2">Note<textarea name="note">'+esc(prior?.note||'')+'</textarea></label>'+
+   '<button type="submit" class="primary span-2">Verifica disponibilità e salva in Supabase</button></form>');
+ }
+ if(action==='create-customer'){
+  return displayModal('Nuova scheda cliente','<form data-save="customer" class="form-grid">'+
+   '<label>Nome<input name="nome" required maxlength="100"></label>'+
+   '<label>Cognome<input name="cognome" required maxlength="100"></label>'+
+   '<label>Telefono<input name="telefono" type="tel" maxlength="60"></label>'+
+   '<label>Email<input name="email" type="email" maxlength="180"></label>'+
+   '<label>Città<input name="citta" maxlength="90"></label>'+
+   '<button type="submit" class="primary span-2">Crea anagrafica Supabase</button></form>');
+ }
+ if(action==='create-rental'){
+  return displayModal('Nuovo noleggio autobus','<form data-save="rental" class="form-grid">'+
+   '<label>Referente<input name="referente" required maxlength="120"></label>'+
+   '<label>Azienda<input name="azienda" maxlength="150"></label>'+
+   '<label>Telefono<input name="telefono" type="tel" maxlength="60"></label>'+
+   '<label>Email<input name="email" type="email" maxlength="150"></label>'+
+   '<label>Partenza da<input name="partenza" required maxlength="150"></label>'+
+   '<label>Destinazione<input name="destinazione" required maxlength="150"></label>'+
+   '<label>Data partenza<input name="data" type="date" required></label>'+
+   '<label>Ora partenza<input name="ora" type="time"></label>'+
+   '<label>Passeggeri<input name="pax" min="1" max="100" type="number" required></label>'+
+   '<label>Prezzo concordato €<input name="prezzo" type="number" min="0" step=".01" required></label>'+
+   '<button type="submit" class="primary span-2">Registra noleggio</button></form>');
+ }
+ if(action==='create-quote'){
+  return displayModal('Nuovo preventivo','<form data-save="quote" class="form-grid">'+
+   '<label>Nome richiedente<input name="nome" required maxlength="100"></label>'+
+   '<label>Cognome<input name="cognome" maxlength="100"></label>'+
+   '<label>Telefono<input name="telefono" required type="tel" maxlength="60"></label>'+
+   '<label>Email<input name="email" type="email" maxlength="180"></label>'+
+   '<label>Partenza da<input name="partenza" required maxlength="150"></label>'+
+   '<label>Destinazione<input name="destinazione" required maxlength="150"></label>'+
+   '<label>Data viaggio<input name="data" type="date" required></label>'+
+   '<label>Passeggeri<input name="pax" type="number" min="1" max="100" value="40" required></label>'+
+   '<label>Quota preventivata €<input name="importo" type="number" min="0" step=".01"></label>'+
+   '<label>Tipo servizio<select name="servizio"><option>Noleggio GT</option><option>Viaggio organizzato</option><option>Limousine Bus</option></select></label>'+
+   '<button type="submit" class="primary span-2">Registra preventivo</button></form>');
+ }
+ if(action==='create-waitlist'){
+  const options=get('trips').filter(t=>!t.archiviato_at).map(t=>'<option value="'+esc(t.id)+'">'+esc(tripName(t)+' · '+dateIT(t.data_partenza))+'</option>').join('');
+  return displayModal('Nuova richiesta in lista d’attesa','<form data-save="waitlist" class="form-grid">'+
+   '<label class="span-2">Viaggio<select name="viaggio" required>'+options+'</select></label>'+
+   '<label>Nome<input name="nome" required maxlength="100"></label>'+
+   '<label>Cognome<input name="cognome" maxlength="100"></label>'+
+   '<label>Telefono<input name="telefono" required type="tel" maxlength="60"></label>'+
+   '<label>Email<input name="email" type="email"></label>'+
+   '<label>Passeggeri<input name="posti" type="number" min="1" max="99" required value="1"></label>'+
+   '<label>Fermata<input name="fermata" maxlength="120"></label>'+
+   '<label class="span-2">Note<textarea name="note"></textarea></label>'+
+   '<button type="submit" class="primary span-2">Salva richiesta senza assegnare posti</button></form>');
+ }
+ if(action==='save-layout-draft'){
+  if(!localEditor?.snapshot)throw new Error('Bozza piantina non disponibile.');
+  const cfg=localEditor.snapshot();
+  const input=document.getElementById('dg4-draft-name');
+  const name=String(input?.value||cfg.name||'').trim();
+  if(!name||name.length>100)throw new Error('Nome piantina obbligatorio.');
+  cfg.name=name;
+  const validated=await rpcRead('dg28_validate_layout_v1',{p_config:cfg,p_capacity:num(cfg.posti_totali)});
+  if(!validated?.valid)throw new Error('Numerazione sedili non valida.');
+  const created=await mutate('layoutLibrary','POST',{nome:name,configurazione:cfg,attivo:true,created_by:currentUser()});
+  if(!Array.isArray(created)||!created[0]?.id)throw new Error('Salvataggio non confermato, verificare la libreria prima di riprovare.');
+  closeModal();showMessage('Bozza piantina salvata: '+name+'. Per applicarla al viaggio usare la funzione dedicata.');
+  return navigate('layouts',true);
+ }
+ if(action==='publish-trip-layout'){
+  const layout=get('layoutLibrary').find(l=>l.id===id);
+  if(!layout)throw new Error('Piantina non trovata.');
+  const options=get('trips').filter(t=>!t.archiviato_at&&t.autobus_id).map(t=>'<option value="'+esc(t.id)+'">'+esc(tripName(t)+' · '+dateIT(t.data_partenza)+' · '+num(t.posti_totali)+' posti')+'</option>').join('');
+  return displayModal('Pubblica piantina ufficiale: '+layout.nome,
+   '<div class="alert">Attenzione: la pubblicazione aggiornerà la piantina usata anche dal sito delle prenotazioni. Verificare posti già prenotati e capienza prima di confermare.</div>'+
+   '<form data-save="publish-layout" class="form-grid"><input type="hidden" name="layout" value="'+esc(id)+'">'+
+   '<label class="span-2">Viaggio da aggiornare<select name="viaggio" required>'+options+'</select></label>'+
+   '<button type="submit" class="primary span-2">Verifica e pubblica in Supabase</button></form>');
+ }
+ if(action==='cancel-booking'){
+  const b=get('bookings').find(x=>x.id===id);
+  if(!b)throw new Error('Prenotazione non disponibile.');
+  const paid=get('payments').filter(p=>p.prenotazione_id===id).reduce((n,p)=>n+num(p.importo),0);
+  if(paid>0 || num(b.pagato)>0){
+   const amount=Math.max(paid,num(b.pagato));
+   if(!confirm('ATTENZIONE: prenotazione con pagamenti di '+money(amount)+'. La procedura libera i sedili ma conserva storico e ricevute. È necessario gestire il rimborso separatamente. Proseguire?'))return;
+  } else if(!confirm('La prenotazione non risulta pagata. Eliminare la prenotazione e liberare i posti?'))return;
+  await writeRpc('dg_delete_booking',{p_booking_id:id});
+  closeModal();showMessage('Prenotazione annullata/eliminata dal server. In caso di pagamenti, verificare l’importo da rimborsare.');
+  return navigate('bookings',true);
+ }
+ if(action==='archive-trip'){
+  const t=tripBy(id);
+  if(!t)throw new Error('Viaggio non trovato.');
+  const reserved=get('bookings').filter(b=>b.viaggio_id===id && bookingActive(b));
+  if(reserved.length)throw new Error('Viaggio con prenotazioni attive: gestire prima i clienti, gli incassi e gli eventuali rimborsi.');
+  if(!confirm('Archiviare questo viaggio e toglierlo dalla vendita sul sito? Lo storico rimarrà disponibile.'))return;
+  await mutate('trips','PATCH',{archiviato_at:new Date().toISOString(),pubblicato:'NO'},id);
+  closeModal();return navigate('trips',true);
+ }
+ if(action==='edit-trip'){
+  const t=tripBy(id);if(!t)throw new Error('Viaggio non trovato.');
+  return displayModal('Modifica viaggio '+tripName(t),'<form data-save="trip-edit" class="form-grid">'+
+   '<input type="hidden" name="tripId" value="'+esc(t.id)+'">'+
+   '<label>Nome viaggio<input name="titolo" required value="'+esc(t.titolo)+'"></label>'+
+   '<label>Destinazione<input name="destinazione" required value="'+esc(t.destinazione)+'"></label>'+
+   '<label>Data partenza<input name="data_partenza" type="date" required value="'+esc(t.data_partenza)+'"></label>'+
+   '<label>Quota €<input name="prezzo" type="number" min="0" step=".01" required value="'+num(t.prezzo)+'"></label>'+
+   '<label>Capienza posti<input name="posti_totali" type="number" min="1" max="100" required value="'+num(t.posti_totali)+'"></label>'+
+   '<label>Minimo partecipanti<input name="minimo_partecipanti" type="number" min="1" max="100" required value="'+num(t.minimo_partecipanti||40)+'"></label>'+
+   '<label>Pubblicazione<select name="pubblicato"><option value="NO" '+(t.pubblicato!=='SI'?'selected':'')+'>Non pubblicato</option><option value="SI" '+(t.pubblicato==='SI'?'selected':'')+'>Pubblicato</option></select></label>'+
+   '<button type="submit" class="primary span-2">Salva modifiche</button></form>');
+ }
+
  if(action==='new-payment'){
   const opts=get('bookings').filter(bookingActive).map(b=>'<option value="'+esc(b.id)+'" '+(id===b.id?'selected':'')+'>'+esc(bookingName(b)+' · '+tripName(tripBy(b.viaggio_id)))+'</option>').join('');
   return displayModal('Registra pagamento','<form data-save="payment" class="form-grid"><label class="span-2">Prenotazione<select name="booking" required>'+opts+'</select></label><label>Tipo<select name="tipo"><option>Acconto</option><option>Saldo</option></select></label><label>Importo €<input name="importo" type="number" min=".01" step=".01" required /></label><label>Metodo<select name="metodo"><option>Contanti</option><option>Bonifico</option><option>POS</option></select></label><label>Data<input name="data" type="date" value="'+todayItaly()+'" required /></label><label class="span-2">Note<textarea name="note"></textarea></label><button class="primary span-2" type="submit">Registra in Supabase</button></form>');
