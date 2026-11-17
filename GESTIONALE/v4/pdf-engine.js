@@ -100,6 +100,73 @@ function makeTripPdf(g){if(!g||!g.trip)throw Error('Seleziona un viaggio valido'
  return doc.finish();
 }
 function saveTripPdf(g){const bytes=makeTripPdf(g),blob=new Blob([bytes],{type:'application/pdf'}),href=URL.createObjectURL(blob);const a=document.createElement('a');const safe=text(g.trip.titolo||'viaggio').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,42);a.download='DELGROSSO_QUOTE_'+date(g.trip.data_partenza).replaceAll('/','-')+'_'+safe+'.pdf';a.href=href;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),45000);return a.download}
+
+/**
+ * One consolidated PDF for a verified reference and one logical trip/date.
+ * Distinct boarding stops retain their own booking lines and sub-totals.
+ * All money quantities are supplied as integer cents to avoid float drift.
+ * The document is generated locally; the individual receipt PDFs are NOT replaced.
+ */
+function makeCombinedBookingPdf(summary){
+ if(!summary||!Array.isArray(summary.sections)||!summary.sections.length||
+   !Number.isInteger(summary.totalCents)||!Number.isInteger(summary.paidCents))
+   throw Error('Riepilogo cumulativo non valido.');
+ const doc=new Sheet('CONFERMA PRENOTAZIONE');doc.y=139;
+ doc.label('CONFERMA RIEPILOGATIVA DEL VIAGGIO',42,125,12,true);
+ doc.paragraph('DELGROSSO VIAGGI & LIMOUSINE BUS - riepilogo cumulativo per referente');
+ doc.heading('REFERENTE E PARTENZA');
+ doc.paragraph('Nominativo: '+text(summary.reference));
+ doc.paragraph('Telefono: '+text(summary.phone));
+ doc.paragraph('Viaggio: '+text(summary.title));
+ doc.paragraph('Data del viaggio: '+date(summary.date));
+ doc.paragraph('Prenotazioni associate: '+summary.bookingCount+'  |  Persone totali: '+summary.passengers);
+ doc.paragraph('Le prenotazioni sono organizzate per fermata di salita; ogni codice e ogni sedile restano distinguibili.');
+ let checkPax=0,checkTotal=0,checkPaid=0,checkBookings=0;
+ for(const section of summary.sections){
+  doc.ensure(95);
+  doc.heading('PARTENZA: '+text(section.stop).slice(0,52));
+  doc.paragraph('Fermata di partenza: '+text(section.stop));
+  for(const item of section.bookings||[]){
+   checkBookings++;
+   checkPax+=Number(item.passengers)||0;
+   checkTotal+=Number(item.totalCents)||0;
+   checkPaid+=Number(item.paidCents)||0;
+   doc.ensure(75);
+   doc.paragraph('Prenotazione: '+text(item.code)+'  |  '+text(item.bus)+'  |  Persone: '+Number(item.passengers));
+   doc.paragraph('Sedili assegnati: '+text(item.seats));
+   doc.paragraph('Totale di questa prenotazione: '+euro(item.totalCents)+
+    '  |  Versato netto: '+euro(item.paidCents)+
+    '  |  Da saldare: '+euro(Math.max(0,item.totalCents-item.paidCents)));
+   doc.rule(42,doc.y+4,W-84);
+   doc.y+=14;
+  }
+  doc.stat('Totale partenza',section.totalCents);
+  doc.stat('Versato per questa partenza',section.paidCents);
+  doc.stat('Da saldare per partenza',Math.max(0,section.totalCents-section.paidCents));
+  doc.paragraph('Totale persone dalla fermata: '+section.passengers);
+ }
+ if(checkPax!==summary.passengers||checkBookings!==summary.bookingCount||
+   checkTotal!==summary.totalCents||checkPaid!==summary.paidCents)
+  throw Error('I totali del PDF cumulativo non coincidono con il dettaglio delle prenotazioni.');
+ doc.heading('TOTALE COMPLESSIVO DI TUTTE LE PARTENZE');
+ doc.paragraph('Prenotazioni: '+summary.bookingCount+'  |  Partecipanti: '+summary.passengers+
+  '  |  Fermate: '+summary.sections.length);
+ doc.stat('TOTALE DA PAGARE',summary.totalCents);
+ doc.stat('TOTALE GIA VERSATO NETTO',summary.paidCents);
+ doc.stat('SALDO COMPLESSIVO RESTANTE',summary.dueCents);
+ if(summary.surplusCents)doc.stat('ECCEDENZA DA VERIFICARE',summary.surplusCents);
+ doc.paragraph('I pagamenti riportati sono netti degli eventuali rimborsi registrati; non vengono creati nuovi incassi.');
+ if(summary.warnings?.length){
+  doc.heading('DIFFERENZE DA VERIFICARE');
+  for(const warn of summary.warnings)doc.paragraph('ATTENZIONE: '+text(warn));
+ }
+ doc.heading('NOTE SULLA CONFERMA');
+ doc.paragraph('Questa conferma cumulativa riunisce prenotazioni già presenti e non modifica le ricevute, i relativi importi o le assegnazioni posti nel sistema aziendale.');
+ doc.paragraph('I documenti fiscali e le ricevute dei singoli incassi rimangono separati e consultabili nel registro pagamenti.');
+ doc.paragraph('Generato il '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' · DELGROSSO VIAGGI & LIMOUSINE BUS');
+ return doc.finish();
+}
+
 function makeBookingPdf(b,t,movements=[]){
  if(!b?.id||!t?.id)throw Error('Prenotazione o viaggio mancanti');
  const doc=new Sheet('CONFERMA PRENOTAZIONE');doc.y=140;
@@ -585,7 +652,7 @@ function makeInvoiceDraftPdf(i){
 }
 
 root.DG4Pdf={makeReceiptPdf,makeAgendaPdf,makeCustomerLedgerPdf,makeRentalSummaryPdf,makeCashSummaryPdf,
- makeTripPdf,makeBookingPdf,makeOperatorPdf,makeRosterPdf,makeOperationalPdf,makeLayoutPdf,
+ makeTripPdf,makeBookingPdf,makeCombinedBookingPdf,makeOperatorPdf,makeRosterPdf,makeOperationalPdf,makeLayoutPdf,
  makeRegisterPdf,makeEconomyPdf,makeFleetPdf,makeCustomerListPdf,makeRentalsPdf,makeDocumentIndexPdf,makeQuotePdf,makeInvoiceDraftPdf,
  makeV4LayoutPdf:(config)=>makeLayoutPdf(toV4LayoutPdf(config)),toV4LayoutPdf};
 
