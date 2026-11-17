@@ -125,3 +125,25 @@ export function pdfRental(r,payments=[]){
  const related=payments.filter(p=>p.noleggio_id===r.id);
  return savePdf(pdfEngine().makeRentalSummaryPdf(r,related),safePdfFilename('NOLEGGIO',r.id.slice(0,8)));
 }
+
+export function pdfEconomy(movements,profit){
+ return savePdf(pdfEngine().makeEconomyPdf(movements,profit),safePdfFilename('ECONOMIA',new Date().toISOString().slice(0,10)));
+}
+export function pdfFleet(vehicles){
+ return savePdf(pdfEngine().makeFleetPdf(vehicles),safePdfFilename('FLOTTA','BUS_GT'));
+}
+export function pdfCustomers(customers){
+ return savePdf(pdfEngine().makeCustomerListPdf(customers),safePdfFilename('CLIENTI',new Date().toISOString().slice(0,10)));
+}
+export function pdfRentals(rentals){
+ return savePdf(pdfEngine().makeRentalsPdf(rentals),safePdfFilename('NOLEGGI',new Date().toISOString().slice(0,10)));
+}
+export function pdfDocuments(documents){
+ return savePdf(pdfEngine().makeDocumentIndexPdf(documents),safePdfFilename('ARCHIVIO',new Date().toISOString().slice(0,10)));
+}
+export function pdfQuote(q){
+ return savePdf(pdfEngine().makeQuotePdf(q),safePdfFilename('PREVENTIVO',q.numero_preventivo||q.id.slice(0,8)));
+}
+export function pdfInvoiceDraft(i){
+ return savePdf(pdfEngine().makeInvoiceDraftPdf(i),safePdfFilename('BOZZA_FATTURA',i.id.slice(0,8)));
+}
