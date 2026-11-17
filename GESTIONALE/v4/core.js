@@ -204,7 +204,7 @@ export async function rpcRead(name,args={}){
 }
 export async function writeRpc(name,payload){
  if(!WRITES_ENABLED)throw new Error('Scritture bloccate: backup completo e collaudo non ancora certificati.');
- const whitelist=new Set(['dg2_save_booking_guarded_v1','dg_register_payment','dg_move_bookings_auto_seats_v1','dg_transfer_cash','dg_manage_booking_seats_v1','dg28_publish_trip_layout_v1','dg28_publish_bus_layout_v1','dg_delete_booking']);
+ const whitelist=new Set(['dg2_save_booking_guarded_v1','dg_register_payment','dg_register_rental_payment','dg_move_bookings_auto_seats_v1','dg_transfer_cash','dg_manage_booking_seats_v1','dg28_publish_trip_layout_v1','dg28_publish_bus_layout_v1','dg_delete_booking']);
  if(!whitelist.has(name))throw new Error('Operazione non autorizzata.');
  const result=await jsonFetch('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},true,0);
  clearCache();return result;
