@@ -45,7 +45,20 @@ jobs:
         run: |
           git archive --format=zip --output=DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17.zip HEAD
           unzip -tq DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17.zip
-          test "$(git ls-files | wc -l | tr -d ' ')" -eq "$(unzip -Z1 DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17.zip | wc -l | tr -d ' ')" || {
+          test "$(git ls-files | wc -l | tr -d ' ')" -eq "$(unzip -Z1 DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17.zip | grep -vc '/ || {
+            echo "ERROR: project archive does not contain every versioned file"; exit 1;
+          }
+          echo "Total versioned files: $(git ls-files | wc -l)"
+          ls -lh DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17.zip
+      - name: Publish full project ZIP for manual GitHub installation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17
+          path: DELGROSSO_VIAGGI_COMPLETO_V4_2026-11-17.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+)" || {
             echo "ERROR: project archive does not contain every versioned file"; exit 1;
           }
           echo "Total versioned files: $(git ls-files | wc -l)"
