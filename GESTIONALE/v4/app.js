@@ -729,29 +729,148 @@ async function handleAction(action,id,button){
  }
  showMessage('Funzione in preparazione: nessun dato è stato modificato.',true);
 }
+function pdfBytesAsBase64(bytes){
+ if(!(bytes instanceof Uint8Array))throw new Error('PDF non disponibile.');
+ const sections=[];
+ for(let i=0;i<bytes.length;i+=8000)sections.push(String.fromCharCode(...bytes.subarray(i,i+8000)));
+ return btoa(sections.join(''));
+}
 async function handleSubmit(form){
  if(!WRITES_ENABLED)throw new Error('Scritture sospese fino a backup completo verificato.');
- const f=new FormData(form);const type=form.dataset.save;
+ const f=new FormData(form),type=form.dataset.save;
  const s=n=>String(f.get(n)||'').trim();
+ const numeric=(key,{min=0,max=1000000}={})=>{
+  const x=Number(s(key));
+  if(!Number.isFinite(x)||x<min||x>max)throw new Error('Valore non valido: '+key);
+  return Math.round(x*100)/100;
+ };
+ let success='Operazione registrata e lettura aggiornata.';
  if(type==='payment'){
-  const amount=Number(s('importo'));if(!(amount>0))throw new Error('Importo non valido.');
-  if(!confirm('Confermare la registrazione di '+money(amount)+'? Non ripetere l’invio se la risposta non arriva.'))return;
-  await writeRpc('dg_register_payment',{p_booking_id:s('booking'),p_tipo:s('tipo'),p_importo:amount,p_metodo:s('metodo'),p_data:s('data'),p_note:s('note')});
+  const amount=numeric('importo',{min:.01});
+  if(!confirm('Confermare l incasso di '+money(amount)+'? Non ripetere l invio se la risposta non arriva.'))return;
+  const saved=await writeRpc('dg_register_payment',{
+   p_booking_id:s('booking'),p_tipo:s('tipo'),p_importo:amount,
+   p_metodo:s('metodo'),p_data:s('data'),p_note:s('note')
+  });
+  if(!saved?.payment_id)throw new Error('Incasso non confermato. Verificare il registro prima di riprovare.');
+  success='Incasso '+money(amount)+' registrato su Supabase · N. '+String(saved.receipt_number||saved.payment_id).slice(0,100)+'.';
+  try{
+   const receipt=await edgeAction('professional-receipts',{action:'generate',kind:'trip',id:saved.payment_id,reissue:false});
+   success+=' Ricevuta professionale archiviata'+(receipt.receiptNumber?' · '+receipt.receiptNumber:'')+'.';
+  }catch(e){success+=' ATTENZIONE: incasso registrato ma PDF non confermato ('+String(e.message||e)+'). NON registrare di nuovo il pagamento.';}
+ } else if(type==='booking'){
+  const prior=s('bookingId')?get('bookings').find(x=>x.id===s('bookingId')):null;
+  const t=tripBy(s('viaggio'));
+  if(!t || t.archiviato_at)throw new Error('Viaggio non disponibile.');
+  if(prior&&prior.viaggio_id!==t.id)throw new Error('Lo spostamento tra date usa la funzione dedicata.');
+  const passengers=numeric('posti',{min:1,max:99});
+  if(!Number.isInteger(passengers))throw new Error('Numero passeggeri intero obbligatorio.');
+  const seats=[...new Set(s('sedili').split(/[,;\s]+/).filter(Boolean))];
+  if(seats.length!==passengers || seats.some(x=>!/^[1-9][0-9]{0,3}$/.test(x)||Number(x)>num(t.posti_totali)))
+   throw new Error('Seleziona esattamente '+passengers+' posti validi per il viaggio.');
+  if(!s('cliente')||!s('fermata'))throw new Error('Cliente e fermata obbligatori.');
+  const total=numeric('totale',{min:0,max:100000});
+  if(prior && total<num(prior.pagato))throw new Error('Non ridurre il totale sotto la quota già pagata.');
+  const bookingId=prior?.id||crypto.randomUUID();
+  const data={
+   viaggio_id:t.id,cliente:s('cliente'),telefono:s('telefono'),email:s('email'),
+   posti:passengers,totale:total,fermata_partenza:s('fermata'),note:s('note'),
+   stato:prior?.stato||'In attesa acconto',giorni_acconto:2
+  };
+  if(!confirm('Salvare su Supabase '+passengers+' passeggeri, posti '+seats.join(', ')+' · '+tripName(t)+'?'))return;
+  const saved=await writeRpc('dg2_save_booking_guarded_v1',{p_id:bookingId,p_data:data,p_seats:seats});
+  if(saved?.id!==bookingId)throw new Error('Esito prenotazione non verificato: controllare il viaggio prima di ripetere.');
+  success='Prenotazione salvata con posti '+seats.join(', ')+'.';
+  try{
+   const bytes=Pdf.pdfEngine().makeBookingPdf(saved,t,[]);
+   const doc=await edgeAction('dg2-booking-pdf',{action:'generate',bookingId:bookingId,pdfBase64:pdfBytesAsBase64(bytes)});
+   if(doc?.success)success+=' Conferma PDF archiviata in Supabase.';
+  }catch(e){success+=' ATTENZIONE: prenotazione registrata ma conferma PDF non archiviata ('+String(e.message||e)+'). NON duplicare la prenotazione.';}
  } else if(type==='agenda'){
-  await mutate('agenda','POST',{titolo:s('titolo'),data_scadenza:s('data_scadenza'),priorita:s('priorita'),descrizione:s('descrizione'),tipo:'attivita',stato:'aperta'});
+  const result=await mutate('agenda','POST',{titolo:s('titolo'),data_scadenza:s('data_scadenza'),
+   priorita:s('priorita'),descrizione:s('descrizione'),tipo:'operativa',stato:'aperta'});
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Salvataggio scadenza non confermato.');
  } else if(type==='trip'){
-  await mutate('trips','POST',{titolo:s('titolo'),destinazione:s('destinazione'),data_partenza:s('data_partenza'),prezzo:Number(s('prezzo')),posti_totali:Number(s('posti_totali')),minimo_partecipanti:Number(s('minimo_partecipanti')),pubblicato:'NO',stato:'PROGRAMMATO'});
+  const result=await mutate('trips','POST',{titolo:s('titolo'),destinazione:s('destinazione'),
+   data_partenza:s('data_partenza'),prezzo:numeric('prezzo'),posti_totali:numeric('posti_totali',{min:1,max:100}),
+   minimo_partecipanti:numeric('minimo_partecipanti',{min:1,max:100}),pubblicato:'NO',stato:'PROGRAMMATO'});
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Creazione viaggio non confermata.');
+  success='Viaggio creato come NON PUBBLICATO. Controllare piantina e fermate prima della vendita.';
+ } else if(type==='trip-edit'){
+  const tripId=s('tripId'),old=tripBy(tripId);
+  if(!old)throw new Error('Viaggio non trovato.');
+  const cap=numeric('posti_totali',{min:1,max:100});
+  const occupied=get('bookings').filter(b=>b.viaggio_id===tripId&&bookingActive(b)).reduce((n,b)=>n+num(b.posti),0);
+  if(cap<occupied)throw new Error('Non è possibile ridurre la capienza sotto '+occupied+' passeggeri già prenotati.');
+  if(!confirm('Modificare il viaggio? Se pubblicato, i dati saranno aggiornati anche sul sito.'))return;
+  const result=await mutate('trips','PATCH',{
+   titolo:s('titolo'),destinazione:s('destinazione'),data_partenza:s('data_partenza'),
+   prezzo:numeric('prezzo'),posti_totali:cap,
+   minimo_partecipanti:numeric('minimo_partecipanti',{min:1,max:100}),pubblicato:s('pubblicato')
+  },tripId);
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Modifica viaggio non verificata.');
+ } else if(type==='customer'){
+  const result=await mutate('customers','POST',{
+   nome:s('nome'),cognome:s('cognome'),telefono:s('telefono'),email:s('email'),citta:s('citta')
+  });
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Nuovo cliente non confermato.');
+ } else if(type==='rental'){
+  const price=numeric('prezzo',{min:0,max:100000});
+  const result=await mutate('rentals','POST',{
+   referente:s('referente'),azienda:s('azienda'),telefono:s('telefono'),email:s('email'),
+   tratta_partenza:s('partenza'),tratta_destinazione:s('destinazione'),data_partenza:s('data'),
+   ora_partenza:s('ora')||null,passeggeri:numeric('pax',{min:1,max:100}),
+   prezzo_concordato:price,acconto:0,saldo:price
+  });
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Noleggio non confermato.');
+ } else if(type==='quote'){
+  const pax=numeric('pax',{min:1,max:100}),price=numeric('importo',{min:0,max:100000});
+  const result=await mutate('quotes','POST',{
+   nome:s('nome'),cognome:s('cognome'),telefono:s('telefono'),email:s('email'),
+   origine:'gestionale_v4',stato:'Nuovo',destinazione:s('destinazione'),
+   data_partenza:s('data'),luogo_partenza:s('partenza'),
+   numero_passeggeri:pax,passeggeri:pax,importo:price,importo_preventivo:price,servizio:s('servizio')
+  });
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Preventivo non registrato, verificare prima di ritentare.');
+  success='Preventivo registrato su Supabase.';
+  try{await edgeAction('professional-quotes',{action:'generate',id:result[0].id});success+=' PDF professionale archiviato.';}
+  catch(e){success+=' ATTENZIONE: PDF professionale non creato ('+String(e.message||e)+'), il preventivo resta registrato.';}
+ } else if(type==='waitlist'){
+  const result=await mutate('waitlist','POST',{
+   viaggio_id:s('viaggio'),nome:s('nome'),cognome:s('cognome'),
+   telefono:s('telefono'),email:s('email'),posti:numeric('posti',{min:1,max:99}),
+   stato:'In attesa',fermata_partenza:s('fermata'),note:s('note'),priorita:0
+  });
+  if(!Array.isArray(result)||!result[0]?.id)throw new Error('Richiesta in lista d attesa non confermata.');
+  success='Richiesta salvata in lista d attesa, senza assegnare sedili.';
+ } else if(type==='publish-layout'){
+  const l=get('layoutLibrary').find(x=>x.id===s('layout')),t=tripBy(s('viaggio'));
+  if(!l||!t)throw new Error('Viaggio o piantina non trovati.');
+  if(num(l.configurazione?.posti_totali)!==num(t.posti_totali))throw new Error('Capienza piantina diversa dai '+t.posti_totali+' posti del viaggio.');
+  const checked=await rpcRead('dg28_validate_layout_v1',{p_config:l.configurazione,p_capacity:num(t.posti_totali)});
+  if(!checked?.valid)throw new Error('Pianta non valida sul server.');
+  if(!confirm('PUBBLICARE piantina su '+tripName(t)+'? Sarà usata anche per le prenotazioni del sito, dopo la verifica dei posti già assegnati.'))return;
+  const result=await writeRpc('dg28_publish_trip_layout_v1',{p_viaggio_id:t.id,p_layout_id:l.id});
+  if(!result?.success)throw new Error('Pubblicazione piantina non confermata.');
+  success='Piantina ufficiale pubblicata nel database per '+tripName(t)+'.';
  } else if(type==='transfer'){
-  if(!confirm('Trasferire '+money(Number(s('importo')))+' al destinatario selezionato?'))return;
-  await writeRpc('dg_transfer_cash',{p_to_user_id:s('recipient'),p_amount:Number(s('importo')),p_note:s('note')});
+  const amount=numeric('importo',{min:.01,max:100000});
+  if(!confirm('Trasferire '+money(amount)+' al destinatario selezionato?'))return;
+  const saved=await writeRpc('dg_transfer_cash',{p_to_user_id:s('recipient'),p_amount:amount,p_note:s('note')});
+  if(!saved?.success)throw new Error('Trasferimento non confermato; controllare il registro prima di riprovare.');
  } else if(type==='move'){
   const args={p_booking_ids:[s('bookingId')],p_target_trip_id:s('targetTrip'),p_target_stop:s('stop')||null,p_preview:true};
   const preview=await writeRpc('dg_move_bookings_auto_seats_v1',args);
   if(!confirm('Anteprima spostamento:\n'+JSON.stringify(preview).slice(0,1000)+'\nConfermi lo spostamento?'))return;
-  await writeRpc('dg_move_bookings_auto_seats_v1',{...args,p_preview:false});
+  const moved=await writeRpc('dg_move_bookings_auto_seats_v1',{...args,p_preview:false});
+  if(!moved?.success)throw new Error('Spostamento non confermato, verificare le prenotazioni.');
+  success='Prenotazione spostata con assegnazione controllata dei posti. Rigenerare la conferma per la nuova data.';
  } else throw new Error('Modulo non ancora disponibile.');
- closeModal();showMessage('Operazione registrata e lettura aggiornata.');await navigate(page,true);
+ closeModal();
+ showMessage(success);
+ await navigate(page,true);
 }
+
 function startListeners(){
  $('login-form').addEventListener('submit',async ev=>{
   ev.preventDefault();const btn=$('login-submit');btn.disabled=true;$('login-error').hidden=true;
