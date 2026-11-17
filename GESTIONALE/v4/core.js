@@ -220,6 +220,41 @@ export async function mutate(resource,method,payload,id=null){
  },true,0);
  clearCache();return result;
 }
+
+/** Signed Storage URL returned by Supabase JavaScript/REST. Reject other hosts. */
+export function normalizeSignedStorageUrl(value) {
+ const raw=String(value||'');
+ const full=raw.startsWith('/storage/v1/object/sign/')?API_URL+raw:
+   raw.startsWith('/object/sign/')?API_URL+'/storage/v1'+raw:
+   raw.startsWith('https://')?raw:'';
+ if(!full)throw new Error('URL documento non riconosciuto.');
+ const url=new URL(full);
+ if(url.origin!==API_URL || !url.pathname.startsWith('/storage/v1/object/sign/'))
+   throw new Error('Il documento non proviene dallo Storage aziendale.');
+ return url.href;
+}
+/** Edge Functions ufficiali esistenti; nessuna nuova chiave di servizio nel client.
+ * Solo signed_url/status in read-only; generate e regenerate proibiti senza backup.
+ */
+export async function edgeAction(slug,payload){
+ const action=String(payload?.action||'');
+ const permissions={
+  'dg2-booking-pdf':{read:['signed_url'],write:['generate','regenerate']},
+  'professional-receipts':{read:['status'],write:['generate']},
+  'professional-quotes':{read:['status'],write:['generate']}
+ };
+ const rule=permissions[slug];
+ if(!rule)throw new Error('Servizio PDF non autorizzato.');
+ const willWrite=rule.write.includes(action);
+ if(!willWrite&&!rule.read.includes(action))throw new Error('Azione PDF non consentita.');
+ if(willWrite&&!WRITES_ENABLED)throw new Error('Archiviazione PDF sospesa fino a backup verificato.');
+ const result=await jsonFetch('/functions/v1/'+slug,{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(payload)
+ },true,0);
+ if(!result?.success)throw new Error(String(result?.error||'Operazione PDF non confermata dal server.'));
+ return result;
+}
 export async function signedReceiptPath(bucket,pathValue){
  if(!['ricevute-prenotazioni','preventivi-pdf','gestionale-documenti'].includes(bucket))throw new Error('Archivio non autorizzato');
  if(!pathValue||String(pathValue).includes('..')||String(pathValue).startsWith('/'))throw new Error('Percorso non valido');
@@ -229,14 +264,5 @@ export async function signedReceiptPath(bucket,pathValue){
   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expiresIn:60})
  },true,0);
  if(!res?.signedURL)throw new Error('Documento non disponibile per questo operatore.');
- const relative=String(res.signedURL);
- // Supabase Storage REST ritorna spesso /object/sign/... e NON /storage/v1/object/sign/...
- // Normalizza senza mai accettare host esterni o schema javascript:.
- const link=relative.startsWith('/storage/v1/object/sign/') ? API_URL+relative :
-  relative.startsWith('/object/sign/') ? API_URL+'/storage/v1'+relative :
-  relative.startsWith('https://') ? relative : '';
- const parsed=new URL(link);
- if(parsed.origin!==API_URL || !parsed.pathname.startsWith('/storage/v1/object/sign/'))
-   throw new Error('URL firmato del documento non valido.');
- return parsed.href;
+ return normalizeSignedStorageUrl(res.signedURL);
 }
