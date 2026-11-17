@@ -6,6 +6,7 @@ import {
 import * as Pdf from './pdf-reports.js';
 import {createLiveSync} from './live-sync.js';
 import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewBusTransfer} from './booking-operations.js';
+import {usableTemplates,inspectLayout,normalizeManualSeats,prepareBisSeatOpening,previewManualLayout} from './bis-manual.js';
 
 const $=id=>document.getElementById(id);
 const NAV={
@@ -15,7 +16,7 @@ const NAV={
  agenda:'Agenda e scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
-let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false;
+let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false, bisWizard=null, pendingBis=null, bisBusy=false;
 const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{},lastSyncAt:0,lastSyncError:null};
 let liveSync=null,backgroundInterval=null,backgroundDebounce=null,backgroundBusy=false,backgroundPending=false,syncMode='offline';
 const money=eur;
@@ -124,7 +125,7 @@ async function navigate(next,force=false,{silent=false}={}){
  $('sidebar').classList.remove('open');if(!silent)$('main').innerHTML='<div class="loading-state"><span class="spinner"></span>Consultazione dati Supabase…</div>';
  const needs={
  dashboard:['trips','bookings','payments','agenda','notifications'],
- trips:['trips','bookings','seats','tripLayouts'],
+ trips:['trips','bookings','seats','tripLayouts','fleet','layoutLibrary'],
  bookings:['trips','bookings','payments','seats','tripLayouts'],
   movements:['trips','bookings','payments','seats','tripLayouts'],
  control:['trips','bookings','seats','tripLayouts','stops'],
@@ -193,7 +194,7 @@ function drawTrips(){
    '<b>'+assigned+' / '+num(t.posti_totali)+'</b><small class="row-sub">'+available+' disponibili da registro prenotazioni</small>',
    money(t.prezzo),
    badge(t.archiviato_at?'Archiviato':t.data_partenza<todayItaly()?'Viaggio concluso':t.stato)+' '+badge(t.data_partenza<todayItaly()?'Storico — non sul sito':(t.pubblicato==='SI'&&!t.archiviato_at)?'Online':'Non pubblicato'),
-   '<div class="row-actions">'+safeLink('Dettagli',t.id,'detail-trip')+'</div>'
+   '<div class="row-actions">'+safeLink('Dettagli',t.id,'detail-trip')+(t.data_partenza>=todayItaly()&&!t.archiviato_at&&!t.bis_parent_id?'<button class="secondary" data-action="open-bis" data-id="'+esc(t.id)+'">+ Apri BUS BIS</button>':'')+'</div>'
   ];
  });
  return intro('Viaggi e partenze','Archivio originale e programmazione della flotta.','<button class="secondary" data-action="pdf-all-roster">↓ PDF prenotati</button><button class="secondary" data-action="refresh">↻ Aggiorna</button>'+writeButton('+ Nuovo viaggio','create-trip'))+
@@ -633,7 +634,7 @@ function tripDetail(id){
  '<div><small>Quota</small><strong>'+money(t.prezzo)+'</strong></div>'+
  '<div><small>Visibilità</small><strong>'+esc(t.data_partenza<todayItaly()?'Viaggio concluso: resta nel gestionale, non appare sul sito':(t.pubblicato==='SI'&&!t.archiviato_at)?'Pubblicato sul sito':'Non pubblicato')+'</strong></div>'+
  '</div><p class="help">ID viaggio: '+esc(t.id)+' · Il BUS BIS mantiene il proprio ID, i propri posti e le prenotazioni separate.</p>'+
- '<div class="action-row"><button class="secondary" data-action="pdf-roster" data-id="'+esc(id)+'">↓ Elenco PDF</button><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Archivia viaggio','archive-trip','data-id="'+esc(id)+'"')+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+'</div>');
+ '<div class="action-row"><button class="secondary" data-action="pdf-roster" data-id="'+esc(id)+'">↓ Elenco PDF</button><button class="secondary" data-action="open-trip-control" data-id="'+esc(id)+'">Apri Control Room</button>'+writeButton('Archivia viaggio','archive-trip','data-id="'+esc(id)+'"')+writeButton('Modifica viaggio','edit-trip','data-id="'+esc(id)+'"')+(t.data_partenza>=todayItaly()&&!t.archiviato_at&&!t.bis_parent_id?'<button class="primary" data-action="open-bis" data-id="'+esc(id)+'">+ Apri BUS BIS · scegli posti manualmente</button>':'')+'</div>');
 }
 function bookingDetail(id){
  const b=get('bookings').find(x=>x.id===id);if(!b)return showMessage('Prenotazione non trovata',true);
