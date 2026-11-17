@@ -873,7 +873,7 @@ function agendaActions(item,section='agenda',isTrash=false){
 }
 function agendaLine(item,section='agenda',isTrash=false){
  return [
-  '<strong>'+esc(item.titolo||'Senza titolo')+'</strong>'+
+  '<strong>'+esc(item.titolo||'Senza titolo')+'</strong>'+ (item.__source==='attivita_gestionale'?'<small class="row-sub">Archivio storico V1/V2 · Supabase</small>':'')+
     (item.descrizione?'<small class="row-sub">'+esc(item.descrizione)+'</small>':'')+
     (item.note?'<small class="row-sub">Note: '+esc(item.note)+'</small>':'')+
     (item.assegnata_a?'<small class="row-sub">Assegnato a: '+esc(item.assegnata_a)+'</small>':''),
@@ -911,13 +911,13 @@ function drawAgenda(){
    (hits.length>3?'<span class="dg4-calendar-overflow">+'+(hits.length-3)+' altre voci</span>':'')+'</button>';
  }).join('');
  const dayEntries=all.filter(x=>x.data_scadenza===selected);
- const agendaCount=agendaEntries(fullAgenda(),'agenda').length,deadlineCount=agendaEntries(fullAgenda(),'scadenze').length;
- return intro('Agenda completa','Calendario mensile per appuntamenti, impegni e note. Le scadenze hanno un elenco separato, senza confonderle con gli appuntamenti.',
+ const agendaCount=agendaEntries(fullAgenda(),'agenda').length,historicalCount=get('legacyAgenda').filter(x=>!agendaDeleted(x)).length;
+ return intro('Agenda completa','Appuntamenti e impegni sincronizzati con Supabase: archivio storico V1/V2 e nuova Agenda in un calendario unico. Scadenze in una sezione separata.',
   '<button class="secondary" data-page="deadlines">Vai alle Scadenze</button>'+
   '<button class="secondary" data-action="pdf-agenda">↓ PDF agenda</button>'+
   agendaButton('+ Nuovo impegno','create-agenda'))+
   '<div class="cards">'+card('Voci agenda',String(agendaCount),'Appuntamenti, note e impegni')+
-  card('Scadenze collegate',String(deadlineCount),'Gestite separatamente')+
+  card('Storico V1/V2 recuperato',String(historicalCount),'Appuntamenti letti da attivita_gestionale')+
   card('Nel mese',String(visible.length),'Attività visualizzate')+
   card('Oggi',String(all.filter(x=>x.data_scadenza===today).length),'Voci del giorno')+'</div>'+
   '<div class="filters">'+searchField('Cerca in tutta l’agenda…')+
@@ -930,7 +930,7 @@ function drawAgenda(){
    'Appuntamenti, note e scadenze del giorno scelto',
    table(['Attività','Data','Tipo','Priorità','Stato','Azioni'],dayEntries.map(x=>agendaLine(x,'agenda',isTrash))),
    !isTrash?agendaButton('+ Aggiungi in questa data','create-agenda','data-date="'+esc(selected)+'"'):'')+
-  panel('Elenco '+(isTrash?'cestino':'impegni e scadenze'),
+  panel('Elenco '+(isTrash?'cestino':'impegni e appuntamenti'),
    'Vista completa delle voci della sezione calendario',
    table(['Attività','Data','Tipo','Priorità','Stato','Azioni'],all.map(x=>agendaLine(x,'agenda',isTrash))));
 }
