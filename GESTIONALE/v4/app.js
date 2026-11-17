@@ -7,16 +7,17 @@ import * as Pdf from './pdf-reports.js';
 import {createLiveSync} from './live-sync.js';
 import {eligibleBusTargets,eligibleDateTargets,seatNumbers,seatInventory,reviewBusTransfer} from './booking-operations.js';
 import {usableTemplates,inspectLayout,normalizeManualSeats,prepareBisSeatOpening,previewManualLayout} from './bis-manual.js';
+import {bookingCreditBalance,destinationsForCredit,reviewCreditTransfer,centesimi} from './credit-transfers.js';
 
 const $=id=>document.getElementById(id);
 const NAV={
- dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',movements:'Spostamenti posti / BUS BIS / date',
+ dashboard:'Dashboard',trips:'Viaggi e partenze',bookings:'Prenotazioni',movements:'Spostamenti posti / BUS BIS / date',credits:'Giroconto quote fra viaggi',
  control:'Control Room',layouts:'Piantine autobus',cash:'Contabilità e casse',
  economy:'Economia e costi',customers:'Clienti',rentals:'Noleggi bus',quotes:'Preventivi',invoices:'Fatturazione / bozze',waitlist:'Lista d’attesa',whatsapp:'WhatsApp Business',reports:'Centro PDF e report',
  agenda:'Agenda e scadenze',fleet:'Flotta GT',documents:'Documenti',
  notifications:'Notifiche',diagnostics:'Diagnostica'
 };
-let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false, bisWizard=null, pendingBis=null, bisBusy=false;
+let operator=null, page='dashboard', ticket=0, localEditor=null, transferWizard=null, pendingTransfer=null, transferBusy=false, bisWizard=null, pendingBis=null, bisBusy=false, creditWizard=null, pendingCredit=null, creditBusy=false, creditLedgerState='not-checked';
 const state={trip:'',stop:'',search:'',bookingsState:'active',pendingAction:'',all:{},lastSyncAt:0,lastSyncError:null};
 let liveSync=null,backgroundInterval=null,backgroundDebounce=null,backgroundBusy=false,backgroundPending=false,syncMode='offline';
 const money=eur;
@@ -128,6 +129,7 @@ async function navigate(next,force=false,{silent=false}={}){
  trips:['trips','bookings','seats','tripLayouts','fleet','layoutLibrary'],
  bookings:['trips','bookings','payments','seats','tripLayouts'],
   movements:['trips','bookings','payments','seats','tripLayouts'],
+  credits:['trips','bookings','payments','operators'],
  control:['trips','bookings','seats','tripLayouts','stops'],
  layouts:['trips','fleet','layoutLibrary','tripLayouts','busLayouts'],
  cash:['cash','operators','payments','rentalPayments','rentals','transfers','trips','bookings'],
@@ -145,9 +147,10 @@ async function navigate(next,force=false,{silent=false}={}){
  };
  try {
   await fetchResources(needs[next],force);
+  if(['credits','cash','bookings'].includes(next))await refreshCreditState();
   if(mine!==ticket)return;
   const views={dashboard:drawDashboard,trips:drawTrips,bookings:drawBookings,movements:drawMovements,
-   control:drawControl,layouts:drawLayouts,cash:drawCash,economy:drawEconomy,
+   control:drawControl,layouts:drawLayouts,cash:drawCash,credits:drawCredits,economy:drawEconomy,
    customers:drawCustomers,rentals:drawRentals,quotes:drawQuotes,invoices:drawInvoices,waitlist:drawWaitlist,whatsapp:drawWhatsApp,reports:drawReports,agenda:drawAgenda,
    fleet:drawFleet,documents:drawDocuments,notifications:drawNotifications,diagnostics:drawDiagnostics};
   $('main').innerHTML=views[next]();
