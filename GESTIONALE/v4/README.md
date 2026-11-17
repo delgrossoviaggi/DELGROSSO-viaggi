@@ -5,13 +5,14 @@ Data tecnica: 17 novembre 2026.
 
 > ATTENZIONE: questa versione è una **build V4 di collaudo read-only**. Tutte le chiamate di modifica sono bloccate in `core.js` mediante `WRITES_ENABLED=false`. I flussi di scrittura sono implementati ma **non certificati su DB di staging né autorizzati in produzione**. NON sostituire la versione usata dall'azienda.
 
-## 19 pagine implementate
+## 20 pagine implementate
 
 | Pagina | Tabelle / viste principali | Consultazione | Operazioni di modifica |
 |---|---|---|---|
 | Dashboard | viaggi, prenotazioni, pagamenti, scadenze, notifiche | sì | non previste |
 | Viaggi | viaggi, prenotazioni, posti | sì, dettaglio e bus BIS | creazione, modifica e archiviazione implementate, non abilitate |
 | Prenotazioni | prenotazioni, prenotazione_posti, pagamenti | sì, ricerca/filtro e conferme | RPC atomica, annullamento/rimborso da verificare, non abilitate |
+| **Spostamenti posti/BUS BIS/date** | prenotazioni, viaggi, posti, pagamenti, layout | sì, scelta sedili, BUS principale/BIS, anteprima cambio data | RPC `dg_manage_booking_seats_v1` e `dg3_sposta_prenotazione_data_v1` con anteprima `dg3_preview_spostamento_data_v1`, conferma bloccata fino a backup certificato |
 | Control Room | viaggi, prenotazioni, dg28_trip_layouts, fermate | sì, numeri e check-in | scritture non abilitate |
 | Piantine | dg2_layout_library, dg28_trip_layouts, dg28_bus_layouts | sì, editor bozza in memoria, JSON | salvataggio/validazione/pubblicazione tramite RPC implementati ma bloccati |
 | Contabilità e casse | dg_cassa_operatori, pagamenti, noleggi_bus_pagamenti, trasferimenti | sì, operatori separati, incassi e ricevute | registrazione gite/noleggi via RPC, trasferimenti, bloccate |
@@ -37,6 +38,16 @@ Data tecnica: 17 novembre 2026.
 - **Funzioni server esistenti** verificate: `dg2-booking-pdf`, `professional-receipts`, `professional-quotes`; creazione PDF+archiviazione predisposta dopo salvataggio transazionale. Il fallimento del documento non provoca una seconda registrazione pagamento/prenotazione. In safe mode anche questo salvataggio documenti è bloccato.
 - Non qualificare i PDF riepilogativi come ricevute fiscali/fatture elettroniche e non inviare bozze FE come documenti emessi.
 
+## Trasferimento partecipanti, numerazione sedili e BUS BIS
+- La procedura `Gestisci` è raggiungibile da **Prenotazioni** e dalla pagina dedicata **Spostamenti posti / BUS BIS / date**.
+- **Stessa data**: solo autobus che appartengono alla stessa partenza logica (stesso `bis_parent_id`/ID capofila), con scelta manuale di sedili liberi e capienza verificata. Il server rifiuta le sovrapposizioni tramite `dg_manage_booking_seats_v1`. Il client esclude posti aziendali riservati, posti fuori servizio e altre prenotazioni.
+- **Data differente**: stessa destinazione, partenza non archiviata e futura, anche **anteriore** alla data originaria se ancora nel futuro. L'anteprima server `dg3_preview_spostamento_data_v1` conserva ove possibile i numeri originali, altrimenti propone altri posti; la conferma usa `dg3_sposta_prenotazione_data_v1` e verifica che i posti previsti non siano cambiati.
+- **Importi**: nessun incasso automatico; acconto/saldo/totale e ricevute storiche restano collegati. La conferma prenotazione si rigenera dopo lo spostamento solo se il server lo ha realmente eseguito. Qualunque guasto PDF non provoca un secondo spostamento.
+- **Dati partecipanti**: aggiornamento separato dei recapiti, nominativo, fermata e note, con confronto `updated_at` per non sovrascrivere le modifiche di un altro operatore. Il cambio del numero persone/quote resta nel modulo prenotazione completo e richiede la selezione di tutti i sedili.
+- **Limite del modello dati**: ogni prenotazione registra un **referente + numero passeggeri**, non un'anagrafica personale distinta per ciascun sedile. Gli spostamenti riguardano per ora **l'intera prenotazione**; dividere uno solo dei partecipanti richiede una procedura separata e riconciliazione degli incassi, non è operativo.
+- **Integrità storica**: 28 prenotazioni potrebbero avere differenze fra posti dichiarati e righe `prenotazione_posti`. In caso di anomalia la schermata blocca le assegnazioni manuali invece di creare collisioni.
+- **Sicurezza**: tutte le azioni definitive mantengono `WRITES_ENABLED=false` finché manca il backup/restore verificato; il wizard può generare anteprime in sola lettura. Non confondere "READY" di Vercel con l'autorizzazione alle scritture.
+
 ## Impostazioni e sicurezza
 - Login: `dg2-operator-login`, validazione JWT `/auth/v1/user`, `is_gestionale_admin`, operatore attivo. Nessuna password memorizzata nel codice, nessuna service role nel browser.
 - Letture con RLS, token in `sessionStorage`, niente salvataggio permanente sul dispositivo; cache dati 25 s solo in memoria, niente N+1 indiscriminati.
@@ -46,7 +57,7 @@ Data tecnica: 17 novembre 2026.
 - Nessun link WhatsApp viene inviato automaticamente; consensi prima di qualunque invito a gruppi.
 
 ## Prove effettuate
-- **GitHub Actions** `.github/workflows/dg4-v4-tests.yml`: parsing sintattico, fixture di 19 schermate, numerazione GT53/GT57/GT63, vincoli safe-mode e test di 16 formati PDF con logo, struttura xref e paginazione. Run `https://github.com/delgrossoviaggi/DELGROSSO-viaggi/actions/runs/44059118088` con esito success sul commit `495531b78723372fc7cc162ea28be0fbe0c989f7`.
+- **GitHub Actions** `.github/workflows/dg4-v4-tests.yml`: parsing sintattico, fixture di 20 schermate, numerazione GT53/GT57/GT63, vincoli safe-mode e test di 16 formati PDF con logo, struttura xref e paginazione. Run `https://github.com/delgrossoviaggi/DELGROSSO-viaggi/actions/runs/44059118088` con esito success sul commit `495531b78723372fc7cc162ea28be0fbe0c989f7`.
 - Vercel integra automaticamente il ramo e segnala `READY` per la preview. **READY non equivale a un login reale o a funzionamento scritture**.
 - Ultima baseline letta senza mutazioni: 16 viaggi, 139 prenotazioni, 96 pagamenti, 642 posti.
 
