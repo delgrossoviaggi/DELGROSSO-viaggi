@@ -19,6 +19,17 @@ test('Other-date destination choices are exact, active and future',()=>{
  const result=logic.eligibleDateTargets(main,[main,bis,unrelated,next,{...next,id:'P',archiviato_at:'2026-10-01'}],'2026-11-17');
  assert.deepEqual([...result].map(t=>t.id),['NEXT']);
 });
+test('An earlier but still future departure is a valid alternative date',()=>{
+ const src={...main,data_partenza:'2026-12-20'};
+ const earlier={...next,id:'EARLY',data_partenza:'2026-11-29'};
+ const found=logic.eligibleDateTargets(src,[src,earlier],'2026-11-17');
+ assert.equal(found.length,1);
+ assert.equal(found[0].id,'EARLY');
+});
+test('An officially blocked or absent seat is never silently assigned',()=>{
+ const layout={rows:[{cells:[{type:'seat',id:'6',status:'blocked'},{type:'seat',id:'7',status:'available'}]}]};
+ assert.throws(()=>logic.reviewBusTransfer({booking,origin:main,target:bis,bookings:[],seatRows:[],chosen:'6,7',layout}),/fuori servizio/);
+});
 test('Selected seats are normalized and deduplicated',()=>{
  assert.deepEqual([...logic.seatNumbers(' 3,  02; 4')],['2','3','4']);
  assert.throws(()=>logic.seatNumbers('1,1'),/due volte/);
