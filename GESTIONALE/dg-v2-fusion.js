@@ -373,5 +373,5 @@ function wire(){
 function boot(){shell();panel();wire();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 // Read-only testing interface: no credentials or data are exposed through it.
-window.DG33V2=Object.freeze({version:VERSION,seatNumbers,normaliseConfig,countSeats,validate,groups,renderStops,template,openEditor,openReports:()=>doReport('list'),clearCache,stats:()=>({...stats})});
+window.DG33V2=Object.freeze({version:VERSION,seatNumbers,normaliseConfig,countSeats,validate,groups,renderStops,template,openEditor,openReports:()=>doReport('list'),getLiveSnapshot:()=>fetchData(true),clearCache,stats:()=>({...stats})});
 })();

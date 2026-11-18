@@ -1,0 +1,38 @@
+DELGROSSO VIAGGI — AGGIORNAMENTO V5 · PIANTINE PDF NOMI E COLORI
+18 novembre 2026
+
+BASATO SULLA V5 ORIGINALE FORNITA IN GESTIONALE(7).zip.
+Non è un aggiornamento per DG37. Non cambia il database Supabase.
+
+INSTALLAZIONE
+1) Conserva uno ZIP della versione funzionante e crea un branch di prova su GitHub.
+2) Estrai questo aggiornamento.
+3) Copia SOLO i file mantenendo i percorsi:
+   GESTIONALE/index.html
+   GESTIONALE/dg-v2-fusion.js
+   GESTIONALE/dg-v5-nominativi-pdf.js
+4) Sostituisci i due file omonimi; aggiungi il terzo.
+5) Pubblica la preview e prova la Control Room con il tuo accesso reale.
+6) Solo dopo un collaudo riuscito, unisci in main e pubblica.
+
+COME UTILIZZARLO
+Control Room · Posti e Passeggeri → Seleziona viaggio →
+"Scarica PDF piantina CON NOMI E COLORI".
+
+IL FILE NON GENERA PIANTINE A PARTIRE DA MODELLI STANDARD.
+Richiede le geometrie ufficiali pubblicate in Supabase per PB FW, PB GS, Century 53.
+Per la coppia BUS/BIS genera entrambi nello stesso documento, ciascuno con propria geometria.
+Se manca un layout o ci sono incongruenze numeriche nei dati, non genera il documento.
+Il nome riportato è il REFERENTE della prenotazione, non il singolo passeggero se non registrato.
+
+Nota: il vecchio pulsante "Piantina posti (storica)" non è eliminato e può ancora mostrare
+uno schema numerico generico; usare il nuovo pulsante per le piantine ufficiali.
+I dati vengono letti con sessione autenticata, in sola lettura, via DG33V2.
+
+COLLAUDI
+- Verificare che il bus FW abbia 25-26 in fila 7 sx e 27-28 in fila 8 dx.
+- Verificare che GS abbia 27-28 in fila 7 sx e 25-26 in fila 8 dx.
+- Verificare che Century 53 abbia fila 10 35-36 a sx, 33-34 a dx,
+  ultima fila 49-50-51-52-53.
+- Verificare ogni riferimento con la piantina effettivamente pubblicata su Supabase.
+- Provare BUS BIS, gruppi con più posti, stampa e lettura da telefono.
