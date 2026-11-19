@@ -4,6 +4,7 @@
   const items=[
    ['suite:piantine','Crea / Modifica piantine'],
    ['suite:cassa-nicola','Contabilità Nicola'],
+   ['compenso-nicola','Il mio credito · Compenso Nicola'],
    ['suite:cassa-raffaele','Contabilità Raffaele'],
    ['suite:agenda','Agenda completa'],
    ['suite:prenotazioni','Prenotazioni con piantina'],
