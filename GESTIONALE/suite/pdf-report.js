@@ -123,6 +123,17 @@ function makeBookingPdf(b,t,movements=[]){
  doc.stat('Versato risultante dall’archivio',cents(b.pagato));
  doc.stat('Residuo',cents(Math.max(0,Number(b.totale||0)-Number(b.pagato||0))));
  if(movements.length){doc.paragraph('Movimenti registrati: '+movements.length+' (verificare la sezione Pagamenti).');}
+ const grp=String(b.note||'');
+ const begin=grp.indexOf('[GRUPPO ACCORPATO - NAPOLI 08/12/2026 - RIFERIMENTO LUCIA NARDELLA]');
+ const finish=grp.indexOf('[FINE GRUPPO ACCORPATO]',begin);
+ if(begin>=0&&finish>begin){
+  const items=grp.slice(begin,finish).split(/\r?\n/).map(x=>x.trim()).filter(x=>/^-.+\|.+posti\s+[0-9]/i.test(x));
+  if(items.length){
+   doc.heading('COMPOSIZIONE DEL GRUPPO - 15 PASSEGGERI');
+   for(const item of items)doc.paragraph(text(item));
+   doc.paragraph('Unica prenotazione di riferimento: Lucia Nardella. Posti e nominativi originari conservati nello storico gestionale.');
+  }
+ }
  doc.heading('CONDIZIONI E AVVERTENZE');
  doc.paragraph('Gli acconti seguono le condizioni della prenotazione. In caso di rinuncia del cliente si applicano le condizioni comunicate; se il viaggio non raggiunge il minimo previsto, verificare le condizioni di rimborso.');
  doc.paragraph('Questa è una conferma di prenotazione e un riepilogo operativo; non sostituisce ricevuta fiscale o fattura. Le modifiche successive possono rendere superata questa versione del documento.');
