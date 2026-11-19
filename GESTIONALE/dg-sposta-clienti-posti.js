@@ -164,7 +164,7 @@ async function move(){
   notification='✓ Spostamento completato: '+(b.cliente_nome||b.cliente)+' · '+tripLabel(t)+' · posti '+seats.join(', ')+'. Pagamenti conservati. Rigenera la conferma della prenotazione.';
   data=null;sourceId='';bookingId='';targetId='';selected.clear();preview=null;
   busy=false;await refresh();notice(notification);
-  if(typeof window.loadAll==='function')window.loadAll(true).catch?.(()=>{});
+  if(typeof window.loadAll==='function')Promise.resolve(window.loadAll(true)).catch(()=>{});
  }catch(e){busy=false;err('Spostamento NON confermato: '+(e.message||String(e))+'. Ricarica i posti e riprova.');paintSeats()}
 }
 function init(){
