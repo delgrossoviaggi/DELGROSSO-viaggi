@@ -101,7 +101,22 @@ async function loadSeatmap(){
  const b=getBooking(bookingId),t=getTrip(targetId);if(!b||!t)return;
  if(!validTrip(t))return err('Viaggio non disponibile: scegli una partenza futura attiva.');
  const layout=layoutFor(t);
- if(!layout)return err('Per questo viaggio manca la piantina ufficiale pubblicata. Prima associala all’autobus nella sezione Piantine.');
+ if(!layout){
+  // Questi sono soltanto numeri non ancora impegnati, NON posti verificati fisicamente:
+  // la selezione operativa resta disabilitata finché non esiste un layout pubblicato.
+  const taken=reserved(t),possible=[];
+  for(let n=1;n<=Number(t.posti_totali||0);n++)if(!taken.has(String(n)))possible.push(n);
+  const noBus=!t.autobus_id;
+  const why=noBus
+   ? 'Questo viaggio non ha un autobus assegnato. In più è impostato a '+t.posti_totali+' posti: verifica capienza reale e scegli il mezzo corretto nella sezione Viaggi.'
+   : 'Il viaggio ha un autobus assegnato, ma manca la piantina ufficiale pubblicata. Apri Piantine e pubblica la disposizione reale del mezzo.';
+  const details=$('dgm-details');
+  if(details)details.innerHTML='<h3>Spostamento momentaneamente bloccato</h3><p>'+escape(why)+'</p>'+
+   '<p><b>Disponibilità numerica indicativa:</b> '+possible.length+' posti ('+escape(possible.join(', '))+'). Non sono confermati sulla piantina fisica.</p>'+
+   '<p>La prenotazione non è stata spostata. Acconti e pagamenti rimangono sul viaggio originale.</p>'+
+   '<button type="button" data-dgm-action="trip-settings">Apri Viaggi e verifica autobus / capienza</button>';
+  return err(why);
+ }
  const physical=(layout.configurazione?.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c?.type==='seat').map(c=>String(c.id||''));
  if(physical.length!==Number(t.posti_totali)||new Set(physical).size!==physical.length)
  return err('Piantina non conforme alla capienza: '+physical.length+' sedili nel layout contro '+t.posti_totali+' posti del viaggio. Correggi la piantina ufficiale prima di spostare il cliente.');
@@ -197,6 +212,7 @@ function init(){
   e.preventDefault();
   if(btn.dataset.dgmAction==='refresh')refresh();
   if(btn.dataset.dgmAction==='move')move();
+  if(btn.dataset.dgmAction==='trip-settings')window.dg44Go?.('viaggi');
  });
  if(location.hash==='#'+route)refresh();
 }
