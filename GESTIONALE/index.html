@@ -7058,6 +7058,7 @@ const S=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wi
 const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POSTI E PASSEGGERI','seat'],
  ['suite:piantine','Crea / Modifica piantine','seat'],
  ['dg34-nicola','Contabilità Nicola','wallet'],
+ ['compenso-nicola','Il mio credito · Compenso Nicola','wallet'],
  ['dg34-raffaele','Contabilità Raffaele','wallet'],
  ['suite:agenda','Agenda completa','calendar'],
  ['suite:prenotazioni','Prenotazioni con piantina','users'],
@@ -7116,6 +7117,7 @@ function build(){
   <div class="dg-v5-actions">
    <button type="button" onclick="dg44Go('suite:piantine')"><span class="dg-v5-ico">▤</span><strong>Crea / Modifica piantine</strong><small>Editor GT53, GT63 e libreria</small></button>
    <button type="button" onclick="go('dg34-nicola')"><span class="dg-v5-ico">€</span><strong>Contabilità Nicola</strong><small>Movimenti, saldo e PDF</small></button>
+   <button type="button" onclick="dg44Go('compenso-nicola')"><span class="dg-v5-ico">◈</span><strong>Il mio credito · Compenso Nicola</strong><small>Compensi maturati, pagati e da ricevere</small></button>
    <button type="button" onclick="go('dg34-raffaele')"><span class="dg-v5-ico">€</span><strong>Contabilità Raffaele</strong><small>Movimenti, saldo e PDF</small></button>
    <button type="button" onclick="dg44Go('suite:agenda')"><span class="dg-v5-ico">▦</span><strong>Agenda completa</strong><small>Appuntamenti e storico</small></button>
    <button type="button" onclick="dg44Go('suite:prenotazioni')"><span class="dg-v5-ico">▣</span><strong>Prenotazioni con piantina</strong><small>Posti liberi e occupati</small></button>
@@ -8096,5 +8098,7 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <link rel="stylesheet" href="./dg34-contabilita.css?v=20261116-dg34">
 <script src="./suite/operator-ledger.js?v=20261116-dg34"></script>
 <script src="./dg34-contabilita.js?v=20261116-dg34" defer></script>
+<link rel="stylesheet" href="./dg-compenso-nicola.css?v=20261119-v1">
+<script defer src="./dg-compenso-nicola.js?v=20261119-v1"></script>
 </body>
 </html>
