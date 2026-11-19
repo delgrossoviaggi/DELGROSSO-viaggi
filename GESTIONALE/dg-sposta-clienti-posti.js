@@ -30,14 +30,15 @@ function notice(text){const h=$('dgm-notice');if(h){h.textContent=String(text||'
 async function getData(force){
  if(data&&!force)return data;
  const sess=await window.dgSuiteGetSession();if(!sess?.user?.id)throw Error('Devi essere autenticato.');
- const [trips,bookings,occupied,tripLayouts,busLayouts]=await Promise.all([
+ const [trips,bookings,occupied,tripLayouts,busLayouts,externalModes]=await Promise.all([
   read('viaggi','id,titolo,destinazione,data_partenza,stato,archiviato_at,posti_totali,posti_occupati,prezzo,autobus_id,bis_numero,id_viaggio'),
   read('prenotazioni','id,viaggio_id,cliente,cliente_nome,telefono,posti,posti_selezionati,stato,pagato,acconto,saldo,totale,fermata_partenza,checkin_effettuato,riserva_aziendale'),
   read('prenotazione_posti','id,prenotazione_id,viaggio_id,posto'),
   read('dg28_trip_layouts','viaggio_id,autobus_id,configurazione,versione'),
-  read('dg28_bus_layouts','autobus_id,configurazione,versione')
+  read('dg28_bus_layouts','autobus_id,configurazione,versione'),
+  read('dg3_autobus_esterni_viaggio','viaggio_id,posti_totali,versione,attivo,disposizione_verificata,tipo_servizio')
  ]);
- data={trips,bookings,occupied,tripLayouts,busLayouts};
+ data={trips,bookings,occupied,tripLayouts,busLayouts,externalModes};
  return data;
 }
 function selectOptions(choices,current,initial){
@@ -54,7 +55,11 @@ function targetOptions(){
  .sort((a,b)=>a.data_partenza.localeCompare(b.data_partenza)||String(a.titolo).localeCompare(String(b.titolo),'it'));
 }
 function layoutFor(t){
- if(!t?.autobus_id)return null;
+ if(!t)return null;
+ if(!t.autobus_id){
+  const ext=data?.externalModes?.find(x=>x.viaggio_id===t.id && x.attivo===true && Number(x.posti_totali)===Number(t.posti_totali));
+  return ext?{versione:ext.versione,source:'esterno_numerico',external:true,provisional:!ext.disposizione_verificata}:null;
+ }
  const exact=data.tripLayouts.find(x=>x.viaggio_id===t.id&&x.autobus_id===t.autobus_id&&x.configurazione?.rows);
  if(exact)return {...exact,source:'viaggio'};
  const bus=data.busLayouts.find(x=>x.autobus_id===t.autobus_id&&x.configurazione?.rows);
@@ -70,31 +75,46 @@ function paintSeats(){
  const t=getTrip(targetId),b=getBooking(bookingId),layout=layoutFor(t);
  const out=$('dgm-layout'),details=$('dgm-details'),submit=$('dgm-submit');
  if(!t||!b||!preview||!layout){if(out)out.innerHTML='';if(details)details.textContent='';if(submit)submit.disabled=true;return}
- const occupied=reserved(t);
- const rows=layout.configurazione.rows;
- if(!Array.isArray(rows)||!rows.length){err('La piantina ufficiale non contiene file di sedili.');return}
- const max=Math.max(...rows.map(r=>Array.isArray(r.cells)?r.cells.length:0));
- let available=0;
- let html='<div class="dgm-front">FRONTE AUTOBUS · AUTISTA</div><div class="dgm-seatrows">';
- rows.forEach((r,i)=>{
-  html+='<div class="dgm-seatrow" style="grid-template-columns:28px repeat('+max+',minmax(0,1fr))"><small>'+String(i+1).padStart(2,'0')+'</small>';
-  for(let k=0;k<max;k++){
-   const c=r.cells?.[k],type=c?.type||'empty',num=String(c?.id||'').trim();
-   if(type==='seat'&&num){
-    const blocked=String(c.status||'available')!=='available';
-    const taken=occupied.has(num);
-    if(!taken&&!blocked)available++;
-    const isSelected=selected.has(num);
-    html+='<button type="button" data-dgm-seat="'+escape(num)+'" class="dgm-seat '+(blocked?'blocked':taken?'taken':isSelected?'selected':'free')+'"'+(taken||blocked?' disabled':'')+' title="'+escape(taken?'Occupato':blocked?'Bloccato':'Posto '+num+' disponibile')+'">'+escape(num)+'<span>'+escape(taken?'OCCUPATO':blocked?'BLOCCATO':isSelected?'SCELTO':'LIBERO')+'</span></button>';
-   }else html+='<div class="dgm-nonseat '+(type==='door'?'door':'')+'">'+escape(type==='aisle'?'CORRIDOIO':type==='door'?'PORTA':'')+'</div>';
-  }
-  html+='</div>';
- });
- html+='</div><div class="dgm-key"><span>🟢 Disponibile</span><span>🔵 Selezionato</span><span>🔴 Occupato</span><span>⚫ Bloccato</span></div>';
- out.innerHTML=html;
+ const occupied=reserved(t),external=layout.source==='esterno_numerico';
+ let available=0,html='';
+ if(external){
+   html='<div class="dgm-front">AUTOBUS COLLEGA · '+escape(t.posti_totali)+' POSTI · NUMERAZIONE PROVVISORIA</div>'+
+    '<p class="dgm-ext-warning"><b>Attenzione:</b> scegli soltanto numeri non ancora prenotati. Questa non è la piantina fisica del collega: verificare la numerazione effettiva prima di comunicare i sedili ai viaggiatori.</p>'+
+    '<div class="dgm-ext-seatgrid">';
+   for(let n=1;n<=Number(t.posti_totali);n++){
+     const num=String(n),taken=occupied.has(num),chosen=selected.has(num);
+     if(!taken)available++;
+     html+='<button type="button" data-dgm-seat="'+num+'" class="dgm-seat '+(taken?'taken':chosen?'selected':'free')+'"'+(taken?' disabled':'')+' title="'+escape(taken?'Numero già prenotato':'Numero provvisoriamente disponibile')+'">'+num+'<span>'+escape(taken?'OCCUPATO':chosen?'SCELTO':'LIBERO')+'</span></button>';
+   }
+   html+='</div>';
+ }else{
+   const rows=layout.configurazione.rows;
+   if(!Array.isArray(rows)||!rows.length){err('La piantina ufficiale non contiene file di sedili.');return}
+   const max=Math.max(...rows.map(r=>Array.isArray(r.cells)?r.cells.length:0));
+   html='<div class="dgm-front">FRONTE AUTOBUS · AUTISTA</div><div class="dgm-seatrows">';
+   rows.forEach((r,i)=>{
+    html+='<div class="dgm-seatrow" style="grid-template-columns:28px repeat('+max+',minmax(0,1fr))"><small>'+String(i+1).padStart(2,'0')+'</small>';
+    for(let k=0;k<max;k++){
+      const c=r.cells?.[k],type=c?.type||'empty',num=String(c?.id||'').trim();
+      if(type==='seat'&&num){
+        const blocked=String(c.status||'available')!=='available',taken=occupied.has(num),chosen=selected.has(num);
+        if(!taken&&!blocked)available++;
+        html+='<button type="button" data-dgm-seat="'+escape(num)+'" class="dgm-seat '+(blocked?'blocked':taken?'taken':chosen?'selected':'free')+'"'+(taken||blocked?' disabled':'')+' title="'+escape(taken?'Occupato':blocked?'Bloccato':'Posto '+num+' disponibile')+'">'+escape(num)+'<span>'+escape(taken?'OCCUPATO':blocked?'BLOCCATO':chosen?'SCELTO':'LIBERO')+'</span></button>';
+      }else html+='<div class="dgm-nonseat '+(type==='door'?'door':'')+'">'+escape(type==='aisle'?'CORRIDOIO':type==='door'?'PORTA':'')+'</div>';
+    }
+    html+='</div>';
+   });
+   html+='</div>';
+ }
+ html+='<div class="dgm-key"><span>🟢 Numero libero</span><span>🔵 Selezionato</span><span>🔴 Occupato</span>'+(external?'':'<span>⚫ Bloccato</span>')+'</div>';
+ if(out)out.innerHTML=html;
  const chosen=[...selected].sort((a,b)=>Number(a)-Number(b));
- details.innerHTML='<b>'+escape(tripLabel(t))+'</b><span>'+b.posti+' posti da assegnare · '+available+' liberi sulla piantina · '+chosen.length+'/'+b.posti+' selezionati</span><p>Scelti: '+(chosen.length?chosen.map(escape).join(', '):'nessuno')+'</p><p>Importi mantenuti: totale '+money(b.totale)+', già versato '+money(b.pagato)+'. '+(preview.price_review_required?'<strong>Attenzione: la tariffa del nuovo viaggio è differente; gli importi originali non cambieranno.</strong>':'')+'</p>';
- submit.disabled=busy||chosen.length!==b.posti;
+ if(details)details.innerHTML='<b>'+escape(tripLabel(t))+'</b><span>'+b.posti+' posti da assegnare · '+available+' numeri liberi · '+chosen.length+'/'+b.posti+' selezionati</span>'+
+ '<p>Scelti: '+(chosen.length?chosen.map(escape).join(', '):'nessuno')+'</p>'+
+ '<p><b>Quota che segue la prenotazione:</b> totale '+money(b.totale)+', acconto '+money(b.acconto)+', già pagato '+money(b.pagato)+', saldo '+money(b.saldo)+'.</p>'+
+ (external?'<p class="dgm-ext-warning">Assegnazione numerica provvisoria: richiedere al collega la conferma della posizione dei sedili prima di emettere una nuova conferma definitiva.</p>':'')+
+ (preview.price_review_required?'<p><strong>La tariffa di listino della nuova partenza è differente; gli importi originali restano invariati.</strong></p>':'');
+ if(submit)submit.disabled=busy||chosen.length!==Number(b.posti);
 }
 async function loadSeatmap(){
  const token=++requestId;preview=null;selected.clear();paintSeats();err('');
@@ -117,8 +137,8 @@ async function loadSeatmap(){
    '<button type="button" data-dgm-action="trip-settings">Apri Viaggi e verifica autobus / capienza</button>';
   return err(why);
  }
- const physical=(layout.configurazione?.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c?.type==='seat').map(c=>String(c.id||''));
- if(physical.length!==Number(t.posti_totali)||new Set(physical).size!==physical.length)
+ const physical=layout.external?[]:(layout.configurazione?.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c?.type==='seat').map(c=>String(c.id||''));
+ if(!layout.external&&(physical.length!==Number(t.posti_totali)||new Set(physical).size!==physical.length))
  return err('Piantina non conforme alla capienza: '+physical.length+' sedili nel layout contro '+t.posti_totali+' posti del viaggio. Correggi la piantina ufficiale prima di spostare il cliente.');
  const note=$('dgm-details');if(note)note.textContent='Verifica disponibilità e pagamenti in corso...';
  try{
@@ -157,6 +177,8 @@ async function refresh(){
  const host=$('page-'+route);if(!host)return;
  page();err('Caricamento prenotazioni e piantine ufficiali...');
  try{
+  const preset=window.dgMoveSeatPrefill;
+  if(preset){sourceId=preset.sourceId||'';bookingId=preset.bookingId||'';targetId=preset.targetId||'';delete window.dgMoveSeatPrefill;}
   await getData(true);err('');
   if(!data.trips.some(t=>t.id===sourceId)){sourceId='';bookingId='';targetId=''}
   if(!data.bookings.some(b=>b.id===bookingId&&b.viaggio_id===sourceId)){bookingId='';targetId=''}
@@ -168,11 +190,11 @@ async function move(){
  const b=getBooking(bookingId),t=getTrip(targetId),layout=layoutFor(t),old=getTrip(sourceId);
  const seats=[...selected].sort((a,b)=>Number(a)-Number(b));
  if(!b||!t||!old||!layout||!preview||seats.length!==b.posti)return err('Seleziona tutti i nuovi posti.');
- if(!confirm('CONFERMI LO SPOSTAMENTO?\n'+(b.cliente_nome||b.cliente)+' ('+b.posti+' posti)\nDa '+tripLabel(old)+'\na '+tripLabel(t)+'\nPosti: '+seats.join(', ')+'\n\nGli acconti rimangono invariati. La vecchia conferma va rigenerata.'))return;
+ if(!confirm('CONFERMI LO SPOSTAMENTO?\n'+(b.cliente_nome||b.cliente)+' ('+b.posti+' posti)\nDa '+tripLabel(old)+'\na '+tripLabel(t)+'\nPosti: '+seats.join(', ')+'\n\nAcconto e saldo rimangono invariati.'+(layout.external?'\nATTENZIONE: numeri provvisori del bus collega, verificare la posizione fisica prima della conferma.':'\nLa vecchia conferma va rigenerata.')))return;
  busy=true;$('dgm-submit').disabled=true;err('Verifica finale in corso. Non chiudere la pagina...');
  try{
   // The RPC verifies the destination layout version and every seat under DB locks.
-  const result=await window.api('rpc/dg3_sposta_prenotazione_posti_scelti_v2','',{
+  const result=await window.api(layout.external?'rpc/dg3_sposta_prenotazione_posti_scelti_v3':'rpc/dg3_sposta_prenotazione_posti_scelti_v2','',{
    method:'POST',body:{
     p_booking_id:b.id,p_target_trip_id:t.id,p_expected_source_trip_id:old.id,
     p_target_seats:seats,p_target_stop:($('dgm-stop')?.value||'').trim()||null,
@@ -180,13 +202,20 @@ async function move(){
    },noCache:true,timeout:30000
   });
   if(!result?.success||!result?.moved)throw Error('Spostamento non confermato da Supabase.');
-  notification='✓ Spostamento completato: '+(b.cliente_nome||b.cliente)+' · '+tripLabel(t)+' · posti '+seats.join(', ')+'. Pagamenti conservati. Rigenera la conferma della prenotazione.';
+  notification='✓ Spostamento completato: '+(b.cliente_nome||b.cliente)+' · '+tripLabel(t)+' · posti '+seats.join(', ')+'. Pagamenti conservati. '+(layout.external?'Conferma con il collega la numerazione fisica prima di inviare i nuovi posti.':'Rigenera la conferma della prenotazione.');
   data=null;sourceId='';bookingId='';targetId='';selected.clear();preview=null;
   busy=false;await refresh();notice(notification);
   if(typeof window.loadAll==='function')Promise.resolve(window.loadAll(true)).catch(()=>{});
  }catch(e){busy=false;err('Spostamento NON confermato: '+(e.message||String(e))+'. Ricarica i posti e riprova.');paintSeats()}
 }
 function init(){
+ window.dgOpenMoveSeatSelector=function(bId,sId,tId){
+   window.dgMoveSeatPrefill={bookingId:bId||'',sourceId:sId||'',targetId:tId||''};
+   if(typeof window.closeModal==='function')window.closeModal();
+   if(typeof window.dg44Go==='function')window.dg44Go('sposta-clienti');else if(typeof window.go==='function')window.go('sposta-clienti');
+   // Also refresh when the V5 navigation uses its original lexical go().
+   refresh();
+ };
  const content=document.querySelector('main.main > .content')||document.querySelector('main .content');
  if(!content)return;
  if(!$('page-'+route)){const sec=document.createElement('section');sec.className='page dgm-page';sec.id='page-'+route;content.appendChild(sec)}
