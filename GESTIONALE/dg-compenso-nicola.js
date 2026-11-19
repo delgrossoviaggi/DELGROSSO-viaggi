@@ -32,7 +32,7 @@ function msg(text,err){const p=el('dgcn-message');if(p){p.textContent=text;p.cla
 function kpi(name,value,sub){return '<div class="dgcn-kpi"><small>'+safe(name)+'</small><strong>'+money(value/100)+'</strong><span>'+safe(sub)+'</span></div>'}
 function html(data){
 const mat=data.rows.reduce((s,c)=>s+c.due,0),got=data.rows.reduce((s,c)=>s+c.got,0),remaining=Math.max(0,mat-got);
-const trips=data.trips.slice().sort((a,b)=>String(b.data_partenza).localeCompare(String(a.data_partenza));
+const trips=data.trips.slice().sort((a,b)=>String(b.data_partenza).localeCompare(String(a.data_partenza)));
 const opt=trips.slice(0,120).map(t=>'<option value="'+safe(t.id)+'">'+safe(date(t.data_partenza)+' · '+t.titolo)+'</option>').join('');
 const rows=(onlyDue?data.rows.filter(x=>x.remaining>0):data.rows);
 return '<header class="dgcn-head"><div><small>DELGROSSO VIAGGI · CONTABILITÀ PERSONALE</small><h2>Il mio credito <span>· Compenso Nicola</span></h2><p>Giornate lavorative, compensi maturati e versamenti di Raffaele. Separato dagli incassi dei passeggeri.</p></div><button data-dgcn="refresh">↻ Aggiorna</button></header>'+
