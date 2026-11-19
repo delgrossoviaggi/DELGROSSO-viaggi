@@ -100,7 +100,11 @@ async function loadSeatmap(){
  const token=++requestId;preview=null;selected.clear();paintSeats();err('');
  const b=getBooking(bookingId),t=getTrip(targetId);if(!b||!t)return;
  if(!validTrip(t))return err('Viaggio non disponibile: scegli una partenza futura attiva.');
- if(!layoutFor(t))return err('Per questo viaggio manca la piantina ufficiale pubblicata. Prima associala all’autobus nella sezione Piantine.');
+ const layout=layoutFor(t);
+ if(!layout)return err('Per questo viaggio manca la piantina ufficiale pubblicata. Prima associala all’autobus nella sezione Piantine.');
+ const physical=(layout.configurazione?.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c?.type==='seat').map(c=>String(c.id||''));
+ if(physical.length!==Number(t.posti_totali)||new Set(physical).size!==physical.length)
+ return err('Piantina non conforme alla capienza: '+physical.length+' sedili nel layout contro '+t.posti_totali+' posti del viaggio. Correggi la piantina ufficiale prima di spostare il cliente.');
  const note=$('dgm-details');if(note)note.textContent='Verifica disponibilità e pagamenti in corso...';
  try{
   const r=await window.api('rpc/dg3_preview_spostamento_data_v1','',{method:'POST',body:{p_booking_id:b.id,p_target_trip_id:t.id},noCache:true,timeout:20000});
