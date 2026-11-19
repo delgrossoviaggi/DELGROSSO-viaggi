@@ -121,16 +121,7 @@ function makeBookingPdf(b,t,movements=[]){
  doc.heading('SITUAZIONE ECONOMICA');
  doc.stat('Totale prenotazione',cents(b.totale));
  doc.stat('Versato risultante dall’archivio',cents(b.pagato));
- doc.stat('Residuo',cents(Math.max(0,Number(b.saldo??(Number(b.totale||0)-Number(b.pagato||0))))));
- const closureNoCash=String(b.note||'').includes('[SALDO AMMINISTRATIVO SENZA INCASSO');
- if(closureNoCash){
-  const adjusted=Math.max(0,Number(b.totale||0)-Number(b.pagato||0)-Number(b.saldo||0));
-  doc.heading('PAGATO - SALDO AMMINISTRATIVO');
-  doc.paragraph('Stato: PAGATO / SALDATO AMMINISTRATIVAMENTE - nessun nuovo incasso di denaro.');
-  doc.stat('Regolarizzazione interna senza incasso',cents(adjusted));
-  doc.stat('Incasso collegato alla regolarizzazione',0);
-  doc.paragraph('Non e una ricevuta fiscale di pagamento: attesta la chiusura amministrativa della quota, senza documentare un versamento di denaro.');
- }
+ doc.stat('Residuo',cents(Math.max(0,Number(b.totale||0)-Number(b.pagato||0))));
  if(movements.length){doc.paragraph('Movimenti registrati: '+movements.length+' (verificare la sezione Pagamenti).');}
  doc.heading('CONDIZIONI E AVVERTENZE');
  doc.paragraph('Gli acconti seguono le condizioni della prenotazione. In caso di rinuncia del cliente si applicano le condizioni comunicate; se il viaggio non raggiunge il minimo previsto, verificare le condizioni di rimborso.');
