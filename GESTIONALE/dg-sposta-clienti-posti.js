@@ -10,7 +10,7 @@ const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).
 const fmt=d=>String(d||'').replace(/^(\d{4})-(\d{2})-(\d{2})$/,(_,a,b,c)=>c+'/'+b+'/'+a);
 const localDate=()=>new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
 const idTrip=v=>v?.id||'';
-const dest=v=>String(v?.destinazione||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const dest=v=>{const n=String(v?.destinazione||'').toLowerCase().replace(/[^a-z0-9]/g,'');return n.includes('alberobello')&&n.includes('locoroto')?'alberobellolocorotondo':n};
 const noCancel=x=>!/annull|cancel|cancell|rimbors/i.test(String(x?.stato||''));
 const validTrip=v=>v && !v.archiviato_at && v.data_partenza>=localDate()&&!/annull|cancel|chius|sold\s*out/i.test(String(v.stato||''));
 const seatList=x=>String(x||'').split(',').map(s=>s.trim()).filter(Boolean);
