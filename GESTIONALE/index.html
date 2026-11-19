@@ -2115,8 +2115,6 @@ function dgClosureReportHTML(v,snapshot,closure){const sum=snapshot?.summary||{}
 
 
 
-<link rel="stylesheet" href="./dg82-acconti.css?v=20261119-v1">
-<script defer src="./dg82-acconti.js?v=20261119-v1"></script>
 </body></html>`}
 window.printTripClosure360=async function(tripId){const v=(state.viaggi||[]).find(x=>x.id===tripId);if(!v)return toast('Viaggio non trovato',false);try{const c=dgActiveTripClosure(tripId);let snapshot=c?.snapshot;if(!snapshot){const p=await rpc('dg_trip_closure_preview_v1',{p_trip_id:tripId});snapshot=p?.snapshot}if(!snapshot)throw new Error('Snapshot non disponibile');dgOpenDocumentHTML('Chiusura 360° · '+(v.titolo||v.destinazione||'Viaggio'),dgClosureReportHTML(v,snapshot,c),{orientation:'landscape'})}catch(e){toast('Report chiusura: '+(e?.message||e),false)}};
 // === FINE CHIUSURA VIAGGIO 360° ===
@@ -8110,5 +8108,8 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script defer src="./dg-compenso-nicola.js?v=20261119-v1"></script>
 <link rel="stylesheet" href="./dg-sposta-clienti-posti.css?v=20261119-v1">
 <script defer src="./dg-sposta-clienti-posti.js?v=20261119-v1"></script>
+<!-- DG84: modulo acconti caricato nell'HTML esterno, non all'interno del template di stampa JavaScript. -->
+<link rel="stylesheet" href="./dg82-acconti.css?v=20261119-dg84">
+<script defer src="./dg82-acconti.js?v=20261119-dg84"></script>
 </body>
 </html>
