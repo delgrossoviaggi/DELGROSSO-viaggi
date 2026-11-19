@@ -1293,6 +1293,11 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
 
 <section class="page" id="page-prenotazioni">
   <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" type="button" onclick="window.dg8OpenWA?.()">📱 LISTA TELEFONI WhatsApp</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
+<!-- DG82: stato acconti e blocco posti; nessuna cancellazione lato browser -->
+<section class="card dg82-panel" id="dg82Panel" aria-label="Conferma posti e acconti">
+ <div class="card-head"><div><h3>🔐 Posti in attesa di acconto · 48 ore + 24 ore bonus</h3><p>Posti temporaneamente riservati fino al versamento in contanti; dopo la registrazione dell’acconto sono confermati. Rilascio automatico solo dopo attivazione e collaudo del servizio sul database.</p></div><button class="btn btn-secondary" type="button" id="dg82Refresh">↻ Aggiorna</button></div>
+ <div class="card-body"><div class="dg82-stats" id="dg82Stats">Caricamento dati...</div><div id="dg82Setup" class="dg82-setup"></div><div class="dg82-tablewrap"><table class="table"><thead><tr><th>Cliente e viaggio</th><th>Posti</th><th>Stato</th><th>Scadenza</th><th>Referente</th><th>Azioni</th></tr></thead><tbody id="dg82Rows"><tr><td colspan="6">Accesso richiesto</td></tr></tbody></table></div><p class="dg82-note">I messaggi WhatsApp sono predisposti per l'invio manuale. Per inviarli automaticamente occorrono Cloud API Meta, template approvati e consenso al contatto. Le prenotazioni già esistenti non vengono annullate o cancellate da questo pannello.</p></div>
+</section>
   <!-- V9: PDF nominativi, direttamente nella pagina Prenotazioni -->
   <section class="card dg9-roster-card" id="dg9RosterPdfPanel" aria-label="Scarica lista prenotati PDF">
    <div class="card-head"><div><h3>📄 LISTE PRENOTATI - PDF</h3><p>Scarica la lista del viaggio scelto oppure di tutte le partenze, con BUS BIS, nomi, posti, fermate e telefoni. Disponibile su PC, iPhone e Android.</p></div></div>
@@ -2110,6 +2115,8 @@ function dgClosureReportHTML(v,snapshot,closure){const sum=snapshot?.summary||{}
 
 
 
+<link rel="stylesheet" href="./dg82-acconti.css?v=20261119-v1">
+<script defer src="./dg82-acconti.js?v=20261119-v1"></script>
 </body></html>`}
 window.printTripClosure360=async function(tripId){const v=(state.viaggi||[]).find(x=>x.id===tripId);if(!v)return toast('Viaggio non trovato',false);try{const c=dgActiveTripClosure(tripId);let snapshot=c?.snapshot;if(!snapshot){const p=await rpc('dg_trip_closure_preview_v1',{p_trip_id:tripId});snapshot=p?.snapshot}if(!snapshot)throw new Error('Snapshot non disponibile');dgOpenDocumentHTML('Chiusura 360° · '+(v.titolo||v.destinazione||'Viaggio'),dgClosureReportHTML(v,snapshot,c),{orientation:'landscape'})}catch(e){toast('Report chiusura: '+(e?.message||e),false)}};
 // === FINE CHIUSURA VIAGGIO 360° ===

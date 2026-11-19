@@ -1,0 +1,1 @@
+DG83 (19-11-2026): protezione acconti incrociata su prenotazioni/pagamenti; SQL scadenze reso non distruttivo (solo verifica manuale dopo 72 ore); guida completa onboarding WhatsApp Business Cloud API Meta e variabili private Vercel. Non applicato su database live. Il sito non è in questo archivio. Il servizio WhatsApp automatico non è attivo.

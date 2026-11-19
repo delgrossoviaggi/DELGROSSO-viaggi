@@ -81,9 +81,9 @@ function paymentTotal(book,rows){const valid=rows.filter(p=>!paymentCancelled(p)
 }
 function report(g,allPayments,trips){const idx=new Map(trips.map(t=>[t.id,t]));const {linked,unlinked}=assignPayments(g,allPayments);const rows=g.bookings.map(b=>{
  const payments=(linked.get(b.id)||[]).slice().sort((a,z)=>String(a.data_pagamento||a.created_at||'').localeCompare(String(z.data_pagamento||z.created_at||'')));
- const p=paymentTotal(b,payments),total=Math.max(0,n(b.totale)),noCash=String(b.note||'').includes('[SALDO AMMINISTRATIVO SENZA INCASSO'),balance=noCash?Math.max(0,n(b.saldo)):Math.max(0,total-p.amount);
+ const p=paymentTotal(b,payments),total=Math.max(0,n(b.totale)),balance=Math.max(0,total-p.amount);
  const t=idx.get(b.viaggio_id)||null;
- return {b,trip:t,payments,total,paid:p.amount,balance,noCash,paidSource:p.source,movements:p.count,canceled:cancelled(b),date:String(t?.data_partenza||'').slice(0,10)};
+ return {b,trip:t,payments,total,paid:p.amount,balance,paidSource:p.source,movements:p.count,canceled:cancelled(b),date:String(t?.data_partenza||'').slice(0,10)};
  }).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
  const active=rows.filter(r=>!r.canceled);
  return {rows,unlinked,total:active.reduce((s,r)=>s+r.total,0),paid:active.reduce((s,r)=>s+r.paid,0),balance:active.reduce((s,r)=>s+r.balance,0),future:active.filter(r=>r.date&&r.date>=todayRome()),past:rows.filter(r=>r.canceled||!r.date||r.date<todayRome())};
@@ -126,7 +126,6 @@ function versionsForPayment(p){const list=dataset.versions.filter(v=>v.payment_i
  return list.filter(v=>v.storage_path&&!current.has(v.storage_path)).slice(0,10);
 }
 function statusTag(r){if(r.canceled)return '<span class="dg10-pill danger">Annullata</span>';
- if(r.noCash)return '<span class="dg10-pill ok">Pagato · senza incasso</span>';
  if(r.total<=.01)return '<span class="dg10-pill">Da verificare</span>';
  if(r.balance<=.01)return '<span class="dg10-pill ok">Saldo pagato</span>';
  if(r.paid>.01)return '<span class="dg10-pill warn">Acconto versato · Saldo da pagare</span>';
@@ -145,7 +144,7 @@ function makeBooking(r){const t=r.trip,b=r.b;let attachments='';
  return `<article class="dg10-trip"><div class="dg10-trip-head"><div><small>${h(fmtDate(date))} · ${h(t?.ora_partenza||'')} · ${h(when)}</small><h4>${h(t?.titolo||t?.destinazione||'Viaggio non presente')}</h4><span class="dg10-sub">${h(t?.destinazione||'')} ${t?.archiviato_at?' · Viaggio archiviato':''}</span></div>${statusTag(r)}</div>
  <div class="dg10-meta"><span>Codice <strong>${h(b.codice||b.id?.slice(0,8))}</strong></span><span>Persone <strong>${Math.max(0,n(b.posti))}</strong></span><span>Posti <strong>${h(b.posti_selezionati||'—')}</strong></span><span>Fermata <strong>${h(b.fermata_partenza||'—')}</strong></span></div>
  <div class="dg10-totals"><div><small>Totale prenotazione</small><b>${eur(r.total)}</b></div><div><small>Versato</small><b>${eur(r.paid)}</b></div><div><small>Saldo residuo</small><b class="${r.balance>.01?'dg10-red':''}">${eur(r.balance)}</b></div></div><p class="dg10-note">Fonte del versato: ${h(r.paidSource)}${r.payments.some(p=>paymentCancelled(p))?' · Presente almeno un movimento annullato':''}.</p>
- ${r.noCash?'<div class="dg10-note"><b>PAGATO - saldo amministrativo.</b> Quota originaria '+eur(r.total)+'; regolarizzazione senza incasso '+eur(Math.max(0,r.total-r.paid-r.balance))+'; incasso effettivo '+eur(r.paid)+'; residuo '+eur(r.balance)+'. Non equivale a una ricevuta di pagamento.</div>':''}${movements}<div class="dg10-docs"><b>Documenti e ricevute</b>${attachments||'<p class="dg10-muted">Nessun PDF archiviato per questa prenotazione. Per generarne uno, apri Prenotazioni o Centro Ricevute.</p>'}</div></article>`;
+ ${movements}<div class="dg10-docs"><b>Documenti e ricevute</b>${attachments||'<p class="dg10-muted">Nessun PDF archiviato per questa prenotazione. Per generarne uno, apri Prenotazioni o Centro Ricevute.</p>'}</div></article>`;
 }
 function drawDetail(){const out=$('dg10Detail');if(!out)return;docs=[];
  if(!recordsSafe()||selected<0||!groups[selected]){out.innerHTML='<div class="card"><div class="card-body dg10-muted">Seleziona un cliente nei risultati per vedere tutti i suoi viaggi e le ricevute.</div></div>';return;}
