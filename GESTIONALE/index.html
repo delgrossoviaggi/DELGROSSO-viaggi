@@ -2148,8 +2148,8 @@ function openMoveBookingsModal(singleId=''){
   window.dgMoveSingleId=singleId||'';
   window.dgMoveSelected=new Set(singleId?[singleId]:[]);
   const sourceOptions=(state.viaggi||[]).filter(v=>dgMoveActiveBookings(v.id).length).slice().sort((a,b)=>String(a.data_partenza||'').localeCompare(String(b.data_partenza||''))).map(v=>`<option value="${v.id}" ${v.id===sourceId?'selected':''}>${esc(v.titolo||v.destinazione||'Viaggio')} · ${dateIT(v.data_partenza)} · ${dgMoveActiveBookings(v.id).reduce((n,b)=>n+Number(b.posti||0),0)} pax</option>`).join('');
-  openModal(singleId?'Sposta prenotazione mantenendo i posti':'Sposta prenotati mantenendo gli stessi posti',`
-    <div class="statusline live" style="margin-bottom:12px"><b>🔄 Cambio data sicuro</b><br>Cliente, pagamenti, acconti, saldo, fermata e note restano invariati. I numeri di posto vengono mantenuti identici.</div>
+  openModal(singleId?'Sposta prenotazione · mantieni o cambia posti':'Sposta prenotati mantenendo gli stessi posti',`
+    <div class="statusline live" style="margin-bottom:12px"><b>🔄 Cambio data sicuro</b><br>Cliente, pagamenti, acconti, saldo, fermata e note restano invariati. Se i vecchi posti sono occupati sulla nuova data usa il pulsante <b>🪑 Scegli altri posti liberi</b>.</div>
     <div class="form-grid">
       <div class="field"><label>Data / viaggio attuale</label><select id="mv_source" ${singleId?'disabled':''} onchange="dgMoveSourceChanged()">${sourceOptions}</select></div>
       <div class="field"><label>Nuova data / viaggio *</label><select id="mv_target" onchange="renderMoveBookingChoices()"><option value="">— Seleziona destinazione —</option>${dgMoveTripOptions(sourceId)}</select></div>
@@ -2158,7 +2158,7 @@ function openMoveBookingsModal(singleId=''){
     <div class="quick-actions" style="margin:8px 0 10px"><button type="button" class="btn btn-secondary btn-sm" onclick="dgMoveSelectAllCompatible()" ${singleId?'style="display:none"':''}>✓ Seleziona tutti compatibili</button><button type="button" class="btn btn-ghost btn-sm" onclick="dgMoveSelected.clear();renderMoveBookingChoices()" ${singleId?'style="display:none"':''}>Deseleziona</button></div>
     <div id="mv_summary" class="statusline">Seleziona la nuova data per controllare i posti.</div>
     <div id="mv_list" style="margin-top:10px"></div>
-  `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button><button class="btn btn-primary" id="mv_confirm" onclick="executeMoveBookings()">🔄 Sposta mantenendo posti</button>`);
+  `,`<button class="btn btn-secondary" onclick="closeModal()">Chiudi</button>${singleId?'<button class="btn btn-secondary" onclick="window.dgOpenMoveSeatSelector(window.dgMoveSingleId,document.getElementById(\'mv_source\')?.value||\'\',document.getElementById(\'mv_target\')?.value||\'\')">🪑 Scegli altri posti liberi</button>':''}<button class="btn btn-primary" id="mv_confirm" onclick="executeMoveBookings()">🔄 Sposta mantenendo posti</button>`);
   renderMoveBookingChoices();
 }
 function dgMoveSourceChanged(){
