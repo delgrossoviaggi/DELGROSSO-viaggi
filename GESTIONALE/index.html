@@ -1230,7 +1230,7 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
 </section>
 
 <section class="page" id="page-controlroom">
-  <div class="section-title dg-r35-ctrl-head"><div><h2>🎛️ CONTROL ROOM · POSTI E PASSEGGERI</h2><p class="section-subtitle">Scegli la partenza: piantina posti GT53/GT63, passeggeri e prenotazioni, BUS 1 / BUS BIS, fermate, check-in e pagamenti.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-dark" onclick="openTripClosure360(document.getElementById('controlTripSelect')?.value||'')">🔒 Chiusura 360°</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
+  <div class="section-title dg-r35-ctrl-head"><div><h2>🎛️ CONTROL ROOM · POSTI E PASSEGGERI</h2><p class="section-subtitle">Scegli la partenza: piantina posti GT53/GT63, passeggeri e prenotazioni, BUS 1 / BUS BIS, fermate, check-in e pagamenti.</p></div><div class="quick-actions"><button class="btn btn-primary" onclick="openBookingModal()">+ Prenotazione</button><button class="btn btn-purple" onclick="openCompanyReserveModal(document.getElementById('controlTripSelect')?.value||'')">🎟️ Riserva DELGROSSO</button><button class="btn btn-primary" type="button" onclick="dg44Go('sposta-clienti')">↔ Cambia data · Scegli posti</button><button class="btn btn-green" onclick="openCheckinModal()">✓ Check-in</button><button class="btn btn-dark" onclick="openTripClosure360(document.getElementById('controlTripSelect')?.value||'')">🔒 Chiusura 360°</button><button class="btn btn-secondary" onclick="openEconomyModal('Entrata')">+ Entrata</button><button class="btn btn-secondary" onclick="loadAll(true)">↻ Sincronizza</button></div></div>
   <div class="optional-toolbar">
     <select id="controlTripSelect"></select>
     <button class="btn btn-primary" onclick="openTripDetail(document.getElementById('controlTripSelect').value)">Apri dossier viaggio</button>
@@ -7059,6 +7059,7 @@ const MAIN=[['dashboard','Scrivania','home'],['controlroom','CONTROL ROOM · POS
  ['suite:piantine','Crea / Modifica piantine','seat'],
  ['dg34-nicola','Contabilità Nicola','wallet'],
  ['compenso-nicola','Il mio credito · Compenso Nicola','wallet'],
+ ['sposta-clienti','Sposta clienti · Scegli posti','seat'],
  ['dg34-raffaele','Contabilità Raffaele','wallet'],
  ['suite:agenda','Agenda completa','calendar'],
  ['suite:prenotazioni','Prenotazioni con piantina','users'],
@@ -8100,5 +8101,7 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <script src="./dg34-contabilita.js?v=20261116-dg34" defer></script>
 <link rel="stylesheet" href="./dg-compenso-nicola.css?v=20261119-v1">
 <script defer src="./dg-compenso-nicola.js?v=20261119-v1"></script>
+<link rel="stylesheet" href="./dg-sposta-clienti-posti.css?v=20261119-v1">
+<script defer src="./dg-sposta-clienti-posti.js?v=20261119-v1"></script>
 </body>
 </html>
