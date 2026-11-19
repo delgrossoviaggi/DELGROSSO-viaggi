@@ -36,7 +36,7 @@ async function getData(force){
   read('prenotazione_posti','id,prenotazione_id,viaggio_id,posto'),
   read('dg28_trip_layouts','viaggio_id,autobus_id,configurazione,versione'),
   read('dg28_bus_layouts','autobus_id,configurazione,versione'),
-  read('dg3_autobus_esterni_viaggio','viaggio_id,posti_totali,versione,attivo,disposizione_verificata,tipo_servizio')
+  read('dg3_autobus_esterni_viaggio','viaggio_id,posti_totali,versione,attivo,disposizione_verificata,tipo_servizio,layout_id,configurazione')
  ]);
  data={trips,bookings,occupied,tripLayouts,busLayouts,externalModes};
  return data;
@@ -58,7 +58,7 @@ function layoutFor(t){
  if(!t)return null;
  if(!t.autobus_id){
   const ext=data?.externalModes?.find(x=>x.viaggio_id===t.id && x.attivo===true && Number(x.posti_totali)===Number(t.posti_totali));
-  return ext?{versione:ext.versione,source:'esterno_numerico',external:true,provisional:!ext.disposizione_verificata}:null;
+  return ext?{versione:ext.versione,source:'esterno_numerico',external:true,configurazione:ext.configurazione||null,provisional:!ext.disposizione_verificata}:null;
  }
  const exact=data.tripLayouts.find(x=>x.viaggio_id===t.id&&x.autobus_id===t.autobus_id&&x.configurazione?.rows);
  if(exact)return {...exact,source:'viaggio'};
@@ -78,14 +78,26 @@ function paintSeats(){
  const occupied=reserved(t),external=layout.source==='esterno_numerico';
  let available=0,html='';
  if(external){
-   html='<div class="dgm-front">AUTOBUS COLLEGA · '+escape(t.posti_totali)+' POSTI · NUMERAZIONE PROVVISORIA</div>'+
-    '<p class="dgm-ext-warning"><b>Attenzione:</b> scegli soltanto numeri non ancora prenotati. Questa non è la piantina fisica del collega: verificare la numerazione effettiva prima di comunicare i sedili ai viaggiatori.</p>'+
-    '<div class="dgm-ext-seatgrid">';
-   for(let n=1;n<=Number(t.posti_totali);n++){
-     const num=String(n),taken=occupied.has(num),chosen=selected.has(num);
-     if(!taken)available++;
-     html+='<button type="button" data-dgm-seat="'+num+'" class="dgm-seat '+(taken?'taken':chosen?'selected':'free')+'"'+(taken?' disabled':'')+' title="'+escape(taken?'Numero già prenotato':'Numero provvisoriamente disponibile')+'">'+num+'<span>'+escape(taken?'OCCUPATO':chosen?'SCELTO':'LIBERO')+'</span></button>';
+   const rows=layout.configurazione?.rows;
+   if(!Array.isArray(rows)||rows.length===0){
+      err('La piantina del bus esterno non risulta collegata: ricarica la pagina o pubblica la piantina del viaggio.');return;
    }
+   const max=Math.max(...rows.map(r=>Array.isArray(r.cells)?r.cells.length:0));
+   html='<div class="dgm-front">FRONTE AUTOBUS · COLLEGA · '+escape(t.posti_totali)+' POSTI</div>'+
+    '<p class="dgm-ext-warning"><b>Piantina associata a Larino 13/12.</b> I posti sono numerati nel gestionale, ma la disposizione fisica del mezzo esterno deve essere confermata dal collega prima di comunicare i sedili.</p>'+
+    '<div class="dgm-seatrows">';
+   rows.forEach((r,i)=>{
+     html+='<div class="dgm-seatrow" style="grid-template-columns:28px repeat('+max+',minmax(0,1fr))"><small>'+String(i+1).padStart(2,'0')+'</small>';
+     for(let k=0;k<max;k++){
+       const c=r.cells?.[k],type=c?.type||'empty',num=String(c?.id||'').trim();
+       if(type==='seat'&&num){
+         const taken=occupied.has(num),blocked=String(c.status||'available')!=='available',chosen=selected.has(num);
+         if(!taken&&!blocked)available++;
+         html+='<button type="button" data-dgm-seat="'+escape(num)+'" class="dgm-seat '+(blocked?'blocked':taken?'taken':chosen?'selected':'free')+'"'+(taken||blocked?' disabled':'')+' title="'+escape(taken?'Occupato':blocked?'Bloccato':'Posto '+num+' libero')+'">'+escape(num)+'<span>'+escape(taken?'OCCUPATO':blocked?'BLOCCATO':chosen?'SCELTO':'LIBERO')+'</span></button>';
+       } else html+='<div class="dgm-nonseat '+(type==='door'?'door':'')+'">'+escape(type==='aisle'?'CORRIDOIO':type==='door'?'PORTA':'')+'</div>';
+     }
+     html+='</div>';
+   });
    html+='</div>';
  }else{
    const rows=layout.configurazione.rows;
@@ -137,8 +149,8 @@ async function loadSeatmap(){
    '<button type="button" data-dgm-action="trip-settings">Apri Viaggi e verifica autobus / capienza</button>';
   return err(why);
  }
- const physical=layout.external?[]:(layout.configurazione?.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c?.type==='seat').map(c=>String(c.id||''));
- if(!layout.external&&(physical.length!==Number(t.posti_totali)||new Set(physical).size!==physical.length))
+ const physical=(layout.configurazione?.rows||[]).flatMap(r=>r.cells||[]).filter(c=>c?.type==='seat').map(c=>String(c.id||''));
+ if(physical.length!==Number(t.posti_totali)||new Set(physical).size!==physical.length)
  return err('Piantina non conforme alla capienza: '+physical.length+' sedili nel layout contro '+t.posti_totali+' posti del viaggio. Correggi la piantina ufficiale prima di spostare il cliente.');
  const note=$('dgm-details');if(note)note.textContent='Verifica disponibilità e pagamenti in corso...';
  try{
