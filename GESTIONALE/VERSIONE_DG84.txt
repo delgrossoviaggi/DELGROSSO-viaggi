@@ -1,0 +1,11 @@
+DELGROSSO VIAGGI — Gestionale DG84 CORREZIONE ACCESSO — 19/11/2026
+
+RISOLTO: il modulo acconti DG82/DG83 era stato inserito per errore nel mezzo della stringa HTML utilizzata dalla stampa Chiusura Viaggio 360°, con un tag </script> che terminava prematuramente lo script principale. Il browser mostrava codice come testo e l’accesso non funzionava.
+
+DG84 ha spostato i collegamenti dg82-acconti.css/js fuori dallo script e prima del tag di chiusura finale </body>. Nessuna modifica a database, credenziali, piantine o logica degli acconti.
+
+CONTROLLI: parsing completo di tutti gli script inline, controllo statico delle risorse, prova browser locale, nessuna scrittura su Supabase.
+
+PUBBLICAZIONE: caricare il CONTENUTO della cartella GESTIONALE del file ZIP nel percorso esatto usato dal progetto GitHub/Vercel. Non creare una cartella GESTIONALE duplicata. Dopo il deploy aprire l'URL abituale del gestionale e premere Ctrl+Shift+R.
+
+La correzione del caricamento non certifica da sola l'intero funzionamento operativo o l'attivazione WhatsApp Cloud API.

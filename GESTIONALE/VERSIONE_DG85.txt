@@ -1,0 +1,6 @@
+DELGROSSO GESTIONALE — DG85 | MODIFICA PRENOTAZIONI
+Data: 19 novembre 2026
+Base: DG84 accesso riparato.
+Modifiche: pannello "Modifica una prenotazione esistente" in Prenotazioni; ricerca nome/telefono/codice/viaggio, selezione e apertura editor ufficiale DG50. Pulsante "Modifica" nell'elenco acconti DG82. Barra di comando "Modifica prenotazione" in testata. Avviso esplicito quando si annulla manualmente una prenotazione già pagata.
+Salvataggio: utilizza la funzione Supabase dg_save_booking_v13 già presente nel progetto gestionale e il controllo di concorrenza DG50; nessuna modifica al database richiesta.
+Non sostituisce il sito. Non attiva messaggi automatici WhatsApp. Non pubblicato su GitHub/Vercel.

@@ -1,0 +1,13 @@
+/* DG85 · pannello di ricerca e modifica prenotazioni */
+.dg85-quick-card{margin:14px 0;border:1px solid #b8d6ed!important;border-radius:14px;box-shadow:0 5px 18px rgba(6,51,92,.07)}
+.dg85-quick-card .card-head{background:linear-gradient(105deg,#eff7ff,#fff);gap:10px;align-items:center}
+.dg85-quick-card h3{color:#103c63}
+.dg85-quick-card .card-head p{font-size:12px;color:#506882;margin:4px 0 0;line-height:1.5}
+.dg85-grid{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,1.4fr) auto;gap:12px;align-items:end}
+.dg85-field{display:flex;flex-direction:column;gap:7px;color:#2c4f70;font-size:12px;font-weight:700;min-width:0}
+.dg85-field input,.dg85-field select{width:100%;height:44px;box-sizing:border-box;background:#fff;color:#172d48;border:1px solid #bdcede;border-radius:10px;padding:10px 11px;font-size:14px}
+.dg85-grid .btn{min-height:44px;white-space:nowrap}
+.dg85-feedback{font-size:12px;color:#57708a;margin-top:11px;line-height:1.5}
+.dg85-feedback.error{color:#b42338}
+@media(max-width:850px){.dg85-grid{grid-template-columns:1fr}.dg85-grid .btn{width:100%}}
+@media(max-width:600px){.dg85-quick-card .card-head{flex-wrap:wrap}.dg85-field input,.dg85-field select{font-size:16px}}

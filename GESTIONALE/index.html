@@ -1292,7 +1292,16 @@ body.dg73-locked #app{filter:none!important;pointer-events:auto!important;user-s
 </section>
 
 <section class="page" id="page-prenotazioni">
-  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" type="button" onclick="window.dg8OpenWA?.()">📱 LISTA TELEFONI WhatsApp</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
+  <div class="section-title"><h2>Prenotazioni</h2><div class="section-actions"><button class="btn btn-purple" onclick="openCompanyReserveModal()">🎟️ Riserva DELGROSSO</button><button class="btn btn-secondary" onclick="openMoveBookingsModal()">🔄 Sposta data</button><button class="btn btn-primary" type="button" onclick="window.dg8OpenWA?.()">📱 LISTA TELEFONI WhatsApp</button><button class="btn btn-secondary" type="button" onclick="window.dg85FocusEditor?.()">✏️ Modifica prenotazione</button><button class="btn btn-primary" onclick="openBookingModal()">+ Nuova prenotazione</button></div></div>
+<!-- DG85: modifica rapida prenotazioni esistenti, con salvataggio protetto in Supabase -->
+<section class="card dg85-quick-card" id="dg85BookingEditor" aria-label="Modifica prenotazione esistente">
+ <div class="card-head"><div><h3>✏️ Modifica una prenotazione esistente</h3><p>Cerca per nome, numero di telefono, codice o viaggio. Le modifiche si salvano su Supabase; gli acconti già registrati restano associati alla prenotazione.</p></div><button class="btn btn-secondary btn-sm" type="button" id="dg85Reload">↻ Aggiorna elenco</button></div>
+ <div class="card-body"><div class="dg85-grid">
+  <label class="dg85-field"><span>1. Cerca la prenotazione</span><input id="dg85BookingQuery" type="search" autocomplete="off" placeholder="Nome, telefono, codice, destinazione…" aria-label="Cerca prenotazione da modificare"></label>
+  <label class="dg85-field"><span>2. Seleziona il cliente e il viaggio</span><select id="dg85BookingSelect" aria-label="Seleziona la prenotazione"><option value="">Accedi e carica le prenotazioni…</option></select></label>
+  <button id="dg85OpenEditor" class="btn btn-primary" type="button" disabled>✏️ Apri modifica</button>
+ </div><div class="dg85-feedback" id="dg85BookingFeedback" role="status" aria-live="polite">Le modifiche riguardano solo la prenotazione selezionata, senza eliminare acconti o pagamenti.</div></div>
+</section>
 <!-- DG82: stato acconti e blocco posti; nessuna cancellazione lato browser -->
 <section class="card dg82-panel" id="dg82Panel" aria-label="Conferma posti e acconti">
  <div class="card-head"><div><h3>🔐 Posti in attesa di acconto · 48 ore + 24 ore bonus</h3><p>Posti temporaneamente riservati fino al versamento in contanti; dopo la registrazione dell’acconto sono confermati. Rilascio automatico solo dopo attivazione e collaudo del servizio sul database.</p></div><button class="btn btn-secondary" type="button" id="dg82Refresh">↻ Aggiorna</button></div>
@@ -2123,6 +2132,7 @@ function renderBookings(){
  const q=($('bookSearch')?.value||'').toLowerCase(), st=$('bookFilter')?.value||'';
  const rows=state.prenotazioni.filter(b=>(!q||(JSON.stringify(b)+' '+tripName(b.viaggio_id)).toLowerCase().includes(q))&&(!st||b.stato===st));
  $('bookingsTable').innerHTML=rows.map(b=>`<tr><td><b>${esc(b.codice||b.id?.slice(0,8))}</b></td><td>${esc(b.cliente)}<br><small>${esc(b.telefono||'')}</small></td><td>${esc(tripName(b.viaggio_id))}</td><td>${b.posti||0}<br><small>${esc(b.posti_selezionati||'')}</small></td><td>${money(b.totale)}</td><td>${money(b.pagato)}</td><td>${money(b.saldo)}</td><td><span class="pill ${b.saldo>0?'wait':'ok'}">${esc(b.stato||'Confermata')}</span></td><td><button class="btn btn-secondary btn-sm" onclick="openBookingModal('${b.id}')">✏️ Modifica</button> <button class="btn btn-ghost btn-sm" onclick="openMoveBookingsModal('${b.id}')">🔄 Data</button> <button class="btn btn-ghost btn-sm" onclick="printConfirmation('${b.id}')">🎫</button> <button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.id}')">Annulla</button> <button class="btn btn-ghost btn-sm" onclick="deleteBooking('${b.id}')">🗑️</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Nessuna prenotazione.</td></tr>';
+ window.dg85RefreshBookingPicker?.();
 }
 
 // === DELGROSSO: spostamento prenotati tra date mantenendo gli stessi posti ===
@@ -5132,37 +5142,16 @@ function activeControlBookings(){
   return (state.prenotazioni||[]).filter(b=>b.viaggio_id===id&&!/annull|cancel/i.test(String(b.stato||'')));
 }
 function selectedControlTrip(){const id=F('controlTripSelect')?.value;return (state.viaggi||[]).find(v=>v.id===id)}
-function dgMergedBookingMembers(b){
-  const note=String(b?.note||'');
-  const a=note.indexOf('[GRUPPO ACCORPATO - NAPOLI 08/12/2026 - RIFERIMENTO LUCIA NARDELLA]');
-  const z=note.indexOf('[FINE GRUPPO ACCORPATO]',a);
-  if(a<0||z<a)return [];
-  return note.slice(a,z).split(/\r?\n/).map(line=>{
-    const match=line.trim().match(/^-\s+(.+?)\s+\|\s+posti\s+([0-9,\s]+)\s+\|\s+(\d+)\s+pax$/);
-    return match?{nome:match[1].trim(),posti:match[2].trim(),pax:Number(match[3])}:null;
-  }).filter(Boolean);
-}
-function dgMergedBookingDetails(b){
-  const members=dgMergedBookingMembers(b);
-  if(!members.length)return '';
-  const total=members.reduce((a,x)=>a+x.pax,0);
-  return '<details style="margin:8px 0 0;padding:7px 10px;background:#edf6ff;border:1px solid #d3e5fa;border-radius:9px">'+
-    '<summary style="cursor:pointer;font-weight:750;color:#174c86">👥 Visualizza i nominativi del gruppo · '+total+' posti</summary>'+
-    '<div style="padding:6px 0 0">'+members.map(x=>
-      '<div style="display:flex;justify-content:space-between;align-items:center;gap:9px;border-bottom:1px solid #dce9f5;padding:7px 2px">'+
-       '<span><b>'+esc(x.nome)+'</b><small style="display:block">Posti '+esc(x.posti)+'</small></span><b>'+x.pax+' pax</b></div>').join('')+
-    '</div></details>';
-}
 function renderBoardingStopsFinal(v,bs){
   const box=F('controlBoardingStops');if(!box)return;
   const groups=boardingGroups(bs),total=groups.reduce((z,g)=>z+g.pax,0),assigned=groups.filter(g=>g.name!=='DA ASSEGNARE').reduce((z,g)=>z+g.pax,0),unassigned=total-assigned;
   if(!groups.length){box.innerHTML='<div class="empty">Nessun passeggero prenotato per questo viaggio.</div>';return}
-  box.innerHTML=`<div class="dg-boarding-summary"><div><small>Totale passeggeri</small><b>${total}</b></div><div><small>Fermata assegnata</small><b>${assigned}</b></div><div class="${unassigned?'warn':''}"><small>Da assegnare</small><b>${unassigned}</b></div><div><small>Fermate utilizzate</small><b>${groups.filter(g=>g.name!=='DA ASSEGNARE').length}</b></div></div><div class="dg-boarding-grid">${groups.map(g=>`<details class="dg-boarding-stop ${g.name==='DA ASSEGNARE'?'missing':''}" ${groups.length<=4?'open':''}><summary><span class="dg-stop-pin">${g.name==='DA ASSEGNARE'?'⚠️':'🚏'}</span><span><b>${esc(g.name==='DA ASSEGNARE'?'Fermata da assegnare':g.name)}</b><small>${g.bookings.length} prenotazion${g.bookings.length===1?'e':'i'}</small></span><strong>${g.pax}<em> pax</em></strong></summary><div class="dg-stop-passengers">${g.bookings.map(b=>`<div class="dg-stop-passenger"><div><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>📞 ${esc(bookingPhone(b))} · posti ${esc(bookingSeatNames(b))}</small>${dgMergedBookingDetails(b)}</div><span>${Math.max(1,fn(b.posti))} pax</span></div>`).join('')}</div></details>`).join('')}</div>${unassigned?`<div class="statusline warn" style="margin-top:10px">⚠️ ${unassigned} passegger${unassigned===1?'o':'i'} non ${unassigned===1?'ha':'hanno'} ancora una fermata di salita assegnata.</div>`:''}`;
+  box.innerHTML=`<div class="dg-boarding-summary"><div><small>Totale passeggeri</small><b>${total}</b></div><div><small>Fermata assegnata</small><b>${assigned}</b></div><div class="${unassigned?'warn':''}"><small>Da assegnare</small><b>${unassigned}</b></div><div><small>Fermate utilizzate</small><b>${groups.filter(g=>g.name!=='DA ASSEGNARE').length}</b></div></div><div class="dg-boarding-grid">${groups.map(g=>`<details class="dg-boarding-stop ${g.name==='DA ASSEGNARE'?'missing':''}" ${groups.length<=4?'open':''}><summary><span class="dg-stop-pin">${g.name==='DA ASSEGNARE'?'⚠️':'🚏'}</span><span><b>${esc(g.name==='DA ASSEGNARE'?'Fermata da assegnare':g.name)}</b><small>${g.bookings.length} prenotazion${g.bookings.length===1?'e':'i'}</small></span><strong>${g.pax}<em> pax</em></strong></summary><div class="dg-stop-passengers">${g.bookings.map(b=>`<div class="dg-stop-passenger"><div><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>📞 ${esc(bookingPhone(b))} · posti ${esc(bookingSeatNames(b))}</small></div><span>${Math.max(1,fn(b.posti))} pax</span></div>`).join('')}</div></details>`).join('')}</div>${unassigned?`<div class="statusline warn" style="margin-top:10px">⚠️ ${unassigned} passegger${unassigned===1?'o':'i'} non ${unassigned===1?'ha':'hanno'} ancora una fermata di salita assegnata.</div>`:''}`;
 }
 window.printControlBoardingStops=function(){
   const v=selectedControlTrip(),bs=activeControlBookings();if(!v)return toast('Seleziona un viaggio',false);
   const groups=boardingGroups(bs),total=groups.reduce((z,g)=>z+g.pax,0);
-  const body=`${typeof controlPrintHeader==='function'?controlPrintHeader(v,'Passeggeri per fermata'):`<h2>${esc(v.titolo||v.destinazione||'Viaggio')}</h2>`}<h3 style="margin:18px 0 8px">Riepilogo fermate · ${total} passeggeri</h3>${groups.map(g=>`<div style="margin:0 0 16px;page-break-inside:avoid"><h4 style="margin:0 0 5px">${esc(g.name==='DA ASSEGNARE'?'FERMATA DA ASSEGNARE':g.name)} — ${g.pax} pax</h4><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Cliente</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Telefono</th><th style="text-align:center;border-bottom:1px solid #bbb;padding:5px">Pax</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Posti</th></tr></thead><tbody>${g.bookings.map(b=>`<tr><td style="padding:5px;border-bottom:1px solid #eee">${esc(b.cliente||b.cliente_nome||'Cliente')}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingPhone(b))}</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">${Math.max(1,fn(b.posti))}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingSeatNames(b))}</td></tr>${dgMergedBookingMembers(b).length?'<tr><td colspan="4" style="padding:8px 14px;background:#f2f7fd"><b>Componenti del gruppo (inclusa Lucia)</b><div>'+dgMergedBookingMembers(b).map(x=>esc(x.nome)+' — posti '+esc(x.posti)+' ('+x.pax+' pax)').join('<div style="border-top:1px solid #dce9f5;margin-top:3px;padding-top:3px"></div>')+'</div></td></tr>':''}`).join('')}</tbody></table></div>`).join('')}`;
+  const body=`${typeof controlPrintHeader==='function'?controlPrintHeader(v,'Passeggeri per fermata'):`<h2>${esc(v.titolo||v.destinazione||'Viaggio')}</h2>`}<h3 style="margin:18px 0 8px">Riepilogo fermate · ${total} passeggeri</h3>${groups.map(g=>`<div style="margin:0 0 16px;page-break-inside:avoid"><h4 style="margin:0 0 5px">${esc(g.name==='DA ASSEGNARE'?'FERMATA DA ASSEGNARE':g.name)} — ${g.pax} pax</h4><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Cliente</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Telefono</th><th style="text-align:center;border-bottom:1px solid #bbb;padding:5px">Pax</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Posti</th></tr></thead><tbody>${g.bookings.map(b=>`<tr><td style="padding:5px;border-bottom:1px solid #eee">${esc(b.cliente||b.cliente_nome||'Cliente')}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingPhone(b))}</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">${Math.max(1,fn(b.posti))}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingSeatNames(b))}</td></tr>`).join('')}</tbody></table></div>`).join('')}`;
   printWindow('Passeggeri per fermata',body,'portrait');
 };
 window.exportControlBoardingCSV=function(){
@@ -7532,7 +7521,7 @@ window.dg50SaveBooking=async function(){if(!isCurrent()||readonly())return;
  if(selected.length>count){message('Hai selezionato più posti numerati del numero di passeggeri. Rimuovi i posti in eccesso.',true);return}
  if(selected.some(x=>editor.busy.has(x))){message('Uno dei posti scelti risulta occupato. Aggiorna la prenotazione.',true);return}
  if(active(status)&&count+editor.totalOtherPax>num(editor.trip.posti_totali)){message(`Capienza insufficiente: sono disponibili al massimo ${Math.max(0,num(editor.trip.posti_totali)-editor.totalOtherPax)} passeggeri per questa prenotazione.`,true);return}
- if(active(editor.row.stato)&&!active(status)){if(!confirm('Confermi l’annullamento? Verranno liberati i posti e mantenuto lo storico dei pagamenti.'))return}
+ if(active(editor.row.stato)&&!active(status)){const paidNow=Math.max(num(editor.row.pagato),num(editor.row.acconto));if(!confirm(paidNow>0?'ATTENZIONE: questa prenotazione ha un acconto/pagamento registrato. Annullandola i posti vengono liberati, ma il pagamento RESTA nella contabilità e occorre gestire l’eventuale rimborso. Vuoi procedere?':'Confermi l’annullamento? Verranno liberati i posti e mantenuto lo storico dei pagamenti.'))return}
  const btn=el('dg50-save');if(btn){btn.disabled=true;btn.textContent='Salvataggio…';}
  try{
  const live=await fresh('prenotazioni',`id=eq.${encodeURIComponent(id)}&select=id,updated_at,pagato,viaggio_id`);
@@ -8132,5 +8121,7 @@ html body.dg44-ready.dg44-authenticated #app.app.on > main.main #page-dashboard.
 <!-- DG84: modulo acconti caricato nell'HTML esterno, non all'interno del template di stampa JavaScript. -->
 <link rel="stylesheet" href="./dg82-acconti.css?v=20261119-dg84">
 <script defer src="./dg82-acconti.js?v=20261119-dg84"></script>
+<link rel="stylesheet" href="./dg85-prenotazioni.css?v=20261119-dg85">
+<script defer src="./dg85-prenotazioni.js?v=20261119-dg85"></script>
 </body>
 </html>
