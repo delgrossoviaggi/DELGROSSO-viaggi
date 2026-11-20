@@ -45,3 +45,29 @@
  body.dg44-ready.dg44-authenticated #dg44-workspace .dg-v5-actions button{padding:9px!important}
 }
 @media screen and (min-width:851px){#dg-v6-mobile-dock,#dg-v6-mobile-sheet,#dg-v6-mobile-backdrop{display:none!important}}
+
+
+/* DG86 iPhone PWA — top controls below Dynamic Island, larger tap targets. */
+@media screen and (max-width:850px) {
+  /* In the Home Screen app, iOS places the clock and Dynamic Island over the viewport.
+     Keep the complete header and its actions below that reserved area. */
+  @media (display-mode:standalone) {
+    body.dg44-ready.dg44-authenticated #dg44-header,
+    body.dg44-ready.dg44-authenticated #app.app.on > .main > .topbar {
+      padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!important;
+      min-height:calc(58px + env(safe-area-inset-top, 0px))!important;
+      height:auto!important;
+      box-sizing:border-box!important;
+      overflow:visible!important;
+    }
+  }
+  /* The operator should not have to tap precisely on a tiny icon. */
+  body.dg44-ready.dg44-authenticated #dg44-header button,
+  body.dg44-ready.dg44-authenticated #dg44-header [role="button"],
+  body.dg44-ready.dg44-authenticated #app.app.on > .main > .topbar button,
+  body.dg44-ready.dg44-authenticated #app.app.on > .main > .topbar [role="button"] {
+    min-width:44px!important;
+    min-height:44px!important;
+    touch-action:manipulation;
+  }
+}
