@@ -282,6 +282,16 @@ async function archiveConfirmation(){
  throw issueError;
 }
 msg.innerHTML=`<strong>Prenotazione registrata correttamente.</strong><br>Codice prenotazione: <strong>${esc(receiptData.riferimento)}</strong><br>La conferma PDF è disponibile per il download; l’invio via email non è ancora garantito.<br>Posti: ${esc(bookedSeats.join(', '))}<br><span id="receiptStatus">Generazione conferma PDF in corso…</span><br><a id="downloadReceipt" class="btn btn-blue" style="margin-top:10px" aria-disabled="true">📄 Preparo il PDF…</a>`;
+// Avviso acconto: visibile solo dopo risposta positiva del server, mai prima della registrazione.
+const depositNotice=document.createElement('section');
+depositNotice.setAttribute('role','status');
+depositNotice.style.cssText='margin:16px 0;padding:16px;border:2px solid #d6a74c;border-radius:12px;background:#fff9eb;color:#29251e;line-height:1.6;text-align:left';
+depositNotice.innerHTML='<strong style="font-size:1.12em">⏳ Prenotazione ricevuta — acconto da versare</strong>'+
+ '<p>I posti <strong>'+esc(bookedSeats.join(', '))+'</strong> per <strong>'+esc(receiptData.viaggio)+'</strong> del <strong>'+esc(receiptData.data)+'</strong> sono temporaneamente riservati, <strong>non ancora confermati definitivamente</strong>.</p>'+
+ '<p>Per confermare la prenotazione, versa l’acconto entro <strong>48 ore dalla registrazione</strong>, contattando DELGROSSO VIAGGI per concordare la consegna in contanti a <strong>Nicola (San Nicandro Garganico)</strong> oppure <strong>Raffaele (San Severo)</strong>.</p>'+
+ '<p>Se l’acconto non risulta registrato entro 48 ore, è previsto un ulteriore periodo di <strong>24 ore</strong>. Trascorse complessivamente 72 ore senza acconto, i posti potranno essere liberati. <strong>Se hai già versato l’acconto, i posti non devono essere liberati.</strong></p>'+
+ '<p><strong>Attenzione:</strong> la prenotazione diventa definitiva soltanto quando l’operatore registra l’acconto nel gestionale. Per dubbi contatta DELGROSSO VIAGGI.</p>';
+msg.insertBefore(depositNotice,document.querySelector('#downloadReceipt'));
 const downloadBtn=document.querySelector('#downloadReceipt'),receiptStatus=document.querySelector('#receiptStatus');
 let customerPdfReady=false;
 try{
@@ -331,7 +341,7 @@ async function tryArchiveWithoutBooking(){
     :'Conferma archiviata. Email non confermata: DELGROSSO potrà verificare l’invio dal gestionale.';
  }catch(archiveError){
   console.error('Archiviazione conferma',archiveError);
-  archiveStatus.textContent='La prenotazione è confermata, ma il salvataggio online del PDF non è verificato. Puoi riprovare qui, senza registrare una seconda prenotazione.';
+  archiveStatus.textContent='La prenotazione è registrata, ma il salvataggio online del PDF non è verificato. Puoi riprovare qui, senza registrare una seconda prenotazione.';
   retryArchiveButton.hidden=false;
  }finally{
   archiving=false;
@@ -341,7 +351,7 @@ async function tryArchiveWithoutBooking(){
 retryArchiveButton.addEventListener('click',()=>{void tryArchiveWithoutBooking()});
 if(customerPdfReady)await tryArchiveWithoutBooking();
 else archiveStatus.textContent='Conferma prenotazione registrata. Il PDF non è stato generato: comunica il codice a DELGROSSO per ricevere il documento.';
-selected=[];form.querySelectorAll('input,textarea').forEach(x=>x.value='');try{await load()}catch(refreshError){console.warn('Ricaricamento posti non riuscito',refreshError)}}catch(err){console.error(err);if(bookingConfirmed){msg.className='notice success';msg.textContent='Prenotazione registrata. La conferma PDF non è disponibile al momento: contattaci per riceverla.'}else{msg.className='notice error';msg.textContent=(err?.message||'Non è stato possibile completare la prenotazione.'); if(bookingRequested&&/fetch|network|rete|tempo|collegamento/i.test(String(err?.message||''))){msg.innerHTML='<strong>Collegamento momentaneamente instabile.</strong><br>Non possiamo verificare l&#39;esito della richiesta. Prima di riprovare, contatta DELGROSSO con nome, viaggio e posti scelti: controlleremo se la prenotazione è già registrata.'}}}finally{sel.disabled=false;seats.style.pointerEvents='';submit.disabled=bookingConfirmed||Boolean(current&&gestTripIsSoldOut(current));submit.textContent=bookingConfirmed?'Prenotazione registrata':submit.disabled?'SOLD OUT':'Invia prenotazione'}}
+selected=[];form.querySelectorAll('input,textarea').forEach(x=>x.value='');try{await load()}catch(refreshError){console.warn('Ricaricamento posti non riuscito',refreshError)}}catch(err){console.error(err);if(bookingConfirmed){msg.className='notice success';msg.textContent='Prenotazione registrata in attesa di acconto. Versa l’acconto entro 48 ore contattando DELGROSSO VIAGGI; la conferma PDF non è disponibile al momento.'}else{msg.className='notice error';msg.textContent=(err?.message||'Non è stato possibile completare la prenotazione.'); if(bookingRequested&&/fetch|network|rete|tempo|collegamento/i.test(String(err?.message||''))){msg.innerHTML='<strong>Collegamento momentaneamente instabile.</strong><br>Non possiamo verificare l&#39;esito della richiesta. Prima di riprovare, contatta DELGROSSO con nome, viaggio e posti scelti: controlleremo se la prenotazione è già registrata.'}}}finally{sel.disabled=false;seats.style.pointerEvents='';submit.disabled=bookingConfirmed||Boolean(current&&gestTripIsSoldOut(current));submit.textContent=bookingConfirmed?'Prenotazione registrata':submit.disabled?'SOLD OUT':'Invia prenotazione'}}
 })();
 </script>
 <script src="js/site-features.js"></script><script src="js/languages.js"></script><script src="js/auto-contrast-v26.js?v=28"></script>
