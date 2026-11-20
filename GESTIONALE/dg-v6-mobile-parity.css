@@ -71,3 +71,59 @@
     touch-action:manipulation;
   }
 }
+
+
+/* DG87 — standalone iPhone: move actual fixed header below the system status bar. */
+@media screen and (max-width:850px) and (display-mode:standalone) {
+  /* The V60 inline style forces the original header to 74px with !important.
+     Moving the entire fixed header (rather than increasing its padding) avoids
+     clipping the menu, notifications and profile under Dynamic Island. */
+  html body.dg44-ready.dg44-authenticated {
+    --dg87-top-clearance: max(54px, env(safe-area-inset-top, 0px));
+  }
+  html body.dg44-ready.dg44-authenticated #dg44-header#dg44-header {
+    position:fixed!important;
+    top:var(--dg87-top-clearance)!important;
+    left:0!important;
+    right:0!important;
+    bottom:auto!important;
+    height:74px!important;
+    min-height:74px!important;
+    padding:8px 11px!important;
+    box-sizing:border-box!important;
+    overflow:visible!important;
+    z-index:110!important;
+  }
+  html body.dg44-ready.dg44-authenticated #app#app.app.on > main.main {
+    padding-top:calc(74px + var(--dg87-top-clearance))!important;
+  }
+  html body.dg44-ready.dg44-authenticated #app#app.app.on > aside.sidebar.dg44-open {
+    top:calc(74px + var(--dg87-top-clearance))!important;
+    bottom:0!important;
+    height:calc(100dvh - 74px - var(--dg87-top-clearance))!important;
+    max-height:calc(100dvh - 74px - var(--dg87-top-clearance))!important;
+  }
+  html body.dg44-ready.dg44-authenticated #dg44-overlay#dg44-overlay.dg44-on {
+    inset:calc(74px + var(--dg87-top-clearance)) 0 0!important;
+  }
+  html body.dg44-ready.dg44-authenticated #dg44-header#dg44-header #dg44-mobile-toggle,
+  html body.dg44-ready.dg44-authenticated #dg44-header#dg44-header .dg44-icon-btn,
+  html body.dg44-ready.dg44-authenticated #dg44-header#dg44-header .dg44-user {
+    min-width:44px!important;
+    width:44px!important;
+    min-height:44px!important;
+    height:44px!important;
+    flex:0 0 44px!important;
+    touch-action:manipulation!important;
+  }
+  html body.dg44-ready.dg44-authenticated #dg44-header#dg44-header #dg44-logo-btn {
+    width:clamp(112px,36vw,160px)!important;
+    min-width:0!important;
+    max-width:40vw!important;
+    flex:0 1 auto!important;
+  }
+  html body.dg44-ready.dg44-authenticated #dg44-header#dg44-header .dg44-head-right {
+    gap:5px!important;
+    flex-shrink:0!important;
+  }
+}
