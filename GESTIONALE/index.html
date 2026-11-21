@@ -5127,6 +5127,29 @@ function boardingGroups(bookings){
   const map=new Map();
   for(const b of bookings||[]){
     if(/annull|cancel/i.test(String(b.stato||'')))continue;
+    // Solo Marianna Rendina, Napoli 22/11/2026: una prenotazione, due fermate.
+    // Righe virtuali per il prospetto fermate: nessuna modifica a posti o pagamenti.
+    if(b.id==='bea0492a-56ef-49c1-8b65-d7f34b454b97' &&
+       b.viaggio_id==='6fe213e9-a032-422d-b6c9-3fc6ef7a764e' &&
+       Number(b.posti)===40 &&
+       /SAN MARCO IN LAMIS \(6\)/i.test(String(b.note||'')) &&
+       /SAN GIOVANNI ROTONDO \(34\)/i.test(String(b.note||''))){
+      const splits=[
+        ['San Marco in Lamis',[7,11,12,13,14,15]],
+        ['San Giovanni Rotondo',Array.from({length:31},(_,i)=>i+16).concat([54,57,58])]
+      ];
+      const originalSeats=bookingSeatNames(b).split(',').map(x=>Number(x.trim())).filter(Number.isFinite);
+      const expected=splits.flatMap(x=>x[1]);
+      if(originalSeats.length===40 && new Set(originalSeats).size===40 &&
+         expected.every(n=>originalSeats.includes(n))){
+        for(const [name,seats] of splits){
+          if(!map.has(name))map.set(name,{name,pax:0,bookings:[]});
+          const view={...b,posti:seats.length,posti_selezionati:seats.join(', '),dgBoardingSeats:seats.join(', ')};
+          map.get(name).pax+=seats.length;map.get(name).bookings.push(view);
+        }
+        continue;
+      }
+    }
     const name=stopKey(b.fermata_partenza);
     if(!map.has(name))map.set(name,{name,pax:0,bookings:[]});
     const g=map.get(name);g.pax+=Math.max(1,fn(b.posti));g.bookings.push(b);
@@ -5146,18 +5169,18 @@ function renderBoardingStopsFinal(v,bs){
   const box=F('controlBoardingStops');if(!box)return;
   const groups=boardingGroups(bs),total=groups.reduce((z,g)=>z+g.pax,0),assigned=groups.filter(g=>g.name!=='DA ASSEGNARE').reduce((z,g)=>z+g.pax,0),unassigned=total-assigned;
   if(!groups.length){box.innerHTML='<div class="empty">Nessun passeggero prenotato per questo viaggio.</div>';return}
-  box.innerHTML=`<div class="dg-boarding-summary"><div><small>Totale passeggeri</small><b>${total}</b></div><div><small>Fermata assegnata</small><b>${assigned}</b></div><div class="${unassigned?'warn':''}"><small>Da assegnare</small><b>${unassigned}</b></div><div><small>Fermate utilizzate</small><b>${groups.filter(g=>g.name!=='DA ASSEGNARE').length}</b></div></div><div class="dg-boarding-grid">${groups.map(g=>`<details class="dg-boarding-stop ${g.name==='DA ASSEGNARE'?'missing':''}" ${groups.length<=4?'open':''}><summary><span class="dg-stop-pin">${g.name==='DA ASSEGNARE'?'⚠️':'🚏'}</span><span><b>${esc(g.name==='DA ASSEGNARE'?'Fermata da assegnare':g.name)}</b><small>${g.bookings.length} prenotazion${g.bookings.length===1?'e':'i'}</small></span><strong>${g.pax}<em> pax</em></strong></summary><div class="dg-stop-passengers">${g.bookings.map(b=>`<div class="dg-stop-passenger"><div><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>📞 ${esc(bookingPhone(b))} · posti ${esc(bookingSeatNames(b))}</small></div><span>${Math.max(1,fn(b.posti))} pax</span></div>`).join('')}</div></details>`).join('')}</div>${unassigned?`<div class="statusline warn" style="margin-top:10px">⚠️ ${unassigned} passegger${unassigned===1?'o':'i'} non ${unassigned===1?'ha':'hanno'} ancora una fermata di salita assegnata.</div>`:''}`;
+  box.innerHTML=`<div class="dg-boarding-summary"><div><small>Totale passeggeri</small><b>${total}</b></div><div><small>Fermata assegnata</small><b>${assigned}</b></div><div class="${unassigned?'warn':''}"><small>Da assegnare</small><b>${unassigned}</b></div><div><small>Fermate utilizzate</small><b>${groups.filter(g=>g.name!=='DA ASSEGNARE').length}</b></div></div><div class="dg-boarding-grid">${groups.map(g=>`<details class="dg-boarding-stop ${g.name==='DA ASSEGNARE'?'missing':''}" ${groups.length<=4?'open':''}><summary><span class="dg-stop-pin">${g.name==='DA ASSEGNARE'?'⚠️':'🚏'}</span><span><b>${esc(g.name==='DA ASSEGNARE'?'Fermata da assegnare':g.name)}</b><small>${g.bookings.length} prenotazion${g.bookings.length===1?'e':'i'}</small></span><strong>${g.pax}<em> pax</em></strong></summary><div class="dg-stop-passengers">${g.bookings.map(b=>`<div class="dg-stop-passenger"><div><b>${esc(b.cliente||b.cliente_nome||'Cliente')}</b><small>📞 ${esc(bookingPhone(b))} · posti ${esc(b.dgBoardingSeats||bookingSeatNames(b))}</small></div><span>${Math.max(1,fn(b.posti))} pax</span></div>`).join('')}</div></details>`).join('')}</div>${unassigned?`<div class="statusline warn" style="margin-top:10px">⚠️ ${unassigned} passegger${unassigned===1?'o':'i'} non ${unassigned===1?'ha':'hanno'} ancora una fermata di salita assegnata.</div>`:''}`;
 }
 window.printControlBoardingStops=function(){
   const v=selectedControlTrip(),bs=activeControlBookings();if(!v)return toast('Seleziona un viaggio',false);
   const groups=boardingGroups(bs),total=groups.reduce((z,g)=>z+g.pax,0);
-  const body=`${typeof controlPrintHeader==='function'?controlPrintHeader(v,'Passeggeri per fermata'):`<h2>${esc(v.titolo||v.destinazione||'Viaggio')}</h2>`}<h3 style="margin:18px 0 8px">Riepilogo fermate · ${total} passeggeri</h3>${groups.map(g=>`<div style="margin:0 0 16px;page-break-inside:avoid"><h4 style="margin:0 0 5px">${esc(g.name==='DA ASSEGNARE'?'FERMATA DA ASSEGNARE':g.name)} — ${g.pax} pax</h4><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Cliente</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Telefono</th><th style="text-align:center;border-bottom:1px solid #bbb;padding:5px">Pax</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Posti</th></tr></thead><tbody>${g.bookings.map(b=>`<tr><td style="padding:5px;border-bottom:1px solid #eee">${esc(b.cliente||b.cliente_nome||'Cliente')}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingPhone(b))}</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">${Math.max(1,fn(b.posti))}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingSeatNames(b))}</td></tr>`).join('')}</tbody></table></div>`).join('')}`;
+  const body=`${typeof controlPrintHeader==='function'?controlPrintHeader(v,'Passeggeri per fermata'):`<h2>${esc(v.titolo||v.destinazione||'Viaggio')}</h2>`}<h3 style="margin:18px 0 8px">Riepilogo fermate · ${total} passeggeri</h3>${groups.map(g=>`<div style="margin:0 0 16px;page-break-inside:avoid"><h4 style="margin:0 0 5px">${esc(g.name==='DA ASSEGNARE'?'FERMATA DA ASSEGNARE':g.name)} — ${g.pax} pax</h4><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Cliente</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Telefono</th><th style="text-align:center;border-bottom:1px solid #bbb;padding:5px">Pax</th><th style="text-align:left;border-bottom:1px solid #bbb;padding:5px">Posti</th></tr></thead><tbody>${g.bookings.map(b=>`<tr><td style="padding:5px;border-bottom:1px solid #eee">${esc(b.cliente||b.cliente_nome||'Cliente')}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(bookingPhone(b))}</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">${Math.max(1,fn(b.posti))}</td><td style="padding:5px;border-bottom:1px solid #eee">${esc(b.dgBoardingSeats||bookingSeatNames(b))}</td></tr>`).join('')}</tbody></table></div>`).join('')}`;
   printWindow('Passeggeri per fermata',body,'portrait');
 };
 window.exportControlBoardingCSV=function(){
   const v=selectedControlTrip(),bs=activeControlBookings();if(!v)return toast('Seleziona un viaggio',false);
   const rows=[['Viaggio','Data','Fermata','Cliente','Telefono','Passeggeri','Posti']];
-  for(const g of boardingGroups(bs))for(const b of g.bookings)rows.push([v.titolo||v.destinazione||'Viaggio',v.data_partenza||'',g.name,b.cliente||b.cliente_nome||'',bookingPhone(b),Math.max(1,fn(b.posti)),bookingSeatNames(b)]);
+  for(const g of boardingGroups(bs))for(const b of g.bookings)rows.push([v.titolo||v.destinazione||'Viaggio',v.data_partenza||'',g.name,b.cliente||b.cliente_nome||'',bookingPhone(b),Math.max(1,fn(b.posti)),b.dgBoardingSeats||bookingSeatNames(b)]);
   const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';const csv=rows.map(r=>r.map(q).join(';')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='DELGROSSO_Fermate_'+String(v.data_partenza||romeISODate())+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 };
