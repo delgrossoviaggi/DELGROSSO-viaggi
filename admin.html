@@ -1,11 +1,12 @@
 <!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Sito | Del Grosso Viaggi</title><link rel="stylesheet" href="assets/pro.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
 :root{--blue:#0878c9;--navy:#07111f;--green:#16834b;--red:#b42318;--gold:#d99b18;--bg:#f2f5f8;--line:#dfe6ed;--muted:#657383}*{box-sizing:border-box}body{background:var(--bg)}.admin{padding:105px 0 70px}.adminbar{background:linear-gradient(135deg,#07111f,#0c2944);color:#fff;border-radius:24px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px;box-shadow:0 14px 40px #07111f18}.adminbar h1{margin:0;font-size:21px}.adminbar small{color:#a9b9c8}.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 12px;position:sticky;top:72px;z-index:20}.tab{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px 16px;font-weight:900;cursor:pointer;white-space:nowrap}.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}.panel{background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 8px 30px #07111f08}.panel h2{margin:0 0 5px}.hint{color:var(--muted);font-size:12px;line-height:1.5}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{margin-top:12px}.field label{display:block;color:#5c6b79;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.input{width:100%;margin-top:6px;border:1px solid #d5dee7;border-radius:12px;padding:12px 13px;background:#fff;font:inherit}.input:focus{outline:3px solid #0878c91c;border-color:var(--blue)}textarea.input{resize:vertical}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn2{border:0;border-radius:11px;padding:10px 13px;font-weight:900;cursor:pointer}.primary{background:var(--blue);color:#fff}.secondary{background:#eaf3fa;color:#075985}.danger{background:#fee4e2;color:#9b1c13}.dark{background:var(--navy);color:#fff}.gold{background:#fff4d7;color:#855d00}.upload{margin-top:16px;border:2px dashed #c8d4df;border-radius:18px;padding:18px;background:#f9fbfc}.upload input[type=file]{width:100%;margin:10px 0}.previews,.media-grid,.gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}.preview,.media-tile,.photo{aspect-ratio:1;border-radius:13px;overflow:hidden;position:relative;background:#e8eef3}.preview img,.media-tile img,.photo img{width:100%;height:100%;object-fit:cover}.media-tile{aspect-ratio:16/10}.media-tools{position:absolute;left:5px;right:5px;bottom:5px;display:flex;justify-content:space-between;gap:4px}.media-tools button,.photo-tools button{border:0;border-radius:8px;background:#07111fe8;color:#fff;padding:7px 8px;font-weight:900;cursor:pointer}.badge{position:absolute;top:6px;left:6px;background:#d99b18;color:#211500;border-radius:8px;padding:5px 7px;font-size:9px;font-weight:900}.progress{height:7px;background:#e8eef3;border-radius:99px;overflow:hidden;margin-top:10px}.progress i{display:block;height:100%;width:0;background:var(--blue);transition:.2s}.list{display:grid;gap:10px;margin-top:18px}.card{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fff}.fleet-row,.post-row,.party-row{display:grid;grid-template-columns:92px 1fr auto;gap:13px;align-items:center}.thumb{width:92px;height:70px;border-radius:12px;object-fit:cover;background:#e8eef3}.card-title{font-weight:950}.meta{font-size:11px;color:var(--muted);margin-top:3px}.editor{margin-top:18px;border:2px solid #cfe5f4;border-radius:20px;padding:18px;background:#fbfdff;scroll-margin-top:110px}.editor-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.editor-head strong{font-size:15px}.editor.editing{border-color:#b8d8ee;box-shadow:0 8px 30px #0878c912}.empty{padding:22px;border:1px dashed #cbd6df;border-radius:15px;text-align:center;color:var(--muted)}.notice{display:none;margin-bottom:14px;padding:12px 14px;border-radius:12px;font-size:12px;font-weight:800}.notice.show{display:block}.notice.ok{background:#e9f8ef;color:#116b3b}.notice.bad{background:#fee9e7;color:#9b1c13}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.stat{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fbfcfd}.stat b{display:block;font-size:22px}.login{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#07111f,#0b2943);display:flex;align-items:center;justify-content:center;padding:20px}.login-box{width:min(430px,100%);background:#fff;border-radius:25px;padding:30px;box-shadow:0 25px 70px #0005}.login-box img{max-width:210px;max-height:70px;display:block;margin:auto;object-fit:contain}.login-box h1{text-align:center;margin:17px 0 5px}.login-box .hint{text-align:center}.toast{position:fixed;right:20px;bottom:20px;z-index:10000;background:#07111f;color:#fff;padding:13px 16px;border-radius:13px;box-shadow:0 12px 35px #0003;transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s}.toast.show{transform:none;opacity:1}.toast.bad{background:#a52318}@media(max-width:760px){.grid2{grid-template-columns:1fr}.previews,.media-grid,.gallery{grid-template-columns:repeat(2,1fr)}.fleet-row,.post-row,.party-row{grid-template-columns:64px 1fr}.thumb{width:64px;height:55px}.fleet-row>.actions,.post-row>.actions,.party-row>.actions{grid-column:1/-1;justify-content:flex-start}.tabs{top:64px}.stats{grid-template-columns:1fr 1fr 1fr}.admin{padding-top:92px}.panel{padding:16px}}
+.admin[hidden]{display:none!important}
 </style><meta name="robots" content="noindex,nofollow"><link rel="stylesheet" href="css/dg-palette-v22.css?v=28">
 <link rel="stylesheet" href="css/dg-refresh-v26.css?v=28">
 </head><body>
 <div id="adminLogin" class="login"><div class="login-box"><img src="assets/logo.JPEG" alt="Del Grosso Viaggi"><h1>Area Admin</h1><p class="hint">Gestisci il sito pubblico in modo semplice e sicuro.</p><div class="field"><label>Email</label><input id="loginEmail" class="input" type="email" autocomplete="username"></div><div class="field"><label>Password</label><input id="loginPassword" class="input" type="password" autocomplete="current-password"></div><button id="loginBtn" class="btn2 primary" style="width:100%;margin-top:16px">🔐 Accedi</button><div id="loginMsg" class="hint" style="margin-top:12px;text-align:center;min-height:18px"></div><a href="index.html" style="display:block;text-align:center;margin-top:12px;color:#0878c9;font-weight:900;text-decoration:none">← Torna al sito</a></div></div>
 <header class="site-header scrolled"><div class="wrap nav"><a class="brand" href="index.html"><img src="assets/logo.JPEG" alt="Del Grosso Viaggi"></a><a class="navcta" href="index.html">Torna al sito</a></div></header>
-<main class="admin"><div class="wrap"><div class="adminbar"><div><h1>DELGROSSO · Admin Sito</h1><small id="adminUser">Pannello di gestione</small></div><button id="logout" class="btn2" style="background:#ffffff16;color:#fff">Esci</button></div><div id="notice" class="notice"></div>
+<main class="admin" id="adminPanel" hidden inert><div class="wrap"><div class="adminbar"><div><h1>DELGROSSO · Admin Sito</h1><small id="adminUser">Pannello di gestione</small></div><button id="logout" class="btn2" style="background:#ffffff16;color:#fff">Esci</button></div><div id="notice" class="notice"></div>
 <div class="tabs"><button class="tab active" data-tab="home">🏠 Home</button><button class="tab" data-tab="fleet">🚌 Flotta</button><button class="tab" data-tab="party">🎉 Party</button><button class="tab" data-tab="posts">📰 News</button><button class="tab" data-tab="settings">📞 Contatti</button></div>
 <section id="home" class="panel tabpanel"><h2>Carousel Home</h2><div class="hint">Qui gestisci le immagini che compaiono nella Home. Puoi aggiungerle, eliminarle una alla volta, scegliere la copertina e cancellare tutto il carousel.</div><div class="upload"><b>➕ Aggiungi immagini</b><input id="homeFiles" type="file" accept="image/*" multiple><div id="homePrev" class="previews"></div><div class="progress"><i id="homeProg"></i></div><div class="actions" style="margin-top:12px"><button id="homeSave" class="btn2 primary">Carica immagini</button></div></div><div id="homeList" class="list"></div></section>
 <section id="fleet" class="panel tabpanel" style="display:none"><h2>Flotta</h2><div class="hint">La modifica avviene sul bus già esistente: non devi ricrearlo. Le foto già presenti vengono mantenute; puoi aggiungerne altre, cambiare copertina o rimuoverle.</div><div id="fleetEditor" class="editor"><div class="editor-head"><strong id="fleetEditorTitle">➕ Nuovo autobus</strong><button id="fleetCancel" class="btn2 secondary" style="display:none">Annulla modifica</button></div><div class="grid2"><div class="field"><label>Nome / modello</label><input id="fleetTitle" class="input" placeholder="Es. IRIZAR SCANIA PB A"></div><div class="field"><label>Posti</label><input id="fleetSeats" class="input" type="number" min="1" placeholder="63"></div></div><div class="field"><label>Descrizione</label><textarea id="fleetDesc" class="input" rows="6" placeholder="Descrizione del mezzo..."></textarea></div><div id="fleetGallery" class="gallery"></div><div class="upload"><b id="fleetUploadTitle">📸 Foto del nuovo mezzo</b><div class="hint">In modifica, queste foto vengono aggiunte a quelle esistenti.</div><input id="fleetFiles" type="file" accept="image/*" multiple><div id="fleetPrev" class="previews"></div><div class="progress"><i id="fleetProg"></i></div><div class="actions" style="margin-top:12px"><button id="fleetSave" class="btn2 primary">💾 Salva nuovo mezzo</button></div></div></div><div id="fleetList" class="list"></div></section>
@@ -57,8 +58,92 @@ async function saveSettings(){try{const payload={id:1,phone:$('#sPhone').value.t
 async function load(){const [c,f,p,n,s]=await Promise.all([sb.from('carousel_home').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),sb.from('site_fleet').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),sb.from('site_party_events').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),sb.from('site_posts').select('*').order('published_at',{ascending:false}).order('created_at',{ascending:false}),sb.from('site_settings').select('*').eq('id',1).maybeSingle()]);if(c.error)console.warn(c.error);if(f.error)console.warn(f.error);if(p.error)console.warn(p.error);if(n.error)console.warn(n.error);carouselStore=c.data||[];renderCarousel();renderFleet(f.data||[]);renderParty(p.data||[]);renderPosts(n.data||[]);if(s.data){$('#sPhone').value=s.data.phone||'';$('#sWhats').value=s.data.whatsapp||'';$('#sEmail').value=s.data.email||'';$('#sAddress').value=s.data.address||'';$('#sInstagram').value=s.data.instagram||'';$('#sFacebook').value=s.data.facebook||'';$('#sWebsite').value=s.data.website||''}}
 $$('.tab').forEach(b=>b.addEventListener('click',()=>{$$('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.tabpanel').forEach(x=>x.style.display=x.id===b.dataset.tab?'block':'none')}));
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id,i=Number(b.dataset.i);if(a==='fleet-edit')editFleet(id);if(a==='fleet-delete')fleetDelete(id);if(a==='fleet-cover')fleetCover(i);if(a==='fleet-remove')fleetRemove(i);if(a==='carousel-cover')carouselCover(id,i);if(a==='carousel-remove')carouselRemove(id,i);if(a==='carousel-delete')carouselDelete(id);if(a==='post-edit')editPost(id);if(a==='post-delete')postDelete(id);if(a==='party-edit')editParty(id);if(a==='party-delete')partyDelete(id)});
-$('#fleetSave').onclick=saveFleet;$('#fleetCancel').onclick=resetFleet;$('#homeSave').onclick=saveCarousel;$('#postSave').onclick=savePost;$('#postCancel').onclick=resetPost;$('#partySave').onclick=saveParty;$('#partyCancel').onclick=resetParty;$('#settingsSave').onclick=saveSettings;$('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
-async function start(){const {data,error}=await sb.auth.getSession();if(error||!data.session){$('#adminLogin').style.display='flex';return}const u=data.session.user,check=await sb.from('site_admins').select('user_id').eq('user_id',u.id).maybeSingle();if(check.error||!check.data){$('#loginMsg').textContent='Account non autorizzato.';await sb.auth.signOut();return}$('#adminLogin').style.display='none';$('#adminUser').textContent=u.email||'Amministratore';await load()}
-$('#loginBtn').onclick=async()=>{const b=$('#loginBtn');busy(b,true,'Accesso');const r=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});if(r.error){$('#loginMsg').textContent='Accesso non riuscito: '+r.error.message;busy(b,false);return}await start();busy(b,false)};[$('#loginEmail'),$('#loginPassword')].forEach(x=>x.addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()}));sb.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_OUT')location.reload()});start();
+$('#fleetSave').onclick=saveFleet;$('#fleetCancel').onclick=resetFleet;$('#homeSave').onclick=saveCarousel;$('#postSave').onclick=savePost;$('#postCancel').onclick=resetPost;$('#partySave').onclick=saveParty;$('#partyCancel').onclick=resetParty;$('#settingsSave').onclick=saveSettings;$('#logout').onclick=logout;
+// Auth is verified by Supabase; the UI is not a substitute for database RLS.
+let authGeneration=0,loadedUser=null,signingIn=false,signingOut=false,blocked=false,authTimer;
+function lockAdmin(message=''){
+  $('#adminPanel').hidden=true;
+  $('#adminPanel').inert=true;
+  $('#adminLogin').style.display='flex';
+  $('#loginMsg').textContent=message;
+  $('#adminUser').textContent='Pannello di gestione';
+}
+function unlockAdmin(user){
+  $('#adminUser').textContent=user.email||'Amministratore';
+  $('#adminPanel').inert=false;
+  $('#adminPanel').hidden=false;
+  $('#adminLogin').style.display='none';
+}
+async function start(){
+  if(blocked||signingOut)return;
+  const generation=++authGeneration;
+  lockAdmin('Verifica accesso in corso…');
+  try{
+    const {data,error}=await sb.auth.getUser();
+    if(generation!==authGeneration||blocked)return;
+    const user=data?.user;
+    if(error||!user){
+      lockAdmin(error&&error.name!=='AuthSessionMissingError'?'Sessione non verificata. Accedi di nuovo.':'');
+      return;
+    }
+    const check=await sb.from('site_admins').select('user_id').eq('user_id',user.id).maybeSingle();
+    if(generation!==authGeneration||blocked)return;
+    if(check.error){lockAdmin('Impossibile verificare i permessi. Riprova.');return;}
+    if(!check.data){lockAdmin('Account non autorizzato. Accedi con un account amministratore.');return;}
+    // Discard the previous account’s in-memory data before showing another account.
+    if(loadedUser&&loadedUser!==user.id){location.reload();return;}
+    if(loadedUser!==user.id){
+      await load();
+      if(generation!==authGeneration||blocked)return;
+      loadedUser=user.id;
+    }
+    unlockAdmin(user);
+  }catch(error){
+    if(generation===authGeneration)lockAdmin('Accesso non verificato. Controlla la connessione e riprova.');
+  }
+}
+async function logout(){
+  if(signingOut)return;
+  signingOut=true;blocked=true;++authGeneration;clearTimeout(authTimer);
+  lockAdmin('Disconnessione in corso…');
+  try{
+    const {error}=await sb.auth.signOut({scope:'local'});
+    if(error)throw error;
+    location.reload();
+  }catch(error){
+    lockAdmin('Disconnessione non completata. Per sicurezza il pannello resta bloccato.');
+  }finally{signingOut=false;}
+}
+function scheduleAuthCheck(){
+  if(signingIn||signingOut||blocked)return;
+  clearTimeout(authTimer);
+  // Never await a Supabase call inside onAuthStateChange itself.
+  authTimer=setTimeout(()=>{if(!signingIn&&!signingOut&&!blocked)void start();},0);
+}
+$('#loginBtn').onclick=async()=>{
+  if(signingIn||signingOut)return;
+  const b=$('#loginBtn');
+  signingIn=true;blocked=false;++authGeneration;clearTimeout(authTimer);
+  lockAdmin('Accesso in corso…');busy(b,true,'Accesso');
+  try{
+    const {error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});
+    if(error){lockAdmin('Accesso non riuscito. Controlla email e password.');return;}
+    $('#loginPassword').value='';
+    await start();
+  }catch(error){lockAdmin('Accesso non riuscito. Controlla la connessione e riprova.');}
+  finally{signingIn=false;busy(b,false);}
+};
+[$('#loginEmail'),$('#loginPassword')].forEach(x=>x.addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()}));
+sb.auth.onAuthStateChange((event)=>{
+  if(event==='SIGNED_OUT'){
+    ++authGeneration;clearTimeout(authTimer);lockAdmin('');
+    if(loadedUser||signingOut)location.reload();
+    return;
+  }
+  if(['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED'].includes(event))scheduleAuthCheck();
+});
+window.addEventListener('focus',()=>{if(loadedUser)scheduleAuthCheck();});
+window.addEventListener('pageshow',event=>{if(event.persisted){lockAdmin('Verifica accesso in corso…');scheduleAuthCheck();}});
+void start();
 </script><script src="js/auto-contrast-v26.js?v=28"></script>
 </body></html>
