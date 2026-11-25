@@ -116,19 +116,20 @@ async function logout(){
 }
 function scheduleAuthCheck(){
   if(signingIn||signingOut||blocked)return;
-  clearTimeout(authTimer);
+  clearTimeout(authTimer);++authGeneration;
+  lockAdmin('Verifica accesso in corso…');
   // Never await a Supabase call inside onAuthStateChange itself.
   authTimer=setTimeout(()=>{if(!signingIn&&!signingOut&&!blocked)void start();},0);
 }
 $('#loginBtn').onclick=async()=>{
   if(signingIn||signingOut)return;
   const b=$('#loginBtn');
-  signingIn=true;blocked=false;++authGeneration;clearTimeout(authTimer);
+  signingIn=true;blocked=true;++authGeneration;clearTimeout(authTimer);
   lockAdmin('Accesso in corso…');busy(b,true,'Accesso');
   try{
     const {error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});
     if(error){lockAdmin('Accesso non riuscito. Controlla email e password.');return;}
-    $('#loginPassword').value='';
+    $('#loginPassword').value='';blocked=false;
     await start();
   }catch(error){lockAdmin('Accesso non riuscito. Controlla la connessione e riprova.');}
   finally{signingIn=false;busy(b,false);}
