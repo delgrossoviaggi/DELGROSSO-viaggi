@@ -29,7 +29,7 @@ const dateParts=iso=>{const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');ret
 const dateLong=iso=>{const p=dateParts(iso);return p.w?p.w.charAt(0).toUpperCase()+p.w.slice(1)+' '+p.d+' '+['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][MESI.indexOf(p.m)]:''};
 const titleCase=s=>String(s||'').replace(/\s*\(\s*[A-Za-z]{2}\s*\)\s*$/,'').toLowerCase().replace(/(^|[\s'(-])([a-zà-ù])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(E|Di|De|Del|Della|In|A|Al|Alla|Da|Con|Per)\b/g,(w,_,i)=>i===0?w:w.toLowerCase()).replace(/\bG\.co\b/i,'G.co');
 const SVG=(d,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const IC={arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
+const IC={photo:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-8 8"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
 const firstStop=t=>titleCase(String(t.luogo_partenza||'').split(/\s*[|]\s*|\s+-\s*|\s*-\s+/)[0]||'');
 function ticketHtml(t,big){
   const st=tripStats(t),pct=st.cap?Math.min(100,Math.round(st.pax/st.cap*100)):0,p=dateParts(t.data_partenza),from=firstStop(t),to=titleCase(t.destinazione||'');
@@ -178,7 +178,7 @@ const ICONS={
   altro:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'
 };
 const TABS=[['oggi','Oggi'],['viaggi','Viaggi'],['prenota','Prenota'],['incassi','Incassi'],['cassa','Cassa'],['altro','Altro']];
-const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',presenze:'Presenze a bordo',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi'};
+const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',sito:'Sito internet',presenze:'Presenze a bordo',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi'};
 
 function render(){
   const app=$('#app');
@@ -187,7 +187,7 @@ function render(){
   let body='';
   if(S.error)body+=`<div class="err">${esc(S.error)} <button class="link" data-act="reload">Riprova</button></div>`;
   if(S.loading&&!S.trips.length)body+='<div class="empty">Carico i dati…</div>';
-  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze}[view]||viewOggi)();
+  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,sito:viewSito,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div class="id"><img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi"><h1>${esc(TITLES[view])}</h1></div>
   <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo">${SVG(IC.ext)}<span class="lbl">Versione completa</span></a></div></header>
@@ -427,9 +427,9 @@ function seatMapHtml(t,opts){
 
 /* ----- Altro, Clienti, Flotta ----- */
 function viewAltro(){
-  const ico={clienti:IC.user,conti:IC.chart,agenda:IC.cal,noleggi:IC.van,preventivi:IC.doc,notifiche:IC.bell,flotta:IC.bus};
+  const ico={sito:IC.photo,clienti:IC.user,conti:IC.chart,agenda:IC.cal,noleggi:IC.van,preventivi:IC.doc,notifiche:IC.bell,flotta:IC.bus};
   const it=(k,t,d)=>`<button class="tile" data-tab="${k}">${SVG(ico[k])}<span class="tt">${t}</span><span class="td">${d}</span></button>`;
-  return `<div class="tiles">${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
+  return `<div class="tiles">${it('sito','Sito internet','Foto della Home, flotta, news ed eventi')}${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
   <section class="card"><h2>Versione completa</h2><span class="muted small">Per le cose rare (piantine nuove, bus BIS, locandine, rimborsi, impostazioni) resta disponibile il gestionale di prima.</span>
   <a class="btn ghost" href="../index.html">${SVG(IC.ext)}Apri la versione completa</a></section>
   <button class="btn light" data-act="logout">${SVG(IC.out)}Esci (${esc(me.nome||me.username)})</button>`;
@@ -981,6 +981,137 @@ async function pollNotifiche(){
   }catch{}
 }
 setInterval(pollNotifiche,60000);
+/* ----- Sito internet: foto della Home, flotta, news, eventi Party (stesso accesso del gestionale) ----- */
+const SITE='https://bhsanrbadsqcpbtxupmr.supabase.co',SITE_KEY='sb_publishable_jcc3RIJmNnXZdhcmFuIKFg_EpxO_rBp';
+S.site=null;S.siteTab='home';
+async function siteCall(action,body={}){
+  await ensureToken();
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),30000);let res;
+  try{res=await fetch(SITE+'/functions/v1/dg-sito-admin',{method:'POST',headers:{apikey:SITE_KEY,Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({action,...body}),signal:ctl.signal,cache:'no-store'})}
+  catch(e){throw new Error(e.name==='AbortError'?'Connessione lenta: riprova tra poco.':'Nessuna connessione internet.')}
+  finally{clearTimeout(tm)}
+  const d=await res.json().catch(()=>null);
+  if(!res.ok||!d||d.success===false)throw new Error((d&&d.error)||'Sito non raggiungibile ('+res.status+').');
+  if(d.carousel!==undefined)S.site=d;
+  return d;
+}
+async function ensureSite(force){if(S.site&&!force)return;await siteCall('state')}
+const siteUrls=x=>{const g=Array.isArray(x&&x.gallery_urls)?x.gallery_urls.filter(Boolean):[];return g.length?g:(x&&x.cover_url?[x.cover_url]:[])};
+/* foto: ridotte a max 1920 px in JPEG prima del caricamento (sito più veloce, upload rapido anche col telefono) */
+async function shrink(file){
+  if(!/^image\//.test(file.type)||/gif|svg/.test(file.type))return file;
+  try{
+    const bmp=await createImageBitmap(file,{imageOrientation:'from-image'});
+    const k=Math.min(1,1920/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');
+    c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.84));
+    return blob&&blob.size<file.size*1.05?new File([blob],'foto.jpg',{type:'image/jpeg'}):file;
+  }catch{return file}
+}
+async function uploadSite(files,folder,onStep){
+  const out=[];let i=0;
+  for(const f0 of files){
+    i++;if(onStep)onStep(i,files.length);
+    const f=await shrink(f0),ext=(f.type==='image/jpeg'?'jpg':(f.name.split('.').pop()||'jpg')).toLowerCase();
+    const u=await siteCall('upload_url',{folder,ext});
+    const r=await fetch(u.signedUrl,{method:'PUT',headers:{apikey:SITE_KEY,'Content-Type':f.type||'application/octet-stream','x-upsert':'false','cache-control':'max-age=31536000'},body:f});
+    if(!r.ok)throw new Error('Caricamento non riuscito ('+r.status+'): riprova.');
+    out.push(u.publicUrl);
+  }
+  return out;
+}
+function pickFiles(accept,multiple){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept=accept;i.multiple=!!multiple;i.onchange=()=>res([...i.files]);i.click()})}
+function siteLazy(fn){
+  if(S.site)return fn();
+  if(S.siteErr)return `<div class="err">${esc(S.siteErr)} <button class="link" data-act="siteRetry">Riprova</button></div>`;
+  if(!S.siteLoading){S.siteLoading=true;ensureSite().then(()=>{S.siteErr=null}).catch(e=>{S.siteErr=e.message}).finally(()=>{S.siteLoading=false;render()})}
+  return '<div class="empty">Carico i contenuti del sito…</div>';
+}
+const photoGrid=(urls,kind,id)=>`<div class="pgrid">${urls.map((u,i)=>`<figure class="ph"><img src="${esc(u)}" alt="" loading="lazy">${i===0?'<span class="cov">Copertina</span>':''}
+  <div class="pbar">${i>0?`<button data-act="phFirst" data-k="${kind}" data-id="${esc(id||'')}" data-i="${i}" aria-label="Metti come copertina">1°</button><button data-act="phLeft" data-k="${kind}" data-id="${esc(id||'')}" data-i="${i}" aria-label="Sposta a sinistra">‹</button>`:'<span></span>'}<button data-act="phDel" data-k="${kind}" data-id="${esc(id||'')}" data-i="${i}" aria-label="Togli foto">${SVG(IC.x)}</button></div></figure>`).join('')}</div>`;
+function viewSito(){return siteLazy(()=>{
+  const st=S.site,tab=S.siteTab,c=(k,t)=>`<button class="chip ${tab===k?'on':''}" data-act="siteTab" data-id="${k}">${t}</button>`;
+  let h=`<div class="chips">${c('home','Foto della Home')}${c('flotta','Flotta')}${c('news','News')}${c('party','Party on the Road')}</div>`;
+  if(tab==='home'){
+    const u=siteUrls({gallery_urls:st.carousel&&st.carousel.foto_urls});
+    h+=`<section class="card"><h2>Foto della Home <span class="muted small">${u.length} foto</span></h2><span class="muted small">Scorrono in alto nella pagina principale del sito. La prima è la copertina. Le foto vengono alleggerite da sole prima di caricarle.</span>
+    <button class="btn gold" data-act="siteAdd" data-k="home">${SVG(IC.plus)}Aggiungi foto</button>${u.length?photoGrid(u,'home',''):'<div class="empty">Nessuna foto: aggiungine una.</div>'}</section>`;
+  }else{
+    const list=tab==='flotta'?st.fleet:tab==='news'?st.posts:st.party;
+    const label={flotta:'Nuovo mezzo',news:'Nuova news',party:'Nuovo evento'}[tab];
+    h+=`<button class="btn" data-act="siteEdit" data-k="${tab}">${SVG(IC.plus)}${label}</button><div class="list2">${list.map(x=>{const g=siteUrls(x);return `<button class="card sitem" data-act="siteEdit" data-k="${tab}" data-id="${x.id}">
+      ${g[0]?`<img src="${esc(g[0])}" alt="" loading="lazy">`:`<span class="noimg">${SVG(IC.photo)}</span>`}
+      <span class="si"><b>${esc(x.title||'Senza titolo')}</b><span class="small muted">${tab==='flotta'?(x.seats?x.seats+' posti · ':'')+g.length+' foto':tab==='news'?esc(dateShort(String(x.published_at||x.created_at||'').slice(0,10)))+(x.category?' · '+esc(x.category):''):esc(x.event_date?dateShort(x.event_date):'Senza data')+' · '+g.length+' foto'}</span>
+      <span class="tag ${x.published===false?'':'ok'}" style="align-self:flex-start;${x.published===false?'background:var(--attesa-bg);color:var(--attesa)':'background:var(--pagato-bg);color:var(--pagato)'}">${x.published===false?'Nascosto':'Visibile sul sito'}</span></span></button>`}).join('')||'<div class="empty">Ancora niente qui.</div>'}</div>`;
+  }
+  h+=`<a class="btn ghost" href="/" target="_blank" rel="noopener">${SVG(IC.ext)}Guarda il sito</a>`;
+  return h;
+})}
+async function siteAddHome(){
+  const files=await pickFiles('image/*',true);if(!files.length)return;
+  toast('Carico '+files.length+(files.length===1?' foto…':' foto…'));
+  try{const add=await uploadSite(files,'carousel',(i,n)=>toast('Carico foto '+i+' di '+n+'…'));
+    const cur=siteUrls({gallery_urls:S.site.carousel&&S.site.carousel.foto_urls});
+    await siteCall('carousel_save',{urls:[...cur,...add]});toast(add.length===1?'Foto aggiunta alla Home':add.length+' foto aggiunte alla Home');render();
+  }catch(e){toast(e.message,true)}
+}
+/* bozza dell'elemento in modifica (flotta, news, party) */
+let siteDraft=null;
+function siteEdit(kind,id){
+  const list=kind==='flotta'?S.site.fleet:kind==='news'?S.site.posts:S.site.party,x=id?list.find(y=>y.id===id):null;
+  siteDraft={kind,id:x?x.id:'',title:x?x.title||'':'',seats:x?x.seats||'':'',description:x?x.description||'':'',category:x?x.category||'':'',excerpt:x?x.excerpt||'':'',body:x?x.body||'':'',event_date:x?x.event_date||'':'',gallery:kind==='news'?(x&&x.cover_url?[x.cover_url]:[]):siteUrls(x),published:x?x.published!==false:true};
+  siteSheet();
+}
+function siteSheet(){
+  const d=siteDraft,k=d.kind,v=s=>esc(s==null?'':s);
+  const title={flotta:d.id?'Modifica mezzo':'Nuovo mezzo',news:d.id?'Modifica news':'Nuova news',party:d.id?'Modifica evento':'Nuovo evento'}[k];
+  sheet(`<h3>${title}</h3>
+  <label class="f">${k==='flotta'?'Nome del mezzo':'Titolo'}<input id="sdTitle" value="${v(d.title)}"></label>
+  ${k==='flotta'?`<label class="f">Posti<input id="sdSeats" type="number" min="1" value="${v(d.seats)}"></label><label class="f">Descrizione<textarea id="sdDesc" rows="4">${v(d.description)}</textarea></label>`:''}
+  ${k==='news'?`<label class="f">Categoria (facoltativa)<input id="sdCat" value="${v(d.category)}"></label><label class="f">Riassunto (si vede nell'elenco)<textarea id="sdExc" rows="2">${v(d.excerpt)}</textarea></label><label class="f">Testo completo<textarea id="sdBody" rows="7">${v(d.body)}</textarea></label>`:''}
+  ${k==='party'?`<label class="f">Data<input id="sdDate" type="date" value="${v(d.event_date)}"></label><label class="f">Descrizione<textarea id="sdDesc" rows="4">${v(d.description)}</textarea></label>`:''}
+  <div class="f"><b style="font-size:14px">${k==='news'?'Foto di copertina':'Foto'}</b> ${d.gallery.length?photoGrid(d.gallery,'draft',''):'<span class="small muted">Nessuna foto.</span>'}
+  <button class="btn light" id="sdAdd">${SVG(IC.plus)}${k==='news'?(d.gallery.length?'Cambia foto':'Scegli foto'):'Aggiungi foto'}</button></div>
+  <label style="display:flex;gap:10px;align-items:center;padding:6px 0"><input type="checkbox" id="sdPub" ${d.published?'checked':''} style="width:22px;height:22px"> Visibile sul sito</label>
+  <button class="btn" id="sdOk">Salva</button>
+  ${d.id?`<button class="action danger" id="sdDel">${SVG(IC.x)}Elimina</button>`:''}
+  <button class="btn light" id="sdNo">Annulla</button>`);
+  const keep=()=>{d.title=$('#sdTitle').value;if($('#sdSeats'))d.seats=$('#sdSeats').value;if($('#sdDesc'))d.description=$('#sdDesc').value;if($('#sdCat'))d.category=$('#sdCat').value;if($('#sdExc'))d.excerpt=$('#sdExc').value;if($('#sdBody'))d.body=$('#sdBody').value;if($('#sdDate'))d.event_date=$('#sdDate').value;d.published=$('#sdPub').checked};
+  d.keep=keep;
+  $('#sdNo').onclick=()=>{siteDraft=null;closeSheet()};
+  $('#sdAdd').onclick=async e=>{const b=e.currentTarget;keep();const files=await pickFiles('image/*',k!=='news');if(!files.length)return;
+    b.disabled=true;b.textContent='Carico…';
+    try{const add=await uploadSite(files,{flotta:'fleet',news:'posts',party:'party'}[k],(i,n)=>{b.textContent='Carico '+i+' di '+n+'…'});d.gallery=k==='news'?add.slice(0,1):[...d.gallery,...add];d.added=(d.added||[]).concat(add)}
+    catch(er){toast(er.message,true)}siteSheet()};
+  $('#sdOk').onclick=e=>guard(e.currentTarget,async()=>{keep();if(!d.title.trim())throw new Error(k==='flotta'?'Scrivi il nome del mezzo.':'Scrivi il titolo.');
+    const base={id:d.id,title:d.title,published:d.published};
+    if(k==='flotta')await siteCall('fleet_save',{...base,seats:d.seats,description:d.description,gallery_urls:d.gallery});
+    else if(k==='news')await siteCall('post_save',{...base,category:d.category,excerpt:d.excerpt,body:d.body,cover_url:d.gallery[0]||null});
+    else await siteCall('party_save',{...base,event_date:d.event_date,description:d.description,gallery_urls:d.gallery});
+    if(d.removed&&d.removed.length)siteCall('remove_files',{urls:d.removed}).catch(()=>{});
+    siteDraft=null;closeSheet();toast('Salvato: già visibile sul sito');render()});
+  if($('#sdDel'))$('#sdDel').onclick=()=>{keep();sheet(`<h3>Eliminare «${esc(d.title||'questo elemento')}»?</h3><span class="muted">Sparisce dal sito insieme alle sue foto. Non si può annullare.</span><button class="btn danger" id="sdYes">Sì, elimina</button><button class="btn light" id="sdBack">No, torna indietro</button>`);
+    $('#sdBack').onclick=siteSheet;
+    $('#sdYes').onclick=e=>guard(e.currentTarget,async()=>{await siteCall('delete',{kind:{flotta:'fleet',news:'post',party:'party'}[k],id:d.id});siteCall('remove_files',{urls:[...d.gallery,...(d.removed||[])]}).catch(()=>{});siteDraft=null;closeSheet();toast('Eliminato');render()})};
+}
+async function photoAction(act,kind,id,i){
+  if(kind==='draft'){const d=siteDraft;if(!d)return;d.keep&&d.keep();const g=d.gallery;
+    if(act==='phFirst')d.gallery=[g[i],...g.filter((_,n)=>n!==i)];
+    else if(act==='phLeft'){[g[i-1],g[i]]=[g[i],g[i-1]]}
+    else{d.removed=(d.removed||[]).concat(g[i]);d.gallery=g.filter((_,n)=>n!==i)}
+    return siteSheet();}
+  const cur=siteUrls({gallery_urls:S.site.carousel&&S.site.carousel.foto_urls});let next=cur.slice();
+  if(act==='phFirst')next=[cur[i],...cur.filter((_,n)=>n!==i)];
+  else if(act==='phLeft'){[next[i-1],next[i]]=[next[i],next[i-1]]}
+  else{
+    sheet(`<h3>Togliere questa foto dalla Home?</h3><img src="${esc(cur[i])}" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:12px"><button class="btn danger" id="pdYes">Sì, togli la foto</button><button class="btn light" id="pdNo">No</button>`);
+    $('#pdNo').onclick=closeSheet;
+    $('#pdYes').onclick=e=>guard(e.currentTarget,async()=>{await siteCall('carousel_save',{urls:cur.filter((_,n)=>n!==i)});siteCall('remove_files',{urls:[cur[i]]}).catch(()=>{});closeSheet();toast('Foto tolta dalla Home');render()});
+    return;
+  }
+  try{await siteCall('carousel_save',{urls:next});render();toast(act==='phFirst'?'Ora è la copertina':'Ordine aggiornato')}catch(e){toast(e.message,true)}
+}
 /* ---------- azioni ---------- */
 function toast(msg,bad){const t=$('#toast');t.textContent=msg;t.className='toast'+(bad?' bad':'');t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,bad?6000:3200)}
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div class="box" role="dialog" aria-modal="true">${html}</div>`;s.hidden=false;s.onclick=e=>{if(e.target===s)closeSheet()};const f=s.querySelector('input');if(f)setTimeout(()=>f.focus(),50)}
@@ -1064,7 +1195,7 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
   const id=a.dataset.id,B=S.book;
   switch(a.dataset.act){
-    case 'reload':loadAll();break;
+    case 'reload':S.site=null;S.siteErr=null;loadAll();break;
     case 'goInc':S.tab='incassi';S.incTrip=id;render();window.scrollTo(0,0);break;
     case 'openTrip':S.tab='viaggi';S.tripId=id;S.search='';render();window.scrollTo(0,0);break;
     case 'backTrips':S.tripId=null;render();break;
@@ -1108,6 +1239,11 @@ document.addEventListener('click',e=>{
     case 'waGroup':waGroupSheet(tripById(id));break;
     case 'agNew':agNewSheet();break;
     case 'agDone':agDone(id);break;
+    case 'siteTab':S.siteTab=id;render();break;
+    case 'siteRetry':S.siteErr=null;render();break;
+    case 'siteAdd':siteAddHome();break;
+    case 'siteEdit':siteEdit(a.dataset.k,id);break;
+    case 'phFirst':case 'phLeft':case 'phDel':photoAction(a.dataset.act,a.dataset.k,id,Number(a.dataset.i));break;
     case 'presenze':S.tab='presenze';S.tripId=id;render();window.scrollTo(0,0);break;
     case 'checkin':toggleCheckin(id);break;
     case 'shareRcpt':{const b=S.bookings.find(x=>x.id===a.dataset.b);shareReceiptSheet(id,b?nameOf(b):'cliente',b&&b.telefono,'trip');break}
