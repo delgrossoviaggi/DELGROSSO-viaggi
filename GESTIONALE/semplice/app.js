@@ -24,6 +24,21 @@ const today=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{tim
 const addDays=(iso,d)=>{const t=new Date(iso+'T12:00:00Z');t.setUTCDate(t.getUTCDate()+d);return t.toISOString().slice(0,10)};
 const GG=['dom','lun','mar','mer','gio','ven','sab'];
 const dateShort=iso=>{if(!/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')))return '—';const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');const y=String(iso).slice(0,4);return GG[d.getUTCDay()]+' '+String(iso).slice(8,10)+'/'+String(iso).slice(5,7)+(y!==today().slice(0,4)?'/'+y.slice(2):'')};
+const MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'],GIORNI=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+const dateParts=iso=>{const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');return isNaN(d)?{d:'—',m:'',w:''}:{d:d.getUTCDate(),m:MESI[d.getUTCMonth()],w:GIORNI[d.getUTCDay()]}};
+const dateLong=iso=>{const p=dateParts(iso);return p.w?p.w.charAt(0).toUpperCase()+p.w.slice(1)+' '+p.d+' '+['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][MESI.indexOf(p.m)]:''};
+const titleCase=s=>String(s||'').replace(/\s*\(\s*[A-Za-z]{2}\s*\)\s*$/,'').toLowerCase().replace(/(^|[\s'(-])([a-zà-ù])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(E|Di|De|Del|Della|In|A|Al|Alla|Da|Con|Per)\b/g,(w,_,i)=>i===0?w:w.toLowerCase()).replace(/\bG\.co\b/i,'G.co');
+const SVG=(d,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const IC={arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
+const firstStop=t=>titleCase(String(t.luogo_partenza||'').split(/\s*[|]\s*|\s+-\s*|\s*-\s+/)[0]||'');
+function ticketHtml(t,big){
+  const st=tripStats(t),pct=st.cap?Math.min(100,Math.round(st.pax/st.cap*100)):0,p=dateParts(t.data_partenza),from=firstStop(t),to=titleCase(t.destinazione||'');
+  return `<span class="stub"><span class="d">${p.d}</span><span class="m">${esc(p.m)}</span><span class="w">${esc(p.w.slice(0,3))}${t.ora_partenza?' '+esc(String(t.ora_partenza).slice(0,5)):''}</span></span>
+  <span class="tb"><span class="t">${esc(titleCase(tripLabel(t)))}${t.bis_parent_id?' <span class="tag warn">bus '+esc(t.bis_numero||2)+'</span>':''}</span>
+  ${from||to?`<span class="route">${esc(from||'Partenza')} ${SVG(IC.arrow)} ${esc(to||'')}</span>`:''}
+  <span class="bar ${pct>=100?'full':''}"><i style="width:${pct}%"></i></span>
+  <span class="foot"><span>${st.pax} su ${st.cap} posti${t.autobus_id?'':' <span class="tag bad">bus da assegnare</span>'}</span>${st.res>0?`<span>da incassare <b class="money-due">${eur(st.res)}</b></span>`:'<span class="money-ok">tutto incassato</span>'}</span></span>`;
+}
 const active=b=>!/annull|cancel|eliminat/i.test(String(b&&b.stato||''));
 const residuo=b=>Math.max(0,r2(num(b.totale)-num(b.pagato)));
 const nameOf=b=>String(b.cliente_nome||b.cliente||'Cliente').trim();
@@ -173,10 +188,10 @@ function render(){
   if(S.loading&&!S.trips.length)body+='<div class="empty">Carico i dati…</div>';
   else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
-  <header class="top"><div><div class="brand">DELGROSSO VIAGGI</div><h1>${esc(TITLES[view])}</h1></div>
-  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo, versione computer">Versione PC</a></div></header>
+  <header class="top"><div class="id"><img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi"><h1>${esc(TITLES[view])}</h1></div>
+  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo">${SVG(IC.ext)}<span class="lbl">Versione completa</span></a></div></header>
   <main>${body}</main>
-  <nav class="nav" aria-label="Menu principale"><div class="in">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
+  <nav class="nav" aria-label="Menu principale"><div class="in"><img class="rail-logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
   </div>`;
 }
 
@@ -184,8 +199,8 @@ function render(){
 let loginUser='nicola';
 function loginView(){
   return `<form class="login" id="loginForm" autocomplete="on">
-  <div class="brand" style="font-weight:700;letter-spacing:.12em;color:#F2C25B">DELGROSSO VIAGGI</div>
-  <h1>Gestionale semplice</h1>
+  <img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi">
+  <h1>Il gestionale</h1><p>Scegli chi sei e scrivi la tua password.</p>
   <div class="who" role="radiogroup" aria-label="Chi sei">
    <button type="button" data-user="nicola" class="${loginUser==='nicola'?'on':''}" aria-pressed="${loginUser==='nicola'}">Nicola</button>
    <button type="button" data-user="raffaele" class="${loginUser==='raffaele'?'on':''}" aria-pressed="${loginUser==='raffaele'}">Raffaele</button>
@@ -207,37 +222,33 @@ function bindLogin(){
 
 /* ----- Oggi ----- */
 function viewOggi(){
-  const nt=nextTrips(),cash=cashInHand(),t0=today();
+  const nt=nextTrips(),cash=cashInHand(),t0=today(),hr=new Date().getHours();
   const week=upcoming().filter(t=>t.data_partenza<=addDays(t0,7)).reduce((a,t)=>a+tripStats(t).res,0);
   const inc=defaultIncTrip(),incT=inc&&tripById(inc);
-  let h=`<p style="margin:0;font-size:16px;color:#334155">Ciao <b>${esc(me.nome||me.username)}</b>.`+
-   (nt.length?` Prossima partenza: <b>${esc(dateShort(nt[0].data_partenza))}</b>, ${nt.length===1?'1 bus':nt.length+' bus'}.`:' Nessuna partenza in programma.')+`</p>`;
-  if(incT){const st=tripStats(incT);h+=`<button class="big gold" data-act="goInc" data-id="${incT.id}"><b>€ Saldi a bordo</b><span>${esc(tripLabel(incT))} · ${esc(dateShort(incT.data_partenza))} · da incassare ${eur(st.res)}</span></button>`}
-  h+=`<button class="big navy" data-tab="prenota"><b>＋ Nuova prenotazione</b></button>`;
-  h+=`<div class="grid2"><div class="kpi"><span>Contanti in mano</span><b>${cash==null?'—':eur(cash)}</b></div><div class="kpi"><span>Da incassare · 7 gg</span><b>${eur(week)}</b></div></div>`;
+  const saluto=hr<13?'Buongiorno':hr<18?'Buon pomeriggio':'Buonasera';
+  const sub=nt.length?(nt[0].data_partenza===t0?'Oggi partono ':dateLong(nt[0].data_partenza)+' partono ')+(nt.length===1?'1 bus.':nt.length+' bus.'):'Nessuna partenza in programma.';
   const todo=[];
-  for(const t of upcoming().filter(t=>t.data_partenza<=addDays(t0,30)&&!t.autobus_id))todo.push(`Assegna l’autobus a <b>${esc(tripLabel(t))}</b> (${esc(dateShort(t.data_partenza))}) dal gestionale completo`);
+  for(const t of upcoming().filter(t=>t.data_partenza<=addDays(t0,30)&&!t.autobus_id))todo.push({tone:'bad',html:`Assegna l’autobus a <b>${esc(titleCase(tripLabel(t)))}</b> del ${esc(dateShort(t.data_partenza))}`,act:`data-act="openTrip" data-id="${t.id}"`});
   const lateAcc=S.bookings.filter(b=>active(b)&&num(b.pagato)<=0&&num(b.totale)>0&&(tripById(b.viaggio_id)||{}).data_partenza>=t0&&String(b.created_at||'').slice(0,10)<=addDays(t0,-num(b.giorni_acconto||2)));
-  for(const b of lateAcc.slice(0,3)){const t=tripById(b.viaggio_id);todo.push(`<b>${esc(nameOf(b))}</b> (${esc(tripLabel(t))} ${esc(dateShort(t.data_partenza))}): acconto non ancora ricevuto`)}
-  if(lateAcc.length>3)todo.push(`Altri ${lateAcc.length-3} clienti senza acconto: li trovi aprendo ogni viaggio`);
+  for(const b of lateAcc.slice(0,3)){const t=tripById(b.viaggio_id);todo.push({tone:'warn',html:`<b>${esc(nameOf(b))}</b> non ha ancora dato l’acconto per ${esc(titleCase(tripLabel(t)))} del ${esc(dateShort(t.data_partenza))}`,act:`data-act="openBooking" data-id="${b.id}"`})}
+  if(lateAcc.length>3)todo.push({tone:'warn',html:`Altri ${lateAcc.length-3} clienti senza acconto: li vedi aprendo ogni viaggio`});
   const lc=S.lastClose&&S.lastClose.data_chiusura;
-  if(!lc||lc<addDays(t0,-2))todo.push(`Chiusura di cassa: ${lc?'ultima il '+esc(dateShort(lc)):'mai fatta'}`);
-  h+=`<section class="card"><h2>Da fare</h2>${todo.length?todo.map(x=>`<div class="row" style="justify-content:flex-start;align-items:flex-start"><b style="color:#B45309">!</b><span>${x}</span></div>`).join(''):'<span class="muted">Tutto in ordine.</span>'}</section>`;
-  if(nt.length)h+=`<section class="card"><h2>Prossime partenze</h2>${nt.map(t=>tripRow(t)).join('')}</section>`;
-  h+=`<a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html">Apri il gestionale completo (versione computer)</a>`;
-  h+=`<button class="link small" style="align-self:center" data-act="logout">Esci (${esc(me.nome||me.username)})</button>`;
-  return h;
+  if(!lc||lc<addDays(t0,-2))todo.push({tone:'warn',html:`Chiudi la cassa: ${lc?'l’ultima chiusura è del '+esc(dateShort(lc)):'non l’hai mai chiusa'}`,act:'data-tab="cassa"'});
+  const left=`<div class="col">
+   ${incT?`<button class="big gold" data-act="goInc" data-id="${incT.id}">${SVG(IC.coins)}<span class="bt"><b>Saldi a bordo</b><span>${esc(titleCase(tripLabel(incT)))}, ${esc(dateShort(incT.data_partenza))}: da incassare ${eur(tripStats(incT).res)}</span></span></button>`:''}
+   <button class="big navy" data-tab="prenota">${SVG(IC.plus)}<span class="bt"><b>Nuova prenotazione</b><span>Cliente, viaggio, acconto</span></span></button>
+   ${nt.length?`<h2 style="margin:8px 2px 0;font-size:21px">Prossime partenze</h2><div class="list2" style="grid-template-columns:1fr">${nt.map(tripRow).join('')}</div>`:''}
+  </div>`;
+  const right=`<div class="col">
+   <div class="grid2"><div class="kpi"><span>Contanti in mano</span><b>${cash==null?'—':eur(cash)}</b></div><div class="kpi"><span>Da incassare in 7 giorni</span><b>${eur(week)}</b></div></div>
+   <section class="card"><h2>Da fare</h2>${todo.length?todo.map(x=>`<button class="link" style="display:flex;gap:10px;align-items:flex-start;color:var(--strada);font-weight:400;padding:8px 0;border-top:1px solid #EEF2F6" ${x.act||''}><span class="tag ${x.tone}" style="padding:2px 8px">!</span><span>${x.html}</span></button>`).join(''):'<span class="muted">Tutto in ordine.</span>'}</section>
+   <button class="link small" style="align-self:center" data-act="logout">Esci (${esc(me.nome||me.username)})</button>
+  </div>`;
+  return `<div class="greet"><h2>${saluto}, ${esc(me.nome||me.username)}</h2><p>${esc(sub)}</p></div><div class="oggi">${left}${right}</div>`;
 }
 
 /* ----- Viaggi ----- */
-function tripRow(t){
-  const st=tripStats(t),pct=st.cap?Math.min(100,Math.round(st.pax/st.cap*100)):0;
-  return `<button class="trip" data-act="openTrip" data-id="${t.id}">
-   <div class="row" style="align-items:baseline"><span class="t">${esc(tripLabel(t))}${t.bis_parent_id?' <span class="tag warn">bus '+esc(t.bis_numero||2)+'</span>':''}</span><span class="small muted" style="white-space:nowrap">${esc(dateShort(t.data_partenza))}</span></div>
-   <div class="bar"><i style="width:${pct}%"></i></div>
-   <div class="row small" style="color:#334155"><span>${st.pax} / ${st.cap} posti${t.autobus_id?'':' · <span class="tag bad">bus da assegnare</span>'}</span><span>Da incassare <b>${eur(st.res)}</b></span></div>
-  </button>`;
-}
+function tripRow(t){return `<button class="ticket" data-act="openTrip" data-id="${t.id}" aria-label="${esc(tripLabel(t)+' '+dateLong(t.data_partenza))}">${ticketHtml(t)}</button>`}
 function viewViaggi(){
   const up=upcoming();
   return `<button class="btn" data-act="tripForm">＋ Nuovo viaggio</button><div class="list2">`+(up.length?up.map(tripRow).join(''):'<div class="empty">Nessun viaggio in programma.</div>')+'</div>';
@@ -248,18 +259,22 @@ function viewViaggio(){
   const list=st.bs.filter(b=>!q||fold(nameOf(b)+' '+b.telefono+' '+b.fermata_partenza).includes(q)).sort((a,b)=>nameOf(a).localeCompare(nameOf(b),'it'));
   const paid=st.bs.filter(b=>residuo(b)<=0).length;
   let h=`<button class="link" data-act="backTrips">‹ Tutti i viaggi</button>
-  <div class="hero"><div style="display:flex;flex-direction:column;gap:3px"><b style="font-size:17px">${esc(t.titolo||tripLabel(t))}</b><span class="small" style="color:#C9D6E6">${esc(dateShort(t.data_partenza))}${t.ora_partenza?' · ore '+esc(String(t.ora_partenza).slice(0,5)):''} · ${st.pax}/${st.cap} posti · ${st.free} liberi</span></div><span class="big-n">${eur(st.res)}</span></div>
-  <div class="grid2"><button class="btn gold" data-act="goInc" data-id="${t.id}">Saldi a bordo</button><button class="btn" data-act="bookTrip" data-id="${t.id}">＋ Prenota qui</button></div>
-  <div class="grid2"><button class="btn light" data-act="tripForm" data-id="${t.id}">Modifica viaggio</button><button class="btn light" data-act="toggleMap">${S.showMap?'Nascondi piantina':'Piantina posti'}</button></div>
-  <div class="grid2"><button class="btn light" data-act="paxList" data-id="${t.id}">Lista passeggeri (stampa/PDF)</button><button class="btn light" data-act="waGroup" data-id="${t.id}">Numeri gruppo WhatsApp</button></div>
+  <div class="ticket big-ticket">${ticketHtml(t,true)}</div>
+  <div class="grid2"><button class="btn gold" data-act="goInc" data-id="${t.id}">Saldi a bordo</button><button class="btn" data-act="bookTrip" data-id="${t.id}">${SVG(IC.plus)} Prenota qui</button></div>
+  <div class="actions">
+   <button class="action" data-act="toggleMap" aria-pressed="${S.showMap}">${SVG(IC.seat)}${S.showMap?'Nascondi piantina':'Piantina posti'}</button>
+   <button class="action" data-act="paxList" data-id="${t.id}">${SVG(IC.list)}Lista passeggeri</button>
+   <button class="action" data-act="waGroup" data-id="${t.id}">${SVG(IC.chat)}Numeri WhatsApp</button>
+   <button class="action" data-act="tripForm" data-id="${t.id}">${SVG(IC.edit)}Modifica viaggio</button>
+  </div>
   ${t.autobus_id?'':'<div class="note">Nessun autobus assegnato: tocca «Modifica viaggio» per sceglierlo.</div>'}
   ${S.showMap?`<section class="card"><h2>Piantina · ${esc(busName(t.autobus_id)||'posti')}</h2>${seatMapHtml(t,{})}<span class="small muted">Tocca un posto occupato per aprire la prenotazione.</span></section>`:''}
   <input class="search" type="search" placeholder="Cerca passeggero, telefono o fermata" value="${esc(S.search)}" data-input="search" aria-label="Cerca passeggero">
-  <p class="small muted" style="margin:0">${st.bs.length} prenotazioni · ${paid} pagate · ${st.bs.length-paid} con residuo</p>`;
+  <p class="small muted" style="margin:0">${st.bs.length} prenotazioni: ${paid} pagate, ${st.bs.length-paid} devono ancora qualcosa. ${st.free} posti liberi.</p>`;
   h+='<div class="list2">'+list.map(b=>{
     const r=residuo(b),seats=seatsOf(b),wa=waNumber(b.telefono);
     const tag=r<=0?'<span class="tag ok">Pagato</span>':num(b.pagato)<=0?`<span class="tag bad">Senza acconto · ${eur(r)}</span>`:`<span class="tag warn">Resta ${eur(r)}</span>`;
-    return `<div class="pax" style="flex-direction:column;align-items:stretch"><div class="row" style="align-items:flex-start"><div class="who"><button class="link" style="padding:0;font-size:16px;font-weight:700;color:var(--ink)" data-act="openBooking" data-id="${b.id}">${esc(nameOf(b))} ›</button><span>${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${seats.length?' · '+esc(seats.join(', ')):''}${b.fermata_partenza?' · '+esc(b.fermata_partenza):''}</span></div>${tag}</div>
+    return `<div class="pax" style="flex-direction:column;align-items:stretch"><div class="row" style="align-items:flex-start"><div class="who"><button class="link" style="padding:0;font-size:16px;font-weight:700;color:var(--ink)" data-act="openBooking" data-id="${b.id}">${esc(nameOf(b))} ›</button><span>${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${seats.length?' · '+esc(seats.join(', ')):''}${b.fermata_partenza?' · '+esc(titleCase(b.fermata_partenza)):''}</span></div>${tag}</div>
     ${b.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(b.telefono))}">Chiama ${esc(b.telefono)}</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}</div>`;
   }).join('')||'<div class="empty">Nessun passeggero trovato.</div>';
   return h+'</div>';
@@ -271,12 +286,12 @@ function viewIncassi(){
   const trips=S.trips.filter(t=>t.data_partenza>=addDays(t0,-10)&&(tripStats(t).res>0||t.id===S.incTrip));
   if(!S.incTrip||!tripById(S.incTrip))S.incTrip=defaultIncTrip();
   const t=tripById(S.incTrip);
-  let h=`<div class="chips" role="tablist" aria-label="Viaggio">${trips.map(x=>`<button class="chip ${x.id===S.incTrip?'on':''}" data-act="incTrip" data-id="${x.id}">${esc(dateShort(x.data_partenza))} · ${esc(tripLabel(x))}${x.bis_parent_id?' (bus '+esc(x.bis_numero||2)+')':''}</button>`).join('')}</div>`;
+  let h=`<div class="chips" role="tablist" aria-label="Viaggio">${trips.map(x=>`<button class="chip ${x.id===S.incTrip?'on':''}" data-act="incTrip" data-id="${x.id}"><b>${esc(dateShort(x.data_partenza))}</b> ${esc(titleCase(tripLabel(x)))}${x.bis_parent_id?' · bus '+esc(x.bis_numero||2):''}</button>`).join('')}</div>`;
   if(!t)return h+'<div class="empty">Nessun saldo da incassare. Ottimo!</div>';
   const st=tripStats(t),due=st.bs.filter(b=>residuo(b)>0).sort((a,b)=>nameOf(a).localeCompare(nameOf(b),'it'));
   const doneToday=S.paysToday.filter(p=>p.viaggio_id===t.id);
   const incToday=doneToday.reduce((a,p)=>a+num(p.importo),0);
-  h+=`<div class="hero"><div style="display:flex;flex-direction:column;gap:3px"><span class="small" style="color:#C9D6E6">${esc(t.titolo||tripLabel(t))}</span><span>Incassati oggi <b>${eur(incToday)}</b> · restano <b>${eur(st.res)}</b></span></div><span class="big-n">${due.length}</span></div>
+  h+=`<div class="hero"><div style="display:flex;flex-direction:column;gap:3px"><b style="font-size:18px">${esc(titleCase(tripLabel(t)))}${t.bis_parent_id?' · bus '+esc(t.bis_numero||2):''}</b><span class="small" style="color:#C9D6E6">${esc(dateLong(t.data_partenza))}</span><span>Incassati oggi <b>${eur(incToday)}</b></span></div><div style="text-align:right"><span class="big-n">${eur(st.res)}</span><div class="small" style="color:#C9D6E6">${due.length} da saldare</div></div></div>
   <p class="small muted" style="margin:0">Tocca il pulsante quando il passeggero ti paga. Viene registrato in contanti a nome tuo. Nessun messaggio al cliente.</p>`;
   if(S.lastPayment&&S.lastPayment.tripId===t.id)h+=`<div class="note row"><span>Registrato: ${esc(S.lastPayment.name)} ${eur(S.lastPayment.amount)}</span><button class="link" data-act="undoPay">Annulla</button></div>`;
   h+='<div class="list2">'+due.map(b=>{const r=residuo(b),seats=seatsOf(b);return `<div class="pax"><div class="who"><b>${esc(nameOf(b))}</b><span>${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${seats.length?' · '+esc(seats.slice(0,8).join(', '))+(seats.length>8?'…':''):''}${num(b.pagato)<=0?' · nessun acconto':''}</span><button class="link small" data-act="payOther" data-id="${b.id}">Importo diverso</button></div><button class="pay" data-act="pay" data-id="${b.id}">Incassato ${eur(r)}</button></div>`}).join('')+'</div>'+(due.length?'':'<div class="empty">Tutti hanno pagato su questo viaggio.</div>');
@@ -290,7 +305,7 @@ function viewCassa(){
   const c=S.cash,cash=cashInHand(),other=otherOperator();
   let h='';
   if(c&&c.error)h+=`<div class="err">Non riesco a calcolare la cassa: ${esc(c.error)}</div>`;
-  h+=`<section class="card" style="align-items:center"><span class="small muted" style="font-weight:700">CONTANTI CHE DOVRESTI AVERE ORA</span><div class="money">${cash==null?'—':eur(cash)}</div>`;
+  h+=`<section class="card" style="align-items:center"><span class="muted" style="font-weight:600">Contanti che dovresti avere ora</span><div class="money">${cash==null?'—':eur(cash)}</div>`;
   if(c&&!c.error)h+=`<div style="width:100%">
    <div class="line"><span>Dall’ultima chiusura${c.previous_date?' ('+esc(dateShort(c.previous_date))+')':''}</span><b>${eur(c.saldo_iniziale)}</b></div>
    <div class="line"><span>Acconti e saldi incassati</span><b>+ ${eur(num(c.incassi_viaggi)+num(c.incassi_noleggi))}</b></div>
@@ -410,11 +425,12 @@ function seatMapHtml(t,opts){
 
 /* ----- Altro, Clienti, Flotta ----- */
 function viewAltro(){
-  const it=(k,t,d)=>`<button class="trip" data-tab="${k}"><span class="t">${t}</span><span class="small muted">${d}</span></button>`;
-  return `<div class="list2">${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
+  const ico={clienti:IC.user,conti:IC.chart,agenda:IC.cal,noleggi:IC.van,preventivi:IC.doc,notifiche:IC.bell,flotta:IC.bus};
+  const it=(k,t,d)=>`<button class="tile" data-tab="${k}">${SVG(ico[k])}<span class="tt">${t}</span><span class="td">${d}</span></button>`;
+  return `<div class="tiles">${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
   <section class="card"><h2>Versione completa</h2><span class="muted small">Per le cose rare (piantine nuove, bus BIS, locandine, rimborsi, impostazioni) resta disponibile il gestionale di prima.</span>
-  <a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html">Apri la versione completa</a></section>
-  <button class="link small" style="align-self:center" data-act="logout">Esci (${esc(me.nome||me.username)})</button>`;
+  <a class="btn ghost" href="../index.html">${SVG(IC.ext)}Apri la versione completa</a></section>
+  <button class="btn light" data-act="logout">${SVG(IC.out)}Esci (${esc(me.nome||me.username)})</button>`;
 }
 async function ensureAllBookings(){
   if(S.allBookings)return;
@@ -502,15 +518,17 @@ function bookingSheet(id){
   const b=S.bookings.find(x=>x.id===id);if(!b)return toast('Prenotazione non trovata: aggiorna.',true);
   const t=tripById(b.viaggio_id),r=residuo(b),wa=waNumber(b.telefono);
   sheet(`<h3>${esc(nameOf(b))}</h3>
-  <span class="muted">${esc(t?tripLabel(t)+' · '+dateShort(t.data_partenza):'')} · ${num(b.posti)} posti${currentSeats(b).length?' (n. '+esc(currentSeats(b).join(', '))+')':''}</span>
+  <span class="muted">${esc(t?titleCase(tripLabel(t))+', '+dateShort(t.data_partenza):'')} · ${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${currentSeats(b).length?' (n. '+esc(currentSeats(b).join(', '))+')':''}${b.fermata_partenza?' · da '+esc(titleCase(b.fermata_partenza)):''}</span>
   <div class="line"><span>Totale</span><b>${eur(b.totale)}</b></div><div class="line"><span>Pagato</span><b>${eur(b.pagato)}</b></div><div class="line"><span>Resta</span><b>${eur(r)}</b></div>
   ${b.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(b.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}
   ${r>0?`<button class="btn gold" id="bsPay">Registra pagamento</button>`:''}
-  <button class="btn" id="bsEdit">Modifica dati</button>
-  <button class="btn light" id="bsPdf">Conferma prenotazione PDF</button>
-  <button class="btn light" id="bsSeats">Cambia posti</button>
-  <button class="btn light" id="bsMove">Sposta su un altro viaggio</button>
-  <button class="btn light" id="bsCancel" style="color:var(--bad)">Annulla prenotazione</button>
+  <div class="actions two">
+  <button class="action" id="bsEdit">${SVG(IC.edit)}Modifica dati</button>
+  <button class="action" id="bsSeats">${SVG(IC.seat)}Cambia posti</button>
+  <button class="action" id="bsMove">${SVG(IC.move)}Sposta viaggio</button>
+  <button class="action" id="bsPdf">${SVG(IC.doc)}Conferma PDF</button>
+  </div>
+  <button class="action danger" id="bsCancel">${SVG(IC.x)}Annulla prenotazione</button>
   <button class="btn light" id="bsClose">Chiudi</button>`);
   $('#bsClose').onclick=closeSheet;
   if($('#bsPay'))$('#bsPay').onclick=()=>askPay(b,r,true);
