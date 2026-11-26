@@ -1,0 +1,16 @@
+/* DELGROSSO DG86 — menu laterale semplice */
+#dg44-sidebar-menu.dg86 .dg86-wrap{display:flex;flex-direction:column;gap:6px;width:100%}
+#dg44-sidebar-menu.dg86 .dg86-search{width:100%;box-sizing:border-box;font-size:15px;padding:10px 12px;border:1px solid #c7d6e8;border-radius:10px;background:#fff;color:#13335b;margin:2px 0 6px}
+#dg44-sidebar-menu.dg86 .dg86-title{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#5b708a;padding:6px 8px 2px}
+#dg44-sidebar-menu.dg86 .dg86-daily,#dg44-sidebar-menu.dg86 .dg86-items{display:flex;flex-direction:column;gap:3px}
+#dg44-sidebar-menu.dg86 .dg86-group{border-top:1px solid #dbe6f3;padding-top:4px}
+#dg44-sidebar-menu.dg86 .dg86-group>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;font-weight:800;color:#13335b;padding:10px 8px;border-radius:9px;min-height:42px;user-select:none}
+#dg44-sidebar-menu.dg86 .dg86-group>summary::-webkit-details-marker{display:none}
+#dg44-sidebar-menu.dg86 .dg86-group>summary::after{content:'▸';font-size:13px;color:#5b708a;transition:transform .15s}
+#dg44-sidebar-menu.dg86 .dg86-group[open]>summary::after{transform:rotate(90deg)}
+#dg44-sidebar-menu.dg86 .dg86-group>summary:hover{background:#e7f0fa}
+#dg44-sidebar-menu.dg86 .dg86-count{margin-left:auto;font-size:12px;font-weight:700;color:#7a8ca3}
+#dg44-sidebar-menu.dg86 .dg86-items{padding:2px 0 6px 8px}
+#dg44-sidebar-menu.dg86 .dg86-daily button{font-size:15px!important}
+#dg44-sidebar-menu.dg86 button[hidden],#dg44-sidebar-menu.dg86 details[hidden],#dg44-sidebar-menu.dg86 .dg86-title[hidden]{display:none!important}
+#dg44-sidebar-menu.dg86 .dg86-phone{display:block;margin-top:8px;padding:10px 8px;border-top:1px solid #dbe6f3;font-size:14px;font-weight:700;color:#0b5cad;text-decoration:none}
