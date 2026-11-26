@@ -46,11 +46,15 @@
       return info?{bytes:b,...info}:null;
     }catch(e){return null}
   }
+  // Referente per fermata: San Severo, Apricena, Lesina -> Raffaele; San Nicandro Garganico -> Nicola.
+  // Fermate diverse o miste: entrambi.
+  const RAFFAELE={nome:'Raffaele DELGROSSO',tel:'320 573 0466'},NICOLA={nome:'Nicola',tel:'366 212 7916'};
+  function stopContacts(f){const s=String(f||'').toLowerCase(),n=/nicandro/.test(s),r=/severo|apricena|lesina/.test(s);return n&&!r?[NICOLA]:r&&!n?[RAFFAELE]:[RAFFAELE,NICOLA]}
   function buildPdf(data,logo){
     const W=595,H=842, objects=[];
     function add(body){objects.push(body);return objects.length}
     const catalog=add('<< /Type /Catalog /Pages 2 0 R >>');
-    const pages=2;
+    const pages=add('<< /Type /Pages /Kids [] /Count 0 >>'); // oggetto 2, completato sotto
     const font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
     const fontBold=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
     let imageId=null;
@@ -87,12 +91,20 @@
     line(310,395,'Posti scelti',9,false); line(310,375,data.posti.join(' - '),14,true);
     line(50,330,'Prezzo per persona',9,false); line(50,310,`EUR ${data.prezzo.toFixed(2)}`,12,true);
     line(50,265,'TOTALE VIAGGIO',10,false); line(50,235,`EUR ${data.totale.toFixed(2)}`,25,true);
-    content.push('0.94 0.97 1 rg 50 175 495 42 re f');
+    // Avviso acconto: 2 giorni, poi i posti vengono svincolati.
+    content.push('1 0.97 0.92 rg 50 160 495 58 re f');
+    content.push('0.89 0.64 0.17 rg 50 160 4 58 re f');
     content.push('0 0 0 rg');
-    line(65,198,'Conserva questo documento come conferma della prenotazione.',10,true);
-    line(50,142,'La conferma non costituisce ricevuta di pagamento.',9,false);
-    line(50,105,'DELGROSSO Viaggi & Limousine Bus',9,false);
-    line(50,88,'Conferma generata automaticamente dal sito ufficiale.',8,false);
+    line(65,200,'IMPORTANTE - ACCONTO ENTRO 2 GIORNI',10,true);
+    line(65,184,'Trascorsi 2 giorni dalla prenotazione, se i posti non sono stati bloccati con un acconto,',8.6,false);
+    line(65,171,'verranno svincolati immediatamente.',8.6,false);
+    line(50,140,'Conserva questo documento. La conferma non costituisce ricevuta di pagamento.',8.6,false);
+    // Contatto per la fermata scelta, in basso a sinistra.
+    const contacts=stopContacts(data.fermataPartenza);
+    line(50,112,'Per l\'acconto e per informazioni contatta:',8.6,false);
+    contacts.forEach((c,i)=>line(50,94-i*18,c.nome+'  -  Tel. e WhatsApp '+c.tel,12,true));
+    line(330,60,'DELGROSSO Viaggi & Limousine Bus',8,false);
+    line(330,47,'Conferma generata dal sito ufficiale.',7.5,false);
     const stream=content.join('\n');
     const resources=`<< /Font << /F1 ${font} 0 R /F2 ${fontBold} 0 R >>${imageId?` /XObject << /Im1 ${imageId} 0 R >>`:''} >>`;
     const contentId=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
@@ -129,7 +141,7 @@
     return new Blob([bytes],{type:'application/pdf'});
   }
   window.DGReceipt={
-    generate,
+    generate,stopContacts,
     async download(data){
       const blob=await generate(data); const url=URL.createObjectURL(blob); const a=document.createElement('a');
       a.href=url; a.download=`conferma-prenotazione-${slug(data.viaggio)}.pdf`; document.body.appendChild(a); a.click(); a.remove();

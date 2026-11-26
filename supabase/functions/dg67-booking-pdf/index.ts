@@ -24,6 +24,9 @@ function wrap(font,size,x,max){
  }if(line)out.push(line);return out.length?out:["-"];
 }
 const seatList=(rows,b)=>{const xs=(rows||[]).map(r=>Number(r.posto)).filter(n=>n>0).sort((a,c)=>a-c);if(xs.length)return xs.join(", ");return T(b.posti_selezionati).split(/[;,\s]+/).filter(s=>/^\d+$/.test(s)).map(Number).sort((a,c)=>a-c).join(", ")};
+// Referente per fermata: San Severo, Apricena, Lesina -> Raffaele; San Nicandro Garganico -> Nicola. Altre o miste: entrambi.
+const RAFFAELE={nome:"Raffaele DELGROSSO",tel:"320 573 0466"},NICOLA={nome:"Nicola",tel:"366 212 7916"};
+export function stopContacts(f){const s=T(f).toLowerCase(),n=/nicandro/.test(s),r=/severo|apricena|lesina/.test(s);return n&&!r?[NICOLA]:r&&!n?[RAFFAELE]:[RAFFAELE,NICOLA]}
 const tripName=v=>clean(v.titolo||v.destinazione||"Viaggio DELGROSSO");
 function footer(page,reg,bold,text){
  page.drawLine({start:{x:42,y:66},end:{x:page.getWidth()-42,y:66},thickness:.8,color:LINE});
@@ -58,7 +61,19 @@ export async function bookingPdf(b,v,seats,pays){
  }
  page.drawRectangle({x:42,y:y-4,width:4,height:16,color:confirmed?GOLD:ORANGE});
  page.drawText(confirmed?"Prenotazione confermata. Presentarsi alla fermata indicata 10 minuti prima della partenza.":"Richiesta registrata: la prenotazione non e ancora confermata.",{x:54,y,size:9.5,font:bold,color:confirmed?NAVY:ORANGE});
- footer(page,reg,bold,"Documento riepilogativo non fiscale - WhatsApp DELGROSSO 320 881 5899");
+ y-=30;
+ // Senza acconto: avviso dei 2 giorni.
+ if(paid<=0){
+  page.drawRectangle({x:42,y:y-46,width:W-84,height:54,color:rgb(1,.97,.92)});page.drawRectangle({x:42,y:y-46,width:4,height:54,color:GOLD});
+  page.drawText("IMPORTANTE - ACCONTO ENTRO 2 GIORNI",{x:56,y:y-8,size:9.5,font:bold,color:NAVY});
+  page.drawText("Trascorsi 2 giorni dalla prenotazione, se i posti non sono stati bloccati con un acconto,",{x:56,y:y-24,size:8.6,font:reg,color:INK});
+  page.drawText("verranno svincolati immediatamente.",{x:56,y:y-36,size:8.6,font:reg,color:INK});
+ }
+ // Referente della fermata, in basso a sinistra.
+ const cs=stopContacts(b.fermata_partenza);
+ page.drawText(paid>0?"Per informazioni contatta:":"Per l'acconto e per informazioni contatta:",{x:42,y:86+cs.length*16,size:8.4,font:reg,color:MUTED});
+ cs.forEach((c,i)=>page.drawText(c.nome+"  -  Tel. e WhatsApp "+c.tel,{x:42,y:86+(cs.length-1-i)*16,size:11,font:bold,color:NAVY}));
+ footer(page,reg,bold,"Documento riepilogativo non fiscale");
  return {bytes:await doc.save(),num,confirmed};
 }
 

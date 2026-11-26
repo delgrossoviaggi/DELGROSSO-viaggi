@@ -126,6 +126,12 @@ function makeBookingPdf(b,t,movements=[]){
  doc.heading('CONDIZIONI E AVVERTENZE');
  doc.paragraph('Gli acconti seguono le condizioni della prenotazione. In caso di rinuncia del cliente si applicano le condizioni comunicate; se il viaggio non raggiunge il minimo previsto, verificare le condizioni di rimborso.');
  doc.paragraph('Questa è una conferma di prenotazione e un riepilogo operativo; non sostituisce ricevuta fiscale o fattura. Le modifiche successive possono rendere superata questa versione del documento.');
+ if(!(Number(b.pagato)>0))doc.paragraph('IMPORTANTE: trascorsi 2 giorni dalla prenotazione, se i posti non sono stati bloccati con un acconto, verranno svincolati immediatamente.');
+ // Referente per fermata: San Severo, Apricena, Lesina -> Raffaele; San Nicandro Garganico -> Nicola. Altre o miste: entrambi.
+ const fs=String(b.fermata_partenza||'').toLowerCase(),fn=/nicandro/.test(fs),fr=/severo|apricena|lesina/.test(fs);
+ const contacts=fn&&!fr?[['Nicola','366 212 7916']]:fr&&!fn?[['Raffaele DELGROSSO','320 573 0466']]:[['Raffaele DELGROSSO','320 573 0466'],['Nicola','366 212 7916']];
+ doc.heading(Number(b.pagato)>0?'CONTATTI':'PER L\'ACCONTO E PER INFORMAZIONI');
+ contacts.forEach(c=>doc.paragraph(c[0]+' - Tel. e WhatsApp '+c[1]));
  doc.paragraph('Generato il '+new Date().toLocaleString('it-IT',{timeZone:'Europe/Rome'})+' · DELGROSSO VIAGGI & LIMOUSINE BUS');
  return doc.finish();
 }
