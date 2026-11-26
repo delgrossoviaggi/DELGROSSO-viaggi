@@ -49,12 +49,18 @@ function statusPill(t){
   if(a.free<=5)return `<span class="pill poco">${a.free===1?'Ultimo posto':'Ultimi '+a.free+' posti'}</span>`;
   return `<span class="pill ok">${a.free} posti liberi</span>`;
 }
+/* linea del percorso: le prime fermate collegate, poi quante ne restano */
+function route(st){
+  if(!st.length)return '';
+  const show=st.slice(0,1),rest=st.length-show.length;
+  return `<span class="route" aria-label="Partenza da ${esc(st.join(', '))}">${show.map((s,i)=>`${i?'<span class="ln"></span>':''}<span class="st">${esc(s)}</span>`).join('')}${rest>0?`<span class="ln"></span><span class="more">+${rest} ${rest===1?'altra fermata':'altre fermate'}</span>`:''}</span>`;
+}
 function ticket(t){
   const p=dparts(t.data_partenza),a=avail(t),img=poster(t),st=stopsOf(t);
   const href=`viaggio.html?id=${encodeURIComponent(t.id)}`;
   return `<a class="ticket${a.sold?' sold':''}" href="${href}">
    <div class="stub"><span class="d">${p.d}</span><span class="m">${p.m.slice(0,3)}</span><span class="w">${p.w.slice(0,3)}</span>${hhmm(t.ora_partenza)&&hhmm(t.ora_partenza)!=='00:00'?`<span class="h">ore ${hhmm(t.ora_partenza)}</span>`:''}</div>
-   <div class="tb"><span class="dest">${esc(tripName(t))}</span><span class="from">${st.length?'Da '+esc(st.join(', ')):''}</span>
+   <div class="tb"><span class="dest">${esc(tripName(t))}</span>${route(st)}
     ${statusPill(t)}
     <div class="row"><span class="price">${eur(t.prezzo)} <small>a persona</small></span><span class="go">${a.sold?'Al completo':'Prenota'}</span></div></div>
    ${img?`<img class="poster" src="${esc(img)}" alt="" loading="lazy">`:''}

@@ -11,7 +11,7 @@ from pathlib import Path
 import html
 
 ROOT = Path(__file__).resolve().parent.parent
-V = "20261126-sito1"
+V = "20261126-sito2"
 SITE = "https://www.delgrossoviaggi.it"
 WA = "https://wa.me/393208815899"
 
@@ -47,11 +47,11 @@ def head(file, title, desc, extra_js=()):
 <meta property="og:type" content="website">
 <meta property="og:url" content="{SITE}/{file}">
 <meta property="og:image" content="{SITE}/assets/logo-ufficiale.jpg">
-<meta name="theme-color" content="#0B2545">
+<meta name="theme-color" content="#060A1E">
 <link rel="icon" href="favicon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preload" href="assets/fonts/dmsans-400-700.woff" as="font" type="font/woff" crossorigin>
-<link rel="preload" href="assets/fonts/bitter-600-800.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/fonts/archivoblack.woff" as="font" type="font/woff" crossorigin>
 <link rel="preconnect" href="https://bhsanrbadsqcpbtxupmr.supabase.co" crossorigin>
 <link rel="stylesheet" href="assets/sito.css?v={V}">
 {js}
@@ -120,7 +120,7 @@ def page(file, title, desc, active, main, body_page, scripts=("js/sito.js",), he
 
 
 def top(crumb, h1, lead):
-    return f"""<section class="page-top"><div class="wrap">{f'<a class="crumb" href="{crumb[0]}">‹ {crumb[1]}</a>' if crumb else ''}<h1>{h1}</h1><p class="lead">{lead}</p></div></section>"""
+    return f"""<section class="page-top"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap">{f'<a class="crumb" href="{crumb[0]}">‹ {crumb[1]}</a>' if crumb else ''}<h1>{h1}</h1><p class="lead">{lead}</p></div></section>"""
 
 
 PEOPLE = f"""<div class="people">
@@ -141,11 +141,13 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
      "Gite in pullman Gran Turismo da San Severo, Apricena, San Nicandro Garganico e Lesina: Napoli, Alberobello, mercatini di Natale. Scegli il posto e prenota online.",
      "index.html", f"""
 <section class="hero">
+ <div class="trails" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
  <div class="wrap hero-grid">
-  <div>
+  <div class="hero-copy">
    <h1>Prossima fermata: la tua gita.</h1>
    <p class="lead">Gite in pullman Gran Turismo con partenza da San Severo, Apricena, San Nicandro Garganico e Lesina. Scegli il posto sulla piantina e prenota in un minuto.</p>
    <div class="hero-actions"><a class="btn btn-oro" href="viaggi.html">Vedi tutte le partenze {I['arrow']}</a><a class="btn btn-chiaro" href="{WA}" target="_blank" rel="noopener">{I['wa']} Scrivici</a></div>
+   <p class="live">Posti aggiornati in tempo reale</p>
   </div>
   <div class="board" aria-live="polite">
    <div class="board-title"><b>Prossime partenze</b><a href="viaggi.html">Tutte</a></div>
@@ -170,7 +172,7 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
  <div class="services">
   <a class="service" href="noleggio.html"><img src="assets/bus-bianco-reale-1400.jpg" alt="" loading="lazy" data-fleet-img="gt"><div class="in"><h3>Noleggio pullman con autista</h3><p class="muted">Per gruppi, scuole, associazioni, squadre sportive e pellegrinaggi.</p><span class="link-freccia">Scopri {I['arrow']}</span></div></a>
   <a class="service" href="limousine.html"><img src="assets/bus-extra-1400.jpg" alt="" loading="lazy" data-fleet-img="limo"><div class="in"><h3>Limousine Bus</h3><p class="muted">Compleanni, addii al nubilato e celibato, serate speciali: la festa comincia a bordo.</p><span class="link-freccia">Scopri {I['arrow']}</span></div></a>
-  <a class="service" href="preventivo.html"><img src="assets/logo-ufficiale.jpg" alt="" loading="lazy" style="object-fit:contain;background:#fff;padding:18px"><div class="in"><h3>Un viaggio su misura</h3><p class="muted">Dicci data, destinazione e numero di persone: ti mandiamo una proposta.</p><span class="link-freccia">Chiedi un preventivo {I['arrow']}</span></div></a>
+  <a class="service" href="preventivo.html"><div class="logo-tile"><img src="assets/logo-bianco.png" alt="" loading="lazy" width="420" height="210"></div><div class="in"><h3>Un viaggio su misura</h3><p class="muted">Dicci data, destinazione e numero di persone: ti mandiamo una proposta.</p><span class="link-freccia">Chiedi un preventivo {I['arrow']}</span></div></a>
  </div>
 </div></section>
 <section class="section" style="padding-top:0" id="homeNewsWrap" hidden><div class="wrap">
@@ -195,14 +197,14 @@ page("viaggi.html", "Partenze | DELGROSSO Viaggi",
 page("viaggio.html", "Dettagli della gita | DELGROSSO Viaggi",
      "Programma, prezzo, orario, fermate di partenza e posti liberi della gita. Scegli il tuo posto e prenota online.",
      "viaggi.html", f"""
-<section class="page-top" style="padding-bottom:30px"><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1 id="tripTitle">Caricamento…</h1><p class="lead" id="tripLead"></p></div></section>
+<section class="page-top" style="padding-bottom:30px"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1 id="tripTitle">Caricamento…</h1><p class="lead" id="tripLead"></p></div></section>
 <section class="section" style="padding-top:26px"><div class="wrap" id="tripDetail" aria-live="polite"><div class="skeleton" style="height:420px"></div></div></section>
 """, "viaggio", scripts=TRIP_JS)
 
 page("prenota.html", "Prenota il tuo posto | DELGROSSO Viaggi",
      "Prenota online la tua gita in pullman: scegli i posti sulla piantina, la fermata di partenza e ricevi subito la conferma in PDF.",
      "", f"""
-<section class="page-top" style="padding:28px 0 30px"><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1>Prenota il tuo posto</h1></div></section>
+<section class="page-top" style="padding:28px 0 30px"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1>Prenota il tuo posto</h1></div></section>
 <section class="section" style="padding-top:22px"><div class="wrap">
  <ol class="stepper" id="stepper" aria-label="Passaggi della prenotazione"><li data-s="1">1 · Gita e posti</li><li data-s="2">2 · I tuoi dati</li><li data-s="3">3 · Conferma</li></ol>
  <div id="book" aria-live="polite"><div class="skeleton" style="height:360px"></div></div>

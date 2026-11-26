@@ -105,7 +105,7 @@ function viewSeats(){
    </div>
    <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:1.35rem">Scegli i posti</h2><span class="muted small">${S.max} ${S.max===1?'posto libero':'posti liberi'}${S.busName?' · '+esc(S.busName):''}</span></div>
-    <div class="legend"><span><i style="background:#E3F0E8"></i>Libero</span><span><i style="background:var(--oro)"></i>Il tuo</span><span><i style="background:#E6EAEF"></i>Occupato</span></div>
+    <div class="legend"><span><i class="l-free"></i>Libero</span><span><i class="l-mine"></i>Il tuo</span><span><i class="l-busy"></i>Occupato</span></div>
     <div class="bus" id="busMap">${busHtml()}</div>
    </div></div>
    <aside class="card summary stack" id="sumBox">${summaryHtml()}</aside></div>`;
@@ -139,7 +139,7 @@ function toggleSeat(id){
   else{if(S.sel.length>=S.max){toast(`Per questa gita puoi prenotare al massimo ${S.max} ${S.max===1?'posto':'posti'}.`);return}S.sel.push(id)}
   refreshSeats();
 }
-function toast(m){let t=$('#bookToast');if(!t){t=document.createElement('div');t.id='bookToast';t.setAttribute('role','alert');t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:100px;z-index:60;background:var(--notte);color:#fff;padding:12px 16px;border-radius:12px;max-width:92vw;box-shadow:var(--ombra)';document.body.appendChild(t)}t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,3800)}
+function toast(m){let t=$('#bookToast');if(!t){t=document.createElement('div');t.id='bookToast';t.setAttribute('role','alert');t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:100px;z-index:60;background:#141C42;color:#fff;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.15);max-width:92vw;box-shadow:var(--ombra)';document.body.appendChild(t)}t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,3800)}
 
 /* ---------- passo 2: dati ---------- */
 function viewData(){
@@ -229,7 +229,7 @@ async function done(result,t,seats){
    <a class="btn btn-oro" id="pdfBtn" aria-disabled="true">Preparo la conferma in PDF…</a>
    <p class="muted small" id="pdfStatus" role="status"></p>
    <div class="note-box"><b>Ora manca solo l’acconto.</b> Versalo in contanti entro 2 giorni dalla prenotazione. Trascorsi 2 giorni, se i posti non sono stati bloccati con un acconto, verranno svincolati immediatamente.</div>
-   <div class="people">${contacts().map(c=>`<a class="person" style="background:var(--notte)" href="tel:+39${esc(c.tel.replace(/\s+/g,''))}"><b>${esc(c.nome)}</b><span class="tel">${esc(c.tel)}</span><span>Tocca per chiamare</span></a>`).join('')}</div>
+   <div class="people">${contacts().map(c=>`<a class="person" href="tel:+39${esc(c.tel.replace(/\s+/g,''))}"><b>${esc(c.nome)}</b><span class="tel">${esc(c.tel)}</span><span>Tocca per chiamare</span></a>`).join('')}</div>
    <p style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-chiaro" href="viaggi.html">Torna alle partenze</a><a class="btn btn-wa" href="${WA}?text=${encodeURIComponent('Buongiorno, ho prenotato online. Codice '+code+', posti '+posti.join(', ')+'.')}" target="_blank" rel="noopener">Scrivici su WhatsApp</a></p>
   </div>`;
   const pdfBtn=$('#pdfBtn'),st=$('#pdfStatus');
