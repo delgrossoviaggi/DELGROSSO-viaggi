@@ -170,7 +170,7 @@ function render(){
   else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div><div class="brand">DELGROSSO VIAGGI</div><h1>${esc(TITLES[view])}</h1></div>
-  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html">Avanzate</a></div></header>
+  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo, versione computer">Versione PC</a></div></header>
   <main>${body}</main>
   <nav class="nav" aria-label="Menu principale"><div class="in">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
   </div>`;
@@ -220,6 +220,7 @@ function viewOggi(){
   if(!lc||lc<addDays(t0,-2))todo.push(`Chiusura di cassa: ${lc?'ultima il '+esc(dateShort(lc)):'mai fatta'}`);
   h+=`<section class="card"><h2>Da fare</h2>${todo.length?todo.map(x=>`<div class="row" style="justify-content:flex-start;align-items:flex-start"><b style="color:#B45309">!</b><span>${x}</span></div>`).join(''):'<span class="muted">Tutto in ordine.</span>'}</section>`;
   if(nt.length)h+=`<section class="card"><h2>Prossime partenze</h2>${nt.map(t=>tripRow(t)).join('')}</section>`;
+  h+=`<a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html">Apri il gestionale completo (versione computer)</a>`;
   h+=`<button class="link small" style="align-self:center" data-act="logout">Esci (${esc(me.nome||me.username)})</button>`;
   return h;
 }
