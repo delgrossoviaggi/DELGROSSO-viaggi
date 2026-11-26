@@ -1,17 +1,21 @@
-name: DG41 actual public catalog
+name: Sito pubblico 2026
 on:
   push:
     paths:
-      - "js/future-v4.js"
-      - "index.html"
-      - "viaggi.html"
-      - "viaggio.html"
-      - "tests/dg41-public-catalog.mjs"
+      - "*.html"
+      - "js/sito.js"
+      - "js/prenota.js"
+      - "js/gestionale.js"
+      - "assets/sito.css"
+      - "tests/sito-2026.mjs"
       - ".github/workflows/dg41-public-catalog.yml"
   pull_request:
     paths:
-      - "js/future-v4.js"
-      - "tests/dg41-public-catalog.mjs"
+      - "*.html"
+      - "js/sito.js"
+      - "js/prenota.js"
+      - "assets/sito.css"
+      - "tests/sito-2026.mjs"
 permissions:
   contents: read
 jobs:
@@ -22,4 +26,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: node tests/dg41-public-catalog.mjs
+      - run: node tests/sito-2026.mjs

@@ -3,8 +3,8 @@
   "short_name": "DELGROSSO",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#03111f",
-  "theme_color": "#03111f",
+  "background_color": "#0B2545",
+  "theme_color": "#0B2545",
   "description": "Viaggi organizzati, Bus Gran Turismo e Limousine Bus.",
   "icons": [
     {"src":"/favicon.png","sizes":"any","type":"image/png","purpose":"any maskable"}
