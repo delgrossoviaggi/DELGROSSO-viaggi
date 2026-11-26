@@ -11,7 +11,7 @@ from pathlib import Path
 import html
 
 ROOT = Path(__file__).resolve().parent.parent
-V = "20261126-sito2"
+V = "20261126-sito3"
 SITE = "https://www.delgrossoviaggi.it"
 WA = "https://wa.me/393208815899"
 
@@ -26,6 +26,7 @@ NAV = [
     ("viaggi.html", "Partenze"),
     ("flotta.html", "Flotta"),
     ("limousine.html", "Limousine Bus"),
+    ("galleria.html", "Foto"),
     ("noleggio.html", "Noleggio"),
     ("chi-siamo.html", "Chi siamo"),
     ("contatti.html", "Contatti"),
@@ -119,8 +120,8 @@ def page(file, title, desc, active, main, body_page, scripts=("js/sito.js",), he
     print("scritto", file, len(out), "byte")
 
 
-def top(crumb, h1, lead):
-    return f"""<section class="page-top"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap">{f'<a class="crumb" href="{crumb[0]}">‹ {crumb[1]}</a>' if crumb else ''}<h1>{h1}</h1><p class="lead">{lead}</p></div></section>"""
+def top(crumb, h1, lead, photo=""):
+    return f"""<section class="page-top{' has-photo' if photo else ''}"{f' data-photo="{photo}"' if photo else ''}><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap">{f'<a class="crumb" href="{crumb[0]}">‹ {crumb[1]}</a>' if crumb else ''}<h1>{h1}</h1><p class="lead">{lead}</p></div></section>"""
 
 
 PEOPLE = f"""<div class="people">
@@ -148,6 +149,7 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
    <p class="lead">Gite in pullman Gran Turismo con partenza da San Severo, Apricena, San Nicandro Garganico e Lesina. Scegli il posto sulla piantina e prenota in un minuto.</p>
    <div class="hero-actions"><a class="btn btn-oro" href="viaggi.html">Vedi tutte le partenze {I['arrow']}</a><a class="btn btn-chiaro" href="{WA}" target="_blank" rel="noopener">{I['wa']} Scrivici</a></div>
    <p class="live">Posti aggiornati in tempo reale</p>
+   <div class="window" id="heroWindow" aria-label="Foto dei nostri viaggi"><img src="assets/bus-extra-1400.jpg" alt="Pullman DELGROSSO in partenza" fetchpriority="high"></div>
   </div>
   <div class="board" aria-live="polite">
    <div class="board-title"><b>Prossime partenze</b><a href="viaggi.html">Tutte</a></div>
@@ -164,8 +166,8 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
  </div>
 </div></section>
 <section class="section" style="padding-top:0"><div class="wrap">
- <div class="section-head"><div><h2>Viaggiate comodi</h2><p class="muted">I nostri pullman, fotografati davvero.</p></div><a class="link-freccia" href="flotta.html">La flotta {I['arrow']}</a></div>
- <div class="strip" id="homePhotos"><img src="assets/bus-bianco-reale-1400.jpg" alt="Pullman Gran Turismo DELGROSSO" loading="lazy"><img src="assets/bus-extra-1400.jpg" alt="Pullman Gran Turismo rosso DELGROSSO" loading="lazy"></div>
+ <div class="section-head"><div><h2>In viaggio con noi</h2><p class="muted">Foto vere delle nostre gite e dei nostri pullman. Tocca una foto per ingrandirla.</p></div><a class="link-freccia" href="galleria.html">Tutte le foto {I['arrow']}</a></div>
+ <div class="mosaic" id="homeMosaic"><img src="assets/bus-bianco-reale-1400.jpg" alt="Pullman Gran Turismo DELGROSSO" loading="lazy"><img src="assets/bus-extra-1400.jpg" alt="Pullman Gran Turismo DELGROSSO" loading="lazy"></div>
 </div></section>
 <section class="section" style="padding-top:0"><div class="wrap">
  <div class="section-head"><h2>Non solo gite</h2></div>
@@ -185,7 +187,7 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
 page("viaggi.html", "Partenze | DELGROSSO Viaggi",
      "Tutte le gite in pullman in programma: date, prezzi, fermate di partenza e posti liberi aggiornati. Prenota online scegliendo il tuo posto.",
      "viaggi.html", f"""
-{top(None, "Tutte le partenze", "Date, prezzi e posti liberi aggiornati in tempo reale. Tocca una gita per vedere il programma e scegliere i posti.")}
+{top(None, "Tutte le partenze", "Date, prezzi e posti liberi aggiornati in tempo reale. Tocca una gita per vedere il programma e scegliere i posti.", "trip")}
 <section class="section" style="padding-top:26px"><div class="wrap">
  <div class="filters" id="monthFilters" role="group" aria-label="Filtra per mese"></div>
  <label class="toggle"><input type="checkbox" id="onlyFree"> Solo gite con posti liberi</label>
@@ -199,6 +201,7 @@ page("viaggio.html", "Dettagli della gita | DELGROSSO Viaggi",
      "viaggi.html", f"""
 <section class="page-top" style="padding-bottom:30px"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1 id="tripTitle">Caricamento…</h1><p class="lead" id="tripLead"></p></div></section>
 <section class="section" style="padding-top:26px"><div class="wrap" id="tripDetail" aria-live="polite"><div class="skeleton" style="height:420px"></div></div></section>
+<section class="section" style="padding-top:0" id="tripPhotosWrap" hidden><div class="wrap"><div class="section-head"><h2>Com’è viaggiare con noi</h2><a class="link-freccia" href="galleria.html">Tutte le foto {I['arrow']}</a></div><div class="strip" id="tripPhotos"></div></div></section>
 """, "viaggio", scripts=TRIP_JS)
 
 page("prenota.html", "Prenota il tuo posto | DELGROSSO Viaggi",
@@ -215,7 +218,7 @@ page("prenota.html", "Prenota il tuo posto | DELGROSSO Viaggi",
 page("flotta.html", "La flotta | DELGROSSO Viaggi",
      "I pullman Gran Turismo e il Limousine Bus di DELGROSSO Viaggi, con foto reali, numero di posti e caratteristiche.",
      "flotta.html", f"""
-{top(None, "La nostra flotta", "Pullman Gran Turismo e Limousine Bus: foto reali dei mezzi con cui viaggerai. Tocca una foto per ingrandirla.")}
+{top(None, "La nostra flotta", "Pullman Gran Turismo e Limousine Bus: foto reali dei mezzi con cui viaggerai. Tocca una foto per ingrandirla.", "fleet")}
 <section class="section" style="padding-top:28px"><div class="wrap"><div class="grid" id="fleetList" aria-live="polite"><div class="skeleton" style="height:320px"></div><div class="skeleton" style="height:320px"></div></div></div></section>
 <section class="section" style="padding-top:0"><div class="wrap"><div class="card" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between"><div><h2>Organizzi un viaggio di gruppo?</h2><p class="muted" style="margin-top:6px">Dicci quante persone, dove e quando: scegliamo noi il mezzo giusto.</p></div><a class="btn btn-oro" href="preventivo.html?servizio=Noleggio%20Bus%20GT">Chiedi un preventivo {I['arrow']}</a></div></div></section>
 """, "flotta")
@@ -223,7 +226,7 @@ page("flotta.html", "La flotta | DELGROSSO Viaggi",
 page("limousine.html", "Limousine Bus | DELGROSSO Viaggi",
      "Limousine Bus per compleanni, feste private, addii al celibato e nubilato e serate speciali in Puglia e Molise. Guarda le foto e chiedi un preventivo.",
      "limousine.html", f"""
-{top(None, "Limousine Bus", "La festa comincia appena sali a bordo: luci, musica e spazio per stare insieme. Per compleanni, addii al celibato e nubilato, diciottesimi e serate speciali.")}
+{top(None, "Limousine Bus", "La festa comincia appena sali a bordo: luci, musica e spazio per stare insieme. Per compleanni, addii al celibato e nubilato, diciottesimi e serate speciali.", "limo")}
 <section class="section" style="padding-top:28px"><div class="wrap">
  <div class="tags"><span class="pill info">Compleanni e diciottesimi</span><span class="pill info">Addii al celibato e nubilato</span><span class="pill info">Feste private</span><span class="pill info">Serate in discoteca</span></div>
  <div class="card"><h2>Guarda gli interni</h2><p class="muted" style="margin-top:6px">Foto reali del nostro Limousine Bus. Tocca una foto per ingrandirla.</p><div class="gallery" id="limoGallery"></div></div>
@@ -243,7 +246,7 @@ page("limousine.html", "Limousine Bus | DELGROSSO Viaggi",
 page("noleggio.html", "Noleggio pullman con autista | DELGROSSO Viaggi",
      "Noleggio di pullman Gran Turismo con conducente per gruppi, scuole, associazioni, società sportive e pellegrinaggi. Chiedi un preventivo.",
      "noleggio.html", f"""
-{top(None, "Noleggio pullman con autista", "Per gruppi, associazioni, società sportive, gite scolastiche, pellegrinaggi ed eventi. Scegliamo il mezzo adatto al vostro itinerario e al numero di persone.")}
+{top(None, "Noleggio pullman con autista", "Per gruppi, associazioni, società sportive, gite scolastiche, pellegrinaggi ed eventi. Scegliamo il mezzo adatto al vostro itinerario e al numero di persone.", "fleet")}
 <section class="section" style="padding-top:28px"><div class="wrap">
  <div class="tags"><span class="pill info">Gruppi e associazioni</span><span class="pill info">Società sportive</span><span class="pill info">Gite scolastiche</span><span class="pill info">Pellegrinaggi</span><span class="pill info">Matrimoni ed eventi</span><span class="pill info">Transfer</span></div>
  <div class="steps">
@@ -259,10 +262,22 @@ page("noleggio.html", "Noleggio pullman con autista | DELGROSSO Viaggi",
 page("partyontheroad.html", "Party on the Road | DELGROSSO Viaggi",
      "Le feste e le serate organizzate a bordo del Limousine Bus DELGROSSO: foto degli eventi e informazioni per organizzare il tuo.",
      "", f"""
-{top(None, "Party on the Road", "Le serate a bordo del nostro Limousine Bus. Guarda le foto degli eventi e organizza il prossimo.")}
+{top(None, "Party on the Road", "Le serate a bordo del nostro Limousine Bus. Guarda le foto degli eventi e organizza il prossimo.", "limo")}
 <section class="section" style="padding-top:28px"><div class="wrap"><div class="grid" id="partyList" aria-live="polite"><div class="skeleton" style="height:260px"></div></div>
 <p style="margin-top:22px"><a class="btn btn-oro" href="preventivo.html?servizio=Limousine%20Bus">Organizza la tua festa {I['arrow']}</a></p></div></section>
 """, "party")
+
+page("galleria.html", "Foto | DELGROSSO Viaggi",
+     "Le foto delle gite DELGROSSO Viaggi, dei pullman Gran Turismo e del Limousine Bus.",
+     "galleria.html", f"""
+{top(None, "Foto", "Le nostre gite, i nostri pullman e le serate sul Limousine Bus. Tocca una foto per ingrandirla.", "trip")}
+<section class="section" style="padding-top:26px"><div class="wrap">
+ <div class="filters" id="photoFilters" role="group" aria-label="Scegli le foto"><button class="chip" type="button" data-f="tutte" aria-pressed="true">Tutte</button><button class="chip" type="button" data-f="gite" aria-pressed="false">Gite</button><button class="chip" type="button" data-f="pullman" aria-pressed="false">Pullman</button><button class="chip" type="button" data-f="limo" aria-pressed="false">Limousine Bus</button></div>
+ <div class="mosaic big" id="photoGrid" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+ <p style="margin-top:18px;text-align:center"><button class="btn btn-chiaro" type="button" id="moreFoto" hidden>Mostra altre foto</button></p>
+</div></section>
+{CONTACT_BAND}
+""", "galleria")
 
 page("news.html", "News | DELGROSSO Viaggi",
      "Novità, nuove gite e comunicazioni di DELGROSSO Viaggi & Limousine Bus.",
@@ -274,7 +289,7 @@ page("news.html", "News | DELGROSSO Viaggi",
 page("chi-siamo.html", "Chi siamo | DELGROSSO Viaggi",
      "DELGROSSO Viaggi & Limousine Bus: gite in pullman, noleggio con conducente ed eventi a bordo, con partenze dal Gargano e dall'Alto Tavoliere.",
      "chi-siamo.html", f"""
-{top(None, "Chi siamo", "Viaggi organizzati in pullman Gran Turismo, noleggio con conducente e Limousine Bus: persone vere, che conosci per nome.")}
+{top(None, "Chi siamo", "Viaggi organizzati in pullman Gran Turismo, noleggio con conducente e Limousine Bus: persone vere, che conosci per nome.", "trip")}
 <section class="section" style="padding-top:28px"><div class="wrap">
  <div class="card prose">
   <p>DELGROSSO Viaggi &amp; Limousine Bus organizza gite in pullman Gran Turismo con partenza da San Severo, Apricena, San Nicandro Garganico, Lesina e dalle altre fermate indicate in ogni viaggio.</p>
@@ -293,7 +308,7 @@ page("chi-siamo.html", "Chi siamo | DELGROSSO Viaggi",
 page("contatti.html", "Contatti | DELGROSSO Viaggi",
      "Contatti di DELGROSSO Viaggi: WhatsApp prenotazioni 320 881 5899, Raffaele 320 573 0466, Nicola 366 212 7916.",
      "contatti.html", f"""
-{top(None, "Contatti", "Per una gita, un noleggio o una festa sul Limousine Bus: chiamaci o scrivici, ti rispondiamo noi.")}
+{top(None, "Contatti", "Per una gita, un noleggio o una festa sul Limousine Bus: chiamaci o scrivici, ti rispondiamo noi.", "trip")}
 <section class="section" style="padding-top:28px"><div class="wrap">
  <div class="contact-band" style="margin-bottom:22px"><div><h2>Chi chiamare</h2><p style="margin-top:10px">Per acconti e informazioni sulle gite chiamaci o scrivici su WhatsApp.</p></div>{PEOPLE}</div>
  <div class="card" style="max-width:760px">

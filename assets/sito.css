@@ -312,3 +312,32 @@ body.has-bar{padding-bottom:84px}
 .site-footer ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
 .site-footer .fine{border-top:1px solid var(--linea);margin-top:30px;padding-top:18px;display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;font-size:.85rem;color:#7C86AE}
 .site-footer .logo-foot{height:54px;width:auto;margin-bottom:14px}
+
+/* ---------- foto ---------- */
+/* finestrino: le foto delle gite scorrono come da un finestrino del pullman */
+.window{position:relative;margin-top:26px;aspect-ratio:16/10;border-radius:28px 28px 18px 18px;overflow:hidden;background:var(--pannello);box-shadow:inset 0 0 0 1px var(--linea),0 20px 60px rgba(122,108,255,.25)}
+.window img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity 1.2s ease}
+.window img.out{opacity:0}
+.window::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 28%),linear-gradient(0deg,rgba(6,10,30,.55),transparent 40%);pointer-events:none}
+.window .dots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px;z-index:2}
+.window .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
+.window .dots i.on{background:#fff;width:20px;border-radius:4px}
+/* mosaico */
+.mosaic{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;grid-auto-flow:dense}
+.mosaic>*{border:0;padding:0;border-radius:16px;overflow:hidden;background:var(--pannello);cursor:zoom-in;aspect-ratio:1/1;position:relative}
+.mosaic img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.mosaic>*:hover img{transform:scale(1.05)}
+.mosaic>*:first-child{grid-column:span 2;aspect-ratio:16/10}
+.mosaic .skeleton{height:auto;cursor:default}
+@media (min-width:860px){.mosaic{grid-template-columns:repeat(4,1fr)}.mosaic>*:first-child{grid-row:span 2;aspect-ratio:auto}.mosaic.big>*:nth-child(7n+5){grid-column:span 2;aspect-ratio:auto}}
+/* intestazioni con foto */
+.page-top.has-photo{min-height:300px;display:flex;align-items:flex-end}
+.page-top .pt-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.42;z-index:0}
+.page-top.has-photo::after{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(0deg,var(--notte) 6%,rgba(6,10,30,.55) 60%,rgba(6,10,30,.35)),linear-gradient(90deg,rgba(6,10,30,.7),transparent 70%)}
+.page-top.has-photo .wrap{width:100%}
+/* biglietto: locandina piccola sul telefono */
+.ticket .tt{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.ticket .tt>div{display:flex;flex-direction:column;gap:10px;min-width:0}
+.ticket .thumb{width:58px;height:74px;object-fit:cover;border-radius:10px;flex:0 0 auto;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+@media (min-width:700px){.ticket .thumb{display:none}}
+@media (max-width:699px){.ticket .price small{display:block;line-height:1.2;margin-top:2px}.ticket .price{line-height:1}}

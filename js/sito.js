@@ -37,6 +37,53 @@ async function rows(table,query){
 const okUrl=u=>/^https:\/\/bhsanrbadsqcpbtxupmr\.supabase\.co\/storage\/v1\/object\/public\/site-media\//.test(String(u||''));
 const urlsOf=x=>{const g=(Array.isArray(x&&x.gallery_urls)?x.gallery_urls:[]).filter(okUrl);return g.length?g:(okUrl(x&&x.cover_url)?[x.cover_url]:[])};
 
+/* ---------- foto (gite, pullman, limousine) ---------- */
+let PHOTOS=null;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+async function photos(){
+  if(PHOTOS)return PHOTOS;
+  const [car,cv,fl,pa]=await Promise.all([
+    rows('carousel_home','select=foto_urls&pubblicato=eq.true&order=sort_order.asc,created_at.desc').catch(()=>[]),
+    rows('site_carousel_viaggi','select=image_url&published=eq.true&order=sort_order.asc').catch(()=>[]),
+    rows('site_fleet','select=title,cover_url,gallery_urls&published=eq.true&order=sort_order.asc,created_at.asc').catch(()=>[]),
+    rows('site_party_events','select=cover_url,gallery_urls&published=eq.true').catch(()=>[])]);
+  const uniq=a=>[...new Set(a.filter(okUrl))];
+  const gite=uniq(car.flatMap(r=>r.foto_urls||[]).concat(cv.map(r=>r.image_url)));
+  const pullman=uniq(fl.filter(x=>!/limo/i.test(x.title)).flatMap(urlsOf));
+  const limo=uniq(fl.filter(x=>/limo/i.test(x.title)).flatMap(urlsOf).concat(pa.flatMap(urlsOf)));
+  return PHOTOS={gite,pullman,limo,tutte:uniq(gite.concat(pullman,limo))};
+}
+const FALLBACK=['assets/bus-extra-1400.jpg','assets/bus-bianco-reale-1400.jpg'];
+function mosaic(box,urls){
+  box.innerHTML=urls.map((u,i)=>`<button type="button" data-g="${i}" aria-label="Ingrandisci la foto ${i+1}"><img src="${esc(u)}" alt="" loading="lazy" decoding="async"></button>`).join('');
+  box.onclick=e=>{const b=e.target.closest('[data-g]');if(b)lightbox(urls,Number(b.dataset.g))};
+}
+function windowShow(box,urls){
+  if(!box||!urls.length)return;
+  const list=urls.slice(0,8);let i=0;
+  box.innerHTML=`<img src="${esc(list[0])}" alt="Foto dalle nostre gite" fetchpriority="high"><img class="out" alt="" decoding="async"><div class="dots">${list.map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`;
+  if(list.length<2||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const [a,b]=box.querySelectorAll('img'),dots=box.querySelectorAll('.dots i');let front=a,back=b;
+  setInterval(()=>{if(document.hidden)return;i=(i+1)%list.length;back.onload=()=>{back.classList.remove('out');front.classList.add('out');[front,back]=[back,front];dots.forEach((d,k)=>d.classList.toggle('on',k===i))};back.src=list[i]},5000);
+}
+async function pageTopPhoto(){
+  const top=document.querySelector('.page-top[data-photo]');if(!top)return;
+  const kind=top.dataset.photo;
+  let p;try{p=await photos()}catch{return}
+  const pool=(kind==='fleet'?p.pullman:kind==='limo'?(p.limo.length?p.limo:p.pullman):p.gite);
+  const u=pool.length?shuffle(pool)[0]:null;if(!u)return;
+  const img=new Image();img.className='pt-photo';img.alt='';img.decoding='async';img.src=u;top.prepend(img);
+}
+async function galleria(){
+  const grid=$('#photoGrid'),more=$('#moreFoto'),f=$('#photoFilters');
+  let p;try{p=await photos()}catch{grid.innerHTML='<div class="empty">Non riesco a caricare le foto in questo momento.</div>';return}
+  let cat='tutte',n=24;
+  const draw=()=>{const all=p[cat]||[];if(!all.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nessuna foto in questa sezione per ora.</div>';more.hidden=true;return}mosaic(grid,all.slice(0,n));more.hidden=all.length<=n};
+  f.addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;cat=b.dataset.f;n=24;f.querySelectorAll('[data-f]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));draw()});
+  more.addEventListener('click',()=>{n+=24;draw()});
+  draw();
+}
+
 /* ---------- partenze ---------- */
 function avail(t){
   const a=typeof gestTripAvailability==='function'?gestTripAvailability(t):{soldOut:false,known:false,free:0};
@@ -60,7 +107,7 @@ function ticket(t){
   const href=`viaggio.html?id=${encodeURIComponent(t.id)}`;
   return `<a class="ticket${a.sold?' sold':''}" href="${href}">
    <div class="stub"><span class="d">${p.d}</span><span class="m">${p.m.slice(0,3)}</span><span class="w">${p.w.slice(0,3)}</span>${hhmm(t.ora_partenza)&&hhmm(t.ora_partenza)!=='00:00'?`<span class="h">ore ${hhmm(t.ora_partenza)}</span>`:''}</div>
-   <div class="tb"><span class="dest">${esc(tripName(t))}</span>${route(st)}
+   <div class="tb"><div class="tt"><div><span class="dest">${esc(tripName(t))}</span>${route(st)}</div>${img?`<img class="thumb" src="${esc(img)}" alt="" loading="lazy">`:''}</div>
     ${statusPill(t)}
     <div class="row"><span class="price">${eur(t.prezzo)} <small>a persona</small></span><span class="go">${a.sold?'Al completo':'Prenota'}</span></div></div>
    ${img?`<img class="poster" src="${esc(img)}" alt="" loading="lazy">`:''}
@@ -86,10 +133,11 @@ async function home(){
     box.innerHTML=show.length?show.map(ticket).join(''):`<div class="empty">Nuove partenze in arrivo. <a href="${WA}" target="_blank" rel="noopener">Scrivici</a> per sapere le prossime date.</div>`;
   }catch(e){console.warn(e);box.innerHTML=tripsError}
   // foto della Home (stesse del gestionale) e foto dei mezzi per i servizi
-  rows('carousel_home','select=foto_urls,sort_order,created_at&pubblicato=eq.true&order=sort_order.asc,created_at.desc&limit=1').then(r=>{
-    const u=((r[0]&&r[0].foto_urls)||[]).filter(okUrl).slice(0,9);
-    if(u.length)$('#homePhotos').innerHTML=u.map((x,i)=>`<img src="${esc(x)}" alt="Foto DELGROSSO Viaggi ${i+1}" loading="lazy">`).join('');
-  }).catch(()=>{});
+  photos().then(p=>{
+    if(p.gite.length)windowShow($('#heroWindow'),p.gite);
+    const mix=p.gite.slice(0,6).concat(p.pullman.slice(0,2),p.limo.slice(0,2),p.gite.slice(6,8)).slice(0,10);
+    if(mix.length)mosaic($('#homeMosaic'),mix);else mosaic($('#homeMosaic'),FALLBACK);
+  }).catch(()=>mosaic($('#homeMosaic'),FALLBACK));
   rows('site_fleet','select=title,cover_url,gallery_urls&published=eq.true&order=sort_order.asc,created_at.asc').then(r=>{
     const limo=r.find(x=>/limo/i.test(x.title)),gt=r.find(x=>!/limo/i.test(x.title));
     const set=(k,x)=>{const u=x&&urlsOf(x)[0],img=document.querySelector(`[data-fleet-img="${k}"]`);if(u&&img)img.src=u};
@@ -156,6 +204,7 @@ async function detail(){
   // su telefono il pulsante resta sempre visibile in basso
   const b=document.createElement('div');b.className='bar';b.innerHTML=`<div class="info"><b>${eur(t.prezzo)} a persona</b><span>${a.sold?'Al completo':a.known?a.free+(a.free===1?' posto libero':' posti liberi'):'Posti da verificare'}</span></div>${a.sold?`<a class="btn btn-wa" href="${WA}?text=${msg}" target="_blank" rel="noopener">Chiedi</a>`:`<a class="btn btn-oro" href="prenota.html?viaggio=${encodeURIComponent(t.id)}">Prenota</a>`}`;
   document.body.appendChild(b);document.body.classList.add('has-bar');
+  photos().then(p=>{const u=shuffle(p.gite).slice(0,8);if(!u.length)return;const st=$('#tripPhotos');st.innerHTML=u.map((x,i)=>`<button type="button" data-g="${i}" style="border:0;padding:0;background:none;cursor:zoom-in" aria-label="Ingrandisci la foto ${i+1}"><img src="${esc(x)}" alt="" loading="lazy" decoding="async"></button>`).join('');st.onclick=e=>{const k=e.target.closest('[data-g]');if(k)lightbox(u,Number(k.dataset.g))};$('#tripPhotosWrap').hidden=false}).catch(()=>{});
 }
 
 /* ---------- flotta, limousine, party, news ---------- */
@@ -233,5 +282,6 @@ async function gestBridgePublic(action,payload){
   const d=await r.json().catch(()=>null);if(!r.ok||(d&&d.error))throw new Error((d&&d.error)||'Servizio non disponibile');return d;
 }
 
-({home,viaggi:catalog,viaggio:detail,flotta:fleet,limousine:limo,party,news,contatti:contact,preventivo:quote}[page]||(()=>{}))();
+({home,viaggi:catalog,viaggio:detail,flotta:fleet,limousine:limo,party,news,contatti:contact,preventivo:quote,galleria}[page]||(()=>{}))();
+pageTopPhoto();
 })();
