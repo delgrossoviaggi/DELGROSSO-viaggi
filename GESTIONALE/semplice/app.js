@@ -439,7 +439,7 @@ async function ensureAllBookings(){
   const [bs,ts,ps]=await Promise.all([
     get('prenotazioni',{select:'id,viaggio_id,cliente,cliente_nome,telefono,email,posti,totale,pagato,stato,posti_selezionati,fermata_partenza,created_at',order:'created_at.desc',limit:'5000'}),
     get('viaggi',{select:'id,titolo,destinazione,data_partenza,bis_numero,bis_parent_id',limit:'2000'}),
-    get('pagamenti',{select:'id,prenotazione_id,importo,tipo,metodo,data_pagamento,receipt_number,receipt_professional_path,incassato_da',order:'data_pagamento.asc',limit:'10000'})
+    get('pagamenti',{select:'id,prenotazione_id,importo,tipo,metodo,data_pagamento,receipt_number,receipt_professional_path,receipt_professional_generated_at,incassato_da',order:'data_pagamento.asc',limit:'10000'})
   ]);
   S.allBookings=bs||[];S.allTrips=ts||[];S.allPays=ps||[];
 }
@@ -539,7 +539,7 @@ function bookingSheet(id){
   $('#bsClose').onclick=closeSheet;
   if($('#bsPay'))$('#bsPay').onclick=()=>askPay(b,r,true);
   $('#bsEdit').onclick=()=>editBookingSheet(b);
-  $('#bsPdf').onclick=()=>confirmationPdf(b.id);
+  $('#bsPdf').onclick=()=>shareConfirmationSheet(b);
   $('#bsSeats').onclick=()=>{seatPick={id:b.id,trip:b.viaggio_id,sel:new Set(currentSeats(b)),need:num(b.posti)};seatSheet()};
   $('#bsMove').onclick=()=>moveSheet(b);
   $('#bsCancel').onclick=()=>cancelSheet(b);
@@ -610,7 +610,7 @@ let accTab='me';
 async function ensureAcc(force){
   if(S.acc&&!force)return;
   const [pays,rent,tr,eco,cl,comp,liq,prof,trips]=await Promise.all([
-    get('pagamenti',{select:'id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,data_pagamento,created_at,incassato_da_user_id,incassato_da,receipt_number,receipt_professional_path',order:'data_pagamento.desc,created_at.desc',limit:'10000'}),
+    get('pagamenti',{select:'id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,data_pagamento,created_at,incassato_da_user_id,incassato_da,receipt_number,receipt_professional_path,receipt_professional_generated_at',order:'data_pagamento.desc,created_at.desc',limit:'10000'}),
     get('noleggi_bus_pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,created_at,incassato_da_user_id',limit:'5000'}).catch(()=>[]),
     get('cassa_trasferimenti',{select:'id,da_operatore_user_id,a_operatore_user_id,importo,stato,data_trasferimento,note,created_at',order:'created_at.desc',limit:'5000'}),
     get('economia_movimenti',{select:'id,tipo,categoria,descrizione,importo,data_movimento,metodo,viaggio_id,origine,pagamento_id,operatore_user_id,operatore,created_at',order:'data_movimento.desc,created_at.desc',limit:'10000'}),
@@ -728,29 +728,23 @@ async function signStorage(path){
 function receipt(pid){
   const p=(S.acc&&S.acc.pays.find(x=>x.id===pid))||(S.allPays||[]).find(x=>x.id===pid);
   openPdf(async()=>{
-    if(p&&p.receipt_professional_path)return signStorage(p.receipt_professional_path);
+    // le ricevute create prima del logo ufficiale vengono rifatte, le altre si riaprono
+    if(p&&p.receipt_professional_path&&String(p.receipt_professional_generated_at||'')>=LOGO_SINCE)return signStorage(p.receipt_professional_path);
     const r=await raw('/functions/v1/professional-receipts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'generate',kind:'trip',id:pid})});
     if(!r||!r.success)throw new Error((r&&r.error)||'Ricevuta non generata.');
-    if(p)p.receipt_professional_path=r.path;
+    if(p){p.receipt_professional_path=r.path;p.receipt_professional_generated_at=new Date().toISOString()}
     return r.signedUrl;
   });
 }
-function confirmationPdf(bid){
-  openPdf(async()=>{const r=await raw('/functions/v1/send-booking-confirmation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'signed_url',bookingId:bid})});if(!r||!r.signedUrl)throw new Error((r&&r.error)||'Conferma PDF non ancora creata: si crea dal gestionale completo.');return r.signedUrl});
-}
+const LOGO_SINCE='2026-11-26T18:24:00Z';
+/* conferma di prenotazione: creata ogni volta aggiornata (posti, pagamenti) e con il logo ufficiale */
+async function confirmationUrl(bid){const r=await raw('/functions/v1/dg67-booking-pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bookingId:bid})});if(!r||!r.success||!r.signedUrl)throw new Error((r&&r.error)||'Conferma PDF non creata.');return r}
+function confirmationPdf(bid){openPdf(async()=>(await confirmationUrl(bid)).signedUrl)}
 
 /* ----- Tappa 3: liste, WhatsApp, agenda, notifiche, noleggi, preventivi ----- */
 function passengerList(t){
-  const st=tripStats(t),bs=st.bs.slice().sort((a,b)=>String(a.fermata_partenza||'').localeCompare(String(b.fermata_partenza||''),'it')||nameOf(a).localeCompare(nameOf(b),'it'));
-  const groups={};for(const b of bs)(groups[b.fermata_partenza||'Fermata non indicata']=groups[b.fermata_partenza||'Fermata non indicata']||[]).push(b);
-  const html=`<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Passeggeri ${esc(tripLabel(t))} ${esc(String(t.data_partenza).split('-').reverse().join('-'))}</title>
-  <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0F1B2A;margin:24px}h1{font-size:20px;margin:0}h2{font-size:15px;margin:18px 0 6px;color:#092744}p{margin:4px 0 12px;color:#55657A;font-size:13px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #DCE3EC;padding:6px 4px;text-align:left;vertical-align:top}th{font-size:11px;text-transform:uppercase;color:#55657A}td.n{text-align:right;white-space:nowrap}.tot{margin-top:16px;font-weight:700}@media print{button{display:none}body{margin:10mm}}</style></head><body>
-  <button onclick="print()" style="float:right;padding:10px 14px;font-size:15px">Stampa / Salva PDF</button>
-  <h1>DELGROSSO VIAGGI · ${esc(t.titolo||tripLabel(t))}</h1><p>${esc(dateShort(t.data_partenza))}${t.ora_partenza?' · ore '+esc(String(t.ora_partenza).slice(0,5)):''} · ${st.pax} passeggeri su ${st.cap} posti${t.autobus_id?' · '+esc(busName(t.autobus_id)):''}</p>
-  ${Object.entries(groups).map(([f,list])=>`<h2>${esc(f)} · ${list.reduce((a,b)=>a+num(b.posti),0)} persone</h2><table><thead><tr><th>Nome</th><th>Telefono</th><th>Posti</th><th>N. posti</th><th class="n">Da incassare</th></tr></thead><tbody>${list.map(b=>`<tr><td>${esc(nameOf(b))}</td><td>${esc(b.telefono||'')}</td><td>${num(b.posti)}</td><td>${esc(currentSeats(b).join(', '))}</td><td class="n">${residuo(b)>0?eur(residuo(b)):'pagato'}</td></tr>`).join('')}</tbody></table>`).join('')}
-  <p class="tot">Totale da incassare a bordo: ${eur(st.res)}</p></body></html>`;
-  const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  const w=window.open(url,'_blank');if(!w)location.href=url;
+  if(!t)return;
+  openPdf(async()=>{const r=await raw('/functions/v1/dg67-booking-pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'passengers',tripId:t.id})});if(!r||!r.success||!r.signedUrl)throw new Error((r&&r.error)||'Lista passeggeri non creata.');return r.signedUrl});
 }
 function waGroupSheet(t){
   const bs=tripStats(t).bs.filter(b=>waNumber(b.telefono));
@@ -863,27 +857,39 @@ function refundSheet(b){
   });
 }
 /* ricevuta: prepara il PDF e lo condivide (WhatsApp, Messaggi, Mail…) dal menu del telefono */
+/* documenti PDF (tutti con il logo ufficiale): si preparano e si condividono dal menu del telefono */
+async function pdfFile(url,filename){const res=await fetch(url);if(!res.ok)throw new Error('Documento non scaricabile.');const blob=await res.blob();return new File([blob],filename,{type:'application/pdf'})}
 async function receiptFile(pid,kind){
   const r=await raw('/functions/v1/professional-receipts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'generate',kind:kind||'trip',id:pid})});
   if(!r||!r.success||!r.signedUrl)throw new Error((r&&r.error)||'Ricevuta non generata.');
-  const res=await fetch(r.signedUrl);if(!res.ok)throw new Error('Ricevuta non scaricabile.');
-  const blob=await res.blob();
-  return {file:new File([blob],'Ricevuta_'+String(r.receiptNumber||pid).replace(/[^A-Za-z0-9_-]+/g,'_')+'.pdf',{type:'application/pdf'}),url:r.signedUrl,number:r.receiptNumber};
+  return {file:await pdfFile(r.signedUrl,'Ricevuta_'+String(r.receiptNumber||pid).replace(/[^A-Za-z0-9_-]+/g,'_')+'.pdf'),url:r.signedUrl,number:r.receiptNumber};
 }
-function shareReceiptSheet(pid,name,tel,kind){
-  sheet(`<h3>Ricevuta per ${esc(name)}</h3><span class="muted">Preparo il PDF della ricevuta…</span><div class="empty">Attendi qualche secondo</div><button class="btn light" id="shNo">Chiudi</button>`);
+async function confirmationFile(bid){
+  const r=await confirmationUrl(bid);
+  return {file:await pdfFile(r.signedUrl,r.filename||'Conferma_prenotazione.pdf'),url:r.signedUrl,number:''};
+}
+function sharePdfSheet(o){
+  sheet(`<h3>${esc(o.title)}</h3><span class="muted">Preparo il PDF…</span><div class="empty">Attendi qualche secondo</div><button class="btn light" id="shNo">Chiudi</button>`);
   $('#shNo').onclick=closeSheet;
-  receiptFile(pid,kind).then(R=>{
+  o.load().then(R=>{
     const canFiles=!!(navigator.canShare&&navigator.canShare({files:[R.file]}));
-    const wa=waNumber(tel),msg=`Buongiorno ${name}, le inviamo la ricevuta ${R.number||''} del pagamento. Grazie, DELGROSSO Viaggi`;
-    sheet(`<h3>Ricevuta pronta</h3><span class="muted">${esc(R.number||'')} · ${esc(name)}</span>
-    ${canFiles?`<button class="btn gold" id="shGo">${SVG(IC.chat)}Invia la ricevuta (scegli WhatsApp)</button><span class="small muted">Si apre il menu di condivisione del telefono: scegli WhatsApp e poi il cliente.</span>`:`<a class="btn gold" href="${esc(R.url)}" target="_blank" rel="noopener">${SVG(IC.doc)}Apri la ricevuta PDF</a>${wa?`<a class="btn light" href="https://wa.me/${wa}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${SVG(IC.chat)}Scrivi al cliente su WhatsApp</a><span class="small muted">Da computer: scarica il PDF e allegalo nella chat di WhatsApp.</span>`:''}`}
+    const wa=waNumber(o.tel),msg=o.msg(R);
+    sheet(`<h3>${esc(o.ready)}</h3><span class="muted">${R.number?esc(R.number)+' · ':''}${esc(o.name)}</span>
+    ${canFiles?`<button class="btn gold" id="shGo">${SVG(IC.chat)}Invia il PDF (scegli WhatsApp)</button><span class="small muted">Si apre il menu di condivisione del telefono: scegli WhatsApp e poi il cliente.</span>`:`${wa?`<a class="btn gold" href="https://wa.me/${wa}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${SVG(IC.chat)}Scrivi al cliente su WhatsApp</a><span class="small muted">Da computer: apri il PDF, scaricalo e allegalo nella chat di WhatsApp.</span>`:''}`}
+    <a class="btn ${canFiles?'light':wa?'light':'gold'}" href="${esc(R.url)}" target="_blank" rel="noopener">${SVG(IC.doc)}Apri il PDF</a>
     <button class="btn light" id="shNo2">Chiudi</button>`);
     $('#shNo2').onclick=closeSheet;
     if(canFiles)$('#shGo').onclick=async()=>{try{await navigator.share({files:[R.file],text:msg})}catch(e){if(e&&e.name!=='AbortError')toast('Condivisione non riuscita: apri il PDF e invialo a mano.',true)}};
   }).catch(e=>{closeSheet();toast(e.message,true)});
 }
-async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,receipt_number,receipt_professional_path,incassato_da',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
+function shareReceiptSheet(pid,name,tel,kind){
+  sharePdfSheet({title:'Ricevuta per '+name,ready:'Ricevuta pronta',name,tel,load:()=>receiptFile(pid,kind),msg:R=>`Buongiorno ${name}, le inviamo la ricevuta ${R.number||''} del pagamento. Grazie, DELGROSSO Viaggi`});
+}
+function shareConfirmationSheet(b){
+  const name=nameOf(b);
+  sharePdfSheet({title:'Conferma per '+name,ready:'Conferma di prenotazione pronta',name,tel:b.telefono,load:()=>confirmationFile(b.id),msg:()=>`Buongiorno ${name}, le inviamo la conferma della sua prenotazione. Grazie, DELGROSSO Viaggi`});
+}
+async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,receipt_number,receipt_professional_path,receipt_professional_generated_at,incassato_da',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
 
 /* noleggi: crea, modifica, pagamenti */
 async function rentalVehicles(id){try{return (await get('noleggi_bus_mezzi',{select:'flotta_id',noleggio_id:'eq.'+id})).map(x=>x.flotta_id)}catch{return []}}

@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
+import { brandHeader, useLogoStorage } from "./dg-logo.ts";
 
 const H={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json; charset=utf-8"};
 const J=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:H});
@@ -10,6 +11,7 @@ const D=v=>{if(!v)return "-";try{return new Intl.DateTimeFormat("it-IT",{timeZon
 const F=v=>T(v,"ricevuta").replace(/[^A-Za-z0-9._-]+/g,"_");
 function secret(){try{const r=Deno.env.get("SUPABASE_SECRET_KEYS");if(r){const x=JSON.parse(r);if(x?.default)return x.default}}catch{}return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||""}
 const sb=createClient(Deno.env.get("SUPABASE_URL")||"",secret(),{auth:{persistSession:false,autoRefreshToken:false}});
+useLogoStorage(sb);
 
 async function operator(req){
   const token=T(req.headers.get("Authorization")).replace(/^Bearer\s+/i,"");
@@ -23,17 +25,13 @@ function wrap(font,size,value,max){
   for(const w of words){const n=line?line+" "+w:w;if(font.widthOfTextAtSize(n,size)<=max)line=n;else{if(line)out.push(line);line=w}}
   if(line)out.push(line);return out.length?out:["-"];
 }
-async function pdf(c){
+export async function pdf(c){
   const doc=await PDFDocument.create(),page=doc.addPage([595.28,841.89]),W=page.getWidth(),Hh=page.getHeight();
   doc.setTitle(c.title+" "+c.number);doc.setAuthor("DELGROSSO VIAGGI & LIMOUSINE BUS");doc.setSubject("Documento gestionale di pagamento - non fiscale");doc.setCreator("DELGROSSO Gestionale 7.4");
   const reg=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold);
   const navy=rgb(.035,.153,.267),blue=rgb(.055,.36,.68),gold=rgb(.90,.64,.15),ink=rgb(.09,.15,.22),muted=rgb(.36,.43,.50),line=rgb(.86,.89,.92),soft=rgb(.96,.975,.99),white=rgb(1,1,1);
-  page.drawRectangle({x:0,y:Hh-132,width:W,height:132,color:navy});page.drawRectangle({x:0,y:Hh-137,width:W,height:5,color:gold});
-  page.drawText("DELGROSSO",{x:42,y:Hh-63,size:26,font:bold,color:white});page.drawText("VIAGGI & LIMOUSINE BUS",{x:42,y:Hh-84,size:10,font:bold,color:rgb(.84,.91,.97)});
-  page.drawText(c.title,{x:42,y:Hh-116,size:15,font:bold,color:white});page.drawText(c.number,{x:W-205,y:Hh-62,size:11,font:bold,color:white});
-  page.drawText("Data operazione: "+D(c.date),{x:W-205,y:Hh-82,size:9,font:reg,color:rgb(.84,.91,.97)});
-  page.drawText("DOCUMENTO GESTIONALE DI PAGAMENTO - NON FISCALE",{x:W-300,y:Hh-108,size:7.6,font:bold,color:rgb(.96,.83,.48)});
-  let y=Hh-178;
+  // Intestazione con il solo logo ufficiale DELGROSSO Viaggi - limousineBUS.
+  let y=await brandHeader(doc,page,reg,bold,{title:c.title,lines:[{text:c.number,bold:true,size:11},{text:"Data operazione: "+D(c.date),color:muted}],note:"DOCUMENTO GESTIONALE DI PAGAMENTO - NON FISCALE"});
   const row=(lab,val)=>{page.drawText(lab.toUpperCase(),{x:42,y,size:7.5,font:bold,color:muted});for(const s of wrap(bold,10.5,val,460)){y-=15;page.drawText(s,{x:42,y,size:10.5,font:bold,color:ink})}y-=13;page.drawLine({start:{x:42,y},end:{x:W-42,y},thickness:.7,color:line});y-=17};
   row("Cliente / intestatario",c.client);row(c.kind==="rental"?"Noleggio / servizio":"Viaggio / servizio",c.service);row("Riferimento pratica",c.reference);
   page.drawRectangle({x:42,y:y-92,width:W-84,height:92,color:soft,borderColor:line,borderWidth:1});
@@ -65,7 +63,7 @@ async function trip(id){
   if(l.error)throw l.error;
   let before=0,after=0;for(const x of l.data||[]){if(x.id===p.id){before=after;after+=sign(x);break}after+=sign(x)}
   const total=Math.max(N(b?.totale||p.totale),0),refund=T(p.tipo).toLowerCase()==="rimborso";
-  return {kind:"trip",id:p.id,row:p,title:refund?"RICEVUTA DI RIMBORSO":"RICEVUTA DI PAGAMENTO",number:T(p.receipt_number||p.ricevuta,"DG-"+String(p.id).slice(0,8).toUpperCase()),date:p.data_pagamento,type:T(p.tipo,"Pagamento"),amount:Math.abs(N(p.importo)),refund,client:T(p.cliente||b?.cliente||b?.cliente_nome,"Cliente"),service:T(v?.titolo||v?.destinazione||p.viaggio,"Viaggio"),reference:T(b?.id_prenotazione||b?.confirmation_number||b?.codice,p.prenotazione_id||"-"),method:T(p.metodo_pagamento||p.metodo,"-"),operator:T(op,"-"),total,before:Math.max(before,0),after:Math.max(after,0),balance:Math.max(total-after,0),notes:T(p.note),details:[["Data viaggio",D(v?.data_partenza)],["Partenza",T(b?.fermata_partenza||v?.luogo_partenza,"-")],["Persone",String(b?.posti||p.persone||"-")],["Posti",T(b?.posti_selezionati,"-")]]};
+  return {kind:"trip",id:p.id,row:p,title:refund?"RICEVUTA DI RIMBORSO":/acconto/i.test(T(p.tipo))?"RICEVUTA DI ACCONTO":/saldo/i.test(T(p.tipo))?"RICEVUTA DI SALDO":"RICEVUTA DI PAGAMENTO",number:T(p.receipt_number||p.ricevuta,"DG-"+String(p.id).slice(0,8).toUpperCase()),date:p.data_pagamento,type:T(p.tipo,"Pagamento"),amount:Math.abs(N(p.importo)),refund,client:T(p.cliente||b?.cliente||b?.cliente_nome,"Cliente"),service:T(v?.titolo||v?.destinazione||p.viaggio,"Viaggio"),reference:T(b?.id_prenotazione||b?.confirmation_number||b?.codice,p.prenotazione_id||"-"),method:T(p.metodo_pagamento||p.metodo,"-"),operator:T(op,"-"),total,before:Math.max(before,0),after:Math.max(after,0),balance:Math.max(total-after,0),notes:T(p.note),details:[["Data viaggio",D(v?.data_partenza)],["Partenza",T(b?.fermata_partenza||v?.luogo_partenza,"-")],["Persone",String(b?.posti||p.persone||"-")],["Posti",T(b?.posti_selezionati,"-")]]};
 }
 async function rental(id){
   const q=await sb.from("noleggi_bus_pagamenti").select("*").eq("id",id).maybeSingle();if(q.error)throw q.error;if(!q.data)throw new Error("Pagamento noleggio non trovato");const p=q.data;
@@ -74,7 +72,7 @@ async function rental(id){
   const l=await sb.from("noleggi_bus_pagamenti").select("id,tipo,importo,data_pagamento,created_at").eq("noleggio_id",p.noleggio_id).order("data_pagamento",{ascending:true}).order("created_at",{ascending:true}).order("id",{ascending:true});if(l.error)throw l.error;
   let before=0,after=0;for(const x of l.data||[]){if(x.id===p.id){before=after;after+=sign(x);break}after+=sign(x)}
   const total=Math.max(N(r.data.prezzo_concordato),0),refund=T(p.tipo).toLowerCase()==="rimborso";
-  return {kind:"rental",id:p.id,row:p,title:refund?"RICEVUTA DI RIMBORSO NOLEGGIO":"RICEVUTA PAGAMENTO NOLEGGIO",number:T(p.receipt_number,"DG-NB-"+String(p.id).slice(0,8).toUpperCase()),date:p.data_pagamento,type:T(p.tipo,"Pagamento"),amount:Math.abs(N(p.importo)),refund,client:T(r.data.referente||r.data.azienda,"Cliente noleggio"),service:T(r.data.tratta_partenza,"-")+" - "+T(r.data.tratta_destinazione,"-"),reference:T(r.data.id_noleggio,p.noleggio_id),method:T(p.metodo,"-"),operator:T(op,"-"),total,before:Math.max(before,0),after:Math.max(after,0),balance:Math.max(total-after,0),notes:T(p.note),details:[["Data servizio",D(r.data.data_partenza)],["Passeggeri",String(r.data.passeggeri||"-")],["Tipo servizio",T(r.data.servizio_tipo,"-")]]};
+  return {kind:"rental",id:p.id,row:p,title:refund?"RICEVUTA DI RIMBORSO NOLEGGIO":/acconto/i.test(T(p.tipo))?"RICEVUTA ACCONTO NOLEGGIO":/saldo/i.test(T(p.tipo))?"RICEVUTA SALDO NOLEGGIO":"RICEVUTA PAGAMENTO NOLEGGIO",number:T(p.receipt_number,"DG-NB-"+String(p.id).slice(0,8).toUpperCase()),date:p.data_pagamento,type:T(p.tipo,"Pagamento"),amount:Math.abs(N(p.importo)),refund,client:T(r.data.referente||r.data.azienda,"Cliente noleggio"),service:T(r.data.tratta_partenza,"-")+" - "+T(r.data.tratta_destinazione,"-"),reference:T(r.data.id_noleggio,p.noleggio_id),method:T(p.metodo,"-"),operator:T(op,"-"),total,before:Math.max(before,0),after:Math.max(after,0),balance:Math.max(total-after,0),notes:T(p.note),details:[["Data servizio",D(r.data.data_partenza)],["Passeggeri",String(r.data.passeggeri||"-")],["Tipo servizio",T(r.data.servizio_tipo,"-")]]};
 }
 async function generate(kind,id,reissue=false,operatorId=null){
   const c=kind==="rental"?await rental(id):await trip(id);

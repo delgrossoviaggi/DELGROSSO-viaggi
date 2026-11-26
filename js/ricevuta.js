@@ -40,7 +40,8 @@
   }
   async function loadLogo(){
     try{
-      const r=await fetch('/assets/logo.JPEG',{cache:'no-store'}); if(!r.ok) return null;
+      // logo ufficiale DELGROSSO Viaggi - limousineBUS, ritagliato per i PDF (riserva: originale)
+      let r=await fetch('/GESTIONALE/assets/delgrosso-logo-pdf-ufficiale.jpg',{cache:'no-store'}); if(!r.ok) r=await fetch('/assets/logo.JPEG',{cache:'no-store'}); if(!r.ok) return null;
       const b=new Uint8Array(await r.arrayBuffer()),info=jpegInfo(b);
       return info?{bytes:b,...info}:null;
     }catch(e){return null}
