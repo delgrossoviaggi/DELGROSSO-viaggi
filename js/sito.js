@@ -145,7 +145,7 @@ async function detail(){
      ${cta}
     </div>
     ${t.descrizione&&small(t.descrizione).length>3?`<div class="card desc">${prog(t.descrizione)}</div>`:''}
-    <div class="note-box">Per bloccare i posti serve un acconto entro 2 giorni dalla prenotazione, da versare al referente della tua fermata. Trascorsi 2 giorni senza acconto, i posti vengono svincolati.</div>
+    <div class="note-box">Per bloccare i posti serve un acconto entro 2 giorni dalla prenotazione: nella conferma trovi il numero da chiamare. Trascorsi 2 giorni senza acconto, i posti vengono svincolati.</div>
    </div></div>`;
   // su telefono il pulsante resta sempre visibile in basso
   const b=document.createElement('div');b.className='bar';b.innerHTML=`<div class="info"><b>${eur(t.prezzo)} a persona</b><span>${a.sold?'Al completo':a.known?a.free+(a.free===1?' posto libero':' posti liberi'):'Posti da verificare'}</span></div>${a.sold?`<a class="btn btn-wa" href="${WA}?text=${msg}" target="_blank" rel="noopener">Chiedi</a>`:`<a class="btn btn-oro" href="prenota.html?viaggio=${encodeURIComponent(t.id)}">Prenota</a>`}`;

@@ -87,8 +87,8 @@ def footer(scripts=("js/sito.js",)):
     <h3>Prenotazioni e informazioni</h3>
     <ul>
      <li><a href="{WA}" target="_blank" rel="noopener">WhatsApp prenotazioni · 320 881 5899</a></li>
-     <li><a href="tel:+393205730466">Raffaele · 320 573 0466</a> <span class="small">(San Severo, Apricena, Lesina)</span></li>
-     <li><a href="tel:+393662127916">Nicola · 366 212 7916</a> <span class="small">(San Nicandro Garganico)</span></li>
+     <li><a href="tel:+393205730466">Raffaele · 320 573 0466</a></li>
+     <li><a href="tel:+393662127916">Nicola · 366 212 7916</a></li>
      <li><a href="mailto:info@delgrossoviaggi.it">info@delgrossoviaggi.it</a></li>
     </ul>
    </div>
@@ -124,13 +124,13 @@ def top(crumb, h1, lead):
 
 
 PEOPLE = f"""<div class="people">
- <a class="person" href="tel:+393205730466"><b>Raffaele</b><span class="tel">320 573 0466</span><span>Fermate di San Severo, Apricena e Lesina</span></a>
- <a class="person" href="tel:+393662127916"><b>Nicola</b><span class="tel">366 212 7916</span><span>Fermata di San Nicandro Garganico</span></a>
+ <a class="person" href="tel:+393205730466"><b>Raffaele</b><span class="tel">320 573 0466</span><span>Tocca per chiamare</span></a>
+ <a class="person" href="tel:+393662127916"><b>Nicola</b><span class="tel">366 212 7916</span><span>Tocca per chiamare</span></a>
  <a class="person wa" href="{WA}" target="_blank" rel="noopener"><b>WhatsApp prenotazioni</b><span class="tel">320 881 5899</span><span>Scrivici per posti, acconti e informazioni</span></a>
 </div>"""
 
 CONTACT_BAND = f"""<section class="section"><div class="wrap"><div class="contact-band">
- <div><h2>Hai una domanda prima di partire?</h2><p style="margin-top:10px">Chiama il referente della tua fermata o scrivici su WhatsApp: ti rispondiamo noi, non un call center.</p></div>
+ <div><h2>Hai una domanda prima di partire?</h2><p style="margin-top:10px">Chiamaci o scrivici su WhatsApp: ti rispondiamo noi, non un call center.</p></div>
  {PEOPLE}
 </div></div></section>"""
 
@@ -158,7 +158,7 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
  <div class="steps">
   <div class="step"><span class="n">1</span><div><h3>Scegli la gita</h3><p class="muted">Data, prezzo e posti liberi sono aggiornati in tempo reale.</p></div></div>
   <div class="step"><span class="n">2</span><div><h3>Tocca i tuoi posti</h3><p class="muted">Sulla piantina del pullman vedi quali sono liberi e scegli dove sederti.</p></div></div>
-  <div class="step"><span class="n">3</span><div><h3>Conferma con l’acconto</h3><p class="muted">Ricevi la conferma in PDF. Versa l’acconto entro 2 giorni al referente della tua fermata.</p></div></div>
+  <div class="step"><span class="n">3</span><div><h3>Conferma con l’acconto</h3><p class="muted">Ricevi la conferma in PDF con il numero da chiamare per versare l’acconto entro 2 giorni.</p></div></div>
  </div>
 </div></section>
 <section class="section" style="padding-top:0"><div class="wrap">
@@ -289,11 +289,11 @@ page("chi-siamo.html", "Chi siamo | DELGROSSO Viaggi",
 """, "chi")
 
 page("contatti.html", "Contatti | DELGROSSO Viaggi",
-     "Contatti di DELGROSSO Viaggi: WhatsApp prenotazioni 320 881 5899, Raffaele 320 573 0466 (San Severo, Apricena, Lesina), Nicola 366 212 7916 (San Nicandro Garganico).",
+     "Contatti di DELGROSSO Viaggi: WhatsApp prenotazioni 320 881 5899, Raffaele 320 573 0466, Nicola 366 212 7916.",
      "contatti.html", f"""
 {top(None, "Contatti", "Per una gita, un noleggio o una festa sul Limousine Bus: chiamaci o scrivici, ti rispondiamo noi.")}
 <section class="section" style="padding-top:28px"><div class="wrap">
- <div class="contact-band" style="margin-bottom:22px"><div><h2>Chi chiamare</h2><p style="margin-top:10px">Per acconti e informazioni sulle gite chiama il referente della tua fermata.</p></div>{PEOPLE}</div>
+ <div class="contact-band" style="margin-bottom:22px"><div><h2>Chi chiamare</h2><p style="margin-top:10px">Per acconti e informazioni sulle gite chiamaci o scrivici su WhatsApp.</p></div>{PEOPLE}</div>
  <div class="card" style="max-width:760px">
   <h2>Scrivici un messaggio</h2><p class="muted" style="margin:6px 0 16px">Prepariamo l’e-mail con il tuo messaggio: dovrai solo premere «Invia» nella tua app di posta.</p>
   <form class="form" id="contactForm" novalidate>
