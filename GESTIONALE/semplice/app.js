@@ -23,7 +23,7 @@ const eur=n=>{const v=r2(n),neg=v<0,a=Math.abs(v),int=Math.floor(a+1e-9),dec=Mat
 const today=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));return p.year+'-'+p.month+'-'+p.day};
 const addDays=(iso,d)=>{const t=new Date(iso+'T12:00:00Z');t.setUTCDate(t.getUTCDate()+d);return t.toISOString().slice(0,10)};
 const GG=['dom','lun','mar','mer','gio','ven','sab'];
-const dateShort=iso=>{if(!/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')))return '—';const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');return GG[d.getUTCDay()]+' '+String(iso).slice(8,10)+'/'+String(iso).slice(5,7)};
+const dateShort=iso=>{if(!/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')))return '—';const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');const y=String(iso).slice(0,4);return GG[d.getUTCDay()]+' '+String(iso).slice(8,10)+'/'+String(iso).slice(5,7)+(y!==today().slice(0,4)?'/'+y.slice(2):'')};
 const active=b=>!/annull|cancel|eliminat/i.test(String(b&&b.stato||''));
 const residuo=b=>Math.max(0,r2(num(b.totale)-num(b.pagato)));
 const nameOf=b=>String(b.cliente_nome||b.cliente||'Cliente').trim();
@@ -117,7 +117,7 @@ async function loadAll(){
       ids.length?get('dg28_trip_layouts',{select:'viaggio_id,autobus_id,configurazione',viaggio_id:inList}).catch(()=>[]):[],
       get('dg28_bus_layouts',{select:'autobus_id,configurazione'}).catch(()=>[])
     ]);
-    S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;S.customers=customers||[];S.fleet=(fleet||[]).filter(f=>f.attivo!==false);S.tripLayouts=tl||[];S.busLayouts=bl||[];S.allBookings=null;S.acc=null;
+    S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;S.customers=customers||[];S.fleet=(fleet||[]).filter(f=>f.attivo!==false);S.tripLayouts=tl||[];S.busLayouts=bl||[];S.allBookings=null;S.acc=null;S.extra=null;
   }catch(e){S.error=e.message}
   S.loading=false;render();
 }
@@ -162,7 +162,7 @@ const ICONS={
   altro:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'
 };
 const TABS=[['oggi','Oggi'],['viaggi','Viaggi'],['prenota','Prenota'],['incassi','Incassi'],['cassa','Cassa'],['altro','Altro']];
-const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità'};
+const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi'};
 
 function render(){
   const app=$('#app');
@@ -171,12 +171,12 @@ function render(){
   let body='';
   if(S.error)body+=`<div class="err">${esc(S.error)} <button class="link" data-act="reload">Riprova</button></div>`;
   if(S.loading&&!S.trips.length)body+='<div class="empty">Carico i dati…</div>';
-  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti}[view]||viewOggi)();
+  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div><div class="brand">DELGROSSO VIAGGI</div><h1>${esc(TITLES[view])}</h1></div>
   <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo, versione computer">Versione PC</a></div></header>
   <main>${body}</main>
-  <nav class="nav" aria-label="Menu principale"><div class="in">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
+  <nav class="nav" aria-label="Menu principale"><div class="in">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
   </div>`;
 }
 
@@ -251,6 +251,7 @@ function viewViaggio(){
   <div class="hero"><div style="display:flex;flex-direction:column;gap:3px"><b style="font-size:17px">${esc(t.titolo||tripLabel(t))}</b><span class="small" style="color:#C9D6E6">${esc(dateShort(t.data_partenza))}${t.ora_partenza?' · ore '+esc(String(t.ora_partenza).slice(0,5)):''} · ${st.pax}/${st.cap} posti · ${st.free} liberi</span></div><span class="big-n">${eur(st.res)}</span></div>
   <div class="grid2"><button class="btn gold" data-act="goInc" data-id="${t.id}">Saldi a bordo</button><button class="btn" data-act="bookTrip" data-id="${t.id}">＋ Prenota qui</button></div>
   <div class="grid2"><button class="btn light" data-act="tripForm" data-id="${t.id}">Modifica viaggio</button><button class="btn light" data-act="toggleMap">${S.showMap?'Nascondi piantina':'Piantina posti'}</button></div>
+  <div class="grid2"><button class="btn light" data-act="paxList" data-id="${t.id}">Lista passeggeri (stampa/PDF)</button><button class="btn light" data-act="waGroup" data-id="${t.id}">Numeri gruppo WhatsApp</button></div>
   ${t.autobus_id?'':'<div class="note">Nessun autobus assegnato: tocca «Modifica viaggio» per sceglierlo.</div>'}
   ${S.showMap?`<section class="card"><h2>Piantina · ${esc(busName(t.autobus_id)||'posti')}</h2>${seatMapHtml(t,{})}<span class="small muted">Tocca un posto occupato per aprire la prenotazione.</span></section>`:''}
   <input class="search" type="search" placeholder="Cerca passeggero, telefono o fermata" value="${esc(S.search)}" data-input="search" aria-label="Cerca passeggero">
@@ -410,8 +411,8 @@ function seatMapHtml(t,opts){
 /* ----- Altro, Clienti, Flotta ----- */
 function viewAltro(){
   const it=(k,t,d)=>`<button class="trip" data-tab="${k}"><span class="t">${t}</span><span class="small muted">${d}</span></button>`;
-  return `<div class="list2">${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
-  <section class="card"><h2>In arrivo nelle prossime versioni</h2><span class="muted small">Liste prenotati PDF, numeri WhatsApp dei gruppi, noleggi, preventivi e agenda. Nel frattempo li trovi nella versione completa.</span>
+  return `<div class="list2">${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
+  <section class="card"><h2>Versione completa</h2><span class="muted small">Per le cose rare (piantine nuove, bus BIS, locandine, rimborsi, impostazioni) resta disponibile il gestionale di prima.</span>
   <a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html">Apri la versione completa</a></section>
   <button class="link small" style="align-self:center" data-act="logout">Esci (${esc(me.nome||me.username)})</button>`;
 }
@@ -714,6 +715,90 @@ function confirmationPdf(bid){
   openPdf(async()=>{const r=await raw('/functions/v1/send-booking-confirmation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'signed_url',bookingId:bid})});if(!r||!r.signedUrl)throw new Error((r&&r.error)||'Conferma PDF non ancora creata: si crea dal gestionale completo.');return r.signedUrl});
 }
 
+/* ----- Tappa 3: liste, WhatsApp, agenda, notifiche, noleggi, preventivi ----- */
+function passengerList(t){
+  const st=tripStats(t),bs=st.bs.slice().sort((a,b)=>String(a.fermata_partenza||'').localeCompare(String(b.fermata_partenza||''),'it')||nameOf(a).localeCompare(nameOf(b),'it'));
+  const groups={};for(const b of bs)(groups[b.fermata_partenza||'Fermata non indicata']=groups[b.fermata_partenza||'Fermata non indicata']||[]).push(b);
+  const html=`<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Passeggeri ${esc(tripLabel(t))} ${esc(String(t.data_partenza).split('-').reverse().join('-'))}</title>
+  <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0F1B2A;margin:24px}h1{font-size:20px;margin:0}h2{font-size:15px;margin:18px 0 6px;color:#092744}p{margin:4px 0 12px;color:#55657A;font-size:13px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #DCE3EC;padding:6px 4px;text-align:left;vertical-align:top}th{font-size:11px;text-transform:uppercase;color:#55657A}td.n{text-align:right;white-space:nowrap}.tot{margin-top:16px;font-weight:700}@media print{button{display:none}body{margin:10mm}}</style></head><body>
+  <button onclick="print()" style="float:right;padding:10px 14px;font-size:15px">Stampa / Salva PDF</button>
+  <h1>DELGROSSO VIAGGI · ${esc(t.titolo||tripLabel(t))}</h1><p>${esc(dateShort(t.data_partenza))}${t.ora_partenza?' · ore '+esc(String(t.ora_partenza).slice(0,5)):''} · ${st.pax} passeggeri su ${st.cap} posti${t.autobus_id?' · '+esc(busName(t.autobus_id)):''}</p>
+  ${Object.entries(groups).map(([f,list])=>`<h2>${esc(f)} · ${list.reduce((a,b)=>a+num(b.posti),0)} persone</h2><table><thead><tr><th>Nome</th><th>Telefono</th><th>Posti</th><th>N. posti</th><th class="n">Da incassare</th></tr></thead><tbody>${list.map(b=>`<tr><td>${esc(nameOf(b))}</td><td>${esc(b.telefono||'')}</td><td>${num(b.posti)}</td><td>${esc(currentSeats(b).join(', '))}</td><td class="n">${residuo(b)>0?eur(residuo(b)):'pagato'}</td></tr>`).join('')}</tbody></table>`).join('')}
+  <p class="tot">Totale da incassare a bordo: ${eur(st.res)}</p></body></html>`;
+  const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  const w=window.open(url,'_blank');if(!w)location.href=url;
+}
+function waGroupSheet(t){
+  const bs=tripStats(t).bs.filter(b=>waNumber(b.telefono));
+  const nums=[...new Map(bs.map(b=>[waNumber(b.telefono),b])).values()];
+  sheet(`<h3>Numeri per il gruppo WhatsApp</h3><span class="muted">${esc(tripLabel(t))} · ${esc(dateShort(t.data_partenza))} · ${nums.length} numeri</span>
+  <div style="max-height:40vh;overflow:auto">${nums.map(b=>`<div class="line"><span>${esc(nameOf(b))}</span><a href="https://wa.me/${waNumber(b.telefono)}" target="_blank" rel="noopener">+${esc(waNumber(b.telefono))}</a></div>`).join('')}</div>
+  <button class="btn" id="waCopy">Copia tutti i numeri</button>
+  <button class="btn light" id="waVcf">Scarica contatti (per aggiungerli alla rubrica)</button>
+  <span class="small muted">Per creare il gruppo: salva i contatti in rubrica, poi in WhatsApp «Nuovo gruppo» e scegli i nomi.</span>
+  <button class="btn light" id="waNo">Chiudi</button>`);
+  $('#waNo').onclick=closeSheet;
+  $('#waCopy').onclick=async()=>{const txt=nums.map(b=>'+'+waNumber(b.telefono)).join('\n');try{await navigator.clipboard.writeText(txt);toast('Numeri copiati')}catch{prompt('Copia i numeri:',txt)}};
+  $('#waVcf').onclick=()=>{
+    const tag=tripLabel(t)+' '+String(t.data_partenza).slice(8,10)+'/'+String(t.data_partenza).slice(5,7);
+    const vcf=nums.map(b=>`BEGIN:VCARD\r\nVERSION:3.0\r\nFN:${nameOf(b).replace(/[\r\n;]/g,' ')} (${tag})\r\nTEL;TYPE=CELL:+${waNumber(b.telefono)}\r\nEND:VCARD`).join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([vcf],{type:'text/vcard'}));a.download='contatti-'+fold(tripLabel(t)).replace(/[^a-z0-9]+/g,'-')+'.vcf';document.body.appendChild(a);a.click();a.remove();
+  };
+}
+async function ensureExtra(force){
+  if(S.extra&&!force)return;
+  const [ag,old,no,ren,pre]=await Promise.all([
+    get('scadenze_gestionale',{select:'id,titolo,descrizione,tipo,stato,priorita,data_scadenza,note,updated_at',order:'data_scadenza.asc',limit:'2000'}).catch(()=>[]),
+    get('attivita_gestionale',{select:'id,titolo,descrizione,stato,priorita,scadenza,updated_at',order:'scadenza.asc',limit:'2000'}).catch(()=>[]),
+    get('notifiche',{select:'id,titolo,messaggio,tipo,letto,created_at',order:'created_at.desc',limit:'80'}).catch(()=>[]),
+    get('noleggi_bus',{select:'id,referente,azienda,telefono,tratta_partenza,tratta_destinazione,data_partenza,ora_partenza,data_ritorno,passeggeri,prezzo_concordato,acconto,saldo,stato_pagamento,stato_noleggio,archiviato_at',order:'data_partenza.desc',limit:'500'}).catch(()=>[]),
+    get('preventivi',{select:'id,numero_preventivo,nome,cognome,azienda,telefono,email,servizio,destinazione,luogo_partenza,data_partenza,data_viaggio,numero_passeggeri,importo_preventivo,importo,stato,created_at',order:'created_at.desc',limit:'500'}).catch(()=>[])
+  ]);
+  S.extra={ag:(ag||[]).map(x=>({...x,src:'scadenze_gestionale',data:x.data_scadenza})).concat((old||[]).map(x=>({...x,src:'attivita_gestionale',data:x.scadenza}))).filter(x=>!/eliminat/i.test(x.stato||'')),no:no||[],ren:(ren||[]).filter(x=>!x.archiviato_at),pre:pre||[]};
+}
+function lazy(fn){if(!S.extra){ensureExtra().then(render).catch(e=>{S.error=e.message;render()});return '<div class="empty">Carico…</div>'}return fn()}
+const done=x=>/complet|fatt|chius/i.test(x.stato||'');
+function viewAgenda(){return lazy(()=>{
+  const t0=today(),A=S.extra.ag.slice().sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')));
+  const open=A.filter(x=>!done(x)),late=open.filter(x=>String(x.data||'').slice(0,10)<t0);
+  const row=x=>`<div class="pax"><div class="who"><b>${esc(x.titolo||'Senza titolo')}</b><span>${esc(dateShort(String(x.data||'').slice(0,10)))}${x.tipo?' · '+esc(x.tipo):''}${x.descrizione?' · '+esc(x.descrizione):''}</span></div>${done(x)?'<span class="tag ok">Fatto</span>':`<button class="pay" style="background:#EEF2F7;color:var(--ink)" data-act="agDone" data-id="${x.id}">Fatto</button>`}</div>`;
+  return `<button class="btn" data-act="agNew">＋ Nuovo appuntamento o scadenza</button>
+  ${late.length?`<section class="card"><h2 style="color:var(--bad)">In ritardo (${late.length})</h2></section><div class="list2">${late.map(row).join('')}</div>`:''}
+  <section class="card"><h2>Da fare (${open.length-late.length})</h2></section><div class="list2">${open.filter(x=>!late.includes(x)).map(row).join('')||'<div class="empty">Niente in programma.</div>'}</div>
+  ${A.filter(done).length?`<details class="card"><summary style="font-weight:700">Completati (${A.filter(done).length})</summary>${A.filter(done).map(row).join('')}</details>`:''}`;
+})}
+function agNewSheet(){
+  sheet(`<h3>Nuovo appuntamento / scadenza</h3>
+  <label class="f">Cosa<input id="agT" placeholder="es. Revisione bus FW125XE"></label>
+  <div class="grid2"><label class="f">Data<input id="agD" type="date" value="${today()}"></label><label class="f">Tipo<select id="agK"><option>Appuntamento</option><option>Scadenza</option><option>Promemoria</option></select></label></div>
+  <label class="f">Dettagli (facoltativi)<input id="agDesc"></label>
+  <button class="btn" id="agOk">Salva</button><button class="btn light" id="agNo">Annulla</button>`);
+  $('#agNo').onclick=closeSheet;
+  $('#agOk').onclick=e=>guard(e.currentTarget,async()=>{const t=$('#agT').value.trim();if(t.length<3)throw new Error('Scrivi cosa devi fare.');
+    await insert('scadenze_gestionale',{titolo:t,descrizione:$('#agDesc').value.trim()||null,tipo:$('#agK').value,stato:'aperta',priorita:'normale',data_scadenza:$('#agD').value});
+    closeSheet();toast('Salvato in agenda');await ensureExtra(true);render()});
+}
+async function agDone(id){
+  const x=S.extra.ag.find(a=>a.id===id);if(!x)return;
+  await guard(null,async()=>{
+    const q=new URLSearchParams({id:'eq.'+x.id});if(x.updated_at)q.set('updated_at','eq.'+x.updated_at);
+    const r=await raw('/rest/v1/'+x.src+'?'+q.toString(),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({stato:'completata'})});
+    if(!Array.isArray(r)||!r.length)throw new Error('Non aggiornato: forse è stato modificato da un altro operatore. Aggiorna e riprova.');
+    toast('Segnato come fatto');await ensureExtra(true);render();
+  });
+}
+function viewNotifiche(){return lazy(()=>`<div class="list2">${S.extra.no.map(n=>`<div class="pax"><div class="who"><b>${esc(n.titolo||'Avviso')}</b><span>${esc(n.messaggio||'')}</span><span>${esc(new Date(n.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}))}</span></div>${n.letto?'':'<span class="tag warn">Nuova</span>'}</div>`).join('')||'<div class="empty">Nessun avviso.</div>'}</div>`)}
+function viewNoleggi(){return lazy(()=>`<div class="list2">${S.extra.ren.map(n=>{const wa=waNumber(n.telefono);return `<section class="card"><div class="row"><b>${esc(n.azienda||n.referente||'Noleggio')}</b><span class="tag ${/saldat/i.test(n.stato_pagamento||'')?'ok':'warn'}">${esc(n.stato_pagamento||'')}</span></div>
+  <span class="small muted">${esc(dateShort(n.data_partenza))}${n.ora_partenza?' ore '+esc(String(n.ora_partenza).slice(0,5)):''} · ${esc(n.tratta_partenza||'')} → ${esc(n.tratta_destinazione||'')} · ${num(n.passeggeri)} passeggeri</span>
+  <div class="line"><span>Prezzo</span><b>${eur(n.prezzo_concordato)}</b></div><div class="line"><span>Resta</span><b>${eur(n.saldo)}</b></div>
+  ${n.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(n.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}</section>`}).join('')||'<div class="empty">Nessun noleggio.</div>'}</div>
+  <a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html#noleggi">Nuovo noleggio o pagamento (versione completa)</a>`)}
+function viewPreventivi(){return lazy(()=>`<div class="list2">${S.extra.pre.map(q=>{const wa=waNumber(q.telefono);return `<section class="card"><div class="row"><b>${esc([q.nome,q.cognome].filter(Boolean).join(' ')||q.azienda||'Richiesta')}</b><span class="tag warn">${esc(q.stato||'')}</span></div>
+  <span class="small muted">${esc(q.numero_preventivo||'')} · ${esc(q.servizio||'')} · ${esc(q.luogo_partenza||'')} → ${esc(q.destinazione||'')} · ${esc(dateShort(q.data_partenza||q.data_viaggio))} · ${num(q.numero_passeggeri)} persone</span>
+  ${num(q.importo_preventivo||q.importo)?`<div class="line"><span>Importo</span><b>${eur(q.importo_preventivo||q.importo)}</b></div>`:''}
+  ${q.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(q.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}${q.email?`<a href="mailto:${esc(q.email)}">Email</a>`:''}</div>`:''}</section>`}).join('')||'<div class="empty">Nessun preventivo.</div>'}</div>
+  <a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html#preventivi">Crea o invia un preventivo (versione completa)</a>`)}
+
 /* ---------- azioni ---------- */
 function toast(msg,bad){const t=$('#toast');t.textContent=msg;t.className='toast'+(bad?' bad':'');t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,bad?6000:3200)}
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div class="box" role="dialog" aria-modal="true">${html}</div>`;s.hidden=false;s.onclick=e=>{if(e.target===s)closeSheet()};const f=s.querySelector('input');if(f)setTimeout(()=>f.focus(),50)}
@@ -837,6 +922,10 @@ document.addEventListener('click',e=>{
     case 'compLink':compLinkSheet(id);break;
     case 'profTrip':profTripSheet(id);break;
     case 'receipt':receipt(id);break;
+    case 'paxList':passengerList(tripById(id));break;
+    case 'waGroup':waGroupSheet(tripById(id));break;
+    case 'agNew':agNewSheet();break;
+    case 'agDone':agDone(id);break;
   }
 });
 document.addEventListener('input',e=>{
