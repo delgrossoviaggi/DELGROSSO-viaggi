@@ -1,0 +1,13 @@
+{
+  "name": "DELGROSSO · Gestionale semplice",
+  "short_name": "DELGROSSO",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#092744",
+  "theme_color": "#092744",
+  "icons": [
+    {"src": "../assets/delgrosso-app-icon-180.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "../assets/delgrosso-app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
