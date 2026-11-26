@@ -11,7 +11,7 @@ from pathlib import Path
 import html
 
 ROOT = Path(__file__).resolve().parent.parent
-V = "20261126-sito3"
+V = "20261126-sito4"
 SITE = "https://www.delgrossoviaggi.it"
 WA = "https://wa.me/393208815899"
 
@@ -121,7 +121,7 @@ def page(file, title, desc, active, main, body_page, scripts=("js/sito.js",), he
 
 
 def top(crumb, h1, lead, photo=""):
-    return f"""<section class="page-top{' has-photo' if photo else ''}"{f' data-photo="{photo}"' if photo else ''}><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap">{f'<a class="crumb" href="{crumb[0]}">‹ {crumb[1]}</a>' if crumb else ''}<h1>{h1}</h1><p class="lead">{lead}</p></div></section>"""
+    return f"""<section class="page-top{' has-photo' if photo else ''}"{f' data-photo="{photo}"' if photo else ''}><div class="wrap">{f'<a class="crumb" href="{crumb[0]}">‹ {crumb[1]}</a>' if crumb else ''}<h1>{h1}</h1><p class="lead">{lead}</p></div></section>"""
 
 
 PEOPLE = f"""<div class="people">
@@ -141,23 +141,20 @@ TRIP_JS = ("js/gestionale.js", "js/sito.js")
 page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Gargano",
      "Gite in pullman Gran Turismo da San Severo, Apricena, San Nicandro Garganico e Lesina: Napoli, Alberobello, mercatini di Natale. Scegli il posto e prenota online.",
      "index.html", f"""
-<section class="hero">
+<section class="cine" aria-labelledby="h1home">
  <div class="bgshow" id="heroWindow" aria-hidden="true"><img src="assets/bus-extra-1400.jpg" alt="" fetchpriority="high"></div>
- <div class="trails" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
- <div class="wrap hero-grid">
-  <div class="hero-copy">
-   <h1>Prossima fermata: la tua gita.</h1>
-   <p class="lead">Gite in pullman Gran Turismo con partenza da San Severo, Apricena, San Nicandro Garganico e Lesina. Scegli il posto sulla piantina e prenota in un minuto.</p>
-   <div class="hero-actions"><a class="btn btn-oro" href="viaggi.html">Vedi tutte le partenze {I['arrow']}</a><a class="btn btn-chiaro" href="{WA}" target="_blank" rel="noopener">{I['wa']} Scrivici</a></div>
-   <p class="live">Posti aggiornati in tempo reale</p>
-  </div>
-  <div class="board" aria-live="polite">
-   <div class="board-title"><b>Prossime partenze</b><a href="viaggi.html">Tutte</a></div>
-   <div class="tickets" id="homeTrips"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
-  </div>
+ <div class="wrap cine-in">
+  <a class="kick" id="liveChip" href="viaggi.html" hidden><b></b><span></span></a>
+  <h1 id="h1home">Prossima fermata: la tua gita.</h1>
+  <p class="lead">Gite in pullman Gran Turismo dal Gargano e dall’Alto Tavoliere. Scegli il posto sulla piantina e parti con noi.</p>
+  <div class="hero-actions"><a class="btn btn-bianco" href="viaggi.html">Vedi le partenze {I['arrow']}</a><a class="btn btn-vetro" href="{WA}" target="_blank" rel="noopener">{I['wa']} Scrivici</a></div>
  </div>
 </section>
-<section class="section" style="padding-top:34px"><div class="wrap">
+<section class="section departures" aria-live="polite"><div class="wrap">
+ <div class="section-head"><h2>Prossime partenze</h2><a class="link-freccia" href="viaggi.html">Tutte le partenze {I['arrow']}</a></div>
+ <div class="cards-row" id="homeTrips"><div class="skeleton tall"></div><div class="skeleton tall"></div><div class="skeleton tall"></div></div>
+</div></section>
+<section class="section" style="padding-top:10px"><div class="wrap">
  <div class="section-head"><div><h2>Prenotare è semplice</h2><p class="muted">Tre passaggi, tutti dal telefono.</p></div></div>
  <div class="steps">
   <div class="step"><span class="n">1</span><div><h3>Scegli la gita</h3><p class="muted">Data, prezzo e posti liberi sono aggiornati in tempo reale.</p></div></div>
@@ -191,7 +188,7 @@ page("viaggi.html", "Partenze | DELGROSSO Viaggi",
 <section class="section" style="padding-top:26px"><div class="wrap">
  <div class="filters" id="monthFilters" role="group" aria-label="Filtra per mese"></div>
  <label class="toggle"><input type="checkbox" id="onlyFree"> Solo gite con posti liberi</label>
- <div id="allTrips" aria-live="polite"><div class="tickets two"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></div>
+ <div id="allTrips" aria-live="polite"><div class="cards-grid"><div class="skeleton tall"></div><div class="skeleton tall"></div><div class="skeleton tall"></div></div></div>
 </div></section>
 {CONTACT_BAND}
 """, "viaggi", scripts=TRIP_JS)
@@ -199,7 +196,7 @@ page("viaggi.html", "Partenze | DELGROSSO Viaggi",
 page("viaggio.html", "Dettagli della gita | DELGROSSO Viaggi",
      "Programma, prezzo, orario, fermate di partenza e posti liberi della gita. Scegli il tuo posto e prenota online.",
      "viaggi.html", f"""
-<section class="page-top" style="padding-bottom:30px"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1 id="tripTitle">Caricamento…</h1><p class="lead" id="tripLead"></p></div></section>
+<section class="page-top" style="padding-bottom:30px"><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1 id="tripTitle">Caricamento…</h1><p class="lead" id="tripLead"></p></div></section>
 <section class="section" style="padding-top:26px"><div class="wrap" id="tripDetail" aria-live="polite"><div class="skeleton" style="height:420px"></div></div></section>
 <section class="section" style="padding-top:0" id="tripPhotosWrap" hidden><div class="wrap"><div class="section-head"><h2>Com’è viaggiare con noi</h2><a class="link-freccia" href="galleria.html">Tutte le foto {I['arrow']}</a></div><div class="strip" id="tripPhotos"></div></div></section>
 """, "viaggio", scripts=TRIP_JS)
@@ -207,7 +204,7 @@ page("viaggio.html", "Dettagli della gita | DELGROSSO Viaggi",
 page("prenota.html", "Prenota il tuo posto | DELGROSSO Viaggi",
      "Prenota online la tua gita in pullman: scegli i posti sulla piantina, la fermata di partenza e ricevi subito la conferma in PDF.",
      "", f"""
-<section class="page-top" style="padding:28px 0 30px"><div class="trails still" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1>Prenota il tuo posto</h1></div></section>
+<section class="page-top" style="padding:28px 0 30px"><div class="wrap"><a class="crumb" href="viaggi.html">‹ Tutte le partenze</a><h1>Prenota il tuo posto</h1></div></section>
 <section class="section" style="padding-top:22px"><div class="wrap">
  <ol class="stepper" id="stepper" aria-label="Passaggi della prenotazione"><li data-s="1">1 · Gita e posti</li><li data-s="2">2 · I tuoi dati</li><li data-s="3">3 · Conferma</li></ol>
  <div id="book" aria-live="polite"><div class="skeleton" style="height:360px"></div></div>

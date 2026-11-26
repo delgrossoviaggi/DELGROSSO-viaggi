@@ -17,7 +17,7 @@
 <link rel="preload" href="assets/fonts/dmsans-400-700.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="assets/fonts/archivoblack.woff" as="font" type="font/woff" crossorigin>
 <link rel="preconnect" href="https://bhsanrbadsqcpbtxupmr.supabase.co" crossorigin>
-<link rel="stylesheet" href="assets/sito.css?v=20261126-sito3">
+<link rel="stylesheet" href="assets/sito.css?v=20261126-sito4">
 
 </head><body data-page="home">
 <a class="skip" href="#main">Vai al contenuto</a>
@@ -31,23 +31,20 @@
 </header>
 <main id="main">
 
-<section class="hero">
+<section class="cine" aria-labelledby="h1home">
  <div class="bgshow" id="heroWindow" aria-hidden="true"><img src="assets/bus-extra-1400.jpg" alt="" fetchpriority="high"></div>
- <div class="trails" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
- <div class="wrap hero-grid">
-  <div class="hero-copy">
-   <h1>Prossima fermata: la tua gita.</h1>
-   <p class="lead">Gite in pullman Gran Turismo con partenza da San Severo, Apricena, San Nicandro Garganico e Lesina. Scegli il posto sulla piantina e prenota in un minuto.</p>
-   <div class="hero-actions"><a class="btn btn-oro" href="viaggi.html">Vedi tutte le partenze <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-chiaro" href="https://wa.me/393208815899" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.4 1.8 2.2 1.2 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.1.1.7-.1 1.3Z"/></svg> Scrivici</a></div>
-   <p class="live">Posti aggiornati in tempo reale</p>
-  </div>
-  <div class="board" aria-live="polite">
-   <div class="board-title"><b>Prossime partenze</b><a href="viaggi.html">Tutte</a></div>
-   <div class="tickets" id="homeTrips"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
-  </div>
+ <div class="wrap cine-in">
+  <a class="kick" id="liveChip" href="viaggi.html" hidden><b></b><span></span></a>
+  <h1 id="h1home">Prossima fermata: la tua gita.</h1>
+  <p class="lead">Gite in pullman Gran Turismo dal Gargano e dall’Alto Tavoliere. Scegli il posto sulla piantina e parti con noi.</p>
+  <div class="hero-actions"><a class="btn btn-bianco" href="viaggi.html">Vedi le partenze <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-vetro" href="https://wa.me/393208815899" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.4 1.8 2.2 1.2 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.1.1.7-.1 1.3Z"/></svg> Scrivici</a></div>
  </div>
 </section>
-<section class="section" style="padding-top:34px"><div class="wrap">
+<section class="section departures" aria-live="polite"><div class="wrap">
+ <div class="section-head"><h2>Prossime partenze</h2><a class="link-freccia" href="viaggi.html">Tutte le partenze <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+ <div class="cards-row" id="homeTrips"><div class="skeleton tall"></div><div class="skeleton tall"></div><div class="skeleton tall"></div></div>
+</div></section>
+<section class="section" style="padding-top:10px"><div class="wrap">
  <div class="section-head"><div><h2>Prenotare è semplice</h2><p class="muted">Tre passaggi, tutti dal telefono.</p></div></div>
  <div class="steps">
   <div class="step"><span class="n">1</span><div><h3>Scegli la gita</h3><p class="muted">Data, prezzo e posti liberi sono aggiornati in tempo reale.</p></div></div>
@@ -111,6 +108,6 @@
   <div class="fine"><span>© <span data-year>2026</span> DELGROSSO Viaggi &amp; Limousine Bus</span><span><a href="privacy.html">Privacy</a> · <a href="cookie.html">Cookie</a> · <a href="area-riservata.html">Area riservata</a></span></div>
  </div>
 </footer>
-<script src="js/gestionale.js?v=20261126-sito3" defer></script><script src="js/sito.js?v=20261126-sito3" defer></script>
+<script src="js/gestionale.js?v=20261126-sito4" defer></script><script src="js/sito.js?v=20261126-sito4" defer></script>
 </body>
 </html>

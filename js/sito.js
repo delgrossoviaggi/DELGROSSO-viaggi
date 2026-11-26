@@ -26,6 +26,7 @@ const poster=t=>{const u=String(t.locandina||t.immagine||'');return /^https:\/\/
 /* ---------- menu e anno ---------- */
 const hdr=$('.site-header'),mb=$('.menu-btn');
 if(mb)mb.addEventListener('click',()=>{const o=hdr.classList.toggle('open');mb.setAttribute('aria-expanded',String(o));mb.setAttribute('aria-label',o?'Chiudi il menu':'Apri il menu')});
+if(page==='home'&&hdr){const f=()=>hdr.classList.toggle('scrolled',scrollY>40);addEventListener('scroll',f,{passive:true});f()}
 document.querySelectorAll('[data-year]').forEach(x=>x.textContent=new Date().getFullYear());
 
 /* ---------- dati del sito (foto, flotta, news) ---------- */
@@ -113,6 +114,15 @@ function ticket(t){
    ${img?`<img class="poster" src="${esc(img)}" alt="" loading="lazy">`:''}
   </a>`;
 }
+/* scheda della gita con foto (locandina, oppure una foto dei nostri viaggi) */
+function card(t,photo){
+  const p=dparts(t.data_partenza),a=avail(t),img=poster(t)||photo||FALLBACK[0],st=stopsOf(t);
+  return `<a class="tcard${a.sold?' sold':''}" href="viaggio.html?id=${encodeURIComponent(t.id)}">
+   <div class="ph"><img src="${esc(img)}" alt="" loading="lazy" decoding="async"><span class="dt"><b>${p.d}</b>${p.m.slice(0,3)}</span>${statusPill(t)}</div>
+   <div class="in"><h3>${esc(tripName(t))}</h3><span class="meta">${esc(p.w.charAt(0).toUpperCase()+p.w.slice(1))}${hhmm(t.ora_partenza)&&hhmm(t.ora_partenza)!=='00:00'?' · ore '+hhmm(t.ora_partenza):''}${st.length?' · da '+esc(st[0])+(st.length>1?' +'+(st.length-1):''):''}</span>
+   <div class="bot"><span class="price">${eur(t.prezzo)} <small>a persona</small></span><span class="go">${a.sold?'Completo':'Prenota'}</span></div></div></a>`;
+}
+const photoFor=(p,i)=>p&&p.gite.length?p.gite[i%p.gite.length]:FALLBACK[i%FALLBACK.length];
 let TRIPS=null;
 async function trips(){
   if(TRIPS)return TRIPS;
@@ -129,8 +139,11 @@ async function home(){
     const list=await trips();
     // prima le gite con posti, poi le altre; massimo 4
     const open=list.filter(t=>!avail(t).sold),sold=list.filter(t=>avail(t).sold);
-    const show=open.concat(sold).slice(0,4).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza)));
-    box.innerHTML=show.length?show.map(ticket).join(''):`<div class="empty">Nuove partenze in arrivo. <a href="${WA}" target="_blank" rel="noopener">Scrivici</a> per sapere le prossime date.</div>`;
+    const show=open.concat(sold).slice(0,6).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza)));
+    const ph=await photos().catch(()=>null);
+    const next=open.find(t=>avail(t).known&&avail(t).free>0);
+    if(next){const c=$('#liveChip');c.querySelector('span').textContent=`${avail(next).free} ${avail(next).free===1?'posto libero':'posti liberi'} · ${tripName(next)}`;c.href=`viaggio.html?id=${encodeURIComponent(next.id)}`;c.hidden=false}
+    box.innerHTML=show.length?show.map((t,i)=>card(t,photoFor(ph,i))).join(''):`<div class="empty">Nuove partenze in arrivo. <a href="${WA}" target="_blank" rel="noopener">Scrivici</a> per sapere le prossime date.</div>`;
   }catch(e){console.warn(e);box.innerHTML=tripsError}
   // foto della Home (stesse del gestionale) e foto dei mezzi per i servizi
   photos().then(p=>{
@@ -150,7 +163,7 @@ async function home(){
 
 async function catalog(){
   const box=$('#allTrips'),fbox=$('#monthFilters'),only=$('#onlyFree');
-  let list;try{list=await trips()}catch(e){console.warn(e);box.innerHTML=tripsError;return}
+  let list,PH=null;try{[list,PH]=await Promise.all([trips(),photos().catch(()=>null)])}catch(e){console.warn(e);box.innerHTML=tripsError;return}
   const months=[...new Map(list.map(t=>{const p=dparts(t.data_partenza);return [p.y+'-'+p.mi,p.m+(p.y!==new Date().getFullYear()?' '+p.y:'')]})).entries()];
   let month='tutti';
   const q=new URLSearchParams(location.search).get('cerca');
@@ -161,7 +174,7 @@ async function catalog(){
     if(q)l=l.filter(t=>(t.titolo+' '+t.destinazione).toLowerCase().includes(q.toLowerCase()));
     if(!l.length){box.innerHTML=`<div class="empty">Nessuna gita con questi filtri. <a href="${WA}" target="_blank" rel="noopener">Chiedici le prossime date</a>.</div>`;return}
     const groups=new Map();l.forEach(t=>{const p=dparts(t.data_partenza),k=p.m+' '+p.y;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
-    box.innerHTML=[...groups].map(([k,g])=>`<h2 class="month-label">${esc(k)}</h2><div class="tickets two">${g.map(ticket).join('')}</div>`).join('');
+    let n=0;box.innerHTML=[...groups].map(([k,g])=>`<h2 class="month-label">${esc(k)}</h2><div class="cards-grid">${g.map(t=>card(t,photoFor(PH,n++))).join('')}</div>`).join('');
   };
   fbox.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;month=b.dataset.m;fbox.querySelectorAll('[data-m]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));draw()});
   only.addEventListener('change',draw);
