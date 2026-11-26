@@ -120,7 +120,7 @@ async function loadAll(){
     const ids=S.trips.map(t=>t.id);
     const inList='in.('+ids.join(',')+')';
     const [bookings,seats,stops,cash,spese,pays,closes,customers,fleet,tl,bl]=await Promise.all([
-      ids.length?get('prenotazioni',{select:'id,viaggio_id,cliente,cliente_nome,telefono,posti,totale,pagato,stato,posti_selezionati,fermata_partenza,giorni_acconto,created_at,note',viaggio_id:inList,limit:'3000'}):[],
+      ids.length?get('prenotazioni',{select:'id,viaggio_id,cliente,cliente_nome,telefono,posti,totale,pagato,stato,posti_selezionati,fermata_partenza,giorni_acconto,created_at,note,email,checkin_effettuato,checked_in_at,checkin_stato',viaggio_id:inList,limit:'3000'}):[],
       ids.length?get('prenotazione_posti',{select:'viaggio_id,prenotazione_id,posto',viaggio_id:inList,limit:'6000'}):[],
       ids.length?get('viaggi_fermate',{select:'viaggio_id,nome,orario,ordine,attiva',viaggio_id:inList}).catch(()=>[]):[],
       rpc('dg_cash_preview_v2',{p_date:t0}).catch(e=>({error:e.message})),
@@ -135,6 +135,7 @@ async function loadAll(){
     S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;S.customers=customers||[];S.fleet=(fleet||[]).filter(f=>f.attivo!==false);S.tripLayouts=tl||[];S.busLayouts=bl||[];S.allBookings=null;S.acc=null;S.extra=null;
   }catch(e){S.error=e.message}
   S.loading=false;render();
+  setTimeout(pollNotifiche,1500);
 }
 const tripById=id=>S.trips.find(t=>t.id===id);
 const bookingsOf=id=>S.bookings.filter(b=>b.viaggio_id===id&&active(b));
@@ -177,16 +178,16 @@ const ICONS={
   altro:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'
 };
 const TABS=[['oggi','Oggi'],['viaggi','Viaggi'],['prenota','Prenota'],['incassi','Incassi'],['cassa','Cassa'],['altro','Altro']];
-const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi'};
+const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',presenze:'Presenze a bordo',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi'};
 
 function render(){
   const app=$('#app');
   if(!session||!me){app.innerHTML=loginView();bindLogin();return}
-  const view=S.tab==='viaggi'&&S.tripId?'viaggio':S.tab;document.body.dataset.view=view;
+  const view=S.tab==='viaggi'&&S.tripId?'viaggio':S.tab;document.body.dataset.view=view;setTimeout(()=>{const nb=document.querySelector('.nav [data-tab="altro"]');if(nb)nb.dataset.badge=unseen?String(unseen):''},0);
   let body='';
   if(S.error)body+=`<div class="err">${esc(S.error)} <button class="link" data-act="reload">Riprova</button></div>`;
   if(S.loading&&!S.trips.length)body+='<div class="empty">Carico i dati…</div>';
-  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi}[view]||viewOggi)();
+  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div class="id"><img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi"><h1>${esc(TITLES[view])}</h1></div>
   <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo">${SVG(IC.ext)}<span class="lbl">Versione completa</span></a></div></header>
@@ -260,6 +261,7 @@ function viewViaggio(){
   const paid=st.bs.filter(b=>residuo(b)<=0).length;
   let h=`<button class="link" data-act="backTrips">‹ Tutti i viaggi</button>
   <div class="ticket big-ticket">${ticketHtml(t,true)}</div>
+  <button class="btn ghost" data-act="presenze" data-id="${t.id}">${SVG(IC.user)}Presenze a bordo · ${bookingsOf(t.id).filter(onBoard).reduce((a,b)=>a+num(b.posti),0)} su ${st.pax}</button>
   <div class="grid2"><button class="btn gold" data-act="goInc" data-id="${t.id}">Saldi a bordo</button><button class="btn" data-act="bookTrip" data-id="${t.id}">${SVG(IC.plus)} Prenota qui</button></div>
   <div class="actions">
    <button class="action" data-act="toggleMap" aria-pressed="${S.showMap}">${SVG(IC.seat)}${S.showMap?'Nascondi piantina':'Piantina posti'}</button>
@@ -293,7 +295,7 @@ function viewIncassi(){
   const incToday=doneToday.reduce((a,p)=>a+num(p.importo),0);
   h+=`<div class="hero"><div style="display:flex;flex-direction:column;gap:3px"><b style="font-size:18px">${esc(titleCase(tripLabel(t)))}${t.bis_parent_id?' · bus '+esc(t.bis_numero||2):''}</b><span class="small" style="color:#C9D6E6">${esc(dateLong(t.data_partenza))}</span><span>Incassati oggi <b>${eur(incToday)}</b></span></div><div style="text-align:right"><span class="big-n">${eur(st.res)}</span><div class="small" style="color:#C9D6E6">${due.length} da saldare</div></div></div>
   <p class="small muted" style="margin:0">Tocca il pulsante quando il passeggero ti paga. Viene registrato in contanti a nome tuo. Nessun messaggio al cliente.</p>`;
-  if(S.lastPayment&&S.lastPayment.tripId===t.id)h+=`<div class="note row"><span>Registrato: ${esc(S.lastPayment.name)} ${eur(S.lastPayment.amount)}</span><button class="link" data-act="undoPay">Annulla</button></div>`;
+  if(S.lastPayment&&S.lastPayment.tripId===t.id)h+=`<div class="note row"><span>Registrato: ${esc(S.lastPayment.name)} ${eur(S.lastPayment.amount)}</span><span style="display:flex;gap:14px">${S.lastPayment.id?`<button class="link" data-act="shareRcpt" data-id="${S.lastPayment.id}" data-b="${S.lastPayment.bookingId}">Invia ricevuta</button>`:''}<button class="link" data-act="undoPay">Annulla</button></span></div>`;
   h+='<div class="list2">'+due.map(b=>{const r=residuo(b),seats=seatsOf(b);return `<div class="pax"><div class="who"><b>${esc(nameOf(b))}</b><span>${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${seats.length?' · '+esc(seats.slice(0,8).join(', '))+(seats.length>8?'…':''):''}${num(b.pagato)<=0?' · nessun acconto':''}</span><button class="link small" data-act="payOther" data-id="${b.id}">Importo diverso</button></div><button class="pay" data-act="pay" data-id="${b.id}">Incassato ${eur(r)}</button></div>`}).join('')+'</div>'+(due.length?'':'<div class="empty">Tutti hanno pagato su questo viaggio.</div>');
   if(doneToday.length)h+=`<section class="card"><h2>Incassati oggi su questo viaggio</h2>${doneToday.map(p=>`<div class="line"><span>${esc(p.cliente||'')}</span><b>${eur(p.importo)}</b></div>`).join('')}</section>`;
   return h;
@@ -528,8 +530,12 @@ function bookingSheet(id){
   <button class="action" id="bsMove">${SVG(IC.move)}Sposta viaggio</button>
   <button class="action" id="bsPdf">${SVG(IC.doc)}Conferma PDF</button>
   </div>
+  <div id="bsPays" class="small muted">Carico i pagamenti…</div>
+  ${num(b.pagato)>0?`<button class="action" id="bsRefund">${SVG(IC.coins)}Registra un rimborso</button>`:''}
   <button class="action danger" id="bsCancel">${SVG(IC.x)}Annulla prenotazione</button>
   <button class="btn light" id="bsClose">Chiudi</button>`);
+  bookingPayments(b.id).then(ps=>{const el=$('#bsPays');if(!el)return;el.className='';el.innerHTML=ps.length?`<b style="font-size:15px">Pagamenti</b>${ps.map(p=>`<div class="line"><span>${esc(dateShort(p.data_pagamento))} · ${esc(p.tipo||'')} · ${esc(p.metodo||'')}</span><span style="display:flex;gap:10px;align-items:center"><b>${eur(p.importo)}</b>${num(p.importo)>0?`<button class="link small" style="padding:0" data-act="shareRcpt" data-id="${p.id}" data-b="${b.id}">Invia ricevuta</button>`:''}</span></div>`).join('')}`:'<span class="small muted">Nessun pagamento registrato.</span>'}).catch(()=>{const el=$('#bsPays');if(el)el.textContent=''});
+  if($('#bsRefund'))$('#bsRefund').onclick=()=>refundSheet(b);
   $('#bsClose').onclick=closeSheet;
   if($('#bsPay'))$('#bsPay').onclick=()=>askPay(b,r,true);
   $('#bsEdit').onclick=()=>editBookingSheet(b);
@@ -590,7 +596,7 @@ function moveSheet(b){
 }
 function cancelSheet(b){
   sheet(`<h3>Annullare la prenotazione?</h3><p style="margin:0">${esc(nameOf(b))} · ${num(b.posti)} posti. I posti tornano liberi.</p>
-  ${num(b.pagato)>0?`<div class="note">Ha già pagato ${eur(b.pagato)}: i pagamenti restano registrati. Se restituisci i soldi, registra il rimborso dalla versione completa.</div>`:''}
+  ${num(b.pagato)>0?`<div class="note">Ha già pagato ${eur(b.pagato)}: i pagamenti restano registrati. Se restituisci i soldi, registra il rimborso dalla scheda della prenotazione.</div>`:''}
   <button class="btn danger" id="cnOk">Sì, annulla la prenotazione</button><button class="btn light" id="cnNo">No</button>`);
   $('#cnNo').onclick=()=>bookingSheet(b.id);
   $('#cnOk').onclick=e=>guard(e.currentTarget,async()=>{
@@ -805,18 +811,170 @@ async function agDone(id){
     toast('Segnato come fatto');await ensureExtra(true);render();
   });
 }
-function viewNotifiche(){return lazy(()=>`<div class="list2">${S.extra.no.map(n=>`<div class="pax"><div class="who"><b>${esc(n.titolo||'Avviso')}</b><span>${esc(n.messaggio||'')}</span><span>${esc(new Date(n.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}))}</span></div>${n.letto?'':'<span class="tag warn">Nuova</span>'}</div>`).join('')||'<div class="empty">Nessun avviso.</div>'}</div>`)}
-function viewNoleggi(){return lazy(()=>`<div class="list2">${S.extra.ren.map(n=>{const wa=waNumber(n.telefono);return `<section class="card"><div class="row"><b>${esc(n.azienda||n.referente||'Noleggio')}</b><span class="tag ${/saldat/i.test(n.stato_pagamento||'')?'ok':'warn'}">${esc(n.stato_pagamento||'')}</span></div>
+function viewNotifiche(){try{localStorage.setItem(SEEN,new Date().toISOString())}catch{}unseen=0;return lazy(()=>`<div class="list2">${S.extra.no.map(n=>`<div class="pax"><div class="who"><b>${esc(n.titolo||'Avviso')}</b><span>${esc(n.messaggio||'')}</span><span>${esc(new Date(n.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}))}</span></div>${n.letto?'':'<span class="tag warn">Nuova</span>'}</div>`).join('')||'<div class="empty">Nessun avviso.</div>'}</div>`)}
+function viewNoleggi(){return lazy(()=>`<button class="btn" data-act="rentEdit">${SVG(IC.plus)}Nuovo noleggio</button><div class="list2">${S.extra.ren.map(n=>{const wa=waNumber(n.telefono);return `<section class="card"><div class="row"><b>${esc(n.azienda||n.referente||'Noleggio')}</b><span class="tag ${/saldat/i.test(n.stato_pagamento||'')?'ok':'warn'}">${esc(n.stato_pagamento||'')}</span></div>
   <span class="small muted">${esc(dateShort(n.data_partenza))}${n.ora_partenza?' ore '+esc(String(n.ora_partenza).slice(0,5)):''} · ${esc(n.tratta_partenza||'')} → ${esc(n.tratta_destinazione||'')} · ${num(n.passeggeri)} passeggeri</span>
   <div class="line"><span>Prezzo</span><b>${eur(n.prezzo_concordato)}</b></div><div class="line"><span>Resta</span><b>${eur(n.saldo)}</b></div>
-  ${n.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(n.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}</section>`}).join('')||'<div class="empty">Nessun noleggio.</div>'}</div>
-  <a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html#noleggi">Nuovo noleggio o pagamento (versione completa)</a>`)}
-function viewPreventivi(){return lazy(()=>`<div class="list2">${S.extra.pre.map(q=>{const wa=waNumber(q.telefono);return `<section class="card"><div class="row"><b>${esc([q.nome,q.cognome].filter(Boolean).join(' ')||q.azienda||'Richiesta')}</b><span class="tag warn">${esc(q.stato||'')}</span></div>
+  ${n.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(n.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}
+  <div class="grid2"><button class="btn light" data-act="rentEdit" data-id="${n.id}">${SVG(IC.edit)}Modifica</button><button class="btn gold" data-act="rentPay" data-id="${n.id}">${SVG(IC.coins)}Pagamento</button></div></section>`}).join('')||'<div class="empty">Nessun noleggio. Creane uno con il pulsante qui sopra.</div>'}</div>`)}
+function viewPreventivi(){return lazy(()=>`<button class="btn" data-act="quoteEdit">${SVG(IC.plus)}Nuovo preventivo</button><div class="list2">${S.extra.pre.map(q=>{const wa=waNumber(q.telefono);return `<section class="card"><div class="row"><b>${esc([q.nome,q.cognome].filter(Boolean).join(' ')||q.azienda||'Richiesta')}</b><span class="tag warn">${esc(q.stato||'')}</span></div>
   <span class="small muted">${esc(q.numero_preventivo||'')} · ${esc(q.servizio||'')} · ${esc(q.luogo_partenza||'')} → ${esc(q.destinazione||'')} · ${esc(dateShort(q.data_partenza||q.data_viaggio))} · ${num(q.numero_passeggeri)} persone</span>
   ${num(q.importo_preventivo||q.importo)?`<div class="line"><span>Importo</span><b>${eur(q.importo_preventivo||q.importo)}</b></div>`:''}
-  ${q.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(q.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}${q.email?`<a href="mailto:${esc(q.email)}">Email</a>`:''}</div>`:''}</section>`}).join('')||'<div class="empty">Nessun preventivo.</div>'}</div>
-  <a class="btn ghost" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="../index.html#preventivi">Crea o invia un preventivo (versione completa)</a>`)}
+  ${q.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(q.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}${q.email?`<a href="mailto:${esc(q.email)}">Email</a>`:''}</div>`:''}
+  <div class="grid2"><button class="btn light" data-act="quoteEdit" data-id="${q.id}">${SVG(IC.edit)}Modifica</button><button class="btn light" data-act="quotePdf" data-id="${q.id}">${SVG(IC.doc)}PDF</button></div></section>`}).join('')||'<div class="empty">Nessun preventivo. Creane uno con il pulsante qui sopra.</div>'}</div>`)}
 
+/* ----- Tappa 4: presenze, rimborsi, ricevute su WhatsApp, noleggi e preventivi completi, avvisi ----- */
+const onBoard=b=>b.checkin_effettuato===true;
+function viewPresenze(){
+  const t=tripById(S.tripId);if(!t){S.tab='viaggi';S.tripId=null;return viewViaggi()}
+  const bs=bookingsOf(t.id),tot=bs.reduce((a,b)=>a+num(b.posti),0),up=bs.filter(onBoard).reduce((a,b)=>a+num(b.posti),0);
+  const groups={};for(const b of bs.slice().sort((a,b)=>nameOf(a).localeCompare(nameOf(b),'it'))){const f=titleCase(b.fermata_partenza||'Fermata non indicata');(groups[f]=groups[f]||[]).push(b)}
+  return `<button class="link" data-act="openTrip" data-id="${t.id}">‹ Torna al viaggio</button>
+  <div class="hero"><div style="display:flex;flex-direction:column;gap:3px"><b style="font-size:18px">Presenze · ${esc(titleCase(tripLabel(t)))}</b><span class="small" style="color:#C9D6E6">${esc(dateLong(t.data_partenza))} · tocca «Salito» quando il passeggero è sul bus</span></div><div style="text-align:right"><span class="big-n">${up}/${tot}</span><div class="small" style="color:#C9D6E6">persone a bordo</div></div></div>
+  <div class="bar ${up>=tot&&tot?'full':''}"><i style="width:${tot?Math.round(up/tot*100):0}%"></i></div>
+  ${Object.entries(groups).map(([f,list])=>`<section class="card"><h2>${esc(f)} <span class="muted small">${list.filter(onBoard).reduce((a,b)=>a+num(b.posti),0)} su ${list.reduce((a,b)=>a+num(b.posti),0)}</span></h2>
+  ${list.map(b=>`<div class="row" style="padding:6px 0;border-top:1px solid #EEF2F6"><div class="who" style="display:flex;flex-direction:column"><b>${esc(nameOf(b))}</b><span class="small muted">${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${currentSeats(b).length?' · n. '+esc(currentSeats(b).join(', ')):''}${residuo(b)>0?' · <span style="color:var(--residuo);font-weight:700">deve '+eur(residuo(b))+'</span>':''}</span></div>
+  <button class="pay ${onBoard(b)?'done':''}" data-act="checkin" data-id="${b.id}" aria-pressed="${onBoard(b)}">${onBoard(b)?'✓ Salito':'Salito'}</button></div>`).join('')}</section>`).join('')||'<div class="empty">Nessun passeggero.</div>'}`;
+}
+async function toggleCheckin(id){
+  const b=S.bookings.find(x=>x.id===id);if(!b||busy)return;
+  const on=!onBoard(b),prev={checkin_effettuato:b.checkin_effettuato,checked_in_at:b.checked_in_at,checkin_stato:b.checkin_stato};
+  Object.assign(b,{checkin_effettuato:on,checked_in_at:on?new Date().toISOString():null,checkin_stato:on?'PRESENTE':'NON_PRESENTE'});render();
+  try{
+    const r=await raw('/rest/v1/prenotazioni?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=representation'},
+      body:JSON.stringify({checkin_effettuato:on,checked_in_at:on?new Date().toISOString():null,checkin_stato:on?'PRESENTE':'NON_PRESENTE',checkin_operatore:on?(me.nome||me.username):null,checkin_fermata:on?(b.fermata_partenza||null):null})});
+    if(!Array.isArray(r)||!r.length)throw new Error('Presenza non salvata: aggiorna e riprova.');
+  }catch(e){Object.assign(b,prev);render();toast(e.message,true)}
+}
+function refundSheet(b){
+  const max=num(b.pagato);
+  sheet(`<h3>Rimborso a ${esc(nameOf(b))}</h3><span class="muted">Ha pagato ${eur(max)}. Il rimborso viene registrato e tolto dal pagato.</span>
+  <label class="f">Importo restituito (€)<input id="rfImp" type="number" inputmode="decimal" min="0.01" max="${max}" step="0.01" value="${max}"></label>
+  <label class="f">Come lo restituisci<select id="rfMet"><option>Contanti</option><option>Bonifico</option><option>POS</option></select></label>
+  <label class="f">Motivo<input id="rfNote" placeholder="es. viaggio annullato dal cliente"></label>
+  <button class="btn danger" id="rfOk">Registra rimborso</button><button class="btn light" id="rfNo">Annulla</button>`);
+  $('#rfNo').onclick=()=>bookingSheet(b.id);
+  $('#rfOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const imp=r2($('#rfImp').value),note=$('#rfNote').value.trim();
+    if(!(imp>0)||imp>max+0.005)throw new Error('Importo non valido (massimo '+eur(max)+').');
+    if(note.length<3)throw new Error('Scrivi il motivo del rimborso.');
+    await rpc('dg_register_payment',{p_booking_id:b.id,p_tipo:'Rimborso',p_importo:imp,p_metodo:$('#rfMet').value,p_data:today(),p_note:note});
+    closeSheet();toast('Rimborso registrato: '+eur(imp));await loadAll();
+  });
+}
+/* ricevuta: prepara il PDF e lo condivide (WhatsApp, Messaggi, Mail…) dal menu del telefono */
+async function receiptFile(pid,kind){
+  const r=await raw('/functions/v1/professional-receipts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'generate',kind:kind||'trip',id:pid})});
+  if(!r||!r.success||!r.signedUrl)throw new Error((r&&r.error)||'Ricevuta non generata.');
+  const res=await fetch(r.signedUrl);if(!res.ok)throw new Error('Ricevuta non scaricabile.');
+  const blob=await res.blob();
+  return {file:new File([blob],'Ricevuta_'+String(r.receiptNumber||pid).replace(/[^A-Za-z0-9_-]+/g,'_')+'.pdf',{type:'application/pdf'}),url:r.signedUrl,number:r.receiptNumber};
+}
+function shareReceiptSheet(pid,name,tel,kind){
+  sheet(`<h3>Ricevuta per ${esc(name)}</h3><span class="muted">Preparo il PDF della ricevuta…</span><div class="empty">Attendi qualche secondo</div><button class="btn light" id="shNo">Chiudi</button>`);
+  $('#shNo').onclick=closeSheet;
+  receiptFile(pid,kind).then(R=>{
+    const canFiles=!!(navigator.canShare&&navigator.canShare({files:[R.file]}));
+    const wa=waNumber(tel),msg=`Buongiorno ${name}, le inviamo la ricevuta ${R.number||''} del pagamento. Grazie, DELGROSSO Viaggi`;
+    sheet(`<h3>Ricevuta pronta</h3><span class="muted">${esc(R.number||'')} · ${esc(name)}</span>
+    ${canFiles?`<button class="btn gold" id="shGo">${SVG(IC.chat)}Invia la ricevuta (scegli WhatsApp)</button><span class="small muted">Si apre il menu di condivisione del telefono: scegli WhatsApp e poi il cliente.</span>`:`<a class="btn gold" href="${esc(R.url)}" target="_blank" rel="noopener">${SVG(IC.doc)}Apri la ricevuta PDF</a>${wa?`<a class="btn light" href="https://wa.me/${wa}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${SVG(IC.chat)}Scrivi al cliente su WhatsApp</a><span class="small muted">Da computer: scarica il PDF e allegalo nella chat di WhatsApp.</span>`:''}`}
+    <button class="btn light" id="shNo2">Chiudi</button>`);
+    $('#shNo2').onclick=closeSheet;
+    if(canFiles)$('#shGo').onclick=async()=>{try{await navigator.share({files:[R.file],text:msg})}catch(e){if(e&&e.name!=='AbortError')toast('Condivisione non riuscita: apri il PDF e invialo a mano.',true)}};
+  }).catch(e=>{closeSheet();toast(e.message,true)});
+}
+async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,receipt_number,receipt_professional_path,incassato_da',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
+
+/* noleggi: crea, modifica, pagamenti */
+async function rentalVehicles(id){try{return (await get('noleggi_bus_mezzi',{select:'flotta_id',noleggio_id:'eq.'+id})).map(x=>x.flotta_id)}catch{return []}}
+async function rentalSheet(id){
+  const r=id?S.extra.ren.find(x=>x.id===id):null,veh=id?await rentalVehicles(id):[];
+  const v=k=>esc(r&&r[k]!=null?r[k]:'');
+  sheet(`<h3>${r?'Modifica noleggio':'Nuovo noleggio'}</h3>
+  <div class="grid2"><label class="f">Referente<input id="rnRef" value="${v('referente')}"></label><label class="f">Azienda / gruppo<input id="rnAz" value="${v('azienda')}"></label></div>
+  <div class="grid2"><label class="f">Telefono<input id="rnTel" type="tel" value="${v('telefono')}"></label><label class="f">Email<input id="rnMail" type="email" value="${v('email')}"></label></div>
+  <div class="grid2"><label class="f">Partenza da<input id="rnFrom" value="${v('tratta_partenza')}"></label><label class="f">Destinazione<input id="rnTo" value="${v('tratta_destinazione')}"></label></div>
+  <div class="grid2"><label class="f">Data<input id="rnData" type="date" value="${v('data_partenza')}"></label><label class="f">Ora<input id="rnOra" type="time" value="${esc(String(r&&r.ora_partenza||'').slice(0,5))}"></label></div>
+  <div class="grid2"><label class="f">Ritorno (facoltativo)<input id="rnRit" type="date" value="${v('data_ritorno')}"></label><label class="f">Passeggeri<input id="rnPax" type="number" min="1" value="${v('passeggeri')||1}"></label></div>
+  <div class="grid2"><label class="f">Prezzo concordato (€)<input id="rnPrezzo" type="number" inputmode="decimal" min="0" step="0.01" value="${v('prezzo_concordato')}"></label>
+  <label class="f">Stato<select id="rnStato">${['Richiesto','Confermato','In corso','Completato','Annullato'].map(x=>`<option ${r&&r.stato_noleggio===x?'selected':''}>${x}</option>`).join('')}</select></label></div>
+  <fieldset class="f" style="border:0;padding:0;margin:0"><legend style="font-weight:600;font-size:14px;margin-bottom:6px">Mezzi</legend>${S.fleet.map(f=>`<label style="display:flex;gap:10px;align-items:center;padding:6px 0"><input type="checkbox" class="rnVeh" value="${f.id}" ${veh.includes(f.id)?'checked':''} style="width:22px;height:22px"> ${esc(busName(f.id))} · ${num(f.posti)} posti</label>`).join('')}</fieldset>
+  <label class="f">Note<input id="rnNote" value="${v('note')}"></label>
+  <span class="small muted">Per mettere «Confermato» serve almeno un acconto registrato e un mezzo scelto.</span>
+  <button class="btn" id="rnOk">${r?'Salva modifiche':'Crea noleggio'}</button><button class="btn light" id="rnNo">Annulla</button>`);
+  $('#rnNo').onclick=closeSheet;
+  $('#rnOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const ids=[...document.querySelectorAll('.rnVeh:checked')].map(x=>x.value),pax=Math.floor(num($('#rnPax').value));
+    const cap=S.fleet.filter(f=>ids.includes(f.id)).reduce((a,f)=>a+num(f.posti),0);
+    if(!$('#rnFrom').value.trim()||!$('#rnTo').value.trim()||!$('#rnData').value)throw new Error('Partenza, destinazione e data sono obbligatorie.');
+    if(ids.length&&cap<pax)throw new Error('I mezzi scelti hanno '+cap+' posti per '+pax+' passeggeri.');
+    const nid=r?r.id:uuid();
+    await rpc('dg_save_rental_v15',{p_id:nid,p_vehicle_ids:ids,p_data:{id_noleggio:r&&r.id_noleggio||null,referente:$('#rnRef').value.trim()||null,azienda:$('#rnAz').value.trim()||null,telefono:$('#rnTel').value.trim()||null,email:$('#rnMail').value.trim()||null,
+      tratta_partenza:$('#rnFrom').value.trim(),tratta_destinazione:$('#rnTo').value.trim(),data_partenza:$('#rnData').value,ora_partenza:$('#rnOra').value||null,data_ritorno:$('#rnRit').value||null,
+      passeggeri:pax,servizio_tipo:r&&r.servizio_tipo||'Andata e ritorno',prezzo_concordato:r2($('#rnPrezzo').value),stato_noleggio:$('#rnStato').value,note:$('#rnNote').value.trim()||null}});
+    closeSheet();toast(r?'Noleggio aggiornato':'Noleggio creato');await ensureExtra(true);render();
+  });
+}
+function rentalPaySheet(id){
+  const r=S.extra.ren.find(x=>x.id===id);if(!r)return;
+  sheet(`<h3>Pagamento noleggio</h3><span class="muted">${esc(r.azienda||r.referente||'')} · resta ${eur(r.saldo)}</span>
+  <div class="grid2"><label class="f">Tipo<select id="rpTipo"><option>Acconto</option><option ${num(r.acconto)>0?'selected':''}>Saldo</option><option>Rimborso</option></select></label><label class="f">Come<select id="rpMet"><option>Contanti</option><option>Bonifico</option><option>POS</option></select></label></div>
+  <label class="f">Importo (€)<input id="rpImp" type="number" inputmode="decimal" min="0.01" step="0.01" value="${num(r.saldo)||''}"></label>
+  <label class="f">Nota (facoltativa)<input id="rpNote"></label>
+  <button class="btn gold" id="rpOk">Registra pagamento</button><button class="btn light" id="rpNo">Annulla</button>`);
+  $('#rpNo').onclick=closeSheet;
+  $('#rpOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const imp=r2($('#rpImp').value),tipo=$('#rpTipo').value;
+    if(!(imp>0))throw new Error('Importo non valido.');
+    if(tipo!=='Rimborso'&&num(r.saldo)>0&&imp>num(r.saldo)+0.005)throw new Error('Supera quanto resta ('+eur(r.saldo)+').');
+    const res=await rpc('dg_register_rental_payment',{p_noleggio_id:r.id,p_tipo:tipo,p_importo:imp,p_metodo:$('#rpMet').value,p_data:today(),p_note:$('#rpNote').value.trim()||null});
+    toast('Pagamento noleggio registrato');await ensureExtra(true);render();
+    const pid=res&&(res.payment_id||res.id);
+    if(pid&&tipo!=='Rimborso')shareReceiptSheet(pid,r.referente||r.azienda||'cliente',r.telefono,'rental');else closeSheet();
+  });
+}
+/* preventivi: crea, modifica stato, PDF */
+const QSTATI=['Nuovo','In Lavorazione','Inviato','Accettato','Rifiutato','Annullato'];
+const QSERV=['Gran Turismo','Limousine Bus','NCC / Mercedes V250D','Navetta Eventi','Viaggio di Gruppo'];
+function quoteSheet(id){
+  const q=id?S.extra.pre.find(x=>x.id===id):null,v=k=>esc(q&&q[k]!=null?q[k]:'');
+  sheet(`<h3>${q?'Modifica preventivo':'Nuovo preventivo'}</h3>
+  <div class="grid2"><label class="f">Nome<input id="qNome" value="${v('nome')}"></label><label class="f">Cognome<input id="qCog" value="${v('cognome')}"></label></div>
+  <div class="grid2"><label class="f">Telefono<input id="qTel" type="tel" value="${v('telefono')}"></label><label class="f">Email<input id="qMail" type="email" value="${v('email')}"></label></div>
+  <label class="f">Azienda / gruppo (facoltativo)<input id="qAz" value="${v('azienda')}"></label>
+  <label class="f">Servizio<select id="qServ">${QSERV.concat(q&&(q.servizio||q.servizio_richiesto)&&!QSERV.includes(q.servizio||q.servizio_richiesto)?[q.servizio||q.servizio_richiesto]:[]).map(x=>`<option ${q&&(q.servizio||q.servizio_richiesto)===x?'selected':''}>${x}</option>`).join('')}</select></label>
+  <div class="grid2"><label class="f">Partenza da<input id="qFrom" value="${v('luogo_partenza')}"></label><label class="f">Destinazione<input id="qTo" value="${v('destinazione')}"></label></div>
+  <div class="grid2"><label class="f">Data<input id="qData" type="date" value="${esc(String(q&&(q.data_partenza||q.data_viaggio)||'').slice(0,10))}"></label><label class="f">Passeggeri<input id="qPax" type="number" min="1" value="${v('numero_passeggeri')}"></label></div>
+  <div class="grid2"><label class="f">Importo proposto (€)<input id="qImp" type="number" inputmode="decimal" min="0" step="0.01" value="${v('importo_preventivo')}"></label><label class="f">Stato<select id="qStato">${QSTATI.concat(q&&!QSTATI.includes(q.stato)?[q.stato]:[]).map(x=>`<option ${q&&q.stato===x?'selected':''}>${x}</option>`).join('')}</select></label></div>
+  <label class="f">Dettagli dell'offerta (vanno nel PDF)<textarea id="qDet" rows="3">${v('dettagli_offerta')}</textarea></label>
+  <button class="btn" id="qOk">${q?'Salva':'Crea preventivo'}</button><button class="btn light" id="qNo">Annulla</button>`);
+  $('#qNo').onclick=closeSheet;
+  $('#qOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const body={nome:$('#qNome').value.trim(),cognome:$('#qCog').value.trim()||null,telefono:$('#qTel').value.trim(),email:$('#qMail').value.trim()||null,azienda:$('#qAz').value.trim()||null,servizio:$('#qServ').value,
+      luogo_partenza:$('#qFrom').value.trim()||null,destinazione:$('#qTo').value.trim(),data_partenza:$('#qData').value||null,data_viaggio:$('#qData').value||null,numero_passeggeri:Math.max(1,Math.floor(num($('#qPax').value))||1),passeggeri:Math.max(1,Math.floor(num($('#qPax').value))||1),
+      importo_preventivo:r2($('#qImp').value),importo:r2($('#qImp').value),stato:$('#qStato').value,dettagli_offerta:$('#qDet').value.trim()||null,operatore:me.nome||me.username,data_modifica:new Date().toISOString()};
+    if(!body.nome||!body.telefono||!body.destinazione)throw new Error('Nome, telefono e destinazione sono obbligatori.');
+    if(q){const res=await raw('/rest/v1/preventivi?id=eq.'+encodeURIComponent(q.id),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)});if(!Array.isArray(res)||!res.length)throw new Error('Preventivo non aggiornato.')}
+    else await insert('preventivi',{...body,origine:'gestionale'});
+    closeSheet();toast(q?'Preventivo aggiornato':'Preventivo creato');await ensureExtra(true);render();
+  });
+}
+function quotePdf(id){openPdf(async()=>{const r=await raw('/functions/v1/professional-quotes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'generate',id})});if(!r||!r.success)throw new Error((r&&r.error)||'PDF non creato.');return r.signedUrl})}
+
+/* avvisi: controllo ogni minuto mentre l'app è aperta */
+const SEEN='dg-semplice-avvisi-visti';
+let unseen=0,lastNotif=null;
+async function pollNotifiche(){
+  if(!session||!me||document.visibilityState!=='visible')return;
+  try{
+    const since=localStorage.getItem(SEEN)||new Date(Date.now()-86400000).toISOString();
+    const rows=await get('notifiche',{select:'id,titolo,messaggio,created_at',created_at:'gt.'+since,order:'created_at.desc',limit:'20'});
+    const n=(rows||[]).length;
+    if(n&&rows[0].id!==lastNotif){lastNotif=rows[0].id;if(unseen)toast('Nuovo avviso: '+(rows[0].titolo||'')+(rows[0].messaggio?' · '+rows[0].messaggio:''))}
+    if(n!==unseen){unseen=n;const b=document.querySelector('.nav [data-tab="altro"]');if(b)b.dataset.badge=n?String(n):''}
+  }catch{}
+}
+setInterval(pollNotifiche,60000);
 /* ---------- azioni ---------- */
 function toast(msg,bad){const t=$('#toast');t.textContent=msg;t.className='toast'+(bad?' bad':'');t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,bad?6000:3200)}
 function sheet(html){const s=$('#sheet');s.innerHTML=`<div class="box" role="dialog" aria-modal="true">${html}</div>`;s.hidden=false;s.onclick=e=>{if(e.target===s)closeSheet()};const f=s.querySelector('input');if(f)setTimeout(()=>f.focus(),50)}
@@ -836,7 +994,7 @@ function askPay(b,amount,custom){
     if(amt>r+0.005)throw new Error('L’importo supera quanto resta da pagare ('+eur(r)+').');
     const tipo=num(b.pagato)<=0&&amt<r?'Acconto':'Saldo';
     const res=await rpc('dg_register_payment',{p_booking_id:b.id,p_tipo:tipo,p_importo:amt,p_metodo:'Contanti',p_data:today(),p_note:'Registrato dal gestionale semplice'});
-    S.lastPayment={id:res&&res.payment_id,name:nameOf(b),amount:amt,tripId:b.viaggio_id};
+    S.lastPayment={id:res&&res.payment_id,name:nameOf(b),amount:amt,tripId:b.viaggio_id,bookingId:b.id};
     closeSheet();toast('Registrato: '+nameOf(b)+' '+eur(amt));await loadAll();
   });
 }
@@ -944,6 +1102,13 @@ document.addEventListener('click',e=>{
     case 'waGroup':waGroupSheet(tripById(id));break;
     case 'agNew':agNewSheet();break;
     case 'agDone':agDone(id);break;
+    case 'presenze':S.tab='presenze';S.tripId=id;render();window.scrollTo(0,0);break;
+    case 'checkin':toggleCheckin(id);break;
+    case 'shareRcpt':{const b=S.bookings.find(x=>x.id===a.dataset.b);shareReceiptSheet(id,b?nameOf(b):'cliente',b&&b.telefono,'trip');break}
+    case 'rentEdit':rentalSheet(id);break;
+    case 'rentPay':rentalPaySheet(id);break;
+    case 'quoteEdit':quoteSheet(id);break;
+    case 'quotePdf':quotePdf(id);break;
   }
 });
 document.addEventListener('input',e=>{

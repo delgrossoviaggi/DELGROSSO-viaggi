@@ -222,3 +222,8 @@ button.sc:disabled{cursor:not-allowed}
 .tile:active{transform:scale(.985)}
 .chip b{font-weight:700;margin-right:4px}
 @media (min-width:900px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.actions.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pay.done{background:var(--pagato-bg);color:var(--pagato)}
+.nav button{position:relative}
+.nav button[data-badge]:not([data-badge=""])::after{content:attr(data-badge);position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--residuo);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+@media (min-width:900px){.nav button[data-badge]:not([data-badge=""])::after{top:50%;left:auto;right:14px;transform:translateY(-50%)}}
+fieldset.f label{font-weight:500}
