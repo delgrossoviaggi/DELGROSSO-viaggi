@@ -142,6 +142,7 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
      "Gite in pullman Gran Turismo da San Severo, Apricena, San Nicandro Garganico e Lesina: Napoli, Alberobello, mercatini di Natale. Scegli il posto e prenota online.",
      "index.html", f"""
 <section class="hero">
+ <div class="bgshow" id="heroWindow" aria-hidden="true"><img src="assets/bus-extra-1400.jpg" alt="" fetchpriority="high"></div>
  <div class="trails" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
  <div class="wrap hero-grid">
   <div class="hero-copy">
@@ -149,7 +150,6 @@ page("index.html", "DELGROSSO Viaggi | Gite in pullman e Limousine Bus dal Garga
    <p class="lead">Gite in pullman Gran Turismo con partenza da San Severo, Apricena, San Nicandro Garganico e Lesina. Scegli il posto sulla piantina e prenota in un minuto.</p>
    <div class="hero-actions"><a class="btn btn-oro" href="viaggi.html">Vedi tutte le partenze {I['arrow']}</a><a class="btn btn-chiaro" href="{WA}" target="_blank" rel="noopener">{I['wa']} Scrivici</a></div>
    <p class="live">Posti aggiornati in tempo reale</p>
-   <div class="window" id="heroWindow" aria-label="Foto dei nostri viaggi"><img src="assets/bus-extra-1400.jpg" alt="Pullman DELGROSSO in partenza" fetchpriority="high"></div>
   </div>
   <div class="board" aria-live="polite">
    <div class="board-title"><b>Prossime partenze</b><a href="viaggi.html">Tutte</a></div>

@@ -121,7 +121,7 @@ p{margin:0}
 .board-title a{color:var(--acqua);font-weight:700;text-decoration:none}
 .live{display:inline-flex;align-items:center;gap:8px;color:var(--acqua);font-weight:700;font-size:.9rem;margin-top:22px}
 .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acqua);box-shadow:0 0 0 4px rgba(51,225,210,.18)}
-@media (min-width:980px){.hero-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start;gap:48px}.hero{padding:76px 0 96px}.hero-copy{position:sticky;top:120px}}
+@media (min-width:980px){.hero-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start;gap:48px}.hero{padding:76px 0 96px}}
 
 /* biglietto (partenza): data, percorso tra le fermate, posti, prezzo */
 .ticket{display:grid;grid-template-columns:92px 1fr;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));color:var(--testo);border-radius:var(--r);box-shadow:inset 0 0 0 1px var(--linea);overflow:hidden;text-decoration:none;position:relative;transition:box-shadow .2s ease,transform .2s ease}
@@ -341,3 +341,14 @@ body.has-bar{padding-bottom:84px}
 .ticket .thumb{width:58px;height:74px;object-fit:cover;border-radius:10px;flex:0 0 auto;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 @media (min-width:700px){.ticket .thumb{display:none}}
 @media (max-width:699px){.ticket .price small{display:block;line-height:1.2;margin-top:2px}.ticket .price{line-height:1}}
+
+/* foto che scorrono dietro il titolo della home */
+.bgshow{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bgshow img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;transition:opacity 1.4s ease}
+.bgshow img.out{opacity:0}
+.bgshow .dots{display:none}
+.bgshow::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,30,.55) 0%,rgba(6,10,30,.35) 30%,rgba(6,10,30,.9) 62%,var(--notte) 100%)}
+@media (min-width:980px){.bgshow{right:42%}.bgshow::after{background:linear-gradient(90deg,rgba(6,10,30,.5),rgba(6,10,30,.25) 50%,var(--notte) 100%),linear-gradient(0deg,var(--notte),transparent 30%)}}
+.hero .trails{z-index:0}
+@media (max-width:979px){.bgshow{bottom:auto;height:640px}.bgshow img{opacity:.75}.bgshow::after{background:linear-gradient(180deg,rgba(6,10,30,.45) 0%,rgba(6,10,30,.55) 45%,rgba(6,10,30,.85) 75%,var(--notte) 100%)}}
+.hero .lead{color:#DCE1F7;text-shadow:0 1px 12px rgba(6,10,30,.6)}.hero h1{text-shadow:0 2px 24px rgba(6,10,30,.5)}

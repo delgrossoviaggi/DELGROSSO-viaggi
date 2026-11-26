@@ -61,7 +61,7 @@ function mosaic(box,urls){
 function windowShow(box,urls){
   if(!box||!urls.length)return;
   const list=urls.slice(0,8);let i=0;
-  box.innerHTML=`<img src="${esc(list[0])}" alt="Foto dalle nostre gite" fetchpriority="high"><img class="out" alt="" decoding="async"><div class="dots">${list.map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`;
+  box.innerHTML=`<img src="${esc(list[0])}" alt="" fetchpriority="high"><img class="out" alt="" decoding="async"><div class="dots">${list.map((_,k)=>`<i class="${k?'':'on'}"></i>`).join('')}</div>`;
   if(list.length<2||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const [a,b]=box.querySelectorAll('img'),dots=box.querySelectorAll('.dots i');let front=a,back=b;
   setInterval(()=>{if(document.hidden)return;i=(i+1)%list.length;back.onload=()=>{back.classList.remove('out');front.classList.add('out');[front,back]=[back,front];dots.forEach((d,k)=>d.classList.toggle('on',k===i))};back.src=list[i]},5000);
