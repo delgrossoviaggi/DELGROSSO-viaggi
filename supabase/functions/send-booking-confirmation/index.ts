@@ -10,6 +10,18 @@ const J=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:H});
 const T=(v:unknown,f="")=>String(v??f).trim();
 const validEmail=(v:unknown):v is string=>typeof v==="string"&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
+// DG-26/11/2026: invio tramite Resend (API HTTPS) quando il secret RESEND_API_KEY è presente.
+// Senza il secret il comportamento resta identico a prima (SMTP Aruba dalle impostazioni).
+const RESEND_KEY=Deno.env.get("RESEND_API_KEY")||"";
+function b64(a:Uint8Array){let s="";for(let i=0;i<a.length;i+=0x8000)s+=String.fromCharCode(...a.subarray(i,i+0x8000));return btoa(s)}
+async function viaResend(o:{fromName:string,fromEmail:string,replyTo:string,to:string,subject:string,text:string,filename:string,content:Uint8Array}){
+  if(!RESEND_KEY)return false;
+  const r=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${RESEND_KEY}`,"Content-Type":"application/json"},
+    body:JSON.stringify({from:`"${o.fromName.replace(/"/g,"")}" <${o.fromEmail}>`,to:[o.to],reply_to:o.replyTo||undefined,subject:o.subject,text:o.text,attachments:[{filename:o.filename,content:b64(o.content)}]})});
+  if(!r.ok)throw new Error(`Invio Resend non riuscito (${r.status}): ${(await r.text()).slice(0,200)}`);
+  return true;
+}
+
 function pdfBytes(v:string){
   const s=T(v).replace(/^data:application\/pdf;base64,/i,"").replace(/\s/g,"");
   if(!s || s.length>16000000) throw new Error("PDF mancante o troppo grande");
@@ -52,10 +64,6 @@ async function smtp(){
   if(q.error)throw q.error;const s=q.data||{};
   return {host:T(s.smtp_host,"smtps.aruba.it"),port:Number(s.smtp_port||465),secure:s.smtp_secure!==false,user:T(s.smtp_username,"prenotazioni@delgrossoviaggi.it"),pass:T(s.smtp_password),fromName:T(s.smtp_from_name,"PRENOTAZIONI DELGROSSO VIAGGI"),fromEmail:T(s.smtp_from_email,"prenotazioni@delgrossoviaggi.it"),replyTo:T(s.smtp_reply_to,"prenotazioni@delgrossoviaggi.it")};
 }
-function fresh(b:R,minutes=20){
-  const ms=Date.now()-new Date(b.created_at||0).getTime();
-  return Number.isFinite(ms)&&ms>=0&&ms<=minutes*60000;
-}
 function validPdf(bytes:Uint8Array){
  if(bytes.length<600||bytes.length>5000000)return false;
  if(String.fromCharCode(...bytes.subarray(0,5))!=='%PDF-')return false;
@@ -73,13 +81,18 @@ function tokenOK(b:R,p:R){
 }
 async function sendMail(b:R,tr:R,path:string,number:string){
   if(!validEmail(b.email))return {sent:false,error:null};
-  const s=await smtp();if(!s.pass)throw new Error("Password SMTP non configurata");
+  const s=await smtp();
   const f=await sb.storage.from("ricevute-prenotazioni").download(path);if(f.error)throw f.error;
   const verifiedPdf=new Uint8Array(await f.data.arrayBuffer());
   if(!validPdf(verifiedPdf))throw new Error("PDF archiviato incompleto o danneggiato: invio bloccato");
-  const tx=nodemailer.createTransport({host:s.host,port:s.port,secure:s.secure,auth:{user:s.user,pass:s.pass}});
   const nome=T(b.cliente_nome||b.cliente,"Cliente"),dest=T(tr?.destinazione||tr?.titolo||b.viaggio_codice,"—");
-  await tx.sendMail({from:{name:s.fromName,address:s.fromEmail},to:T(b.email),replyTo:s.replyTo,subject:`Conferma prenotazione ${number} - Del Grosso Viaggi`,text:`Buongiorno ${nome},\n\nla tua prenotazione è stata registrata correttamente.\n\nViaggio: ${dest}\nNumero prenotazione: ${number}\n\nIn allegato trovi la conferma di prenotazione da conservare e presentare al check-in.\n\nDel Grosso Viaggi & Limousine Bus`,attachments:[{filename:`Conferma_Prenotazione_${number}.pdf`,content:verifiedPdf,contentType:"application/pdf"}]});
+  const subject=`Conferma prenotazione ${number} - Del Grosso Viaggi`;
+  const text=`Buongiorno ${nome},\n\nla tua prenotazione è stata registrata correttamente.\n\nViaggio: ${dest}\nNumero prenotazione: ${number}\n\nIn allegato trovi la conferma di prenotazione da conservare e presentare al check-in.\n\nDel Grosso Viaggi & Limousine Bus`;
+  const filename=`Conferma_Prenotazione_${number}.pdf`;
+  if(await viaResend({fromName:s.fromName,fromEmail:s.fromEmail,replyTo:s.replyTo,to:T(b.email),subject,text,filename,content:verifiedPdf}))return {sent:true,error:null};
+  if(!s.pass)throw new Error("Password SMTP non configurata");
+  const tx=nodemailer.createTransport({host:s.host,port:s.port,secure:s.secure,auth:{user:s.user,pass:s.pass}});
+  await tx.sendMail({from:{name:s.fromName,address:s.fromEmail},to:T(b.email),replyTo:s.replyTo,subject,text,attachments:[{filename,content:verifiedPdf,contentType:"application/pdf"}]});
   return {sent:true,error:null};
 }
 
@@ -91,6 +104,7 @@ Deno.serve(async(req)=>{
     if(p.action==="smtp_check"){
       // Operator-only connection/authentication check. Never sends a message.
       if(!await operator(req))return J({success:false,error:"Controllo SMTP riservato agli operatori"},403);
+      if(RESEND_KEY)return J({success:true,provider:"resend",smtpConfigured:true,authenticated:true,message:"Invio email tramite Resend attivo. Nessuna email inviata."});
       let tx:any=null;
       try{
         const settings=await smtp();
