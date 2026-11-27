@@ -29,7 +29,7 @@ const dateParts=iso=>{const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');ret
 const dateLong=iso=>{const p=dateParts(iso);return p.w?p.w.charAt(0).toUpperCase()+p.w.slice(1)+' '+p.d+' '+['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][MESI.indexOf(p.m)]:''};
 const titleCase=s=>String(s||'').replace(/\s*\(\s*[A-Za-z]{2}\s*\)\s*$/,'').toLowerCase().replace(/(^|[\s'(-])([a-zà-ù])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(E|Di|De|Del|Della|In|A|Al|Alla|Da|Con|Per)\b/g,(w,_,i)=>i===0?w:w.toLowerCase()).replace(/\bG\.co\b/i,'G.co');
 const SVG=(d,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const IC={arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
+const IC={swap:'<path d="M4 8h15l-4-4M20 16H5l4 4"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
 const firstStop=t=>titleCase(String(t.luogo_partenza||'').split(/\s*[|]\s*|\s+-\s*|\s*-\s+/)[0]||'');
 function ticketHtml(t,big){
   const st=tripStats(t),pct=st.cap?Math.min(100,Math.round(st.pax/st.cap*100)):0,p=dateParts(t.data_partenza),from=firstStop(t),to=titleCase(t.destinazione||'');
@@ -51,8 +51,17 @@ const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(
 
 /* ---------- sessione e API ---------- */
 let session=null, me=null, refreshing=null;
-function saveSession(s){session={...s,expires_at:s.expires_at||Math.floor(Date.now()/1000)+num(s.expires_in||3600)};try{localStorage.setItem(STORE,JSON.stringify(session))}catch{}}
+function saveSession(s){session={...s,expires_at:s.expires_at||Math.floor(Date.now()/1000)+num(s.expires_in||3600)};try{localStorage.setItem(STORE,JSON.stringify(session))}catch{}mirrorToWeb()}
 function dropSession(){session=null;me=null;try{localStorage.removeItem(STORE)}catch{}}
+/* passaggio semplice ⇄ versione web: la versione web tiene l'accesso in sessionStorage 'dg_auth'.
+   Quando uno dei due rinnova l'accesso aggiorna anche l'altro, così il rinnovo non lo fa scadere. */
+const WEB_KEY='dg_auth';
+function webSession(){try{return JSON.parse(sessionStorage.getItem(WEB_KEY)||'null')}catch{return null}}
+function mirrorToWeb(){try{const w=webSession();if(session&&w&&w.user&&session.user&&w.user.id===session.user.id)sessionStorage.setItem(WEB_KEY,JSON.stringify(session))}catch{}}
+function toWeb(){
+  try{if(session&&session.access_token&&session.refresh_token&&session.user&&session.user.id){sessionStorage.setItem(WEB_KEY,JSON.stringify(session));sessionStorage.setItem('dg_login','1')}}catch{}
+  location.href='../index.html';
+}
 async function raw(path,opt={},auth=true){
   const headers={apikey:KEY,Accept:'application/json',...(opt.headers||{})};
   if(auth){await ensureToken();headers.Authorization='Bearer '+session.access_token}
@@ -190,7 +199,7 @@ function render(){
   else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze,riepilogo:viewRiepilogo}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div class="id"><img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi"><h1>${esc(TITLES[view])}</h1></div>
-  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo">${SVG(IC.ext)}<span class="lbl">Versione completa</span></a></div></header>
+  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><button class="switch" data-act="toWeb" aria-label="Passa alla versione web">${SVG(IC.swap)}<span class="l-lg">Versione web</span><span class="l-sm">Web</span></button></div></header>
   <main>${body}</main>
   <nav class="nav" aria-label="Menu principale"><div class="in"><img class="rail-logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi','riepilogo'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
   </div>`;
@@ -209,7 +218,7 @@ function loginView(){
   <label style="display:flex;flex-direction:column;gap:8px;font-weight:600">Password<input id="pw" type="password" autocomplete="current-password" required></label>
   <button class="btn gold" type="submit" id="loginBtn">Entra</button>
   <div id="loginErr" class="err" hidden></div>
-  <a href="../index.html" style="color:#C9D6E6;text-align:center">Apri il gestionale completo</a>
+  <a href="../index.html" style="color:#C9D6E6;text-align:center">Vai alla versione web</a>
   </form>`;
 }
 function bindLogin(){
@@ -432,7 +441,7 @@ function viewAltro(){
   const it=(k,t,d)=>`<button class="tile" data-tab="${k}">${SVG(ico[k])}<span class="tt">${t}</span><span class="td">${d}</span></button>`;
   return `<div class="tiles">${it('riepilogo','Riepilogo viaggio','Chi ha saldato, chi ha l’acconto, chi deve ancora pagare. Con PDF')}${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
   <section class="card"><h2>Versione completa</h2><span class="muted small">Per le cose rare (piantine nuove, bus BIS, locandine, rimborsi, impostazioni) resta disponibile il gestionale di prima.</span>
-  <a class="btn ghost" href="../index.html">${SVG(IC.ext)}Apri la versione completa</a></section>
+  <button class="btn ghost" data-act="toWeb">${SVG(IC.swap)}Passa alla versione web</button></section>
   <button class="btn light" data-act="logout">${SVG(IC.out)}Esci (${esc(me.nome||me.username)})</button>`;
 }
 async function ensureAllBookings(){
@@ -1307,6 +1316,7 @@ document.addEventListener('click',e=>{
     case 'compLink':compLinkSheet(id);break;
     case 'profTrip':profTripSheet(id);break;
     case 'receipt':receipt(id);break;
+    case 'toWeb':toWeb();break;
     case 'collector':collectorSheet(id);break;
     case 'paxList':passengerList(tripById(id));break;
     case 'waGroup':waGroupSheet(tripById(id));break;
@@ -1345,7 +1355,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 /* ---------- avvio ---------- */
 (async()=>{
-  try{const s=JSON.parse(localStorage.getItem(STORE)||'null');if(s&&s.refresh_token){session=s;await authorize();await loadAll();return}}
+  try{let s=JSON.parse(localStorage.getItem(STORE)||'null');const w=webSession();
+    if((!s||!s.refresh_token)&&w&&w.refresh_token&&w.user&&w.user.id){s=w;try{localStorage.setItem(STORE,JSON.stringify(w))}catch{}}
+    if(s&&s.refresh_token){session=s;await authorize();await loadAll();return}}
   catch(e){dropSession()}
   render();
 })();

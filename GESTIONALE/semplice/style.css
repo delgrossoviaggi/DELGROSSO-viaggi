@@ -275,3 +275,9 @@ fieldset.f label{font-weight:500}
 .pline small.by,.line small.by{font-size:13px;color:var(--grigio);font-weight:400}
 .pline small.by b{color:var(--inchiostro,#14233a)}
 .pline>span:last-child b{white-space:nowrap}
+
+/* pulsante Semplice ⇄ Versione web, sempre con la scritta */
+.top .tools .switch{gap:8px;background:var(--oro,#E2A32B);color:#2A1B00;font-weight:700}
+.top .tools .switch svg{width:18px;height:18px}
+.top .tools .switch .l-sm{display:none}
+@media (max-width:599px){.top .tools .switch{padding:0 12px}.top .tools .switch .l-lg{display:none}.top .tools .switch .l-sm{display:inline}}
