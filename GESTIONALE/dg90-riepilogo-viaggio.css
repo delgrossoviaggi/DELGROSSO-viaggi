@@ -83,3 +83,8 @@
 .dg90 :focus-visible,.dg90-box :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @media (max-width:900px){.dg90-row2{grid-template-columns:1fr}.dg90-list{grid-template-columns:1fr}}
 @media (max-width:560px){.dg90-hero{flex-direction:column;align-items:flex-start}.dg90-due{text-align:left}.dg90-stati{gap:8px}.dg90-st{padding:12px 10px 12px 14px}.dg90-st .n{font-size:28px}}
+/* DG91 — Modifica incassatore */
+.dg91-note{margin:0;background:#FBEFD5;color:#8A5A00;border-radius:12px;padding:12px 14px;font-size:14.5px}
+.dg91-who{font-weight:600;display:block;margin-top:2px}
+.dg91-btn{display:flex;margin:6px 0 6px;white-space:nowrap}
+#paymentsTable td:last-child{min-width:200px}

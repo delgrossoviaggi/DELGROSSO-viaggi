@@ -29,7 +29,7 @@ const dateParts=iso=>{const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');ret
 const dateLong=iso=>{const p=dateParts(iso);return p.w?p.w.charAt(0).toUpperCase()+p.w.slice(1)+' '+p.d+' '+['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][MESI.indexOf(p.m)]:''};
 const titleCase=s=>String(s||'').replace(/\s*\(\s*[A-Za-z]{2}\s*\)\s*$/,'').toLowerCase().replace(/(^|[\s'(-])([a-zà-ù])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(E|Di|De|Del|Della|In|A|Al|Alla|Da|Con|Per)\b/g,(w,_,i)=>i===0?w:w.toLowerCase()).replace(/\bG\.co\b/i,'G.co');
 const SVG=(d,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const IC={arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
+const IC={swap:'<path d="M4 8h15l-4-4M20 16H5l4 4"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
 const firstStop=t=>titleCase(String(t.luogo_partenza||'').split(/\s*[|]\s*|\s+-\s*|\s*-\s+/)[0]||'');
 function ticketHtml(t,big){
   const st=tripStats(t),pct=st.cap?Math.min(100,Math.round(st.pax/st.cap*100)):0,p=dateParts(t.data_partenza),from=firstStop(t),to=titleCase(t.destinazione||'');
@@ -51,8 +51,17 @@ const fold=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(
 
 /* ---------- sessione e API ---------- */
 let session=null, me=null, refreshing=null;
-function saveSession(s){session={...s,expires_at:s.expires_at||Math.floor(Date.now()/1000)+num(s.expires_in||3600)};try{localStorage.setItem(STORE,JSON.stringify(session))}catch{}}
+function saveSession(s){session={...s,expires_at:s.expires_at||Math.floor(Date.now()/1000)+num(s.expires_in||3600)};try{localStorage.setItem(STORE,JSON.stringify(session))}catch{}mirrorToWeb()}
 function dropSession(){session=null;me=null;try{localStorage.removeItem(STORE)}catch{}}
+/* passaggio semplice ⇄ versione web: la versione web tiene l'accesso in sessionStorage 'dg_auth'.
+   Quando uno dei due rinnova l'accesso aggiorna anche l'altro, così il rinnovo non lo fa scadere. */
+const WEB_KEY='dg_auth';
+function webSession(){try{return JSON.parse(sessionStorage.getItem(WEB_KEY)||'null')}catch{return null}}
+function mirrorToWeb(){try{const w=webSession();if(session&&w&&w.user&&session.user&&w.user.id===session.user.id)sessionStorage.setItem(WEB_KEY,JSON.stringify(session))}catch{}}
+function toWeb(){
+  try{if(session&&session.access_token&&session.refresh_token&&session.user&&session.user.id){sessionStorage.setItem(WEB_KEY,JSON.stringify(session));sessionStorage.setItem('dg_login','1')}}catch{}
+  location.href='../index.html';
+}
 async function raw(path,opt={},auth=true){
   const headers={apikey:KEY,Accept:'application/json',...(opt.headers||{})};
   if(auth){await ensureToken();headers.Authorization='Bearer '+session.access_token}
@@ -101,7 +110,7 @@ async function login(username,password){
 async function authorize(){
   const ok=await rpc('is_gestionale_admin',{});
   if(ok!==true)throw new Error('Questo account non è un operatore del gestionale.');
-  const rows=await get('operatori_gestionale',{select:'user_id,username,nome,attivo'});
+  const rows=await get('operatori_gestionale',{select:'user_id,username,nome,attivo,ruolo'});
   const uid=session.user&&session.user.id;
   me=(rows||[]).find(o=>o.user_id===uid&&o.attivo===true);
   if(!me)throw new Error('Operatore non attivo.');
@@ -190,7 +199,7 @@ function render(){
   else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze,riepilogo:viewRiepilogo}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div class="id"><img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi"><h1>${esc(TITLES[view])}</h1></div>
-  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><a href="../index.html" aria-label="Apri il gestionale completo">${SVG(IC.ext)}<span class="lbl">Versione completa</span></a></div></header>
+  <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><button class="switch" data-act="toWeb" aria-label="Passa alla versione web">${SVG(IC.swap)}<span class="l-lg">Versione web</span><span class="l-sm">Web</span></button></div></header>
   <main>${body}</main>
   <nav class="nav" aria-label="Menu principale"><div class="in"><img class="rail-logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi','riepilogo'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
   </div>`;
@@ -209,7 +218,7 @@ function loginView(){
   <label style="display:flex;flex-direction:column;gap:8px;font-weight:600">Password<input id="pw" type="password" autocomplete="current-password" required></label>
   <button class="btn gold" type="submit" id="loginBtn">Entra</button>
   <div id="loginErr" class="err" hidden></div>
-  <a href="../index.html" style="color:#C9D6E6;text-align:center">Apri il gestionale completo</a>
+  <a href="../index.html" style="color:#C9D6E6;text-align:center">Vai alla versione web</a>
   </form>`;
 }
 function bindLogin(){
@@ -432,7 +441,7 @@ function viewAltro(){
   const it=(k,t,d)=>`<button class="tile" data-tab="${k}">${SVG(ico[k])}<span class="tt">${t}</span><span class="td">${d}</span></button>`;
   return `<div class="tiles">${it('riepilogo','Riepilogo viaggio','Chi ha saldato, chi ha l’acconto, chi deve ancora pagare. Con PDF')}${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
   <section class="card"><h2>Versione completa</h2><span class="muted small">Per le cose rare (piantine nuove, bus BIS, locandine, rimborsi, impostazioni) resta disponibile il gestionale di prima.</span>
-  <a class="btn ghost" href="../index.html">${SVG(IC.ext)}Apri la versione completa</a></section>
+  <button class="btn ghost" data-act="toWeb">${SVG(IC.swap)}Passa alla versione web</button></section>
   <button class="btn light" data-act="logout">${SVG(IC.out)}Esci (${esc(me.nome||me.username)})</button>`;
 }
 async function ensureAllBookings(){
@@ -535,7 +544,7 @@ function bookingSheet(id){
   ${num(b.pagato)>0?`<button class="action" id="bsRefund">${SVG(IC.coins)}Registra un rimborso</button>`:''}
   <button class="action danger" id="bsCancel">${SVG(IC.x)}Annulla prenotazione</button>
   <button class="btn light" id="bsClose">Chiudi</button>`);
-  bookingPayments(b.id).then(ps=>{const el=$('#bsPays');if(!el)return;el.className='';el.innerHTML=ps.length?`<b style="font-size:15px">Pagamenti</b>${ps.map(p=>`<div class="line"><span>${esc(dateShort(p.data_pagamento))} · ${esc(p.tipo||'')} · ${esc(p.metodo||'')}</span><span style="display:flex;gap:10px;align-items:center"><b>${eur(p.importo)}</b>${num(p.importo)>0?`<button class="link small" style="padding:0" data-act="shareRcpt" data-id="${p.id}" data-b="${b.id}">Invia ricevuta</button>`:''}</span></div>`).join('')}`:'<span class="small muted">Nessun pagamento registrato.</span>'}).catch(()=>{const el=$('#bsPays');if(el)el.textContent=''});
+  bookingPayments(b.id).then(ps=>{const el=$('#bsPays');if(!el)return;el.className='';el.innerHTML=ps.length?`<b style="font-size:15px">Pagamenti</b>${ps.map(p=>{const k=payKey('trip',p,{label:nameOf(b),bookingId:b.id});return `<div class="line pline"><span>${esc(dateShort(p.data_pagamento))} · ${esc(p.tipo||'')} · ${esc(p.metodo_pagamento||p.metodo||'')}<small class="by">${isRefund(p)?'dato da':'incassato da'} <b>${esc(collectorName(p))}</b>${collectorBtn(k,p)}</small></span><span style="display:flex;gap:10px;align-items:center"><b>${eur(p.importo)}</b>${num(p.importo)>0?`<button class="link small" style="padding:0" data-act="shareRcpt" data-id="${p.id}" data-b="${b.id}">Invia ricevuta</button>`:''}</span></div>`}).join('')}`:'<span class="small muted">Nessun pagamento registrato.</span>'}).catch(e=>{const el=$('#bsPays');if(el)el.textContent='Non riesco a leggere i pagamenti: '+e.message});
   if($('#bsRefund'))$('#bsRefund').onclick=()=>refundSheet(b);
   $('#bsClose').onclick=closeSheet;
   if($('#bsPay'))$('#bsPay').onclick=()=>askPay(b,r,true);
@@ -612,7 +621,7 @@ async function ensureAcc(force){
   if(S.acc&&!force)return;
   const [pays,rent,tr,eco,cl,comp,liq,prof,trips]=await Promise.all([
     get('pagamenti',{select:'id,prenotazione_id,viaggio_id,cliente,importo,tipo,stato,metodo,metodo_pagamento,data_pagamento,created_at,incassato_da_user_id,incassato_da,receipt_number,receipt_professional_path,receipt_professional_generated_at',order:'data_pagamento.desc,created_at.desc',limit:'10000'}),
-    get('noleggi_bus_pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,created_at,incassato_da_user_id',limit:'5000'}).catch(()=>[]),
+    get('noleggi_bus_pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,created_at,incassato_da_user_id,incassato_da',limit:'5000'}).catch(()=>[]),
     get('cassa_trasferimenti',{select:'id,da_operatore_user_id,a_operatore_user_id,importo,stato,data_trasferimento,note,created_at',order:'created_at.desc',limit:'5000'}),
     get('economia_movimenti',{select:'id,tipo,categoria,descrizione,importo,data_movimento,metodo,viaggio_id,origine,pagamento_id,operatore_user_id,operatore,created_at',order:'data_movimento.desc,created_at.desc',limit:'10000'}),
     get('cassa_chiusure',{select:'data_chiusura,operatore_user_id,saldo_teorico,contanti_contati,differenza,created_at',order:'created_at.desc',limit:'500'}).catch(()=>[]),
@@ -629,8 +638,8 @@ const opName=uid=>{const o=S.operators.find(x=>x.user_id===uid);return o?(o.nome
 const tripOfAcc=id=>(S.acc&&S.acc.trips.find(t=>t.id===id))||tripById(id)||null;
 function ledger(uid){
   const A=S.acc,rows=[];
-  for(const p of A.pays.filter(p=>p.incassato_da_user_id===uid&&!/annull|storn/i.test(p.stato||''))){const v=isRefund(p)?-Math.abs(num(p.importo)):Math.abs(num(p.importo));rows.push({d:p.data_pagamento||String(p.created_at).slice(0,10),kind:isRefund(p)?'Rimborso':p.tipo||'Incasso',who:p.cliente,trip:p.viaggio_id,v,cash:isCash(p.metodo_pagamento||p.metodo),method:p.metodo_pagamento||p.metodo,pid:p.id})}
-  for(const p of A.rent.filter(p=>p.incassato_da_user_id===uid)){const v=isRefund(p)?-Math.abs(num(p.importo)):Math.abs(num(p.importo));rows.push({d:p.data_pagamento||String(p.created_at).slice(0,10),kind:'Noleggio',who:'',v,cash:isCash(p.metodo),method:p.metodo})}
+  for(const p of A.pays.filter(p=>p.incassato_da_user_id===uid&&!/annull|storn/i.test(p.stato||''))){const v=isRefund(p)?-Math.abs(num(p.importo)):Math.abs(num(p.importo));rows.push({d:p.data_pagamento||String(p.created_at).slice(0,10),kind:isRefund(p)?'Rimborso':p.tipo||'Incasso',who:p.cliente,trip:p.viaggio_id,v,cash:isCash(p.metodo_pagamento||p.metodo),method:p.metodo_pagamento||p.metodo,pid:p.id,ck:payKey('trip',p,{label:p.cliente||'',acc:true}),cp:p})}
+  for(const p of A.rent.filter(p=>p.incassato_da_user_id===uid)){const v=isRefund(p)?-Math.abs(num(p.importo)):Math.abs(num(p.importo));rows.push({d:p.data_pagamento||String(p.created_at).slice(0,10),kind:'Noleggio',who:'',v,cash:isCash(p.metodo),method:p.metodo,ck:payKey('rental',p,{label:'Noleggio',acc:true}),cp:p})}
   for(const t of A.tr.filter(t=>t.da_operatore_user_id===uid||t.a_operatore_user_id===uid)){const out=t.da_operatore_user_id===uid;rows.push({d:t.data_trasferimento||String(t.created_at).slice(0,10),kind:out?'Consegnati a '+opName(t.a_operatore_user_id):'Ricevuti da '+opName(t.da_operatore_user_id),who:t.note||'',v:out?-num(t.importo):num(t.importo),cash:true,method:'Contanti',transfer:true})}
   for(const e of A.eco.filter(e=>e.operatore_user_id===uid&&!e.pagamento_id&&!/^(automatico|migrazione)/i.test(e.origine||''))){const out=/uscita/i.test(e.tipo);rows.push({d:e.data_movimento,kind:(out?'Spesa · ':'Entrata · ')+(e.categoria||''),who:e.descrizione&&e.descrizione!==e.categoria?e.descrizione:'',trip:e.viaggio_id,v:out?-num(e.importo):num(e.importo),cash:isCash(e.metodo),method:e.metodo||'non indicato'})}
   rows.sort((a,b)=>String(b.d).localeCompare(String(a.d)));
@@ -655,7 +664,7 @@ function viewConti(){
   <div class="grid2"><div class="kpi"><span>Incassi in contanti</span><b>${eur(L.incCash)}</b></div><div class="kpi"><span>Incassi POS/bonifico</span><b>${eur(L.incOther)}</b></div>
   <div class="kpi"><span>Ricevuti da collega</span><b>${eur(L.tin)}</b></div><div class="kpi"><span>Consegnati a collega</span><b>${eur(L.tout)}</b></div>
   <div class="kpi"><span>Spese in contanti</span><b>${eur(L.spese)}</b></div><div class="kpi"><span>Movimenti</span><b>${L.rows.length}</b></div></div>
-  <section class="card"><h2>Movimenti</h2>${L.rows.slice(0,S.accMore?2000:60).map(r=>{const t=r.trip&&tripOfAcc(r.trip);return `<div class="line"><span>${esc(dateShort(r.d))} · <b>${esc(r.kind)}</b>${r.who?' · '+esc(r.who):''}${t?' · '+esc(tripLabel(t))+' '+esc(dateShort(t.data_partenza)):''}${r.cash?'':' <span class="tag warn">'+esc(r.method||'non contanti')+'</span>'}${r.pid?` <button class="link small" style="padding:0" data-act="receipt" data-id="${r.pid}">PDF</button>`:''}</span><b style="white-space:nowrap;color:${r.v<0?'var(--bad)':'var(--ok)'}">${r.v<0?'− ':'+ '}${eur(Math.abs(r.v))}</b></div>`}).join('')||'<span class="muted">Nessun movimento.</span>'}
+  <section class="card"><h2>Movimenti</h2>${L.rows.slice(0,S.accMore?2000:60).map(r=>{const t=r.trip&&tripOfAcc(r.trip);return `<div class="line"><span>${esc(dateShort(r.d))} · <b>${esc(r.kind)}</b>${r.who?' · '+esc(r.who):''}${t?' · '+esc(tripLabel(t))+' '+esc(dateShort(t.data_partenza)):''}${r.cash?'':' <span class="tag warn">'+esc(r.method||'non contanti')+'</span>'}${r.pid?` <button class="link small" style="padding:0" data-act="receipt" data-id="${r.pid}">PDF</button>`:''}${r.ck?collectorBtn(r.ck,r.cp,true):''}</span><b style="white-space:nowrap;color:${r.v<0?'var(--bad)':'var(--ok)'}">${r.v<0?'− ':'+ '}${eur(Math.abs(r.v))}</b></div>`}).join('')||'<span class="muted">Nessun movimento.</span>'}
   ${L.rows.length>60&&!S.accMore?`<button class="link" data-act="accMore">Mostra tutti (${L.rows.length})</button>`:''}</section>`;
   return h;
 }
@@ -975,6 +984,40 @@ function rpDoneSheet(d){
     };
   }
 }
+/* «Modifica incassatore»: solo amministratori. Sposta il pagamento (e la sua cassa) su un altro operatore. */
+const isAdmin=()=>!!me&&me.ruolo==='admin';
+const PAYS=new Map();
+function payKey(kind,p,ctx){const k=kind+':'+p.id;PAYS.set(k,{kind,p,...ctx});return k}
+function collectorName(p){const o=S.operators.find(x=>x.user_id===p.incassato_da_user_id);return o?(o.nome||o.username):(p.incassato_da||'non indicato')}
+function collectorBtn(k,p,short){return isAdmin()&&!/annull|storn/i.test(p.stato||'')?` <button class="link small" style="padding:0" data-act="collector" data-id="${esc(k)}">${short?'Cambia incassatore':'Modifica incassatore'}</button>`:''}
+function collectorSheet(k,pick){
+  const o=PAYS.get(k);if(!o)return toast('Pagamento non trovato: aggiorna.',true);
+  if(!isAdmin())return toast('Solo gli amministratori possono cambiare chi ha incassato.',true);
+  const p=o.p,refund=isRefund(p)||num(p.importo)<0,amt=Math.abs(num(p.importo)),cash=isCash(p.metodo_pagamento||p.metodo),from=collectorName(p);
+  const others=S.operators.filter(x=>x.user_id!==p.incassato_da_user_id);
+  if(!others.length)return toast('Non ci sono altri operatori a cui assegnarlo.',true);
+  if(!pick&&others.length===1)pick=others[0].user_id;
+  const to=pick&&S.operators.find(x=>x.user_id===pick),toName=to?(to.nome||to.username):'';
+  const back=()=>o.bookingId?bookingSheet(o.bookingId):closeSheet();
+  sheet(`<h3>Modifica incassatore</h3>
+  <span class="muted">${esc(o.label||'')}${o.label?' · ':''}${esc(p.tipo||'Pagamento')} di ${eur(amt)} del ${esc(dateShort(p.data_pagamento||String(p.created_at||'').slice(0,10)))} · ${esc(p.metodo_pagamento||p.metodo||'')}</span>
+  <div class="line"><span>Ora risulta ${refund?'dato':'incassato'} da</span><b>${esc(from)}</b></div>
+  <div class="pick">${others.map(x=>`<button class="${x.user_id===pick?'on':''}" data-ci="${x.user_id}" aria-pressed="${x.user_id===pick}">${refund?'Dato':'Incassato'} da ${esc(x.nome||x.username)}</button>`).join('')}</div>
+  <label class="f">Motivo (facoltativo)<input id="ciWhy" placeholder="es. registrato per sbaglio a nome mio"></label>
+  ${to?`<div class="note">${cash?`La cassa di ${esc(from)} ${refund?'sale':'scende'} di ${eur(amt)}, quella di ${esc(toName)} ${refund?'scende':'sale'} di ${eur(amt)}.`:`Pagato con ${esc(p.metodo_pagamento||p.metodo)}: i contanti non cambiano, cambia solo a chi è attribuito.`} La ricevuta verrà rifatta con il nome giusto. Nessun messaggio al cliente.</div>`:''}
+  <button class="btn" id="ciOk" ${to?'':'disabled'}>${to?'Conferma: '+(refund?'dato':'incassato')+' da '+esc(toName):'Scegli chi ha '+(refund?'dato il rimborso':'incassato')}</button>
+  <button class="btn light" id="ciNo">Annulla</button>`);
+  document.querySelectorAll('#sheet [data-ci]').forEach(x=>x.onclick=()=>{const w=$('#ciWhy').value;collectorSheet(k,x.dataset.ci);$('#ciWhy').value=w});
+  $('#ciNo').onclick=back;
+  $('#ciOk').onclick=e=>guard(e.currentTarget,async()=>{
+    if(!to)throw new Error('Scegli chi ha incassato.');
+    let r;try{r=await rpc('dg_change_payment_collector',{p_kind:o.kind,p_payment_id:p.id,p_user_id:to.user_id,p_reason:$('#ciWhy').value.trim()||null})}
+    catch(err){const m=String(err.message||'');throw new Error(/SOLO_AMMINISTRATORI/.test(m)?'Solo gli amministratori possono cambiare chi ha incassato.':/PAGAMENTO_ANNULLATO/.test(m)?'Questo pagamento è stato annullato.':/PAGAMENTO_NON_TROVATO/.test(m)?'Pagamento non trovato: aggiorna.':/OPERATORE_NON_VALIDO/.test(m)?'Operatore non attivo.':m)}
+    toast(r&&r.changed===false?'Era già a nome di '+toName:'Ora risulta '+(refund?'dato':'incassato')+' da '+toName);
+    if(o.acc){await ensureAcc(true);closeSheet();render();loadAll()}
+    else{await loadAll();if(o.bookingId)bookingSheet(o.bookingId);else closeSheet()}
+  });
+}
 function rpPdf(scope){
   const t=rpTrips().up.concat(rpTrips().past).find(x=>x.id===S.rpTrip);if(!t)return;
   const label=titleCase(tripLabel(t))+(t.bis_parent_id?' bus '+(t.bis_numero||2):'')+' del '+dateShort(t.data_partenza);
@@ -1058,7 +1101,7 @@ function shareConfirmationSheet(b){
   const name=nameOf(b);
   sharePdfSheet({title:'Conferma per '+name,ready:'Conferma di prenotazione pronta',name,tel:b.telefono,load:()=>confirmationFile(b.id),msg:()=>`Buongiorno ${name}, le inviamo la conferma della sua prenotazione. Grazie, DELGROSSO Viaggi`});
 }
-async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,metodo,data_pagamento,receipt_number,receipt_professional_path,receipt_professional_generated_at,incassato_da',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
+async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,stato,metodo,metodo_pagamento,data_pagamento,receipt_number,receipt_professional_path,receipt_professional_generated_at,incassato_da,incassato_da_user_id',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
 
 /* noleggi: crea, modifica, pagamenti */
 async function rentalVehicles(id){try{return (await get('noleggi_bus_mezzi',{select:'flotta_id',noleggio_id:'eq.'+id})).map(x=>x.flotta_id)}catch{return []}}
@@ -1273,6 +1316,8 @@ document.addEventListener('click',e=>{
     case 'compLink':compLinkSheet(id);break;
     case 'profTrip':profTripSheet(id);break;
     case 'receipt':receipt(id);break;
+    case 'toWeb':toWeb();break;
+    case 'collector':collectorSheet(id);break;
     case 'paxList':passengerList(tripById(id));break;
     case 'waGroup':waGroupSheet(tripById(id));break;
     case 'agNew':agNewSheet();break;
@@ -1310,7 +1355,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 /* ---------- avvio ---------- */
 (async()=>{
-  try{const s=JSON.parse(localStorage.getItem(STORE)||'null');if(s&&s.refresh_token){session=s;await authorize();await loadAll();return}}
+  try{let s=JSON.parse(localStorage.getItem(STORE)||'null');const w=webSession();
+    if((!s||!s.refresh_token)&&w&&w.refresh_token&&w.user&&w.user.id){s=w;try{localStorage.setItem(STORE,JSON.stringify(w))}catch{}}
+    if(s&&s.refresh_token){session=s;await authorize();await loadAll();return}}
   catch(e){dropSession()}
   render();
 })();
