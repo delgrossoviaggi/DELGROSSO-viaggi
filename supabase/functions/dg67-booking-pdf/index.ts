@@ -119,7 +119,29 @@ export async function passengersPdf(v,bookings,seats,bus){
 const due=b=>Math.max(0,Math.round((N(b.totale)-N(b.pagato))*100)/100);
 const cifra=x=>N(x).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
 const ora=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date()).map(x=>[x.type,x.value]));return p.day+"/"+p.month+"/"+p.year+" ore "+p.hour+":"+p.minute};
-export async function paymentsPdf(v,bookings,seats,bus,scope){
+// Soldi raccolti sul viaggio da ciascun operatore (Nicola, Raffaele): acconti + saldi - rimborsi.
+// "Senza nome": soldi segnati come pagati sulle prenotazioni senza un pagamento registrato (quindi senza chi li ha incassati).
+export function collectors(pays,ops,active=[]){
+ const P=new Map(),cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+ const add=n=>{if(!P.has(n))P.set(n,{name:n,net:0,acc:0,sal:0,rim:0,other:0});return P.get(n)};
+ for(const o of (ops||[]).filter(o=>/nicola|raffaele/i.test(T(o.username)+" "+T(o.nome))))add(cap(clean(o.nome||o.username)));
+ for(const p of pays||[]){
+  if(/annull|storn/i.test(T(p.stato)))continue;
+  const o=(ops||[]).find(x=>x.user_id&&x.user_id===p.incassato_da_user_id);
+  const c=add(cap(clean(o?(o.nome||o.username):p.incassato_da).toLowerCase())||"Non indicato");
+  const refund=/rimbors/i.test(T(p.tipo)),v=refund?-Math.abs(N(p.importo)):Math.abs(N(p.importo));
+  c.net+=v;if(refund)c.rim+=v;else if(/acconto/i.test(T(p.tipo)))c.acc+=v;else c.sal+=v;
+  if(!/contant/i.test(T(p.metodo_pagamento||p.metodo)))c.other+=v;
+ }
+ const r=x=>Math.round(x*100)/100,order=n=>/nicola/i.test(n)?0:/raffaele/i.test(n)?1:2;
+ const byB={},act=new Set(active.map(b=>b.id));let annullate=0;
+ for(const p of pays||[]){if(/annull|storn/i.test(T(p.stato)))continue;const v=/rimbors/i.test(T(p.tipo))?-Math.abs(N(p.importo)):Math.abs(N(p.importo));byB[p.prenotazione_id]=(byB[p.prenotazione_id]||0)+v;if(p.prenotazione_id&&!act.has(p.prenotazione_id))annullate+=v}
+ let ignoto=0,ignotoN=0;for(const b of active){const d=r(N(b.pagato)-(byB[b.id]||0));if(d>=.01){ignoto+=d;ignotoN++}}
+ const extra=ignoto>=.01?[{name:"Senza nome",net:r(ignoto),acc:0,sal:0,rim:0,other:0,ignoto:ignotoN}]:[];
+ const out=[...P.values()].map(c=>({...c,net:r(c.net),acc:r(c.acc),sal:r(c.sal),rim:r(c.rim),other:r(c.other)})).filter(c=>order(c.name)<2||Math.abs(c.net)>=.01||c.acc||c.sal||c.rim).sort((a,b)=>order(a.name)-order(b.name)||a.name.localeCompare(b.name,"it")).concat(extra);
+ out.annullate=r(annullate);return out;
+}
+export async function paymentsPdf(v,bookings,seats,bus,scope,soldi=[]){
  const all=scope==="all";
  const doc=await PDFDocument.create();
  const reg=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold);
@@ -136,7 +158,24 @@ export async function paymentsPdf(v,bookings,seats,bus,scope){
  page.drawRectangle({x:42,y:y-70,width:W-84,height:70,color:SOFT,borderColor:LINE,borderWidth:1});
  const cw=(W-84)/3;[["TOTALE VIAGGIO",euro(tot),INK],["INCASSATO",euro(paid),GREEN],["DA INCASSARE",euro(rest),rest>0?ORANGE:GREEN]].forEach((c,i)=>{const x=56+i*cw;page.drawText(c[0],{x,y:y-22,size:7.5,font:bold,color:MUTED});page.drawText(c[1],{x,y:y-46,size:16,font:bold,color:c[2]})});
  page.drawText(sorted.length+" prenotazioni, "+pax+" persone: "+ok.length+" saldate, "+acc.length+" con acconto, "+none.length+" senza acconto",{x:56,y:y-62,size:8,font:reg,color:MUTED});
- y-=94;
+ y-=88;
+ // soldi raccolti da Nicola e da Raffaele su questo viaggio
+ if(soldi.length){
+  page.drawText("SOLDI RACCOLTI SU QUESTO VIAGGIO",{x:42,y,size:8.6,font:bold,color:NAVY});
+  const mw=(W-84)/soldi.length;
+  page.drawRectangle({x:42,y:y-72,width:W-84,height:64,color:WHITE,borderColor:LINE,borderWidth:1});
+  soldi.forEach((c,i)=>{
+   const x=56+i*mw;if(i)page.drawLine({start:{x:42+i*mw,y:y-64},end:{x:42+i*mw,y:y-16},thickness:.6,color:LINE});
+   page.drawText(clean(c.name).toUpperCase(),{x,y:y-24,size:7.5,font:bold,color:MUTED});
+   page.drawText(euro(c.net),{x,y:y-43,size:15,font:bold,color:NAVY});
+   const d=c.ignoto?"pagati senza ricevuta, "+c.ignoto+(c.ignoto===1?" prenotazione":" prenotazioni"):[c.acc?"acconti "+cifra(c.acc):"",c.sal?"saldi "+cifra(c.sal):"",c.rim?"rimborsi "+cifra(c.rim):""].filter(Boolean).join(" - ")||"nessun incasso";
+   const ls=wrap(reg,7.2,d,mw-24).concat(c.other?wrap(reg,7.2,"di cui "+cifra(c.other)+" con POS o bonifico",mw-24):[]).slice(0,2);
+   ls.forEach((l,k)=>page.drawText(l,{x,y:y-56-k*9,size:7.2,font:reg,color:MUTED}));
+  });
+  y-=84;
+  if(Math.abs(N(soldi.annullate))>=.01){page.drawText("Nei totali di Nicola e Raffaele ci sono anche "+euro(soldi.annullate)+" di prenotazioni annullate (non compresi in Incassato).",{x:42,y,size:7.4,font:reg,color:MUTED});y-=12}
+  y-=14;
+ }else y-=6;
  const head=()=>{page.drawRectangle({x:42,y:y-6,width:W-84,height:20,color:NAVY});
   for(const [t,x] of [["NOME",46],["TELEFONO",178],["FERMATA",254],["PERS.",346]])page.drawText(t,{x,y,size:7.2,font:bold,color:WHITE});
   for(const [t,r] of [["TOTALE",425],["VERSATO",487],["DA SALDARE",R-4]])page.drawText(t,{x:r-bold.widthOfTextAtSize(t,7.2),y,size:7.2,font:bold,color:WHITE});
@@ -220,7 +259,10 @@ Deno.serve(async req=>{
    const list=(bs.data||[]).filter(b=>!b.riserva_aziendale&&!/annull|cancel|eliminat/i.test(T(b.stato)));
    const ps=await sb.from("prenotazione_posti").select("prenotazione_id,posto").eq("viaggio_id",tid).limit(6000);if(ps.error)throw ps.error;
    let bus="";const bid=tr.data.autobus_id;if(bid){const f=await sb.from("flotta").select("titolo,marca,modello,targa").eq("id",bid).maybeSingle();if(f.data)bus=(f.data.titolo||[f.data.marca,f.data.modello].filter(Boolean).join(" "))+(f.data.targa?" "+f.data.targa:"")}
-   const bytes=await paymentsPdf(tr.data,list,ps.data||[],bus,scope);
+   const bids=(bs.data||[]).map(b=>b.id);
+   const pg=bids.length?await sb.from("pagamenti").select("prenotazione_id,importo,tipo,stato,metodo,metodo_pagamento,incassato_da_user_id,incassato_da").in("prenotazione_id",bids).limit(10000):{data:[]};if(pg.error)throw pg.error;
+   const og=await sb.from("operatori_gestionale").select("user_id,nome,username");if(og.error)throw og.error;
+   const bytes=await paymentsPdf(tr.data,list,ps.data||[],bus,scope,collectors(pg.data||[],og.data||[],list));
    const slug=tripName(tr.data).replace(/[^a-zA-Z0-9_-]+/g,"_");
    return await store("riepiloghi-pagamenti/"+tid+"-"+scope+".pdf",bytes,"DELGROSSO_"+(scope==="all"?"Riepilogo_pagamenti_":"Da_incassare_")+slug+"_"+T(tr.data.data_partenza)+".pdf");
   }

@@ -110,7 +110,7 @@ async function authorize(){
 
 /* ---------- dati ---------- */
 const S={tab:'oggi',fleet:[],tripLayouts:[],busLayouts:[],allBookings:null,clientQ:'',clientKey:null,showMap:false,trips:[],bookings:[],seats:[],stops:[],customers:[],cash:null,spese:[],paysToday:[],lastClose:null,operators:[],
-  tripId:null,incTrip:null,search:'',loading:false,error:'',book:null,lastPayment:null,rpTrip:null,rpFilter:'',rpB:{},rpPast:null};
+  tripId:null,incTrip:null,search:'',loading:false,error:'',book:null,lastPayment:null,rpTrip:null,rpFilter:'',rpB:{},rpPay:{},rpPast:null};
 async function loadAll(){
   S.loading=true;S.error='';render();
   try{
@@ -132,7 +132,7 @@ async function loadAll(){
       ids.length?get('dg28_trip_layouts',{select:'viaggio_id,autobus_id,configurazione',viaggio_id:inList}).catch(()=>[]):[],
       get('dg28_bus_layouts',{select:'autobus_id,configurazione'}).catch(()=>[])
     ]);
-    S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;S.customers=customers||[];S.fleet=(fleet||[]).filter(f=>f.attivo!==false);S.tripLayouts=tl||[];S.busLayouts=bl||[];S.allBookings=null;S.acc=null;S.extra=null;S.rpB={};
+    S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;S.customers=customers||[];S.fleet=(fleet||[]).filter(f=>f.attivo!==false);S.tripLayouts=tl||[];S.busLayouts=bl||[];S.allBookings=null;S.acc=null;S.extra=null;S.rpB={};S.rpPay={};
   }catch(e){S.error=e.message}
   S.loading=false;render();
   setTimeout(pollNotifiche,1500);
@@ -844,6 +844,44 @@ function rpBookings(t){
   }
   return {list:all.filter(own),ris:all.filter(b=>active(b)&&b.riserva_aziendale)};
 }
+/* soldi raccolti sul viaggio: acconti + saldi − rimborsi, per chi li ha incassati (Nicola, Raffaele) */
+function rpPays(t){
+  if(S.rpPay[t.id])return S.rpPay[t.id];
+  const ids=(tripById(t.id)?S.bookings.filter(b=>b.viaggio_id===t.id):(S.rpB[t.id]||[])).map(b=>b.id);
+  if(!ids.length)return S.rpPay[t.id]=[];
+  if(!rpLoading.has('p'+t.id)){rpLoading.add('p'+t.id);get('pagamenti',{select:'id,prenotazione_id,importo,tipo,stato,metodo,metodo_pagamento,incassato_da_user_id,incassato_da',prenotazione_id:'in.('+ids.join(',')+')',limit:'5000'})
+    .then(r=>{S.rpPay[t.id]=r||[]}).catch(e=>{S.rpPay[t.id]={error:e.message}}).finally(()=>{rpLoading.delete('p'+t.id);if(S.tab==='riepilogo')render()})}
+  return null;
+}
+function collectors(pays,active){
+  const P=new Map(),cap=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x,add=n=>{if(!P.has(n))P.set(n,{name:n,net:0,acc:0,sal:0,rim:0,other:0});return P.get(n)};
+  for(const o of S.operators.filter(o=>/nicola|raffaele/i.test(o.username+' '+(o.nome||''))))add(cap(o.nome||o.username));
+  for(const p of pays){
+    if(/annull|storn/i.test(p.stato||''))continue;
+    const o=S.operators.find(x=>x.user_id===p.incassato_da_user_id),c=add(cap(String(o?(o.nome||o.username):(p.incassato_da||'')).trim().toLowerCase())||'Non indicato');
+    const v=isRefund(p)?-Math.abs(num(p.importo)):Math.abs(num(p.importo));
+    c.net+=v;if(isRefund(p))c.rim+=v;else if(/acconto/i.test(p.tipo||''))c.acc+=v;else c.sal+=v;
+    if(!isCash(p.metodo_pagamento||p.metodo))c.other+=v;
+  }
+  const ord=n=>/nicola/i.test(n)?0:/raffaele/i.test(n)?1:2;
+  // soldi segnati come pagati sulle prenotazioni ma senza un pagamento registrato: non si sa chi li ha incassati
+  const byB={},act=new Set(active.map(b=>b.id));let annullate=0;
+  for(const p of pays){if(/annull|storn/i.test(p.stato||''))continue;const v=isRefund(p)?-Math.abs(num(p.importo)):Math.abs(num(p.importo));byB[p.prenotazione_id]=(byB[p.prenotazione_id]||0)+v;if(!act.has(p.prenotazione_id))annullate+=v}
+  let ignoto=0,ignotoN=0;for(const b of active){const d=r2(num(b.pagato)-(byB[b.id]||0));if(d>=.01){ignoto+=d;ignotoN++}}
+  const out=[...P.values()].filter(c=>ord(c.name)<2||Math.abs(c.net)>=.01).sort((a,b)=>ord(a.name)-ord(b.name)||a.name.localeCompare(b.name,'it'))
+    .concat(ignoto>=.01?[{name:'Senza nome',net:r2(ignoto),acc:0,sal:0,rim:0,other:0,ignoto:ignotoN}]:[]);
+  out.annullate=r2(annullate);return out;
+}
+function soldiHtml(t,active){
+  const pays=rpPays(t);
+  if(!pays)return '<section class="card soldi"><h2>Soldi raccolti su questo viaggio</h2><span class="small muted">Carico i pagamenti…</span></section>';
+  if(pays.error)return `<section class="card soldi"><h2>Soldi raccolti su questo viaggio</h2><span class="small muted">Non riesco a leggere i pagamenti: ${esc(pays.error)}</span></section>`;
+  const cs=collectors(pays,active);
+  return `<section class="card soldi"><h2>Soldi raccolti su questo viaggio</h2><div class="ops">${cs.map(c=>`<div class="op${c.ignoto?' ign':''}"><span class="l">${esc(c.name)}</span><b class="v">${eur(c.net)}</b>
+   <span class="d">${c.ignoto?`segnati come pagati senza ricevuta, quindi senza chi li ha incassati (${c.ignoto} ${c.ignoto===1?'prenotazione':'prenotazioni'})`:[c.acc?'acconti '+eur(c.acc):'',c.sal?'saldi '+eur(c.sal):'',c.rim?'rimborsi '+eur(c.rim):''].filter(Boolean).join(' · ')||'nessun incasso'}</span>
+   ${Math.abs(c.other)>=.01?`<span class="d">di cui ${eur(c.other)} con POS o bonifico</span>`:''}</div>`).join('')}</div>
+   ${Math.abs(cs.annullate)>=.01?`<span class="small muted">Nei totali di Nicola e Raffaele ci sono anche ${eur(cs.annullate)} di prenotazioni annullate, che non sono compresi negli incassati qui sopra.</span>`:''}</section>`;
+}
 function viewRiepilogo(){
   rpLoadPast();
   const {up,past}=rpTrips(),all=up.concat(past);
@@ -862,6 +900,7 @@ function viewRiepilogo(){
   const ris=data.ris.reduce((a,b)=>a+num(b.posti),0),future=t.data_partenza>=today(),canOpen=!!tripById(t.id);
   h+=`<div class="hero"><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><b style="font-size:18px">${esc(titleCase(tripLabel(t)))}${t.bis_parent_id?' · bus '+esc(t.bis_numero||2):''}</b><span class="small" style="color:#C9D6E6">${esc(dateLong(t.data_partenza))} · ${bs.length} prenotazioni, ${pax} persone</span><span>Incassati <b>${eur(paid)}</b> su ${eur(tot)}</span></div><div style="text-align:right"><span class="big-n">${eur(due)}</span><div class="small" style="color:#C9D6E6">ancora da incassare</div></div></div>
   <div class="stati" role="group" aria-label="Mostra solo">${['ok','acc','none'].map(k=>`<button class="st ${k}" data-act="rpFilter" data-v="${k}" aria-pressed="${S.rpFilter===k}"><span class="n">${G[k].length}</span><span class="l">${RP[k].t}</span><span class="a">${k==='ok'?eur(sum(G.ok,b=>num(b.pagato)))+' incassati':'devono '+eur(sum(G[k],residuo))}</span></button>`).join('')}</div>
+  ${soldiHtml(t,bs)}
   <div class="pdfs"><button class="btn gold" data-act="rpPdf" data-v="due">${SVG(IC.doc)}PDF di chi deve ancora pagare</button><button class="btn light" data-act="rpPdf" data-v="all">${SVG(IC.doc)}PDF riepilogo completo</button></div>
   ${ris?`<p class="small muted" style="margin:0">Non conteggiati: ${ris} posti riservati DELGROSSO.</p>`:''}
   ${S.rpFilter?`<button class="link" data-act="rpFilter" data-v="${S.rpFilter}">Mostra tutte le prenotazioni</button>`:''}`;

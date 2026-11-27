@@ -252,3 +252,15 @@ fieldset.f label{font-weight:500}
 .action.wide{grid-column:1/-1;justify-content:center}
 @media (min-width:900px){.pdfs{grid-template-columns:1fr 1fr}.stati{gap:14px}.st{min-height:110px;padding:16px 16px 16px 20px}.st .n{font-size:38px}}
 @media (prefers-reduced-motion:reduce){.st:active{transform:none}}
+/* soldi raccolti sul viaggio da Nicola e da Raffaele */
+.soldi h2{margin:0;font-size:18px}
+.soldi .ops{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+.soldi .op{display:flex;flex-direction:column;gap:2px;padding:4px 14px 4px 0;min-width:0}
+.soldi .op:nth-child(even){border-left:1px solid var(--linea);padding-left:14px}
+.soldi .op:nth-child(n+3){border-top:1px solid var(--linea);margin-top:10px;padding-top:12px}
+.soldi .op.ign{grid-column:1/-1;border-left:0;padding-left:0}
+.soldi .op.ign .v{color:var(--attesa)}
+.soldi .op .l{font-weight:700;font-size:14.5px;color:var(--grigio)}
+.soldi .op .v{font-family:var(--f-titolo);font-size:28px;line-height:1.1;color:var(--notte);font-variant-numeric:tabular-nums}
+.soldi .op .d{font-size:12.5px;color:var(--grigio);font-variant-numeric:tabular-nums}
+@media (min-width:900px){.soldi .op .v{font-size:32px}}
