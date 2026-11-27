@@ -5,7 +5,7 @@
  */
 (function(){
 'use strict';
-const DAILY=['dashboard','controlroom','viaggi','prenotazioni','pagamenti','cassa','clienti'];
+const DAILY=['dashboard','controlroom','viaggi','riepilogo-viaggio','prenotazioni','pagamenti','cassa','clienti'];
 const GROUPS=[
   {id:'viaggi',label:'Viaggi e posti',pages:['suite:piantine','sposta-clienti','posti','caricamento','suite:prenotazioni','liste-pdf','operativo','partenze','radar'],words:['piantin','posti','partenz','viaggi']},
   {id:'vendite',label:'Clienti e vendite',pages:['scheda-cliente','crm','preventivi','noleggi','acconti'],words:['cliente','preventiv','noleggi','acconti']},
