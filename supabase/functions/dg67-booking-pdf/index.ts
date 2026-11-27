@@ -5,6 +5,7 @@ import { brandHeader, brandMini, useLogoStorage, NAVY, GOLD, INK, MUTED, LINE } 
 // Documenti PDF del gestionale con il solo logo ufficiale DELGROSSO Viaggi - limousineBUS:
 // - conferma di prenotazione (bookingId)
 // - lista passeggeri di un viaggio (action "passengers", tripId)
+// - chi deve ancora pagare / riepilogo pagamenti di un viaggio (action "payments", tripId, scope "due" | "all")
 const url=Deno.env.get("SUPABASE_URL")||"",key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const sb=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
 useLogoStorage(sb);
@@ -16,7 +17,7 @@ const N=x=>Number(x)||0;
 const euro=(x)=>"EUR "+N(x).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
 const date=(x)=>{const m=T(x).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+"/"+m[2]+"/"+m[1]:"Da definire"};
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const SOFT=rgb(.96,.975,.99),WHITE=rgb(1,1,1),ORANGE=rgb(.80,.33,.10),GREEN=rgb(.05,.45,.28);
+const SOFT=rgb(.96,.975,.99),WHITE=rgb(1,1,1),ORANGE=rgb(.80,.33,.10),GREEN=rgb(.05,.45,.28),AMBER=rgb(.54,.35,0);
 function wrap(font,size,x,max){
  let out=[],line="";for(let w of clean(x||"-").split(/\s+/)){
  while(font.widthOfTextAtSize(w,size)>max&&w.length>1){let j=1;while(j<w.length&&font.widthOfTextAtSize(w.slice(0,j+1),size)<=max)j++;if(line){out.push(line);line=""}out.push(w.slice(0,j));w=w.slice(j)}
@@ -114,6 +115,71 @@ export async function passengersPdf(v,bookings,seats,bus){
  return await doc.save();
 }
 
+// Situazione pagamenti di un viaggio: chi non ha versato nulla, chi ha l'acconto, (con scope "all") chi ha saldato.
+const due=b=>Math.max(0,Math.round((N(b.totale)-N(b.pagato))*100)/100);
+const cifra=x=>N(x).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+const ora=()=>{const p=Object.fromEntries(new Intl.DateTimeFormat("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date()).map(x=>[x.type,x.value]));return p.day+"/"+p.month+"/"+p.year+" ore "+p.hour+":"+p.minute};
+export async function paymentsPdf(v,bookings,seats,bus,scope){
+ const all=scope==="all";
+ const doc=await PDFDocument.create();
+ const reg=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold);
+ doc.setTitle((all?"Riepilogo pagamenti ":"Da incassare ")+tripName(v)+" "+date(v.data_partenza));doc.setAuthor("DELGROSSO VIAGGI & LIMOUSINE BUS");doc.setCreator("DELGROSSO Gestionale");
+ const byB={};for(const s of seats||[])(byB[s.prenotazione_id]=byB[s.prenotazione_id]||[]).push(s);
+ const name=b=>clean(b.cliente_nome||b.cliente||"Cliente");
+ const sorted=bookings.slice().sort((a,c)=>name(a).localeCompare(name(c),"it"));
+ const none=sorted.filter(b=>due(b)>0&&N(b.pagato)<=0),acc=sorted.filter(b=>due(b)>0&&N(b.pagato)>0),ok=sorted.filter(b=>due(b)<=0);
+ const sum=(xs,f)=>Math.round(xs.reduce((a,b)=>a+f(b),0)*100)/100;
+ const tot=sum(sorted,b=>N(b.totale)),paid=sum(sorted,b=>N(b.pagato)),rest=sum(sorted,due),pax=sorted.reduce((a,b)=>a+N(b.posti),0);
+ let page=doc.addPage([595.28,841.89]);const W=page.getWidth(),R=W-42;
+ let y=await brandHeader(doc,page,reg,bold,{title:all?"RIEPILOGO PAGAMENTI":"CHI DEVE ANCORA PAGARE",lines:[{text:tripName(v),bold:true,size:10.5},{text:date(v.data_partenza)+(v.ora_partenza?" ore "+T(v.ora_partenza).slice(0,5):""),color:MUTED},bus?{text:clean(bus),color:MUTED}:null],note:"SITUAZIONE AL "+ora().toUpperCase()});
+ // riquadro con i totali
+ page.drawRectangle({x:42,y:y-70,width:W-84,height:70,color:SOFT,borderColor:LINE,borderWidth:1});
+ const cw=(W-84)/3;[["TOTALE VIAGGIO",euro(tot),INK],["INCASSATO",euro(paid),GREEN],["DA INCASSARE",euro(rest),rest>0?ORANGE:GREEN]].forEach((c,i)=>{const x=56+i*cw;page.drawText(c[0],{x,y:y-22,size:7.5,font:bold,color:MUTED});page.drawText(c[1],{x,y:y-46,size:16,font:bold,color:c[2]})});
+ page.drawText(sorted.length+" prenotazioni, "+pax+" persone: "+ok.length+" saldate, "+acc.length+" con acconto, "+none.length+" senza acconto",{x:56,y:y-62,size:8,font:reg,color:MUTED});
+ y-=94;
+ const head=()=>{page.drawRectangle({x:42,y:y-6,width:W-84,height:20,color:NAVY});
+  for(const [t,x] of [["NOME",46],["TELEFONO",178],["FERMATA",254],["PERS.",346]])page.drawText(t,{x,y,size:7.2,font:bold,color:WHITE});
+  for(const [t,r] of [["TOTALE",425],["VERSATO",487],["DA SALDARE",R-4]])page.drawText(t,{x:r-bold.widthOfTextAtSize(t,7.2),y,size:7.2,font:bold,color:WHITE});
+  y-=24};
+ const newPage=async()=>{page=doc.addPage([595.28,841.89]);y=await brandMini(doc,page,reg,(all?"Riepilogo pagamenti":"Chi deve ancora pagare")+" - "+tripName(v)+" - "+date(v.data_partenza)+" - Pagina "+doc.getPageCount());head()};
+ const money=(t,r,yy,font,color)=>page.drawText(t,{x:r-font.widthOfTextAtSize(t,8.6),y:yy,size:8.6,font,color});
+ const section=async(title,sub,list,color,tc=color)=>{
+  if(y<150)await newPage();
+  page.drawRectangle({x:42,y:y-3,width:4,height:14,color});
+  page.drawText(title+"  ("+list.length+")",{x:52,y,size:9.5,font:bold,color:NAVY});
+  const s=list.length?sub+" "+euro(sum(list,all&&color===GREEN?b=>N(b.pagato):due)):"";if(s)page.drawText(s,{x:R-bold.widthOfTextAtSize(s,8.6),y,size:8.6,font:bold,color:tc});
+  y-=20;
+  if(!list.length){page.drawText("Nessuno.",{x:52,y,size:8.6,font:reg,color:MUTED});y-=22;return}
+  for(const b of list){
+   const nl=wrap(bold,8.8,name(b),124).slice(0,2),created=T(b.created_at).slice(0,10),st=seatList(byB[b.id],b);
+   const sub2=wrap(reg,7.2,(created?"Prenotato il "+date(created):"")+(st?(created?" - ":"")+"posti "+st:""),200).slice(0,2),fl=wrap(reg,8.6,b.fermata_partenza||"-",88).slice(0,2);
+   const h=Math.max(nl.length*11+(sub2[0]&&sub2[0]!=="-"?sub2.length*9.5:0),fl.length*11)+8;
+   if(y-h<84)await newPage();
+   nl.forEach((l,i)=>page.drawText(l,{x:46,y:y-i*11,size:8.8,font:bold,color:INK}));
+   if(sub2[0]&&sub2[0]!=="-")sub2.forEach((l,i)=>page.drawText(l,{x:46,y:y-nl.length*11-i*9.5+1,size:7.2,font:reg,color:MUTED}));
+   page.drawText(clean(b.telefono)||"-",{x:178,y,size:8.6,font:reg,color:INK});
+   fl.forEach((l,i)=>page.drawText(l,{x:254,y:y-i*11,size:8.6,font:reg,color:INK}));
+   page.drawText(String(N(b.posti)),{x:352,y,size:8.6,font:reg,color:INK});
+   money(cifra(b.totale),425,y,reg,INK);money(cifra(b.pagato),487,y,reg,N(b.pagato)>0?GREEN:MUTED);
+   const r=due(b);money(r>0?cifra(r):"Saldato",R-4,y,bold,r>0?ORANGE:GREEN);
+   y-=h;page.drawLine({start:{x:42,y:y+10},end:{x:R,y:y+10},thickness:.4,color:LINE});
+  }
+  y-=12;
+ };
+ if(!all&&!none.length&&!acc.length){page.drawText("Tutti hanno saldato: nessuno deve ancora pagare.",{x:46,y,size:10,font:bold,color:GREEN});y-=24}
+ else{
+  head();
+  await section("SENZA ACCONTO - DEVONO PAGARE TUTTO","Da incassare",none,ORANGE);
+  await section("CON ACCONTO - DEVONO SALDARE","Da incassare",acc,GOLD,AMBER);
+ }
+ if(all){if(!none.length&&!acc.length)head();await section("SALDATI","Incassato",ok,GREEN)}
+ if(y<100)await newPage();
+ page.drawText("Totale da incassare: "+euro(rest),{x:42,y:y-4,size:11,font:bold,color:rest>0?ORANGE:GREEN});
+ page.drawText("Importi in euro",{x:R-reg.widthOfTextAtSize("Importi in euro",8),y:y-4,size:8,font:reg,color:MUTED});
+ doc.getPages().forEach(p=>footer(p,reg,bold,"Uso interno - situazione pagamenti al "+ora()));
+ return await doc.save();
+}
+
 async function operator(req){
  const token=T(req.headers.get("authorization")).replace(/^Bearer\s+/i,"");
  if(!token)return null;
@@ -146,6 +212,17 @@ Deno.serve(async req=>{
    let bus="";const bid=tr.data.autobus_id;if(bid){const f=await sb.from("flotta").select("titolo,marca,modello,targa").eq("id",bid).maybeSingle();if(f.data)bus=(f.data.titolo||[f.data.marca,f.data.modello].filter(Boolean).join(" "))+(f.data.targa?" "+f.data.targa:"")}
    const bytes=await passengersPdf(tr.data,list,ps.data||[],bus);
    return await store("liste-passeggeri/"+tid+".pdf",bytes,"DELGROSSO_Passeggeri_"+tripName(tr.data).replace(/[^a-zA-Z0-9_-]+/g,"_")+"_"+T(tr.data.data_partenza)+".pdf");
+  }
+  if(T(body.action)==="payments"){
+   const tid=T(body.tripId),scope=T(body.scope)==="all"?"all":"due";if(!UUID.test(tid))return J({success:false,error:"ID viaggio non valido"},400);
+   const tr=await sb.from("viaggi").select("*").eq("id",tid).maybeSingle();if(tr.error)throw tr.error;if(!tr.data)return J({success:false,error:"Viaggio non trovato"},404);
+   const bs=await sb.from("prenotazioni").select("id,cliente,cliente_nome,telefono,posti,totale,pagato,stato,fermata_partenza,posti_selezionati,riserva_aziendale,created_at").eq("viaggio_id",tid).limit(2000);if(bs.error)throw bs.error;
+   const list=(bs.data||[]).filter(b=>!b.riserva_aziendale&&!/annull|cancel|eliminat/i.test(T(b.stato)));
+   const ps=await sb.from("prenotazione_posti").select("prenotazione_id,posto").eq("viaggio_id",tid).limit(6000);if(ps.error)throw ps.error;
+   let bus="";const bid=tr.data.autobus_id;if(bid){const f=await sb.from("flotta").select("titolo,marca,modello,targa").eq("id",bid).maybeSingle();if(f.data)bus=(f.data.titolo||[f.data.marca,f.data.modello].filter(Boolean).join(" "))+(f.data.targa?" "+f.data.targa:"")}
+   const bytes=await paymentsPdf(tr.data,list,ps.data||[],bus,scope);
+   const slug=tripName(tr.data).replace(/[^a-zA-Z0-9_-]+/g,"_");
+   return await store("riepiloghi-pagamenti/"+tid+"-"+scope+".pdf",bytes,"DELGROSSO_"+(scope==="all"?"Riepilogo_pagamenti_":"Da_incassare_")+slug+"_"+T(tr.data.data_partenza)+".pdf");
   }
   const id=T(body.bookingId);
   if(!UUID.test(id))return J({success:false,error:"ID non valido"},400);

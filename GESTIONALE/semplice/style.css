@@ -227,3 +227,28 @@ button.sc:disabled{cursor:not-allowed}
 .nav button[data-badge]:not([data-badge=""])::after{content:attr(data-badge);position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--residuo);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
 @media (min-width:900px){.nav button[data-badge]:not([data-badge=""])::after{top:50%;left:auto;right:14px;transform:translateY(-50%)}}
 fieldset.f label{font-weight:500}
+
+/* ---------- riepilogo viaggio: saldati, con acconto, senza acconto ---------- */
+.st,.rp-h{--c:var(--notte3);--tx:var(--strada)}
+.st.ok,.rp-h.ok{--c:var(--pagato);--tx:var(--pagato)}
+.st.acc,.rp-h.acc{--c:var(--oro);--tx:var(--attesa)}
+.st.none,.rp-h.none{--c:var(--residuo);--tx:var(--residuo)}
+.stati{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.st{border:0;background:var(--carta);border-radius:var(--r-m);padding:12px 10px 12px 14px;min-height:98px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;color:var(--strada);box-shadow:inset 4px 0 0 var(--c)}
+.st .n{font-family:var(--f-titolo);font-size:32px;font-weight:700;line-height:1.05;color:var(--tx);font-variant-numeric:tabular-nums}
+.st .l{font-weight:700;font-size:14.5px;line-height:1.2}
+.st .a{font-size:12.5px;color:var(--grigio);font-variant-numeric:tabular-nums;margin-top:2px}
+.st[aria-pressed="true"]{background:var(--notte);color:#fff}
+.st[aria-pressed="true"] .n{color:#fff}
+.st[aria-pressed="true"] .a{color:#C9D6E6}
+.st:active{transform:scale(.985)}
+.pdfs{display:grid;gap:10px}
+.rp-h{display:flex;flex-direction:column;gap:2px;padding:10px 2px 0 12px;border-left:4px solid var(--c)}
+.rp-h h2{margin:0;font-size:20px;font-weight:700;color:var(--strada)}
+.rp-h h2 span{color:var(--tx)}
+.pax.rp{flex-direction:column;align-items:stretch;gap:10px}
+.pax.rp .who .nm{padding:0;font-size:16.5px;font-weight:700;color:var(--strada);text-align:left}
+.pax.rp .who .late{color:var(--residuo);font-weight:700}
+.action.wide{grid-column:1/-1;justify-content:center}
+@media (min-width:900px){.pdfs{grid-template-columns:1fr 1fr}.stati{gap:14px}.st{min-height:110px;padding:16px 16px 16px 20px}.st .n{font-size:38px}}
+@media (prefers-reduced-motion:reduce){.st:active{transform:none}}
