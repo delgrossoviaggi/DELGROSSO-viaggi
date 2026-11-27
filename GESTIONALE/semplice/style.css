@@ -270,3 +270,8 @@ fieldset.f label{font-weight:500}
 .rp-act .contacts{gap:6px}
 .rp-act .contacts a{padding:9px 11px}
 .rp-act .pay svg{width:20px;height:20px}
+/* chi ha incassato, sotto ogni pagamento */
+.pline>span:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pline small.by,.line small.by{font-size:13px;color:var(--grigio);font-weight:400}
+.pline small.by b{color:var(--inchiostro,#14233a)}
+.pline>span:last-child b{white-space:nowrap}
