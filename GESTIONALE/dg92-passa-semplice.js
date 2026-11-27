@@ -57,7 +57,10 @@ function init(){
 @media (max-width:440px){.dg92-switch{height:38px;padding:0 10px;gap:6px;margin-right:4px;font-size:13.5px}.dg92-switch svg{width:16px;height:16px}#dg44-logo-btn{flex:0 1 auto!important;min-width:0!important}#dg44-logo-btn img,#dg44-logo{max-width:108px!important;width:108px!important;height:auto!important}}
 @media (max-width:350px){.dg92-switch .l-sm{display:none}}`;
   document.head.appendChild(css);
-  let tries=0;const t=setInterval(()=>{if(place()||++tries>90)clearInterval(t)},700);place();
+  /* la barra in alto e il menu possono essere ridisegnati: rimetto il pulsante ogni volta che sparisce */
+  place();let queued=false;
+  new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;if(!document.getElementById('dg92Switch')||!document.getElementById('dg92Menu'))place()})}).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')place()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
