@@ -917,10 +917,63 @@ function viewRiepilogo(){
       <span>${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${seats.length?' (n. '+esc(seats.join(', '))+')':''}${b.fermata_partenza?' · '+esc(titleCase(b.fermata_partenza)):''}</span>
       <span>Totale ${eur(b.totale)} · versato ${eur(b.pagato)}${created?' · prenotato il '+esc(created.slice(8,10)+'/'+created.slice(5,7)):''}</span>
       ${late?'<span class="late">Oltre i 2 giorni senza acconto</span>':''}</div>${tag}</div>
-      ${k!=='ok'&&b.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(b.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}</div>`;
+      ${k!=='ok'?`<div class="rp-act"><button class="pay" data-act="rpPay" data-id="${b.id}">${SVG(IC.coins)}Incassa ${eur(r)}</button>${b.telefono?`<div class="contacts"><a href="tel:${esc(phoneDigits(b.telefono))}">Chiama</a>${wa?`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div>`:''}</div>`:''}</div>`;
     }).join('')||'<div class="empty">Nessuno.</div>')+'</div>';
   }
   return h;
+}
+/* incasso dal Riepilogo: importo e modo già pronti, due tocchi */
+let rpP=null;
+const rpFind=id=>S.bookings.find(x=>x.id===id)||Object.values(S.rpB).flat().find(x=>x.id===id);
+const METODI=['Contanti','POS','Bonifico'];
+function rpPayAmount(b){const r=residuo(b),P=rpP;return P.amt==='tutto'?r:P.amt==='meta'?Math.min(r,r2(num(b.totale)/2)):Math.min(r,r2(num(P.altro)))}
+function rpPayLabel(b){const a=rpPayAmount(b);return a>0?'Registra '+eur(a)+(rpP.met==='Contanti'?' in contanti':' con '+rpP.met):'Scrivi l’importo'}
+function rpPaySheet(id){
+  const b=rpFind(id);if(!b)return toast('Prenotazione non trovata: aggiorna.',true);
+  if(!rpP||rpP.id!==id)rpP={id,amt:'tutto',altro:'',met:'Contanti'};
+  const r=residuo(b),t=tripById(b.viaggio_id)||(S.rpPast||[]).find(x=>x.id===b.viaggio_id),half=r2(num(b.totale)/2);
+  if(r<=0)return toast(nameOf(b)+' ha già pagato tutto.');
+  const opts=[['tutto',(num(b.pagato)>0?'Saldo · ':'Tutto · ')+eur(r)]].concat(num(b.pagato)<=0&&half>0&&half<r?[['meta','Acconto metà · '+eur(half)]]:[]).concat([['altro','Altra cifra']]);
+  sheet(`<h3>Incassa da ${esc(nameOf(b))}</h3>
+  <span class="muted">${t?esc(titleCase(tripLabel(t)))+', '+esc(dateShort(t.data_partenza))+' · ':''}totale ${eur(b.totale)} · versato ${eur(b.pagato)} · <b>deve ${eur(r)}</b></span>
+  <div class="pick">${opts.map(([k,l])=>`<button class="${rpP.amt===k?'on':''}" data-rpamt="${k}" aria-pressed="${rpP.amt===k}">${esc(l)}</button>`).join('')}</div>
+  ${rpP.amt==='altro'?`<label class="f">Importo ricevuto (€)<input id="rpAltro" type="number" inputmode="decimal" min="0.01" max="${r}" step="0.01" value="${esc(rpP.altro)}" placeholder="massimo ${esc(String(r).replace('.',','))}"></label>`:''}
+  <div class="chips" role="group" aria-label="Come ha pagato">${METODI.map(m=>`<button class="chip ${rpP.met===m?'on':''}" data-rpmet="${m}" aria-pressed="${rpP.met===m}">${m}</button>`).join('')}</div>
+  <button class="btn gold" id="rpOk">${esc(rpPayLabel(b))}</button>
+  <span class="small muted">Viene registrato come incassato da ${esc(me.nome||me.username)}. Nessun messaggio al cliente.</span>
+  <button class="btn light" id="rpNo">Annulla</button>`);
+  const box=$('#sheet');
+  box.querySelectorAll('[data-rpamt]').forEach(x=>x.onclick=()=>{rpP.amt=x.dataset.rpamt;rpPaySheet(id);if(rpP.amt==='altro')setTimeout(()=>{const i=$('#rpAltro');if(i)i.focus()},60)});
+  box.querySelectorAll('[data-rpmet]').forEach(x=>x.onclick=()=>{rpP.met=x.dataset.rpmet;rpPaySheet(id)});
+  const inp=$('#rpAltro');if(inp)inp.oninput=()=>{rpP.altro=inp.value;$('#rpOk').textContent=rpPayLabel(b)};
+  $('#rpNo').onclick=()=>{rpP=null;closeSheet()};
+  $('#rpOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const amt=rpPayAmount(b),met=rpP.met;
+    if(!(amt>0))throw new Error('Scrivi l’importo ricevuto.');
+    if(amt>r+0.005)throw new Error('L’importo supera quanto resta da pagare ('+eur(r)+').');
+    const tipo=num(b.pagato)<=0&&amt<r?'Acconto':'Saldo';
+    const res=await rpc('dg_register_payment',{p_booking_id:b.id,p_tipo:tipo,p_importo:amt,p_metodo:met,p_data:today(),p_note:'Registrato dal Riepilogo viaggio'});
+    const done={pid:res&&res.payment_id,num:res&&res.receipt_number,name:nameOf(b),tel:b.telefono,amt,met,tipo,rest:r2(r-amt)};
+    rpP=null;
+    rpDoneSheet(done);loadAll();
+  });
+}
+function rpDoneSheet(d){
+  sheet(`<h3>Incasso registrato</h3>
+  <p style="margin:0;font-size:17px"><b>${esc(d.name)}</b>: ${esc(d.tipo.toLowerCase())} di <b>${eur(d.amt)}</b> ${d.met==='Contanti'?'in contanti':'con '+esc(d.met)}.${d.rest>0?' Resta da pagare '+eur(d.rest)+'.':' Ha pagato tutto.'}</p>
+  ${d.num?`<span class="small muted">Ricevuta ${esc(d.num)}</span>`:''}
+  ${d.pid?`<button class="btn gold" id="rdRcpt">${SVG(IC.doc)}Manda la ricevuta al cliente</button>`:''}
+  <button class="btn" id="rdOk">Fatto</button>
+  ${d.pid?`<button class="link" id="rdUndo" style="align-self:center">Ho sbagliato: annulla questo incasso</button>`:''}`);
+  $('#rdOk').onclick=closeSheet;
+  if(d.pid){
+    $('#rdRcpt').onclick=()=>shareReceiptSheet(d.pid,d.name,d.tel,'trip');
+    $('#rdUndo').onclick=()=>{
+      sheet(`<h3>Annullare l’incasso?</h3><p style="margin:0">${esc(d.name)} · ${eur(d.amt)}. Il pagamento viene tolto e il residuo torna come prima.</p><button class="btn danger" id="ruOk">Sì, annulla l’incasso</button><button class="btn light" id="ruNo">No</button>`);
+      $('#ruNo').onclick=()=>rpDoneSheet(d);
+      $('#ruOk').onclick=e=>guard(e.currentTarget,async()=>{await rpc('dg_delete_payment',{p_payment_id:d.pid,p_reason:'Annullato subito dopo la registrazione (Riepilogo viaggio)'});closeSheet();toast('Incasso annullato');await loadAll()});
+    };
+  }
 }
 function rpPdf(scope){
   const t=rpTrips().up.concat(rpTrips().past).find(x=>x.id===S.rpTrip);if(!t)return;
@@ -1227,6 +1280,7 @@ document.addEventListener('click',e=>{
     case 'riepilogo':S.tab='riepilogo';if(id)S.rpTrip=id;S.rpFilter='';render();window.scrollTo(0,0);break;
     case 'rpFilter':S.rpFilter=S.rpFilter===a.dataset.v?'':a.dataset.v;render();break;
     case 'rpPdf':rpPdf(a.dataset.v);break;
+    case 'rpPay':rpPaySheet(id);break;
     case 'presenze':S.tab='presenze';S.tripId=id;render();window.scrollTo(0,0);break;
     case 'checkin':toggleCheckin(id);break;
     case 'shareRcpt':{const b=S.bookings.find(x=>x.id===a.dataset.b);shareReceiptSheet(id,b?nameOf(b):'cliente',b&&b.telefono,'trip');break}
