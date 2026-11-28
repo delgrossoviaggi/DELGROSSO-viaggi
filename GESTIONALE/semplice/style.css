@@ -314,3 +314,22 @@ h3.sec{margin:6px 0 -2px;font-size:15px;font-weight:700;color:var(--grigio);lett
 .manage[aria-expanded="true"] .chev{transform:rotate(180deg)}
 @media (prefers-reduced-motion:reduce){.manage .chev{transition:none}}
 .manage .tag:not(.ok):not(.warn){background:var(--fondo);color:var(--grigio)}
+/* ===== fase 2: spese ed entrate, documenti, flotta ===== */
+.eco{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;border:0;background:transparent;text-align:left;padding:11px 2px;border-top:1px solid var(--linea);color:inherit;font:inherit;min-height:56px}
+.eco:first-of-type{border-top:0}
+button.eco{cursor:pointer}
+button.eco:active{background:var(--fondo)}
+.eco-t{display:flex;flex-direction:column;gap:3px;min-width:0}
+.eco-t b{font-size:15.5px}
+.eco-t small{font-size:13px;color:var(--grigio);line-height:1.35}
+.eco-v{font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.eco.out .eco-v{color:var(--residuo)}.eco.in .eco-v{color:var(--pagato)}
+.eco-day{gap:0;padding-top:12px}
+.eco-day h3.sec{margin-bottom:4px!important}
+.eco .tag:not(.ok):not(.warn):not(.bad),.card .tag:not(.ok):not(.warn):not(.bad){background:var(--fondo);color:var(--grigio)}
+.card.bus{border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;width:100%}
+.card.bus:active{transform:scale(.995)}
+.btn.danger-t{color:var(--residuo)}
+.sheet .eco{padding-left:0;padding-right:0}
+.sheet .box>*{flex-shrink:0}
+.sheet .chips{flex-wrap:wrap;overflow:visible}
