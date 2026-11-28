@@ -1,0 +1,125 @@
+/* DG95 · Look nuovo della versione web, in linea con il gestionale semplice.
+   Notte (navy del marchio) per la struttura, oro solo per il segno che indica dove sei e per le azioni chiave,
+   carta bianca per i contenuti. Caratteri Figtree (testo) e Bricolage Grotesque (titoli e numeri).
+   Solo aspetto: nessuna funzione cambia. Per tornare al vecchio look basta togliere questo file. */
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700;800&display=swap");
+
+:root{
+  --dg-notte:#0B2545;--dg-notte2:#13355F;--dg-notte3:#1D4A80;
+  --dg-strada:#13212F;--dg-grigio:#5A6B7E;--dg-linea:#D7E0EA;--dg-fondo:#EDF1F6;--dg-carta:#FFFFFF;--dg-velo:#F5F8FB;
+  --dg-oro:#E2A32B;--dg-oro-scuro:#8A5A00;--dg-oro-chiaro:#FBEFD5;
+  --dg-pagato:#1E7A4C;--dg-pagato-bg:#DDF3E7;--dg-residuo:#A8361C;--dg-residuo-bg:#FBE4DC;
+  --dg-ui:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --dg-titolo:"Bricolage Grotesque","Figtree",-apple-system,sans-serif;
+  /* le variabili originali puntano ai colori nuovi, così cambiano anche i moduli più vecchi */
+  --navy:#0B2545;--navy2:#13355F;--blue:#13355F;--blue2:#1D4A80;--cyan:#1D4A80;--green:#1E7A4C;--orange:#E2A32B;--red:#A8361C;--purple:#13355F;
+  --bg:#EDF1F6;--card:#FFFFFF;--text:#13212F;--muted:#5A6B7E;--line:#D7E0EA;--shadow:0 1px 2px rgba(11,37,69,.05);
+}
+
+/* ---------- base ---------- */
+html body.dg44-ready{font-family:var(--dg-ui)!important;color:var(--dg-strada);background:var(--dg-fondo)!important;font-size:14px;-webkit-font-smoothing:antialiased}
+html body.dg44-ready #app,html body.dg44-ready .main,html body.dg44-ready .content{background:var(--dg-fondo)!important;background-image:none!important}
+html body.dg44-ready button,html body.dg44-ready input,html body.dg44-ready select,html body.dg44-ready textarea{font-family:var(--dg-ui)}
+html body.dg44-ready :focus-visible{outline:3px solid var(--dg-oro)!important;outline-offset:2px}
+
+/* ---------- intestazione: notte piena con il filo d'oro ---------- */
+html body.dg44-ready #dg44-header{background:var(--dg-notte)!important;background-image:none!important;box-shadow:inset 0 -3px 0 var(--dg-oro),0 2px 12px rgba(11,37,69,.18)!important}
+html body.dg44-ready #dg44-header .dg44-slogan{font-family:var(--dg-ui)}
+html body.dg44-ready #dg44-header .dg44-slogan strong,html body.dg44-ready #dg44-header .dg44-slogan b{font-family:var(--dg-titolo);font-weight:700;letter-spacing:-.01em}
+
+/* ---------- menu laterale ---------- */
+html body.dg44-ready .sidebar{background:var(--dg-fondo)!important;background-image:none!important}
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button{font-family:var(--dg-ui)!important;font-size:15px!important;font-weight:600!important;color:var(--dg-strada)!important;background:transparent!important;background-image:none!important;border-radius:12px!important;box-shadow:none!important;position:relative;transition:background-color .15s}
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button:hover{background:#E1E8F1!important;color:var(--dg-notte)!important}
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button.active,
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button[aria-current="page"]{background:var(--dg-notte)!important;color:#fff!important;box-shadow:inset 4px 0 0 var(--dg-oro)!important}
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button.active *{color:#fff!important}
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button.active svg{stroke:currentColor}
+html body.dg44-ready #dg44-sidebar-menu .dg44-nav-button.dg92-menu{background:var(--dg-oro-chiaro)!important;color:var(--dg-oro-scuro)!important;box-shadow:inset 0 0 0 1px #EBCB8B!important}
+html body.dg44-ready #dg44-sidebar-menu .dg86-title{text-transform:none!important;letter-spacing:0!important;font-size:13px!important;font-weight:700!important;color:var(--dg-grigio)!important}
+html body.dg44-ready #dg44-sidebar-menu .dg86-group>summary{font-size:15px!important;font-weight:700!important;color:var(--dg-strada)!important;text-transform:none!important;letter-spacing:0!important;border-radius:12px}
+html body.dg44-ready #dg44-sidebar-menu .dg86-group>summary:hover{background:#E1E8F1}
+html body.dg44-ready #dg44-sidebar-menu .dg86-search{border:1px solid var(--dg-linea)!important;border-radius:12px!important;background:#fff!important}
+
+/* ---------- titolo di pagina ---------- */
+html body.dg44-ready .section-title{background:var(--dg-carta)!important;border:1px solid var(--dg-linea)!important;border-left:5px solid var(--dg-oro)!important;border-radius:16px!important;box-shadow:none!important}
+html body.dg44-ready .section-title h2{font-family:var(--dg-titolo)!important;font-weight:700!important;letter-spacing:-.015em;color:var(--dg-notte)!important;font-size:26px!important;line-height:1.1!important}
+html body.dg44-ready .section-subtitle{color:var(--dg-grigio)!important;font-size:14px!important}
+html body.dg44-ready h2,html body.dg44-ready h3{color:var(--dg-notte)}
+html body.dg44-ready .card h3,html body.dg44-ready .card-head h3,html body.dg44-ready .dg44-card h3{font-family:var(--dg-ui);font-weight:800;font-size:17px;color:var(--dg-notte)!important}
+
+/* ---------- riquadri ---------- */
+html body.dg44-ready .card,html body.dg44-ready .dg44-card,html body.dg44-ready .toolbar,html body.dg44-ready .dg-v5-shortcuts,html body.dg44-ready .dg44-stat{background:var(--dg-carta)!important;border:1px solid var(--dg-linea)!important;border-radius:16px!important;box-shadow:0 1px 2px rgba(11,37,69,.04)!important}
+html body.dg44-ready .dg44-stat strong,html body.dg44-ready .dg44-stat b,html body.dg44-ready .metric strong,html body.dg44-ready .metric .value{font-family:var(--dg-titolo)!important;font-weight:700!important;color:var(--dg-notte)!important;letter-spacing:-.02em}
+
+/* ---------- pulsanti: tre tipi soli ---------- */
+html body.dg44-ready .btn{font-family:var(--dg-ui)!important;font-size:14px!important;font-weight:700!important;border-radius:11px!important;min-height:40px;padding:9px 15px!important;line-height:1.2;box-shadow:none!important;text-shadow:none!important;transition:background-color .15s,border-color .15s}
+html body.dg44-ready .btn.btn-sm{font-size:13px!important;min-height:36px;padding:7px 12px!important;border-radius:10px!important}
+/* principali: notte */
+html body.dg44-ready .btn.btn-primary,html body.dg44-ready .btn.btn-purple,html body.dg44-ready .btn.btn-dark,html body.dg44-ready .btn.btn-blue{background:var(--dg-notte)!important;background-image:none!important;color:#fff!important;border:1px solid var(--dg-notte)!important}
+html body.dg44-ready .btn.btn-primary:hover,html body.dg44-ready .btn.btn-purple:hover,html body.dg44-ready .btn.btn-dark:hover,html body.dg44-ready .btn.btn-blue:hover{background:var(--dg-notte3)!important;border-color:var(--dg-notte3)!important}
+/* secondari: bianco con bordo */
+html body.dg44-ready .btn.btn-secondary,html body.dg44-ready .btn.btn-ghost,html body.dg44-ready .btn.btn-light{background:#fff!important;background-image:none!important;color:var(--dg-notte)!important;border:1px solid var(--dg-linea)!important}
+html body.dg44-ready .btn.btn-secondary:hover,html body.dg44-ready .btn.btn-ghost:hover,html body.dg44-ready .btn.btn-light:hover{background:var(--dg-velo)!important;border-color:#B9C8D8!important}
+/* WhatsApp e conferme: verde pieno */
+html body.dg44-ready .btn.btn-green,html body.dg44-ready .btn.btn-success{background:var(--dg-pagato)!important;background-image:none!important;color:#fff!important;border:1px solid var(--dg-pagato)!important}
+html body.dg44-ready .btn.btn-green:hover,html body.dg44-ready .btn.btn-success:hover{background:#17633D!important}
+/* eliminare / annullare: rosso mattone */
+html body.dg44-ready .btn.btn-danger,html body.dg44-ready .btn.dg47-delete{background:#fff!important;background-image:none!important;color:var(--dg-residuo)!important;border:1px solid #E7B9AB!important}
+html body.dg44-ready .btn.btn-danger:hover,html body.dg44-ready .btn.dg47-delete:hover{background:var(--dg-residuo-bg)!important}
+html body.dg44-ready .btn:disabled,html body.dg44-ready .btn[disabled]{opacity:.5!important}
+
+/* ---------- campi ---------- */
+html body.dg44-ready .content input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),
+html body.dg44-ready .content select,html body.dg44-ready .content textarea{border-color:var(--dg-linea)!important;border-radius:10px!important;color:var(--dg-strada)!important;box-shadow:none!important}
+html body.dg44-ready .field input,html body.dg44-ready .field select,html body.dg44-ready .toolbar input,html body.dg44-ready .toolbar select,
+html body.dg44-ready .modal input:not([type=checkbox]):not([type=radio]),html body.dg44-ready .modal select{font-size:15px!important;min-height:42px;border-radius:11px!important;background:#fff!important}
+html body.dg44-ready .content input:focus,html body.dg44-ready .content select:focus,html body.dg44-ready .content textarea:focus{border-color:var(--dg-notte3)!important;box-shadow:0 0 0 3px rgba(226,163,43,.35)!important;outline:none}
+html body.dg44-ready .field label,html body.dg44-ready label{color:var(--dg-strada)}
+html body.dg44-ready .field label{font-size:13px!important;font-weight:700!important}
+
+/* ---------- tabelle: più leggibili ---------- */
+html body.dg44-ready .table th,html body.dg44-ready table.table thead th,html body.dg44-ready .content table th{font-size:12.5px!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important;color:var(--dg-grigio)!important;background:var(--dg-velo)!important;border-bottom:1px solid var(--dg-linea)!important;padding:10px 10px!important;white-space:nowrap}
+html body.dg44-ready .table td,html body.dg44-ready .content table td{font-size:13px!important;color:var(--dg-strada);border-bottom:1px solid #E6ECF2!important;padding:9px 9px!important;vertical-align:middle}
+html body.dg44-ready .table tbody tr:hover td,html body.dg44-ready .content table tbody tr:hover td{background:#F7FAFC!important}
+html body.dg44-ready .table td small,html body.dg44-ready .content table td small{font-size:12.5px;color:var(--dg-grigio)}
+
+/* ---------- etichette di stato ---------- */
+html body.dg44-ready .badge,html body.dg44-ready .pill{border-radius:999px!important;font-weight:700!important;font-size:12px!important;letter-spacing:0!important;text-transform:none!important}
+
+/* ---------- dettagli rimasti col blu acceso ---------- */
+html body.dg44-ready .dg54-direct button{background:var(--dg-notte)!important;background-image:none!important;color:#fff!important;border:0!important;box-shadow:none!important;border-radius:11px!important}
+html body.dg44-ready .dg54-direct button:hover{background:var(--dg-notte3)!important}
+html body.dg44-ready .dg44-card-head button,html body.dg44-ready .dg47-trip-actions button,html body.dg44-ready .dg53-edit{color:var(--dg-notte3)!important;font-weight:700!important}
+html body.dg44-ready .dg47-new-trip{background:var(--dg-notte)!important;background-image:none!important;color:#fff!important;border-radius:10px!important}
+html body.dg44-ready #dg44-header .dg44-avatar,html body.dg44-ready .avatar{background:var(--dg-notte2)!important;background-image:none!important;box-shadow:0 0 0 2px rgba(255,255,255,.18)!important}
+html body.dg44-ready .dg53-bus-tab.active{background:var(--dg-notte)!important;background-image:none!important;color:#fff!important;box-shadow:inset 0 -3px 0 var(--dg-oro)!important}
+html body.dg44-ready .dg52-page-header{background:var(--dg-notte)!important;background-image:none!important;box-shadow:inset 0 -3px 0 var(--dg-oro)!important;border-radius:16px!important}
+html body.dg44-ready .pill.info,html body.dg44-ready .dg-chip{background:#E7EEF7!important;color:var(--dg-notte3)!important;border-color:#CFDDEC!important}
+html body.dg44-ready .dg-v5-ico,html body.dg44-ready .dg-v5-eyebrow{color:var(--dg-notte3)!important}
+html body.dg44-ready .dg-v5-eyebrow{text-transform:none!important;letter-spacing:0!important;font-size:13px!important}
+
+html body.dg44-ready #page-controlroom .section-title.dg-r35-ctrl-head,html body.dg44-ready .section-title.dg-r35-ctrl-head{background:var(--dg-notte)!important;background-image:none!important;border:0!important;border-left:5px solid var(--dg-oro)!important}
+html body.dg44-ready .section-title.dg-r35-ctrl-head h2{color:#fff!important}
+
+/* pulsanti dentro le tabelle: compatti, per non allargare le righe */
+html body.dg44-ready table .btn.btn-sm,html body.dg44-ready table .btn{font-size:12px!important;min-height:32px;padding:6px 9px!important;border-radius:9px!important}
+/* pulsanti in testa alla pagina: su una riga sola */
+html body.dg44-ready .section-actions{flex-wrap:wrap;gap:8px}
+html body.dg44-ready .section-actions .btn{white-space:nowrap}
+@media (max-width:720px){html body.dg44-ready table .btn.btn-sm,html body.dg44-ready table .btn{font-size:14px!important;min-height:38px}html body.dg44-ready .section-actions .btn{white-space:normal}}
+
+/* ---------- telefono ---------- */
+@media (max-width:720px){
+  html body.dg44-ready{font-size:15px}
+  html body.dg44-ready .section-title h2{font-size:23px!important}
+  html body.dg44-ready .btn{min-height:44px;font-size:15px!important}
+  html body.dg44-ready .btn.btn-sm{min-height:40px;font-size:14px!important}
+  html body.dg44-ready .sidebar,html body.dg44-ready #dg44-sidebar-menu{background:var(--dg-fondo)!important;background-image:none!important}
+  html body.dg44-ready #dg-v6-mobile-dock{background:var(--dg-notte)!important;box-shadow:0 -1px 0 rgba(255,255,255,.06),0 -6px 18px rgba(11,37,69,.18)!important}
+  html body.dg44-ready #dg-v6-mobile-dock button{font-family:var(--dg-ui)!important;font-weight:700!important;border-radius:12px!important}
+  html body.dg44-ready #dg-v6-mobile-dock #dg-v6-functions{background:var(--dg-oro)!important;color:var(--dg-notte)!important;border:0!important}
+  html body.dg44-ready .table td,html body.dg44-ready .content table td{font-size:15px!important}
+}
+@media (prefers-reduced-motion:reduce){html body.dg44-ready *{transition:none!important}}
+@media print{html body.dg44-ready{background:#fff!important}}
