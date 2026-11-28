@@ -29,7 +29,7 @@ const dateParts=iso=>{const d=new Date(String(iso).slice(0,10)+'T12:00:00Z');ret
 const dateLong=iso=>{const p=dateParts(iso);return p.w?p.w.charAt(0).toUpperCase()+p.w.slice(1)+' '+p.d+' '+['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][MESI.indexOf(p.m)]:''};
 const titleCase=s=>String(s||'').replace(/\s*\(\s*[A-Za-z]{2}\s*\)\s*$/,'').toLowerCase().replace(/(^|[\s'(-])([a-zà-ù])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(E|Di|De|Del|Della|In|A|Al|Alla|Da|Con|Per)\b/g,(w,_,i)=>i===0?w:w.toLowerCase()).replace(/\bG\.co\b/i,'G.co');
 const SVG=(d,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
-const IC={swap:'<path d="M4 8h15l-4-4M20 16H5l4 4"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
+const IC={receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',img:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',busplus:'<rect x="3" y="5" width="13" height="12" rx="2"/><path d="M3 11h13M6 17v2M13 17v2M20 8v6M17 11h6"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',swap:'<path d="M4 8h15l-4-4M20 16H5l4 4"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',seat:'<path d="M7 4v8a3 3 0 0 0 3 3h7"/><path d="M7 15v5M17 11v9M7 18h10"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',bus:'<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/>',van:'<path d="M3 17V7a2 2 0 0 1 2-2h9l5 5h1a1 1 0 0 1 1 1v6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',move:'<path d="M4 12h16M14 6l6 6-6 6"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'};
 const firstStop=t=>titleCase(String(t.luogo_partenza||'').split(/\s*[|]\s*|\s+-\s*|\s*-\s+/)[0]||'');
 function ticketHtml(t,big){
   const st=tripStats(t),pct=st.cap?Math.min(100,Math.round(st.pax/st.cap*100)):0,p=dateParts(t.data_partenza),from=firstStop(t),to=titleCase(t.destinazione||'');
@@ -65,7 +65,7 @@ function toWeb(){
 async function raw(path,opt={},auth=true){
   const headers={apikey:KEY,Accept:'application/json',...(opt.headers||{})};
   if(auth){await ensureToken();headers.Authorization='Bearer '+session.access_token}
-  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),20000);
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),opt.timeout||20000);
   let res;
   try{res=await fetch(API+path,{...opt,headers,signal:ctl.signal,cache:'no-store'})}
   catch(e){throw new Error(e.name==='AbortError'?'Connessione lenta: riprova tra poco.':'Nessuna connessione internet.')}
@@ -91,14 +91,17 @@ async function ensureToken(){
 }
 function friendly(m){
   const s=String(m||'');
-  const map={IMPORTO_SUPERIORE_AL_RESIDUO:'L’importo supera quanto resta da pagare.',IMPORTO_NON_VALIDO:'Importo non valido.',POSTI_INSUFFICIENTI:'Non ci sono abbastanza posti liberi su questo viaggio.',DATI_PRENOTAZIONE_NON_VALIDI:'Mancano dati della prenotazione (nome o fermata).',OPERATORE_NON_AUTORIZZATO:'Operatore non autorizzato.',AUTH_REQUIRED:'Accesso richiesto.',PRENOTAZIONE_NON_TROVATA:'Prenotazione non trovata: aggiorna.'};
+  const map={IMPORTO_SUPERIORE_AL_RESIDUO:'L’importo supera quanto resta da pagare.',IMPORTO_NON_VALIDO:'Importo non valido.',POSTI_INSUFFICIENTI:'Non ci sono abbastanza posti liberi su questo viaggio.',DATI_PRENOTAZIONE_NON_VALIDI:'Mancano dati della prenotazione (nome o fermata).',OPERATORE_NON_AUTORIZZATO:'Operatore non autorizzato.',AUTH_REQUIRED:'Accesso richiesto.',PRENOTAZIONE_NON_TROVATA:'Prenotazione non trovata: aggiorna.',RIMBORSO_SUPERIORE_AL_PAGATO:'Il rimborso supera quanto ha pagato il cliente.',IMPORTO_SUPERIORE_AL_TOTALE:'Con questo importo il cliente pagherebbe più del prezzo del viaggio.',VIAGGIO_CHIUSO_CONTABILMENTE:'Il viaggio è chiuso: prima va riaperto dalla versione web.',VIAGGIO_GIA_CHIUSO:'Il viaggio è già chiuso.',VIAGGIO_CHIUSO:'Il viaggio è chiuso: per cambiare i posti va prima riaperto dalla versione web.',CONFERMA_ANOMALIE_RICHIESTA:'Ci sono avvisi da confermare prima di chiudere.',CHECKIN_GIA_EFFETTUATO:'Qualcuno risulta già salito a bordo: il viaggio non si può annullare.',MOTIVO_OBBLIGATORIO:'Scrivi il motivo (almeno 8 lettere).',CONFERMA_ESPLICITA_OBBLIGATORIA:'Scrivi ANNULLA VIAGGIO per confermare.',VIAGGIO_NON_DISPONIBILE:'Viaggio non disponibile.',BUS_NON_TROVATO_O_NON_ATTIVO:'Questo bus non è disponibile.',BUS_BIS_OBBLIGATORIO:'Scegli il bus da aggiungere.',SELEZIONA_ALMENO_UN_POSTO:'Scegli almeno un posto.',SELEZIONA_ALMENO_UNA_PRENOTAZIONE:'Scegli almeno una prenotazione.',SPOSTAMENTO_CONSENTITO_SOLO_TRA_BUS_DELLO_STESSO_VIAGGIO_BIS:'Si può spostare solo tra i bus dello stesso viaggio.',GRUPPO_MULTI_ORIGINE_NON_CONSENTITO:'Scegli prenotazioni dello stesso bus.',POSTI_ORIGINE_INCOERENTI_NEL_GRUPPO:'Una prenotazione ha i posti in disordine: aprila, tocca «Cambia posti» e salva, poi riprova.',SELEZIONA_ESATTAMENTE:'Il numero di posti non corrisponde alle persone.',UNO_O_PIU_POSTI_DESTINAZIONE_NON_VALIDI:'Posti non validi sul bus di arrivo.',POSTI_NON_VALIDI:'Uno o più posti non sono validi.',OPERAZIONE_NON_AUTORIZZATA:'Operazione non autorizzata.',TIPO_PAGAMENTO_NON_VALIDO:'Tipo di pagamento non valido.',PAGAMENTO_NON_TROVATO:'Pagamento non trovato: aggiorna.',VIAGGIO_ANNULLATO:'Il viaggio è annullato.',VIAGGIO_NON_TROVATO:'Viaggio non trovato: aggiorna.'};
+  if(s.includes('CHIUSURA_BLOCCATA'))return 'Non si può chiudere: '+s.replace(/^.*CHIUSURA_BLOCCATA:\s*/,'');
   for(const k in map)if(s.includes(k))return map[k];
+  if(/POSTI_.*OCCUPAT/i.test(s))return 'Uno o più posti sono già occupati: scegline altri.';
   if(/Cassa insufficiente/i.test(s))return 'Il gestionale non vede abbastanza contanti nella tua cassa per questa consegna.';
   if(/nota per la differenza/i.test(s))return 'C’è una differenza: scrivi una nota.';
   return s.slice(0,240);
 }
 const get=(table,params)=>raw('/rest/v1/'+table+'?'+new URLSearchParams(params).toString());
 const rpc=(name,args)=>raw('/rest/v1/rpc/'+name,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(args||{})});
+const patch=(table,filter,row)=>raw('/rest/v1/'+table+'?'+new URLSearchParams(filter).toString(),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(row)});
 const insert=(table,row)=>raw('/rest/v1/'+table,{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(row)});
 
 async function login(username,password){
@@ -118,17 +121,19 @@ async function authorize(){
 }
 
 /* ---------- dati ---------- */
-const S={tab:'oggi',fleet:[],tripLayouts:[],busLayouts:[],allBookings:null,clientQ:'',clientKey:null,showMap:false,trips:[],bookings:[],seats:[],stops:[],customers:[],cash:null,spese:[],paysToday:[],lastClose:null,operators:[],
+const S={closures:[],staticAt:0,tab:'oggi',fleet:[],tripLayouts:[],busLayouts:[],allBookings:null,clientQ:'',clientKey:null,showMap:false,trips:[],bookings:[],seats:[],stops:[],customers:[],cash:null,spese:[],paysToday:[],lastClose:null,operators:[],
   tripId:null,incTrip:null,search:'',loading:false,error:'',book:null,lastPayment:null,rpTrip:null,rpFilter:'',rpB:{},rpPay:{},rpPast:null};
 async function loadAll(){
   S.loading=true;S.error='';render();
   try{
     const t0=today(),from=addDays(t0,-10);
-    const trips=await get('viaggi',{select:'id,id_viaggio,titolo,destinazione,luogo_partenza,descrizione,minimo_partecipanti,autobus,data_partenza,ora_partenza,prezzo,stato,pubblicato,posti_totali,posti_occupati,autobus_id,bis_parent_id,bis_numero,archiviato_at',data_partenza:'gte.'+from,archiviato_at:'is.null',order:'data_partenza.asc,titolo.asc',limit:'200'});
+    const trips=await get('viaggi',{select:'id,id_viaggio,titolo,destinazione,luogo_partenza,descrizione,minimo_partecipanti,autobus,data_partenza,ora_partenza,prezzo,stato,pubblicato,posti_totali,posti_occupati,autobus_id,bis_parent_id,bis_numero,archiviato_at,locandina,sold_out_manual',data_partenza:'gte.'+from,archiviato_at:'is.null',order:'data_partenza.asc,titolo.asc',limit:'200'});
     S.trips=(trips||[]).filter(t=>!/annullat/i.test(String(t.stato||''))).sort((a,b)=>String(a.data_partenza).localeCompare(String(b.data_partenza))||num(a.bis_numero)-num(b.bis_numero)||String(a.titolo).localeCompare(String(b.titolo)));
     const ids=S.trips.map(t=>t.id);
     const inList='in.('+ids.join(',')+')';
-    const [bookings,seats,stops,cash,spese,pays,closes,customers,fleet,tl,bl]=await Promise.all([
+    /* clienti, flotta e piantine cambiano di rado: li riscarico solo ogni 10 minuti o con ↻ */
+    const fresh=!S.staticAt||Date.now()-S.staticAt>600000;
+    const [bookings,seats,stops,cash,spese,pays,closes,customers,fleet,tl,bl,chiusure]=await Promise.all([
       ids.length?get('prenotazioni',{select:'id,viaggio_id,cliente,cliente_nome,telefono,posti,totale,pagato,stato,posti_selezionati,fermata_partenza,giorni_acconto,created_at,note,email,checkin_effettuato,checked_in_at,checkin_stato,riserva_aziendale',viaggio_id:inList,limit:'3000'}):[],
       ids.length?get('prenotazione_posti',{select:'viaggio_id,prenotazione_id,posto',viaggio_id:inList,limit:'6000'}):[],
       ids.length?get('viaggi_fermate',{select:'viaggio_id,nome,orario,ordine,attiva',viaggio_id:inList}).catch(()=>[]):[],
@@ -136,12 +141,13 @@ async function loadAll(){
       get('economia_movimenti',{select:'id,categoria,descrizione,importo,metodo,viaggio_id,created_at',tipo:'eq.Uscita',data_movimento:'eq.'+t0,operatore_user_id:'eq.'+me.user_id,order:'created_at.desc'}).catch(()=>[]),
       get('pagamenti',{select:'id,prenotazione_id,viaggio_id,cliente,importo,tipo,metodo,receipt_number,created_at,incassato_da_user_id',incassato_da_user_id:'eq.'+me.user_id,created_at:'gte.'+t0+'T00:00:00+01:00',order:'created_at.desc'}).catch(()=>[]),
       get('cassa_chiusure',{select:'data_chiusura,contanti_contati,created_at',operatore_user_id:'eq.'+me.user_id,order:'created_at.desc',limit:'1'}).catch(()=>[]),
-      get('clienti',{select:'nome,cognome,telefono',limit:'3000'}).catch(()=>[]),
-      get('flotta',{select:'id,titolo,marca,modello,posti,targa,stato,attivo',order:'titolo.asc'}).catch(()=>[]),
+      fresh?get('clienti',{select:'nome,cognome,telefono',limit:'3000'}).catch(()=>null):null,
+      fresh?get('flotta',{select:'id,titolo,marca,modello,posti,targa,stato,attivo',order:'titolo.asc'}).catch(()=>null):null,
       ids.length?get('dg28_trip_layouts',{select:'viaggio_id,autobus_id,configurazione',viaggio_id:inList}).catch(()=>[]):[],
-      get('dg28_bus_layouts',{select:'autobus_id,configurazione'}).catch(()=>[])
+      fresh?get('dg28_bus_layouts',{select:'autobus_id,configurazione'}).catch(()=>null):null,
+      ids.length?get('dg_viaggi_chiusure',{select:'viaggio_id,chiusa_at,chiusa_da_nome',viaggio_id:inList,stato_chiusura:'eq.CHIUSA'}).catch(()=>[]):[]
     ]);
-    S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;S.customers=customers||[];S.fleet=(fleet||[]).filter(f=>f.attivo!==false);S.tripLayouts=tl||[];S.busLayouts=bl||[];S.allBookings=null;S.acc=null;S.extra=null;S.rpB={};S.rpPay={};
+    S.bookings=bookings||[];S.seats=seats||[];S.stops=stops||[];S.cash=cash;S.spese=spese||[];S.paysToday=pays||[];S.lastClose=(closes||[])[0]||null;if(customers)S.customers=customers;if(fleet)S.fleet=fleet.filter(f=>f.attivo!==false);S.tripLayouts=tl||[];if(bl)S.busLayouts=bl;if(fresh&&customers&&fleet&&bl)S.staticAt=Date.now();S.closures=chiusure||[];S.allBookings=null;S.acc=null;S.extra=null;S.rpB={};S.rpPay={};
   }catch(e){S.error=e.message}
   S.loading=false;render();
   setTimeout(pollNotifiche,1500);
@@ -187,7 +193,7 @@ const ICONS={
   altro:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'
 };
 const TABS=[['oggi','Oggi'],['viaggi','Viaggi'],['prenota','Prenota'],['incassi','Incassi'],['cassa','Cassa'],['altro','Altro']];
-const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',presenze:'Presenze a bordo',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi',riepilogo:'Riepilogo viaggio'};
+const TITLES={oggi:'Oggi',viaggi:'Viaggi',viaggio:'Viaggio',prenota:'Nuova prenotazione',incassi:'Saldi a bordo',cassa:'La mia cassa',altro:'Altro',clienti:'Clienti',flotta:'Flotta',conti:'Contabilità',agenda:'Agenda',presenze:'Presenze a bordo',notifiche:'Avvisi',noleggi:'Noleggi',preventivi:'Preventivi',riepilogo:'Riepilogo viaggio',economia:'Spese',documenti:'Documenti'};
 
 function render(){
   const app=$('#app');
@@ -196,12 +202,12 @@ function render(){
   let body='';
   if(S.error)body+=`<div class="err">${esc(S.error)} <button class="link" data-act="reload">Riprova</button></div>`;
   if(S.loading&&!S.trips.length)body+='<div class="empty">Carico i dati…</div>';
-  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze,riepilogo:viewRiepilogo}[view]||viewOggi)();
+  else body+=({oggi:viewOggi,viaggi:viewViaggi,viaggio:viewViaggio,prenota:viewPrenota,incassi:viewIncassi,cassa:viewCassa,altro:viewAltro,clienti:viewClienti,flotta:viewFlotta,conti:viewConti,agenda:viewAgenda,notifiche:viewNotifiche,noleggi:viewNoleggi,preventivi:viewPreventivi,presenze:viewPresenze,riepilogo:viewRiepilogo,economia:viewEconomia,documenti:viewDocumenti}[view]||viewOggi)();
   app.innerHTML=`<div class="shell">
   <header class="top"><div class="id"><img class="logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi"><h1>${esc(TITLES[view])}</h1></div>
   <div class="tools"><button data-act="reload" aria-label="Aggiorna">${S.loading?'…':'↻'}</button><button class="switch" data-act="toWeb" aria-label="Passa alla versione web">${SVG(IC.swap)}<span class="l-lg">Versione web</span><span class="l-sm">Web</span></button></div></header>
   <main>${body}</main>
-  <nav class="nav" aria-label="Menu principale"><div class="in"><img class="rail-logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi','riepilogo'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
+  <nav class="nav" aria-label="Menu principale"><div class="in"><img class="rail-logo" src="../delgrosso-logo-originale-bianco.png" alt="DELGROSSO Viaggi">${TABS.map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k||(k==='altro'&&['clienti','flotta','conti','agenda','notifiche','noleggi','preventivi','riepilogo','economia','documenti'].includes(S.tab))?'on':''}" aria-current="${S.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>${l}</button>`).join('')}</div></nav>
   </div>`;
 }
 
@@ -268,18 +274,36 @@ function viewViaggio(){
   const st=tripStats(t),q=fold(S.search);
   const list=st.bs.filter(b=>!q||fold(nameOf(b)+' '+b.telefono+' '+b.fermata_partenza).includes(q)).sort((a,b)=>nameOf(a).localeCompare(nameOf(b),'it'));
   const paid=st.bs.filter(b=>residuo(b)<=0).length;
+  const closed=S.closures.find(c=>c.viaggio_id===t.id),group=busGroup(t),online=t.pubblicato==='SI',soldOut=/sold\s*out/i.test(String(t.stato||''));
   let h=`<button class="link" data-act="backTrips">‹ Tutti i viaggi</button>
   <div class="ticket big-ticket">${ticketHtml(t,true)}</div>
   <button class="btn ghost" data-act="presenze" data-id="${t.id}">${SVG(IC.user)}Presenze a bordo · ${bookingsOf(t.id).filter(onBoard).reduce((a,b)=>a+num(b.posti),0)} su ${st.pax}</button>
   <div class="grid2"><button class="btn gold" data-act="goInc" data-id="${t.id}">Saldi a bordo</button><button class="btn" data-act="bookTrip" data-id="${t.id}">${SVG(IC.plus)} Prenota qui</button></div>
+  ${group.length>1?`<div class="chips" role="group" aria-label="Bus di questo viaggio">${group.map(x=>`<button class="chip ${x.id===t.id?'on':''}" data-act="openTrip" data-id="${x.id}" aria-pressed="${x.id===t.id}"><b>Bus ${num(x.bis_numero)||1}</b>${tripStats(x).pax}/${num(x.posti_totali)}</button>`).join('')}</div>`:''}
+  ${closed?`<div class="note okn">${SVG(IC.lock)} Viaggio chiuso il ${esc(dateShort(String(closed.chiusa_at||'').slice(0,10)))}${closed.chiusa_da_nome?' da '+esc(closed.chiusa_da_nome):''}: i posti non si possono più cambiare.</div>`:''}
+  ${t.autobus_id?'':`<div class="note">Nessun autobus assegnato: apri «Gestione viaggio» e tocca «Modifica viaggio» per sceglierlo.</div>`}
+  <h3 class="sec">Passeggeri</h3>
   <div class="actions">
    <button class="action" data-act="toggleMap" aria-pressed="${S.showMap}">${SVG(IC.seat)}${S.showMap?'Nascondi piantina':'Piantina posti'}</button>
    <button class="action" data-act="paxList" data-id="${t.id}">${SVG(IC.list)}Lista passeggeri</button>
    <button class="action" data-act="waGroup" data-id="${t.id}">${SVG(IC.chat)}Numeri WhatsApp</button>
-   <button class="action" data-act="tripForm" data-id="${t.id}">${SVG(IC.edit)}Modifica viaggio</button>
+   ${closed?'':`<button class="action" data-act="reserve" data-id="${t.id}">${SVG(IC.star)}Riserva posti DELGROSSO</button>`}
+   ${group.length>1&&!closed?`<button class="action" data-act="multiBus" data-id="${t.id}">${SVG(IC.move)}Sposta su un altro bus</button>`:''}
    <button class="action wide" data-act="riepilogo" data-id="${t.id}">${SVG(IC.coins)}Riepilogo pagamenti e PDF di chi deve pagare</button>
   </div>
-  ${t.autobus_id?'':'<div class="note">Nessun autobus assegnato: tocca «Modifica viaggio» per sceglierlo.</div>'}
+  <button class="manage" data-act="manage" aria-expanded="${!!S.manage}">${SVG(IC.edit)}<span><b>Gestione viaggio</b><small>Modifica, spese, locandina, bus BIS, sito, chiusura</small></span><span class="tag ${!online?'':soldOut?'warn':'ok'}">${!online?'Non sul sito':soldOut?'SOLD OUT':'Sul sito'}</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+  ${S.manage?`<h3 class="sec">Viaggio</h3>
+  <div class="actions">
+   <button class="action" data-act="tripForm" data-id="${t.id}">${SVG(IC.edit)}Modifica viaggio</button>
+   <button class="action" data-act="tripSpesa" data-id="${t.id}">${SVG(IC.receipt)}Aggiungi una spesa</button>
+   <button class="action" data-act="poster" data-id="${t.id}">${t.locandina?`<img class="thumb" src="${esc(t.locandina)}" alt="" loading="lazy">`:SVG(IC.img)}${t.locandina?'Locandina':'Carica locandina'}</button>
+   ${closed?'':`<button class="action" data-act="bis" data-id="${t.id}">${SVG(IC.busplus)}Apri bus ${group.length+1} (BIS)</button>`}
+   ${closed?'':`<button class="action" data-act="closeTrip" data-id="${t.id}">${SVG(IC.lock)}Chiudi viaggio</button>`}
+   ${closed||!isAdmin()?'':`<button class="action danger wide" data-act="cancelTrip" data-id="${t.id}">${SVG(IC.x)}Annulla viaggio</button>`}
+  </div>
+  <h3 class="sec">Sul sito</h3>
+  <div class="sitebox ${!online?'off':soldOut?'sold':'on'}"><span class="st-line">${SVG(IC.globe)}<b>${!online?'Nascosto dal sito':soldOut?'SOLD OUT sul sito':'Visibile sul sito'}</b><span>${!online?'nessuno lo vede online':soldOut?'si vede, ma online non si prenota':'i clienti possono prenotare online'}</span></span>
+   <div class="grid2">${online?`<button class="btn light" data-act="site" data-v="OFFLINE" data-id="${t.id}">Togli dal sito</button>`:`<button class="btn" data-act="site" data-v="ONLINE" data-id="${t.id}">Metti sul sito</button>`}${soldOut?`<button class="btn" data-act="site" data-v="REOPEN" data-id="${t.id}">Riapri le vendite</button>`:`<button class="btn light" data-act="site" data-v="SOLD_OUT" data-id="${t.id}">Segna SOLD OUT</button>`}</div></div>`:''}
   ${S.showMap?`<section class="card"><h2>Piantina · ${esc(busName(t.autobus_id)||'posti')}</h2>${seatMapHtml(t,{})}<span class="small muted">Tocca un posto occupato per aprire la prenotazione.</span></section>`:''}
   <input class="search" type="search" placeholder="Cerca passeggero, telefono o fermata" value="${esc(S.search)}" data-input="search" aria-label="Cerca passeggero">
   <p class="small muted" style="margin:0">${st.bs.length} prenotazioni: ${paid} pagate, ${st.bs.length-paid} devono ancora qualcosa. ${st.free} posti liberi.</p>`;
@@ -437,10 +461,12 @@ function seatMapHtml(t,opts){
 
 /* ----- Altro, Clienti, Flotta ----- */
 function viewAltro(){
-  const ico={riepilogo:IC.coins,clienti:IC.user,conti:IC.chart,agenda:IC.cal,noleggi:IC.van,preventivi:IC.doc,notifiche:IC.bell,flotta:IC.bus};
+  const ico={economia:IC.receipt,documenti:IC.folder,riepilogo:IC.coins,clienti:IC.user,conti:IC.chart,agenda:IC.cal,noleggi:IC.van,preventivi:IC.doc,notifiche:IC.bell,flotta:IC.bus};
   const it=(k,t,d)=>`<button class="tile" data-tab="${k}">${SVG(ico[k])}<span class="tt">${t}</span><span class="td">${d}</span></button>`;
-  return `<div class="tiles">${it('riepilogo','Riepilogo viaggio','Chi ha saldato, chi ha l’acconto, chi deve ancora pagare. Con PDF')}${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Autobus, posti e targhe')}</div>
-  <section class="card"><h2>Versione completa</h2><span class="muted small">Per le cose rare (piantine nuove, bus BIS, locandine, rimborsi, impostazioni) resta disponibile il gestionale di prima.</span>
+  return `<h3 class="sec">Soldi</h3><div class="tiles">${it('riepilogo','Riepilogo viaggio','Chi ha saldato, chi ha l’acconto, chi deve ancora pagare. Con PDF')}${it('conti','Contabilità','Nicola, Raffaele, compenso, guadagno per viaggio')}${it('economia','Spese ed entrate','Pedaggi, parcheggi, pranzi, compensi, con la foto della ricevuta')}</div>
+  <h3 class="sec">Clienti e lavori</h3><div class="tiles">${it('clienti','Clienti','Cerca un cliente: viaggi fatti, pagamenti, telefono')}${it('preventivi','Preventivi','Richieste dal sito e dal gestionale')}${it('noleggi','Noleggi','Noleggi bus con prezzi e pagamenti')}</div>
+  <h3 class="sec">Organizzazione</h3><div class="tiles">${it('agenda','Agenda','Appuntamenti, scadenze, promemoria')}${it('notifiche','Avvisi','Nuove prenotazioni e messaggi del sistema')}${it('flotta','Flotta','Stato dei bus, rifornimenti, lavori e scadenze')}${it('documenti','Documenti','Contratti, assicurazioni, libretti, fatture')}</div>
+  <section class="card"><h2>Versione completa</h2><span class="muted small">Per le poche cose non ancora qui (piantine dei bus, statistiche, impostazioni) passa alla versione web.</span>
   <button class="btn ghost" data-act="toWeb">${SVG(IC.swap)}Passa alla versione web</button></section>
   <button class="btn light" data-act="logout">${SVG(IC.out)}Esci (${esc(me.nome||me.username)})</button>`;
 }
@@ -480,12 +506,6 @@ function viewCliente(g){
     ${pays.map(p=>`<div class="line"><span>${esc(String(p.data_pagamento||'').split('-').reverse().join('/'))} · ${esc(p.tipo||'')} · ${esc(p.metodo||'')}${p.incassato_da?' · '+esc(p.incassato_da):''}</span><b>${eur(p.importo)} <button class="link small" style="padding:0" data-act="receipt" data-id="${p.id}">PDF</button></b></div>`).join('')}
     ${tripById(b.viaggio_id)&&active(b)?`<button class="link" data-act="openBooking" data-id="${b.id}">Apri prenotazione ›</button>`:''}</section>`}).join('')}`;
 }
-function viewFlotta(){
-  return `<div class="list2">${S.fleet.map(f=>{const next=upcoming().filter(t=>t.autobus_id===f.id).slice(0,3);
-    return `<section class="card"><div class="row"><b>${esc(f.titolo||[f.marca,f.modello].filter(Boolean).join(' '))}</b><span class="tag ${/manut|fermo|guast/i.test(f.stato||'')?'bad':'ok'}">${esc(f.stato||'attivo')}</span></div>
-    <span class="small muted">${esc(f.targa||'targa n/d')} · ${num(f.posti)} posti</span>
-    ${next.length?next.map(t=>`<div class="line"><span>${esc(dateShort(t.data_partenza))} · ${esc(tripLabel(t))}</span></div>`).join(''):'<span class="small muted">Nessun viaggio assegnato a breve</span>'}</section>`}).join('')||'<div class="empty">Nessun mezzo.</div>'}</div>`;
-}
 
 /* ----- viaggio: crea / modifica ----- */
 function tripFormSheet(id){
@@ -503,7 +523,7 @@ function tripFormSheet(id){
   <label class="f">Descrizione (facoltativa)<textarea id="tfDesc" rows="3">${v('descrizione')}</textarea></label>
   <div class="grid2"><label class="f">Sul sito<select id="tfPub"><option value="SI" ${t&&t.pubblicato==='SI'?'selected':''}>Visibile</option><option value="NO" ${!t||t.pubblicato!=='SI'?'selected':''}>Nascosto</option></select></label>
   <label class="f">Stato<select id="tfStato">${['Programmato','Confermato','SOLD OUT','Concluso'].concat(t&&t.stato&&!['Programmato','Confermato','SOLD OUT','Concluso'].includes(t.stato)?[t.stato]:[]).map(x=>`<option ${t&&t.stato===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label></div>
-  <span class="small muted">La locandina e il bus BIS si gestiscono dalla versione completa.</span>
+  <span class="small muted">Locandina, bus BIS e stato sul sito si gestiscono dalla pagina del viaggio.</span>
   <button class="btn" id="tfOk">${t?'Salva modifiche':'Crea viaggio'}</button><button class="btn light" id="tfNo">Annulla</button>`);
   $('#tfNo').onclick=closeSheet;
   $('#tfBus').onchange=e=>{const f=S.fleet.find(x=>x.id===e.target.value);if(f&&num(f.posti)&&!t)$('#tfPosti').value=num(f.posti)};
@@ -544,7 +564,7 @@ function bookingSheet(id){
   ${num(b.pagato)>0?`<button class="action" id="bsRefund">${SVG(IC.coins)}Registra un rimborso</button>`:''}
   <button class="action danger" id="bsCancel">${SVG(IC.x)}Annulla prenotazione</button>
   <button class="btn light" id="bsClose">Chiudi</button>`);
-  bookingPayments(b.id).then(ps=>{const el=$('#bsPays');if(!el)return;el.className='';el.innerHTML=ps.length?`<b style="font-size:15px">Pagamenti</b>${ps.map(p=>{const k=payKey('trip',p,{label:nameOf(b),bookingId:b.id});return `<div class="line pline"><span>${esc(dateShort(p.data_pagamento))} · ${esc(p.tipo||'')} · ${esc(p.metodo_pagamento||p.metodo||'')}<small class="by">${isRefund(p)?'dato da':'incassato da'} <b>${esc(collectorName(p))}</b>${collectorBtn(k,p)}</small></span><span style="display:flex;gap:10px;align-items:center"><b>${eur(p.importo)}</b>${num(p.importo)>0?`<button class="link small" style="padding:0" data-act="shareRcpt" data-id="${p.id}" data-b="${b.id}">Invia ricevuta</button>`:''}</span></div>`}).join('')}`:'<span class="small muted">Nessun pagamento registrato.</span>'}).catch(e=>{const el=$('#bsPays');if(el)el.textContent='Non riesco a leggere i pagamenti: '+e.message});
+  bookingPayments(b.id).then(ps=>{const el=$('#bsPays');if(!el)return;el.className='';el.innerHTML=ps.length?`<b style="font-size:15px">Pagamenti</b>${ps.map(p=>{const k=payKey('trip',p,{label:nameOf(b),bookingId:b.id});return `<div class="line pline"><span>${esc(dateShort(p.data_pagamento))} · ${esc(p.tipo||'')} · ${esc(p.metodo_pagamento||p.metodo||'')}<small class="by">${isRefund(p)?'dato da':'incassato da'} <b>${esc(collectorName(p))}</b>${collectorBtn(k,p)}</small></span><span style="display:flex;gap:10px;align-items:center"><b>${eur(p.importo)}</b>${num(p.importo)>0?`<button class="link small" style="padding:0" data-act="shareRcpt" data-id="${p.id}" data-b="${b.id}">Invia ricevuta</button>`:''}${/annull|storn/i.test(p.stato||'')||!isAdmin()?'':`<button class="link small" style="padding:0" data-act="editPay" data-id="${esc(k)}">Modifica</button>`}</span></div>`}).join('')}`:'<span class="small muted">Nessun pagamento registrato.</span>'}).catch(e=>{const el=$('#bsPays');if(el)el.textContent='Non riesco a leggere i pagamenti: '+e.message});
   if($('#bsRefund'))$('#bsRefund').onclick=()=>refundSheet(b);
   $('#bsClose').onclick=closeSheet;
   if($('#bsPay'))$('#bsPay').onclick=()=>askPay(b,r,true);
@@ -1018,6 +1038,451 @@ function collectorSheet(k,pick){
     else{await loadAll();if(o.bookingId)bookingSheet(o.bookingId);else closeSheet()}
   });
 }
+/* ===== Fase 1 «semplice completo»: viaggio, sito, BIS, posti riservati, chiusura, annullamento, modifica pagamento ===== */
+const busGroup=t=>{const root=t.bis_parent_id||t.id;return S.trips.filter(x=>(x.bis_parent_id||x.id)===root).sort((a,b)=>num(a.bis_numero||1)-num(b.bis_numero||1))};
+const busLabel=t=>'bus '+(num(t.bis_numero)||1)+(t.autobus_id?' · '+busName(t.autobus_id):'');
+const tripTitle=t=>titleCase(tripLabel(t))+', '+dateShort(t.data_partenza);
+
+/* sul sito: ONLINE, OFFLINE, SOLD_OUT, REOPEN */
+function siteAction(id,a){
+  const t=tripById(id);if(!t)return;
+  const msg={ONLINE:'Ora è visibile sul sito',OFFLINE:'Tolto dal sito',SOLD_OUT:'Segnato SOLD OUT',REOPEN:'Vendite riaperte'}[a];
+  const go=async()=>{await rpc('dg_set_trip_online_state',{p_trip_id:id,p_action:a});closeSheet();toast(msg);await loadAll()};
+  if(a==='ONLINE'||a==='REOPEN')return guard(null,go);
+  sheet(`<h3>${a==='OFFLINE'?'Togliere il viaggio dal sito?':'Segnare SOLD OUT?'}</h3><span class="muted">${esc(tripTitle(t))}</span>
+  <div class="note">${a==='OFFLINE'?'Il viaggio sparisce dal sito: nessuno potrà vederlo né prenotarlo online. Le prenotazioni già fatte restano.':'Il viaggio resta sul sito con la scritta SOLD OUT e online non si potrà più prenotare. Le prenotazioni già fatte restano.'}</div>
+  <button class="btn" id="saOk">${a==='OFFLINE'?'Sì, togli dal sito':'Sì, segna SOLD OUT'}</button><button class="btn light" id="saNo">Annulla</button>`);
+  $('#saNo').onclick=closeSheet;$('#saOk').onclick=e=>guard(e.currentTarget,go);
+}
+
+/* locandina: foto dalla galleria o dalla fotocamera, rimpicciolita prima di caricarla */
+async function shrinkImage(file){
+  if(!file||!/^image\//.test(file.type||'image/'))throw new Error('Scegli una foto (JPG, PNG o WEBP).');
+  let bmp=null;try{bmp=await createImageBitmap(file)}catch{}
+  if(!bmp)return file;
+  const sc=Math.min(1,1800/Math.max(bmp.width,bmp.height));
+  if(sc===1&&file.size<1500000&&/jpe?g|webp/i.test(file.type))return file;
+  const c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.86));
+  return blob?new File([blob],'locandina.jpg',{type:'image/jpeg'}):file;
+}
+async function uploadPoster(file,tripId){
+  const f=await shrinkImage(file);
+  if(f.size>15*1024*1024)throw new Error('La foto è troppo grande (massimo 15 MB).');
+  const ext=f.type==='image/png'?'png':f.type==='image/webp'?'webp':'jpg',path='viaggi/'+tripId+'/'+Date.now()+'.'+ext;
+  await raw('/storage/v1/object/locandine/'+path,{method:'POST',headers:{'Content-Type':f.type||'image/jpeg','x-upsert':'true'},body:f,timeout:90000});
+  return API+'/storage/v1/object/public/locandine/'+path;
+}
+function posterSheet(id){
+  const t=tripById(id);if(!t)return;
+  sheet(`<h3>Locandina</h3><span class="muted">${esc(tripTitle(t))}</span>
+  ${t.locandina?`<img class="poster" src="${esc(t.locandina)}" alt="Locandina di ${esc(titleCase(tripLabel(t)))}">`:'<div class="empty">Nessuna locandina: sul sito compare una foto dei vostri viaggi.</div>'}
+  <label class="btn filebtn">${SVG(IC.img)}<span>${t.locandina?'Cambia locandina':'Carica la locandina'}</span><input id="poFile" type="file" accept="image/*"></label>
+  ${t.locandina?'<button class="btn light" id="poDel">Togli la locandina</button>':''}
+  <span class="small muted">Scegli una foto dalla galleria o falla con la fotocamera: viene rimpicciolita da sola e compare subito sul sito.</span>
+  <button class="btn light" id="poNo">Chiudi</button>`);
+  $('#poNo').onclick=closeSheet;
+  $('#poFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const lab=e.target.closest('label');lab.classList.add('busy');lab.firstChild.nextSibling.textContent='Carico la locandina…';
+    guard(null,async()=>{try{const url=await uploadPoster(f,id);await patch('viaggi',{id:'eq.'+id},{locandina:url});toast('Locandina caricata');await loadAll();posterSheet(id)}catch(err){posterSheet(id);throw err}})};
+  if(t.locandina)$('#poDel').onclick=e=>guard(e.currentTarget,async()=>{await patch('viaggi',{id:'eq.'+id},{locandina:null});toast('Locandina tolta');await loadAll();posterSheet(id)});
+}
+
+/* bus BIS: stesso viaggio, stesse fermate e stesso prezzo, su un altro bus */
+function bisSheet(id){
+  const t=tripById(id);if(!t)return;
+  const group=busGroup(t),used=new Set(S.trips.filter(x=>x.data_partenza===t.data_partenza&&x.autobus_id).map(x=>x.autobus_id));
+  const buses=S.fleet.filter(f=>!used.has(f.id)&&!/fermo|manuten|offic|guast/i.test(String(f.stato||'')));
+  sheet(`<h3>Apri il bus ${group.length+1} (BIS)</h3><span class="muted">${esc(tripTitle(t))}</span>
+  <span class="small muted">Si crea un altro bus per lo stesso viaggio, con le stesse fermate e lo stesso prezzo. Poi puoi spostarci dei passeggeri.</span>
+  ${buses.length?`<label class="f">Bus da aggiungere<select id="biBus">${buses.map(f=>`<option value="${f.id}">${esc(busName(f.id))} · ${num(f.posti)} posti</option>`).join('')}</select></label>
+  <label class="check"><input type="checkbox" id="biPub" checked> Mettilo subito sul sito</label>`:'<div class="note">Non ci sono bus liberi in questa data.</div>'}
+  <button class="btn" id="biOk" ${buses.length?'':'disabled'}>Apri il bus ${group.length+1}</button><button class="btn light" id="biNo">Annulla</button>`);
+  $('#biNo').onclick=closeSheet;
+  if(buses.length)$('#biOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const r=await rpc('dg_open_trip_bis_v1',{p_source_trip_id:t.id,p_bus_id:$('#biBus').value,p_publish:$('#biPub').checked});
+    closeSheet();toast('Aperto il bus '+(r&&r.bis_numero||group.length+1)+(r&&r.bus_conflict?': il bus scelto non era libero, sceglilo da «Modifica viaggio»':''));
+    if(r&&r.trip_id){S.tripId=r.trip_id;S.tab='viaggi'}await loadAll();window.scrollTo(0,0);
+  });
+}
+
+/* sposta un gruppo di prenotazioni su un altro bus dello stesso viaggio (posti scelti in automatico, vicini) */
+let mbus=null;
+function multiBusSheet(id){
+  const t=tripById(id);if(!t)return;
+  const others=busGroup(t).filter(x=>x.id!==id);
+  if(!others.length)return toast('Prima apri un bus BIS.',true);
+  if(!mbus||mbus.from!==id)mbus={from:id,sel:new Set(),to:others[0].id};
+  const list=bookingsOf(id).filter(b=>!b.riserva_aziendale).sort((a,b)=>nameOf(a).localeCompare(nameOf(b),'it'));
+  sheet(`<h3>Sposta su un altro bus</h3><span class="muted">${esc(tripTitle(t))} · ora sul ${esc(busLabel(t))}</span>
+  <label class="f">Sposta sul<select id="mbTo">${others.map(x=>`<option value="${x.id}" ${x.id===mbus.to?'selected':''}>${esc(busLabel(x))} · ${tripStats(x).free} posti liberi</option>`).join('')}</select></label>
+  <b style="font-size:15px">Chi sposti</b>
+  <div class="checklist">${list.map(b=>`<label class="ck"><input type="checkbox" data-mb="${b.id}" ${mbus.sel.has(b.id)?'checked':''}><span><b>${esc(nameOf(b))}</b><small>${num(b.posti)} ${num(b.posti)===1?'posto':'posti'}${seatsOf(b).length?' · n. '+esc(seatsOf(b).join(', ')):''}${b.fermata_partenza?' · '+esc(titleCase(b.fermata_partenza)):''}</small></span></label>`).join('')||'<div class="empty">Nessuna prenotazione su questo bus.</div>'}</div>
+  <div class="note" id="mbNote"></div>
+  <button class="btn" id="mbOk" disabled>Sposta</button><button class="btn light" id="mbNo">Annulla</button>`);
+  const upd=()=>{const pax=list.filter(b=>mbus.sel.has(b.id)).reduce((a,b)=>a+num(b.posti),0),tt=tripById(mbus.to),free=tt?tripStats(tt).free:0;
+    $('#mbNote').textContent=!pax?'Scegli le prenotazioni da spostare.':free>=pax?pax+(pax===1?' persona':' persone')+': i posti sul bus di arrivo vengono scelti in automatico, vicini se possibile. I pagamenti restano collegati.':'Sul bus di arrivo ci sono solo '+free+' posti liberi per '+pax+' persone.';
+    const ok=$('#mbOk');ok.disabled=!(pax&&free>=pax);ok.textContent=pax?'Sposta '+pax+(pax===1?' persona':' persone'):'Sposta'};
+  document.querySelectorAll('#sheet [data-mb]').forEach(x=>x.onchange=()=>{x.checked?mbus.sel.add(x.dataset.mb):mbus.sel.delete(x.dataset.mb);upd()});
+  $('#mbTo').onchange=e=>{mbus.to=e.target.value;upd()};upd();
+  $('#mbNo').onclick=()=>{mbus=null;closeSheet()};
+  $('#mbOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const tt=tripById(mbus.to),ids=[...mbus.sel],pax=list.filter(b=>mbus.sel.has(b.id)).reduce((a,b)=>a+num(b.posti),0),seats=autoSeats(tt,pax).map(String);
+    if(seats.length!==pax)throw new Error('Sul bus di arrivo non ci sono abbastanza posti liberi.');
+    await rpc('dg_reseat_bookings_multibus_v2',{p_booking_ids:ids,p_target_trip_id:tt.id,p_target_seats:seats});
+    mbus=null;closeSheet();toast((pax===1?'Spostata 1 persona':'Spostate '+pax+' persone')+' sul bus '+(num(tt.bis_numero)||1)+(seats.length<=6?': posti '+seats.join(', '):''));await loadAll();
+  });
+}
+
+/* posti riservati DELGROSSO (gratuiti: autista, accompagnatore, ospiti) */
+function reserveSheet(id){
+  const t=tripById(id);if(!t)return;
+  if(!seatPick||seatPick.mode!=='reserve'||seatPick.trip!==id)seatPick={mode:'reserve',trip:id,sel:new Set(),need:99,draw:()=>reserveSheet(id)};
+  const P=seatPick,mine=bookingsOf(id).filter(b=>b.riserva_aziendale),note=$('#rsNote')?$('#rsNote').value:'';
+  sheet(`<h3>Riserva posti DELGROSSO</h3><span class="muted">${esc(tripTitle(t))} · posti gratuiti per autista, accompagnatore o ospiti</span>
+  ${mine.length?`<div class="note">Già riservati: ${mine.map(b=>`<button class="link small" style="padding:0" data-act="openBooking" data-id="${b.id}">n. ${esc(seatsOf(b).join(', ')||'?')}</button>`).join(' · ')}. Tocca per liberarli.</div>`:''}
+  ${tripStats(t).free?'':'<div class="note">Su questo bus non ci sono posti liberi.</div>'}
+  ${seatMapHtml(t,{pick:P.sel})}
+  <div class="legend small"><span class="sc seat free"></span> libero <span class="sc seat sel"></span> scelto <span class="sc seat busy"></span> occupato</div>
+  <label class="f">Nota (facoltativa)<input id="rsNote" value="${esc(note)}" placeholder="es. accompagnatore"></label>
+  <button class="btn" id="rsOk" ${P.sel.size?'':'disabled'}>${P.sel.size?'Riserva '+P.sel.size+(P.sel.size===1?' posto':' posti')+' ('+[...P.sel].sort((a,b)=>num(a)-num(b)).join(', ')+')':'Tocca i posti da riservare'}</button><button class="btn light" id="rsNo">Annulla</button>`);
+  $('#rsNo').onclick=()=>{seatPick=null;closeSheet()};
+  $('#rsOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const seats=[...P.sel].sort((a,b)=>num(a)-num(b));
+    await rpc('dg_reserve_company_seats',{p_trip_id:id,p_seats:seats,p_note:$('#rsNote').value.trim()||null});
+    seatPick=null;closeSheet();toast('Riservati per DELGROSSO: posti '+seats.join(', '));await loadAll();
+  });
+}
+
+/* chiusura del viaggio: prima il controllo, poi la conferma */
+async function closeTripSheet(id){
+  const t=tripById(id);if(!t)return;
+  sheet(`<h3>Chiudi il viaggio</h3><span class="muted">${esc(tripTitle(t))}</span><div class="empty">Controllo il viaggio…</div>`);
+  let p;try{p=await rpc('dg_trip_closure_preview_v1',{p_trip_id:id})}catch(e){sheet(`<h3>Chiudi il viaggio</h3><div class="note">${esc(e.message)}</div><button class="btn light" id="ctNo">Chiudi</button>`);$('#ctNo').onclick=closeSheet;return}
+  const s=p.summary||{},w=p.warnings||[],bl=p.blockers||[];
+  const rows=[['Prenotazioni',num(s.prenotazioni)],['Passeggeri',num(s.passeggeri_clienti)],['Incassato',eur(s.incassato)],['Ancora da incassare',eur(s.residuo)],['Costi registrati',eur(s.costi_economia)],['Margine',eur(s.margine)]];
+  sheet(`<h3>Chiudi il viaggio</h3><span class="muted">${esc(tripTitle(t))}</span>
+  <div>${rows.map(([k,v])=>`<div class="line"><span>${k}</span><b>${esc(String(v))}</b></div>`).join('')}</div>
+  ${bl.map(x=>`<div class="note badn">${esc(x)}</div>`).join('')}
+  ${w.length?`<div class="note"><b>Da controllare</b><ul class="ul">${w.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+  <span class="small muted">La chiusura salva il riepilogo finale del viaggio e blocca le modifiche ai posti. Per riaprirlo serve la versione web.</span>
+  ${p.can_close?`<label class="f">Nota (facoltativa)<input id="ctNote"></label>${w.length?'<label class="check"><input type="checkbox" id="ctForce"> Ho controllato gli avvisi: chiudi lo stesso</label>':''}<button class="btn" id="ctOk">Chiudi il viaggio</button>`:''}
+  <button class="btn light" id="ctNo">${p.can_close?'Annulla':'Torna al viaggio'}</button>`);
+  $('#ctNo').onclick=closeSheet;
+  if(p.can_close)$('#ctOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const force=!!($('#ctForce')&&$('#ctForce').checked);
+    if(w.length&&!force)throw new Error('Spunta «Ho controllato gli avvisi» per chiudere.');
+    await rpc('dg_close_trip_v1',{p_trip_id:id,p_note:$('#ctNote').value.trim()||null,p_force:force});
+    closeSheet();toast('Viaggio chiuso');await loadAll();
+  });
+}
+
+/* annullamento del viaggio con tutte le prenotazioni: motivo e conferma scritta */
+function cancelTripSheet(id){
+  const t=tripById(id);if(!t)return;
+  const st=tripStats(t),paid=st.bs.filter(b=>num(b.pagato)>0),tot=r2(paid.reduce((a,b)=>a+num(b.pagato),0));
+  sheet(`<h3>Annullare il viaggio?</h3><span class="muted">${esc(tripTitle(t))} · ${esc(busLabel(t))}</span>
+  <div class="note badn">Vengono annullate tutte le ${st.bs.length} prenotazioni (${st.pax} persone) e il viaggio sparisce dal sito. ${paid.length?paid.length+(paid.length===1?' cliente ha':' clienti hanno')+' già pagato '+eur(tot)+': poi dovrai restituire i soldi e registrare i rimborsi. ':''}Non si può tornare indietro.</div>
+  <label class="f">Motivo<textarea id="caWhy" rows="3" placeholder="es. numero minimo non raggiunto"></textarea></label>
+  <label class="f">Per confermare scrivi ANNULLA VIAGGIO<input id="caConf" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+  <button class="btn danger" id="caOk">Annulla il viaggio</button><button class="btn light" id="caNo">No, torna indietro</button>`);
+  $('#caNo').onclick=closeSheet;
+  $('#caOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const why=$('#caWhy').value.trim(),conf=$('#caConf').value.trim().toUpperCase().replace(/\s+/g,' ');
+    if(why.length<8)throw new Error('Scrivi il motivo (almeno 8 lettere).');
+    if(conf!=='ANNULLA VIAGGIO')throw new Error('Scrivi ANNULLA VIAGGIO per confermare.');
+    const r=await rpc('dg26_annulla_viaggio_e_prenotazioni_v1',{p_viaggio_id:id,p_motivo:why,p_conferma:conf});
+    S.tripId=null;await loadAll();
+    sheet(`<h3>Viaggio annullato</h3><p style="margin:0">${esc(tripTitle(t))}: ${num(r&&r.prenotazioni_annullate)} prenotazioni annullate.</p>
+    ${num(r&&r.totale_rimborsi_da_eseguire)>0?`<div class="note">Da restituire: <b>${eur(r.totale_rimborsi_da_eseguire)}</b> a ${num(r.prenotazioni_con_rimborso)} ${num(r.prenotazioni_con_rimborso)===1?'cliente':'clienti'}. Quando restituisci i soldi, registra il rimborso dalla scheda del cliente.</div>`:''}
+    <button class="btn" id="caDone">Fatto</button>`);$('#caDone').onclick=closeSheet;
+  });
+}
+
+/* modifica di un pagamento (importo, tipo, modo, data, nota) */
+function editPaySheet(k){
+  const o=PAYS.get(k);if(!o)return toast('Pagamento non trovato: aggiorna.',true);
+  const p=o.p,b=S.bookings.find(x=>x.id===o.bookingId)||{},met=p.metodo_pagamento||p.metodo||'Contanti',tipo=isRefund(p)?'Rimborso':(/saldo/i.test(p.tipo||'')?'Saldo':'Acconto');
+  sheet(`<h3>Modifica pagamento</h3><span class="muted">${esc(nameOf(b))}${p.receipt_number?' · ricevuta '+esc(p.receipt_number):''}</span>
+  <div class="grid2"><label class="f">Tipo<select id="epTipo">${['Acconto','Saldo','Rimborso'].map(x=>`<option ${x===tipo?'selected':''}>${x}</option>`).join('')}</select></label>
+  <label class="f">Importo (€)<input id="epImp" type="number" inputmode="decimal" step="0.01" min="0.01" value="${Math.abs(num(p.importo))}"></label></div>
+  <div class="grid2"><label class="f">Come<select id="epMet">${[...new Set(METODI.concat([met]))].map(x=>`<option ${x===met?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+  <label class="f">Data<input id="epData" type="date" value="${esc(String(p.data_pagamento||today()).slice(0,10))}"></label></div>
+  <label class="f">Nota (facoltativa)<input id="epNote" value="${esc(p.note||'')}"></label>
+  <span class="small muted">La ricevuta viene rifatta con i dati nuovi; la vecchia resta nello storico.</span>
+  <button class="btn" id="epOk">Salva</button><button class="btn light" id="epNo">Annulla</button>`);
+  $('#epNo').onclick=()=>bookingSheet(o.bookingId);
+  $('#epOk').onclick=e=>guard(e.currentTarget,async()=>{
+    const imp=r2($('#epImp').value);if(!(imp>0))throw new Error('Importo non valido.');
+    await rpc('dg_update_payment_v14',{p_payment_id:p.id,p_booking_id:o.bookingId,p_tipo:$('#epTipo').value,p_importo:imp,p_metodo:$('#epMet').value,p_data:$('#epData').value||today(),p_note:$('#epNote').value.trim()||null});
+    toast('Pagamento aggiornato');await loadAll();bookingSheet(o.bookingId);
+  });
+}
+/* ===== Fase 2 «semplice completo»: spese ed entrate, documenti, flotta ===== */
+const CAT_USCITA=['Pedaggi','Parcheggio','Pranzo','Compenso autista','Compenso collaboratore','Hotel','Ingressi e guide','Carburante','Manutenzione','Ufficio','Altro'];
+const CAT_ENTRATA=['Incasso noleggio','Contributo','Rimborso ricevuto','Altro'];
+const METODI_ECO=['Contanti','POS','Bonifico','Carta'];
+const DOC_CAT=['Viaggio','Bus','Fornitore','Contratto','Assicurazione','Fattura','Altro'];
+const MAN_TIPI=['Tagliando','Gomme','Revisione','Riparazione','Lavaggio','Bollo','Assicurazione','Altro'];
+const BUS_STATI=['Disponibile','In manutenzione','Fermo'];
+const DOCS_BUCKET='gestionale-documenti';
+const dayFull=iso=>{const d=String(iso||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return '—';return new Date(d+'T12:00:00Z').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'})};
+const del=(table,filter)=>raw('/rest/v1/'+table+'?'+new URLSearchParams(filter).toString(),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+const monthKey=d=>String(d||today()).slice(0,7);
+const monthLabel=k=>{const [y,m]=k.split('-').map(Number);return new Date(Date.UTC(y,m-1,15)).toLocaleDateString('it-IT',{month:'long',year:'numeric',timeZone:'UTC'})};
+const addMonths=(k,n)=>{const [y,m]=k.split('-').map(Number);const d=new Date(Date.UTC(y,m-1+n,1));return d.toISOString().slice(0,7)};
+const extOf=f=>{const t=String(f.type||'');if(t==='application/pdf')return 'pdf';if(t==='image/png')return 'png';if(t==='image/webp')return 'webp';return 'jpg'};
+const slug=s=>String(s||'documento').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'documento';
+async function uploadDoc(file,folder,name){
+  if(!file)throw new Error('Scegli un file.');
+  const isImg=/^image\//.test(file.type||'');
+  if(!isImg&&file.type!=='application/pdf')throw new Error('Si possono caricare foto (JPG, PNG, WEBP) o PDF.');
+  const f=isImg?await shrinkImage(file):file;
+  if(f.size>15*1024*1024)throw new Error('Il file è troppo grande (massimo 15 MB).');
+  const path=folder+'/'+new Date().getFullYear()+'/'+Date.now()+'-'+slug(name)+'.'+extOf(f);
+  await raw('/storage/v1/object/'+DOCS_BUCKET+'/'+path.split('/').map(encodeURIComponent).join('/'),{method:'POST',headers:{'Content-Type':f.type||'application/octet-stream','x-upsert':'false'},body:f,timeout:90000});
+  return {path,type:f.type||'application/octet-stream',size:f.size};
+}
+async function signDoc(path,bucket){
+  const enc=String(path).split('/').map(encodeURIComponent).join('/');
+  const r=await raw('/storage/v1/object/sign/'+(bucket||DOCS_BUCKET)+'/'+enc,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({expiresIn:600})});
+  const u=r&&(r.signedURL||r.signedUrl);if(!u)throw new Error('Documento non disponibile.');
+  return u.startsWith('http')?u:API+'/storage/v1'+u;
+}
+const tripChoices=(keep)=>{const t0=today();return S.trips.filter(t=>t.data_partenza>=addDays(t0,-120)&&t.data_partenza<=addDays(t0,120)||t.id===keep).sort((a,b)=>String(b.data_partenza).localeCompare(String(a.data_partenza)))};
+const tripOpt=t=>`${esc(dateShort(t.data_partenza))} · ${esc(titleCase(tripLabel(t)))}${busGroup(t).length>1?' (bus '+(num(t.bis_numero)||1)+')':''}`;
+const tripNameAny=id=>{const t=tripById(id)||(S.ecoTrips||[]).find(x=>x.id===id);return t?titleCase(tripLabel(t))+' '+dateShort(t.data_partenza):''};
+
+/* ---------- Spese ed entrate ---------- */
+let ecoMonth=monthKey(),ecoFilter='tutti',ecoAll=false;
+async function ensureEco(force){
+  if(S.eco&&S.eco.month===ecoMonth&&!force)return;
+  const from=ecoMonth+'-01',to=addMonths(ecoMonth,1)+'-01';
+  const [rows,trips]=await Promise.all([
+    get('economia_movimenti',{select:'id,tipo,categoria,descrizione,importo,data_movimento,metodo,viaggio_id,flotta_id,origine,pagamento_id,noleggio_pagamento_id,operatore,operatore_user_id,note,allegato_path,numero_documento,created_at',and:'(data_movimento.gte.'+from+',data_movimento.lt.'+to+')',order:'data_movimento.desc,created_at.desc',limit:'3000'}),
+    S.ecoTrips?Promise.resolve(S.ecoTrips):get('viaggi',{select:'id,titolo,destinazione,data_partenza,bis_numero,bis_parent_id',limit:'2000'}).catch(()=>[])
+  ]);
+  S.ecoTrips=trips||[];S.eco={month:ecoMonth,rows:rows||[]};
+}
+const ecoAuto=e=>!!(e.pagamento_id||e.noleggio_pagamento_id)||/^(automatico|migrazione|riconciliazione)/i.test(e.origine||'');
+const ecoIncasso=e=>!!e.pagamento_id||/incasso prenotazione/i.test(e.categoria||'');
+const ecoEditable=e=>!ecoAuto(e);
+function viewEconomia(){
+  if(!S.eco||S.eco.month!==ecoMonth){ensureEco().then(render).catch(e=>{S.error=e.message;render()});return '<div class="empty">Carico spese ed entrate…</div>'}
+  const R=S.eco.rows,out=R.filter(e=>/uscita/i.test(e.tipo)),inc=R.filter(e=>/entrata/i.test(e.tipo));
+  const sum=a=>r2(a.reduce((s,e)=>s+Math.abs(num(e.importo)),0));
+  const months=Array.from({length:13},(_,i)=>addMonths(monthKey(),-i));
+  let list=R.filter(e=>ecoAll||!ecoIncasso(e));
+  if(ecoFilter==='Uscita')list=list.filter(e=>/uscita/i.test(e.tipo));
+  if(ecoFilter==='Entrata')list=list.filter(e=>/entrata/i.test(e.tipo));
+  const byDay=new Map();for(const e of list){const d=String(e.data_movimento||'').slice(0,10);if(!byDay.has(d))byDay.set(d,[]);byDay.get(d).push(e)}
+  const row=e=>{const out=/uscita/i.test(e.tipo),t=e.viaggio_id&&tripNameAny(e.viaggio_id),bus=e.flotta_id&&busName(e.flotta_id),auto=ecoAuto(e);
+    return `<${auto?'div':'button'} class="eco ${out?'out':'in'}" ${auto?'':`data-act="ecoEdit" data-id="${e.id}"`}><span class="eco-t"><b>${esc(e.categoria||(out?'Spesa':'Entrata'))}</b><small>${[e.descrizione&&e.descrizione!==e.categoria?esc(e.descrizione):'',t?esc(t):'',bus?esc(bus):'',e.operatore?esc(e.operatore):''].filter(Boolean).join(' · ')}${e.metodo&&!/contant/i.test(e.metodo)?` <span class="tag">${esc(e.metodo)}</span>`:''}${e.allegato_path?' <span class="tag">ricevuta</span>':''}${auto?' <span class="tag">automatico</span>':''}</small></span><b class="eco-v">${out?'−':'+'} ${eur(Math.abs(num(e.importo)))}</b></${auto?'div':'button'}>`};
+  return `<label class="f">Mese<select data-input="ecoMonth">${months.map(m=>`<option value="${m}" ${m===ecoMonth?'selected':''}>${esc(monthLabel(m))}</option>`).join('')}</select></label>
+  <div class="grid2"><div class="kpi"><span>Spese</span><b>${eur(sum(out))}</b></div><div class="kpi"><span>Entrate (senza prenotazioni)</span><b>${eur(sum(inc.filter(e=>!ecoIncasso(e))))}</b></div></div>
+  <div class="grid2"><button class="btn" data-act="ecoNew" data-v="Uscita">${SVG(IC.plus)}Spesa</button><button class="btn light" data-act="ecoNew" data-v="Entrata">${SVG(IC.plus)}Entrata</button></div>
+  <div class="chips">${[['tutti','Tutto'],['Uscita','Solo spese'],['Entrata','Solo entrate']].map(([k,l])=>`<button class="chip ${ecoFilter===k?'on':''}" data-act="ecoFilter" data-v="${k}">${l}</button>`).join('')}<button class="chip ${ecoAll?'on':''}" data-act="ecoAll" aria-pressed="${ecoAll}">Incassi prenotazioni (${eur(sum(R.filter(ecoIncasso)))})</button></div>
+  ${list.length?[...byDay].map(([d,a])=>`<section class="card eco-day"><h3 class="sec" style="margin:0">${esc(dateLong(d))}</h3>${a.map(row).join('')}</section>`).join(''):`<div class="empty">Nessun movimento in ${esc(monthLabel(ecoMonth))}.</div>`}
+  <p class="small muted" style="margin:0">Gli incassi delle prenotazioni e dei noleggi arrivano da soli. Qui aggiungi tutto il resto: pedaggi, parcheggi, pranzi, compensi, hotel. Le spese in contanti escono dalla cassa di chi le registra.</p>`;
+}
+let ecoDraft=null;
+function ecoSheet(kind,id,preset){
+  const e=id?(S.eco&&S.eco.rows.find(x=>x.id===id)):null;
+  if(!ecoDraft||ecoDraft.id!==(id||null)||ecoDraft.kind!==(e?(/entrata/i.test(e.tipo)?'Entrata':'Uscita'):kind))ecoDraft={id:id||null,kind:e?(/entrata/i.test(e.tipo)?'Entrata':'Uscita'):kind,cat:e?e.categoria:(kind==='Entrata'?CAT_ENTRATA[0]:CAT_USCITA[0]),trip:e?e.viaggio_id:(preset&&preset.trip)||'',file:null};
+  const D=ecoDraft,cats=(D.kind==='Entrata'?CAT_ENTRATA:CAT_USCITA).concat(D.cat&&!(D.kind==='Entrata'?CAT_ENTRATA:CAT_USCITA).includes(D.cat)?[D.cat]:[]);
+  const v=(k,def)=>esc(e&&e[k]!=null?e[k]:(def==null?'':def));
+  sheet(`<h3>${e?(D.kind==='Entrata'?'Modifica entrata':'Modifica spesa'):(D.kind==='Entrata'?'Nuova entrata':'Nuova spesa')}</h3>
+  <div class="chips" role="group" aria-label="Categoria">${cats.map(c=>`<button class="chip ${c===D.cat?'on':''}" data-ecocat="${esc(c)}" aria-pressed="${c===D.cat}">${esc(c)}</button>`).join('')}</div>
+  <div class="grid2"><label class="f">Importo (€)<input id="ecImp" type="number" inputmode="decimal" min="0.01" step="0.01" value="${e?Math.abs(num(e.importo)):''}"></label>
+  <label class="f">Data<input id="ecData" type="date" value="${v('data_movimento',today())}"></label></div>
+  <label class="f">Come<select id="ecMet">${[...new Set(METODI_ECO.concat(e&&e.metodo?[e.metodo]:[]))].map(m=>`<option ${((e&&e.metodo)||'Contanti')===m?'selected':''}>${esc(m)}</option>`).join('')}</select></label>
+  <label class="f">Viaggio (facoltativo)<select id="ecTrip"><option value="">Nessuno</option>${tripChoices(D.trip).map(t=>`<option value="${t.id}" ${t.id===D.trip?'selected':''}>${tripOpt(t)}</option>`).join('')}</select></label>
+  <label class="f">Descrizione (facoltativa)<input id="ecDesc" value="${e&&e.descrizione!==e.categoria?v('descrizione'):''}" placeholder="${D.kind==='Entrata'?'es. noleggio scuola':'es. parcheggio bus a Napoli'}"></label>
+  <label class="f">N. ricevuta o fattura (facoltativo)<input id="ecNum" value="${v('numero_documento')}"></label>
+  ${e&&e.allegato_path?`<button class="link small" style="padding:0;align-self:flex-start" data-act="ecoAtt" data-id="${e.id}">Vedi la ricevuta allegata</button>`:''}
+  <label class="btn light filebtn">${SVG(IC.img)}<span id="ecFileL">${D.file?esc(D.file.name):(e&&e.allegato_path?'Sostituisci la foto della ricevuta':'Foto della ricevuta (facoltativa)')}</span><input id="ecFile" type="file" accept="image/*,application/pdf"></label>
+  <button class="btn" id="ecOk">${e?'Salva':'Registra'}</button>
+  ${e?'<button class="btn light danger-t" id="ecDel">Elimina</button>':''}
+  <button class="btn light" id="ecNo">Annulla</button>`);
+  document.querySelectorAll('#sheet [data-ecocat]').forEach(b=>b.onclick=()=>{D.cat=b.dataset.ecocat;document.querySelectorAll('#sheet [data-ecocat]').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)})});
+  $('#ecFile').onchange=ev=>{D.file=ev.target.files&&ev.target.files[0]||null;$('#ecFileL').textContent=D.file?D.file.name:'Foto della ricevuta (facoltativa)'};
+  $('#ecNo').onclick=()=>{ecoDraft=null;closeSheet()};
+  $('#ecOk').onclick=ev=>guard(ev.currentTarget,async()=>{
+    const imp=r2($('#ecImp').value);if(!(imp>0))throw new Error('Scrivi l’importo.');
+    const data=$('#ecData').value||today(),desc=$('#ecDesc').value.trim();
+    const row={tipo:D.kind,categoria:D.cat,descrizione:desc||D.cat,importo:imp,data_movimento:data,metodo:$('#ecMet').value,viaggio_id:$('#ecTrip').value||null,numero_documento:$('#ecNum').value.trim()||null};
+    if(D.file){const up=await uploadDoc(D.file,'economia',D.cat);row.allegato_path=up.path}
+    if(e)await patch('economia_movimenti',{id:'eq.'+e.id},row);
+    else await insert('economia_movimenti',{...row,origine:'manuale',note:'Registrata dal gestionale semplice'});
+    ecoMonth=monthKey(data);ecoDraft=null;closeSheet();toast(e?'Salvato':(D.kind==='Entrata'?'Entrata registrata':'Spesa registrata'));
+    await ensureEco(true);await loadAll();
+  });
+  if(e)$('#ecDel').onclick=()=>{
+    sheet(`<h3>Eliminare questa ${D.kind==='Entrata'?'entrata':'spesa'}?</h3><p style="margin:0">${esc(e.categoria)}${e.descrizione&&e.descrizione!==e.categoria?' · '+esc(e.descrizione):''}: <b>${eur(Math.abs(num(e.importo)))}</b> del ${esc(dateShort(e.data_movimento))}.</p>
+    ${/contant/i.test(e.metodo||'')?'<div class="note">Era in contanti: i contanti che dovresti avere in cassa cambiano di conseguenza.</div>':''}
+    <button class="btn danger" id="edOk">Sì, elimina</button><button class="btn light" id="edNo">No</button>`);
+    $('#edNo').onclick=()=>ecoSheet(D.kind,e.id);
+    $('#edOk').onclick=ev=>guard(ev.currentTarget,async()=>{await del('economia_movimenti',{id:'eq.'+e.id});ecoDraft=null;closeSheet();toast('Eliminato');await ensureEco(true);await loadAll()});
+  };
+}
+
+/* ---------- Documenti ---------- */
+let docCat='',docQ='';
+async function ensureDocs(force){
+  if(S.docs&&!force)return;
+  S.docs=await get('documenti_gestionali',{select:'id,categoria,titolo,descrizione,viaggio_id,flotta_id,storage_bucket,storage_path,url,mime_type,dimensione,scadenza,note,created_at',order:'created_at.desc',limit:'1000'})||[];
+}
+const docDue=d=>{if(!d.scadenza)return '';const s=String(d.scadenza).slice(0,10),t0=today();return s<t0?'bad':s<=addDays(t0,30)?'warn':''};
+function docRow(d){
+  const due=docDue(d),link=[d.viaggio_id&&tripNameAny(d.viaggio_id),d.flotta_id&&busName(d.flotta_id)].filter(Boolean).join(' · ');
+  return `<button class="eco" data-act="docOpen" data-id="${d.id}"><span class="eco-t"><b>${esc(d.titolo)}</b><small>${esc(d.categoria||'Documento')}${link?' · '+esc(link):''} · ${esc(dateShort(String(d.created_at).slice(0,10)))}${/pdf/i.test(d.mime_type||'')?' <span class="tag">PDF</span>':''}</small></span>${d.scadenza?`<span class="tag ${due}">${due==='bad'?'scaduto':'scade'} ${esc(dateShort(String(d.scadenza).slice(0,10)))}</span>`:''}</button>`;
+}
+function viewDocumenti(){
+  if(!S.docs){ensureDocs().then(render).catch(e=>{S.error=e.message;render()});return '<div class="empty">Carico i documenti…</div>'}
+  const q=docQ.trim().toLowerCase();
+  const list=S.docs.filter(d=>(!docCat||d.categoria===docCat)&&(!q||[d.titolo,d.categoria,d.note,d.descrizione,d.viaggio_id&&tripNameAny(d.viaggio_id),d.flotta_id&&busName(d.flotta_id)].join(' ').toLowerCase().includes(q)));
+  const soon=S.docs.filter(d=>docDue(d));
+  return `<button class="btn" data-act="docNew">${SVG(IC.plus)}Carica un documento</button>
+  ${soon.length?`<div class="note">${soon.length===1?'1 documento è scaduto o scade':soon.length+' documenti sono scaduti o scadono'} entro 30 giorni.</div>`:''}
+  <input class="search" data-input="docQ" value="${esc(docQ)}" placeholder="Cerca per titolo, viaggio, bus…" aria-label="Cerca documento">
+  <div class="chips">${['',...DOC_CAT].map(c=>`<button class="chip ${docCat===c?'on':''}" data-act="docCat" data-v="${esc(c)}">${c||'Tutti'}</button>`).join('')}</div>
+  ${list.length?`<section class="card">${list.map(docRow).join('')}</section>`:`<div class="empty">${S.docs.length?'Nessun documento trovato.':'Ancora nessun documento. Carica contratti, assicurazioni, libretti dei bus, fatture: li ritrovi qui e dalla scheda del bus.'}</div>`}`;
+}
+let docDraft=null;
+function docUploadSheet(preset){
+  if(!docDraft)docDraft={file:null,cat:(preset&&preset.cat)||'Altro',trip:(preset&&preset.trip)||'',bus:(preset&&preset.bus)||''};
+  const D=docDraft;
+  sheet(`<h3>Carica un documento</h3>
+  <label class="btn filebtn">${SVG(IC.doc)}<span id="duFileL">${D.file?esc(D.file.name):'Scegli foto o PDF'}</span><input id="duFile" type="file" accept="image/*,application/pdf"></label>
+  <label class="f">Titolo<input id="duTit" value="${esc(D.tit||'')}" placeholder="es. Assicurazione Irizar FW 2027"></label>
+  <div class="chips" role="group" aria-label="Tipo di documento">${DOC_CAT.map(c=>`<button class="chip ${c===D.cat?'on':''}" data-ducat="${esc(c)}" aria-pressed="${c===D.cat}">${esc(c)}</button>`).join('')}</div>
+  <label class="f">Viaggio (facoltativo)<select id="duTrip"><option value="">Nessuno</option>${tripChoices(D.trip).map(t=>`<option value="${t.id}" ${t.id===D.trip?'selected':''}>${tripOpt(t)}</option>`).join('')}</select></label>
+  <label class="f">Bus (facoltativo)<select id="duBus"><option value="">Nessuno</option>${S.fleet.map(f=>`<option value="${f.id}" ${f.id===D.bus?'selected':''}>${esc(busName(f.id))}</option>`).join('')}</select></label>
+  <label class="f">Scadenza (facoltativa)<input id="duSca" type="date" value="${esc(D.sca||'')}"></label>
+  <label class="f">Nota (facoltativa)<input id="duNote" value="${esc(D.note||'')}"></label>
+  <button class="btn" id="duOk">Carica</button><button class="btn light" id="duNo">Annulla</button>`);
+  document.querySelectorAll('#sheet [data-ducat]').forEach(b=>b.onclick=()=>{D.cat=b.dataset.ducat;document.querySelectorAll('#sheet [data-ducat]').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)})});
+  $('#duFile').onchange=ev=>{D.file=ev.target.files&&ev.target.files[0]||null;$('#duFileL').textContent=D.file?D.file.name:'Scegli foto o PDF';if(D.file&&!$('#duTit').value.trim())$('#duTit').value=D.file.name.replace(/\.[a-z0-9]+$/i,'').replace(/[_-]+/g,' ').slice(0,80)};
+  $('#duNo').onclick=()=>{docDraft=null;closeSheet()};
+  $('#duOk').onclick=ev=>guard(ev.currentTarget,async()=>{
+    const tit=$('#duTit').value.trim();
+    if(!D.file)throw new Error('Scegli il file da caricare.');
+    if(tit.length<3)throw new Error('Scrivi un titolo (almeno 3 lettere).');
+    const up=await uploadDoc(D.file,'documenti',tit);
+    await insert('documenti_gestionali',{titolo:tit,categoria:D.cat,viaggio_id:$('#duTrip').value||null,flotta_id:$('#duBus').value||null,scadenza:$('#duSca').value||null,note:$('#duNote').value.trim()||null,storage_bucket:DOCS_BUCKET,storage_path:up.path,mime_type:up.type,dimensione:up.size,created_by:me.user_id});
+    const bus=$('#duBus').value;docDraft=null;closeSheet();toast('Documento caricato');await ensureDocs(true);
+    if(S.tab==='flotta'&&bus)busSheet(bus);else render();
+  });
+}
+function docSheet(id){
+  const d=(S.docs||[]).find(x=>x.id===id);if(!d)return toast('Documento non trovato: aggiorna.',true);
+  const link=[d.viaggio_id&&tripNameAny(d.viaggio_id),d.flotta_id&&busName(d.flotta_id)].filter(Boolean).join(' · '),due=docDue(d);
+  sheet(`<h3>${esc(d.titolo)}</h3><span class="muted">${esc(d.categoria||'Documento')}${link?' · '+esc(link):''}</span>
+  ${d.scadenza?`<div class="note ${due==='bad'?'badn':''}">${due==='bad'?'Scaduto il':'Scade il'} ${esc(dayFull(d.scadenza))}</div>`:''}
+  ${d.note?`<p style="margin:0">${esc(d.note)}</p>`:''}
+  <span class="small muted">Caricato il ${esc(dateShort(String(d.created_at).slice(0,10)))}${d.dimensione?' · '+Math.max(1,Math.round(num(d.dimensione)/1024))+' KB':''}</span>
+  <button class="btn" id="dsOpen">${SVG(IC.ext)}Apri</button>
+  ${isAdmin()?'<button class="btn light danger-t" id="dsDel">Elimina</button>':''}
+  <button class="btn light" id="dsNo">Chiudi</button>`);
+  $('#dsNo').onclick=closeSheet;
+  $('#dsOpen').onclick=()=>openPdf(()=>d.storage_path?signDoc(d.storage_path,d.storage_bucket):Promise.resolve(d.url));
+  if(isAdmin())$('#dsDel').onclick=()=>{
+    sheet(`<h3>Eliminare il documento?</h3><p style="margin:0">«${esc(d.titolo)}» verrà cancellato per sempre, anche il file.</p><button class="btn danger" id="ddOk">Sì, elimina</button><button class="btn light" id="ddNo">No</button>`);
+    $('#ddNo').onclick=()=>docSheet(id);
+    $('#ddOk').onclick=ev=>guard(ev.currentTarget,async()=>{
+      if(d.storage_path)await raw('/storage/v1/object/'+(d.storage_bucket||DOCS_BUCKET),{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({prefixes:[d.storage_path]})}).catch(()=>null);
+      await del('documenti_gestionali',{id:'eq.'+d.id});closeSheet();toast('Documento eliminato');await ensureDocs(true);render();
+    });
+  };
+}
+
+/* ---------- Flotta: stato, rifornimenti, manutenzioni, documenti ---------- */
+async function ensureFleetData(force){
+  if(S.fl&&!force)return;
+  const [fuel,man]=await Promise.all([
+    get('carburante_flotta',{select:'id,flotta_id,viaggio_id,data_rifornimento,km,litri,prezzo_litro,importo,distributore,metodo,note,created_at',order:'data_rifornimento.desc,created_at.desc',limit:'2000'}).catch(()=>[]),
+    get('manutenzioni_flotta',{select:'id,flotta_id,tipo,descrizione,data_intervento,km,costo,officina,stato,prossima_data,prossimi_km,viaggio_id,note,created_at',order:'data_intervento.desc,created_at.desc',limit:'2000'}).catch(()=>[])
+  ]);
+  S.fl={fuel:fuel||[],man:man||[]};
+}
+const nextDue=busId=>{const t0=today();return (S.fl?S.fl.man:[]).filter(m=>m.flotta_id===busId&&m.prossima_data&&String(m.prossima_data)>=addDays(t0,-365)).sort((a,b)=>String(a.prossima_data).localeCompare(String(b.prossima_data)))[0]||null};
+function viewFlotta(){
+  if(!S.fl){ensureFleetData().then(render).catch(e=>{S.error=e.message;render()})}
+  const t0=today(),mk=monthKey();
+  return `<div class="list2">${S.fleet.map(f=>{const next=upcoming().filter(t=>t.autobus_id===f.id).slice(0,3),due=S.fl&&nextDue(f.id),fuelM=S.fl?r2(S.fl.fuel.filter(x=>x.flotta_id===f.id&&monthKey(x.data_rifornimento)===mk).reduce((a,x)=>a+num(x.importo),0)):0;
+    const bad=/manut|fermo|guast|offic/i.test(f.stato||'');
+    return `<button class="card bus" data-act="busOpen" data-id="${f.id}"><div class="row"><b>${esc(f.titolo||[f.marca,f.modello].filter(Boolean).join(' '))}</b><span class="tag ${bad?'bad':'ok'}">${esc(f.stato||'Disponibile')}</span></div>
+    <span class="small muted">${esc(f.targa||'targa n/d')} · ${num(f.posti)} posti${fuelM?' · carburante questo mese '+eur(fuelM):''}</span>
+    ${due?`<span class="small"><span class="tag ${String(due.prossima_data)<t0?'bad':String(due.prossima_data)<=addDays(t0,30)?'warn':''}">${esc(due.tipo)} ${esc(dateShort(String(due.prossima_data).slice(0,10)))}</span></span>`:''}
+    ${next.length?next.map(t=>`<div class="line"><span>${esc(dateShort(t.data_partenza))} · ${esc(titleCase(tripLabel(t)))}</span></div>`).join(''):'<span class="small muted">Nessun viaggio assegnato a breve</span>'}</button>`}).join('')||'<div class="empty">Nessun mezzo.</div>'}</div>`;
+}
+async function busSheet(id){
+  const f=S.fleet.find(x=>x.id===id);if(!f)return;
+  if(!S.fl||!S.docs){sheet(`<h3>${esc(busName(id))}</h3><div class="empty">Carico…</div>`);try{await Promise.all([ensureFleetData(),ensureDocs()])}catch(e){return toast(e.message,true)}}
+  const hist=[...S.fl.fuel.filter(x=>x.flotta_id===id).map(x=>({d:x.data_rifornimento,k:'fuel',x})),...S.fl.man.filter(x=>x.flotta_id===id).map(x=>({d:x.data_intervento,k:'man',x}))].sort((a,b)=>String(b.d).localeCompare(String(a.d))).slice(0,15);
+  const docs=S.docs.filter(d=>d.flotta_id===id),due=nextDue(id),st=f.stato||'Disponibile';
+  sheet(`<h3>${esc(busName(id))}</h3><span class="muted">${num(f.posti)} posti</span>
+  <div class="chips" role="group" aria-label="Stato del bus">${[...new Set(BUS_STATI.concat([st]))].map(s=>`<button class="chip ${s===st?'on':''}" data-busst="${esc(s)}" aria-pressed="${s===st}">${esc(s)}</button>`).join('')}</div>
+  ${due?`<div class="note">Prossima scadenza: <b>${esc(due.tipo)}</b> il ${esc(dayFull(due.prossima_data))}</div>`:''}
+  <div class="grid2"><button class="btn" id="bsFuel">${SVG(IC.plus)}Rifornimento</button><button class="btn" id="bsMan">${SVG(IC.plus)}Lavoro / scadenza</button></div>
+  <button class="btn light" id="bsDoc">${SVG(IC.doc)}Carica un documento del bus</button>
+  ${docs.length?`<b style="font-size:15px">Documenti</b>${docs.map(docRow).join('')}`:''}
+  <b style="font-size:15px">Storico</b>
+  ${hist.map(h=>h.k==='fuel'?`<button class="eco out" data-flrow="fuel:${h.x.id}"><span class="eco-t"><b>Rifornimento</b><small>${esc(dateShort(h.d))}${h.x.litri?' · '+num(h.x.litri)+' l':''}${h.x.km?' · '+num(h.x.km).toLocaleString('it-IT')+' km':''}${h.x.distributore?' · '+esc(h.x.distributore):''}</small></span><b class="eco-v">− ${eur(h.x.importo)}</b></button>`
+    :`<button class="eco out" data-flrow="man:${h.x.id}"><span class="eco-t"><b>${esc(h.x.tipo)}</b><small>${esc(dateShort(h.d))}${h.x.officina?' · '+esc(h.x.officina):''}${h.x.km?' · '+num(h.x.km).toLocaleString('it-IT')+' km':''}${h.x.prossima_data?' · prossima '+esc(dateShort(String(h.x.prossima_data).slice(0,10))):''}</small></span><b class="eco-v">${num(h.x.costo)?'− '+eur(h.x.costo):''}</b></button>`).join('')||'<span class="small muted">Ancora niente: registra rifornimenti e lavori, finiscono anche nelle spese.</span>'}
+  <button class="btn light" id="bsNo">Chiudi</button>`);
+  $('#bsNo').onclick=closeSheet;
+  document.querySelectorAll('#sheet [data-busst]').forEach(b=>b.onclick=()=>{const s=b.dataset.busst;if(s===st)return;guard(null,async()=>{await patch('flotta',{id:'eq.'+id},{stato:s});f.stato=s;toast('Stato: '+s);busSheet(id);render()})});
+  $('#bsFuel').onclick=()=>fuelSheet(id);$('#bsMan').onclick=()=>manSheet(id);
+  $('#bsDoc').onclick=()=>{docDraft=null;docUploadSheet({cat:'Bus',bus:id})};
+  document.querySelectorAll('#sheet [data-flrow]').forEach(b=>b.onclick=()=>{const [k,rid]=b.dataset.flrow.split(':');flRowSheet(id,k,rid)});
+}
+function fuelSheet(busId){
+  const t0=today(),near=S.trips.filter(t=>t.autobus_id===busId&&t.data_partenza>=addDays(t0,-7)&&t.data_partenza<=addDays(t0,3));
+  sheet(`<h3>Rifornimento · ${esc(busName(busId))}</h3>
+  <div class="grid2"><label class="f">Importo (€)<input id="fuImp" type="number" inputmode="decimal" min="0.01" step="0.01"></label><label class="f">Data<input id="fuData" type="date" value="${t0}"></label></div>
+  <div class="grid2"><label class="f">Litri (facoltativo)<input id="fuLit" type="number" inputmode="decimal" min="0" step="0.01"></label><label class="f">Km (facoltativo)<input id="fuKm" type="number" inputmode="numeric" min="0" step="1"></label></div>
+  <label class="f">Come<select id="fuMet">${METODI_ECO.map(m=>`<option>${m}</option>`).join('')}</select></label>
+  <label class="f">Distributore (facoltativo)<input id="fuDist" placeholder="es. Q8 Apricena"></label>
+  ${near.length?`<label class="f">Viaggio (facoltativo)<select id="fuTrip"><option value="">Nessuno</option>${near.map(t=>`<option value="${t.id}">${tripOpt(t)}</option>`).join('')}</select></label>`:''}
+  <span class="small muted">Finisce anche nelle spese del mese (categoria Carburante). I contanti della tua cassa non cambiano.</span>
+  <button class="btn" id="fuOk">Registra</button><button class="btn light" id="fuNo">Annulla</button>`);
+  $('#fuNo').onclick=()=>busSheet(busId);
+  $('#fuOk').onclick=ev=>guard(ev.currentTarget,async()=>{
+    const imp=r2($('#fuImp').value);if(!(imp>0))throw new Error('Scrivi l’importo.');
+    const lit=num($('#fuLit').value)||null;
+    await insert('carburante_flotta',{flotta_id:busId,data_rifornimento:$('#fuData').value||t0,importo:imp,litri:lit,prezzo_litro:lit?Math.round(imp/lit*1000)/1000:null,km:Math.round(num($('#fuKm').value))||null,metodo:$('#fuMet').value,distributore:$('#fuDist').value.trim()||null,viaggio_id:$('#fuTrip')?$('#fuTrip').value||null:null,created_by:me.user_id});
+    toast('Rifornimento registrato');S.eco=null;await ensureFleetData(true);await loadAll();busSheet(busId);
+  });
+}
+let manTipo='Tagliando';
+function manSheet(busId){
+  const t0=today();
+  sheet(`<h3>Lavoro o scadenza · ${esc(busName(busId))}</h3>
+  <div class="chips" role="group" aria-label="Tipo">${MAN_TIPI.map(c=>`<button class="chip ${c===manTipo?'on':''}" data-mant="${esc(c)}" aria-pressed="${c===manTipo}">${esc(c)}</button>`).join('')}</div>
+  <div class="grid2"><label class="f">Data del lavoro<input id="maData" type="date" value="${t0}"></label><label class="f">Costo (€, facoltativo)<input id="maCost" type="number" inputmode="decimal" min="0" step="0.01"></label></div>
+  <div class="grid2"><label class="f">Km (facoltativo)<input id="maKm" type="number" inputmode="numeric" min="0" step="1"></label><label class="f">Officina (facoltativa)<input id="maOff"></label></div>
+  <label class="f">Prossima scadenza (facoltativa)<input id="maNext" type="date"></label>
+  <label class="f">Nota (facoltativa)<input id="maNote" placeholder="es. cambiate 2 gomme anteriori"></label>
+  <span class="small muted">Se scrivi il costo, finisce anche nelle spese (categoria Manutenzione). La prossima scadenza compare sulla scheda del bus.</span>
+  <button class="btn" id="maOk">Registra</button><button class="btn light" id="maNo">Annulla</button>`);
+  document.querySelectorAll('#sheet [data-mant]').forEach(b=>b.onclick=()=>{manTipo=b.dataset.mant;document.querySelectorAll('#sheet [data-mant]').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)})});
+  $('#maNo').onclick=()=>busSheet(busId);
+  $('#maOk').onclick=ev=>guard(ev.currentTarget,async()=>{
+    const data=$('#maData').value||t0,cost=r2($('#maCost').value)||null;
+    await insert('manutenzioni_flotta',{flotta_id:busId,tipo:manTipo,data_intervento:data,costo:cost,km:Math.round(num($('#maKm').value))||null,officina:$('#maOff').value.trim()||null,prossima_data:$('#maNext').value||null,note:$('#maNote').value.trim()||null,stato:data>t0?'Programmata':'Completata',created_by:me.user_id});
+    toast('Registrato');S.eco=null;await ensureFleetData(true);busSheet(busId);
+  });
+}
+function flRowSheet(busId,k,id){
+  const x=(k==='fuel'?S.fl.fuel:S.fl.man).find(r=>r.id===id);if(!x)return;
+  const lines=k==='fuel'?[['Data',dateShort(x.data_rifornimento)],['Importo',eur(x.importo)],['Litri',x.litri?num(x.litri):'—'],['Km',x.km?num(x.km).toLocaleString('it-IT'):'—'],['Come',x.metodo||'—'],['Distributore',x.distributore||'—']]
+    :[['Data',dateShort(x.data_intervento)],['Costo',num(x.costo)?eur(x.costo):'—'],['Km',x.km?num(x.km).toLocaleString('it-IT'):'—'],['Officina',x.officina||'—'],['Prossima scadenza',x.prossima_data?dateShort(String(x.prossima_data).slice(0,10)):'—']];
+  sheet(`<h3>${k==='fuel'?'Rifornimento':esc(x.tipo)}</h3>${lines.map(([a,b])=>`<div class="line"><span>${a}</span><b>${esc(String(b))}</b></div>`).join('')}${x.note?`<p style="margin:0">${esc(x.note)}</p>`:''}
+  <button class="btn light danger-t" id="frDel">Elimina</button><button class="btn light" id="frNo">Indietro</button>`);
+  $('#frNo').onclick=()=>busSheet(busId);
+  $('#frDel').onclick=ev=>guard(ev.currentTarget,async()=>{await del(k==='fuel'?'carburante_flotta':'manutenzioni_flotta',{id:'eq.'+id});toast('Eliminato (tolto anche dalle spese)');S.eco=null;await ensureFleetData(true);await loadAll();busSheet(busId)});
+}
 function rpPdf(scope){
   const t=rpTrips().up.concat(rpTrips().past).find(x=>x.id===S.rpTrip);if(!t)return;
   const label=titleCase(tripLabel(t))+(t.bis_parent_id?' bus '+(t.bis_numero||2):'')+' del '+dateShort(t.data_partenza);
@@ -1101,7 +1566,7 @@ function shareConfirmationSheet(b){
   const name=nameOf(b);
   sharePdfSheet({title:'Conferma per '+name,ready:'Conferma di prenotazione pronta',name,tel:b.telefono,load:()=>confirmationFile(b.id),msg:()=>`Buongiorno ${name}, le inviamo la conferma della sua prenotazione. Grazie, DELGROSSO Viaggi`});
 }
-async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,stato,metodo,metodo_pagamento,data_pagamento,receipt_number,receipt_professional_path,receipt_professional_generated_at,incassato_da,incassato_da_user_id',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
+async function bookingPayments(bid){return get('pagamenti',{select:'id,importo,tipo,stato,metodo,metodo_pagamento,data_pagamento,receipt_number,receipt_professional_path,receipt_professional_generated_at,incassato_da,incassato_da_user_id,note',prenotazione_id:'eq.'+bid,order:'data_pagamento.asc,created_at.asc'})}
 
 /* noleggi: crea, modifica, pagamenti */
 async function rentalVehicles(id){try{return (await get('noleggi_bus_mezzi',{select:'flotta_id',noleggio_id:'eq.'+id})).map(x=>x.flotta_id)}catch{return []}}
@@ -1276,7 +1741,7 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
   const id=a.dataset.id,B=S.book;
   switch(a.dataset.act){
-    case 'reload':loadAll();break;
+    case 'reload':S.staticAt=0;S.eco=null;S.docs=null;S.fl=null;loadAll();break;
     case 'goInc':S.tab='incassi';S.incTrip=id;render();window.scrollTo(0,0);break;
     case 'openTrip':S.tab='viaggi';S.tripId=id;S.search='';render();window.scrollTo(0,0);break;
     case 'backTrips':S.tripId=null;render();break;
@@ -1306,7 +1771,7 @@ document.addEventListener('click',e=>{
     case 'tripForm':tripFormSheet(id);break;
     case 'toggleMap':S.showMap=!S.showMap;render();break;
     case 'openBooking':closeSheet();bookingSheet(id);break;
-    case 'pickSeat':{const P=seatPick;if(!P)break;const v=a.dataset.v;if(P.sel.has(v))P.sel.delete(v);else{if(P.sel.size>=P.need){const first=[...P.sel][0];P.sel.delete(first)}P.sel.add(v)}seatSheet();break}
+    case 'pickSeat':{const P=seatPick;if(!P)break;const v=a.dataset.v;if(P.sel.has(v))P.sel.delete(v);else{if(P.sel.size>=P.need){const first=[...P.sel][0];P.sel.delete(first)}P.sel.add(v)}(P.draw||seatSheet)();break}
     case 'openClient':S.clientKey=id;render();window.scrollTo(0,0);break;
     case 'closeClient':S.clientKey=null;render();break;
     case 'accTab':accTab=a.dataset.v;S.accMore=false;render();break;
@@ -1318,6 +1783,25 @@ document.addEventListener('click',e=>{
     case 'receipt':receipt(id);break;
     case 'toWeb':toWeb();break;
     case 'collector':collectorSheet(id);break;
+    case 'editPay':editPaySheet(id);break;
+    case 'manage':S.manage=!S.manage;render();break;
+    case 'ecoNew':ecoDraft=null;ecoSheet(a.dataset.v);break;
+    case 'ecoEdit':ecoDraft=null;ecoSheet(null,id);break;
+    case 'ecoFilter':ecoFilter=a.dataset.v;render();break;
+    case 'ecoAll':ecoAll=!ecoAll;render();break;
+    case 'ecoAtt':{const e=S.eco&&S.eco.rows.find(x=>x.id===id);if(e&&e.allegato_path)openPdf(()=>signDoc(e.allegato_path));break}
+    case 'tripSpesa':ecoDraft=null;ecoSheet('Uscita',null,{trip:id});break;
+    case 'docNew':docDraft=null;docUploadSheet();break;
+    case 'docOpen':docSheet(id);break;
+    case 'docCat':docCat=a.dataset.v;render();break;
+    case 'busOpen':busSheet(id);break;
+    case 'site':siteAction(id,a.dataset.v);break;
+    case 'poster':posterSheet(id);break;
+    case 'bis':bisSheet(id);break;
+    case 'multiBus':multiBusSheet(id);break;
+    case 'reserve':seatPick=null;reserveSheet(id);break;
+    case 'closeTrip':closeTripSheet(id);break;
+    case 'cancelTrip':cancelTripSheet(id);break;
     case 'paxList':passengerList(tripById(id));break;
     case 'waGroup':waGroupSheet(tripById(id));break;
     case 'agNew':agNewSheet();break;
@@ -1338,6 +1822,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{
   const k=e.target.dataset&&e.target.dataset.input;if(!k)return;const v=e.target.value,B=S.book;
   if(k==='clientQ'){S.clientQ=v;const pos=e.target.selectionStart;render();const s=document.querySelector('[data-input="clientQ"]');if(s){s.focus();try{s.setSelectionRange(pos,pos)}catch{}}return}
+  if(k==='docQ'){docQ=v;const pos=e.target.selectionStart;render();const s=document.querySelector('[data-input="docQ"]');if(s){s.focus();try{s.setSelectionRange(pos,pos)}catch{}}return}
   if(k==='search'){S.search=v;const pos=e.target.selectionStart;render();const s=document.querySelector('[data-input="search"]');if(s){s.focus();try{s.setSelectionRange(pos,pos)}catch{}}return}
   if(k==='bkNome'||k==='bkTel'){B[k==='bkNome'?'nome':'tel']=v;const pos=e.target.selectionStart;render();const s=document.querySelector(`[data-input="${k}"]`);if(s){s.focus();try{s.setSelectionRange(pos,pos)}catch{}}return}
   if(k==='bkFermata')B.fermata=v;
@@ -1349,6 +1834,7 @@ document.addEventListener('change',e=>{
   const k=e.target.dataset&&e.target.dataset.input;
   if(k==='bkTrip'){S.book.tripId=e.target.value;S.book.totale=null;S.book.fermata='';render()}
   if(k==='rpTrip'){S.rpTrip=e.target.value;S.rpFilter='';render()}
+  if(k==='ecoMonth'){ecoMonth=e.target.value;render()}
   if(k==='bkTot'||k==='bkAccAltro')render();
 });
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&session&&me&&!busy)loadAll()});

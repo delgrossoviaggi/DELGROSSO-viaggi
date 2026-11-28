@@ -281,3 +281,55 @@ fieldset.f label{font-weight:500}
 .top .tools .switch svg{width:18px;height:18px}
 .top .tools .switch .l-sm{display:none}
 @media (max-width:599px){.top .tools .switch{padding:0 12px}.top .tools .switch .l-lg{display:none}.top .tools .switch .l-sm{display:inline}}
+/* ===== fase 1 «semplice completo» ===== */
+h3.sec{margin:6px 0 -2px;font-size:15px;font-weight:700;color:var(--grigio);letter-spacing:.01em}
+.action .thumb{width:34px;height:44px;object-fit:cover;border-radius:6px;flex:0 0 auto;box-shadow:0 0 0 1px var(--linea)}
+.sitebox{background:var(--carta);border-radius:var(--r-l,18px);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 4px 0 0 var(--c,var(--grigio))}
+.sitebox.on{--c:var(--pagato)}.sitebox.off{--c:var(--grigio)}.sitebox.sold{--c:var(--residuo)}
+.sitebox .st-line{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}
+.sitebox .st-line svg{width:24px;height:24px;grid-row:span 2;color:var(--c)}
+.sitebox .st-line b{font-size:16.5px;color:var(--c)}
+.sitebox .st-line span{font-size:13.5px;color:var(--grigio)}
+.poster{width:100%;max-height:52vh;object-fit:contain;border-radius:14px;background:var(--carta)}
+.filebtn{position:relative;overflow:hidden;cursor:pointer}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.filebtn.busy{opacity:.7;pointer-events:none}
+.check{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;min-height:44px}
+.check input,.ck input{width:22px;height:22px;flex:0 0 auto;accent-color:var(--notte)}
+.checklist{display:flex;flex-direction:column;gap:6px;max-height:42vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.ck{display:flex;align-items:center;gap:12px;background:var(--carta);border-radius:12px;padding:10px 12px;min-height:52px}
+.ck span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ck small{font-size:13px;color:var(--grigio)}
+.note.okn{background:var(--pagato-bg);color:var(--pagato);display:flex;gap:8px;align-items:center}
+.note.okn svg{width:20px;height:20px;flex:0 0 auto}
+.note.badn{background:var(--residuo-bg);color:var(--residuo)}
+.note .ul{margin:6px 0 0;padding-left:18px}
+.pline>span:last-child{flex-wrap:wrap;justify-content:flex-end;row-gap:4px}
+.manage{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--carta);border-radius:var(--r-m);padding:14px;text-align:left;color:var(--notte);min-height:64px;cursor:pointer}
+.manage>svg:first-child{width:22px;height:22px;flex:0 0 auto}
+.manage>span:nth-child(2){display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.manage b{font-size:16px}.manage small{font-size:13px;color:var(--grigio)}
+.manage .tag{flex:0 0 auto}
+.manage .chev{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
+.manage[aria-expanded="true"] .chev{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.manage .chev{transition:none}}
+.manage .tag:not(.ok):not(.warn){background:var(--fondo);color:var(--grigio)}
+/* ===== fase 2: spese ed entrate, documenti, flotta ===== */
+.eco{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;border:0;background:transparent;text-align:left;padding:11px 2px;border-top:1px solid var(--linea);color:inherit;font:inherit;min-height:56px}
+.eco:first-of-type{border-top:0}
+button.eco{cursor:pointer}
+button.eco:active{background:var(--fondo)}
+.eco-t{display:flex;flex-direction:column;gap:3px;min-width:0}
+.eco-t b{font-size:15.5px}
+.eco-t small{font-size:13px;color:var(--grigio);line-height:1.35}
+.eco-v{font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.eco.out .eco-v{color:var(--residuo)}.eco.in .eco-v{color:var(--pagato)}
+.eco-day{gap:0;padding-top:12px}
+.eco-day h3.sec{margin-bottom:4px!important}
+.eco .tag:not(.ok):not(.warn):not(.bad),.card .tag:not(.ok):not(.warn):not(.bad){background:var(--fondo);color:var(--grigio)}
+.card.bus{border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;width:100%}
+.card.bus:active{transform:scale(.995)}
+.btn.danger-t{color:var(--residuo)}
+.sheet .eco{padding-left:0;padding-right:0}
+.sheet .box>*{flex-shrink:0}
+.sheet .chips{flex-wrap:wrap;overflow:visible}
